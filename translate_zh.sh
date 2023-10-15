@@ -10,10 +10,10 @@ sed -i "s|label=\"Skip\", value=\"Skip\",|label=\"跳过\", value=\"跳过\",|" 
 sed -i "s|label=\"Stop\", value=\"Stop\",|label=\"终止\", value=\"终止\",|" $WEBUI
 sed -i "s|label='Upscale or Variation'|label='强化与变换'|" $WEBUI
 sed -i "s|label='Drag above image to here',|label='将图片拖入这里',|" $WEBUI
-sed -i "s|label='Upscale or Variation:',|label='强化(Vary)与变换(Upscale)：',|" $WEBUI
+sed -i "s|label='Upscale or Variation:',|label='强化(Upscale)与变换(Vary)：',|" $WEBUI
 sed -i "s|U0001F4D4 Document<|U0001F4D4 参考文档<|" $WEBUI
 sed -i "s|label='Image Prompt'|label='依图生图'|" $WEBUI
-sed -i "s|label='Stop At',|label='终止在',|" $WEBUI
+sed -i "s|label='Stop At',|label='停在',|" $WEBUI
 sed -i "s|label='Weight',|label='权重',|" $WEBUI
 sed -i "s|label='Type',|label='类型',|" $WEBUI
 sed -i "s|label='Input Image',|label='输入图片',|" $WEBUI
@@ -70,7 +70,7 @@ sed -i "s|label='Inpaint Engine',|label='修补引擎',|" $WEBUI
 sed -i "s|info='Version of Fooocus inpaint model'|info='Fooocus修补引擎版本'|" $WEBUI
 sed -i "s|label='Control Debug'|label='调试控制'|" $WEBUI
 sed -i "s|label='Debug Preprocessor of ControlNets',|label='ControlNets的调试预处理器',|" $WEBUI
-sed -i "s|label='Mixing Image Prompt and Vary/Upscale',|label='混合图像提示和可变/放大',|" $WEBUI
+sed -i "s|label='Mixing Image Prompt and Vary/Upscale',|label='混合图像提示和变换/增强',|" $WEBUI
 sed -i "s|label='Mixing Image Prompt and Inpaint',|label='混合图像提示和修复',|" $WEBUI
 sed -i "s|label='Softness of ControlNet',|label='ControlNet柔化',|" $WEBUI
 sed -i "s|info='Similar to the Control Mode in A1111 (use 0.0 to disable). '|info='类似于A1111中的控制模式（使用0.0禁用）'|" $WEBUI

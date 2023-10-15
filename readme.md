@@ -1,3 +1,7 @@
+
+## 🔔 更新
+- [2023.10.16] 初始版本，界面文字汉化，新增--webroot参数，设定云端URL访问的根路径。
+
 # Fooocus
 
 <img src="https://github.com/lllyasviel/Fooocus/assets/19834515/f79c5981-cf80-4ee3-b06b-3fef3f8bfbc7" width=100%>
