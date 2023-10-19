@@ -4,7 +4,7 @@
 WEBUI="webui.py"
 sed -i "s|label='Preview',|label='预览',|" $WEBUI
 sed -i "s|label='Gallery',|label='图集',|" $WEBUI
-sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入提示词。\",|" $WEBUI
+sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入文生图提示词。\",|" $WEBUI
 sed -i "s|label=\"Generate\", value=\"Generate\",|label=\"生成\", value=\"生成\",|" $WEBUI
 sed -i "s|label=\"Skip\", value=\"Skip\",|label=\"跳过\", value=\"跳过\",|" $WEBUI
 sed -i "s|label=\"Stop\", value=\"Stop\",|label=\"终止\", value=\"终止\",|" $WEBUI
@@ -12,7 +12,7 @@ sed -i "s|label='Upscale or Variation'|label='强化与变换'|" $WEBUI
 sed -i "s|label='Drag above image to here',|label='将图片拖入这里',|" $WEBUI
 sed -i "s|label='Upscale or Variation:',|label='强化(Upscale)与变换(Vary)：',|" $WEBUI
 sed -i "s|U0001F4D4 Document<|U0001F4D4 参考文档<|" $WEBUI
-sed -i "s|label='Image Prompt'|label='依图生图'|" $WEBUI
+sed -i "s|label='Image Prompt'|label='以图生图'|" $WEBUI
 sed -i "s|label='Stop At',|label='停在',|" $WEBUI
 sed -i "s|label='Weight',|label='权重',|" $WEBUI
 sed -i "s|label='Type',|label='类型',|" $WEBUI
@@ -26,7 +26,7 @@ sed -i "s|label='Aspect Ratios',|label='宽高比',|" $WEBUI
 sed -i "s|info='width × height'|info='宽 × 高'|" $WEBUI
 sed -i "s|label='Image Number',|label='出图数量',|" $WEBUI
 sed -i "s|label='Negative Prompt',|label='反向提示词',|" $WEBUI
-sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入提示词。\",|" $WEBUI
+sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入反向提示词。\",|" $WEBUI
 sed -i "s|info='Describing what you do not want to see.',|info='描述你不想看到的内容',|" $WEBUI
 sed -i "s|label='Random',|label='随机种子',|" $WEBUI
 sed -i "s|label='Seed',|label='种子',|" $WEBUI
@@ -52,7 +52,7 @@ sed -i "s|label='ADM Guidance End At Step',|label='ADM指导结束步长',|" $WE
 sed -i "s|info='When to end the guidance from positive/negative ADM. '|info='从正向/负向ADM结束指导的时间'|" $WEBUI
 sed -i "s|label='Refiner swap method',|label='精炼交换方式',|" $WEBUI
 sed -i "s|label='CFG Mimicking from TSNR',|label='CFG模拟TSNR',|" $WEBUI
-sed -i "s|info='Enabling Fooocus\\'s implementation of CFG mimicking for TSNR '|info='启用Fooocus的CFG模拟TSNR实现'|" $WEBUI
+sed -i "s|info='Enabling Fooocus\'s implementation of CFG mimicking for TSNR '|info='启用Fooocus的CFG模拟TSNR实现'|" $WEBUI
 sed -i "s|'(effective when real CFG > mimicked CFG).'|'（实际生效需满足真实CFG大于模拟CFG的条件）'|" $WEBUI
 sed -i "s|label='Sampler',|label='采样器',|" $WEBUI
 sed -i "s|info='Only effective in non-inpaint mode.'|info='仅在非修复模式下有效'|" $WEBUI
@@ -65,7 +65,7 @@ sed -i "s|label='Forced Overwrite of Generating Width',|label='强制覆盖生�
 sed -i "s|label='Forced Overwrite of Generating Heigh',|label='强制覆盖生成高度',|" $WEBUI
 sed -i "s|label='Forced Overwrite of Denoising Strength of \"Vary\"',|label='强制覆盖变换的去噪强度',|" $WEBUI
 sed -i "s|info='Set as negative number to disable. For developer debugging.'|info='设为负数以禁用。用于开发者调试'|" $WEBUI
-sed -i "s|label='Forced Overwrite of Denoising Strength of \"Upscale\",|label='强制覆盖强化的去噪强度',|" $WEBUI
+sed -i "s|label='Forced Overwrite of Denoising Strength of \"Upscale\"',|label='强制覆盖强化的去噪强度',|" $WEBUI
 sed -i "s|label='Inpaint Engine',|label='修补引擎',|" $WEBUI
 sed -i "s|info='Version of Fooocus inpaint model'|info='Fooocus修补引擎版本'|" $WEBUI
 sed -i "s|label='Control Debug'|label='调试控制'|" $WEBUI
