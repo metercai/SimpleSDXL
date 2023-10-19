@@ -5,6 +5,7 @@ import modules.flags
 import modules.sdxl_styles
 
 from modules.model_loader import load_file_from_url
+from modules.util import get_files_from_folder
 
 config_path = "user_path_config.txt"
 config_dict = {}
@@ -120,7 +121,8 @@ default_styles = get_config_item_or_set_default(
 default_negative_prompt = get_config_item_or_set_default(
     key='default_negative_prompt',
     default_value='low quality, bad hands, bad eyes, cropped, missing fingers, extra digit',
-    validator=lambda x: isinstance(x, str)
+    validator=lambda x: isinstance(x, str),
+    disable_empty_as_none=True
 )
 default_positive_prompt = get_config_item_or_set_default(
     key='default_positive_prompt',
@@ -168,19 +170,8 @@ model_filenames = []
 lora_filenames = []
 
 
-def get_model_filenames(folder_path):
-    if not os.path.isdir(folder_path):
-        raise ValueError("Folder path is not a valid directory.")
-
-    filenames = []
-    for filename in os.listdir(folder_path):
-        if os.path.isfile(os.path.join(folder_path, filename)):
-            for ends in ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch']:
-                if filename.lower().endswith(ends):
-                    filenames.append(filename)
-                    break
-
-    return filenames
+def get_model_filenames(folder_path, name_filter=None):
+    return get_files_from_folder(folder_path, ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch'], name_filter)
 
 
 def update_all_model_names():
@@ -198,6 +189,15 @@ def downloading_inpaint_models(v):
         model_dir=inpaint_models_path,
         file_name='fooocus_inpaint_head.pth'
     )
+    head_file = os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth')
+    patch_file = None
+
+    # load_file_from_url(
+    #     url='https://huggingface.co/lllyasviel/Annotators/resolve/main/ControlNetLama.pth',
+    #     model_dir=inpaint_models_path,
+    #     file_name='ControlNetLama.pth'
+    # )
+    # lama_file = os.path.join(inpaint_models_path, 'ControlNetLama.pth')
 
     if v == 'v1':
         load_file_from_url(
@@ -205,8 +205,7 @@ def downloading_inpaint_models(v):
             model_dir=inpaint_models_path,
             file_name='inpaint.fooocus.patch'
         )
-        return os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth'), os.path.join(inpaint_models_path,
-                                                                                           'inpaint.fooocus.patch')
+        patch_file = os.path.join(inpaint_models_path, 'inpaint.fooocus.patch')
 
     if v == 'v2.5':
         load_file_from_url(
@@ -214,8 +213,9 @@ def downloading_inpaint_models(v):
             model_dir=inpaint_models_path,
             file_name='inpaint_v25.fooocus.patch'
         )
-        return os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth'), os.path.join(inpaint_models_path,
-                                                                                           'inpaint_v25.fooocus.patch')
+        patch_file = os.path.join(inpaint_models_path, 'inpaint_v25.fooocus.patch')
+
+    return head_file, patch_file
 
 
 def downloading_controlnet_canny():

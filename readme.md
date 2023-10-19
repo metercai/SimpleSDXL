@@ -1,10 +1,13 @@
-
 ## 🔔 更新
 - [2023.10.16] 初始版本，界面文字汉化，新增--webroot参数，设定云端URL访问的根路径。
 
 # Fooocus
+=======
+<div align=center>
+<img src="https://github.com/lllyasviel/Fooocus/assets/19834515/9ad8ae87-1dc2-4acc-9a44-a5fa4ae2aad6" width=80%>
+</div>
 
-<img src="https://github.com/lllyasviel/Fooocus/assets/19834515/f79c5981-cf80-4ee3-b06b-3fef3f8bfbc7" width=100%>
+# Fooocus
 
 Fooocus is an image generating software (based on [Gradio](https://www.gradio.app/)).
 
@@ -17,8 +20,6 @@ Fooocus is a rethinking of Stable Diffusion and Midjourney’s designs:
 Fooocus has included and automated [lots of inner optimizations and quality improvements](#tech_list). Users can forget all those difficult technical parameters, and just enjoy the interaction between human and computer to "explore new mediums of thought and expanding the imaginative powers of the human species" `[1]`.
 
 Fooocus has simplified the installation. Between pressing "download" and generating the first image, the number of needed mouse clicks is strictly limited to less than 3. Minimal GPU memory requirement is 4GB (Nvidia).
-
-Fooocus also developed many "fooocus-only" features for advanced users to get perfect results. [Click here to browse the advanced features.](https://github.com/lllyasviel/Fooocus/discussions/117)
 
 `[1]` David Holz, 2019.
 
@@ -41,7 +42,7 @@ Using Fooocus is as easy as (probably easier than) Midjourney – but this does 
 | --quality | Advanced -> Quality |
 | --repeat | Advanced -> Image Number |
 | Multi Prompts (::) | Just use multiple lines of prompts |
-| Prompt Weights | You can use " I am (happy:1.5)". <br> Fooocus uses A1111's reweighting algorithm so that results are better than ComfyUI if users directly copy prompts from Civitai. (Because if prompts are written in ComfyUI's reweighting, users are less likely to copy prompt texts as they prefer dragging files) |
+| Prompt Weights | You can use " I am (happy:1.5)". <br> Fooocus uses A1111's reweighting algorithm so that results are better than ComfyUI if users directly copy prompts from Civitai. (Because if prompts are written in ComfyUI's reweighting, users are less likely to copy prompt texts as they prefer dragging files) <br> To use embedding, you can use "(embedding:file_name:1.1)" |
 | --no | Advanced -> Negative Prompt |
 | --ar | Advanced -> Aspect Ratios |
 
@@ -52,6 +53,8 @@ We also have a few things borrowed from the best parts of LeonardoAI:
 | Prompt Magic | Advanced -> Style -> Fooocus V2 |
 | Advanced Sampler Parameters (like Contrast/Sharpness/etc) | Advanced -> Advanced -> Sampling Sharpness / etc |
 | User-friendly ControlNets | Input Image -> Image Prompt -> Advanced |
+
+Fooocus also developed many "fooocus-only" features for advanced users to get perfect results. [Click here to browse the advanced features.](https://github.com/lllyasviel/Fooocus/discussions/117)
 
 # Download
 
@@ -183,6 +186,8 @@ Same with the above instructions. You need to change torch to AMD version
 
 AMD is not intensively tested, however. The AMD support is in beta.
 
+Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus Anime/Realistic Edition.
+
 ### Windows(AMD GPUs)
 
 Same with Windows. Download the software, edit the content of `run.bat` as:
@@ -195,6 +200,8 @@ Same with Windows. Download the software, edit the content of `run.bat` as:
 Then run the `run.bat`.
 
 AMD is not intensively tested, however. The AMD support is in beta.
+
+Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus Anime/Realistic Edition.
 
 ### Mac
 
@@ -210,6 +217,8 @@ You can install Fooocus on Apple Mac silicon (M1 or M2) with macOS 'Catalina' or
 1. Install the pygit2, `pip install pygit2==1.12.2`.
 1. Install the packages required by Fooocus, `pip install -r requirements_versions.txt`.
 1. Launch Fooocus by running `python entry_with_update.py`. The first time you run Fooocus, it will automatically download the Stable Diffusion SDXL models and will take a significant time, depending on your internet connection.
+
+Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus Anime/Realistic Edition.
 
 ## List of "Hidden" Tricks
 <a name="tech_list"></a>
@@ -257,6 +266,8 @@ For example ["realisticStockPhoto_v10" is a pretty good model from CivitAI](http
     "default_cfg_scale": 3.0,
     "default_sampler": "dpmpp_2m",
     "default_scheduler": "karras",
+    "default_negative_prompt": "low quality",
+    "default_positive_prompt": "",
     "default_styles": [
         "Fooocus V2",
         "Default (Slightly Cinematic)",
@@ -265,43 +276,27 @@ For example ["realisticStockPhoto_v10" is a pretty good model from CivitAI](http
 }
 ```
 
-Then you will get this special Fooocus software for you
+Consider twice before you really change the config. If you find yourself breaking things, just delete `Fooocus\user_path_config.txt`. Fooocus will go back to default.
 
-<details>
-
-<summary>Click here to the see the image. </summary>
-
-![image](https://github.com/lllyasviel/misc/assets/19834515/002b0fd1-2cf3-4cd7-8a73-cde573729c07)
-
-("girl in garden, holding flowers, freckles", seed 12345)
-
-</details>
-
-Below, for comparison, is the default Fooocus without config customization:
-
-<details>
-
-<summary>Click here to the see the image. </summary>
-
-![image](https://github.com/lllyasviel/misc/assets/19834515/1a9fa48b-37af-48bc-bc7e-1cb03bb38b59)
-
-("girl in garden, holding flowers, freckles", seed 12345)
-
-</details>
-
-You can see that default Fooocus is also strong though "realisticStockPhoto_v10" may understand "freckles" better. 
-
-Consider twice before you really change the config because in many cases results are worse than default official Fooocus. You are warned, and you need to know exactly what you are doing.
-
-If you find yourself breaking things, just delete `Fooocus\user_path_config.txt`. Fooocus will go back to default.
+A safter way is just to try "run_anime.bat" or "run_realistic.bat" - they should be already good enough for different tasks.
 
 ## Advanced Features
 
 [Click here to browse the advanced features.](https://github.com/lllyasviel/Fooocus/discussions/117)
 
+Fooocus also has many community forks, just like SD-WebUI, for enthusiastic users who want to try!
+
+| SD-WebUI's forks | Fooocus' forks |
+| - | - |
+| [vladmandic/automatic](https://github.com/vladmandic/automatic) </br> [anapnoe/stable-diffusion-webui-ux](https://github.com/anapnoe/stable-diffusion-webui-ux) </br> and so on ... | [runew0lf/RuinedFooocus](https://github.com/runew0lf/RuinedFooocus) </br> [MoonRide303/Fooocus-MRE](https://github.com/MoonRide303/Fooocus-MRE) </br> and so on ... |
+
+See also [About Forking and Promotion of Forks](https://github.com/lllyasviel/Fooocus/discussions/699).
+
 ## Thanks
 
 Fooocus is powered by [FCBH backend](https://github.com/lllyasviel/Fooocus/tree/main/backend), which starts from an odd mixture of [Automatic1111](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
+
+Special thanks to [twri](https://github.com/twri) and [3Diva](https://github.com/3Diva) for creating additional SDXL styles available in Fooocus.
 
 ## Update Log
 
