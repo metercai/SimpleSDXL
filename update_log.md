@@ -1,3 +1,59 @@
+# 2.1.703
+
+* Fixed many previous problems related to inpaint.
+
+# 2.1.702
+
+* Corrected reading empty negative prompt from config (it shouldn't turn into None).
+
+# 2.1.701
+
+* Updated FreeU node to v2 (gives less overcooked results).
+
+# 2.1.699
+
+* Disabled smart memory management (solves some memory issues).
+
+# 2.1.698
+
+* Added support for loading model files from subfolders.
+
+# 2.1.696
+
+* Improved wildcards implementation (using same wildcard multiple times will now return different values).
+
+**(2023 Oct 18) Again, the feature updating of Fooocus will be paused for about two or three weeks because we have some other workloads - we will come back in early or mid November. However, you may still see updates if other collaborators are fixing bugs or solving problems.**
+
+# 2.1.695 (requested emergency bug fix)
+
+* Reduced 3.4GB RAM use when swapping base model.
+* Reduced 372MB VRAM use in VAE decoding after using control model in image prompt.
+* Note that Official ComfyUI (d44a2de) will run out of VRAM when using sdxl and control-lora on 2060 6GB that does not support float16 at resolution 1024. Fooocus 2.1.695 succeeded in outputting images without OOM using exactly same devices.
+
+(2023 Oct 17) Announcement of update being paused.
+
+# 2.1.693
+
+* Putting custom styles before pre-defined styles.
+* Avoided the consusion between Fooocus Anime preset and Fooocus Anime style (Fooocus Anime style is renamed to Fooocus Masterpiece because it does not make images Anime-looking if not using with Fooocus Anime preset).
+* Fixed some minor bugs in Fooocus Anime preset's prompt emphasizing of commas.
+* Supported and documented embedding grammar (and wildcards grammar). 
+* This release is a relative stable version and many features are determined now.
+
+# 2.1.687
+
+* Added support for wildcards (using files from wildcards folder - try prompts like `__color__ sports car` with different seeds).
+
+# 2.1.682
+
+* Added support for custom styles (loaded from JSON files placed in sdxl_styles folder).
+
+# 2.1.681
+
+* Added support for generate hotkey (CTRL+ENTER).
+* Added support for generate forever (RMB on Generate button).
+* Added support for playing sound when generation is finished ('notification.ogg' or 'notification.mp3').
+
 # 2.1.62
 
 * Preset system. Added anime and realistic support.

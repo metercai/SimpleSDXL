@@ -223,6 +223,12 @@ def prepare_text_encoder(async_call=True):
 def refresh_everything(refiner_model_name, base_model_name, loras):
     global final_unet, final_clip, final_vae, final_refiner_unet, final_refiner_vae, final_expansion
 
+    final_unet = None
+    final_clip = None
+    final_vae = None
+    final_refiner_unet = None
+    final_refiner_vae = None
+
     refresh_refiner_model(refiner_model_name)
     refresh_base_model(base_model_name)
     refresh_loras(loras)
@@ -234,14 +240,12 @@ def refresh_everything(refiner_model_name, base_model_name, loras):
 
     final_unet.model.diffusion_model.in_inpaint = False
 
-    if xl_refiner is None:
-        final_refiner_unet = None
-        final_refiner_vae = None
-    else:
+    if xl_refiner is not None:
         final_refiner_unet = xl_refiner.unet
-        final_refiner_unet.model.diffusion_model.in_inpaint = False
-
         final_refiner_vae = xl_refiner.vae
+
+        if final_refiner_unet is not None:
+            final_refiner_unet.model.diffusion_model.in_inpaint = False
 
     if final_expansion is None:
         final_expansion = FooocusExpansion()
@@ -316,20 +320,24 @@ def calculate_sigmas(sampler, model, scheduler, steps, denoise):
 @torch.no_grad()
 @torch.inference_mode()
 def process_diffusion(positive_cond, negative_cond, steps, switch, width, height, image_seed, callback, sampler_name, scheduler_name, latent=None, denoise=1.0, tiled=False, cfg_scale=7.0, refiner_swap_method='joint'):
-    global final_unet, final_refiner_unet
+    global final_unet, final_refiner_unet, final_vae, final_refiner_vae
 
     assert refiner_swap_method in ['joint', 'separate', 'vae', 'upscale']
 
-    if final_refiner_unet is not None:
-        if isinstance(final_refiner_unet.model.latent_format, fcbh.latent_formats.SD15) \
-                and refiner_swap_method != 'upscale':
-            refiner_swap_method = 'vae'
+    refiner_use_different_vae = final_refiner_vae is not None and final_refiner_unet is not None
 
-    if refiner_swap_method == 'vae' and denoise < 0.95:
-        # VAE swap only support full denoise
-        refiner_swap_method = 'joint'
-        # Disable refiner to avoid SD15 in joint swap
-        final_refiner_unet = None
+    if refiner_swap_method == 'upscale':
+        if not refiner_use_different_vae:
+            refiner_swap_method = 'joint'
+    else:
+        if refiner_use_different_vae:
+            if denoise > 0.95:
+                refiner_swap_method = 'vae'
+            else:
+                # VAE swap only support full denoise
+                # Disable refiner to avoid SD15 in joint/separate swap
+                final_refiner_unet = None
+                final_refiner_vae = None
 
     print(f'[Sampler] refiner_swap_method = {refiner_swap_method}')
 
@@ -371,14 +379,10 @@ def process_diffusion(positive_cond, negative_cond, steps, switch, width, height
         decoded_latent = core.decode_vae(vae=final_vae, latent_image=sampled_latent, tiled=tiled)
 
     if refiner_swap_method == 'upscale':
-        target_model = final_refiner_unet
-        if target_model is None:
-            target_model = final_unet
-
         sampled_latent = core.ksampler(
-            model=target_model,
-            positive=clip_separate(positive_cond, target_model=target_model.model, target_clip=final_clip),
-            negative=clip_separate(negative_cond, target_model=target_model.model, target_clip=final_clip),
+            model=final_refiner_unet,
+            positive=clip_separate(positive_cond, target_model=final_refiner_unet.model, target_clip=final_clip),
+            negative=clip_separate(negative_cond, target_model=final_refiner_unet.model, target_clip=final_clip),
             latent=empty_latent,
             steps=steps, start_step=0, last_step=steps, disable_noise=False, force_full_denoise=True,
             seed=image_seed,
@@ -390,11 +394,7 @@ def process_diffusion(positive_cond, negative_cond, steps, switch, width, height
             previewer_start=0,
             previewer_end=steps,
         )
-
-        target_model = final_refiner_vae
-        if target_model is None:
-            target_model = final_vae
-        decoded_latent = core.decode_vae(vae=target_model, latent_image=sampled_latent, tiled=tiled)
+        decoded_latent = core.decode_vae(vae=final_refiner_vae, latent_image=sampled_latent, tiled=tiled)
 
     if refiner_swap_method == 'separate':
         sampled_latent = core.ksampler(
@@ -441,6 +441,9 @@ def process_diffusion(positive_cond, negative_cond, steps, switch, width, height
         decoded_latent = core.decode_vae(vae=target_model, latent_image=sampled_latent, tiled=tiled)
 
     if refiner_swap_method == 'vae':
+        if modules.inpaint_worker.current_task is not None:
+            modules.inpaint_worker.current_task.unswap()
+
         sample_hijack.history_record = []
         core.ksampler(
             model=final_unet,
@@ -512,9 +515,6 @@ def process_diffusion(positive_cond, negative_cond, steps, switch, width, height
             sigmas=sigmas,
             noise=refiner_noise
         )
-
-        if modules.inpaint_worker.current_task is not None:
-            modules.inpaint_worker.current_task.swap()
 
         target_model = final_refiner_vae
         if target_model is None:

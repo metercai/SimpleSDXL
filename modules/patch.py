@@ -1,3 +1,4 @@
+import os
 import torch
 import time
 import fcbh.model_base
@@ -20,9 +21,10 @@ import fcbh.cli_args
 import args_manager
 import modules.advanced_parameters as advanced_parameters
 import warnings
+import safetensors.torch
 
 from fcbh.k_diffusion import utils
-from fcbh.k_diffusion.sampling import BrownianTreeNoiseSampler, trange
+from fcbh.k_diffusion.sampling import trange
 from fcbh.ldm.modules.diffusionmodules.openaimodel import timestep_embedding, forward_timestep_embed
 
 
@@ -481,17 +483,53 @@ def patched_load_models_gpu(*args, **kwargs):
     return y
 
 
+def build_loaded(module, loader_name):
+    original_loader_name = loader_name + '_origin'
+
+    if not hasattr(module, original_loader_name):
+        setattr(module, original_loader_name, getattr(module, loader_name))
+
+    original_loader = getattr(module, original_loader_name)
+
+    def loader(*args, **kwargs):
+        result = None
+        try:
+            result = original_loader(*args, **kwargs)
+        except Exception as e:
+            result = None
+            exp = str(e) + '\n'
+            for path in list(args) + list(kwargs.values()):
+                if isinstance(path, str):
+                    if os.path.exists(path):
+                        exp += f'File corrupted: {path} \n'
+                        corrupted_backup_file = path + '.corrupted'
+                        if os.path.exists(corrupted_backup_file):
+                            os.remove(corrupted_backup_file)
+                        os.replace(path, corrupted_backup_file)
+                        if os.path.exists(path):
+                            os.remove(path)
+                        exp += f'Fooocus has tried to move the corrupted file to {corrupted_backup_file} \n'
+                        exp += f'You may try again now and Fooocus will download models again. \n'
+            raise ValueError(exp)
+        return result
+
+    setattr(module, loader_name, loader)
+    return
+
+
+def disable_smart_memory():
+    print(f'[Fooocus] Disabling smart memory')
+    fcbh.model_management.DISABLE_SMART_MEMORY = True
+    args_manager.args.disable_smart_memory = True
+    fcbh.cli_args.args.disable_smart_memory = True
+    return
+
+
 def patch_all():
-    if not fcbh.model_management.DISABLE_SMART_MEMORY:
-        vram_inadequate = fcbh.model_management.total_vram < 20 * 1024
-        is_old_gpu_arch = not fcbh.model_management.should_use_fp16()
-        if vram_inadequate or is_old_gpu_arch:
-            # https://github.com/lllyasviel/Fooocus/issues/602
-            print(f'[Fooocus Smart Memory] Disabling smart memory, '
-                  f'vram_inadequate = {vram_inadequate}, is_old_gpu_arch = {is_old_gpu_arch}.')
-            fcbh.model_management.DISABLE_SMART_MEMORY = True
-            args_manager.args.disable_smart_memory = True
-            fcbh.cli_args.args.disable_smart_memory = True
+    # Many recent reports show that Comfyanonymous's method is still not robust enough and many 4090s are broken
+    # We will not use it until this method is really usable
+    # For example https://github.com/lllyasviel/Fooocus/issues/724
+    disable_smart_memory()
 
     if not hasattr(fcbh.model_management, 'load_models_gpu_origin'):
         fcbh.model_management.load_models_gpu_origin = fcbh.model_management.load_models_gpu
@@ -508,5 +546,8 @@ def patch_all():
     fcbh.sd1_clip.ClipTokenWeightEncoder.encode_token_weights = encode_token_weights_patched_with_a1111_method
 
     warnings.filterwarnings(action='ignore', module='torchsde')
+
+    build_loaded(safetensors.torch, 'load_file')
+    build_loaded(torch, 'load')
 
     return
