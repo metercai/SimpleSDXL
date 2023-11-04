@@ -19,9 +19,9 @@ sed -i "s|label='Type',|label='类型',|" $WEBUI
 sed -i "s|label='Input Image',|label='输入图片',|" $WEBUI
 sed -i "s|label='Advanced',|label='高级选项',|" $WEBUI
 sed -i "s|label='Inpaint or Outpaint (beta)'|label='修补与融合（测试）'|" $WEBUI
-sed -i "s|'Outpaint Expansion (<a|'扩图 (<a|" $WEBUI
+sed -i "s|'Outpaint Expansion (<a|'向外绘制扩展 (<a|" $WEBUI
 sed -i "s|label='Setting'|label='设置'|" $WEBUI
-sed -i "s|label='Performance',|label='性能（Speed速度，Quality质量）',|" $WEBUI
+sed -i "s|label='Performance',|label='Speed速度优先/Quality质量优先）',|" $WEBUI
 sed -i "s|label='Aspect Ratios',|label='宽高比',|" $WEBUI
 sed -i "s|info='width × height'|info='宽 × 高'|" $WEBUI
 sed -i "s|label='Image Number',|label='出图数量',|" $WEBUI
@@ -30,11 +30,13 @@ sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入反向提示词
 sed -i "s|info='Describing what you do not want to see.',|info='描述你不想看到的内容',|" $WEBUI
 sed -i "s|label='Random',|label='随机种子',|" $WEBUI
 sed -i "s|label='Seed',|label='种子',|" $WEBUI
+sed -i "s|U0001F4DA History Log<|U0001F4D4 历史记录<|" $WEBUI
 sed -i "s|label='Style'|label='风格'|" $WEBUI
 sed -i "s|label='Model'|label='模型'|" $WEBUI
 sed -i "s|label='Image Style'|label='图片风格'|" $WEBUI
 sed -i "s|label='Base Model (SDXL only)',|label='SDXL基础模型',|" $WEBUI
 sed -i "s|label='Refiner (SDXL or SD 1.5)',|label='SDXL精炼模型',|" $WEBUI
+sed -i "s|label='LoRAs'|label='LoRA局部调整模型'|" $WEBUI
 sed -i "s|label='Refresh',|label='刷新',|" $WEBUI
 sed -i "s|504 Refresh All Files',|504 全部刷新',|" $WEBUI
 sed -i "s|label='Advanced'|label='高级'|" $WEBUI
@@ -43,7 +45,7 @@ sed -i "s|info='Higher value means image and texture are sharper.'|info='越高�
 sed -i "s|label='Guidance Scale',|label='提示词引导系数',|" $WEBUI
 sed -i "s|info='Higher value means style is cleaner, vivider, and more artistic.'|info='提示词作用的强度，越高风格越干净、生动、更具艺术感'|" $WEBUI
 sed -i "s|label='Developer Debug Mode',|label='开发者模式',|" $WEBUI
-sed -i "s|label='Developer Debug Tools'|label='开发者调试工具'|" $WEBUI
+sed -i "s|label='Developer Debug Tools'|label='工具参数'|" $WEBUI
 sed -i "s|label='Positive ADM Guidance Scaler',|label='正向ADM指导缩放',|" $WEBUI
 sed -i "s|info='The scaler multiplied to positive ADM (use 1.0 to disable). '|info='用于乘以正向ADM的缩放器 (使用1.0以禁用). '|" $WEBUI
 sed -i "s|label='Negative ADM Guidance Scaler',|label='负向ADM指导缩放',|" $WEBUI
@@ -52,24 +54,25 @@ sed -i "s|label='ADM Guidance End At Step',|label='ADM指导结束步长',|" $WE
 sed -i "s|info='When to end the guidance from positive/negative ADM. '|info='从正向/负向ADM结束指导的时间'|" $WEBUI
 sed -i "s|label='Refiner swap method',|label='精炼交换方式',|" $WEBUI
 sed -i "s|label='CFG Mimicking from TSNR',|label='CFG模拟TSNR',|" $WEBUI
-sed -i "s|info='Enabling Fooocus\'s implementation of CFG mimicking for TSNR '|info='启用Fooocus的CFG模拟TSNR实现'|" $WEBUI
+sed -i "s|info='Enabling Fooocus\\\'s implementation of CFG mimicking for TSNR '|info='启用Fooocus的CFG模拟TSNR实现'|" $WEBUI
 sed -i "s|'(effective when real CFG > mimicked CFG).'|'（实际生效需满足真实CFG大于模拟CFG的条件）'|" $WEBUI
 sed -i "s|label='Sampler',|label='采样器',|" $WEBUI
 sed -i "s|info='Only effective in non-inpaint mode.'|info='仅在非修复模式下有效'|" $WEBUI
 sed -i "s|label='Scheduler',|label='调度器',|" $WEBUI
 sed -i "s|info='Scheduler of Sampler.'|info='采样器调度程序'|" $WEBUI
 sed -i "s|label='Forced Overwrite of Sampling Step',|label='强制覆盖采样步长',|" $WEBUI
-sed -i "s|info='Set as -1 to disable. For developer debugging.'|info='设为-1以禁用。用于开发者调试'|" $WEBUI
+sed -i "s|info='Set as -1 to disable. For developer debugging.|info='设为-1以禁用。用于开发者调试。|" $WEBUI
 sed -i "s|label='Forced Overwrite of Refiner Switch Step',|label='强制覆盖优化开关步长',|" $WEBUI
 sed -i "s|label='Forced Overwrite of Generating Width',|label='强制覆盖生成宽度',|" $WEBUI
-sed -i "s|label='Forced Overwrite of Generating Heigh',|label='强制覆盖生成高度',|" $WEBUI
+sed -i "s|label='Forced Overwrite of Generating Height',|label='强制覆盖生成高度',|" $WEBUI
+sed -i "s|'Results will be worse for non-standard numbers that SDXL is not trained on.'|'使用未经训练的非标准数字会更糟糕。'|" $WEBUI
 sed -i "s|label='Forced Overwrite of Denoising Strength of \"Vary\"',|label='强制覆盖变换的去噪强度',|" $WEBUI
 sed -i "s|info='Set as negative number to disable. For developer debugging.'|info='设为负数以禁用。用于开发者调试'|" $WEBUI
 sed -i "s|label='Forced Overwrite of Denoising Strength of \"Upscale\"',|label='强制覆盖强化的去噪强度',|" $WEBUI
 sed -i "s|label='Inpaint Engine',|label='修补引擎',|" $WEBUI
 sed -i "s|info='Version of Fooocus inpaint model'|info='Fooocus修补引擎版本'|" $WEBUI
-sed -i "s|label='Control Debug'|label='调试控制'|" $WEBUI
-sed -i "s|label='Debug Preprocessor of ControlNets',|label='ControlNets的调试预处理器',|" $WEBUI
+sed -i "s|label='Control Debug'|label='图像控制'|" $WEBUI
+sed -i "s|label='Debug Preprocessors',|label='调试预处理器',|" $WEBUI
 sed -i "s|label='Mixing Image Prompt and Vary/Upscale',|label='混合图像提示和变换/增强',|" $WEBUI
 sed -i "s|label='Mixing Image Prompt and Inpaint',|label='混合图像提示和修复',|" $WEBUI
 sed -i "s|label='Softness of ControlNet',|label='ControlNet柔化',|" $WEBUI
@@ -77,6 +80,8 @@ sed -i "s|info='Similar to the Control Mode in A1111 (use 0.0 to disable). '|inf
 sed -i "s|label='Canny'|label='锐化Canny',|" $WEBUI
 sed -i "s|label='Canny Low Threshold',|label='锐化的低阈值',|" $WEBUI
 sed -i "s|label='Canny High Threshold',|label='锐化的高阈值',|" $WEBUI
+
+#sed -i "s|share=args_manager.args.share|share=args_manager.args.share, root_path=args_manager.args.webroot|" $WEBUI
 
 # sdxl_styles.py
 
