@@ -18,7 +18,7 @@ sed -i "s|label='Weight',|label='权重',|" $WEBUI
 sed -i "s|label='Type',|label='类型',|" $WEBUI
 sed -i "s|label='Input Image',|label='输入图片',|" $WEBUI
 sed -i "s|label='Advanced', value=modules|label='高级选项', value=modules|" $WEBUI
-sed -i "s|label='Advanced', value=False|label='控图能力（ImagePrompt：元素，PyraCanny：形状，CPDS：构图）', value=False|" $WEBUI
+sed -i "s|label='Advanced', value=False|label='高级控图模式（ImagePrompt：元素，PyraCanny：形状，CPDS：构图）', value=False|" $WEBUI
 sed -i "s|label='Inpaint or Outpaint (beta)'|label='局部重绘与外扩重绘（测试）'|" $WEBUI
 sed -i "s|'Outpaint Expansion (<a|'向外扩展重绘 (<a|" $WEBUI
 sed -i "s|'Outpaint Expansion Direction:'|'外扩重绘方向'|" $WEBUI
@@ -67,6 +67,8 @@ sed -i "s|label='Sampler',|label='采样器',|" $WEBUI
 sed -i "s|info='Only effective in non-inpaint mode.'|info='仅在非修复模式下有效'|" $WEBUI
 sed -i "s|label='Scheduler',|label='调度器',|" $WEBUI
 sed -i "s|info='Scheduler of Sampler.'|info='采样器调度程序'|" $WEBUI
+sed -i "s|label='Generate Image Grid for Each Batch',|label='每批次生成图片网格',|" $WEBUI
+sed -i "s|info='(Experimental) This may cause performance problems on some computers and certain internet conditions.'|info='试验性，可能在某些电脑或网络条件下导致性能问题。'|" $WEBUI
 sed -i "s|label='Forced Overwrite of Sampling Step',|label='强制覆盖采样步长',|" $WEBUI
 sed -i "s|info='Set as -1 to disable. For developer debugging.|info='设为-1以禁用。用于开发者调试。|" $WEBUI
 sed -i "s|label='Forced Overwrite of Refiner Switch Step',|label='强制覆盖优化开关步长',|" $WEBUI
