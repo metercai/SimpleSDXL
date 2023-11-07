@@ -8,20 +8,22 @@ sed -i "s|placeholder=\"Type prompt here.\",|placeholder=\"输入文生图提示
 sed -i "s|label=\"Generate\", value=\"Generate\",|label=\"生成\", value=\"生成\",|" $WEBUI
 sed -i "s|label=\"Skip\", value=\"Skip\",|label=\"跳过\", value=\"跳过\",|" $WEBUI
 sed -i "s|label=\"Stop\", value=\"Stop\",|label=\"终止\", value=\"终止\",|" $WEBUI
-sed -i "s|label='Upscale or Variation'|label='强化与变换'|" $WEBUI
+sed -i "s|label='Upscale or Variation'|label='精修与二创'|" $WEBUI
 sed -i "s|label='Drag above image to here',|label='将图片拖入这里',|" $WEBUI
-sed -i "s|label='Upscale or Variation:',|label='强化(Upscale)与变换(Vary)：',|" $WEBUI
+sed -i "s|label='Upscale or Variation:',|label='精修(Upscale)与二创(Vary)：',|" $WEBUI
 sed -i "s|U0001F4D4 Document<|U0001F4D4 参考文档<|" $WEBUI
 sed -i "s|label='Image Prompt'|label='以图生图'|" $WEBUI
-sed -i "s|label='Stop At',|label='停在',|" $WEBUI
+sed -i "s|label='Stop At',|label='停止于',|" $WEBUI
 sed -i "s|label='Weight',|label='权重',|" $WEBUI
 sed -i "s|label='Type',|label='类型',|" $WEBUI
 sed -i "s|label='Input Image',|label='输入图片',|" $WEBUI
-sed -i "s|label='Advanced',|label='高级选项',|" $WEBUI
-sed -i "s|label='Inpaint or Outpaint (beta)'|label='修补与融合（测试）'|" $WEBUI
-sed -i "s|'Outpaint Expansion (<a|'向外绘制扩展 (<a|" $WEBUI
+sed -i "s|label='Advanced', value=modules|label='高级选项', value=modules|" $WEBUI
+sed -i "s|label='Advanced', value=False|label='控图能力（ImagePrompt：元素，PyraCanny：形状，CPDS：构图）', value=False|" $WEBUI
+sed -i "s|label='Inpaint or Outpaint (beta)'|label='局部重绘与外扩重绘（测试）'|" $WEBUI
+sed -i "s|'Outpaint Expansion (<a|'向外扩展重绘 (<a|" $WEBUI
+sed -i "s|'Outpaint Expansion Direction:'|'外扩重绘方向'|" $WEBUI
 sed -i "s|label='Setting'|label='设置'|" $WEBUI
-sed -i "s|label='Performance',|label='Speed速度优先/Quality质量优先）',|" $WEBUI
+sed -i "s|label='Performance',|label='性能选择',|" $WEBUI
 sed -i "s|label='Aspect Ratios',|label='宽高比',|" $WEBUI
 sed -i "s|info='width × height'|info='宽 × 高'|" $WEBUI
 sed -i "s|label='Image Number',|label='出图数量',|" $WEBUI
@@ -36,7 +38,12 @@ sed -i "s|label='Model'|label='模型'|" $WEBUI
 sed -i "s|label='Image Style'|label='图片风格'|" $WEBUI
 sed -i "s|label='Base Model (SDXL only)',|label='SDXL基础模型',|" $WEBUI
 sed -i "s|label='Refiner (SDXL or SD 1.5)',|label='SDXL精炼模型',|" $WEBUI
-sed -i "s|label='LoRAs'|label='LoRA局部调整模型'|" $WEBUI
+sed -i "s|label='Refiner Switch At'|label='精炼介入点'|" $WEBUI
+sed -i "s|info='Use 0.4 for SD1.5 realistic models; '|info='SD1.5现实模型选0.4；'|" $WEBUI
+sed -i "s|'or 0.667 for SD1.5 anime models; '|'SD1.5动漫模型选0.667；'|" $WEBUI
+sed -i "s|'or 0.8 for XL-refiners; '|'SDXL精炼模型选0.8；'|" $WEBUI
+sed -i "s|'or any value for switching two SDXL models.'|'其他任何值也适用于SDXL模型'|" $WEBUI
+sed -i "s|label='LoRAs'|label='LoRA局部模型'|" $WEBUI
 sed -i "s|label='Refresh',|label='刷新',|" $WEBUI
 sed -i "s|504 Refresh All Files',|504 全部刷新',|" $WEBUI
 sed -i "s|label='Advanced'|label='高级'|" $WEBUI
@@ -72,16 +79,16 @@ sed -i "s|label='Forced Overwrite of Denoising Strength of \"Upscale\"',|label='
 sed -i "s|label='Inpaint Engine',|label='修补引擎',|" $WEBUI
 sed -i "s|info='Version of Fooocus inpaint model'|info='Fooocus修补引擎版本'|" $WEBUI
 sed -i "s|label='Control Debug'|label='图像控制'|" $WEBUI
-sed -i "s|label='Debug Preprocessors',|label='调试预处理器',|" $WEBUI
-sed -i "s|label='Mixing Image Prompt and Vary/Upscale',|label='混合图像提示和变换/增强',|" $WEBUI
-sed -i "s|label='Mixing Image Prompt and Inpaint',|label='混合图像提示和修复',|" $WEBUI
+sed -i "s|label='Debug Preprocessors',|label='预处理器调试模式',|" $WEBUI
+sed -i "s|label='Mixing Image Prompt and Vary/Upscale',|label='以图生图+精修与二创',|" $WEBUI
+sed -i "s|label='Mixing Image Prompt and Inpaint',|label='以图生图+图片重绘',|" $WEBUI
 sed -i "s|label='Softness of ControlNet',|label='ControlNet柔化',|" $WEBUI
 sed -i "s|info='Similar to the Control Mode in A1111 (use 0.0 to disable). '|info='类似于A1111中的控制模式（使用0.0禁用）'|" $WEBUI
 sed -i "s|label='Canny'|label='锐化Canny',|" $WEBUI
 sed -i "s|label='Canny Low Threshold',|label='锐化的低阈值',|" $WEBUI
 sed -i "s|label='Canny High Threshold',|label='锐化的高阈值',|" $WEBUI
 
-#sed -i "s|share=args_manager.args.share|share=args_manager.args.share, root_path=args_manager.args.webroot|" $WEBUI
+sed -i "s|share=args_manager.args.share|share=args_manager.args.share, root_path=args_manager.args.webroot|" $WEBUI
 
 # sdxl_styles.py
 

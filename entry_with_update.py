@@ -38,8 +38,6 @@ try:
         print("Fast-forward merge")
     elif merge_result & pygit2.GIT_MERGE_ANALYSIS_NORMAL:
         print("Update failed - Did you modified any file?")
-    os.system('./translate_zh.sh')
-    print('Translate text to zh_CN.')
 except Exception as e:
     print('Update failed.')
     print(str(e))
