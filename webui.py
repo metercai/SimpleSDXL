@@ -3,7 +3,7 @@ import random
 import os
 import time
 import shared
-import modules.path
+import modules.config
 import fooocus_version
 import modules.html
 import modules.async_worker as worker
@@ -87,7 +87,7 @@ with shared.gradio_root:
                     prompt = gr.Textbox(show_label=False, placeholder="输入文生图提示词。", elem_id='positive_prompt',
                                         container=False, autofocus=True, elem_classes='type_row', lines=1024)
 
-                    default_prompt = modules.path.default_prompt
+                    default_prompt = modules.config.default_prompt
                     if isinstance(default_prompt, str) and default_prompt != '':
                         shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
 
@@ -112,7 +112,7 @@ with shared.gradio_root:
                     skip_button.click(skip_clicked, queue=False)
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='输入图片', value=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='高级选项', value=modules.path.default_advanced_checkbox, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='高级选项', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='精修与二创') as uov_tab:
@@ -182,16 +182,16 @@ with shared.gradio_root:
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
-        with gr.Column(scale=1, visible=modules.path.default_advanced_checkbox) as advanced_column:
+        with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='设置'):
                 performance_selection = gr.Radio(label='性能选择', choices=['Speed', 'Quality'], value='Speed')
-                aspect_ratios_selection = gr.Radio(label='宽高比', choices=modules.path.available_aspect_ratios,
-                                                   value=modules.path.default_aspect_ratio, info='宽 × 高')
-                image_number = gr.Slider(label='出图数量', minimum=1, maximum=32, step=1, value=modules.path.default_image_number)
+                aspect_ratios_selection = gr.Radio(label='宽高比', choices=modules.config.available_aspect_ratios,
+                                                   value=modules.config.default_aspect_ratio, info='宽 × 高')
+                image_number = gr.Slider(label='出图数量', minimum=1, maximum=32, step=1, value=modules.config.default_image_number)
                 negative_prompt = gr.Textbox(label='反向提示词', show_label=True, placeholder="输入文生图提示词。",
                                              info='描述你不想看到的内容', lines=2,
                                              elem_id='negative_prompt',
-                                             value=modules.path.default_prompt_negative)
+                                             value=modules.config.default_prompt_negative)
                 seed_random = gr.Checkbox(label='随机种子', value=True)
                 image_seed = gr.Textbox(label='种子', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
 
@@ -217,37 +217,37 @@ with shared.gradio_root:
             with gr.Tab(label='风格'):
                 style_selections = gr.CheckboxGroup(show_label=False, container=False,
                                                     choices=legal_style_names,
-                                                    value=modules.path.default_styles,
+                                                    value=modules.config.default_styles,
                                                     label='图片风格')
             with gr.Tab(label='模型'):
                 with gr.Row():
-                    base_model = gr.Dropdown(label='SDXL基础模型', choices=modules.path.model_filenames, value=modules.path.default_base_model_name, show_label=True)
-                    refiner_model = gr.Dropdown(label='SDXL精炼模型', choices=['None'] + modules.path.model_filenames, value=modules.path.default_refiner_model_name, show_label=True)
+                    base_model = gr.Dropdown(label='SDXL基础模型', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
+                    refiner_model = gr.Dropdown(label='SDXL精炼模型', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
 
                 refiner_switch = gr.Slider(label='精炼介入点', minimum=0.1, maximum=1.0, step=0.0001,
                                            info='SD1.5现实模型选0.4；'
                                                 'SD1.5动漫模型选0.667；'
                                                 'SDXL精炼模型选0.8；'
                                                 '其他任何值也适用于SDXL模型',
-                                           value=modules.path.default_refiner_switch,
-                                           visible=modules.path.default_refiner_model_name != 'None')
+                                           value=modules.config.default_refiner_switch,
+                                           visible=modules.config.default_refiner_model_name != 'None')
 
                 refiner_model.change(lambda x: gr.update(visible=x != 'None'),
                                      inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
 
-                with gr.Accordion(label='LoRA局部模型', open=True):
+                with gr.Accordion(label='LoRAs (SDXL or SD 1.5)', open=True):
                     lora_ctrls = []
                     for i in range(5):
                         with gr.Row():
-                            lora_model = gr.Dropdown(label=f'SDXL LoRA {i+1}', choices=['None'] + modules.path.lora_filenames, value=modules.path.default_lora_name if i == 0 else 'None')
-                            lora_weight = gr.Slider(label='权重', minimum=-2, maximum=2, step=0.01, value=modules.path.default_lora_weight)
+                            lora_model = gr.Dropdown(label=f'LoRA {i+1}', choices=['None'] + modules.config.lora_filenames, value=modules.config.default_lora_name if i == 0 else 'None')
+                            lora_weight = gr.Slider(label='权重', minimum=-2, maximum=2, step=0.01, value=modules.config.default_lora_weight)
                             lora_ctrls += [lora_model, lora_weight]
                 with gr.Row():
                     model_refresh = gr.Button(label='刷新', value='\U0001f504 全部刷新', variant='secondary', elem_classes='refresh_button')
             with gr.Tab(label='高级'):
-                sharpness = gr.Slider(label='采样的清晰度', minimum=0.0, maximum=30.0, step=0.001, value=modules.path.default_sample_sharpness,
+                sharpness = gr.Slider(label='采样的清晰度', minimum=0.0, maximum=30.0, step=0.001, value=modules.config.default_sample_sharpness,
                                       info='越高图像和纹理越清晰')
-                guidance_scale = gr.Slider(label='提示词引导系数', minimum=1.0, maximum=30.0, step=0.01, value=modules.path.default_cfg_scale,
+                guidance_scale = gr.Slider(label='提示词引导系数', minimum=1.0, maximum=30.0, step=0.01, value=modules.config.default_cfg_scale,
                                       info='提示词作用的强度，越高风格越干净、生动、更具艺术感')
                 gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/117" target="_blank">\U0001F4D4 参考文档</a>')
                 dev_mode = gr.Checkbox(label='开发者模式', value=False, container=False)
@@ -269,10 +269,10 @@ with shared.gradio_root:
                                                  info='启用Fooocus的CFG模拟TSNR实现'
                                                       '（实际生效需满足真实CFG大于模拟CFG的条件）')
                         sampler_name = gr.Dropdown(label='采样器', choices=flags.sampler_list,
-                                                   value=modules.path.default_sampler,
+                                                   value=modules.config.default_sampler,
                                                    info='仅在非修复模式下有效')
                         scheduler_name = gr.Dropdown(label='调度器', choices=flags.scheduler_list,
-                                                     value=modules.path.default_scheduler,
+                                                     value=modules.config.default_scheduler,
                                                      info='采样器调度程序')
 
                         generate_image_grid = gr.Checkbox(label='每批次生成图片网格',
@@ -300,7 +300,7 @@ with shared.gradio_root:
                                                                minimum=-1, maximum=1.0, step=0.001, value=-1,
                                                                info='设为负数以禁用。用于开发者调试')
 
-                        inpaint_engine = gr.Dropdown(label='重绘引擎', value='v1', choices=['v1', 'v2.5'],
+                        inpaint_engine = gr.Dropdown(label='重绘引擎', value='v1', choices=['v1', 'v2.5', 'v2.6'],
                                                      info='Fooocus重绘引擎版本')
 
                     with gr.Tab(label='图像控制'):
@@ -344,11 +344,11 @@ with shared.gradio_root:
                 dev_mode.change(dev_mode_checked, inputs=[dev_mode], outputs=[dev_tools], queue=False)
 
                 def model_refresh_clicked():
-                    modules.path.update_all_model_names()
+                    modules.config.update_all_model_names()
                     results = []
-                    results += [gr.update(choices=modules.path.model_filenames), gr.update(choices=['None'] + modules.path.model_filenames)]
+                    results += [gr.update(choices=modules.config.model_filenames), gr.update(choices=['None'] + modules.config.model_filenames)]
                     for i in range(5):
-                        results += [gr.update(choices=['None'] + modules.path.lora_filenames), gr.update()]
+                        results += [gr.update(choices=['None'] + modules.config.lora_filenames), gr.update()]
                     return results
 
                 model_refresh.click(model_refresh_clicked, [], [base_model, refiner_model] + lora_ctrls, queue=False)

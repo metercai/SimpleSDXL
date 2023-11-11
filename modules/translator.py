@@ -1,7 +1,7 @@
 import os
 import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-from modules.path import translator_path
+from modules.config import translator_path
 
 models_dir = os.path.join(translator_path, 'nllb-200-distilled-600M')
 
