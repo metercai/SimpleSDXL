@@ -28,6 +28,7 @@ def worker():
     import modules.constants as constants
     import modules.advanced_parameters as advanced_parameters
     import fooocus_extras.ip_adapter as ip_adapter
+    import modules.translator as translator
 
     from modules.sdxl_styles import apply_style, apply_wildcards, fooocus_expansion
     from modules.private_logger import log
@@ -132,6 +133,8 @@ def worker():
         uov_input_image = args.pop()
         outpaint_selections = args.pop()
         inpaint_input_image = args.pop()
+
+        prompt = translator.convert(prompt)
 
         cn_tasks = {flags.cn_ip: [], flags.cn_canny: [], flags.cn_cpds: []}
         for _ in range(4):
