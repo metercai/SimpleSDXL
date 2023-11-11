@@ -293,15 +293,15 @@ with shared.gradio_root:
                                                      minimum=-1, maximum=2048, step=1, value=-1,
                                                      info='设为-1以禁用。用于开发者调试。 '
                                                           '使用未经训练的非标准数字会更糟糕。')
-                        overwrite_vary_strength = gr.Slider(label='强制覆盖变换的去噪强度',
+                        overwrite_vary_strength = gr.Slider(label='强制覆盖"二创"的去噪强度',
                                                             minimum=-1, maximum=1.0, step=0.001, value=-1,
                                                             info='设为负数以禁用。用于开发者调试')
-                        overwrite_upscale_strength = gr.Slider(label='强制覆盖强化的去噪强度',
+                        overwrite_upscale_strength = gr.Slider(label='强制覆盖"精修"的去噪强度',
                                                                minimum=-1, maximum=1.0, step=0.001, value=-1,
                                                                info='设为负数以禁用。用于开发者调试')
 
-                        inpaint_engine = gr.Dropdown(label='修补引擎', value='v1', choices=['v1', 'v2.5'],
-                                                     info='Fooocus修补引擎版本')
+                        inpaint_engine = gr.Dropdown(label='重绘引擎', value='v1', choices=['v1', 'v2.5'],
+                                                     info='Fooocus重绘引擎版本')
 
                     with gr.Tab(label='图像控制'):
                         debugging_cn_preprocessor = gr.Checkbox(label='预处理器调试模式', value=False)

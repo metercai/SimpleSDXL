@@ -60,6 +60,7 @@ controlnet_models_path = get_dir_or_set_default('controlnet_models_path', '../mo
 clip_vision_models_path = get_dir_or_set_default('clip_vision_models_path', '../models/clip_vision/')
 fooocus_expansion_path = get_dir_or_set_default('fooocus_expansion_path',
                                                 '../models/prompt_expansion/fooocus_expansion')
+translator_path = get_dir_or_set_default('translator_path','../models/translator/')
 temp_outputs_path = get_dir_or_set_default('temp_outputs_path', '../outputs/')
 
 

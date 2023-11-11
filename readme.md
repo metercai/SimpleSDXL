@@ -1,5 +1,6 @@
 ## 🔔 更新
-- [2023.10.16] 初始版本，界面文字汉化，新增--webroot参数，设定云端URL访问的根路径。
+- [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线翻译器：nllb-200，Prompt支持中英文混编，自动识别并翻译。需提前下载翻译模型文件到 models/translator/ 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。
+- [2023.10.16] 初始版本，界面文字汉化，新增--webroot参数，设定云端URL访问的根路径。如云端访问地址为：http://hostname/sdxl/ ，启动参数中需追加 --webroot /sdxl 。
 
 # Fooocus
 =======
