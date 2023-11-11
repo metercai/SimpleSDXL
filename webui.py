@@ -71,7 +71,7 @@ def generate_clicked(*args):
 reload_javascript()
 
 shared.gradio_root = gr.Blocks(
-    title=f'Fooocus {fooocus_version.version} ' + ('' if args_manager.args.preset is None else args_manager.args.preset),
+    title=f'SimpleSDXL derived form Fooocus {fooocus_version.version} ' + ('' if args_manager.args.preset is None else args_manager.args.preset),
     css=modules.html.css).queue()
 
 with shared.gradio_root:
@@ -212,7 +212,7 @@ with shared.gradio_root:
 
                 seed_random.change(random_checked, inputs=[seed_random], outputs=[image_seed], queue=False)
 
-                gr.HTML(f'<a href="/file={get_current_html_path()}" target="_blank">\U0001F4D4 历史记录</a>')
+                gr.HTML(f'<a href="{args_manager.args.webroot}/file={get_current_html_path()}" target="_blank">\U0001F4D4 历史记录</a>')
 
             with gr.Tab(label='风格'):
                 style_selections = gr.CheckboxGroup(show_label=False, container=False,
