@@ -12,7 +12,6 @@ import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.advanced_parameters as advanced_parameters
 import args_manager
-import json
 
 from modules.sdxl_styles import legal_style_names
 from modules.private_logger import get_current_html_path
@@ -31,8 +30,6 @@ def generate_clicked(*args):
         gr.update(visible=True, value=None), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
-
-    print(f'args:{args}')
 
     worker.buffer.append(list(args))
     finished = False
@@ -81,10 +78,15 @@ with shared.gradio_root:
     with gr.Row():
         with gr.Column(scale=2):
             with gr.Row():
-                progress_window = grh.Image(label='预览', show_label=True, height=640, visible=False)
-                progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', height=640, visible=False)
-            progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False, elem_id='progress-bar', elem_classes='progress-bar')
-            gallery = gr.Gallery(label='图集', show_label=False, object_fit='contain', height=745, visible=True, elem_classes='resizable_area')
+                progress_window = grh.Image(label='预览', show_label=True, visible=False, height=768,
+                                            elem_classes=['main_view'])
+                progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain',
+                                              height=768, visible=False, elem_classes=['main_view'])
+            progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
+                                    elem_id='progress-bar', elem_classes='progress-bar')
+            gallery = gr.Gallery(label='图集', show_label=False, object_fit='contain', visible=True, height=768,
+                                 elem_classes=['resizable_area', 'main_view', 'final_gallery'],
+                                 elem_id='final_gallery')
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="输入文生图提示词。", elem_id='positive_prompt',
@@ -174,8 +176,8 @@ with shared.gradio_root:
                         outpaint_selections = gr.CheckboxGroup(choices=['Left', 'Right', 'Top', 'Bottom'], value=[], label='Outpaint', show_label=False, container=False)
                         gr.HTML('* Powered by Fooocus Inpaint Engine (beta) <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 参考文档</a>')
 
-            switch_js = "(x) => {if(x){setTimeout(() => window.scrollTo({ top: 850, behavior: 'smooth' }), 50);}else{setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);} return x}"
-            down_js = "() => {setTimeout(() => window.scrollTo({ top: 850, behavior: 'smooth' }), 50);}"
+            switch_js = "(x) => {if(x){viewer_to_bottom(100);viewer_to_bottom(500);}else{viewer_to_top();} return x;}"
+            down_js = "() => {viewer_to_bottom();}"
 
             input_image_checkbox.change(lambda x: gr.update(visible=x), inputs=input_image_checkbox, outputs=image_input_panel, queue=False, _js=switch_js)
             ip_advanced.change(lambda: None, queue=False, _js=down_js)
@@ -187,7 +189,9 @@ with shared.gradio_root:
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='设置'):
-                performance_selection = gr.Radio(label='性能选择', choices=['Speed', 'Quality'], value='Speed')
+                performance_selection = gr.Radio(label='性能选择',
+                                                 choices=['Speed', 'Quality', 'Extreme Speed'],
+                                                 value='Speed')
                 aspect_ratios_selection = gr.Radio(label='宽高比', choices=modules.config.available_aspect_ratios,
                                                    value=modules.config.default_aspect_ratio, info='宽 × 高')
                 image_number = gr.Slider(label='出图数量', minimum=1, maximum=32, step=1, value=modules.config.default_image_number)
@@ -238,7 +242,7 @@ with shared.gradio_root:
                 refiner_model.change(lambda x: gr.update(visible=x != 'None'),
                                      inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
 
-                with gr.Accordion(label='LoRAs (SDXL or SD 1.5)', open=True):
+                with gr.Accordion(label='LoRA局部模型', open=True):
                     lora_ctrls = []
                     for i in range(5):
                         with gr.Row():
@@ -272,11 +276,9 @@ with shared.gradio_root:
                                                  info='启用Fooocus的CFG模拟TSNR实现'
                                                       '（实际生效需满足真实CFG大于模拟CFG的条件）')
                         sampler_name = gr.Dropdown(label='采样器', choices=flags.sampler_list,
-                                                   value=modules.config.default_sampler,
-                                                   info='仅在非修复模式下有效')
+                                                   value=modules.config.default_sampler)
                         scheduler_name = gr.Dropdown(label='调度器', choices=flags.scheduler_list,
-                                                     value=modules.config.default_scheduler,
-                                                     info='采样器调度程序')
+                                                     value=modules.config.default_scheduler)
 
                         generate_image_grid = gr.Checkbox(label='每批次生成图片网格',
                                                           info='试验性，可能在某些电脑或网络条件下导致性能问题。',
@@ -303,7 +305,9 @@ with shared.gradio_root:
                                                                minimum=-1, maximum=1.0, step=0.001, value=-1,
                                                                info='设为负数以禁用。用于开发者调试')
 
-                        inpaint_engine = gr.Dropdown(label='重绘引擎', value='v1', choices=['v1', 'v2.5', 'v2.6'],
+                        inpaint_engine = gr.Dropdown(label='重绘引擎',
+                                                     value=flags.default_inpaint_engine_version,
+                                                     choices=flags.inpaint_engine_versions,
                                                      info='Fooocus重绘引擎版本')
 
                     with gr.Tab(label='图像控制'):
@@ -356,7 +360,16 @@ with shared.gradio_root:
 
                 model_refresh.click(model_refresh_clicked, [], [base_model, refiner_model] + lora_ctrls, queue=False)
 
-        advanced_checkbox.change(lambda x: gr.update(visible=x), advanced_checkbox, advanced_column, queue=False)
+        performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11,
+                                     inputs=performance_selection,
+                                     outputs=[
+                                         guidance_scale, sharpness, adm_scaler_end, adm_scaler_positive,
+                                         adm_scaler_negative, refiner_switch, refiner_model, sampler_name,
+                                         scheduler_name, adaptive_cfg, refiner_swap_method
+                                     ], queue=False, show_progress=False)
+
+        advanced_checkbox.change(lambda x: gr.update(visible=x), advanced_checkbox, advanced_column, queue=False) \
+            .then(fn=lambda: None, _js='refresh_grid_delayed', queue=False)
 
         ctrls = [
             prompt, negative_prompt, style_selections,
@@ -374,7 +387,7 @@ with shared.gradio_root:
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
-            .then(fn=None, _js='playNotification')
+            .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
             if os.path.exists(notification_file):
