@@ -281,7 +281,7 @@ def update_all_model_names():
 
 
 def downloading_inpaint_models(v):
-    assert v in ['v1', 'v2.5', 'v2.6']
+    assert v in modules.flags.inpaint_engine_versions
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/fooocus_inpaint_head.pth',
@@ -318,6 +318,15 @@ def downloading_inpaint_models(v):
     return head_file, patch_file
 
 
+def downloading_sdxl_lcm_lora():
+    load_file_from_url(
+        url='https://huggingface.co/lllyasviel/misc/resolve/main/sdxl_lcm_lora.safetensors',
+        model_dir=path_loras,
+        file_name='sdxl_lcm_lora.safetensors'
+    )
+    return os.path.join(path_loras, 'sdxl_lcm_lora.safetensors')
+
+
 def downloading_controlnet_canny():
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors',
@@ -336,7 +345,9 @@ def downloading_controlnet_cpds():
     return os.path.join(path_controlnet, 'fooocus_xl_cpds_128.safetensors')
 
 
-def downloading_ip_adapters():
+def downloading_ip_adapters(v):
+    assert v in ['ip', 'face']
+
     results = []
 
     load_file_from_url(
@@ -353,12 +364,21 @@ def downloading_ip_adapters():
     )
     results += [os.path.join(path_controlnet, 'fooocus_ip_negative.safetensors')]
 
-    load_file_from_url(
-        url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin',
-        model_dir=path_controlnet,
-        file_name='ip-adapter-plus_sdxl_vit-h.bin'
-    )
-    results += [os.path.join(path_controlnet, 'ip-adapter-plus_sdxl_vit-h.bin')]
+    if v == 'ip':
+        load_file_from_url(
+            url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin',
+            model_dir=path_controlnet,
+            file_name='ip-adapter-plus_sdxl_vit-h.bin'
+        )
+        results += [os.path.join(path_controlnet, 'ip-adapter-plus_sdxl_vit-h.bin')]
+
+    if v == 'face':
+        load_file_from_url(
+            url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus-face_sdxl_vit-h.bin',
+            model_dir=path_controlnet,
+            file_name='ip-adapter-plus-face_sdxl_vit-h.bin'
+        )
+        results += [os.path.join(path_controlnet, 'ip-adapter-plus-face_sdxl_vit-h.bin')]
 
     return results
 

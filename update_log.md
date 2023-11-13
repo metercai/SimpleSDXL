@@ -1,3 +1,30 @@
+# 2.1.802
+
+* Default inpaint engine changed to v2.6. You can still use inpaint engine v1 in dev tools.
+* Fix some VRAM problems.
+
+# 2.1.799
+
+* Added 'Extreme Speed' performance mode (based on LCM). The previous complicated settings are not needed now.
+
+# 2.1.798
+
+* added lcm scheduler - LCM may need to set both sampler and scheduler to "lcm". Other than that, see the description in 2.1.782 logs.
+
+# 2.1.797
+
+* fixed some dependency problems with facexlib and filterpy.
+
+# 2.1.793
+
+* Added many javascripts to improve user experience. Now users with small screen will always see full canvas without needing to scroll.
+
+# 2.1.790
+
+* Face swap (in line with Midjourney InsightFace): Input Image -> Image Prompt -> Advanced -> FaceSwap
+* The performance is super high. Use it carefully and never use it in any illegal things!
+* This implementation will crop faces for you and you do NOT need to crop faces before feeding images into Fooocus. (If you previously manually crop faces from images for other software, you do not need to do that now in Fooocus.)
+
 # 2.1.788
 
 * Fixed some math problems in previous versions.
@@ -21,7 +48,7 @@ Now when you load a lora, the following things will happen:
 
 In this way, Fooocus 2.1.782 can benefit from all models and loras from CivitAI with both SDXL and SD1.5 ecosystem, using the unique Fooocus swap algorithm, to achieve extremely high quality results (although the default setting is already very high quality), especially in some anime use cases, if users really want to play with all these things.
 
-Recently the community also developed LCM loras. Users can use it by setting the sampler as 'LCM', sceduler as 'sgm_uniform', the forced overwrite of sampling step as 4 to 8, and CFG guidance as 1.0, in dev tools. Do not forget to change the LCM lora weight to 1.0 (many people forget this and report failure cases). Also, set refiner to None. If LCM's feedback in the artists community is good (not the feedback in the programmer community of Stable Diffusion), Fooocus may add some other shortcuts in the future.
+Recently the community also developed LCM loras. Users can use it by setting the sampler as 'LCM', scheduler as 'sgm_uniform' (Update in 2.1.798: scheduler should also be "lcm"), the forced overwrite of sampling step as 4 to 8, and CFG guidance as 1.0, in dev tools. Do not forget to change the LCM lora weight to 1.0 (many people forget this and report failure cases). Also, set refiner to None. If LCM's feedback in the artists community is good (not the feedback in the programmer community of Stable Diffusion), Fooocus may add some other shortcuts in the future.
 
 # 2.1.781
 
