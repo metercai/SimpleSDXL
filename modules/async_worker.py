@@ -1,6 +1,5 @@
 import threading
 
-
 buffer = []
 outputs = []
 global_results = []

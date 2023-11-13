@@ -12,6 +12,7 @@ import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.advanced_parameters as advanced_parameters
 import args_manager
+import json
 
 from modules.sdxl_styles import legal_style_names
 from modules.private_logger import get_current_html_path
@@ -30,6 +31,8 @@ def generate_clicked(*args):
         gr.update(visible=True, value=None), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
+
+    print(f'args:{args}')
 
     worker.buffer.append(list(args))
     finished = False
