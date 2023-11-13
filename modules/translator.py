@@ -1,9 +1,9 @@
 import os
 import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-from modules.config import translator_path
+from modules.config import path_translator
 
-models_dir = os.path.join(translator_path, 'nllb-200-distilled-600M')
+models_dir = os.path.join(path_translator, 'nllb-200-distilled-600M')
 
 def is_chinese_char(_char):
     if u'\u4e00' <= _char <= u'\u9fa5':
