@@ -158,7 +158,7 @@ with shared.gradio_root:
 
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
-                        ip_advanced = gr.Checkbox(label='高级控图模式（ImagePrompt：元素，PyraCanny：形状，CPDS：构图）', value=False, container=False)
+                        ip_advanced = gr.Checkbox(label='高级控图模式（ImagePrompt：元素，PyraCanny：形状，CPDS：构图，FaceSwap：换脸）', value=False, container=False)
                         gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 参考文档</a>')
 
                         def ip_advance_checked(x):
@@ -311,7 +311,10 @@ with shared.gradio_root:
                                                      info='Fooocus重绘引擎版本')
 
                     with gr.Tab(label='图像控制'):
-                        debugging_cn_preprocessor = gr.Checkbox(label='预处理器调试模式', value=False)
+                        debugging_cn_preprocessor = gr.Checkbox(label='预处理器调试模式', value=False,
+                                                                info='See the results from preprocessors.')
+                        skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
+                                                               info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
 
                         mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='以图生图+精修与二创',
                                                                            value=False)
@@ -340,7 +343,7 @@ with shared.gradio_root:
                         scheduler_name, generate_image_grid, overwrite_step, overwrite_switch, overwrite_width, overwrite_height,
                         overwrite_vary_strength, overwrite_upscale_strength,
                         mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint,
-                        debugging_cn_preprocessor, controlnet_softness, canny_low_threshold, canny_high_threshold,
+                        debugging_cn_preprocessor, skipping_cn_preprocessor, controlnet_softness, canny_low_threshold, canny_high_threshold,
                         inpaint_engine, refiner_swap_method]
                 adps += freeu_ctrls
 
