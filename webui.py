@@ -11,7 +11,9 @@ import modules.constants as constants
 import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.advanced_parameters as advanced_parameters
+import modules.style_sorter as style_sorter
 import args_manager
+import copy
 
 from modules.sdxl_styles import legal_style_names
 from modules.private_logger import get_current_html_path
@@ -81,11 +83,11 @@ with shared.gradio_root:
                 progress_window = grh.Image(label='预览', show_label=True, visible=False, height=768,
                                             elem_classes=['main_view'])
                 progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain',
-                                              height=768, visible=False, elem_classes=['main_view'])
+                                              height=768, visible=False, elem_classes=['main_view', 'image_gallery'])
             progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
             gallery = gr.Gallery(label='图集', show_label=False, object_fit='contain', visible=True, height=768,
-                                 elem_classes=['resizable_area', 'main_view', 'final_gallery'],
+                                 elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery')
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
@@ -190,10 +192,11 @@ with shared.gradio_root:
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='设置'):
                 performance_selection = gr.Radio(label='性能选择',
-                                                 choices=['Speed', 'Quality', 'Extreme Speed'],
-                                                 value='Speed')
+                                                 choices=modules.flags.performance_selections,
+                                                 value=modules.config.default_performance)
                 aspect_ratios_selection = gr.Radio(label='宽高比', choices=modules.config.available_aspect_ratios,
-                                                   value=modules.config.default_aspect_ratio, info='宽 × 高')
+                                                   value=modules.config.default_aspect_ratio, info='宽 × 高',
+                                                   elem_classes='aspect_ratios')
                 image_number = gr.Slider(label='出图数量', minimum=1, maximum=32, step=1, value=modules.config.default_image_number)
                 negative_prompt = gr.Textbox(label='反向提示词', show_label=True, placeholder="输入文生图提示词。",
                                              info='描述你不想看到的内容', lines=2,
@@ -219,13 +222,42 @@ with shared.gradio_root:
 
                 seed_random.change(random_checked, inputs=[seed_random], outputs=[image_seed], queue=False)
 
-                gr.HTML(f'<a href="{args_manager.args.webroot}/file={get_current_html_path()}" target="_blank">\U0001F4D4 历史记录</a>')
+                if not args_manager.args.disable_image_log:
+                    gr.HTML(f'<a href="{args_manager.args.webroot}/file={get_current_html_path()}" target="_blank">\U0001F4D4 历史记录</a>')
 
             with gr.Tab(label='风格'):
+                style_sorter.try_load_sorted_styles(
+                    style_names=legal_style_names,
+                    default_selected=modules.config.default_styles)
+
+                style_search_bar = gr.Textbox(show_label=False, container=False,
+                                              placeholder="\U0001F50E 输入关键词搜索风格...",
+                                              value="",
+                                              label='Search Styles')
                 style_selections = gr.CheckboxGroup(show_label=False, container=False,
-                                                    choices=legal_style_names,
-                                                    value=modules.config.default_styles,
-                                                    label='图片风格')
+                                                    choices=copy.deepcopy(style_sorter.all_styles),
+                                                    value=copy.deepcopy(modules.config.default_styles),
+                                                    label='Selected Styles',
+                                                    elem_classes=['style_selections'])
+                gradio_receiver_style_selections = gr.Textbox(elem_id='gradio_receiver_style_selections', visible=False)
+
+                shared.gradio_root.load(lambda: gr.update(choices=copy.deepcopy(style_sorter.all_styles)),
+                                        outputs=style_selections)
+
+                style_search_bar.change(style_sorter.search_styles,
+                                        inputs=[style_selections, style_search_bar],
+                                        outputs=style_selections,
+                                        queue=False,
+                                        show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}')
+
+                gradio_receiver_style_selections.input(style_sorter.sort_styles,
+                                                       inputs=style_selections,
+                                                       outputs=style_selections,
+                                                       queue=False,
+                                                       show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}')
+
             with gr.Tab(label='模型'):
                 with gr.Row():
                     base_model = gr.Dropdown(label='SDXL基础模型', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
@@ -244,10 +276,12 @@ with shared.gradio_root:
 
                 with gr.Accordion(label='LoRA局部模型', open=True):
                     lora_ctrls = []
-                    for i in range(5):
+
+                    for i, (n, v) in enumerate(modules.config.default_loras):
                         with gr.Row():
-                            lora_model = gr.Dropdown(label=f'LoRA {i+1}', choices=['None'] + modules.config.lora_filenames, value=modules.config.default_lora_name if i == 0 else 'None')
-                            lora_weight = gr.Slider(label='权重', minimum=-2, maximum=2, step=0.01, value=modules.config.default_lora_weight)
+                            lora_model = gr.Dropdown(label=f'LoRA {i+1}', choices=['None'] + modules.config.lora_filenames, value=n)
+                            lora_weight = gr.Slider(label='权重', minimum=-2, maximum=2, step=0.01, value=v,
+                                                    elem_classes='lora_weight')
                             lora_ctrls += [lora_model, lora_weight]
                 with gr.Row():
                     model_refresh = gr.Button(label='刷新', value='\U0001f504 全部刷新', variant='secondary', elem_classes='refresh_button')
@@ -272,7 +306,8 @@ with shared.gradio_root:
                         refiner_swap_method = gr.Dropdown(label='精炼交换方式', value='joint',
                                                           choices=['joint', 'separate', 'vae'])
 
-                        adaptive_cfg = gr.Slider(label='CFG模拟TSNR', minimum=1.0, maximum=30.0, step=0.01, value=7.0,
+                        adaptive_cfg = gr.Slider(label='CFG模拟TSNR', minimum=1.0, maximum=30.0, step=0.01,
+                                                 value=modules.config.default_cfg_tsnr,
                                                  info='启用Fooocus的CFG模拟TSNR实现'
                                                       '（实际生效需满足真实CFG大于模拟CFG的条件）')
                         sampler_name = gr.Dropdown(label='采样器', choices=flags.sampler_list,
@@ -285,10 +320,12 @@ with shared.gradio_root:
                                                           value=False)
 
                         overwrite_step = gr.Slider(label='强制覆盖采样步长',
-                                                   minimum=-1, maximum=200, step=1, value=-1,
+                                                   minimum=-1, maximum=200, step=1,
+                                                   value=modules.config.default_overwrite_step,
                                                    info='设为-1以禁用。用于开发者调试。')
                         overwrite_switch = gr.Slider(label='强制覆盖优化开关步长',
-                                                     minimum=-1, maximum=200, step=1, value=-1,
+                                                     minimum=-1, maximum=200, step=1,
+                                                     value=modules.config.default_overwrite_switch,
                                                      info='设为-1以禁用。用于开发者调试。')
                         overwrite_width = gr.Slider(label='强制覆盖生成宽度',
                                                     minimum=-1, maximum=2048, step=1, value=-1,
@@ -304,17 +341,18 @@ with shared.gradio_root:
                         overwrite_upscale_strength = gr.Slider(label='强制覆盖"精修"的去噪强度',
                                                                minimum=-1, maximum=1.0, step=0.001, value=-1,
                                                                info='设为负数以禁用。用于开发者调试')
-
                         inpaint_engine = gr.Dropdown(label='重绘引擎',
-                                                     value=flags.default_inpaint_engine_version,
+                                                     value=modules.config.default_inpaint_engine_version,
                                                      choices=flags.inpaint_engine_versions,
                                                      info='Fooocus重绘引擎版本')
+                        disable_preview = gr.Checkbox(label='取消预览', value=False,
+                                                      info='在图片生成过程中不进行预览。')
 
                     with gr.Tab(label='图像控制'):
                         debugging_cn_preprocessor = gr.Checkbox(label='预处理器调试模式', value=False,
-                                                                info='See the results from preprocessors.')
-                        skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
-                                                               info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
+                                                                info='查看预处理的结果')
+                        skipping_cn_preprocessor = gr.Checkbox(label='跳过预处理器', value=False,
+                                                               info='不做图片预处理。（比如在canny/depth/cropped-face等情况下输入图片是可用的。）')
 
                         mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='以图生图+精修与二创',
                                                                            value=False)
@@ -332,14 +370,14 @@ with shared.gradio_root:
                                                              step=1, value=128)
 
                     with gr.Tab(label='FreeU'):
-                        freeu_enabled = gr.Checkbox(label='Enabled', value=False)
+                        freeu_enabled = gr.Checkbox(label='使用FreeU增强图片生成质量', value=False)
                         freeu_b1 = gr.Slider(label='B1', minimum=0, maximum=2, step=0.01, value=1.01)
                         freeu_b2 = gr.Slider(label='B2', minimum=0, maximum=2, step=0.01, value=1.02)
                         freeu_s1 = gr.Slider(label='S1', minimum=0, maximum=4, step=0.01, value=0.99)
                         freeu_s2 = gr.Slider(label='S2', minimum=0, maximum=4, step=0.01, value=0.95)
                         freeu_ctrls = [freeu_enabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2]
 
-                adps = [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg, sampler_name,
+                adps = [disable_preview, adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg, sampler_name,
                         scheduler_name, generate_image_grid, overwrite_step, overwrite_switch, overwrite_width, overwrite_height,
                         overwrite_vary_strength, overwrite_upscale_strength,
                         mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint,
