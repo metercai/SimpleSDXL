@@ -1,6 +1,7 @@
 ## 🔔 更新
+- [2023.11.18] 将大部分汉化翻译移到language/cn.json；界面上新增历史图片浏览功能，可以按照日期分组快速浏览历史生成的图片，每次进入会默认加载最新一组的最新一张。同步最新版本v2.1.821。
 - [2023.11.14] 风格名称汉化，里面有太多西方专属词汇，中文用户用的比较少，待改进。同步版本到v2.1.805，看到测试中的FaceSwap了 。
-- [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线翻译器：nllb-200，Prompt支持中英文混编，自动识别并翻译。需提前下载翻译模型文件到 models/translator/ 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。
+- [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线翻译器：nllb-200，Prompt支持中英文混编，自动识别并翻译。需提前下载翻译模型文件到 models/translator/ 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。注：需要整目录下载，保留目录名。
 - [2023.10.16] 初始版本，界面文字汉化，新增--webroot参数，设定云端URL访问的根路径。如云端访问地址为：http://hostname/sdxl/ ，启动参数中需追加 --webroot /sdxl 。
 
 # Fooocus
