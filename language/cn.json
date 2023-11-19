@@ -5,7 +5,7 @@
   "Generate": "生成",
   "Skip": "跳过",
   "Stop": "停止",
-  "Type prompt here.": "输入文生图提示词，支持英文和中文混编。",
+  "Type prompt here.": "输入文生图提示词，支持中文和英文混编。",
   "Input Image": "输入图片",
   "Advanced": "高级",
   "Upscale or Variation": "精修与二创",
