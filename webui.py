@@ -20,6 +20,7 @@ from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 
+import enhanced.gallery as gallery_util
 
 def generate_clicked(*args):
     # outputs=[progress_html, progress_window, progress_gallery, gallery]
@@ -61,34 +62,13 @@ def generate_clicked(*args):
                 yield gr.update(visible=False), \
                     gr.update(visible=False), \
                     gr.update(visible=False), \
-                    gr.update(visible=True, value=get_images_from_gallery_index(None)), gr.update(visible=True)
+                    gr.update(visible=True, value=gallery_util.get_images_from_gallery_index(None)), gr.update(visible=True, value=gallery_util.output_list[0])
                 finished = True
 
     execution_time = time.perf_counter() - execution_start_time
     print(f'Total time: {execution_time:.2f} seconds')
     return
 
-# new for Gallery_Index
-from modules.config import path_outputs
-output_files = sorted([f[2:] for f in os.listdir(path_outputs) if os.path.isdir(os.path.join(path_outputs,f))], reverse=True)
-print(f'output_files={output_files}')
-
-def get_images_from_gallery_index(choice):
-    if choice is None:
-        choice = output_files[0]
-    choice = "20" + choice
-    path_gallery = os.path.join(path_outputs, choice)
-    print(f'path_gallery={path_gallery}')
-    images_gallery0 = sorted([f for f in modules.util.get_files_from_folder(path_gallery, ['.png'], None)], reverse=True)
-    images_gallery = [os.path.join(path_gallery,f) for f in images_gallery0]
-    return images_gallery
-
-def change_gallery_index(choice):
-    return gr.update(visible=True, preview=True, value=get_images_from_gallery_index(choice))
-
-def hidden_gallery_index():
-    return gr.update(visible=False)
-# end
 
 reload_javascript()
 
@@ -113,9 +93,10 @@ with shared.gradio_root:
                                     elem_id='progress-bar', elem_classes='progress-bar')
             gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True, value=get_images_from_gallery_index(None))  # changed
-            gallery_index = gr.Radio(output_files, label="Gallery_Index", value=output_files[0], show_label=False)  # new
-            gallery_index.change(fn=change_gallery_index, inputs=gallery_index, outputs=gallery)                    # new
+                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))             # changed
+            with gr.Accordion("历史图片索引:"):
+                gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=gallery_util.output_list[0], show_label=False)  # new
+                gallery_index.change(fn=gallery_util.change_gallery_index, inputs=gallery_index, outputs= gallery, scroll_to_output=True)       # new
 
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
@@ -462,7 +443,7 @@ with shared.gradio_root:
         ctrls += ip_ctrls
 
         generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
-            .then(fn=hidden_gallery_index, outputs=gallery_index) \
+            .then(fn=gallery_util.hidden_gallery_index, outputs=gallery_index) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery, gallery_index]) \
