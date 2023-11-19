@@ -32,7 +32,7 @@ def generate_clicked(*args):
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
         gr.update(visible=True, value=None), \
         gr.update(visible=False, value=None), \
-        gr.update(visible=False), gr.update(visible=False)
+        gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
 
     worker.async_tasks.append(task)
 
@@ -52,17 +52,19 @@ def generate_clicked(*args):
                 yield gr.update(visible=True, value=modules.html.make_progress_html(percentage, title)), \
                     gr.update(visible=True, value=image) if image is not None else gr.update(), \
                     gr.update(), \
-                    gr.update(visible=False), gr.update(visible=False)
+                    gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
             if flag == 'results':
                 yield gr.update(visible=True), \
                     gr.update(visible=True), \
                     gr.update(visible=True, value=product), \
-                    gr.update(visible=False), gr.update(visible=False)
+                    gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
             if flag == 'finish':
                 yield gr.update(visible=False), \
                     gr.update(visible=False), \
                     gr.update(visible=False), \
-                    gr.update(visible=True, value=gallery_util.get_images_from_gallery_index(None)), gr.update(visible=True, value=gallery_util.output_list[0])
+                    gr.update(visible=True, value=gallery_util.get_images_from_gallery_index(None)), \
+                    gr.update(visible=True, value=gallery_util.output_list[0]), gr.update(visible=True)
+
                 finished = True
 
     execution_time = time.perf_counter() - execution_start_time
@@ -94,7 +96,7 @@ with shared.gradio_root:
             gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))             # changed
-            with gr.Accordion("历史图片索引:"):
+            with gr.Accordion("历史图片索引:", open=False) as index_radio:                                                                      # new
                 gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=gallery_util.output_list[0], show_label=False)  # new
                 gallery_index.change(fn=gallery_util.change_gallery_index, inputs=gallery_index, outputs= gallery, scroll_to_output=True)       # new
 
@@ -442,11 +444,11 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image]
         ctrls += ip_ctrls
 
-        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
-            .then(fn=gallery_util.hidden_gallery_index, outputs=gallery_index) \
+        generate_button.click(fn=gallery_util.hidden_gallery_index, outputs=index_radio) \
+            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
-            .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery, gallery_index]) \
+            .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery, gallery_index, index_radio]) \
             .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 

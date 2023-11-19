@@ -1,8 +1,10 @@
 import gradio as gr
 import os
+import math
+import modules.util as util
 
 from modules.config import path_outputs
-import modules.util as util
+
 
 output_list = []
 max_per_page = 28
@@ -16,7 +18,6 @@ def get_listdir_output(num_max):
         path_gallery = os.path.join(path_outputs, index)
         nums = len(util.get_files_from_folder(path_gallery, ['.png'], None))
         if nums > max_per_page:
-            import math
             for i in range(1,math.ceil(nums/max_per_page)+1):
                 listdirs1.append(index + "/" + str(i))
             listdirs1.remove(index)
@@ -57,7 +58,7 @@ def change_gallery_index(choice):
     return gr.update(visible=True, preview=True, value=get_images_from_gallery_index(choice))
 
 def hidden_gallery_index():
-    return gr.update(visible=False)
+    return gr.update(visible=False, open=False)
 
 output_list = get_listdir_output(None)
 print(f'output_list={output_list}')
