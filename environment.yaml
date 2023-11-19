@@ -1,4 +1,4 @@
-name: fooocus
+name: SimpleSDXL
 channels:
   - defaults
 dependencies:
