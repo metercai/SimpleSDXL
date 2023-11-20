@@ -22,6 +22,7 @@ def get_listdir_output(num_max):
                 listdirs1.append(index + "/" + str(i))
             listdirs1.remove(index)
     listdirs = sorted([f[2:] for f in listdirs1], reverse=True)
+    print(f'first page={listdirs[0]}')
     if num_max is None:
         return listdirs
     elif num_max < len(listdirs) and num_max > 0:
@@ -45,20 +46,23 @@ def get_images_from_gallery_index(choice):
     images_gallery0 = sorted([f for f in util.get_files_from_folder(path_gallery, ['.png'], None)], reverse=True)
     nums = len(images_gallery0)
     if page > 0:
+        page = abs(page-math.ceil(nums/max_per_page))+1
         if page*max_per_page < nums:
             images_gallery0 = images_gallery0[(page-1)*max_per_page:page*max_per_page-1]
         else:
             images_gallery0 = images_gallery0[nums-max_per_page:]
     images_gallery = [os.path.join(path_gallery,f) for f in images_gallery0]
-    print(f'path_gallery={path_gallery}, nums={nums}, page={page}')
+    print(f'path_gallery={path_gallery}, nums={nums}, page={_page[1]}')
     return images_gallery
 
 def change_gallery_index(choice):
+    return gr.update(visible=True, preview=True, value=get_images_from_gallery_index(choice)), \
+           gr.update(visible=False)
+
+def refresh_output_list():
     global output_list
-    return gr.update(visible=True, preview=True, value=get_images_from_gallery_index(choice))
 
-def hidden_gallery_index():
-    return gr.update(visible=False, open=False)
+    output_list = get_listdir_output(None)
 
-output_list = get_listdir_output(None)
+refresh_output_list()
 print(f'output_list={output_list}')
