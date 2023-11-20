@@ -22,7 +22,6 @@ def get_listdir_output(num_max):
                 listdirs1.append(index + "/" + str(i))
             listdirs1.remove(index)
     listdirs = sorted([f[2:] for f in listdirs1], reverse=True)
-    print(f'first page={listdirs[0]}')
     if num_max is None:
         return listdirs
     elif num_max < len(listdirs) and num_max > 0:
