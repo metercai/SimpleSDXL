@@ -98,9 +98,9 @@ with shared.gradio_root:
                                     elem_id='progress-bar', elem_classes='progress-bar')
             gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))             # changed
-            with gr.Accordion("历史图片索引:", open=False) as index_radio:                                                                      # new
-                gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)  # new
+                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))          # changed
+            with gr.Accordion("Historical Image Index:", open=False) as index_radio:                                                     # new
+                gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)                  # new
                 gallery_index.change(gallery_util.change_gallery_index, inputs=gallery_index, outputs=[gallery, progress_gallery])       # new
 
             with gr.Row(elem_classes='type_row'):
