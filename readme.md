@@ -1,10 +1,60 @@
-## 🔔 更新
+## 🔔 更新 / Update
 - [2023.11.20] 完善历史图片索引功能，新增一天内的图片分页，避免组内图片数量过大；修复其他已知bug。
 - [2023.11.18] 将大部分汉化翻译移到 `language/cn.json` ；界面上新增历史图片浏览功能，可以按照日期分组快速浏览历史生成的图片，每次进入会默认加载最新一组的最新一张。同步最新版本v2.1.821。
 - [2023.11.14] 风格名称汉化，里面有太多西方专属词汇，中文用户用的比较少，待改进。同步版本到v2.1.805，看到测试中的FaceSwap了 。
 - [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线多语言翻译器：**nllb-200**，Prompt支持中英文混编，自动识别中文并统一翻译到英文。此功能需提前下载翻译模型到 `models/translator/` 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。注：需要整目录下载，保留目录名。
 - [2023.10.16] 初始版本，界面文字汉化，新增 `--webroot` 参数，设定云端URL访问的根路径。如云端访问地址为：http://hostname/sdxl/ ，启动参数中需追加 `--webroot /sdxl` 。
 
+## 什么是SimpleSDXL？/ What's SimpleSDXL?
+- **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SDXL的出图质量很出色，Fooocus的易用性非常棒，站在巨人的肩膀上有了SimpleSDXL，更简洁更易用。
+- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的初衷之一。
+- **场景定制** 文生图和图生图有非常多的使用场景，需要出色的裁剪定制能力，进一步简化流程与操作，以接入更多使用场景，发挥SDXL的强大能力。
+
+## 增强特性 / Enhanced Features
+- [x] **中文界面** SimpleSDXL的汉化翻译更贴合中文用户思维习惯。Fooocus现有多语言机制只能基于key-value一对一翻译，无法针对场景做适应性变化。SimpleSDXL新增了外挂机制针对个别场景做定制翻译，比如"Advanced"，在不同位置出现会有不同的翻译文字。 
+- [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。
+- [x] **历史图片索引** Fooocus无法快速浏览历史图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
+- [ ] **历史图片管理** 对出图质量不高的图片，可以点击删除，避免占用过多存储空间，无效增加浏览检索的时间。
+- [ ] **图片提示词管理** 对出图后的提示词进行管理，方便对历史图片提示词的借鉴使用。
+- [ ] **场景配置包快速切换** 在主界面上可以对场景配置包进行快速切换，能够快速体验不同场景配置包的出图效果。
+- [x] **访问根路径可设置** Fooocus的主场景在本机部署。当在云端部署配置前置转发后，会引起URL路径系统混乱。SimpleSDXL新增 `--webroot` 参数，可以设定访问URL的根路径，方便云端部署。
+- [ ] **前后端分离，算力云化** 实现操控端本机部署，模型端云化部署。让无GPU卡设备用户也可使用上SDXL。
+- [x] **模型打包，墙内外双源** 中文用户天然要面对复杂网络环境的处理。SimpleSDXL将使用到的模型文件打包，提供内外两个源供下载。
+- [x] **主线功能及时同步** SimpleSDXL新增代码会保持良好的结构，与Fooocus主线版本具备兼容性，可以及时同步主线新增能力和Bug修复。
+
+## 安装使用 / Install & Usage
+### Windows :
+1, 点击下载可执行压缩包： SimpleSDXL-win64-latest-in ， SimpleSDXL-win64-latest-out 。
+
+2, 解压缩后点击运行：`run.bat` 。第一次运行会主动下载模型打包文件，时间较长，需耐心等待。
+
+3, 启动成功后，会自动打开浏览器，进入主界面。
+
+### Linux :
+1, 安装 Anaconda 
+
+    curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh 
+    bash Miniconda3-latest-Linux-x86_64.sh
+2, 安装应用环境
+
+    git clone https://github.com/metercai/SimpleSDXL.git
+    cd SimpleSDXL
+    conda env create -f environment.yaml
+    conda activate fooocus
+    pip install -r requirements_versions.txt
+3, 同步模型库文件
+
+    git lfs install
+    git clone https://huggingface.co/metercai/SimpleSDXL models
+    # 国内用户可以换魔搭社区的源
+    # git clone https://www.modelscope.cn/metercai/SimpleSDXL-models.git models
+4, 启动服务
+
+    python entry_with_update.py --language cn --theme dark --preset realistic
+    # 云端部署可以配置： ip, port, webroot 等参数
+    # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --language cn --preset realistic --theme dark
+
+---
 <div align=center>
 <img src="https://github.com/lllyasviel/Fooocus/assets/19834515/483fb86d-c9a2-4c20-997c-46dafc124f25">
 
