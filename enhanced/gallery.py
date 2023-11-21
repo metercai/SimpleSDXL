@@ -13,6 +13,8 @@ def get_listdir_output(num_max):
     global max_per_page
 
     listdirs = [f for f in os.listdir(path_outputs) if os.path.isdir(os.path.join(path_outputs,f))]
+    if listdirs is None:
+        return None
     listdirs1 = listdirs.copy()
     for index in listdirs:
         path_gallery = os.path.join(path_outputs, index)
@@ -34,6 +36,8 @@ def get_images_from_gallery_index(choice):
 
     if choice is None:
         output_list = get_listdir_output(None)
+        if output_list is None:
+            return None
         choice = output_list[0]
     choice = "20" + choice
     page = 0
