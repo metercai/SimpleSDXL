@@ -36,7 +36,7 @@ def get_images_from_gallery_index(choice):
 
     if choice is None:
         output_list = get_listdir_output(None)
-        if output_list is None:
+        if len(output_list) == 0:
             return None
         choice = output_list[0]
     choice = "20" + choice
