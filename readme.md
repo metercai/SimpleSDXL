@@ -11,6 +11,7 @@
 - **场景定制** 文生图和图生图有非常多的使用场景，需要出色的裁剪定制能力，进一步简化流程与操作，以接入更多使用场景，发挥SDXL的强大能力。
 
 ## 增强特性 / Enhanced Features
+已实现及计划实现的功能特性：
 - [x] **中文界面** SimpleSDXL的汉化翻译更贴合中文用户思维习惯。Fooocus现有多语言机制只能基于key-value一对一翻译，无法针对场景做适应性变化。SimpleSDXL新增了外挂机制针对个别场景做定制翻译，比如"Advanced"，在不同位置出现会有不同的翻译文字。 
 - [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。
 - [x] **历史图片索引** Fooocus无法快速浏览历史图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
@@ -24,7 +25,7 @@
 
 ## 安装使用 / Install & Usage
 ### Windows :
-1, 点击下载可执行压缩包： SimpleSDXL-win64-latest-in ， SimpleSDXL-win64-latest-out 。
+1, 点击下载可执行压缩包： [SimpleSDXL-win64-latest-out](https://github.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_out_2-1-822.exe) ，国内网络下载： [SimpleSDXL-win64-latest-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in_2-1-822.exe)。
 
 2, 解压缩后点击运行：`run.bat` 。第一次运行会主动下载模型打包文件，时间较长，需耐心等待。
 
