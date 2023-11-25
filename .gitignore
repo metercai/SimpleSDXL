@@ -50,4 +50,4 @@ experiment.py
 /package-lock.json
 /.coverage*
 /auth.json
-models/**
+/models

@@ -34,7 +34,7 @@ def worker():
     import modules.advanced_parameters as advanced_parameters
     import fooocus_extras.ip_adapter as ip_adapter
     import fooocus_extras.face_crop
-    import modules.translator as translator
+    import enhanced.translator as translator
 
     from modules.sdxl_styles import apply_style, apply_wildcards, fooocus_expansion
     from modules.private_logger import log
