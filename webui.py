@@ -78,7 +78,7 @@ def generate_clicked(*args):
 
 reload_javascript()
 
-title = f'Fooocus {fooocus_version.version}'
+title = f'SimpleSDXL derived from Fooocus {fooocus_version.version}'
 
 if isinstance(args_manager.args.preset, str):
     title += ' ' + args_manager.args.preset
@@ -137,7 +137,7 @@ with shared.gradio_root:
                     skip_button.click(skip_clicked, queue=False, show_progress=False)
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='Advanced option', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -178,7 +178,7 @@ with shared.gradio_root:
 
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
-                        ip_advanced = gr.Checkbox(label='Advanced', value=False, container=False)
+                        ip_advanced = gr.Checkbox(label='Advanced control', value=False, container=False)
                         gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Document</a>')
 
                         def ip_advance_checked(x):
@@ -222,7 +222,7 @@ with shared.gradio_root:
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
                                                    value=modules.config.default_aspect_ratio, info='width × height',
                                                    elem_classes='aspect_ratios')
-                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
+                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type negative prompt here.",
                                              info='Describing what you do not want to see.', lines=2,
                                              elem_id='negative_prompt',
                                              value=modules.config.default_prompt_negative)
@@ -248,7 +248,7 @@ with shared.gradio_root:
                                    queue=False, show_progress=False)
 
                 if not args_manager.args.disable_image_log:
-                    gr.HTML(f'<a href="/file={get_current_html_path()}" target="_blank">\U0001F4DA History Log</a>')
+                    gr.HTML(f'<a href="{args_manager.args.webroot}/file={get_current_html_path()}" target="_blank">\U0001F4DA History Log</a>')
 
             with gr.Tab(label='Style'):
                 style_sorter.try_load_sorted_styles(
@@ -539,7 +539,7 @@ shared.gradio_root.launch(
     inbrowser=args_manager.args.auto_launch,
     server_name=args_manager.args.listen,
     server_port=args_manager.args.port,
-    share=args_manager.args.share,
+    share=args_manager.args.share, 
     root_path=args_manager.args.webroot,
     auth=check_auth if args_manager.args.share and auth_enabled else None,
     blocked_paths=[constants.AUTH_FILENAME]

@@ -6,7 +6,7 @@ import fcbh.cli_args as fcbh_cli
 fcbh_cli.parser.add_argument("--share", action='store_true', help="Set whether to share on Gradio.")
 fcbh_cli.parser.add_argument("--preset", type=str, default=None, help="Apply specified UI preset.")
 
-fcbh_cli.parser.add_argument("--language", type=str, default='default',
+fcbh_cli.parser.add_argument("--language", type=str, default='cn',
                              help="Translate UI using json files in [language] folder. "
                                   "For example, [--language example] will use [language/example.json] for translation.")
 
@@ -15,7 +15,7 @@ fcbh_cli.parser.add_argument("--enable-smart-memory", action="store_true",
                              help="Force loading models to vram when the unload can be avoided. "
                                   "Some Mac users may need this.")
 
-fcbh_cli.parser.add_argument("--theme", type=str, help="launches the UI with light or dark theme", default=None)
+fcbh_cli.parser.add_argument("--theme", type=str, help="launches the UI with light or dark theme", default='dark')
 fcbh_cli.parser.add_argument("--disable-image-log", action='store_true',
                              help="Prevent writing images and logs to hard drive.")
 
