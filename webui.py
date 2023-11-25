@@ -21,6 +21,7 @@ from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 
 import enhanced.gallery as gallery_util
+import enhanced.topbar  as topbar
 
 def generate_clicked(*args):
     import fcbh.model_management as model_management
@@ -77,32 +78,34 @@ def generate_clicked(*args):
 
 reload_javascript()
 
-title = f'SimpleSDXL derived from Fooocus {fooocus_version.version}'
+title = f'Fooocus {fooocus_version.version}'
 
 if isinstance(args_manager.args.preset, str):
     title += ' ' + args_manager.args.preset
 
 shared.gradio_root = gr.Blocks(
     title=title,
-    css=modules.html.css).queue()
+    css=modules.html.css + topbar.nav_css).queue()
 
 with shared.gradio_root:
     with gr.Row():
         with gr.Column(scale=2):
-            with gr.Row():
-                progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=768,
+            with gr.Group():
+                with gr.Row(variant='compact'):
+                    topbar_html = gr.HTML(value=topbar.make_html(), visible=True, elem_id='top_nav', elem_classes='top_nav')
+                with gr.Row():
+                    progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=768,
                                             elem_classes=['main_view'])
-                progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain',
+                    progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain',
                                               height=768, visible=False, elem_classes=['main_view', 'image_gallery'])
-            progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
+                progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
-            gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
+                gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))          # changed
-            with gr.Accordion("Historical Image Index:", open=False) as index_radio:                                                     # new
-                gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)                  # new
-                gallery_index.change(gallery_util.change_gallery_index, inputs=gallery_index, outputs=[gallery, progress_gallery])       # new
-
+                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))
+                with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
+                    gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False) 
+                    gallery_index.change(gallery_util.change_gallery_index, inputs=gallery_index, outputs=[gallery, progress_gallery],show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.", elem_id='positive_prompt',
@@ -134,7 +137,7 @@ with shared.gradio_root:
                     skip_button.click(skip_clicked, queue=False, show_progress=False)
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='高级选项', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -175,7 +178,7 @@ with shared.gradio_root:
 
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
-                        ip_advanced = gr.Checkbox(label='高级控图模式: ImagePrompt-元素提示，PyraCanny-物体形状，CPDS-整体构图，FaceSwap-换脸', value=False, container=False)
+                        ip_advanced = gr.Checkbox(label='Advanced', value=False, container=False)
                         gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Document</a>')
 
                         def ip_advance_checked(x):
@@ -215,11 +218,11 @@ with shared.gradio_root:
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=modules.flags.performance_selections,
                                                  value=modules.config.default_performance)
+                image_number = gr.Slider(label='Image Number', minimum=1, maximum=32, step=1, value=modules.config.default_image_number)
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
                                                    value=modules.config.default_aspect_ratio, info='width × height',
                                                    elem_classes='aspect_ratios')
-                image_number = gr.Slider(label='Image Number', minimum=1, maximum=32, step=1, value=modules.config.default_image_number)
-                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type negative prompt here.",
+                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
                                              info='Describing what you do not want to see.', lines=2,
                                              elem_id='negative_prompt',
                                              value=modules.config.default_prompt_negative)
@@ -245,7 +248,7 @@ with shared.gradio_root:
                                    queue=False, show_progress=False)
 
                 if not args_manager.args.disable_image_log:
-                    gr.HTML(f'<a href="{args_manager.args.webroot}/file={get_current_html_path()}" target="_blank">\U0001F4DA History Log</a>')
+                    gr.HTML(f'<a href="/file={get_current_html_path()}" target="_blank">\U0001F4DA History Log</a>')
 
             with gr.Tab(label='Style'):
                 style_sorter.try_load_sorted_styles(
@@ -504,17 +507,25 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt]
         ctrls += ip_ctrls
 
-        generate_button.click(lambda: (gr.update(visible=False, open=False), gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False)), outputs=[index_radio, stop_button, skip_button, generate_button]) \
+        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True, value=None), gr.update(visible=True, open=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[gallery_index, index_radio, generate_button, stop_button, skip_button]) \
+            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
             if os.path.exists(notification_file):
                 gr.Audio(interactive=False, value=notification_file, elem_id='audio_notification', visible=False)
                 break
+    with gr.Row():
+        preset_params = gr.JSON({}, visible=False)
+        preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
+                             guidance_scale, sharpness, sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, \
+                             style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index], show_progress=False) \
+                     .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
+    shared.gradio_root.load(topbar.get_preset_params, inputs=preset_params, outputs=preset_params, _js=topbar.get_preset_params_js, queue=True)
+
 
 
 def dump_default_english_config():
@@ -528,7 +539,8 @@ shared.gradio_root.launch(
     inbrowser=args_manager.args.auto_launch,
     server_name=args_manager.args.listen,
     server_port=args_manager.args.port,
-    share=args_manager.args.share, root_path=args_manager.args.webroot,
+    share=args_manager.args.share,
+    root_path=args_manager.args.webroot,
     auth=check_auth if args_manager.args.share and auth_enabled else None,
     blocked_paths=[constants.AUTH_FILENAME]
 )

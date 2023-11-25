@@ -55,7 +55,6 @@ def get_images_from_gallery_index(choice):
         else:
             images_gallery0 = images_gallery0[nums-max_per_page:]
     images_gallery = [os.path.join(path_gallery,f) for f in images_gallery0]
-    print(f'path_gallery={path_gallery}, nums={nums}, page={page}')
     return images_gallery
 
 def change_gallery_index(choice):
