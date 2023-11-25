@@ -95,7 +95,7 @@ def make_html():
 def reset_context(preset_params):
     preset = preset_params.get("__preset", config.preset)
     config.preset = preset
-    print(f'preset={preset}')
+    print(f'preset={preset}' + ", theme=" + f'{preset_params.get("__theme")}')
 
     if isinstance(preset, str):
         preset_path = os.path.abspath(f'./presets/{preset}.json')
