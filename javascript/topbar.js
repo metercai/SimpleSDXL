@@ -21,11 +21,15 @@ function mark_position_for_topbar(preset_name,theme_name) {
     var current_theme_id = "theme_"+theme_name;
     var p_obj=document.getElementById(current_preset_id);
     var t_obj=document.getElementById(current_theme_id);
+    var bgcolor = "#ccddff";
+    switch(current_theme_id) {
+	case "theme_dark":  bgcolor = "#6495ed";break;
+    }
     if (p_obj!=null) {
-        p_obj.style.backgroundColor="#77DDFF";
+        p_obj.style.backgroundColor=bgcolor;
     }
     if (t_obj!=null) {
-	t_obj.style.backgroundColor="#77DDFF";
+	t_obj.style.backgroundColor=bgcolor;
     }
 }
 
@@ -33,14 +37,12 @@ function refresh_preset(newPreset) {
     var current = get_topbar_current();
     var host_path = document.baseURI.split("?")[0];
     var newurl = host_path+"?__theme="+current[0]+"&__preset="+newPreset+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000);
-    console.log("new_url="+newurl);
     window.location.replace(newurl);
 }
 function refresh_theme(newTheme) {
     var current = get_topbar_current();
     var host_path = document.baseURI.split("?")[0];
     var newurl = host_path+"?__theme="+newTheme+"&__preset="+current[1]+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000);
-    console.log("new_url="+newurl);
     window.location.replace(newurl)
 }
 
