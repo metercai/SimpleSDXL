@@ -65,6 +65,6 @@ def refresh_output_list():
     global output_list
 
     output_list = get_listdir_output(None)
+    return output_list
 
 refresh_output_list()
-print(f'output_list={output_list}')

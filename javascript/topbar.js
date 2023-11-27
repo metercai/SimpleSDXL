@@ -31,6 +31,7 @@ function mark_position_for_topbar(preset_name,theme_name) {
     if (t_obj!=null) {
 	t_obj.style.backgroundColor=bgcolor;
     }
+/*    set_toolbox();  */
 }
 
 function refresh_preset(newPreset) {
@@ -63,4 +64,17 @@ function set_theme_preset(theme,preset) {
         newURL += '&__preset=' + preset;
     }
     window.location.replace(newURL);
+}
+
+
+function set_toolbox() {
+    let toolbox = gradioApp().getElementById("toolbox");
+    if (toolbox==null) {
+        const gallery = gradioApp().getElementById("final_gallery");
+        toolbox = document.createElement('div');
+        toolbox.id = "toolbox";
+	toolbox.className = "toolbox";
+        toolbox.innerHTML = "<ul class=\"toolbox_item\"><li><a href=# >PromptInfo</a></li><li><a href=# >PromptImage</a></li><li><a href=# >ColumnStyle</a></li><li><a href=# >Delete</a></li>";
+        gallery.appendChild(toolbox);
+    }
 }
