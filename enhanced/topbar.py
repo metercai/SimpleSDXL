@@ -15,14 +15,16 @@ nav_css = '''
 .top_nav_left {
     position:absolute;
     left: 0;
+    margin: 0;
+    padding: 0;
     list-style: none;
-    margin: auto;
 }
 .top_nav_right {
     position:absolute;
     right:0;
+    margin: 0;
+    padding: 0;
     list-style: none;
-    margin: auto;
 }
 
 .top_nav_preset {
@@ -40,13 +42,22 @@ nav_css = '''
 }
 
 .top_nav_theme {
-    color: rgb(224, 9, 9);
     display: inline-block;
     text-align: center;
     width: 40px;
 }
 .top_nav_theme:hover {
     background-color: rgb(161, 158, 158);
+}
+
+.toolbox {
+    height: auto;
+    position: absolute;
+    top: 250px;
+    left: 85%;
+    width: 100px !important;
+    z-index: 20;
+    text-align: center;
 }
 '''
 
@@ -123,11 +134,11 @@ def reset_context(preset_params):
                 gr.update(value=config.add_ratio(config.config_dict.get("default_aspect_ratio", config.default_aspect_ratio)))]
     for i, (n, v) in enumerate(config.config_dict.get("default_loras", config.default_loras)):
         results += [gr.update(value=n),gr.update(value=v)]
-    gallery_util.refresh_output_list()
-    results +=  [gr.update(value=gallery_util.get_images_from_gallery_index(None)), gr.update()]
+    results +=  [gr.update(value=gallery_util.get_images_from_gallery_index(None)), gr.update(choices=gallery_util.output_list, value=gallery_util.output_list[0])]
     return results
 
 def get_preset_params(preset_params, request: gr.Request):
+    gallery_util.refresh_output_list()
     return preset_params
 
 

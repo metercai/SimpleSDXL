@@ -68,11 +68,12 @@ def generate_clicked(*args):
                 yield gr.update(visible=False), \
                     gr.update(visible=False), \
                     gr.update(visible=True), \
-                    gr.update(visible=False, value=gallery_util.get_images_from_gallery_index(None))
+                    gr.update(visible=False)
                 finished = True
 
     execution_time = time.perf_counter() - execution_start_time
     print(f'Total time: {execution_time:.2f} seconds')
+    gallery_util.refresh_output_list()
     return
 
 
@@ -102,7 +103,7 @@ with shared.gradio_root:
                                     elem_id='progress-bar', elem_classes='progress-bar')
                 gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True, value=gallery_util.get_images_from_gallery_index(None))
+                                 elem_id='final_gallery', preview=True)  
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
                     gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False) 
                     gallery_index.change(gallery_util.change_gallery_index, inputs=gallery_index, outputs=[gallery, progress_gallery],show_progress=False)
@@ -138,6 +139,7 @@ with shared.gradio_root:
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
+                image_tools_checkbox = gr.Checkbox(label='Image Tools', value=False, visible=False, container=False, elem_classes='min_check')
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -213,6 +215,12 @@ with shared.gradio_root:
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
+            with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
+                prompt_info_button = gr.Button(value='PromptInfo', size='sm', visible=True)
+                prompt_image_button = gr.Button(value='PromptImage', size='sm', visible=True)
+                prompt_image_button = gr.Button(value='ReGenerate', size='sm', visible=True)
+                image_tools_checkbox.change(lambda x: gr.update(visible=x), inputs=image_tools_checkbox,
+                            outputs=image_toolbox, queue=False, show_progress=False)
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
                 performance_selection = gr.Radio(label='Performance',
@@ -511,7 +519,7 @@ with shared.gradio_root:
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
+            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=gallery_util.output_list)), outputs=[generate_button, stop_button, skip_button, gallery_index]) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
@@ -523,7 +531,8 @@ with shared.gradio_root:
         preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
                              guidance_scale, sharpness, sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, \
                              style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index], show_progress=False) \
-                     .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
+                     .then(fn=lambda: None, _js='refresh_grid_delayed')
+
     shared.gradio_root.load(topbar.get_preset_params, inputs=preset_params, outputs=preset_params, _js=topbar.get_preset_params_js, queue=True)
 
 
