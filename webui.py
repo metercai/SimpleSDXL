@@ -527,7 +527,7 @@ with shared.gradio_root:
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=gallery_util.output_list)), outputs=[generate_button, stop_button, skip_button, gallery_index]) \
+            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=gallery_util.output_list, value=gallery_util.output_list[0])), outputs=[generate_button, stop_button, skip_button, gallery_index]) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
