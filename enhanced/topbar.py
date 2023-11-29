@@ -95,6 +95,30 @@ nav_html = '''
 </div>
 '''
 
+nav_html_new = '''
+<div class="top_nav">
+    <ul class="top_nav_left" id="top_preset">
+    Preset:
+    *itemlist*
+    </ul>
+    <ul class="top_nav_right" id="top_theme">
+    <li class="top_nav_theme">
+    <select id="top_theme_1">
+    <option value="light">明亮</option>
+    <option value="dark">夜黑</option>
+    </select>
+    </li>
+    <li class="top_nav_theme">
+    <select id="top_theme_2">
+    <option value="cn">中文</option>
+    <option value="en">En</option>
+    </select>
+    </li>
+    </ul>
+</div>
+'''
+
+
 get_preset_params_js = '''
 function(preset_params) {
     var preset=preset_params["__preset"];
@@ -119,7 +143,7 @@ def make_html():
     itemlist = ''
     for i in range(len(presets)):
         itemlist += '<li class="top_nav_preset" id="preset_' + presets[i][:-5] + '" onclick="refresh_preset(\'' + presets[i][:-5] + '\')">' + presets[i][:-5] + '</li>'
-    return nav_html.replace('*itemlist*', itemlist)
+    return nav_html_new.replace('*itemlist*', itemlist)
 
 
 def reset_context(preset_params):
