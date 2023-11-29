@@ -80,6 +80,7 @@ def try_load_deprecated_user_path_config():
 try_load_deprecated_user_path_config()
 
 preset = args_manager.args.preset
+theme = args_manager.args.theme
 
 if isinstance(preset, str):
     preset_path = os.path.abspath(f'./presets/{preset}.json')

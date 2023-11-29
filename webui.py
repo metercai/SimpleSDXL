@@ -103,10 +103,12 @@ with shared.gradio_root:
                                     elem_id='progress-bar', elem_classes='progress-bar')
                 gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True)  
+                                 elem_id='final_gallery', preview=True)
+                prompt_info_box = gr.Markdown(gallery_util.make_infobox_markdown(None),  visible=False, elem_id='infbox', elem_classes='infobox')
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
-                    gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False) 
-                    gallery_index.change(gallery_util.change_gallery_index, inputs=gallery_index, outputs=[gallery, progress_gallery],show_progress=False)
+                    gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
+                    prompt_info = gr.State(value='')
+                    gallery_index.change(lambda x: [gr.update(visible=True, preview=True, value=gallery_util.get_images_from_gallery_index(x)), gr.update(visible=False), gr.update(visible=False)], inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box],show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.", elem_id='positive_prompt',
@@ -139,7 +141,19 @@ with shared.gradio_root:
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
-                image_tools_checkbox = gr.Checkbox(label='Image Tools', value=False, visible=False, container=False, elem_classes='min_check')
+                image_tools_checkbox = gr.Checkbox(label='Image Tools', value=False, container=False, elem_classes='min_check')
+            with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
+                image_tools_box_title = gr.Button(value='TOOLBOX', size='sm', visible=True, interactive=False)
+                prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
+                prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True, interactive=False)
+                prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
+                image_tools_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=False)], inputs=image_tools_checkbox,
+                            outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
+                
+                infobox_state = gr.State(value=False)
+                prompt_info_button.click(gallery_util.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
+                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, gallery, prompt_info], outputs=[prompt_info, prompt_info_box], show_progress=False)
+
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -215,12 +229,6 @@ with shared.gradio_root:
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
-            with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
-                prompt_info_button = gr.Button(value='PromptInfo', size='sm', visible=True)
-                prompt_image_button = gr.Button(value='PromptImage', size='sm', visible=True)
-                prompt_image_button = gr.Button(value='ReGenerate', size='sm', visible=True)
-                image_tools_checkbox.change(lambda x: gr.update(visible=x), inputs=image_tools_checkbox,
-                            outputs=image_toolbox, queue=False, show_progress=False)
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
                 performance_selection = gr.Radio(label='Performance',
