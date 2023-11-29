@@ -23,7 +23,7 @@ function mark_position_for_topbar(preset_name,theme_name) {
     var t_obj=document.getElementById(current_theme_id);
     var bgcolor = "#ccddff";
     switch(current_theme_id) {
-	case "theme_dark":  bgcolor = "#6495ed";break;
+	case "theme_dark":  bgcolor = "#6495ed"; break;
     }
     if (p_obj!=null) {
         p_obj.style.backgroundColor=bgcolor;
@@ -31,7 +31,6 @@ function mark_position_for_topbar(preset_name,theme_name) {
     if (t_obj!=null) {
 	t_obj.style.backgroundColor=bgcolor;
     }
-/*    set_toolbox();  */
 }
 
 function refresh_preset(newPreset) {

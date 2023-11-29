@@ -4,11 +4,13 @@ import fcbh.cli_args as fcbh_cli
 
 
 fcbh_cli.parser.add_argument("--share", action='store_true', help="Set whether to share on Gradio.")
-fcbh_cli.parser.add_argument("--preset", type=str, default=None, help="Apply specified UI preset.")
+fcbh_cli.parser.add_argument("--preset", type=str, default='default', help="Apply specified UI preset.")
 
 fcbh_cli.parser.add_argument("--language", type=str, default='cn',
                              help="Translate UI using json files in [language] folder. "
                                   "For example, [--language example] will use [language/example.json] for translation.")
+
+fcbh_cli.parser.add_argument("--webroot", type=str, default='', help="Set the webroot path.")
 
 # For example, https://github.com/lllyasviel/Fooocus/issues/849
 fcbh_cli.parser.add_argument("--enable-smart-memory", action="store_true",

@@ -131,6 +131,10 @@
   "light": "明亮",
   "dark": "夜黑",
   "Image Tools": "图片工具",
+  "TOOLBOX": "【工具箱】",
+  "ViewInfo": "查看参数",
+  "ReGenerate": "重新生成",
+  "EmbedInfo": "嵌入参数",
 
 
     "Image Style": "图片风格",
