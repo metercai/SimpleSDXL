@@ -143,14 +143,12 @@ with shared.gradio_root:
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
                 image_tools_checkbox = gr.Checkbox(label='Image Tools', value=False, container=False, elem_classes='min_check')
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
-                image_tools_box_title = gr.Button(value='TOOLBOX', size='sm', visible=True, interactive=False)
+                image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
-                prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True, interactive=False)
+                prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True, interactive=True)
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
                 image_tools_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=False)], inputs=image_tools_checkbox,
                             outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
-                
-                infobox_state = gr.State(value=False)
                 prompt_info_button.click(gallery_util.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
                 gallery.select(gallery_util.select_gallery, inputs=[gallery_index, gallery, prompt_info], outputs=[prompt_info, prompt_info_box], show_progress=False)
 
@@ -522,6 +520,10 @@ with shared.gradio_root:
         ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt]
         ctrls += ip_ctrls
+
+        reset_params = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name] + lora_ctrls
+        reset_params += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
+        prompt_regen_button.click(gallery_util.reset_params, inputs=prompt_info, outputs=reset_params, show_progress=False)
 
         generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
