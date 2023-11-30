@@ -123,7 +123,7 @@
   "Advanced Control": "高级控图模式: ImagePrompt-元素提示，PyraCanny-物体形状，CPDS-整体构图，FaceSwap-换脸",
   "Preset:": "预置包:",
   "Theme:": "背景:",
-  "default": "默认",
+  "default": "F家",
   "realistic": "写实",
   "anime": "动漫",
   "sai": "原生",
@@ -131,9 +131,9 @@
   "light": "明亮",
   "dark": "夜黑",
   "Image Tools": "图片工具",
-  "TOOLBOX": "【工具箱】",
+  "ToolBox": "工具箱",
   "ViewInfo": "查看参数",
-  "ReGenerate": "重新生成",
+  "ReGenerate": "提参重生",
   "EmbedInfo": "嵌入参数",
 
 

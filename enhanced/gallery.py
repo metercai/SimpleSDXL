@@ -2,17 +2,17 @@ import gradio as gr
 import os
 import math
 import json
+import copy
 import modules.util as util
 import modules.config as config
-
 from lxml import etree
 
 output_list = []
 max_per_page = 28
 
 images_list=['',[]]
-
 images_prompt=['',[]]
+
 
 def refresh_output_list():
     global output_list, max_per_page
@@ -32,9 +32,9 @@ def refresh_output_list():
     print(f'[Gallery] Refresh_output_list: loaded {len(output_list)} images_lists.')
     return
 
+
 def refresh_images_list(choice):
     global output_list, images_list
-
 
     if choice == images_list[0]:
         if images_list[0] == output_list[0].split('/')[0]:
@@ -45,6 +45,7 @@ def refresh_images_list(choice):
     parse_html_log(choice)
     print(f'[Gallery] Refresh_images_list: loaded {len(images_list[1])} image_items of {images_list[0]}.')
     return
+
 
 def get_images_from_gallery_index(choice):
     global output_list, images_list, max_per_page
@@ -103,7 +104,6 @@ def parse_html_log(choice):
     global images_prompt
     
     html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
-
     html = etree.parse(html_file, etree.HTMLParser())
     prompt_infos = html.xpath('/html/body/div')
     images_prompt[1] = []
@@ -150,6 +150,7 @@ def select_gallery(choice, selected, prompt_info, evt: gr.SelectData):
 
     return result, gr.update(value=make_infobox_markdown(result))
 
+
 def make_infobox_markdown(info):
     bgcolor = '#ddd'
     if config.theme == "dark":
@@ -165,11 +166,41 @@ def make_infobox_markdown(info):
     html += '</div>'
     return html
 
+
 infobox_state = False
+
 
 def toggle_prompt_info(prompt_info):
     global infobox_state
     infobox_state = not infobox_state
     print(f'[Gallery] Toggle_image_info: {infobox_state}')
     return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state)
+
+
+def reset_params(info):
+    aspect_ratios = info['Resolution'][1:-1].replace(', ', '*')
+    adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in info['ADM Guidance'][1:-1].split(', ')]
+    refiner_model = None if info['Refiner Model']=='' else info['Refiner Model']
+    lora_results = []
+    for k in range(0,5):
+        lora_results += [gr.update(value='None'), gr.update(value=1.0)]
+    for key in info:
+        i=0
+        if key.startswith('LoRA ['):
+            lora_model = key[6:-9]
+            lora_weight = float(info[key])
+            lora_results.insert(i, gr.update(value=lora_model))
+            lora_results.insert(i+1, gr.update(value=lora_weight))
+            i += 2
+    lora_results = lora_results[:10]
+    styles = [f[1:-1] for f in info['Styles'][1:-1].split(', ')]
+    results = []
+    results += [gr.update(value=info['Prompt']), gr.update(value=info['Negative Prompt']), gr.update(value=copy.deepcopy(styles)), \
+            gr.update(value=info['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(info['Sharpness'])), \
+            gr.update(value=float(info['Guidance Scale'])), gr.update(value=info['Base Model']), gr.update(value=refiner_model), \
+            gr.update(value=float(info['Refiner Switch'])), gr.update(value=info['Sampler']), gr.update(value=info['Scheduler'])]
+    results += lora_results
+    results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
+    print(f'[Gallery] Reset_params: update {len(results)} params from current image.')
+    return results
 
