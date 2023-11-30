@@ -143,7 +143,7 @@ def make_html():
     itemlist = ''
     for i in range(len(presets)):
         itemlist += '<li class="top_nav_preset" id="preset_' + presets[i][:-5] + '" onclick="refresh_preset(\'' + presets[i][:-5] + '\')">' + presets[i][:-5] + '</li>'
-    return nav_html_new.replace('*itemlist*', itemlist)
+    return nav_html.replace('*itemlist*', itemlist)
 
 
 def reset_context(preset_params):

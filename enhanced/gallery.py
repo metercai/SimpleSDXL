@@ -114,11 +114,11 @@ def parse_html_log(choice):
             if x.endswith(': '):
                 x=x[:-2]
             if x==' ':
-                x='-'
+                x=''
             return x
         text = list(map(standardized, info.xpath('.//p//text()')))
-        if text[6]!='-':
-            text.insert(6, '-')
+        if text[6]!='':
+            text.insert(6, '')
         #print(f'text={text}')
         info_json='{' + f'"Filename": "{text[0]}",\n' \
                       + f'"{text[1]}": "{text[2]}",\n' \
