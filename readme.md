@@ -1,5 +1,5 @@
 ## SimpleSDXL首屏
-<div align=center>![SimpleSDXL screen](https://github.com/metercai/SimpleSDXL/assets/5652458/661820e0-0899-406e-aa8e-1c4f541943e3)</div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/661820e0-0899-406e-aa8e-1c4f541943e3"></div>
 
 ## 🔔 更新 / Update
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，用于二次生成。(Extract the generation parameters of finished images from log.html, automatically backfill the input interface, for secondary generation.)
