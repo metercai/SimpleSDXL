@@ -1,11 +1,12 @@
 ## SimpleSDXL
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/661820e0-0899-406e-aa8e-1c4f541943e3"></div>
-在Fooocus基础上增强功能，可无缝迁移升级 / Enhanced features base on Fooocus, can be seamless upgrading
+在Fooocus基础上增强功能，可无缝迁移升级 <br> Enhanced features base on Fooocus, can be seamless upgrading
 
-- **中英文混编提示词**: 离线模型，无API依赖和限制。 /  **Chinese English mixed prompts**:  Offline model without API dependencies and limitations.
-- **已生成图片集浏览**: 原生版本仅限当次生成的图片集。 /  **Finished image sets browsing**:  Fooocus only applies to the current generated image set.
-- **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 /  **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
-- **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 /  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
+- **中英文混编提示词**: 离线模型，无API依赖和限制。<br>
+  **Chinese English mixed prompts**:  Offline model without API dependencies and limitations.
+- **已生成图片集浏览**: 原生版本仅限浏览当次生成的图片集。 <br>  **Finished image sets browsing**:  Fooocus only can browse the current generated image set.
+- **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 <br>  **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
+- **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
