@@ -153,25 +153,20 @@ def reset_context(preset_params):
     config.theme = theme
 
     results = []
-    if preset == config.preset:
-        results = [gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()]
-        for i, (n, v) in enumerate(config.default_loras):
-             results += [gr.update(), gr.update()]
-    else:
-        config.preset = preset
-        if isinstance(preset, str):
-            preset_path = os.path.abspath(f'./presets/{preset}.json')
-            try:
-                if os.path.exists(preset_path):
-                    with open(preset_path, "r", encoding="utf-8") as json_file:
-                        config.config_dict.update(json.load(json_file))
-                else:
-                    raise FileNotFoundError
-            except Exception as e:
-                print(f'Load preset [{preset_path}] failed')
-                print(e)
-        reset_default_config()
-        results += [gr.update(value=config.default_base_model_name), \
+    config.preset = preset
+    if isinstance(preset, str):
+        preset_path = os.path.abspath(f'./presets/{preset}.json')
+        try:
+            if os.path.exists(preset_path):
+                with open(preset_path, "r", encoding="utf-8") as json_file:
+                    config.config_dict.update(json.load(json_file))
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            print(f'Load preset [{preset_path}] failed')
+            print(e)
+    reset_default_config()
+    results += [gr.update(value=config.default_base_model_name), \
                 gr.update(value=config.default_refiner_model_name), \
                 gr.update(value=config.default_refiner_switch), \
                 gr.update(value=config.default_cfg_scale), \
@@ -183,10 +178,10 @@ def reset_context(preset_params):
                 gr.update(value=config.default_prompt_negative), \
                 gr.update(value=copy.deepcopy(config.default_styles)), \
                 gr.update(value=config.add_ratio(config.default_aspect_ratio))]
-        for i, (n, v) in enumerate(config.default_loras):
-            results += [gr.update(value=n),gr.update(value=v)]
+    for i, (n, v) in enumerate(config.default_loras):
+        results += [gr.update(value=n),gr.update(value=v)]
 
-    results +=  [gr.update(), gr.update(choices=gallery_util.output_list, value=gallery_util.output_list[0])]
+    results +=  [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)<1 else  gallery_util.output_list[0])]
     return results
 
 def get_preset_params(preset_params, request: gr.Request):
