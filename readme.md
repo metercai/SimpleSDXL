@@ -1,10 +1,16 @@
-## SimpleSDXL首屏
+## SimpleSDXL
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/661820e0-0899-406e-aa8e-1c4f541943e3"></div>
+在Fooocus基础上增强功能，可无缝迁移升级 / Enhanced features base on Fooocus, can be seamless upgrading
+
+- **中英文混编提示词**: 离线模型，无API依赖和限制。 /  **Chinese English mixed prompts**:  Offline model without API dependencies and limitations.
+- **已生成图片集浏览**: 原生版本仅限当次生成的图片集。 /  **Finished image sets browsing**:  Fooocus only applies to the current generated image set.
+- **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 /  **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
+- **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 /  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
-- [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，用于二次生成。(Extract the generation parameters of finished images from log.html, automatically backfill the input interface, for secondary generation.)
+- [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
 - [2023.11.30] 重要更新：新增图片参数工具箱，实现图片浏览过程中对生成参数的及时查看，数据源来自于图片目录的 `log.html` ，可以与主线版本无缝衔接。
-- [2023.11.26] 重要更新：新增顶部工具条，实现了场景预置包的切换和背景切换。优化界面布局，将“出图数量”选项提高到首屏，默认中文界面、夜黑背景和高级选项打开。总之常用操作尽可能快捷。这是一次重要的升级，基于定制预置包，可以简化步骤，快速进入特定使用场景。欢迎定制自己的专属预置包！同步主线最新版本v2.1.824。
+- [2023.11.26] 重要更新：新增顶部工具条，实现了场景预置包的切换和背景切换。优化界面布局，将“出图数量”选项提高到首屏，默认中文界面、夜黑背景和高级选项打开，常用操作尽可能快捷。同步主线最新版本v2.1.824。
 - [2023.11.20] 完善历史图片索引功能，新增一天内的图片分页，避免组内图片数量过大；修复其他已知bug。
 - [2023.11.18] 将大部分汉化翻译移到 `language/cn.json` ；界面上新增历史图片浏览功能，可以按照日期分组快速浏览历史生成的图片，每次进入会默认加载最新一组的最新一张。同步最新版本v2.1.821。
 - [2023.11.14] 风格名称汉化，里面有太多西方专属词汇，中文用户用的比较少，待改进。同步版本到v2.1.805，看到测试中的FaceSwap了 。
@@ -18,9 +24,9 @@
 
 ## 增强特性 / Enhanced Features
 已实现及计划实现的功能特性：
-- [x] **中文界面** SimpleSDXL的汉化翻译更贴合中文用户思维习惯。Fooocus现有多语言机制只能基于key-value一对一翻译，无法针对场景做适应性变化。SimpleSDXL新增了外挂机制针对个别场景做定制翻译，比如"Advanced"，在不同位置出现会有不同的翻译文字。 
-- [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。
-- [x] **历史图片索引** Fooocus无法快速浏览历史图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
+- [x] **中文界面** SimpleSDXL的汉化翻译更贴合中文用户思维习惯。针对个别场景做了定制翻译，比如"Advanced"，在不同位置出现会有不同的文字翻译。 
+- [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。社区中的在线翻译器是调用第三方Api接口，会有访问限制，也无法适应中英混编的Tag表述模式。
+- [x] **历史图片索引** Fooocus无法浏览前一次生成的图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
 - [x] **生成参数管理** 对出图后的提示词等参数进行管理，可以查看和自动回填，方便对历史图片生成参数的借鉴使用。
 - [x] **场景预置包切换** 在主界面上可以对场景预置包进行快速切换，能够快速体验不同场景预置包的出图效果。
 - [ ] **图片预置包嵌入** 精选优质的已生成图片，嵌入生成参数和预置包信息，方便学习和交流。
@@ -57,9 +63,11 @@
     # git clone https://www.modelscope.cn/metercai/SimpleSDXL-models.git models
 4, 启动服务
 
-    python entry_with_update.py --language cn --theme dark --preset realistic
+    python entry_with_update.py --preset realistic
     # 云端部署可以配置： ip, port, webroot 等参数
-    # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --language cn --preset realistic --theme dark
+    # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --preset realistic
+    # Enter English UI : --language en
+    # python entry_with_update.py --preset realistic --language en
 
 ---
 <div align=center>
