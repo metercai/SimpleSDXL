@@ -108,7 +108,9 @@ with shared.gradio_root:
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
                     gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
                     prompt_info = gr.State(value='')
-                    gallery_index.change(lambda x: [gr.update(visible=True, preview=True, value=gallery_util.get_images_from_gallery_index(x)), gr.update(visible=False), gr.update(visible=False)], inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box],show_progress=False)
+                    gallery_index.change(lambda x: [gr.update(visible=True, preview=True, value=gallery_util.get_images_from_gallery_index(x)), \
+                            gr.update(visible=False), gr.update(visible=False), gallery_util.get_images_prompt(x,0)], \
+                            inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box, prompt_info],show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.", elem_id='positive_prompt',
@@ -150,7 +152,7 @@ with shared.gradio_root:
                 image_tools_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=False)], inputs=image_tools_checkbox,
                             outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
                 prompt_info_button.click(gallery_util.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
-                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, gallery, prompt_info], outputs=[prompt_info, prompt_info_box], show_progress=False)
+                gallery.select(gallery_util.select_gallery, inputs=gallery_index, outputs=[prompt_info, prompt_info_box], show_progress=False)
 
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
