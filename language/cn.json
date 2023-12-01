@@ -123,7 +123,7 @@
   "Advanced Control": "高级控图模式: ImagePrompt-元素提示，PyraCanny-物体形状，CPDS-整体构图，FaceSwap-换脸",
   "Preset:": "预置包:",
   "Theme:": "背景:",
-  "default": "F家",
+  "default": "默认",
   "realistic": "写实",
   "anime": "动漫",
   "sai": "原生",

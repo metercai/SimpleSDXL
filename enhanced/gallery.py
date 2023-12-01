@@ -143,7 +143,7 @@ def parse_html_log(choice):
     print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
     
 
-def select_gallery(choice, selected, prompt_info, evt: gr.SelectData):
+def select_gallery(choice, evt: gr.SelectData):
 
     result = get_images_prompt(choice, evt.index)
     print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list.')
