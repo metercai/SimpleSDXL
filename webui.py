@@ -74,6 +74,7 @@ def generate_clicked(*args):
     execution_time = time.perf_counter() - execution_start_time
     print(f'Total time: {execution_time:.2f} seconds')
     gallery_util.refresh_output_list()
+    gallery_util.parse_html_log(gallery_util.output_list[0])
     return
 
 
@@ -101,16 +102,16 @@ with shared.gradio_root:
                                               height=768, visible=False, elem_classes=['main_view', 'image_gallery'])
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
-                gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
+                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True)
                 prompt_info_box = gr.Markdown(gallery_util.make_infobox_markdown(None),  visible=False, elem_id='infbox', elem_classes='infobox')
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
                     gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
                     prompt_info = gr.State(value='')
-                    gallery_index.change(lambda x: [gr.update(visible=True, preview=True, value=gallery_util.get_images_from_gallery_index(x)), \
-                            gr.update(visible=False), gr.update(visible=False), gallery_util.get_images_prompt(x,0)], \
-                            inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box, prompt_info],show_progress=False)
+                    gallery_index.select(lambda x: [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)], \
+                            inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box], show_progress=False)
+                    gallery_index.change(lambda x: [gr.update(value=gallery_util.get_images_from_gallery_index(x)), gallery_util.get_images_prompt(x,0), gr.update(open=False, visible=len(gallery_util.output_list)>0)], inputs=gallery_index, outputs=[gallery, prompt_info, index_radio], show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.", elem_id='positive_prompt',
@@ -153,6 +154,7 @@ with shared.gradio_root:
                             outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
                 prompt_info_button.click(gallery_util.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
                 gallery.select(gallery_util.select_gallery, inputs=gallery_index, outputs=[prompt_info, prompt_info_box], show_progress=False)
+                progress_gallery.select(gallery_util.select_gallery_progress, outputs=[prompt_info, prompt_info_box], show_progress=False)
 
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
@@ -527,11 +529,13 @@ with shared.gradio_root:
         reset_params += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         prompt_regen_button.click(gallery_util.reset_params, inputs=prompt_info, outputs=reset_params, show_progress=False)
 
-        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
+        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False)), outputs=[stop_button, skip_button, generate_button]) \
+            .then(lambda: gr.update(visible=False, open=False), outputs=index_radio, show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=gallery_util.output_list, value=gallery_util.output_list[0])), outputs=[generate_button, stop_button, skip_button, gallery_index]) \
+            .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
+            .then(lambda: (gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)), outputs=[gallery_index, index_radio], show_progress=False) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:

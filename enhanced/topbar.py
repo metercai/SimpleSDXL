@@ -181,7 +181,7 @@ def reset_context(preset_params):
     for i, (n, v) in enumerate(config.default_loras):
         results += [gr.update(value=n),gr.update(value=v)]
 
-    results +=  [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)<1 else  gallery_util.output_list[0])]
+    results +=  [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
     return results
 
 def get_preset_params(preset_params, request: gr.Request):

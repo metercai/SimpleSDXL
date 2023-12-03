@@ -4,7 +4,7 @@
     "default_refiner_switch": 0.5,
     "default_loras": [
         [
-            "None",
+            "sdxl_lcm_lora.safetensors",
             1.0
         ],
         [

@@ -51,7 +51,7 @@ def get_images_from_gallery_index(choice):
     global output_list, images_list, max_per_page
 
     if choice is None:
-        refresh_output_list()
+#        refresh_output_list()
         if len(output_list) == 0:
             return None
         choice = output_list[0]
@@ -81,6 +81,8 @@ refresh_output_list()
 def get_images_prompt(choice, selected):
     global images_list, images_prompt
 
+    if choice is None:
+        choice = output_list[0]
     page = 0
     _page = choice.split("/")
     if len(_page) > 1:
@@ -89,7 +91,6 @@ def get_images_prompt(choice, selected):
 
     if choice != images_prompt[0] or images_prompt[1] is None:
         parse_html_log(choice)
-        images_prompt[0] = choice
     nums = len(images_prompt[1])
     if page > 0:
         page = abs(page-math.ceil(nums/max_per_page))+1
@@ -103,6 +104,7 @@ def get_images_prompt(choice, selected):
 def parse_html_log(choice):
     global images_prompt
     
+    choice = choice.split('/')[0]
     html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
     html = etree.parse(html_file, etree.HTMLParser())
     prompt_infos = html.xpath('/html/body/div')
@@ -120,23 +122,15 @@ def parse_html_log(choice):
         if text[6]!='':
             text.insert(6, '')
         #print(f'text={text}')
+        nums = len(text)
         info_json='{' + f'"Filename": "{text[0]}",\n' \
                       + f'"{text[1]}": "{text[2]}",\n' \
                       + f'"{text[4]}": "{text[5]}",\n' \
-                      + f'"{text[7]}": "{text[8]}",\n' \
-                      + f'"{text[10]}": "{text[11]}",\n' \
-                      + f'"{text[12]}": "{text[13]}",\n' \
-                      + f'"{text[14]}": "{text[15]}",\n' \
-                      + f'"{text[16]}": "{text[17]}",\n' \
-                      + f'"{text[18]}": "{text[19]}",\n' \
-                      + f'"{text[20]}": "{text[21]}",\n' \
-                      + f'"{text[22]}": "{text[23]}",\n' \
-                      + f'"{text[24]}": "{text[25]}",\n' \
-                      + f'"{text[26]}": "{text[27]}",\n' \
-                      + f'"{text[28]}": "{text[29]}",\n' \
-                      + f'"{text[30]}": "{text[31]}",\n' \
-                      + f'"{text[32]}": "{text[33]}",\n' \
-                      + f'"{text[34]}": "{text[35]}"' + '}'
+                      + f'"{text[7]}": "{text[8]}",\n' 
+        for i in range(0,int(nums/2)-5):
+            info_json += f'"{text[10+i*2]}": "{text[11+i*2]}",\n'
+        info_json = info_json[:-2]
+        info_json += '}'
         #print(f'info_json={info_json}')
         images_prompt[1].append(json.loads(info_json))
     images_prompt[0] = choice
@@ -147,6 +141,15 @@ def select_gallery(choice, evt: gr.SelectData):
 
     result = get_images_prompt(choice, evt.index)
     print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list.')
+
+    return result, gr.update(value=make_infobox_markdown(result))
+
+
+def select_gallery_progress(evt: gr.SelectData):
+    global output_list
+
+    result = get_images_prompt(None, evt.index)
+    print(f'[Gallery] Selected_gallery_progress: selected index {evt.index} of {output_list[0]} images_list.')
 
     return result, gr.update(value=make_infobox_markdown(result))
 
