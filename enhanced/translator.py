@@ -19,7 +19,7 @@ def Q2B_number_punctuation(text):
         j = Q_punct.find(texts[i])
         if j >= 0:
             texts[i] = Bpunct[j]
-    print(f'punctuation: text1={text} \n text2={texts}')
+    #print(f'punctuation: text1={text} \n text2={texts}')
     return ''.join(texts)
 
 def Q2B_alphabet(text):
@@ -31,7 +31,7 @@ def Q2B_alphabet(text):
         j = Q_alphabet.find(texts[i])
         if j >= 0:
             texts[i] = Balphabet[j]
-    print(f'alphabet: text1={text} \n text2={texts}')
+    #print(f'alphabet: text1={text} \n text2={texts}')
     return ''.join(texts)
 
 def translate_en(model, tokenizer, text_zh):
@@ -67,7 +67,7 @@ def convert(text: str) -> str:
                     else:
                         #text_zh = Q2B_alphabet(text_zh)
                         text_en = translate_en(model, tokenizer, text_zh)
-                        print(f'translate: {text_zh} -> {text_en}')
+                        #print(f'translate: {text_zh} -> {text_en}')
                         text_eng += text_en  
                         text_zh = ""
                 text_eng += _char
