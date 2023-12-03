@@ -123,16 +123,14 @@ def parse_html_log(choice):
             text.insert(6, '')
         #print(f'text={text}')
         nums = len(text)
-        info_json='{' + f'"Filename": "{text[0]}",\n' \
-                      + f'"{text[1]}": "{text[2]}",\n' \
-                      + f'"{text[4]}": "{text[5]}",\n' \
-                      + f'"{text[7]}": "{text[8]}",\n' 
+        info_dict={"Filename":text[0]}
+        info_dict[text[1]] = text[2]
+        info_dict[text[4]] = text[5]
+        info_dict[text[7]] = text[8]
         for i in range(0,int(nums/2)-5):
-            info_json += f'"{text[10+i*2]}": "{text[11+i*2]}",\n'
-        info_json = info_json[:-2]
-        info_json += '}'
-        #print(f'info_json={info_json}')
-        images_prompt[1].append(json.loads(info_json))
+            info_dict[text[10+i*2]] = text[11+i*2]
+        print(f'info_dict={info_dict}')
+        images_prompt[1].append(info_dict)
     images_prompt[0] = choice
     print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
     
