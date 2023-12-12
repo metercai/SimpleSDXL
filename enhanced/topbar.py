@@ -313,7 +313,10 @@ default_models_info = {
         "hash": "ByRRjGtahV4XYEMvvwPIBblb0voHJy8PNq33rtlaAeM=" },
     "checkpoints/bluePencilXLV200.cXoH.safetensors": {
         "size": 6938040682,
-        "hash": "1ZYnt0lbBYHe0rBIismPneuGtS1D6dkCkU8Pnc/9sWw=" }
+        "hash": "1ZYnt0lbBYHe0rBIismPneuGtS1D6dkCkU8Pnc/9sWw=" },
+    "checkpoints/dreamshaperXL_turboDpmppSDE.safetensors": {
+        "size": 6939220250,
+        "hash": "Z28NYMjoYBRtXooNgCWZyt0E58rfhcKD8Yn0HwHJ41k=" }
      }
     
 
