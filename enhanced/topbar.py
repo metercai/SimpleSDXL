@@ -9,6 +9,7 @@ import modules.sdxl_styles
 import numbers
 import copy
 import base64
+import re
 import hashlib
 import requests
 import time
@@ -227,44 +228,57 @@ def reset_context(preset_params):
 
 def save_preset(prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, preset_name):
 
-    preset = {}
-    preset["default_model"] = base_model
-    preset["default_refiner"] = refiner_model
-    preset["default_refiner_switch"] = refiner_switch
-    preset["default_loras"] = [[lora_model1, lora_weight1], [lora_model2, lora_weight2], [lora_model3, lora_weight3], [lora_model4, lora_weight4], [lora_model5, lora_weight5]]
-    preset["default_cfg_scale"] = guidance_scale
-    preset["default_sample_sharpness"] = sharpness
-    preset["default_sampler"] = sampler_name
-    preset["default_scheduler"] = scheduler_name
-    preset["default_performance"] = performance_selection
-    preset["default_prompt"] = prompt
-    preset["default_prompt_negative"] = negative_prompt
-    preset["default_styles"] = style_selections
-    preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
+    if preset_name is not None and preset_name != '':
+        preset = {}
+        preset["default_model"] = base_model
+        preset["default_refiner"] = refiner_model
+        preset["default_refiner_switch"] = refiner_switch
+        preset["default_loras"] = [[lora_model1, lora_weight1], [lora_model2, lora_weight2], [lora_model3, lora_weight3], [lora_model4, lora_weight4], [lora_model5, lora_weight5]]
+        preset["default_cfg_scale"] = guidance_scale
+        preset["default_sample_sharpness"] = sharpness
+        preset["default_sampler"] = sampler_name
+        preset["default_scheduler"] = scheduler_name
+        preset["default_performance"] = performance_selection
+        preset["default_prompt"] = prompt
+        preset["default_prompt_negative"] = negative_prompt
+        preset["default_styles"] = style_selections
+        preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
 
-    preset["checkpoint_downloads"] = {base_model:""}
-    if refiner_model is not None:
-        preset["checkpoint_downloads"][refiner_model]=""
-    preset["embeddings_downloads"] = {}
-    preset["lora_downloads"] = {}
-    if lora_model1 is not None:
-        preset["lora_downloads"][lora_model1] = ""
-    if lora_model2 is not None:
-        preset["lora_downloads"][lora_model2] = ""
-    if lora_model3 is not None:
-        preset["lora_downloads"][lora_model3] = ""
-    if lora_model4 is not None:
-        preset["lora_downloads"][lora_model4] = ""
-    if lora_model5 is not None:
-        preset["lora_downloads"][lora_model5] = ""
+        preset["checkpoint_downloads"] = {base_model:models_info["checkpoints/"+base_model]["url"]}
+        if refiner_model and refiner_model != 'None':
+            preset["checkpoint_downloads"].update({refiner_model:models_info["checkpoints/"+refiner_model]["url"]})
 
-    #print(f'preset:{preset}')
-    save_path = 'presets/' + preset_name + '.json'
-    with open(save_path, "w", encoding="utf-8") as json_file:
-        json.dump(preset, json_file, indent=4)
+        preset["embeddings_downloads"] = {}
+        prompt_tags = re.findall(r'[\(](.*?)[)]', negative_prompt) + re.findall(r'[\(](.*?)[)]', prompt)
+        embeddings = {}
+        for e in prompt_tags:
+            embed = e.split(':')
+            if len(embed)>2 and embed[0] == 'embedding':
+                embeddings.update({embed[1]:embed[2]})
+        embeddings = embeddings.keys()
+        for k in models_info.keys():
+            if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
+                preset["embeddings_downloads"].update({k[11:]:models_info[k]["url"]})
 
-    config.preset_reset = preset_name
-    print(f'[Topbar] Saved the current params and config to {save_path}.')
+        preset["lora_downloads"] = {}
+        if lora_model1 and lora_model1 != 'None':
+            preset["lora_downloads"].update({lora_model1:models_info["loras/"+lora_model1]["url"]})
+        if lora_model2 and lora_model2 != 'None':
+            preset["lora_downloads"].update({lora_model2:models_info["loras/"+lora_model2]["url"]})
+        if lora_model3 and lora_model3 != 'None':
+            preset["lora_downloads"].update({lora_model3:models_info["loras/"+lora_model3]["url"]})
+        if lora_model4 and lora_model4 != 'None':
+            preset["lora_downloads"].update({lora_model4:models_info["loras/"+lora_model4]["url"]})
+        if lora_model5 and lora_model5 != 'None':
+            preset["lora_downloads"].update({lora_model5:models_info["loras/"+lora_model5]["url"]})
+
+        #print(f'preset:{preset}')
+        save_path = 'presets/' + preset_name + '.json'
+        with open(save_path, "w", encoding="utf-8") as json_file:
+            json.dump(preset, json_file, indent=4)
+
+        config.preset_reset = preset_name
+        print(f'[Topbar] Saved the current params and config to {save_path}.')
 
     return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=make_html())
 
