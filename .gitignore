@@ -51,3 +51,5 @@ experiment.py
 /.coverage*
 /auth.json
 /models
+/.*.did
+/.*.pem
