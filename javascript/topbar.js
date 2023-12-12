@@ -16,17 +16,23 @@ function get_topbar_current() {
     return current;
 }
 
-function mark_position_for_topbar(preset_name,theme_name) {
+function mark_position_for_topbar(preset_name,theme_name,preset_pre) {
     var current_preset_id = "preset_"+preset_name;
     var current_theme_id = "theme_"+theme_name;
+    var pre_preset_id = "preset_"+preset_pre;
     var p_obj=document.getElementById(current_preset_id);
+    var p1_obj=document.getElementById(pre_preset_id);
     var t_obj=document.getElementById(current_theme_id);
     var bgcolor = "#ccddff";
     switch(current_theme_id) {
 	case "theme_dark":  bgcolor = "#6495ed"; break;
     }
     if (p_obj!=null) {
+	bgcolor1 = p_obj.style.backgroundColor;
         p_obj.style.backgroundColor=bgcolor;
+	if (p1_obj!=null) {
+	    p1_obj.style.backgroundColor=bgcolor1;
+	}
     }
     if (t_obj!=null) {
 	t_obj.style.backgroundColor=bgcolor;

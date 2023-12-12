@@ -5,6 +5,7 @@ import json
 import copy
 import modules.util as util
 import modules.config as config
+import enhanced.topbar as topbar
 from lxml import etree
 
 output_list = []
@@ -106,7 +107,7 @@ def parse_html_log(choice):
     
     choice = choice.split('/')[0]
     html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
-    html = etree.parse(html_file, etree.HTMLParser())
+    html = etree.parse(html_file, etree.HTMLParser(encoding='utf-8'))
     prompt_infos = html.xpath('/html/body/div')
     images_prompt[1] = []
     for info in prompt_infos:
@@ -121,6 +122,8 @@ def parse_html_log(choice):
         text = list(map(standardized, info.xpath('.//p//text()')))
         if text[6]!='':
             text.insert(6, '')
+        if text[8]=='':
+            text.insert(8, '')
         #print(f'text={text}')
         nums = len(text)
         info_dict={"Filename":text[0]}
@@ -129,10 +132,10 @@ def parse_html_log(choice):
         info_dict[text[7]] = text[8]
         for i in range(0,int(nums/2)-5):
             info_dict[text[10+i*2]] = text[11+i*2]
-        print(f'info_dict={info_dict}')
+        #print(f'info_dict={info_dict}')
         images_prompt[1].append(info_dict)
     images_prompt[0] = choice
-    print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
+    print(f'[ToolBox] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
     
 
 def select_gallery(choice, evt: gr.SelectData):
@@ -174,7 +177,7 @@ infobox_state = False
 def toggle_prompt_info(prompt_info):
     global infobox_state
     infobox_state = not infobox_state
-    print(f'[Gallery] Toggle_image_info: {infobox_state}')
+    print(f'[ToolBox] Toggle_image_info: {infobox_state}')
     return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state)
 
 
@@ -202,6 +205,57 @@ def reset_params(info):
             gr.update(value=float(info['Refiner Switch'])), gr.update(value=info['Sampler']), gr.update(value=info['Scheduler'])]
     results += lora_results
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
-    print(f'[Gallery] Reset_params: update {len(results)} params from current image.')
-    return results
+    print(f'[ToolBox] Reset_params: update {len(results)} params from current image.')
+    return results + [gr.update(visible=False)] * 2
 
+note_box_state = [None,False,False]
+
+def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
+    note_box_state[2] = False
+    flag = 1
+    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+    for i in range(len(checklist)):
+        if checklist[i] is not None and checklist[i] != 'None':
+            if i<2 and topbar.models_info["checkpoints/"+checklist[i]]["url"] is None:
+                flag = 0
+            if i>=2 and topbar.models_info["loras/"+checklist[i]]["url"] is None:
+                flag = 0
+    if flag == 0:
+        note_box_state[2] = True
+    return toggle_note_box('regen')
+
+def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
+    note_box_state[2] = False
+    flag = 1
+    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+    for i in range(len(checklist)):
+        if checklist[i] is not None and checklist[i] != 'None':
+            if i<2 and topbar.models_info["checkpoints/"+checklist[i]]["url"] is None:
+                flag = 0
+            if i>=2 and topbar.models_info["loras/"+checklist[i]]["url"] is None:
+                flag = 0
+    if flag == 0:
+        note_box_state[2] = True
+    return toggle_note_box('preset')
+
+def toggle_note_box(item):
+    global note_box_state
+
+    if note_box_state[0] is None:
+        note_box_state[0] = item
+    if item == note_box_state[0]:
+        note_box_state[1] = not note_box_state[1]
+    elif not note_box_state[1]:
+        note_box_state[1] = not note_box_state[1]
+        note_box_state[0] = item
+    else:
+        return [gr.update()] * 4
+    flag = note_box_state[1]
+    title_extra = ""
+    if note_box_state[2]:
+        title_extra = '\n' + topbar.toolbox_note_invalid_url
+    if item == 'regen':
+        return [gr.update(value=topbar.toolbox_note_regenerate_title + title_extra), gr.update(visible=False), gr.update(visible=flag), gr.update(visible=flag)]
+    if item == 'preset':
+        return [gr.update(value=topbar.toolbox_note_preset_title + title_extra), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag)]
+    
