@@ -212,30 +212,26 @@ note_box_state = [None,False,False]
 
 def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
     note_box_state[2] = False
-    flag = 1
     checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
     for i in range(len(checklist)):
         if checklist[i] and checklist[i] != 'None':
             k1 = "checkpoints/"+checklist[i]
             k2 = "loras/"+checklist[i]
-            if (i<2 and k1 in topbar.models_info) or (i>=2 and k2 in topbar.models_info):
-                flag = 0
-    if flag == 0:
-        note_box_state[2] = True
+            if (i<2 and k1 not in topbar.models_info.keys()) or (i>=2 and k2 not in topbar.models_info.keys()):
+                note_box_state[2] = True
+                break
     return toggle_note_box('regen')
 
 def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
     note_box_state[2] = False
-    flag = 1
     checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
     for i in range(len(checklist)):
         if checklist[i] and checklist[i] != 'None':
             k1 = "checkpoints/"+checklist[i]
             k2 = "loras/"+checklist[i]
-            if (i<2 and k1 in topbar.models_info) or (i>=2 and k2 in topbar.models_info):
-                flag = 0
-    if flag == 0:
-        note_box_state[2] = True
+            if (i<2 and k1 not in topbar.models_info.keys()) or (i>=2 and k2 not in topbar.models_info.keys()):
+                note_box_state[2] = True
+                break
     return toggle_note_box('preset')
 
 def toggle_note_box(item):
