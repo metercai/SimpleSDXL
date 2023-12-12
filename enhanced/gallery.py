@@ -216,9 +216,9 @@ def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lo
     checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
     for i in range(len(checklist)):
         if checklist[i] and checklist[i] != 'None':
-            if i<2 and topbar.models_info["checkpoints/"+checklist[i]]["url"] is None:
-                flag = 0
-            if i>=2 and topbar.models_info["loras/"+checklist[i]]["url"] is None:
+            k1 = "checkpoints/"+checklist[i]
+            k2 = "loras/"+checklist[i]
+            if (i<2 and k1 in topbar.models_info) or (i>=2 and k2 in topbar.models_info):
                 flag = 0
     if flag == 0:
         note_box_state[2] = True
@@ -230,9 +230,9 @@ def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, l
     checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
     for i in range(len(checklist)):
         if checklist[i] and checklist[i] != 'None':
-            if i<2 and topbar.models_info["checkpoints/"+checklist[i]]["url"] is None:
-                flag = 0
-            if i>=2 and topbar.models_info["loras/"+checklist[i]]["url"] is None:
+            k1 = "checkpoints/"+checklist[i]
+            k2 = "loras/"+checklist[i]
+            if (i<2 and k1 in topbar.models_info) or (i>=2 and k2 in topbar.models_info):
                 flag = 0
     if flag == 0:
         note_box_state[2] = True
