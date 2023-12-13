@@ -356,7 +356,14 @@ def init_models_info():
         print(f'[Topbar] Computing hash for {len(new_filenames)} model files. It\'s some minutes.')
         try:
             for filename in new_filenames:
-                file_path = os.path.abspath(f'./models/{filename}')
+                if filename.startswith('checkpoints'):
+                    file_path = os.path.join(config.path_checkpoints, filename[12:])
+                elif filename.startswith('loras'):
+                    file_path = os.path.join(config.path_loras, filename[6:])
+                elif filename.startswith('embeddings'):
+                    file_path = os.path.join(config.path_embeddings, filename[11:])
+                else:
+                    file_path = os.path.abspath(f'./models/{filename}')
                 size = os.path.getsize(file_path)
                 if filename in default_models_info.keys() and size == default_models_info[filename]["size"]:
                     hash = default_models_info[filename]["hash"]
