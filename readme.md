@@ -9,7 +9,7 @@
 - **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
-- [2023.12.12] <b> 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.825。 </b>
+- [2023.12.12] <b> 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.830。 </b>
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
 - [2023.11.30] 重要更新：新增图片参数工具箱，实现图片浏览过程中对生成参数的及时查看，数据源来自于图片目录的 `log.html` ，可以与主线版本无缝衔接。
 - [2023.11.26] 重要更新：新增顶部工具条，实现了场景预置包的切换和背景切换。优化界面布局，将“出图数量”选项提高到首屏，默认中文界面、夜黑背景和高级选项打开，常用操作尽可能快捷。同步主线最新版本v2.1.824。
@@ -180,9 +180,11 @@ Note that the minimal requirement is **4GB Nvidia GPU memory (4GB VRAM)** and **
 
 Please open an issue if you use similar devices but still cannot achieve acceptable performances.
 
+See also the common problems and troubleshoots [here](troubleshoot.md).
+
 ### Colab
 
-(Last tested - 2023 Nov 15)
+(Last tested - 2023 Dec 12)
 
 | Colab | Info
 | --- | --- |
@@ -294,7 +296,7 @@ You can install Fooocus on Apple Mac silicon (M1 or M2) with macOS 'Catalina' or
 1. Create a new conda environment, `conda env create -f environment.yaml`.
 1. Activate your new conda environment, `conda activate fooocus`.
 1. Install the packages required by Fooocus, `pip install -r requirements_versions.txt`.
-1. Launch Fooocus by running `python entry_with_update.py`. (Some Mac M2 users may need `python entry_with_update.py --enable-smart-memory` to speed up model loading/unloading.) The first time you run Fooocus, it will automatically download the Stable Diffusion SDXL models and will take a significant time, depending on your internet connection.
+1. Launch Fooocus by running `python entry_with_update.py`. (Some Mac M2 users may need `python entry_with_update.py --disable-offload-from-vram` to speed up model loading/unloading.) The first time you run Fooocus, it will automatically download the Stable Diffusion SDXL models and will take a significant time, depending on your internet connection.
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus Anime/Realistic Edition.
 
@@ -377,6 +379,34 @@ A safter way is just to try "run_anime.bat" or "run_realistic.bat" - they should
 
 ~Note that `user_path_config.txt` is deprecated and will be removed soon.~ (Edit: it is already removed.)
 
+### All CMD Flags
+
+```
+entry_with_update.py  [-h] [--listen [IP]] [--port PORT]
+                      [--disable-header-check [ORIGIN]]
+                      [--web-upload-size WEB_UPLOAD_SIZE]
+                      [--external-working-path PATH [PATH ...]]
+                      [--output-path OUTPUT_PATH] [--temp-path TEMP_PATH]
+                      [--cache-path CACHE_PATH] [--in-browser]
+                      [--disable-in-browser] [--gpu-device-id DEVICE_ID]
+                      [--async-cuda-allocation | --disable-async-cuda-allocation]
+                      [--disable-attention-upcast] [--all-in-fp32 | --all-in-fp16]
+                      [--unet-in-bf16 | --unet-in-fp16 | --unet-in-fp8-e4m3fn | --unet-in-fp8-e5m2]
+                      [--vae-in-fp16 | --vae-in-fp32 | --vae-in-bf16]
+                      [--clip-in-fp8-e4m3fn | --clip-in-fp8-e5m2 | --clip-in-fp16 | --clip-in-fp32]
+                      [--directml [DIRECTML_DEVICE]] [--disable-ipex-hijack]
+                      [--preview-option [none,auto,fast,taesd]]
+                      [--attention-split | --attention-quad | --attention-pytorch]
+                      [--disable-xformers]
+                      [--always-gpu | --always-high-vram | --always-normal-vram | 
+                       --always-low-vram | --always-no-vram | --always-cpu]
+                      [--always-offload-from-vram] [--disable-server-log]
+                      [--debug-mode] [--is-windows-embedded-python]
+                      [--disable-server-info] [--share] [--preset PRESET]
+                      [--language LANGUAGE] [--disable-offload-from-vram]
+                      [--theme THEME] [--disable-image-log]
+```
+
 ## Advanced Features
 
 [Click here to browse the advanced features.](https://github.com/lllyasviel/Fooocus/discussions/117)
@@ -390,8 +420,6 @@ Fooocus also has many community forks, just like SD-WebUI's [vladmandic/automati
 See also [About Forking and Promotion of Forks](https://github.com/lllyasviel/Fooocus/discussions/699).
 
 ## Thanks
-
-Fooocus is powered by [FCBH backend](https://github.com/lllyasviel/Fooocus/tree/main/backend), which starts from an odd mixture of [Automatic1111](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
 
 Special thanks to [twri](https://github.com/twri) and [3Diva](https://github.com/3Diva) for creating additional SDXL styles available in Fooocus.
 
