@@ -125,14 +125,26 @@ def parse_html_log(choice):
         if text[8]=='':
             text.insert(8, '')
         #print(f'text={text}')
-        nums = len(text)
         info_dict={"Filename":text[0]}
-        info_dict[text[1]] = text[2]
-        info_dict[text[4]] = text[5]
-        info_dict[text[7]] = text[8]
-        for i in range(0,int(nums/2)-5):
-            info_dict[text[10+i*2]] = text[11+i*2]
-        #print(f'info_dict={info_dict}')
+        if text[3]=='':
+            info_dict[text[1]] = text[2]
+            info_dict[text[4]] = text[5]
+            info_dict[text[7]] = text[8]
+            for i in range(0,int(len(text)/2)-5):
+                info_dict[text[10+i*2]] = text[11+i*2]
+        else:
+            if text[4]!='Fooocus V2 Expansion':
+                del text[6]
+            else:
+                text.insert(4, '')
+                if text[6]=='Styles':
+                    text.insert(6, '')
+                    del text[8]
+                else:
+                    del text[7]
+            for i in range(0,int(len(text)/2)-1):
+                info_dict[text[1+i*2]] = text[2+i*2]
+        #print(f'{len(text)},info_dict={info_dict}')
         images_prompt[1].append(info_dict)
     images_prompt[0] = choice
     print(f'[ToolBox] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
