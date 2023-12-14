@@ -215,7 +215,6 @@ with shared.gradio_root:
                         ip_advanced.change(ip_advance_checked, inputs=ip_advanced,
                                            outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
                                            queue=False, show_progress=False)
-
                     with gr.TabItem(label='Inpaint or Outpaint') as inpaint_tab:
                         inpaint_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
                         with gr.Row():
@@ -225,7 +224,17 @@ with shared.gradio_root:
                         example_inpaint_prompts = gr.Dataset(samples=modules.config.example_inpaint_prompts, label='Additional Prompt Quick List', components=[inpaint_additional_prompt], visible=False)
                         gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Document</a>')
                         example_inpaint_prompts.click(lambda x: x[0], inputs=example_inpaint_prompts, outputs=inpaint_additional_prompt, show_progress=False, queue=False)
-
+                    with gr.TabItem(label='Describe') as desc_tab:
+                        with gr.Row():
+                            with gr.Column():
+                                desc_input_image = grh.Image(label='Drag any image to here', source='upload', type='numpy')
+                            with gr.Column():
+                                desc_method = gr.Radio(
+                                    label='Content Type',
+                                    choices=[flags.desc_type_photo, flags.desc_type_anime],
+                                    value=flags.desc_type_photo)
+                                desc_btn = gr.Button(value='Describe this Image into Prompt')
+                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/1363" target="_blank">\U0001F4D4 Document</a>')
             switch_js = "(x) => {if(x){viewer_to_bottom(100);viewer_to_bottom(500);}else{viewer_to_top();} return x;}"
             down_js = "() => {viewer_to_bottom();}"
 
@@ -237,6 +246,7 @@ with shared.gradio_root:
             uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
+            desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
@@ -580,6 +590,19 @@ with shared.gradio_root:
             if os.path.exists(notification_file):
                 gr.Audio(interactive=False, value=notification_file, elem_id='audio_notification', visible=False)
                 break
+
+        def trigger_describe(mode, img):
+            if mode == flags.desc_type_photo:
+                from extras.interrogate import default_interrogator as default_interrogator_photo
+                return default_interrogator_photo(img), ["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"]
+            if mode == flags.desc_type_anime:
+                from extras.wd14tagger import default_interrogator as default_interrogator_anime
+                return default_interrogator_anime(img), ["Fooocus V2", "Fooocus Masterpiece"]
+            return mode, ["Fooocus V2"]
+
+        desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
+                       outputs=[prompt, style_selections], show_progress=True, queue=False)
+
     with gr.Row():
         preset_params = gr.JSON({}, visible=False)
         preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
@@ -598,7 +621,6 @@ with shared.gradio_root:
         .then(fn=lambda x: x, inputs=preset_params, _js=topbar.reset_preset_params_js)
 
     shared.gradio_root.load(fn=lambda x: x, inputs=preset_params, outputs=preset_params, _js=topbar.get_preset_params_js, queue=False, show_progress=False)
-
 
 
 def dump_default_english_config():
