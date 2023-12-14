@@ -148,6 +148,11 @@
   "LoRAs": "局部模型",
   "Others": "其他模型",
   "\ud83d\udd04 Sync All Info": "\ud83d\udd04 全部同步",
+  "Describe": "描述图片",
+  "Content Type": "内容类型",
+  "Photograph": "照片",
+  "Art/Anime": "艺术/动漫",
+  "Describe this Image into Prompt": "描绘图片内容加入提示词",
 
 
 
