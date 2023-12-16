@@ -286,6 +286,8 @@ models_info = {}
 models_info_muid = {}
 models_info_rsync = {}
 models_info_file = ['models_info', 0]
+models_info_path = os.path.abspath(f'./models/{models_info_file[0]}.json')
+
 models_hub_host = "http://modelhub.token.tm:1120"
 token_did.init_local_did(f'SimpleSDXL_User')
 
@@ -321,9 +323,8 @@ default_models_info = {
     
 
 def init_models_info():
-    global models_info, models_info_muid, models_info_rsync, models_info_file
+    global models_info, models_info_muid, models_info_rsync, models_info_file, models_info_path
 
-    models_info_path = os.path.abspath(f'./models/{models_info_file[0]}.json')
     if os.path.exists(models_info_path):
         file_mtime = time.localtime(os.path.getmtime(models_info_path)) 
         if (models_info is None or file_mtime != models_info_file[1]):
@@ -352,8 +353,6 @@ def init_models_info():
         if filename not in models_info.keys():
             new_filenames.append(filename)
     if len(new_filenames)>0:
-        execution_start_time = time.perf_counter()
-        print(f'[Topbar] Computing hash for {len(new_filenames)} model files. It\'s some minutes.')
         try:
             for filename in new_filenames:
                 if filename.startswith('checkpoints'):
@@ -368,68 +367,61 @@ def init_models_info():
                 if filename in default_models_info.keys() and size == default_models_info[filename]["size"]:
                     hash = default_models_info[filename]["hash"]
                 else:
-                    sha256obj = hashlib.sha256()
-                    with open(file_path, 'rb') as f:
-                        while True:
-                            b = f.read(4*1024*1024)
-                            if not b:
-                                break
-                            sha256obj.update(b)
-                    hash = base64.b64encode(sha256obj.digest()).decode('utf-8')
+                    hash = ''
                 models_info.update({filename:{'size': size, 'hash': hash, 'url': None, 'muid': None}})
             with open(models_info_path, "w", encoding="utf-8") as json_file:
                 json.dump(models_info, json_file, indent=4)
             models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
         except Exception as e:
-            print(f'[Topbar] Load and compute file hash [{models_info_path}] failed!')
+            print(f'[Topbar] Update model info file [{models_info_path}] failed!')
             print(e)
-        execution_time = time.perf_counter() - execution_start_time
-        print(f'[Topbar] Total time for model file hash {execution_time:.2f} seconds')
     
     return
 
 
-def rsync_universal_models_info():
-    global models_info, models_info_muid, models_info_rsync, models_info_file
+def complement_model_hash():
+    global models_info, models_info_file, models_info_path
 
-    models_info_path = os.path.abspath(f'./models/{models_info_file[0]}.json')
-    file_mtime = time.localtime(os.path.getmtime(models_info_path))
-    if (models_info is None or file_mtime != models_info_file[1]):
-        try:
-            with open(models_info_path, "r", encoding="utf-8") as json_file:
-                models_info.update(json.load(json_file))
-            models_info_file[1] = file_mtime
-        except Exception as e:
-            print(f'[Topbar] Load model info file [{models_info_path}] failed!')
-            print(e)
-    for k in models_info.keys():
-        if models_info[k]['muid'] is not None and len(models_info[k]['muid'])>0:
-            models_info_muid.update({models_info[k]['muid']: k})
-        else:
-            models_info_rsync.update({k: {"hash": models_info[k]['hash'], "url": models_info[k]['url']}})
+    flag = False
+    execution_start_time = time.perf_counter()
+    print(f'[Topbar] Computing hash for {len(models_info.keys())} model files. It\'s some minutes.')
     try:
-        response = requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
-        rsync_muid_msg = { "files": token_did.encrypt_default(json.dumps(models_info_rsync)) }
-        headers = { "DID": token_did.DID}
-        response = requests.post(f'{models_hub_host}/rsync_muid/', data = json.dumps(rsync_muid_msg), headers = headers)
-        results = json.loads(response.text)
-        if (results["message"] == "it's ok!" and results["results"]):
-            for k in results["results"].keys():
-                models_info[k]['muid'] = results["results"][k]['muid']
-                models_info[k]['url'] = results["results"][k]['url']
-                print(f'[Topbar] Rsync info from model hub: MUID={models_info[k]["muid"]}, filename={k}')
+        for filename in models_info.keys():
+            if filename.startswith('checkpoints'):
+                file_path = os.path.join(config.path_checkpoints, filename[12:])
+            elif filename.startswith('loras'):
+                file_path = os.path.join(config.path_loras, filename[6:])
+            elif filename.startswith('embeddings'):
+                file_path = os.path.join(config.path_embeddings, filename[11:])
+            else:
+                file_path = os.path.abspath(f'./models/{filename}')
+            if models_info[filename]['url'] is None:
+                sha256obj = hashlib.sha256()
+                with open(file_path, 'rb') as f:
+                    while True:
+                        b = f.read(4*1024*1024)
+                        if not b:
+                            break
+                        sha256obj.update(b)
+                hash = base64.b64encode(sha256obj.digest()).decode('utf-8')
+                models_info.update({filename:{'size': models_info[filename]['size'], 'hash': hash, 'url': models_info[filename]['url'], 'muid': models_info[filename]['muid']}})
+                flag = True
+                print(f'[Topbar] Computing the file hash: {hash} <- {filename}')
+        if flag:
             with open(models_info_path, "w", encoding="utf-8") as json_file:
                 json.dump(models_info, json_file, indent=4)
             models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
     except Exception as e:
-            print(f'[Topbar] Connect the models hub site failed!')
-            print(e)
-    models_info_rsync = {}
-    return 
+        print(f'[Topbar] Load and compute file hash failed!')
+        print(e)
+    execution_time = time.perf_counter() - execution_start_time
+    print(f'[Topbar] Total time for models file hash {execution_time:.2f} seconds')
+
+    return gr.update(value=f'Total time for models file hash {execution_time:.2f} seconds')
 
 
 def sync_model_info_click(*args):
-    global models_info, models_info_rsync, models_info_file
+    global models_info, models_info_rsync, models_info_file, models_info_path
 
     downurls = list(args)
     #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
@@ -453,9 +445,31 @@ def sync_model_info_click(*args):
             models_info[keylist[i]]['url'] = durl
 
     flag = len(models_info_rsync.keys())
-    models_info_path = os.path.abspath(f'./models/{models_info_file[0]}.json')
     file_mtime = time.localtime(os.path.getmtime(models_info_path))
-    rsync_universal_models_info()
+
+    for k in models_info.keys():
+        if models_info[k]['muid'] is not None and len(models_info[k]['muid'])>0:
+            models_info_muid.update({models_info[k]['muid']: k})
+        else:
+            models_info_rsync.update({k: {"hash": models_info[k]['hash'], "url": models_info[k]['url']}})
+    try:
+        response = requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
+        rsync_muid_msg = { "files": token_did.encrypt_default(json.dumps(models_info_rsync)) }
+        headers = { "DID": token_did.DID}
+        response = requests.post(f'{models_hub_host}/rsync_muid/', data = json.dumps(rsync_muid_msg), headers = headers)
+        results = json.loads(response.text)
+        if (results["message"] == "it's ok!" and results["results"]):
+            for k in results["results"].keys():
+                models_info[k]['muid'] = results["results"][k]['muid']
+                models_info[k]['url'] = results["results"][k]['url']
+                print(f'[Topbar] Rsync info from model hub: MUID={models_info[k]["muid"]} <- {k}')
+            with open(models_info_path, "w", encoding="utf-8") as json_file:
+                json.dump(models_info, json_file, indent=4)
+            models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
+    except Exception as e:
+            print(f'[Topbar] Connect the models hub site failed!')
+            print(e)
+
     file_mtime2 = time.localtime(os.path.getmtime(models_info_path))
     if (flag and file_mtime == file_mtime2):
         with open(models_info_path, "w", encoding="utf-8") as json_file:
@@ -468,6 +482,7 @@ def sync_model_info_click(*args):
         durl = None if models_info[k]['url'] is None else models_info[k]['url']
         results += [gr.update(info=f'MUID={muid}', value=durl)]
 
+    results += [gr.update(value=f'Rsync info of models in local file: {len(models_info_rsync)}')]
     return results
 
 

@@ -348,9 +348,9 @@ with shared.gradio_root:
 
                 with gr.Row():
                     model_refresh = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
-                sync_model_info = gr.Checkbox(label='Sync model info', info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
-                with gr.Row(visible=False) as info_sync_texts:
-                    with gr.Column():
+                with gr.Row():
+                    sync_model_info = gr.Checkbox(label='Sync model info', info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
+                    with gr.Column(visible=False) as info_sync_texts:
                         models_infos = []
                         keylist = sorted(topbar.models_info.keys())
                         with gr.Tab(label='Checkpoints'):
@@ -374,9 +374,13 @@ with shared.gradio_root:
                                     durl = None if topbar.models_info[k]['url'] is None else topbar.models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
-                    info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync All Info', variant='secondary', elem_classes='refresh_button')
-                sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button], queue=False, show_progress=False)
-                info_sync_button.click(topbar.sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
+                with gr.Row(visible=False) as info_button:
+                    info_hash_button = gr.Button(label='Hash', value='\U0001f504 Update Local Hash', variant='secondary', elem_classes='refresh_button')
+                    info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', variant='secondary', elem_classes='refresh_button')
+                info_progress = gr.Markdown(f'Total models in local file: {len(topbar.models_info.keys())}', visible=False)
+                sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_button, info_progress], queue=False, show_progress=False)
+                info_hash_button.click(lambda: gr.update(value='Starting to compute hash value of models file...', visible=True), outputs=info_progress, queue=False, show_progress=False).then(topbar.complement_model_hash, outputs=info_progress, queue=False, show_progress=False)
+                info_sync_button.click(lambda: gr.update(value='Starting to rsync muid and url of models file...', visible=True), outputs=info_progress, queue=False, show_progress=False).then(topbar.sync_model_info_click, inputs=models_infos, outputs=models_infos + [info_progress], queue=False, show_progress=False)
 
             with gr.Tab(label='Advanced'):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=1.0, maximum=30.0, step=0.01,
