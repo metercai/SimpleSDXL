@@ -71,14 +71,14 @@ vae_approx_filenames = [
 
 
 def download_models():
-    for file_name, url in checkpoint_downloads.items():
-        load_file_from_url(url=url, model_dir=path_checkpoints, file_name=file_name)
     for file_name, url in embeddings_downloads.items():
         load_file_from_url(url=url, model_dir=path_embeddings, file_name=file_name)
     for file_name, url in lora_downloads.items():
         load_file_from_url(url=url, model_dir=path_loras, file_name=file_name)
     for file_name, url in vae_approx_filenames:
         load_file_from_url(url=url, model_dir=path_vae_approx, file_name=file_name)
+    for file_name, url in checkpoint_downloads.items():
+        load_file_from_url(url=url, model_dir=path_checkpoints, file_name=file_name)
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_expansion.bin',
@@ -93,6 +93,9 @@ def ini_args():
     from args_manager import args
     return args
 
+
+import enhanced.token_did as token_did
+token_did.init_local_did(f'SimpleSDXL_User')
 
 prepare_environment()
 build_launcher()

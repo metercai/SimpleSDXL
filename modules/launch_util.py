@@ -14,7 +14,7 @@ re_requirement = re.compile(r"\s*([-_a-zA-Z0-9]+)\s*(?:==\s*([-+_.a-zA-Z0-9]+))?
 
 python = sys.executable
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")
-index_url = os.environ.get('INDEX_URL', "")
+index_url = os.environ.get('INDEX_URL', "https://pypi.tuna.tsinghua.edu.cn/simple")
 
 modules_path = os.path.dirname(os.path.realpath(__file__))
 script_path = os.path.dirname(modules_path)

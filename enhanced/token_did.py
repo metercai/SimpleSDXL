@@ -5,6 +5,7 @@ import base58
 import hashlib
 import uuid
 import json
+import time
 
 from cryptography.hazmat.primitives import serialization, hashes, padding
 from cryptography.hazmat.primitives.asymmetric import ed25519, x25519
@@ -107,17 +108,18 @@ def encrypt(did, text):
                                     format=serialization.PrivateFormat.Raw, \
                                     encryption_algorithm=serialization.NoEncryption())
     )
+    salt0 = hashlib.new('sha256',f'now()={int(time.time()/600)}'.encode('utf-8')).digest()
     derivedkey = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=None,
+        salt=salt0[:16],    
         info=system_name,
     ).derive(prikey_self.exchange(exkey))
     iv = os.urandom(16)
     encryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(iv)).encryptor()
     padder = padding.PKCS7(128).padder()
     ct = iv + encryptor.update(padder.update(text.encode('utf-8')) + padder.finalize()) + encryptor.finalize()
-    return base64.b64encode(ct).decode('utf-8')
+    return base64.urlsafe_b64encode(ct).decode('utf-8')
 
 
 def encrypt_default(text):
@@ -138,17 +140,40 @@ def decrypt(did, text):
                                     format=serialization.PrivateFormat.Raw, \
                                     encryption_algorithm=serialization.NoEncryption())
     )
+    time_value = int(time.time()/600)
+    salt0 = hashlib.new('sha256',f'now()={time_value}'.encode('utf-8')).digest()
     derivedkey = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=None,
+        salt=salt0[:16],
         info=system_name,
     ).derive(prikey_self.exchange(exkey))
-    ct = base64.b64decode(text.encode('utf-8'))
+    ct = base64.urlsafe_b64decode(text.encode('utf-8'))
     decryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(ct[:16])).decryptor()
     unpadder = padding.PKCS7(128).unpadder()
-    pt = unpadder.update(decryptor.update(ct[16:]) + decryptor.finalize()) + unpadder.finalize()
-    return pt.decode('utf-8')
+    flag = False
+    try:
+        pt = unpadder.update(decryptor.update(ct[16:]) + decryptor.finalize()) + unpadder.finalize()
+        pt = pt.decode('utf-8')
+    except (ValueError, UnicodeDecodeError) as e:
+        flag = True
+    if flag:
+        salt0 = hashlib.new('sha256',f'now()={time_value+1}'.encode('utf-8')).digest()
+        derivedkey = HKDF(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt0[:16],
+            info=system_name,
+        ).derive(prikey_self.exchange(exkey))
+        ct = base64.urlsafe_b64decode(text.encode('utf-8'))
+        decryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(ct[:16])).decryptor()
+        unpadder = padding.PKCS7(128).unpadder()
+        try:
+            pt = unpadder.update(decryptor.update(ct[16:]) + decryptor.finalize()) + unpadder.finalize()
+            pt = pt.decode('utf-8')
+        except (ValueError, UnicodeDecodeError) as e:
+            pt = None
+    return pt
 
 
 def decrypt_default(text):
