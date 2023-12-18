@@ -15,6 +15,7 @@ import requests
 import time
 import enhanced.gallery as gallery_util
 import enhanced.token_did as token_did
+from enhanced.models_hub_host import models_hub_host
 
 nav_css = '''
 .top_nav{
@@ -287,9 +288,6 @@ models_info_muid = {}
 models_info_rsync = {}
 models_info_file = ['models_info', 0]
 models_info_path = os.path.abspath(f'./models/{models_info_file[0]}.json')
-
-models_hub_host = "http://modelhub.token.tm:1120"
-token_did.init_local_did(f'SimpleSDXL_User')
 
 default_models_info = {
     "checkpoints/juggernautXL_version6Rundiffusion.safetensors": {
