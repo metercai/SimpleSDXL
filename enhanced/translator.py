@@ -1,7 +1,10 @@
 import os
 import torch
+import tarfile
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from modules.config import path_translator
+from modules.model_loader import load_file_from_url
+from download import download
 
 translator_path = os.path.join(path_translator, 'nllb-200-distilled-600M')
 
@@ -50,6 +53,14 @@ def convert(text: str) -> str:
 
     #text = Q2B_number_punctuation(text)
     if is_chinese(text):
+        if not os.path.exists(translator_path):
+            os.makedirs(translator_path)
+            url = 'https://gitee.com/metercai/SimpleSDXL/releases/download/win64/nllb_200_distilled_600m.tar.gz'
+            cached_file = os.path.abspath(os.path.join(translator_path, 'nllb_200_distilled_600m.tar.gz'))
+            download(url, cached_file, progressbar=True)
+            with tarfile.open(cached_file, 'r:gz') as tarf:
+                tarf.extractall(translator_path)
+            os.remove(cached_file)
         load_file_from_url(
                 url='https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin',
                 model_dir=translator_path,
