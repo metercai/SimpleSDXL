@@ -9,7 +9,7 @@
 - **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
-- [2023.12.20] <b> 重要更新：加载流程针对国内网络环境进行优化，包括启动器瘦身，PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(97M): [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL的升级包(41M): [SimpleSDXL_win64_upgrade_in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境基础上的升级，保持两个版本同时可用。同步主线版本v2.1.853。</b>
+- [2023.12.20] <b> 重要更新：启动流程针对国内网络环境进行优化，包括启动器瘦身，PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(97M): [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL的升级包(41M): [SimpleSDXL_win64_upgrade_in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境基础上的升级，保持两个版本同时可用。同步主线版本v2.1.853。</b>
 - [2023.12.12] 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.830。
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
 - [2023.11.30] 重要更新：新增图片参数工具箱，实现图片浏览过程中对生成参数的及时查看，数据源来自于图片目录的 `log.html` ，可以与主线版本无缝衔接。
@@ -40,17 +40,17 @@
 
 ## 安装使用 / Install & Usage
 ### Windows :
-分两种情况:
+分两种情况:<br>
 一，在现有Fooocus环境下安装，两个版本可同时使用:
     点击下载一键升级包：[SimpleSDXL_win64_upgrade_in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。注意必须用cmd的命令行运行，有足够权限可以创建软连接。第一次启动后，会创建软连接，确保与Fooocus共享同一模型库和输入输出的图片库目录，从而两个版本可同时使用。
 
-二，全新安装SimpleSDXL:
-1, 点击下载一键启动包（可执行压缩包）： [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)。
-2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会下载项目代码，然后自动安装所需的各种PyPI模块，启动程序后，还会下载基础模型文件，总体时间较长，需耐心等待。全部采用国内源，不需要科学上网。
+二，全新安装SimpleSDXL:<br>
+1, 点击下载一键启动包（可执行压缩包）： [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)。<br>
+2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会下载项目代码，然后自动安装所需的各种PyPI模块，启动程序后，还会下载基础模型文件，总体时间较长，需耐心等待。下载源已全部更新为国内源，不需要科学上网。<br>
 3, 启动成功后，会自动打开浏览器，进入主界面。
 
 ### Linux :
-一，在现有Fooocus环境下安装，两个版本可同时使用:
+一，在现有Fooocus环境下安装，两个版本可同时使用:<br>
 1, 进入与现有Fooocus目录的父目录，即保证新建的SimpleSDXL目录与Fooocus目录同级。
 
     git clone https://github.com/metercai/SimpleSDXL.git
@@ -87,7 +87,7 @@
     # Enter English UI : --language en
     # python entry_with_update.py --language en
 
-模型库文件同步: 条件允许的可以直接同步模型库。
+模型库文件同步: 条件允许的可以直接同步模型库，不用一个个下载了。
 
     git lfs install
     git clone https://huggingface.co/metercai/SimpleSDXL models
