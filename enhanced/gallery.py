@@ -111,39 +111,51 @@ def parse_html_log(choice):
     prompt_infos = html.xpath('/html/body/div')
     images_prompt[1] = []
     for info in prompt_infos:
-        def standardized(x):
-            if x.startswith(', '):
-                x=x[2:]
-            if x.endswith(': '):
-                x=x[:-2]
-            if x==' ':
-                x=''
-            return x
-        text = list(map(standardized, info.xpath('.//p//text()')))
-        if text[6]!='':
-            text.insert(6, '')
-        if text[8]=='':
-            text.insert(8, '')
-        #print(f'text={text}')
-        info_dict={"Filename":text[0]}
-        if text[3]=='':
-            info_dict[text[1]] = text[2]
-            info_dict[text[4]] = text[5]
-            info_dict[text[7]] = text[8]
-            for i in range(0,int(len(text)/2)-5):
-                info_dict[text[10+i*2]] = text[11+i*2]
-        else:
-            if text[4]!='Fooocus V2 Expansion':
-                del text[6]
+        text = info.xpath('.//p//text()')
+        if len(text)>20:
+            def standardized(x):
+                if x.startswith(', '):
+                    x=x[2:]
+                if x.endswith(': '):
+                    x=x[:-2]
+                if x==' ':
+                    x=''
+                return x
+            text = list(map(standardized, info.xpath('.//p//text()')))
+            if text[6]!='':
+                text.insert(6, '')
+            if text[8]=='':
+                text.insert(8, '')
+            info_dict={"Filename":text[0]}
+            if text[3]=='':
+                info_dict[text[1]] = text[2]
+                info_dict[text[4]] = text[5]
+                info_dict[text[7]] = text[8]
+                for i in range(0,int(len(text)/2)-5):
+                    info_dict[text[10+i*2]] = text[11+i*2]
             else:
-                text.insert(4, '')
-                if text[6]=='Styles':
-                    text.insert(6, '')
-                    del text[8]
+                if text[4]!='Fooocus V2 Expansion':
+                    del text[6]
                 else:
-                    del text[7]
-            for i in range(0,int(len(text)/2)-1):
-                info_dict[text[1+i*2]] = text[2+i*2]
+                    text.insert(4, '')
+                    if text[6]=='Styles':
+                        text.insert(6, '')
+                        del text[8]
+                    else:
+                        del text[7]
+                for i in range(0,int(len(text)/2)-1):
+                    info_dict[text[1+i*2]] = text[2+i*2]
+        else:
+            text = info.xpath('.//td//text()')
+            if text[2]=='\n':
+                text.insert(2, '')
+            if text[5]=='\n':
+                text.insert(5, '')
+            if text[8]=='\n':
+                text.insert(8, '')
+            info_dict={"Filename":text[0]}
+            for i in range(0,int(len(text)/3)):
+                    info_dict[text[1+i*3]] = text[2+i*3]
         #print(f'{len(text)},info_dict={info_dict}')
         images_prompt[1].append(info_dict)
     images_prompt[0] = choice
