@@ -1,1 +1,1 @@
-models_hub_host = "http://modelhub.token.tm:1120"
+models_hub_host = "http://124.222.60.66:1120"

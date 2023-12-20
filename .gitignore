@@ -50,6 +50,16 @@ user_path_config-deprecated.txt
 /package-lock.json
 /.coverage*
 /auth.json
-/models
 /.*.did
 /.*.pem
+/models/models_info.jso
+!fooocus_inpaint_head.pth
+!fooocus_ip_negative.safetensors
+!unaestheticXLv31.safetensors
+!vaeapp_sd15.pth
+!xl-to-v1_interposer-v3.1.safetensors
+!xlvaeapp.pth
+/src
+pyproject.toml
+Cargo.toml
+.github/workflows/

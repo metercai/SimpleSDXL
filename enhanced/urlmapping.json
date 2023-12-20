@@ -25,5 +25,6 @@
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/SDXL_FILM_PHOTOGRAPHY_STYLE_BetaV0.4.safetensors": "3EisPvThTxkiF3t5rTx8Hr7K1irGkgmgw",
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/bluePencilXL_v050.safetensors": "EtxaaF5qpbCBQpeEVjDP6VCzR6c73UNeP",
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/DreamShaper_8_pruned.safetensors": "CF9y4BTWLiidKyTW9WS5ktsiUqmrpYHQe",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/unaestheticXLv31.safetensors": "81WhJ1ZA2vqosx6iw4SbaqMY1GCXP1Cmt"
+    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/unaestheticXLv31.safetensors": "81WhJ1ZA2vqosx6iw4SbaqMY1GCXP1Cmt",
+    "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin": "BKCc6XUAxSUcHChdY4KfJ9oQKvCuYbSpr"
 }
