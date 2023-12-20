@@ -2,10 +2,7 @@ import os
 from urllib.parse import urlparse
 from typing import Optional
 
-from enhanced.models_hub_host import models_hub_host
-import enhanced.token_did as token_did
 import json
-import requests
 
 inFlag = True
 urlmapping = {}
@@ -31,6 +28,9 @@ def load_file_from_url(
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
         if inFlag and url in urlmapping.keys():
+            from enhanced.models_hub_host import models_hub_host
+            import enhanced.token_did as token_did
+            import requests
             try:
                 requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
             except Exception as e:

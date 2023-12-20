@@ -34,6 +34,8 @@ def prepare_environment():
     torch_command = os.environ.get('TORCH_COMMAND',
                                    f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    torch_command = os.environ.get('TORCH_COMMAND',
+                                   f"pip install torch==2.1.0 torchvision==0.16.0 -i https://pypi.tuna.tsinghua.edu.cn/simple")
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
@@ -94,9 +96,6 @@ def ini_args():
     return args
 
 
-import enhanced.token_did as token_did
-token_did.init_local_did(f'SimpleSDXL_User')
-
 prepare_environment()
 build_launcher()
 args = ini_args()
@@ -106,6 +105,8 @@ if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
+import enhanced.token_did as token_did
+token_did.init_local_did(f'SimpleSDXL_User')
 
 download_models()
 

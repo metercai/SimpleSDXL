@@ -3,7 +3,7 @@ import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from modules.config import path_translator
 
-models_dir = os.path.join(path_translator, 'nllb-200-distilled-600M')
+translator_path = os.path.join(path_translator, 'nllb-200-distilled-600M')
 
 Q_punct = '｀～！＠＃＄％＾＆＊（）＿＋＝－｛｝［］：＂；｜＜＞？，．／。　１２３４５６７８９０'
 B_punct = '`~!@#$%^&*()_+=-{}[]:";|<>?,./. 1234567890'
@@ -50,9 +50,13 @@ def convert(text: str) -> str:
 
     #text = Q2B_number_punctuation(text)
     if is_chinese(text):
-        print(f'[Translator] load model form : {models_dir}')
-        tokenizer = AutoTokenizer.from_pretrained(models_dir, src_lang="zho_Hans")
-        model = AutoModelForSeq2SeqLM.from_pretrained(models_dir)
+        load_file_from_url(
+                url='https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin',
+                model_dir=translator_path,
+                file_name='pytorch_model.bin')
+        print(f'[Translator] load model form : {translator_path}')
+        tokenizer = AutoTokenizer.from_pretrained(translator_path, src_lang="zho_Hans")
+        model = AutoModelForSeq2SeqLM.from_pretrained(translator_path)
 
         text_eng = ""
         text_zh = ""
