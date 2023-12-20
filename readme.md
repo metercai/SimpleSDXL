@@ -66,7 +66,7 @@
     # Enter English UI : --language en
     # python entry_with_update.py --language en
 
-二，全新安装SimpleSDXL:
+二，全新安装SimpleSDXL:<br>
 1, 安装 Anaconda 
 
     curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh 
