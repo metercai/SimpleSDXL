@@ -52,7 +52,7 @@ user_path_config-deprecated.txt
 /auth.json
 /.*.did
 /.*.pem
-/models/models_info.jso
+/models/models_info.json
 !fooocus_inpaint_head.pth
 !fooocus_ip_negative.safetensors
 !unaestheticXLv31.safetensors
