@@ -9,7 +9,7 @@
 - **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
-- [2023.12.20] <b> 重要更新：启动流程针对国内网络进行优化，包括启动器瘦身，以及PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(93M): [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL升级包(40M): [SimpleSDXL_win64_upgrade_in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境上的升级，保持两个版本同时可用。同步主线版本v2.1.853。</b>
+- [2023.12.20] <b> 重要更新：启动流程针对国内网络进行优化，包括启动器瘦身，以及PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(93M): [SimpleSDXL-win64-in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL升级包(40M): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境上的升级，保持两个版本同时可用。同步主线版本v2.1.853。</b>
 - [2023.12.12] 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.830。
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
 - [2023.11.30] 重要更新：新增图片参数工具箱，实现图片浏览过程中对生成参数的及时查看，数据源来自于图片目录的 `log.html` ，可以与主线版本无缝衔接。
@@ -42,10 +42,10 @@
 ### Windows :
 分两种情况:<br>
 一，在现有Fooocus环境下安装，两个版本可同时使用:
-    点击下载**一键升级包**(40M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。注意必须用cmd的命令行运行。在第一次启动后，需要足够权限创建软连接，确保与Fooocus共享同一模型库和图片目录，从而让两个版本可同时使用。
+    点击下载**一键升级包**(40M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。注意必须用cmd的命令行运行。在第一次启动后，需要足够权限创建软连接，确保与Fooocus共享同一模型库和图片目录，从而让两个版本可同时使用。
 
 二，全新安装SimpleSDXL:<br>
-1, 点击下载**一键启动包**(93M,可执行压缩包): [SimpleSDXL-win64-in](https://edge.tokentm.net/pkg/SimpleSDXL/SimpleSDXL_win64_in.exe)。<br>
+1, 点击下载**一键启动包**(93M,可执行压缩包): [SimpleSDXL-win64-in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
 2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会下载项目代码，然后自动安装所需的各种PyPI模块.程序启动后，还会下载基础大模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。<br>
 3, 启动成功后，会自动打开浏览器，进入主界面。
 
