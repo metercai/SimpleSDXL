@@ -110,4 +110,10 @@ token_did.init_local_did(f'SimpleSDXL_User')
 
 download_models()
 
+from enhanced.location import location
+if location !='CN':
+    if 'language' not in sys.argv:
+        args.language='default'
+        print(f'args.language:{args.language}')
+
 from webui import *

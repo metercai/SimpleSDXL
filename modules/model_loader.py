@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 from typing import Optional
 
 import json
+from enhanced.location import location
 
-inFlag = True
 urlmapping = {}
 urlmapping_path = os.path.abspath(f'./enhanced/urlmapping.json')
 with open(urlmapping_path, "r", encoding="utf-8") as json_file:
@@ -27,10 +27,10 @@ def load_file_from_url(
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
-        if inFlag and url in urlmapping.keys():
-            from enhanced.models_hub_host import models_hub_host
+        import requests
+        from enhanced.models_hub_host import models_hub_host
+        if location=='CN' and url in urlmapping.keys():
             import enhanced.token_did as token_did
-            import requests
             try:
                 requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
             except Exception as e:
