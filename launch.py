@@ -18,7 +18,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import platform
 import fooocus_version
 
-from build_launcher import build_launcher
+from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, run, python, run_pip, requirements_met
 from modules.model_loader import load_file_from_url
 from modules.config import path_checkpoints, path_loras, path_vae_approx, path_fooocus_expansion, \
@@ -36,6 +36,9 @@ def prepare_environment():
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
     torch_command = os.environ.get('TORCH_COMMAND',
                                    f"pip install torch==2.1.0 torchvision==0.16.0 -i https://pypi.tuna.tsinghua.edu.cn/simple")
+    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
+    if is_win32_standalone_build:
+        torch_command += f' -t {target_path_win}'
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
@@ -59,7 +62,10 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
-        run_pip(f"install -r \"{requirements_file}\"", "requirements")
+        if is_win32_standalone_build:
+            run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
+        else:
+            run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
     return
 
