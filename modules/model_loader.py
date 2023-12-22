@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 from typing import Optional
 
 import json
-from enhanced.location import location
 
 urlmapping = {}
 urlmapping_path = os.path.abspath(f'./enhanced/urlmapping.json')
@@ -29,6 +28,7 @@ def load_file_from_url(
     if not os.path.exists(cached_file):
         import requests
         from enhanced.models_hub_host import models_hub_host
+        from enhanced.location import location
         if location=='CN' and url in urlmapping.keys():
             import enhanced.token_did as token_did
             try:
