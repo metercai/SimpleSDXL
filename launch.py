@@ -34,8 +34,7 @@ def prepare_environment():
     torch_command = os.environ.get('TORCH_COMMAND',
                                    f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 -i https://pypi.tuna.tsinghua.edu.cn/simple")
+    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
     if is_win32_standalone_build:
         torch_command += f' -t {target_path_win}'
@@ -103,7 +102,7 @@ def ini_args():
 
 
 prepare_environment()
-build_launcher()
+#build_launcher()
 args = ini_args()
 
 
