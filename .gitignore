@@ -59,6 +59,7 @@ user_path_config-deprecated.txt
 !vaeapp_sd15.pth
 !xl-to-v1_interposer-v3.1.safetensors
 !xlvaeapp.pth
+/enhanced/config.json
 /src
 pyproject.toml
 Cargo.toml
