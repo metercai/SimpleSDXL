@@ -22,6 +22,8 @@ from modules.auth import auth_enabled, check_auth
 
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
+import enhanced.toolbox  as toolbox
+from enhanced.models_info import models_info, sync_model_info_click 
 
 def generate_clicked(*args):
     import ldm_patched.modules.model_management as model_management
@@ -87,7 +89,7 @@ if isinstance(args_manager.args.preset, str):
 
 shared.gradio_root = gr.Blocks(
     title=title,
-    css=modules.html.css + topbar.nav_css).queue()
+    css=modules.html.css + topbar.css + toolbox.css).queue()
 
 with shared.gradio_root:
     with gr.Row():
@@ -105,10 +107,11 @@ with shared.gradio_root:
                 gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=True, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True)
-                prompt_info_box = gr.Markdown(gallery_util.make_infobox_markdown(None), visible=False, elem_classes='infobox')
+                prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None), visible=False, elem_classes='infobox')
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
-                    params_note_input = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)
+                    params_note_input_name = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)
+                    params_note_input_url = gr.Textbox(show_label=False, placeholder="Type preset reference url here.", min_width=100, elem_classes='preset_input', visible=False)
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
@@ -159,7 +162,7 @@ with shared.gradio_root:
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
                 image_tools_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=False)], inputs=image_tools_checkbox,
                             outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
-                prompt_info_button.click(gallery_util.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
+                prompt_info_button.click(toolbox.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
                 gallery.select(gallery_util.select_gallery, inputs=gallery_index, outputs=[prompt_info, prompt_info_box], show_progress=False)
                 progress_gallery.select(gallery_util.select_gallery_progress, outputs=[prompt_info, prompt_info_box], show_progress=False)
 
@@ -250,6 +253,7 @@ with shared.gradio_root:
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
+                preset_instruction = gr.HTML(value=topbar.preset_instruction, visible=False)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=modules.flags.performance_selections,
                                                  value=modules.config.default_performance)
@@ -352,35 +356,32 @@ with shared.gradio_root:
                     sync_model_info = gr.Checkbox(label='Sync model info', info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
                     with gr.Column(visible=False) as info_sync_texts:
                         models_infos = []
-                        keylist = sorted(topbar.models_info.keys())
+                        keylist = sorted(models_info.keys())
                         with gr.Tab(label='Checkpoints'):
                             for k in keylist:
                                 if k.startswith('checkpoints'):
-                                    muid = ' ' if topbar.models_info[k]['muid'] is None else topbar.models_info[k]['muid']
-                                    durl = None if topbar.models_info[k]['url'] is None else topbar.models_info[k]['url']
+                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
                         with gr.Tab(label='LoRAs'):
                             for k in keylist:
                                 if k.startswith('loras'):
-                                    muid = ' ' if topbar.models_info[k]['muid'] is None else topbar.models_info[k]['muid']
-                                    durl = None if topbar.models_info[k]['url'] is None else topbar.models_info[k]['url']
+                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
                         with gr.Tab(label='Others'):
                             for k in keylist:
                                 if not k.startswith('checkpoints') and not k.startswith('loras'):
-                                    muid = ' ' if topbar.models_info[k]['muid'] is None else topbar.models_info[k]['muid']
-                                    durl = None if topbar.models_info[k]['url'] is None else topbar.models_info[k]['url']
+                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
-                with gr.Row(visible=False) as info_button:
-                    info_hash_button = gr.Button(label='Hash', value='\U0001f504 Update Local Hash', variant='secondary', elem_classes='refresh_button')
-                    info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', variant='secondary', elem_classes='refresh_button')
-                info_progress = gr.Markdown(f'Total models in local file: {len(topbar.models_info.keys())}', visible=False)
-                sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_button, info_progress], queue=False, show_progress=False)
-                info_hash_button.click(lambda: gr.update(value='Starting to compute hash value of models file...', visible=True), outputs=info_progress, queue=False, show_progress=False).then(topbar.complement_model_hash, outputs=info_progress, queue=False, show_progress=False)
-                info_sync_button.click(lambda: gr.update(value='Starting to rsync muid and url of models file...', visible=True), outputs=info_progress, queue=False, show_progress=False).then(topbar.sync_model_info_click, inputs=models_infos, outputs=models_infos + [info_progress], queue=False, show_progress=False)
+                info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', visible=False, variant='secondary', elem_classes='refresh_button')
+                info_progress = gr.Markdown('Note: If MUID is not obtained after synchronizing, it means that it is a new model file. You need to add an available download URL before.', visible=False)
+                sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
+                info_sync_button.click(sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
 
             with gr.Tab(label='Advanced'):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=1.0, maximum=30.0, step=0.01,
@@ -390,9 +391,9 @@ with shared.gradio_root:
                                       value=modules.config.default_sample_sharpness,
                                       info='Higher value means image and texture are sharper.')
                 gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/117" target="_blank">\U0001F4D4 Document</a>')
-                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=False, container=False)
+                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=True, container=False)
 
-                with gr.Column(visible=False) as dev_tools:
+                with gr.Column(visible=True) as dev_tools:
                     with gr.Tab(label='Debug Tools'):
                         adm_scaler_positive = gr.Slider(label='Positive ADM Guidance Scaler', minimum=0.1, maximum=3.0,
                                                         step=0.001, value=1.5, info='The scaler multiplied to positive ADM (use 1.0 to disable). ')
@@ -608,21 +609,22 @@ with shared.gradio_root:
                        outputs=[prompt, style_selections], show_progress=True, queue=False)
 
     with gr.Row():
-        preset_params = gr.JSON({}, visible=False)
+        preset_params = gr.JSON({"__message":topbar.get_system_message(), "__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
         preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
                              guidance_scale, sharpness, sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, \
-                             style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index], show_progress=False) \
+                             style_selections, aspect_ratios_selection] + lora_ctrls, show_progress=False) \
+                     .then(topbar.reset_context_UI, outputs=[gallery, gallery_index, preset_instruction], show_progress=False) \
                      .then(fn=lambda: None, _js='refresh_grid_delayed')
 
-    prompt_regen_button.click(gallery_util.toggle_note_box_regen, inputs=model_check, outputs=[params_note_info, params_note_input, params_note_regen_button, params_note_box], show_progress=False)
-    params_note_regen_button.click(topbar.reset_default_preset, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
-        .then(fn=lambda x: x, inputs=preset_params, _js=topbar.reset_preset_params_js) \
-        .then(gallery_util.reset_params, inputs=prompt_info, outputs=reset_params + [ params_note_regen_button, params_note_box], show_progress=False)
+    prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check, outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_default_preset, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
+        .then(fn=lambda x: x, inputs=preset_params, _js=toolbox.reset_preset_params_js) \
+        .then(toolbox.reset_params, inputs=prompt_info, outputs=reset_params + [ params_note_regen_button, params_note_box], show_progress=False)
 
-    prompt_preset_button.click(gallery_util.toggle_note_box_preset, inputs=model_check, outputs=[params_note_info, params_note_input, params_note_preset_button, params_note_box], show_progress=False)
-    params_note_preset_button.click(topbar.save_preset, inputs=reset_preset + [params_note_input], outputs=[params_note_input, params_note_preset_button, params_note_box, topbar_html], show_progress=False) \
-        .then(topbar.reset_preset_params, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
-        .then(fn=lambda x: x, inputs=preset_params, _js=topbar.reset_preset_params_js)
+    prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check, outputs=[params_note_info, params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box], show_progress=False)
+    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, params_note_input_url] + reset_preset, outputs=[params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box], show_progress=False) \
+        .then(toolbox.reset_preset_params, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
+        .then(fn=lambda x: x, inputs=preset_params, _js=toolbox.reset_preset_params_js)
 
     shared.gradio_root.load(fn=lambda x: x, inputs=preset_params, outputs=preset_params, _js=topbar.get_preset_params_js, queue=False, show_progress=False)
 
