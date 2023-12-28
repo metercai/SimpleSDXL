@@ -117,7 +117,7 @@ function(preset_params) {
     if (url_params["__theme"]!=null) {
         theme=url_params["__theme"];
     }
-    if (message!=null && message.length>40) {
+    if (message!=null && message.length>60) {
         showSysMsg(message);
     }
     mark_position_for_topbar(nav_id_list,preset,theme);
