@@ -1,5 +1,5 @@
 ## SimpleSDXL
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/2bc8f9b0-16e5-479e-9794-886572753079"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/fb4b0f05-44b3-451d-95e0-e3e6de7cd929"></div>
 在Fooocus基础上增强功能，可无缝升级，两版本同时可用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available simultaneously.
 
 - **中英文混编提示词**: 离线翻译模型，无API依赖和限制，更适于Tag表述。<br>
@@ -17,7 +17,8 @@
 - [2023.11.26] 重要更新：新增顶部工具条，实现了场景预置包的切换和背景切换。优化界面布局，将“出图数量”选项提高到首屏，默认中文界面、夜黑背景和高级选项打开，常用操作尽可能快捷。同步主线最新版本v2.1.824。
 - [2023.11.20] 完善历史图片索引功能，新增一天内的图片分页，避免组内图片数量过大；修复其他已知bug。
 - [2023.11.18] 将大部分汉化翻译移到 `language/cn.json` ；界面上新增历史图片浏览功能，可以按照日期分组快速浏览历史生成的图片，每次进入会默认加载最新一组的最新一张。同步最新版本v2.1.821。
-- [2023.11.14] 风格名称汉化，里面有太多西方专属词汇，中文用户比较少用，待改进。同步版本到v2.1.805，看到测试中的FaceSwap了 。
+- [2023.11.14] 风格名称汉化，里面有太多西方专属词汇，中文用![SimpleSDXL](https://github.com/metercai/SimpleSDXL/assets/5652458/7259e44b-874d-4756-9195-ad706837c448)
+户比较少用，待改进。同步版本到v2.1.805，看到测试中的FaceSwap了 。
 - [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线多语言翻译器：**nllb-200**，Prompt支持中英文混编，自动识别中文并统一翻译到英文。此功能需提前下载翻译模型到 `models/translator/` 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。注：需要整目录下载，保留目录名。
 - [2023.10.16] 初始版本，界面文字汉化，新增 `--webroot` 参数，设定云端URL访问的根路径。如云端访问地址为：http://hostname/sdxl/ ，启动参数中需追加 `--webroot /sdxl` 。
 
