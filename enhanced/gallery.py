@@ -159,7 +159,7 @@ def parse_html_log(choice):
         #print(f'{len(text)},info_dict={info_dict}')
         images_prompt[1].append(info_dict)
     images_prompt[0] = choice
-    print(f'[ToolBox] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
+    print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
     
 
 def select_gallery(choice, evt: gr.SelectData):

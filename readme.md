@@ -1,15 +1,16 @@
 ## SimpleSDXL
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/2bc8f9b0-16e5-479e-9794-886572753079"></div>
-在Fooocus基础上增强功能，可无缝迁移升级 <br> Enhanced features base on Fooocus, can be seamless upgrading
+在Fooocus基础上增强功能，可无缝升级，两版本同时可用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available simultaneously.
 
 - **中英文混编提示词**: 离线翻译模型，无API依赖和限制，更适于Tag表述。<br>
   **Chinese English mixed prompts**:  Offline translation model without API dependencies, more suitable for Tags.
 - **已生成图片集浏览**: 原生版本仅限浏览当次生成的图片集。 <br>  **Finished image sets browsing**:  Fooocus only can browse the current generated image set.
 - **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 <br>  **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
-- **在线切换预置包和背景色**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
+- **预置包和背景及时切换**: 原生版本需要修改启动参数重启。 <br>  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart.
 
 ## 🔔 更新 / Update
-- [2023.12.20] <b> 重要更新：启动流程针对国内网络进行优化，包括启动器瘦身，以及PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(93M): [SimpleSDXL-win64-in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL升级包(40M): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境上的升级，保持两个版本同时可用。同步主线版本v2.1.853，并适配了新的log.html格式。</b>
+- [2023.12.28] <b> 重要更新：底层代码结构重构，相册图集、顶部导航、右侧工具箱解耦。预置包生成流程和加载流程优化，启用MUID模型文件标识，文件名不同自动转换，本地无模型文件自动下载，自动识别embeddings模型，模型MUID标识同步改手动触发。顶部导航视觉优化，新增日志消息提示层，提取和展示Fooocus和SimpleSDXL的最新更新日志，增强互动。本次更新为由预置包和嵌参图片组成的开放系统打下基础，以实现多场景适配的定制能力。同步主线v2.1.855。</b>
+- [2023.12.20] 下载优化：启动流程针对国内网络进行优化，包括启动器瘦身，以及PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(75M): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL升级包(40M): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境上的升级，保持两个版本同时可用。同步主线版本v2.1.853，并适配了新的log.html格式。
 - [2023.12.12] 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.830。
 - [2023.12.01] 新增特性：提取历史图片的生成参数，自动回填输入界面，可编辑后二次做生成。
 - [2023.11.30] 重要更新：新增图片参数工具箱，实现图片浏览过程中对生成参数的及时查看，数据源来自于图片目录的 `log.html` ，可以与主线版本无缝衔接。
@@ -31,7 +32,7 @@
 - [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。社区中的在线翻译器是调用第三方Api接口，会有访问限制，也无法适应中英混编的Tag表述模式。
 - [x] **历史图片索引** Fooocus无法浏览前一次生成的图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
 - [x] **生成参数管理** 对出图后的提示词等参数进行管理，可以查看和自动回填，方便对历史图片生成参数的借鉴使用。
-- [x] **场景预置包切换** 在主界面上可以对场景预置包进行快速切换，能够快速体验不同场景预置包的出图效果。
+- [x] **场景预置包切换** 在主界面上可以对场景预置包进行切换，自动下载预置包相关资源，确保可用性，体验不同场景预置包的出图效果。
 - [ ] **图片预置包嵌入** 精选优质的已生成图片，嵌入生成参数和预置包信息，方便学习和交流。
 - [x] **访问根路径可设置** Fooocus的主场景在本机部署。当在云端部署配置前置转发后，会引起URL路径系统混乱。SimpleSDXL新增 `--webroot` 参数，可以设定访问URL的根路径，方便云端部署。
 - [ ] **前后端分离，算力云化** 实现操控端本机部署，模型端云化部署。让无GPU卡设备用户也可使用上SDXL。
@@ -45,7 +46,7 @@
     点击下载**一键升级包**(40M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。注意必须用cmd的命令行运行。在第一次启动后，需要足够权限创建软连接，确保与Fooocus共享同一模型库和图片目录，从而让两个版本可同时使用。
 
 二，全新安装SimpleSDXL:<br>
-1, 点击下载**一键启动包**(93M,可执行压缩包): [SimpleSDXL-win64-in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
+1, 点击下载**一键启动包**(75M,可执行压缩包): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
 2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会下载项目代码，然后自动安装所需的各种PyPI模块.程序启动后，还会下载基础大模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。<br>
 3, 启动成功后，会自动打开浏览器，进入主界面。
 
@@ -124,6 +125,8 @@ Fooocus has included and automated [lots of inner optimizations and quality impr
 Fooocus has simplified the installation. Between pressing "download" and generating the first image, the number of needed mouse clicks is strictly limited to less than 3. Minimal GPU memory requirement is 4GB (Nvidia).
 
 `[1]` David Holz, 2019.
+
+**Recently many fake websites exist on Google when you search “fooocus”. Do not trust those – here is the only official source of Fooocus.**
 
 ## [Installing Fooocus](#download)
 

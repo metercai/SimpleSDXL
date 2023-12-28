@@ -64,30 +64,39 @@ def init_models_info():
     model_filenames = config.get_model_filenames(config.path_checkpoints)
     lora_filenames = config.get_model_filenames(config.path_loras)
     embedding_filenames = config.get_model_filenames(config.path_embeddings)
+    models_info_muid = {}
     new_filenames = []
+    new_models_info = {}
     for k in model_filenames:
         filename = 'checkpoints/'+k
         if filename not in models_info.keys():
             new_filenames.append(filename)
+        else:
+            new_models_info.update({filename: models_info[filename]})
+            if models_info[filename]['muid']:
+                models_info_muid.update({models_info[filename]['muid']: filename})
     for k in lora_filenames:
         filename = 'loras/'+k
         if filename not in models_info.keys():
             new_filenames.append(filename)
+        else:
+            new_models_info.update({filename: models_info[filename]})
+            if models_info[filename]['muid']:
+                models_info_muid.update({models_info[filename]['muid']: filename})
     for k in embedding_filenames:
         filename = 'embeddings/'+k
         if filename not in models_info.keys():
             new_filenames.append(filename)
+        else:
+            new_models_info.update({filename: models_info[filename]})
+            if models_info[filename]['muid']:
+                models_info_muid.update({models_info[filename]['muid']: filename})
+    models_info = new_models_info
+
     if len(new_filenames)>0:
         try:
             for filename in new_filenames:
-                if filename.startswith('checkpoints'):
-                    file_path = os.path.join(config.path_checkpoints, filename[12:])
-                elif filename.startswith('loras'):
-                    file_path = os.path.join(config.path_loras, filename[6:])
-                elif filename.startswith('embeddings'):
-                    file_path = os.path.join(config.path_embeddings, filename[11:])
-                else:
-                    file_path = os.path.abspath(f'./models/{filename}')
+                file_path = os.path.abspath(f'./models/{filename}')
                 size = os.path.getsize(file_path)
                 if filename in default_models_info.keys() and size == default_models_info[filename]["size"]:
                     hash = default_models_info[filename]["hash"]
@@ -147,9 +156,7 @@ def sync_model_info_click(*args):
     file_mtime = time.localtime(os.path.getmtime(models_info_path))
 
     for k in models_info.keys():
-        if models_info[k]['muid'] is not None and len(models_info[k]['muid'])>0:
-            models_info_muid.update({models_info[k]['muid']: k})
-        else:
+        if not models_info[k]['muid']:
             models_info_rsync.update({k: {"hash": models_info[k]['hash'], "url": models_info[k]['url']}})
     try:
         response = requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
@@ -160,8 +167,9 @@ def sync_model_info_click(*args):
         if (results["message"] == "it's ok!" and results["results"]):
             for k in results["results"].keys():
                 models_info[k]['muid'] = results["results"][k]['muid']
+                models_info_muid[results["results"][k]['muid']] = k
                 models_info[k]['url'] = results["results"][k]['url']
-            print(f'[ModelInfo] Rsync {len(results["results"].keys())} MUIDs from model hub.')
+            print(f'[ModelInfo] Rsync {len(results["results"].keys())} MUIDs info from model hub.')
             with open(models_info_path, "w", encoding="utf-8") as json_file:
                 json.dump(models_info, json_file, indent=4)
             models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
