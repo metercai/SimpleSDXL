@@ -190,13 +190,13 @@ def save_preset(name, url, prompt, negative_prompt, style_selections, performanc
         preset["default_styles"] = style_selections
         preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
 
-        def get_muid(k):
+        def get_muid_link(k):
             muid = models_info[k]['muid']
             return '' if muid is None else f'MUID:{muid}'
 
-        preset["checkpoint_downloads"] = {base_model:get_muid("checkpoints/"+base_model)}
+        preset["checkpoint_downloads"] = {base_model: get_muid_link("checkpoints/"+base_model)}
         if refiner_model and refiner_model != 'None':
-            preset["checkpoint_downloads"].update({refiner_model:get_muid("checkpoints/"+refiner_model)})
+            preset["checkpoint_downloads"].update({refiner_model: get_muid_link("checkpoints/"+refiner_model)})
 
         preset["embeddings_downloads"] = {}
         prompt_tags = re.findall(r'[\(](.*?)[)]', negative_prompt) + re.findall(r'[\(](.*?)[)]', prompt)
@@ -208,19 +208,19 @@ def save_preset(name, url, prompt, negative_prompt, style_selections, performanc
         embeddings = embeddings.keys()
         for k in models_info.keys():
             if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
-                preset["embeddings_downloads"].update({k[11:]:get_muid(k)})
+                preset["embeddings_downloads"].update({k[11:]: get_muid_link(k)})
 
         preset["lora_downloads"] = {}
         if lora_model1 and lora_model1 != 'None':
-            preset["lora_downloads"].update({lora_model1:get_muid("loras/"+lora_model1)})
+            preset["lora_downloads"].update({lora_model1: get_muid_link("loras/"+lora_model1)})
         if lora_model2 and lora_model2 != 'None':
-            preset["lora_downloads"].update({lora_model2:get_muid("loras/"+lora_model2)})
+            preset["lora_downloads"].update({lora_model2: get_muid_link("loras/"+lora_model2)})
         if lora_model3 and lora_model3 != 'None':
-            preset["lora_downloads"].update({lora_model3:get_muid("loras/"+lora_model3)})
+            preset["lora_downloads"].update({lora_model3: get_muid_link("loras/"+lora_model3)})
         if lora_model4 and lora_model4 != 'None':
-            preset["lora_downloads"].update({lora_model4:get_muid("loras/"+lora_model4)})
+            preset["lora_downloads"].update({lora_model4: get_muid_link("loras/"+lora_model4)})
         if lora_model5 and lora_model5 != 'None':
-            preset["lora_downloads"].update({lora_model5:get_muid("loras/"+lora_model5)})
+            preset["lora_downloads"].update({lora_model5: get_muid_link("loras/"+lora_model5)})
 
         if url:
             preset["reference"] = url

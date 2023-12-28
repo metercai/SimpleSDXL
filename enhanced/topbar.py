@@ -7,8 +7,10 @@ import modules.flags
 import modules.sdxl_styles
 import numbers
 import copy
+import re
 import enhanced.gallery as gallery_util
-
+from enhanced.models_info import models_info, models_info_muid
+from modules.model_loader import load_file_from_url, load_file_from_muid
 css = '''
 .top_nav{
     height: 18px;
@@ -106,7 +108,7 @@ function(preset_params) {
     var message=preset_params["__message"];
     var nav_id_list=preset_params["__nav_id_list"];
     var nav_preset_html = preset_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html)
+    update_topbar("top_preset",nav_preset_html);
     const params = new URLSearchParams(window.location.search);
     url_params = Object.fromEntries(params);
     if (url_params["__preset"]!=null) {
@@ -115,7 +117,7 @@ function(preset_params) {
     if (url_params["__theme"]!=null) {
         theme=url_params["__theme"];
     }
-    if (message!=null && message.length>10) {
+    if (message!=null && message.length>40) {
         showSysMsg(message);
     }
     mark_position_for_topbar(nav_id_list,preset,theme);
@@ -195,16 +197,20 @@ def get_system_message():
                 line = log_file.readline()
     update_msg_f = update_msg_f.replace("\n","  ")
     update_msg_s = update_msg_s.replace("\n","  ")
-    body = ''
+    
     import args_manager
     f_log_path = os.path.abspath("./update_log.md")
     s_log_path = os.path.abspath("./simplesdxl_log.md")
     if len(update_msg_f)>0:
-        body += f'<b id="update_f">[Fooocus最新更新]</b>: {update_msg_f}<a href="{args_manager.args.webroot}/file={f_log_path}">更多>></a>   '
+        body_f = f'<b id="update_f">[Fooocus最新更新]</b>: {update_msg_f}<a href="{args_manager.args.webroot}/file={f_log_path}">更多>></a>   '
+    else:
+        body_f = '<b id="update_f"> </b>'
     if len(update_msg_s)>0:
-        body += f'<b id="update_s">[SimpleSDXL最新更新]</b>: {update_msg_s}<a href="{args_manager.args.webroot}/file={s_log_path}">更多>></a>'
+        body_s = f'<b id="update_s">[SimpleSDXL最新更新]</b>: {update_msg_s}<a href="{args_manager.args.webroot}/file={s_log_path}">更多>></a>'
+    else:
+         body_s = '<b id="update_f"> </b>'
     import mistune
-    body = mistune.html(body)
+    body = mistune.html(body_f+body_s)
     if first_line_f and first_line_s and (first_line_f != config_ext['fooocus_line'] or first_line_s != config_ext['simplesdxl_line']):
         config_ext['fooocus_line']=first_line_f
         config_ext['simplesdxl_line']=first_line_s
@@ -223,21 +229,33 @@ def preset_instruction():
     if p_name == 'default':
         p_name = '默认'
     body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href=>\U0001F4DD 什么是预置包</a></span>'
-    preset_url_str = f'{preset_url}&__theme={config.theme}' if preset_url.count('?') else f'{preset_url}?__theme={config.theme}'
+    preset_url_str = ''
+    if preset_url:
+        preset_url_str = f'{preset_url}&__theme={config.theme}' if preset_url.count('?') else f'{preset_url}?__theme={config.theme}'
     body += f'<iframe src="{preset_url_str}" frameborder="0" scrolling="no" height="100" width="100%"></iframe>'
     return head + body + foot
+
+
+def embeddings_model_split(prompt, prompt_negative):
+    prompt_tags = re.findall(r'[\(](.*?)[)]', prompt_negative) + re.findall(r'[\(](.*?)[)]', prompt)
+    embeddings = []
+    for e in prompt_tags:
+        embed = e.split(':')
+        if len(embed)>2 and embed[0] == 'embedding':
+            embeddings += [embed[1]]
+    embeds = []
+    for k in models_info.keys():
+            if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
+                embeds += [k]
+    return embeds
 
 
 def reset_context(preset_params):
     global preset_name, preset_url
 
-    preset = preset_params.get("__preset", config.preset)
-    theme = preset_params.get("__theme", config.theme)
+    preset = preset_params.get("__preset")
+    theme = preset_params.get("__theme")
     print(f'[Topbar] Reset_context: preset={config.preset}-->{preset}, theme={config.theme}-->{theme}')
-    config.theme = theme
-
-    results = []
-    config.preset = preset
     config_org = {}
     if isinstance(preset, str):
         preset_path = os.path.abspath(f'./presets/{preset}.json')
@@ -245,20 +263,95 @@ def reset_context(preset_params):
             if os.path.exists(preset_path):
                 with open(preset_path, "r", encoding="utf-8") as json_file:
                     config_org = json.load(json_file)
-                    config.config_dict.update(config_org)
             else:
                 raise FileNotFoundError
         except Exception as e:
             print(f'Load preset [{preset_path}] failed')
             print(e)
-    reset_default_config()
-    preset_name = preset
     if 'reference' in config_org.keys():
-        preset_url = config.config_dict["reference"]
+        preset_url = config_org["reference"]
     else:
         preset_url = ''
         if 'reference' in config.config_dict.keys():
             config.config_dict.pop("reference")
+    
+    down_muid = {}
+    for k in config_org["checkpoint_downloads"].keys():
+        if config_org["checkpoint_downloads"][k].startswith('MUID:'):
+            down_muid.update({"checkpoints/"+k: config_org["checkpoint_downloads"][k][5:]})
+    for k in config_org["embeddings_downloads"].keys():
+        if config_org["embeddings_downloads"][k].startswith('MUID:'):
+            down_muid.update({"embeddings/"+k: config_org["embeddings_downloads"][k][5:]})
+    for k in config_org["lora_downloads"].keys():
+        if config_org["lora_downloads"][k].startswith('MUID:'):
+            down_muid.update({"loras/"+k: config_org["lora_downloads"][k][5:]})
+
+    embeddings = embeddings_model_split(config_org["default_prompt"], config_org["default_prompt_negative"])
+    checklist = ["checkpoints/"+config_org["default_model"], "checkpoints/"+config_org["default_refiner"]] + ["loras/"+n for i, (n, v) in enumerate(config_org["default_loras"])]
+    checklist += embeddings
+
+    newlist = []
+    downlist = []
+    not_MUID = False
+    for i in range(len(checklist)):
+        f = checklist[i]
+        filename = f
+        if f and f != "checkpoints/None" and f != "loras/None":
+            if f not in models_info.keys():
+                if f in down_muid.keys() and down_muid[f] in models_info_muid.keys():
+                    filename = models_info_muid[down_muid[f]]
+                    print(f'[Topbar] The local file {filename.split("/")[1]} is the same as in preset {f.split("/")[1]}, replace it with the local file.')
+                else:
+                    downlist += [f]
+            else:
+                if not models_info[f]['muid']:
+                    not_MUID = True
+        newlist += [filename]
+
+    if downlist:
+        print(f'[Topbar] The model file in preset is not local, ready to download.')
+        for f in downlist:
+            if f in down_muid:
+                model_dir, filename = os.path.split(os.path.abspath(f'./models/{f}'))
+                load_file_from_muid(filename, down_muid[f], model_dir)
+            elif f[12:] in config_org["checkpoint_downloads"]:
+                load_file_from_url(url=config_org["checkpoint_downloads"][f[12:]], model_dir=config.path_checkpoints, file_name=f[12:])
+            elif f[6:] in config_org["lora_downloads"]:
+                load_file_from_url(url=config_org["lora_downloads"][f[6:]], model_dir=config.path_loras, file_name=f[6:])
+            elif f[11:] in config_org["embeddings_downloads"]:
+                load_file_from_url(url=config_org["embeddings_downloads"][f[11:]], model_dir=config.path_embeddings, file_name=f[11:])
+            else:
+                print(f'[Topbar] The model file in preset is not local and cannot be download.')
+
+    if not_MUID:
+        print(f'[Topbar] The preset contains model file without MUID, need to sync model info for usability and transferability.')
+    
+    new_loras = []
+    for i in range(len(newlist)):
+        if newlist[i] != checklist[i]:
+            if i==0:
+                config_org["default_model"]=newlist[i][12:]
+            elif i==1:
+                config_org["default_refiner"]=newlist[i][12:]
+            elif i>1 and i<7:
+                new_loras += [[newlist[i][6:], config_org["default_loras"][i-2][1]]]
+            else:
+                embedding_new = newlist[i][11:].split('.')[0]
+                embedding_old = checklist[i][11:].split('.')[0]
+                config_org["default_prompt"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
+                config_org["default_prompt_negative"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
+        elif i>1 and i<7:
+            new_loras += [[newlist[i][6:], config_org["default_loras"][i-2][1]]]
+    config_org["default_loras"] = new_loras
+    
+    config.config_dict.update(config_org)
+    reset_default_config()
+
+    config.theme = theme
+    config.preset = preset
+    preset_name = preset
+    
+    results = []
     results += [gr.update(value=config.default_base_model_name), \
                 gr.update(value=config.default_refiner_model_name), \
                 gr.update(value=config.default_refiner_switch), \
@@ -273,12 +366,10 @@ def reset_context(preset_params):
                 gr.update(value=config.add_ratio(config.default_aspect_ratio))]
     for i, (n, v) in enumerate(config.default_loras):
         results += [gr.update(value=n),gr.update(value=v)]
-    return results
-
-def reset_context_UI():
-    results = [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
+    results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction())]
     return results
+
 
 def reset_default_config():
     config.default_base_model_name = config.get_config_item_or_set_default(
@@ -445,4 +536,4 @@ def reset_default_config():
 
     config.config_dict["default_loras"] = config.default_loras = config.default_loras[:5] + [['None', 1.0] for _ in range(5 - len(config.default_loras))]
 
-
+    return

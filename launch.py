@@ -41,6 +41,8 @@ def prepare_environment():
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
+    from enhanced.version import simplesdxl_ver
+    print(f'SimpleSDXL version: {simplesdxl_ver}')
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)

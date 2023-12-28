@@ -1,6 +1,7 @@
 import gradio as gr
 import random
 import os
+import json
 import time
 import shared
 import modules.config
@@ -12,6 +13,7 @@ import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.advanced_parameters as advanced_parameters
 import modules.style_sorter as style_sorter
+import modules.meta_parser
 import args_manager
 import copy
 
@@ -24,6 +26,7 @@ import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
 import enhanced.toolbox  as toolbox
 from enhanced.models_info import models_info, sync_model_info_click 
+from enhanced.version import simplesdxl_ver
 
 def generate_clicked(*args):
     import ldm_patched.modules.model_management as model_management
@@ -82,7 +85,7 @@ def generate_clicked(*args):
 
 reload_javascript()
 
-title = f'SimpleSDXL derived from Fooocus {fooocus_version.version}'
+title = f'SimpleSDXL {simplesdxl_ver} derived from Fooocus {fooocus_version.version}'
 
 if isinstance(args_manager.args.preset, str):
     title += ' ' + args_manager.args.preset
@@ -123,7 +126,7 @@ with shared.gradio_root:
                     gallery_index.change(lambda x: [gr.update(value=gallery_util.get_images_from_gallery_index(x)), gallery_util.get_images_prompt(x,0), gr.update(open=False, visible=len(gallery_util.output_list)>0)], inputs=gallery_index, outputs=[gallery, prompt_info, index_radio], show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
-                    prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.", elem_id='positive_prompt',
+                    prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
                                         container=False, autofocus=False, elem_classes='type_row', lines=1024)
 
                     default_prompt = modules.config.default_prompt
@@ -132,6 +135,7 @@ with shared.gradio_root:
 
                 with gr.Column(scale=3, min_width=0):
                     generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
+                    load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False)
                     skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
                     stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
 
@@ -360,22 +364,22 @@ with shared.gradio_root:
                         with gr.Tab(label='Checkpoints'):
                             for k in keylist:
                                 if k.startswith('checkpoints'):
-                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
-                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
+                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
+                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
                         with gr.Tab(label='LoRAs'):
                             for k in keylist:
                                 if k.startswith('loras'):
-                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
-                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
+                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
+                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
                         with gr.Tab(label='Others'):
                             for k in keylist:
                                 if not k.startswith('checkpoints') and not k.startswith('loras'):
-                                    muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
-                                    durl = None if models_info[k]['url'] is None else models_info[k]['url']
+                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
+                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
                                     downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
                                     models_infos += [downURL]
                 info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', visible=False, variant='secondary', elem_classes='refresh_button')
@@ -578,11 +582,55 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt]
         ctrls += ip_ctrls
 
+        def parse_meta(raw_prompt_txt):
+            loaded_json = None
+            try:
+                if '{' in raw_prompt_txt:
+                    if '}' in raw_prompt_txt:
+                        if ':' in raw_prompt_txt:
+                            loaded_json = json.loads(raw_prompt_txt)
+                            assert isinstance(loaded_json, dict)
+            except:
+                loaded_json = None
+
+            if loaded_json is None:
+                return gr.update(), gr.update(visible=True), gr.update(visible=False)
+
+            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True)
+
+        prompt.input(parse_meta, inputs=prompt, outputs=[prompt, generate_button, load_parameter_button], queue=False, show_progress=False)
+
+        load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=prompt, outputs=[
+            advanced_checkbox,
+            image_number,
+            prompt,
+            negative_prompt,
+            style_selections,
+            performance_selection,
+            aspect_ratios_selection,
+            overwrite_width,
+            overwrite_height,
+            sharpness,
+            guidance_scale,
+            adm_scaler_positive,
+            adm_scaler_negative,
+            adm_scaler_end,
+            base_model,
+            refiner_model,
+            refiner_switch,
+            sampler_name,
+            scheduler_name,
+            seed_random,
+            image_seed,
+            generate_button,
+            load_parameter_button
+        ] + lora_ctrls, queue=False, show_progress=False)
+
         reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name] + lora_ctrls
         reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
-        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False)), outputs=[stop_button, skip_button, generate_button]) \
+        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False), []), outputs=[stop_button, skip_button, generate_button, gallery]) \
             .then(lambda: gr.update(visible=False, open=False), outputs=index_radio, show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
@@ -612,8 +660,7 @@ with shared.gradio_root:
         preset_params = gr.JSON({"__message":topbar.get_system_message(), "__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
         preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
                              guidance_scale, sharpness, sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, \
-                             style_selections, aspect_ratios_selection] + lora_ctrls, show_progress=False) \
-                     .then(topbar.reset_context_UI, outputs=[gallery, gallery_index, preset_instruction], show_progress=False) \
+                             style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index, preset_instruction], show_progress=False) \
                      .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check, outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
