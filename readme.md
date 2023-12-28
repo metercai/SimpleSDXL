@@ -1,4 +1,4 @@
-## SimpleSDXL
+## SimpleSDXL - Fooocus中文孪生版
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/fb4b0f05-44b3-451d-95e0-e3e6de7cd929"></div>
 在Fooocus基础上增强功能，可无缝升级，两版本同时可用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available simultaneously.
 
