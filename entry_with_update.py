@@ -26,6 +26,10 @@ try:
     remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
     remote_commit = repo.revparse_single(remote_reference)
 
+    from enhanced.version import commit_id
+    commit_id = remote_commit.id[:7]
+    print(f'commit_id:{commit_id}')
+
     merge_result, _ = repo.merge_analysis(remote_commit.id)
 
     if merge_result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
