@@ -8,9 +8,12 @@ import modules.sdxl_styles
 import numbers
 import copy
 import re
+import args_manager
 import enhanced.gallery as gallery_util
 from enhanced.models_info import models_info, models_info_muid
 from modules.model_loader import load_file_from_url, load_file_from_muid
+
+
 css = '''
 .top_nav{
     height: 18px;
@@ -105,7 +108,6 @@ get_preset_params_js = '''
 function(preset_params) {
     var preset=preset_params["__preset"];
     var theme=preset_params["__theme"];
-    var message=preset_params["__message"];
     var nav_id_list=preset_params["__nav_id_list"];
     var nav_preset_html = preset_params["__nav_preset_html"];
     update_topbar("top_preset",nav_preset_html);
@@ -117,9 +119,6 @@ function(preset_params) {
     if (url_params["__theme"]!=null) {
         theme=url_params["__theme"];
     }
-    if (message!=null && message.length>60) {
-        showSysMsg(message);
-    }
     mark_position_for_topbar(nav_id_list,preset,theme);
     preset_params["__preset"]=preset;
     preset_params["__theme"]=theme;
@@ -127,10 +126,23 @@ function(preset_params) {
 }
 '''
 
+toggle_system_message_js = '''
+function(system_params) {
+    var message=system_params["__message"];
+    if (message!=null && message.length>60) {
+        showSysMsg(message);
+    }
+    system_params["__message"]="system_message_displayed!";
+    return system_params;
+}
+'''
+
 preset_name = 'default'
 preset_url = ''
 nav_id_list = ''
 nav_preset_html = ''
+system_message = ''
+config_ext = {}
 
 def make_html():
     global nav_id_list, nav_preset_html
@@ -154,8 +166,6 @@ def make_html():
     return nav_html.replace('*item_list*', item_list)
 
 
-config_ext = {}
-
 def get_system_message():
     fooocus_log = os.path.abspath(f'./update_log.md')
     simplesdxl_log = os.path.abspath(f'./simplesdxl_log.md')
@@ -170,35 +180,36 @@ def get_system_message():
     if os.path.exists(fooocus_log):
         with open(fooocus_log, "r", encoding="utf-8") as log_file:
             line = log_file.readline()
-            if first_line_f is None:
-                first_line_f = line.strip()
             while line:
                 if line == '\n':
                     line = log_file.readline()
                     continue
+                if line.startswith("# ") and first_line_f is None:
+                    first_line_f = line.strip()
                 if line.strip() == config_ext['fooocus_line']:
                     break
-                update_msg_f += line
+                if first_line_f:
+                    update_msg_f += line
                 line = log_file.readline()
     update_msg_s = ''
     first_line_s = None
     if os.path.exists(simplesdxl_log):
         with open(simplesdxl_log, "r", encoding="utf-8") as log_file:
             line = log_file.readline()
-            if first_line_s is None:
-                first_line_s = line.strip()
             while line:
                 if line == '\n':
                     line = log_file.readline()
                     continue
+                if line.startswith("# ") and first_line_s is None:
+                    first_line_s = line.strip()
                 if line.strip() == config_ext['simplesdxl_line']:
                     break
-                update_msg_s += line
+                if first_line_s:
+                    update_msg_s += line
                 line = log_file.readline()
     update_msg_f = update_msg_f.replace("\n","  ")
     update_msg_s = update_msg_s.replace("\n","  ")
     
-    import args_manager
     f_log_path = os.path.abspath("./update_log.md")
     s_log_path = os.path.abspath("./simplesdxl_log.md")
     if len(update_msg_f)>0:
@@ -208,7 +219,7 @@ def get_system_message():
     if len(update_msg_s)>0:
         body_s = f'<b id="update_s">[SimpleSDXL最新更新]</b>: {update_msg_s}<a href="{args_manager.args.webroot}/file={s_log_path}">更多>></a>'
     else:
-         body_s = '<b id="update_f"> </b>'
+         body_s = '<b id="update_s"> </b>'
     import mistune
     body = mistune.html(body_f+body_s)
     if first_line_f and first_line_s and (first_line_f != config_ext['fooocus_line'] or first_line_s != config_ext['simplesdxl_line']):
@@ -218,7 +229,7 @@ def get_system_message():
             json.dump(config_ext, config_file)
     return body if body else ''
 
-
+system_message = get_system_message()
 
 def preset_instruction():
     global preset_name, preset_url
@@ -231,7 +242,8 @@ def preset_instruction():
     body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href=>\U0001F4DD 什么是预置包</a></span>'
     preset_url_str = ''
     if preset_url:
-        preset_url_str = f'{preset_url}&__theme={config.theme}' if preset_url.count('?') else f'{preset_url}?__theme={config.theme}'
+        append_str = f'__theme={config.theme}__lang={args_manager.args.language}'
+        preset_url_str = f'{preset_url}&{append_str}' if preset_url.count('?') else f'{preset_url}?{append_str}'
     body += f'<iframe src="{preset_url_str}" frameborder="0" scrolling="no" height="100" width="100%"></iframe>'
     return head + body + foot
 
@@ -251,7 +263,7 @@ def embeddings_model_split(prompt, prompt_negative):
 
 
 def reset_context(preset_params):
-    global preset_name, preset_url
+    global preset_name, preset_url, system_message
 
     preset = preset_params.get("__preset")
     theme = preset_params.get("__theme")
@@ -271,9 +283,13 @@ def reset_context(preset_params):
     if 'reference' in config_org.keys():
         preset_url = config_org["reference"]
     else:
-        preset_url = ''
         if 'reference' in config.config_dict.keys():
             config.config_dict.pop("reference")
+        preset_inc_path = os.path.abspath(f'./presets/{preset}.inc')
+        if os.path.exists(preset_inc_path):
+            preset_url = f'{args_manager.args.webroot}/file={preset_inc_path}'
+        else:
+            preset_url = ''
     
     down_muid = {}
     for k in config_org["checkpoint_downloads"].keys():
@@ -368,6 +384,9 @@ def reset_context(preset_params):
         results += [gr.update(value=n),gr.update(value=v)]
     results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction())]
+    results += [gr.update(value={"__message":system_message})]
+    system_message = 'system message was displayed!'
+
     return results
 
 
