@@ -26,6 +26,7 @@ import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
 import enhanced.toolbox  as toolbox
 import enhanced.translator  as translator
+import enhanced.enhanced_parameters as enhanced_parameters
 from enhanced.models_info import models_info, sync_model_info_click 
 from enhanced.version import simplesdxl_ver
 
@@ -527,8 +528,10 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):
-                translate_after_checkbox = gr.Checkbox(label='Modify after translation', info='You can modify the translated prompt before generate.')
-                translator_radio = gr.Radio(label='Translation methods', choices=['Local','APIs'], value='Local', info='\'Local\' requires more GPU/CPU and \'APIs\' rely on third.')
+                translation_modifiable = gr.Checkbox(label='Modify after translation', value=True, info='You can modify the translated prompt before generate.')
+                translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                
+                ehps = [translation_modifiable, translation_methods]
 
         performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11 +
                                                [gr.update(visible=x != 'Extreme Speed')] * 1,
@@ -604,7 +607,7 @@ with shared.gradio_root:
 
             return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
 
-        prompt.input(parse_meta, inputs=[prompt, translate_after_checkbox], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
+        prompt.input(parse_meta, inputs=[prompt, translation_modifiable], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
         
         translator_button.click(lambda x: [gr.update(value=translator.convert(x)), gr.update(visible=True), gr.update(visible=False)], inputs=prompt, outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
 
@@ -642,6 +645,7 @@ with shared.gradio_root:
             .then(lambda: gr.update(visible=False, open=False), outputs=index_radio, show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
+            .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(lambda: (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)), outputs=[generate_button, stop_button, skip_button]) \
             .then(lambda: (gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)), outputs=[gallery_index, index_radio], show_progress=False) \

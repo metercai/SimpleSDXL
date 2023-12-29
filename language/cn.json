@@ -7,7 +7,7 @@
   "Stop": "停止",
   "Load Parameters": "加载参数",
   "Translator": "翻译到英文",
-  "Type prompt here or paste parameters.": "输入文生图提示词，支持中文和英文混编。",
+  "Type prompt here or paste parameters.": "输入文生图提示词，支持中英文混合编辑，可调整翻译结果。",
   "Finished Images Index:": "历史图片索引：",
   "Input Image": "输入图片",
   "Advanced": "高级",
@@ -163,9 +163,9 @@
   "Modify after translation": "翻译后可修改",
   "You can modify the translated prompt before generate.": "翻译后的提示词可以修改，确认之后再去生成。",
   "Translation methods": "翻译方式",
-  "Local": "本地模型",
-  "APIs": "在线接口",
-  "'Local' requires more GPU/CPU and 'APIs' rely on third.": "本地模型需要消耗更多GPU/CPU算力，在线接口会依赖于第三方。",
+  "Model in local": "本地模型",
+  "APIs on third": "第三方接口",
+  "'Model' requires more GPU/CPU and 'APIs' rely on third.": "本地模型需要消耗更多GPU/CPU算力，在线接口会依赖于第三方。",
   
 
 
