@@ -19,6 +19,7 @@ function get_topbar_current() {
 var current_topbar = get_topbar_current();
 var c_theme_id = "theme_"+current_topbar[0];
 var c_preset_id = "preset_"+current_topbar[1];
+
 function nav_mOver(nav_item){
     if (nav_item.id != c_preset_id && nav_item.id != c_theme_id) {
         if (c_theme_id == 'theme_light') {

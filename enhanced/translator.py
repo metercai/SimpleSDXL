@@ -44,10 +44,11 @@ def translate_en(model, tokenizer, text_zh):
     )
     return tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
 
+is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
+
 def convert(text: str) -> str:
     global Q_alphabet, B_punct
 
-    is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
     is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
 
 

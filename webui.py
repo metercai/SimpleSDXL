@@ -25,6 +25,7 @@ from modules.auth import auth_enabled, check_auth
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
 import enhanced.toolbox  as toolbox
+import enhanced.translator  as translator
 from enhanced.models_info import models_info, sync_model_info_click 
 from enhanced.version import simplesdxl_ver
 
@@ -121,8 +122,7 @@ with shared.gradio_root:
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
                     gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
                     prompt_info = gr.State(value='')
-                    gallery_index.select(lambda x: [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)], \
-                            inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box], show_progress=False)
+                    gallery_index.select(gallery_util.clear_windows, inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box], show_progress=False)
                     gallery_index.change(lambda x: [gr.update(value=gallery_util.get_images_from_gallery_index(x)), gallery_util.get_images_prompt(x,0), gr.update(open=False, visible=len(gallery_util.output_list)>0)], inputs=gallery_index, outputs=[gallery, prompt_info, index_radio], show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
@@ -136,6 +136,7 @@ with shared.gradio_root:
                 with gr.Column(scale=3, min_width=0):
                     generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
                     load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False)
+                    translator_button = gr.Button(label="Translator", value="Translator", elem_classes='type_row', elem_id='translator_button', visible=False)
                     skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
                     stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
 
@@ -525,6 +526,10 @@ with shared.gradio_root:
                 model_refresh.click(model_refresh_clicked, [], [base_model, refiner_model] + lora_ctrls,
                                     queue=False, show_progress=False)
 
+            with gr.Tab(label='Enhanced'):
+                translate_after_checkbox = gr.Checkbox(label='Modify after translation', info='You can modify the translated prompt before generate.')
+                translator_radio = gr.Radio(label='Translation methods', choices=['Local','APIs'], value='Local', info='\'Local\' requires more GPU/CPU and \'APIs\' rely on third.')
+
         performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11 +
                                                [gr.update(visible=x != 'Extreme Speed')] * 1,
                                      inputs=performance_selection,
@@ -582,7 +587,7 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt]
         ctrls += ip_ctrls
 
-        def parse_meta(raw_prompt_txt):
+        def parse_meta(raw_prompt_txt, after):
             loaded_json = None
             try:
                 if '{' in raw_prompt_txt:
@@ -594,11 +599,14 @@ with shared.gradio_root:
                 loaded_json = None
 
             if loaded_json is None:
-                return gr.update(), gr.update(visible=True), gr.update(visible=False)
+                flag = after and translator.is_chinese(raw_prompt_txt)
+                return gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)
 
-            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True)
+            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
 
-        prompt.input(parse_meta, inputs=prompt, outputs=[prompt, generate_button, load_parameter_button], queue=False, show_progress=False)
+        prompt.input(parse_meta, inputs=[prompt, translate_after_checkbox], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
+        
+        translator_button.click(lambda x: [gr.update(value=translator.convert(x)), gr.update(visible=True), gr.update(visible=False)], inputs=prompt, outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=prompt, outputs=[
             advanced_checkbox,
@@ -657,11 +665,12 @@ with shared.gradio_root:
                        outputs=[prompt, style_selections], show_progress=True, queue=False)
 
     with gr.Row():
-        preset_params = gr.JSON({"__message":topbar.get_system_message(), "__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
+        preset_params = gr.JSON({"__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
+        system_params = gr.JSON({}, visible=False)
         preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, \
                              guidance_scale, sharpness, sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, \
-                             style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index, preset_instruction], show_progress=False) \
-                     .then(fn=lambda: None, _js='refresh_grid_delayed')
+                             style_selections, aspect_ratios_selection] + lora_ctrls + [gallery, gallery_index, preset_instruction, system_params], show_progress=False) \
+                     .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js).then(fn=lambda: None, _js='refresh_grid_delayed')
 
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check, outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
     params_note_regen_button.click(toolbox.reset_default_preset, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \

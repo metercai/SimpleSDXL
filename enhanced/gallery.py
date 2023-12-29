@@ -161,6 +161,9 @@ def parse_html_log(choice):
     images_prompt[0] = choice
     print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
     
+def clear_windows(x):
+    toolbox.infobox_state = False
+    return [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)]
 
 def select_gallery(choice, evt: gr.SelectData):
 
