@@ -26,9 +26,8 @@ try:
     remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
     remote_commit = repo.revparse_single(remote_reference)
 
-    from enhanced.version import commit_id
-    commit_id = remote_commit.id[:7]
-    print(f'commit_id:{commit_id}')
+    import enhanced.version as version
+    version.commit_id = f'{remote_commit.id}'[:7]
 
     merge_result, _ = repo.merge_analysis(remote_commit.id)
 

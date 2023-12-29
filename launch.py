@@ -17,6 +17,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 import platform
 import fooocus_version
+import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, run, python, run_pip, requirements_met
@@ -41,7 +42,6 @@ def prepare_environment():
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
-    import enhanced.version as version
     print(f'SimpleSDXL version: {version.get_simplesdxl_ver()}')
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
