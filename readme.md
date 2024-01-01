@@ -1,5 +1,5 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/fb4b0f05-44b3-451d-95e0-e3e6de7cd929"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/021f7e3e-8895-4601-a56c-21b1120f533f"></div>
 在Fooocus基础上增强功能，可无缝升级，两版本同时可用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available simultaneously.
 
 - **中英文混编提示词**: 离线在线自主选择，支持翻译后再编辑，更适于Tag表述。<br>
@@ -12,7 +12,8 @@
   **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart, no generation tool provided.
 
 ## 🔔 更新 / Update
-- [2023.12.30] <b> 提示词翻译器升级：支持中英文混合编辑，支持翻译后再编辑，可自主选择本地模型翻译还是第三方接口翻译，提升提示词翻译器的总体可用性和可控性，翻译质量也能得到保障，应该是目前文生图提示词翻译器的最佳实践了。同步主线v2.1.856。</b>
+- [2024.01.01] <b> 新年新版本：界面交互优化，状态信息迁移到会话(session)，多浏览器访问互不干扰。优化了手机访问界面，PC和手机可同步使用。生成图片过程中禁止预置包切换，保障出图过程的完整。增加相册缓存，提升历史图片索引切换速度。修复模型路径bug，同步主线版本v2.1.859。</b>
+- [2023.12.30] 提示词翻译器升级：支持中英文混合编辑，支持翻译后再编辑，可自主选择本地模型翻译还是第三方接口翻译，提升提示词翻译器的总体可用性和可控性，翻译质量也能得到保障，应该是目前文生图提示词翻译器的最佳实践了。同步主线v2.1.856。
 - [2023.12.28] 重要更新：底层代码结构重构，相册图集、顶部导航、右侧工具箱解耦。预置包生成流程和加载流程优化，启用MUID模型文件标识，文件名不同自动转换，本地无模型文件自动下载，自动识别embeddings模型，模型MUID标识同步改手动触发。顶部导航视觉优化，新增日志消息提示层，提取和展示Fooocus和SimpleSDXL的最新更新日志，增强互动。本次更新为由预置包和嵌参图片组成的开放系统打下基础，以实现多场景适配的定制能力。同步主线v2.1.855。
 - [2023.12.20] 下载优化：启动流程针对国内网络进行优化，包括启动器瘦身，以及PyPI包索引库、项目代码库和模型库等全都选用国内源进行更新和下载。一键启动器(75M): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)，提供从零开始的安装过程引导。SimpleSDXL升级包(40M): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)，提供在Fooocus已有环境上的升级，保持两个版本同时可用。同步主线版本v2.1.853，并适配了新的log.html格式。
 - [2023.12.12] 新增特性：将当前环境的配置和参数生成自己的预置包，自动上到顶部导航。对接统一模型标识信息库，为预置包和带参图片分享的可用性提供基础支撑。同步主线版本v2.1.830。
@@ -98,6 +99,9 @@
     git clone https://huggingface.co/metercai/SimpleSDXL models
     # 国内用户可以换魔搭社区的源
     # git clone https://www.modelscope.cn/metercai/SimpleSDXL-models.git models
+
+## 在线交流：qq群：938075852 --- 新年新版本，需要增加哪些新功能，可以进群畅聊
+<div align=center><img width="250" src="https://github.com/metercai/SimpleSDXL/assets/5652458/e1d08b8c-4112-4857-b066-b0e10b1c9ec8"></div>
 
 ---
 <div align=center>
