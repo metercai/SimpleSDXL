@@ -16,12 +16,28 @@ function get_topbar_current() {
     return current;
 }
 
+var browser={
+    device: function(){
+           var u = navigator.userAgent;
+           // console.log(navigator);
+           return {
+                is_mobile: !!u.match(/AppleWebKit.*Mobile.*/),
+                is_pc: (u.indexOf('Macintosh') > -1 || u.indexOf('Windows NT') > -1),
+		is_wx_mini: (u.indexOf('miniProgram') > -1),
+            };
+         }(),
+    language: (navigator.browserLanguage || navigator.language).toLowerCase()
+}
+
+
+
 var current_topbar = get_topbar_current();
 var c_theme_id = "theme_"+current_topbar[0];
 var c_preset_id = "preset_"+current_topbar[1];
+var c_generating_state = 0;
 
 function nav_mOver(nav_item){
-    if (nav_item.id != c_preset_id && nav_item.id != c_theme_id) {
+    if (nav_item.id != c_preset_id && nav_item.id != c_theme_id && c_generating_state==0) {
         if (c_theme_id == 'theme_light') {
             nav_item.style.color = 'var(--neutral-800)';
             nav_item.style.backgroundColor= 'var(--neutral-300)';
@@ -58,22 +74,14 @@ function mark_position_for_topbar(nav_id_str,preset_name,theme_name) {
     var nav_id_list = new Array();
     nav_id_list = nav_id_str.split(",")
     for (var i=0;i<nav_id_list.length;i++) {
-	nav_item=document.getElementById(nav_id_list[i]);
+	nav_item=gradioApp().getElementById(nav_id_list[i]);
 	if (nav_item.id != c_preset_id && nav_item.id != c_theme_id) {
             if (c_theme_id == 'theme_light') {
-		if (nav_item.id  == 'update_f' || nav_item.id  == 'update_s') 
-	            nav_item.style.color = 'var(--primary-500)'
-		else {
-                    nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.backgroundColor= 'var(--neutral-50)';
-		}
+                nav_item.style.color = 'var(--neutral-400)';
+                nav_item.style.backgroundColor= 'var(--neutral-50)';
             } else {
-		if (nav_item.id  == 'update_f' || nav_item.id  == 'update_s')
-                    nav_item.style.color = 'var(--primary-300)'
-                else {
-                    nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.backgroundColor= 'var(--neutral-950';
-                }
+                nav_item.style.color = 'var(--neutral-400)';
+                nav_item.style.backgroundColor= 'var(--neutral-950';
 	    }
         } else {
 	    if (c_theme_id == 'theme_light') {
@@ -85,19 +93,35 @@ function mark_position_for_topbar(nav_id_str,preset_name,theme_name) {
             }
 	}
     }
+    var top_theme=gradioApp().getElementById("top_theme");
+    if (top_theme!=null && browser.device.is_mobile) 
+	top_theme.style.display = "none";
+    var infobox=gradioApp().getElementById("infobox");
+    if (infobox!=null) {
+	css = infobox.getAttribute("class")
+	//console.log("infobox.css="+css)
+        if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
+	    infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
+    }
+    
 }
 
 function refresh_preset(newPreset) {
     var current = get_topbar_current();
     var host_path = document.baseURI.split("?")[0];
     var newurl = host_path+"?__theme="+current[0]+"&__preset="+newPreset+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000);
-    window.location.replace(newurl);
+    if (!c_generating_state) {
+        window.location.replace(newurl);
+    }
 }
+
 function refresh_theme(newTheme) {
     var current = get_topbar_current();
     var host_path = document.baseURI.split("?")[0];
     var newurl = host_path+"?__theme="+newTheme+"&__preset="+current[1]+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000);
-    window.location.replace(newurl)
+    if (!c_generating_state) {
+	window.location.replace(newurl);
+    }
 }
 
 function set_theme_preset(theme,preset) {
@@ -127,14 +151,23 @@ function showSysMsg(message) {
     const sysmsg = gradioApp().getElementById("sys_msg");
     const sysmsgText = gradioApp().getElementById("sys_msg_text");
     sysmsgText.innerHTML = message;
+    
+    const update_f = gradioApp().getElementById("update_f");
+    const update_s = gradioApp().getElementById("update_s");
+
     if (c_theme_id == 'theme_light') {
         sysmsg.style.color = "var(--neutral-600)";
         sysmsg.style.backgroundColor = "var(--secondary-100)";
+	update_f.style.color = 'var(--primary-500)';
+	update_s.style.color = 'var(--primary-500)';
     }
     else {
         sysmsg.style.color = "var(--neutral-100)";
         sysmsg.style.backgroundColor = "var(--secondary-400)";
+	update_f.style.color = 'var(--primary-300)';
+        update_s.style.color = 'var(--primary-300)';
     }
+
     sysmsg.style.display = "block";
 }
 

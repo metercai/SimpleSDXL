@@ -81,7 +81,6 @@ def generate_clicked(*args):
     execution_time = time.perf_counter() - execution_start_time
     print(f'Total time: {execution_time:.2f} seconds')
     gallery_util.refresh_output_list()
-    gallery_util.parse_html_log(gallery_util.output_list[0])
     return
 
 
@@ -102,17 +101,18 @@ with shared.gradio_root:
             with gr.Group():
                 with gr.Row(variant='compact'):
                     topbar_html = gr.HTML(value=topbar.make_html(), visible=True, elem_id='top_nav', elem_classes='top_nav')
+                    state_topbar = gr.State({})
                 with gr.Row():
-                    progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=768,
+                    progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=520, elem_id='preview_generating',
                                             elem_classes=['main_view'])
-                    progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain',
-                                              height=768, visible=False, elem_classes=['main_view', 'image_gallery'])
+                    progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
+                                              height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
-                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=True, height=768,
+                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=True, height=520,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True)
-                prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None), visible=False, elem_classes='infobox')
+                prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None), visible=False, elem_id='infobox', elem_classes='infobox')
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
                     params_note_input_name = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)
@@ -122,9 +122,8 @@ with shared.gradio_root:
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
                 with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
                     gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
-                    prompt_info = gr.State(value='')
-                    gallery_index.select(gallery_util.clear_windows, inputs=gallery_index, outputs=[gallery, progress_gallery, prompt_info_box], show_progress=False)
-                    gallery_index.change(lambda x: [gr.update(value=gallery_util.get_images_from_gallery_index(x)), gallery_util.get_images_prompt(x,0), gr.update(open=False, visible=len(gallery_util.output_list)>0)], inputs=gallery_index, outputs=[gallery, prompt_info, index_radio], show_progress=False)
+                    gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_gallery, prompt_info_box, params_note_box, state_topbar], show_progress=False)
+                    gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
@@ -166,11 +165,10 @@ with shared.gradio_root:
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_preset_button = gr.Button(value='SavePreset', size='sm', visible=True)
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
-                image_tools_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=False)], inputs=image_tools_checkbox,
-                            outputs=[image_toolbox, prompt_info_box], queue=False, show_progress=False)
-                prompt_info_button.click(toolbox.toggle_prompt_info, inputs=prompt_info, outputs=prompt_info_box, show_progress=False)
-                gallery.select(gallery_util.select_gallery, inputs=gallery_index, outputs=[prompt_info, prompt_info_box], show_progress=False)
-                progress_gallery.select(gallery_util.select_gallery_progress, outputs=[prompt_info, prompt_info_box], show_progress=False)
+                image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
+                prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
+                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar], outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
+                progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
@@ -259,7 +257,7 @@ with shared.gradio_root:
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
-                preset_instruction = gr.HTML(value=topbar.preset_instruction, visible=False)
+                preset_instruction = gr.HTML(visible=False)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=modules.flags.performance_selections,
                                                  value=modules.config.default_performance)
@@ -589,7 +587,8 @@ with shared.gradio_root:
         ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt]
         ctrls += ip_ctrls
-
+        
+        system_params = gr.JSON({"__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
         state_is_generating = gr.State(False)
         def parse_meta(raw_prompt_txt, is_generating, modifiable):
             loaded_json = None
@@ -645,14 +644,17 @@ with shared.gradio_root:
         reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
-        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True), outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating]) \
-            .then(lambda: gr.update(visible=False, open=False), outputs=index_radio, show_progress=False) \
+        generate_button.click(topbar.sync_generating_state_true, inputs=state_topbar, outputs=[system_params, state_topbar], show_progress=False) \
+            .then(fn=lambda x: None, inputs=system_params, _js=topbar.sync_generating_state_js) \
+            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False)), outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox], show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False), outputs=[generate_button, stop_button, skip_button, state_is_generating]) \
             .then(lambda: (gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)), outputs=[gallery_index, index_radio], show_progress=False) \
+            .then(topbar.sync_generating_state_false, inputs=state_topbar, outputs=[system_params, state_topbar], show_progress=False) \
+            .then(fn=lambda x: None, inputs=system_params, _js=topbar.sync_generating_state_js) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
@@ -672,25 +674,24 @@ with shared.gradio_root:
         desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
 
-    with gr.Row():
-        preset_params = gr.JSON({"__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
-        system_params = gr.JSON({}, visible=False)
-        preset_params.change(topbar.reset_context, inputs=preset_params, outputs=[base_model, refiner_model, refiner_switch, guidance_scale, sharpness, \
+
+    prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box, state_topbar], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_default_preset, inputs=state_topbar, outputs=[system_params, state_topbar], queue=True, show_progress=False) \
+        .then(fn=lambda x: x, inputs=system_params,  _js=toolbox.reset_preset_params_js) \
+        .then(toolbox.reset_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box], show_progress=False)
+
+    prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
+    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, params_note_input_url, state_topbar] + reset_preset, outputs=[params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box, preset_instruction, state_topbar], show_progress=False) \
+        .then(toolbox.reset_preset_params, inputs=state_topbar, outputs=[system_params, state_topbar], queue=False, show_progress=False) \
+        .then(fn=lambda x: None, inputs=system_params, _js=toolbox.reset_preset_params_js)
+
+    shared.gradio_root.load(fn=lambda x: [x, x], inputs=system_params, outputs=[system_params, state_topbar], _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
+                      .then(topbar.reset_context, inputs=state_topbar, outputs=[base_model, refiner_model, refiner_switch, guidance_scale, sharpness, \
                              sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, style_selections, aspect_ratios_selection] + \
-                             lora_ctrls + [gallery, gallery_index, preset_instruction, system_params], show_progress=False) \
-                     .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js).then(fn=lambda: None, _js='refresh_grid_delayed')
-
-    prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check, outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
-    params_note_regen_button.click(toolbox.reset_default_preset, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
-        .then(fn=lambda x: x, inputs=preset_params, _js=toolbox.reset_preset_params_js) \
-        .then(toolbox.reset_params, inputs=prompt_info, outputs=reset_params + [ params_note_regen_button, params_note_box], show_progress=False)
-
-    prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check, outputs=[params_note_info, params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box], show_progress=False)
-    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, params_note_input_url] + reset_preset, outputs=[params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box], show_progress=False) \
-        .then(toolbox.reset_preset_params, inputs=preset_params, outputs=preset_params, queue=False, show_progress=False) \
-        .then(fn=lambda x: x, inputs=preset_params, _js=toolbox.reset_preset_params_js)
-
-    shared.gradio_root.load(fn=lambda x: x, inputs=preset_params, outputs=preset_params, _js=topbar.get_preset_params_js, queue=False, show_progress=False)
+                             lora_ctrls + [gallery, gallery_index, preset_instruction, state_topbar], show_progress=False) \
+                      .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+                      .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+                      .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
 
 
 def dump_default_english_config():

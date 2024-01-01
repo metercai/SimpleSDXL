@@ -5,6 +5,7 @@ import re
 import gradio as gr
 import modules.config as config
 import enhanced.topbar as topbar
+import enhanced.gallery as gallery
 from enhanced.models_info import models_info
 
 css = '''
@@ -21,10 +22,10 @@ css = '''
 .infobox {
     height: auto;
     position: absolute;
-    top: -240px;
+    top: -15rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 400px !important;
+    width: 28rem !important;
     z-index: 20;
     text-align: left;
     opacity: 0.85;
@@ -33,6 +34,23 @@ css = '''
     line-height: 120%;
     border: groove;
 }
+
+.infobox_mobi {
+    height: auto;
+    position: absolute;
+    top: -16rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22rem !important;
+    z-index: 20;
+    text-align: left;
+    opacity: 0.85;
+    border-radius: 8px;
+    padding: 6px;
+    line-height: 120%;
+    border: groove;
+}
+
 
 .toolbox_note {
     height: auto;
@@ -59,6 +77,12 @@ css = '''
 '''
 
 
+# app context
+toolbox_note_preset_title='Save a new preset for the current params and configuration.'
+toolbox_note_regenerate_title='Extract parameters to backfill for regeneration. Please note that some parameters will be modified!'
+toolbox_note_invalid_url='The model in the params and configuration is missing MUID. For usability and transferability, please click "Sync model info" in the right model tab.'
+
+
 def make_infobox_markdown(info):
     bgcolor = '#ddd'
     if config.theme == "dark":
@@ -75,17 +99,102 @@ def make_infobox_markdown(info):
     return html
 
 
-infobox_state = False
+def toggle_toolbox(state, state_params):
+    state_params.update({"infobox_state": 0})
+    state_params.update({"note_box_state": ['',0,0]})
+    return [gr.update(visible=state)] + [gr.update(visible=False)] * 6 + [state_params]
 
 
-def toggle_prompt_info(prompt_info):
-    global infobox_state
+def toggle_prompt_info(state_params):
+    infobox_state = state_params["infobox_state"]
     infobox_state = not infobox_state
-    print(f'[ToolBox] Toggle_image_info: {infobox_state}')
-    return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state)
+    state_params.update({"infobox_state": infobox_state})
+    #print(f'[ToolBox] Toggle_image_info: {infobox_state}')
+    [choice, selected] = state_params["prompt_info"]
+    prompt_info = gallery.get_images_prompt(choice, selected)
+    return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state), state_params
 
 
-def reset_params(info):
+def check_preset_models(checklist, state_params):
+    note_box_state = state_params["note_box_state"]
+    note_box_state[2] = 0
+    for i in range(len(checklist)):
+        if checklist[i] and checklist[i] != 'None':
+            k1 = "checkpoints/"+checklist[i]
+            k2 = "loras/"+checklist[i]
+            if (i<2 and (k1 not in models_info.keys() or not models_info[k1]['muid'])) or (i>=2 and (k2 not in models_info.keys() or not models_info[k2]['muid'])):
+                note_box_state[2] = 1
+                break
+    state_params.update({"note_box_state": note_box_state})
+    return state_params
+
+
+def toggle_note_box(item, state_params):
+    note_box_state = state_params["note_box_state"]
+    if note_box_state[0] is None:
+        note_box_state[0] = item
+    if item == note_box_state[0]:
+        note_box_state[1] = not note_box_state[1]
+    elif not note_box_state[1]:
+        note_box_state[1] = not note_box_state[1]
+        note_box_state[0] = item
+    else:
+        state_params.update({"note_box_state": note_box_state})
+        return [gr.update(visible=True)] + [gr.update()] * (4 if item == 'preset' else 2) + [state_params]
+    state_params.update({"note_box_state": note_box_state})
+    flag = note_box_state[1]
+    title_extra = ""
+    if note_box_state[2]:
+        title_extra = '\n' + toolbox_note_invalid_url
+    if item == 'regen':
+        return gr.update(value=toolbox_note_regenerate_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
+    if item == 'preset':
+        return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
+
+
+def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
+    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+    state_params = check_preset_models(checklist, state_params)
+    return toggle_note_box('regen', state_params)
+
+
+def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
+    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+    state_params = check_preset_models(checklist, state_params)
+    return toggle_note_box('preset', state_params)
+
+
+def reset_default_preset(state_params):
+    state_params["__preset"]= 'default'
+    state_params.update({"note_box_state": ['',0,0]})
+    #print(f'reset_default_preset:{state_params}')
+    return state_params, state_params
+
+
+def reset_preset_params(state_params):
+    state_params.update({"__nav_id_list": topbar.nav_id_list})
+    state_params.update({"__nav_preset_html": topbar.nav_preset_html})
+    #print(f'preset_params_out:{state_params}')
+    return state_params, state_params
+
+
+reset_preset_params_js = '''
+function(system_params) {
+    var preset=system_params["__preset"];
+    var theme=system_params["__theme"];
+    var nav_id_list=system_params["__nav_id_list"];
+    var nav_preset_html = system_params["__nav_preset_html"];
+    update_topbar("top_preset",nav_preset_html)
+    mark_position_for_topbar(nav_id_list,preset,theme);
+    return
+}
+'''
+
+
+def reset_params(state_params):
+
+    [choice, selected] = state_params["prompt_info"]
+    info = gallery.get_images_prompt(choice, selected)
     aspect_ratios = info['Resolution'][1:-1].replace(', ', '*')
     adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in info['ADM Guidance'][1:-1].split(', ')]
     refiner_model = None if info['Refiner Model']=='' else info['Refiner Model']
@@ -109,70 +218,11 @@ def reset_params(info):
             gr.update(value=float(info['Refiner Switch'])), gr.update(value=info['Sampler']), gr.update(value=info['Scheduler'])]
     results += lora_results
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
-    print(f'[ToolBox] Reset_params: update {len(results)} params from current image.')
+    print(f'[ToolBox] Reset_params: update {len(results)} params from current image log file.')
     return results + [gr.update(visible=False)] * 2
 
 
-
-toolbox_note_preset_title='Save a new preset for the current params and configuration.'
-toolbox_note_regenerate_title='Extract parameters to backfill for regeneration. Please note that some parameters will be modified!'
-toolbox_note_invalid_url='The model in the params and configuration is missing MUID. For usability and transferability, please click "Sync model info" in the right model tab.'
-
-note_box_state = [None,False,False]
-
-def check_preset_models(checklist):
-    note_box_state[2] = False
-    for i in range(len(checklist)):
-        if checklist[i] and checklist[i] != 'None':
-            k1 = "checkpoints/"+checklist[i]
-            k2 = "loras/"+checklist[i]
-            if (i<2 and (k1 not in models_info.keys() or not models_info[k1]['muid'])) or (i>=2 and (k2 not in models_info.keys() or not models_info[k2]['muid'])):
-                note_box_state[2] = True
-                break
-    return
-
-
-def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
-    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
-    check_preset_models(checklist)
-    return toggle_note_box('regen')
-
-def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
-    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
-    check_preset_models(checklist)
-    return toggle_note_box('preset')
-
-def toggle_note_box(item):
-    global note_box_state
-
-    if note_box_state[0] is None:
-        note_box_state[0] = item
-    if item == note_box_state[0]:
-        note_box_state[1] = not note_box_state[1]
-    elif not note_box_state[1]:
-        note_box_state[1] = not note_box_state[1]
-        note_box_state[0] = item
-    else:
-        return [gr.update()] * 5 if item == 'preset' else 3
-    flag = note_box_state[1]
-    title_extra = ""
-    if note_box_state[2]:
-        title_extra = '\n' + toolbox_note_invalid_url
-    if item == 'regen':
-        return [gr.update(value=toolbox_note_regenerate_title + title_extra), gr.update(visible=flag), gr.update(visible=flag)]
-    if item == 'preset':
-        return [gr.update(value=toolbox_note_preset_title + title_extra), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag)]
-
-
-def reset_default_preset(preset_params):
-    global note_box_state
-    preset_params["__preset"] = 'default'
-    note_box_state = [None,False,False]
-    return preset_params
-
-
-def save_preset(name, url, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
-    global note_box_state
+def save_preset(name, url, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
 
     if name is not None and name != '':
         preset = {}
@@ -230,30 +280,13 @@ def save_preset(name, url, prompt, negative_prompt, style_selections, performanc
         with open(save_path, "w", encoding="utf-8") as json_file:
             json.dump(preset, json_file, indent=4)
 
-        topbar.preset_name = name
-        topbar.preset_url = url
+        state_params.update({"__preset": name})
+        state_params.update({"preset_url": url})
         print(f'[ToolBox] Saved the current params and config to {save_path}.')
-    note_box_state = [None,False,False]
+    state_params.update({"note_box_state": ['',0,0]})
     topbar.make_html()
-    return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
+    results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)]
+    results += [gr.update(visible=True if url else False, value=topbar.preset_instruction(state_params))]
 
-
-def reset_preset_params(preset_params):
-    preset_params["__preset"]=topbar.preset_name
-    preset_params["__nav_id_list"]=topbar.nav_id_list
-    preset_params["__nav_preset_html"]=topbar.nav_preset_html
-    return preset_params
-
-
-reset_preset_params_js = '''
-function(preset_params) {
-    var preset=preset_params["__preset"];
-    var theme=preset_params["__theme"];
-    var nav_id_list=preset_params["__nav_id_list"];
-    var nav_preset_html = preset_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html)
-    mark_position_for_topbar(nav_id_list,preset,theme);
-    return 
-}
-'''
+    return results + [state_params]
 
