@@ -104,45 +104,13 @@ nav_html = '''
 </div>
 '''
 
-get_preset_params_js = '''
-function(preset_params) {
-    var preset=preset_params["__preset"];
-    var theme=preset_params["__theme"];
-    var nav_id_list=preset_params["__nav_id_list"];
-    var nav_preset_html = preset_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html);
-    const params = new URLSearchParams(window.location.search);
-    url_params = Object.fromEntries(params);
-    if (url_params["__preset"]!=null) {
-        preset=url_params["__preset"];
-    }
-    if (url_params["__theme"]!=null) {
-        theme=url_params["__theme"];
-    }
-    mark_position_for_topbar(nav_id_list,preset,theme);
-    preset_params["__preset"]=preset;
-    preset_params["__theme"]=theme;
-    return preset_params;
-}
-'''
 
-toggle_system_message_js = '''
-function(system_params) {
-    var message=system_params["__message"];
-    if (message!=null && message.length>60) {
-        showSysMsg(message);
-    }
-    system_params["__message"]="system_message_displayed!";
-    return system_params;
-}
-'''
-
-preset_name = 'default'
-preset_url = ''
+# app context
 nav_id_list = ''
 nav_preset_html = ''
 system_message = ''
 config_ext = {}
+
 
 def make_html():
     global nav_id_list, nav_preset_html
@@ -160,7 +128,7 @@ def make_html():
     for i in range(len(presets)):
         item_list += f'<li class="top_nav_preset" id="preset_{presets[i][:-5]}" onmouseover="nav_mOver(this)" onmouseout="nav_mOut(this)" onclick="refresh_preset(\'{presets[i][:-5]}\')">{presets[i][:-5]}</li>'
         id_array += f'preset_{presets[i][:-5]},'
-    id_array += 'theme_light,theme_dark,update_f,update_s'
+    id_array += 'theme_light,theme_dark'
     nav_id_list = id_array
     nav_preset_html = item_list
     return nav_html.replace('*item_list*', item_list)
@@ -229,14 +197,13 @@ def get_system_message():
             json.dump(config_ext, config_file)
     return body if body else ''
 
-system_message = get_system_message()
 
-def preset_instruction():
-    global preset_name, preset_url
-
+def preset_instruction(state_params):
+    preset = state_params["__preset"]
+    preset_url = state_params["preset_url"]
     head = "<div style='max-width:100%; height:120px; overflow:auto'>"
     foot = "</div>"
-    p_name = config.preset
+    p_name = preset
     if p_name == 'default':
         p_name = '默认'
     body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href=>\U0001F4DD 什么是预置包</a></span>'
@@ -262,11 +229,73 @@ def embeddings_model_split(prompt, prompt_negative):
     return embeds
 
 
-def reset_context(preset_params):
-    global preset_name, preset_url, system_message
+get_preset_params_js = '''
+function(preset_params) {
+    var preset=preset_params["__preset"];
+    var theme=preset_params["__theme"];
+    var nav_id_list=preset_params["__nav_id_list"];
+    var nav_preset_html = preset_params["__nav_preset_html"];
+    update_topbar("top_preset",nav_preset_html);
+    const params = new URLSearchParams(window.location.search);
+    url_params = Object.fromEntries(params);
+    if (url_params["__preset"]!=null) {
+        preset=url_params["__preset"];
+    }
+    if (url_params["__theme"]!=null) {
+        theme=url_params["__theme"];
+    }
+    mark_position_for_topbar(nav_id_list,preset,theme);
+    preset_params["__preset"]=preset;
+    preset_params["__theme"]=theme;
+    return preset_params;
+}
+'''
 
-    preset = preset_params.get("__preset")
-    theme = preset_params.get("__theme")
+
+toggle_system_message_js = '''
+function(system_params) {
+    var message=system_params["__message"];
+    if (message!=null && message.length>60) {
+        showSysMsg(message);
+    }
+    return
+}
+'''
+
+
+sync_generating_state_js = '''
+function(system_params) {
+    if (system_params["__generating_state"])
+        c_generating_state = 1;
+    else
+        c_generating_state = 0;
+    return
+}
+'''
+
+
+def sync_generating_state_true(state_params):
+    state_params.update({'__generating_state':1})
+    return state_params, state_params
+
+
+def sync_generating_state_false(state_params):
+    state_params.update({'__generating_state':0})
+    output_index = gallery_util.output_list[0].split('/')[0]
+    gallery_util.refresh_images_list(output_index, True)
+    gallery_util.parse_html_log(output_index, True)
+    return state_params, state_params
+
+
+def sync_message(state_params):
+    state_params.update({"__message":system_message})
+    return state_params
+
+def reset_context(state_params):
+    global system_message
+
+    preset = state_params.get("__preset")
+    theme = state_params.get("__theme")
     print(f'[Topbar] Reset_context: preset={config.preset}-->{preset}, theme={config.theme}-->{theme}')
     config_org = {}
     if isinstance(preset, str):
@@ -365,8 +394,8 @@ def reset_context(preset_params):
 
     config.theme = theme
     config.preset = preset
-    preset_name = preset
-    
+    state_params.update({"preset_url":preset_url})
+
     results = []
     results += [gr.update(value=config.default_base_model_name), \
                 gr.update(value=config.default_refiner_model_name), \
@@ -383,8 +412,9 @@ def reset_context(preset_params):
     for i, (n, v) in enumerate(config.default_loras):
         results += [gr.update(value=n),gr.update(value=v)]
     results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
-    results += [gr.update(visible=True if preset_url else False, value=preset_instruction())]
-    results += [gr.update(value={"__message":system_message})]
+    results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
+    state_params.update({"__message":system_message})
+    results += [state_params]
     system_message = 'system message was displayed!'
 
     return results
@@ -556,3 +586,6 @@ def reset_default_config():
     config.config_dict["default_loras"] = config.default_loras = config.default_loras[:5] + [['None', 1.0] for _ in range(5 - len(config.default_loras))]
 
     return
+
+
+system_message = get_system_message()

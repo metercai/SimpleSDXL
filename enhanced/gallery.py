@@ -8,12 +8,15 @@ import modules.config as config
 import enhanced.toolbox as toolbox
 from lxml import etree
 
+
+# app context
 output_list = []
 max_per_page = 28
 
-images_list=['',[]]
-images_prompt=['',[]]
-
+images_list = {}
+images_list_keys = []
+images_prompt = {}
+images_prompt_keys = []
 
 def refresh_output_list():
     global output_list, max_per_page
@@ -34,25 +37,42 @@ def refresh_output_list():
     return
 
 
-def refresh_images_list(choice):
-    global output_list, images_list
+def images_list_update(choice, state_params):
+    global output_list
+    
+    images_gallery = get_images_from_gallery_index(choice)
+    state_params.update({"prompt_info": [choice, 0]})
+    return gr.update(value=images_gallery), gr.update(open=False, visible=len(output_list)>0), state_params
 
-    if choice == images_list[0]:
-        if images_list[0] == output_list[0].split('/')[0]:
-            images_list[1] = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, '20' + images_list[0]), ['.png'], None)], reverse=True) 
-        return
-    images_list[0] = choice
-    images_list[1] = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, '20' + images_list[0]), ['.png'], None)], reverse=True)
-    parse_html_log(choice)
-    print(f'[Gallery] Refresh_images_list: loaded {len(images_list[1])} image_items of {images_list[0]}.')
-    return
+
+def select_index(x, state_params, evt: gr.SelectData):
+    state_params.update({"infobox_state": 0})
+    state_params.update({"note_box_state": ['',0,0]})
+    print(f'[Gallery] Selected_gallery_index: change new index.')
+    return [gr.update(visible=True)] + [gr.update(visible=False)] * 3 + [state_params]
+
+
+def select_gallery(choice, state_params, evt: gr.SelectData):
+    state_params.update({"note_box_state": ['',0,0]})
+    state_params.update({"prompt_info": [choice, evt.index]})
+    result = get_images_prompt(choice, evt.index)
+    print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list.')
+    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 5 + [state_params]
+
+
+def select_gallery_progress(state_params, evt: gr.SelectData):
+    global output_list
+    state_params.update({"note_box_state": ['',0,0]})
+    state_params.update({"prompt_info": [None, evt.index]})
+    result = get_images_prompt(None, evt.index)
+    print(f'[Gallery] Selected_gallery_progress: selected index {evt.index} of {output_list[0]} images_list.')
+    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 5 + [state_params]
 
 
 def get_images_from_gallery_index(choice):
-    global output_list, images_list, max_per_page
+    global output_list, max_per_page, images_list
 
     if choice is None:
-#        refresh_output_list()
         if len(output_list) == 0:
             return None
         choice = output_list[0]
@@ -62,25 +82,39 @@ def get_images_from_gallery_index(choice):
         choice = _page[0]
         page = int(_page[1])
 
-    refresh_images_list(choice)
-    images_gallery = images_list[1]
+    images_gallery = refresh_images_list(choice)
     nums = len(images_gallery)
     if page > 0:
         page = abs(page-math.ceil(nums/max_per_page))+1
         if page*max_per_page < nums:
-            images_gallery = images_list[1][(page-1)*max_per_page:page*max_per_page-1]
+            images_gallery = images_list[choice][(page-1)*max_per_page:page*max_per_page-1]
         else:
-            images_gallery = images_list[1][nums-max_per_page:]
+            images_gallery = images_list[choice][nums-max_per_page:]
     images_gallery = [os.path.join(os.path.join(config.path_outputs, '20' + choice), f) for f in images_gallery]
     #print(f'[Gallery]Get images from index: choice={choice}, page={page}, images_gallery={images_gallery}')
     return images_gallery
 
 
-refresh_output_list()
+def refresh_images_list(choice: str, passthrough = False):
+    global output_list, images_list, images_list_keys
+
+    if not passthrough and choice in images_list_keys:
+        images_list_keys.remove(choice)
+        images_list_keys.append(choice)
+        #print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[choice])} image_items of {choice}.')
+        return images_list[choice]
+
+    if len(images_list.keys())>15:
+        images_list.pop(images_list_keys.pop(0))
+    images_list.update({choice: sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, '20' + choice), ['.png'], None)], reverse=True)})
+    images_list_keys.append(choice)
+    parse_html_log(choice)
+    print(f'[Gallery] Refresh_images_list: loaded {len(images_list[choice])} image_items of {choice}.')
+    return images_list[choice]
 
 
 def get_images_prompt(choice, selected):
-    global images_list, images_prompt
+    global max_per_page, images_prompt, images_prompt_keys
 
     if choice is None:
         choice = output_list[0]
@@ -90,26 +124,32 @@ def get_images_prompt(choice, selected):
         choice = _page[0]
         page = int(_page[1])
 
-    if choice != images_prompt[0] or images_prompt[1] is None:
-        parse_html_log(choice)
-    nums = len(images_prompt[1])
+    parse_html_log(choice)
+    nums = len(images_prompt[choice])
     if page > 0:
         page = abs(page-math.ceil(nums/max_per_page))+1
         if page*max_per_page < nums:
             selected = (page-1)*max_per_page + selected
         else:
             selected = nums-max_per_page + selected
-    return images_prompt[1][selected]
+    images_prompt_keys.remove(choice)
+    images_prompt_keys.append(choice)
+    return images_prompt[choice][selected]
 
 
-def parse_html_log(choice):
-    global images_prompt
+def parse_html_log(choice: str, passthrough = False):
+    global images_prompt, images_prompt_keys
     
     choice = choice.split('/')[0]
+    if not passthrough and choice in images_prompt_keys and images_prompt[choice]:
+        images_prompt_keys.remove(choice)
+        images_prompt_keys.append(choice)
+        #print(f'[Gallery] Parse_html_log: hit cache {len(images_prompt[choice])} image_infos of {choice}.')
+        return
     html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
     html = etree.parse(html_file, etree.HTMLParser(encoding='utf-8'))
     prompt_infos = html.xpath('/html/body/div')
-    images_prompt[1] = []
+    images_prompt_list = []
     for info in prompt_infos:
         text = info.xpath('.//p//text()')
         if len(text)>20:
@@ -147,37 +187,26 @@ def parse_html_log(choice):
                     info_dict[text[1+i*2]] = text[2+i*2]
         else:
             text = info.xpath('.//td//text()')
-            if text[2]=='\n':
-                text.insert(2, '')
-            if text[5]=='\n':
-                text.insert(5, '')
-            if text[8]=='\n':
-                text.insert(8, '')
-            info_dict={"Filename":text[0]}
-            for i in range(0,int(len(text)/3)):
+            if len(text)>10:
+                if text[2]=='\n':
+                    text.insert(2, '')
+                if text[5]=='\n':
+                    text.insert(5, '')
+                if text[8]=='\n':
+                    text.insert(8, '')
+                info_dict={"Filename":text[0]}
+                for i in range(0,int(len(text)/3)):
                     info_dict[text[1+i*3]] = text[2+i*3]
+            else:
+                print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
         #print(f'{len(text)},info_dict={info_dict}')
-        images_prompt[1].append(info_dict)
-    images_prompt[0] = choice
-    print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[1])} image_infos of {choice}.')
-    
-def clear_windows(x):
-    toolbox.infobox_state = False
-    return [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)]
-
-def select_gallery(choice, evt: gr.SelectData):
-
-    result = get_images_prompt(choice, evt.index)
-    print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list.')
-
-    return result, gr.update(value=toolbox.make_infobox_markdown(result))
+        images_prompt_list.append(info_dict)
+    if len(images_prompt.keys())>15:
+        images_prompt.pop(images_prompt_keys.pop(0))
+    images_prompt.update({choice: images_prompt_list})
+    images_prompt_keys.append(choice)
+    print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[choice])} image_infos of {choice}.')
+    return
 
 
-def select_gallery_progress(evt: gr.SelectData):
-    global output_list
-
-    result = get_images_prompt(None, evt.index)
-    print(f'[Gallery] Selected_gallery_progress: selected index {evt.index} of {output_list[0]} images_list.')
-
-    return result, gr.update(value=toolbox.make_infobox_markdown(result))
-
+refresh_output_list()

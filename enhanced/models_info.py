@@ -95,14 +95,21 @@ def init_models_info():
 
     if len(new_filenames)>0:
         try:
-            for filename in new_filenames:
-                file_path = os.path.abspath(f'./models/{filename}')
+            for f in new_filenames:
+                if f.startswith("checkpoints/"):
+                    file_path = os.path.join(config.path_checkpoints, f[12:])
+                elif f.startswith("loras/"):
+                    file_path = os.path.join(config.path_loras, f[6:])
+                elif f.startswith("embeddings/"):
+                    file_path = os.path.join(config.path_embeddings, f[11:])
+                else:
+                    file_path = os.path.abspath(f'./models/{filename}')
                 size = os.path.getsize(file_path)
-                if filename in default_models_info.keys() and size == default_models_info[filename]["size"]:
-                    hash = default_models_info[filename]["hash"]
+                if f in default_models_info.keys() and size == default_models_info[f]["size"]:
+                    hash = default_models_info[f]["hash"]
                 else:
                     hash = ''
-                models_info.update({filename:{'size': size, 'hash': hash, 'url': None, 'muid': None}})
+                models_info.update({f:{'size': size, 'hash': hash, 'url': None, 'muid': None}})
             with open(models_info_path, "w", encoding="utf-8") as json_file:
                 json.dump(models_info, json_file, indent=4)
             models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
