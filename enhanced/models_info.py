@@ -103,7 +103,7 @@ def init_models_info():
                 elif f.startswith("embeddings/"):
                     file_path = os.path.join(config.path_embeddings, f[11:])
                 else:
-                    file_path = os.path.abspath(f'./models/{filename}')
+                    file_path = os.path.abspath(f'./models/{f}')
                 size = os.path.getsize(file_path)
                 if f in default_models_info.keys() and size == default_models_info[f]["size"]:
                     hash = default_models_info[f]["hash"]
@@ -137,10 +137,18 @@ def sync_model_info_click(*args):
     downurls = list(args)
     #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
     keys = sorted(models_info.keys())
-    for k in keys:
-        if not models_info[k]['hash']:
-            print(f'[ModelInfo] Computing file hash for {k}')
-            models_info[k].update({'hash':get_file_sha256(os.path.abspath(f'./models/{k}'))})
+    for f in keys:
+        if not models_info[f]['hash']:
+            print(f'[ModelInfo] Computing file hash for {f}')
+            if f.startswith("checkpoints/"):
+                file_path = os.path.join(config.path_checkpoints, f[12:])
+            elif f.startswith("loras/"):
+                file_path = os.path.join(config.path_loras, f[6:])
+            elif f.startswith("embeddings/"):
+                file_path = os.path.join(config.path_embeddings, f[11:])
+            else:
+                file_path = os.path.abspath(f'./models/{f}')
+            models_info[f].update({'hash':get_file_sha256(file_path)})
     keylist = []
     for i in range(len(keys)):
         if keys[i].startswith('checkpoints'):

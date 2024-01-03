@@ -64,3 +64,4 @@ user_path_config-deprecated.txt
 pyproject.toml
 Cargo.toml
 .github/workflows/
+/outputs.1

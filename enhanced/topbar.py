@@ -357,7 +357,15 @@ def reset_context(state_params):
         print(f'[Topbar] The model file in preset is not local, ready to download.')
         for f in downlist:
             if f in down_muid:
-                model_dir, filename = os.path.split(os.path.abspath(f'./models/{f}'))
+                if f.startswith("checkpoints/"):
+                    file_path = os.path.join(config.path_checkpoints, f[12:])
+                elif f.startswith("loras/"):
+                    file_path = os.path.join(config.path_loras, f[6:])
+                elif f.startswith("embeddings/"):
+                    file_path = os.path.join(config.path_embeddings, f[11:])
+                else:
+                    file_path = os.path.abspath(f'./models/{f}')
+                model_dir, filename = os.path.split(file_path)
                 load_file_from_muid(filename, down_muid[f], model_dir)
             elif f[12:] in config_org["checkpoint_downloads"]:
                 load_file_from_url(url=config_org["checkpoint_downloads"][f[12:]], model_dir=config.path_checkpoints, file_name=f[12:])

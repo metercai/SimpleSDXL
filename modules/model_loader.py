@@ -22,14 +22,16 @@ def load_file_from_muid(
         import requests
         from enhanced.models_hub_host import models_hub_host
         import enhanced.token_did as token_did
+        from enhanced.location import location
         try:
             requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
         except Exception as e:
             print(f'Connect the models hub site failed!')
             print(e)
-        print(f'Downloading: "{filename}" from {models_hub_host}')
+        print(f'Get info from {models_hub_host} and downloading: "{filename}" at location: {location}.')
         filename2 = token_did.encrypt_default(muid)
         url2 = f'{models_hub_host}/mfile/{token_did.DID}/{filename2}'
+        #url2 = f'{models_hub_host}/lmfile/{location}/{token_did.DID}/{filename2}'
         cached_file2 = os.path.abspath(os.path.join(model_dir, filename2))
         from download import download
         download(url2, cached_file2, progressbar=True)

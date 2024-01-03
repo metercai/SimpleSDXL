@@ -528,7 +528,8 @@ with shared.gradio_root:
             with gr.Tab(label='Enhanced'):
                 translation_modifiable = gr.Checkbox(label='Modify after translation', value=True, info='You can modify the translated prompt before generate.')
                 translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
-                
+                mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
+
                 ehps = [translation_modifiable, translation_methods]
 
         performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11 +
@@ -707,7 +708,7 @@ shared.gradio_root.launch(
     server_port=args_manager.args.port,
     share=args_manager.args.share, 
     root_path=args_manager.args.webroot,
-    auth=check_auth if args_manager.args.share and auth_enabled else None,
+    auth=check_auth if auth_enabled else None,
     blocked_paths=[constants.AUTH_FILENAME]
 )
 

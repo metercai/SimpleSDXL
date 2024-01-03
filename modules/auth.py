@@ -35,6 +35,8 @@ auth_enabled = auth_dict != None
 
 
 def check_auth(user, password):
+    print(f'user:{user},password:{password}\nauth_dict:{auth_dict}')
+    print(f'auth_dict[user]:{auth_dict[user]}\n cp:{hashlib.sha256(bytes(password, encoding="utf-8")).hexdigest()}')
     if user not in auth_dict:
         return False
     else:   
