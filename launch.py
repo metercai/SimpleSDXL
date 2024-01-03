@@ -63,7 +63,13 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
+       
         if is_win32_standalone_build:
+            import modules.launch_util as launch_util
+            if len(launch_util.met_diff.keys())>0:
+                for p in launch_util.met_diff.keys():
+                    print(f'Uninstall {p}.{launch_util.met_diff[p]} ...')
+                    run(f'"{python}" -m pip uninstall -y {p}=={launch_util.met_diff[p]}')
             run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
