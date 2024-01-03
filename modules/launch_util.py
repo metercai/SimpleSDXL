@@ -84,6 +84,7 @@ def requirements_met(requirements_file):
     global met_diff
 
     met_diff = {}
+    result = True
     with open(requirements_file, "r", encoding="utf8") as file:
         for line in file:
             if line.strip() == "":
@@ -91,7 +92,8 @@ def requirements_met(requirements_file):
 
             m = re.match(re_requirement, line)
             if m is None:
-                return False
+                result = False
+                continue
 
             package = m.group(1).strip()
             version_required = (m.group(2) or "").strip()
@@ -102,10 +104,11 @@ def requirements_met(requirements_file):
             try:
                 version_installed = importlib.metadata.version(package)
             except Exception:
-                return False
+                result = False
+                continue
 
             if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
                 met_diff.update({package:version_installed})
-                return False
+                result = False
 
-    return True
+    return result
