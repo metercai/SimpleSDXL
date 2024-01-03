@@ -1,6 +1,6 @@
 ## SimpleSDXL - Fooocus中文孪生版
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/021f7e3e-8895-4601-a56c-21b1120f533f"></div>
-在Fooocus基础上增强功能，可无缝升级，两版本同时可用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available simultaneously.
+在Fooocus基础上增强功能，可无缝升级，两版本同时可用。经过了手机适配，PC和手机可同步使用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronously. Adapted to mobile, PC and phone can be used synchronously.
 
 - **中英文混编提示词**: 离线在线自主选择，支持翻译后再编辑，更适于Tag表述。<br>
   **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Tags.
@@ -8,8 +8,8 @@
   **Finished image sets browsing**:  Fooocus only can browse the current generated image set.
 - **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 <br>
   **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
-- **预置包在线切换和生成**: 原生版切换需要修改启动参数重启，没有提供生成工具。 <br>
-  **Switch preset and theme online**:  Fooocus requires modification of startup parameters to restart, no generation tool provided.
+- **预置包切换和模型下载**: 预置包可在界面上主动切换和生成，加载预置包时会自动下载补齐本地缺失的模型文件。 <br>
+  **Switch preset and download missing files**:  The preset can be switched and generated through UI, and it wil download the missing local model files in loading.
 
 ## 🔔 更新 / Update
 - [2024.01.01] <b> 新年新版本：界面交互优化，状态信息迁移到会话(session)，多浏览器访问互不干扰。优化了手机访问界面，PC和手机可同步使用。生成图片过程中禁止预置包切换，保障出图过程的完整。增加相册缓存，提升历史图片索引切换速度。修复模型路径bug，同步主线版本v2.1.859。</b>

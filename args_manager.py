@@ -9,6 +9,7 @@ args_parser.parser.add_argument("--language", type=str, default='cn',
                                   "For example, [--language example] will use [language/example.json] for translation.")
 
 args_parser.parser.add_argument("--webroot", type=str, default='', help="Set the webroot path.")
+args_parser.parser.add_argument("--location", type=str, default='CN', help="Set the location access location.")
 
 # For example, https://github.com/lllyasviel/Fooocus/issues/849
 args_parser.parser.add_argument("--disable-offload-from-vram", action="store_true",

@@ -115,12 +115,20 @@ if args.gpu_device_id is not None:
 import enhanced.token_did as token_did
 token_did.init_local_did(f'SimpleSDXL_User')
 
+import enhanced.location as location 
+location.init_location()
+
+if '--location' in sys.argv:
+        location.location = args.location
+
 download_models()
 
-from enhanced.location import location
-if location !='CN':
-    if 'language' not in sys.argv:
+if location.location !='CN':
+    if '--language' not in sys.argv:
         args.language='default'
-        print(f'args.language:{args.language}')
+
+import socket
+if '--listen' not in sys.argv:
+    args.listen = socket.gethostbyname(socket.gethostname())
 
 from webui import *
