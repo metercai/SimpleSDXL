@@ -40,7 +40,7 @@ def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_
         "encoding": 'utf8',
         "errors": 'ignore',
     }
-
+    
     if not live:
         run_kwargs["stdout"] = run_kwargs["stderr"] = subprocess.PIPE
 
@@ -72,6 +72,7 @@ def run_pip(command, desc=None, live=default_command_live):
         return None
 
 
+met_diff = {}
 def requirements_met(requirements_file):
     """
     Does a simple parse of a requirements.txt file to determine if all rerqirements in it
@@ -80,7 +81,9 @@ def requirements_met(requirements_file):
 
     import importlib.metadata
     import packaging.version
+    global met_diff
 
+    met_diff = {}
     with open(requirements_file, "r", encoding="utf8") as file:
         for line in file:
             if line.strip() == "":
@@ -102,6 +105,7 @@ def requirements_met(requirements_file):
                 return False
 
             if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
+                met_diff.update({package:version_installed})
                 return False
 
     return True
