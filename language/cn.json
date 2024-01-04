@@ -176,7 +176,10 @@
   "Inpaint or Outpaint (default)": "内部或外部重绘(默认)",
   "Improve Detail (face, hand, eyes, etc.)": "细节提升重绘(脸、手、眼睛等)",
   "Modify Content (add objects, change background, etc.)": "内容修改重绘(增加物体或改变背景等)",
-   
+  "Mask Erode or Dilate": "蒙板收缩或扩充",
+  "Positive value will make white area in the mask larger, negative value will make white area smaller.(default is 0, always process before any mask invert)": "正值使蒙板白色区域扩大，负值缩小。默认值0，总是在蒙板翻转前处理。",
+  "Enable Mask Upload": "激活蒙板上传",
+  "Invert Mask": "翻转蒙板", 
 
 
 
