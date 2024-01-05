@@ -1,5 +1,5 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_SimpleSDXL_2024_all.png"></div>
+<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_all.png"></div>
 在Fooocus基础上增强功能，可无缝升级，两版本同时可用。经过了手机适配，PC和手机可同步使用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronously. Adapted to mobile, PC and phone can be used synchronously.
 
 - **中英文混编提示词**: 离线在线自主选择，支持翻译后再编辑，更适于Tag表述。<br>
