@@ -1,6 +1,7 @@
 ## 什么是预置包?
-<img width="400" src="https://v2.token.tm/img/SimpleSDXL_preset.png">
-* **预置包**，顾名思义就是预先设置好的一组环境配置参数。
+<div align=center><img width="450" style="border: 2px dotted blue;" src="https://v2.token.tm/img/SimpleSDXL_preset.png"></div>
+
+* **预置包**，顾名思义就是预先设置好的一组环境配置参数。从上面的基础架构图中可以看出，预置包是SimpleSDXL的重要组成部分。
 * 预置包代表了图片生成的一种预设风格，一类预设主题，亦是一种预设的方法范例。它将变幻无穷的图片创作分门别类，通过全面的参数设定确保出图的基本效果和质量。
 * 预置包可以大幅降低普通用户使用SDXL出图的使用门槛。 因为即使相同的提示词，在不同的模型和参数下，SDXL生成的图片也会千差万别，质量也都参差不齐。把所有影响出图的环境和参数打包在一起，形成预置包后，使用相同的预置包，可以保障相似的出图效果。
 * 预置包是积累和沉淀出图经验的有力工具。出图新手和老手的差别就在于谁在环境配置和参数设置上的经验更丰富，能更快更好的达成预期目标。用好预置包工具，可以快速缩短新手和老手之间的距离。
@@ -38,6 +39,6 @@
 <br><br>两种方式在调用时都会通过url参数方式传入两个环境变量，"__theme"表示当前的背景样式：dark(夜黑)或light(明亮)，"__lang"表示界面语言：cn(中文)或default(英文)。概要说明页可根据参数自行适配。
 
 ## 如何获取制作好的预置包？
-- SimpleSDXL会优选社区用户制作的预置包更新到preset目录下，上到导航条，供大家使用。
+- SimpleSDXL会优选社区用户制作的预置包更新到presets目录下，上到导航条，供大家使用。
 - 加入SimpleSDXL用户交流QQ群：938075852，通过群内获取。
-<img width="250" src="https://v2.token.tm/img/SimpleSDXL_preset.png">
+<img width="250" src="https://v2.token.tm/img/qqgroup.jpg">
