@@ -1,5 +1,5 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/021f7e3e-8895-4601-a56c-21b1120f533f"></div>
+<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_SimpleSDXL_2024_all.png"></div>
 在Fooocus基础上增强功能，可无缝升级，两版本同时可用。经过了手机适配，PC和手机可同步使用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronously. Adapted to mobile, PC and phone can be used synchronously.
 
 - **中英文混编提示词**: 离线在线自主选择，支持翻译后再编辑，更适于Tag表述。<br>
@@ -100,8 +100,8 @@
     # 国内用户可以换魔搭社区的源
     # git clone https://www.modelscope.cn/metercai/SimpleSDXL-models.git models
 
-## 在线交流：qq群：938075852 --- 新年新版本，需要增加哪些新功能，可以进群畅聊
-<div align=center><img width="250" src="https://github.com/metercai/SimpleSDXL/assets/5652458/e1d08b8c-4112-4857-b066-b0e10b1c9ec8"></div>
+## 在线交流：qq群：938075852  新年新版本，需要增加哪些新功能，进群畅聊
+<div align=center><img width="250" src="https://v2.token.tm/img/qqgroup.jpg"></div>
 
 ---
 <div align=center>
