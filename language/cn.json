@@ -140,7 +140,6 @@
   "SavePreset": "生成预置包",
   "Preset Name": "预置包名",
   "Type preset name here.": "输入预置包名",
-  "Type preset reference url here.": "输入预置包说明链接",
   "Extract parameters to backfill for regeneration. Please note that some parameters will be modified!": "提取当前图片生成参数准备重新生成。请注意点击'确认'后，将回到'默认'预置包环境并根据图片参数重置生成参数！",
   "Save a new preset for the current params and configuration.": "保存当前环境配置和生成参数为新的预置包。",
   "The model in the params and configuration is missing MUID. For usability and transferability, please click \"Sync model info\" in the right model tab.": "当前配置环境内的模型缺少统一模型标识MUID。为了确保预置包及嵌入参数图片的可用性，请在右侧模型选项卡中选择\"同步模型信息\"。",

@@ -116,7 +116,6 @@ with shared.gradio_root:
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
                     params_note_input_name = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)
-                    params_note_input_url = gr.Textbox(show_label=False, placeholder="Type preset reference url here.", min_width=100, elem_classes='preset_input', visible=False)
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
@@ -165,10 +164,10 @@ with shared.gradio_root:
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_preset_button = gr.Button(value='SavePreset', size='sm', visible=True)
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
-                image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
+                image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
-                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar], outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
-                progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_input_url, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
+                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar], outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
+                progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
@@ -698,8 +697,8 @@ with shared.gradio_root:
         .then(fn=lambda x: x, inputs=system_params,  _js=toolbox.reset_preset_params_js) \
         .then(toolbox.reset_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box], show_progress=False)
 
-    prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
-    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, params_note_input_url, state_topbar] + reset_preset, outputs=[params_note_input_name, params_note_input_url, params_note_preset_button, params_note_box, preset_instruction, state_topbar], show_progress=False) \
+    prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
+    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, state_topbar] + reset_preset, outputs=[params_note_input_name, params_note_preset_button, params_note_box, preset_instruction, state_topbar], show_progress=False) \
         .then(toolbox.reset_preset_params, inputs=state_topbar, outputs=[system_params, state_topbar], queue=False, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js=toolbox.reset_preset_params_js)
 

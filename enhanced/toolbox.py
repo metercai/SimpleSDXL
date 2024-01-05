@@ -102,7 +102,7 @@ def make_infobox_markdown(info):
 def toggle_toolbox(state, state_params):
     state_params.update({"infobox_state": 0})
     state_params.update({"note_box_state": ['',0,0]})
-    return [gr.update(visible=state)] + [gr.update(visible=False)] * 6 + [state_params]
+    return [gr.update(visible=state)] + [gr.update(visible=False)] * 5 + [state_params]
 
 
 def toggle_prompt_info(state_params):
@@ -140,7 +140,7 @@ def toggle_note_box(item, state_params):
         note_box_state[0] = item
     else:
         state_params.update({"note_box_state": note_box_state})
-        return [gr.update(visible=True)] + [gr.update()] * (4 if item == 'preset' else 2) + [state_params]
+        return [gr.update(visible=True)] + [gr.update()] * (3 if item == 'preset' else 2) + [state_params]
     state_params.update({"note_box_state": note_box_state})
     flag = note_box_state[1]
     title_extra = ""
@@ -149,7 +149,7 @@ def toggle_note_box(item, state_params):
     if item == 'regen':
         return gr.update(value=toolbox_note_regenerate_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'preset':
-        return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
+        return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
 
 
 def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
@@ -222,7 +222,7 @@ def reset_params(state_params):
     return results + [gr.update(visible=False)] * 2
 
 
-def save_preset(name, url, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
+def save_preset(name, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
 
     if name is not None and name != '':
         preset = {}
