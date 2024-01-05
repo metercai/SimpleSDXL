@@ -206,7 +206,7 @@ def preset_instruction(state_params):
     p_name = preset
     if p_name == 'default':
         p_name = '默认'
-    body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href=>\U0001F4DD 什么是预置包</a></span>'
+    body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     preset_url_str = ''
     if preset_url:
         append_str = f'__theme={config.theme}__lang={args_manager.args.language}'
@@ -314,7 +314,7 @@ def reset_context(state_params):
     else:
         if 'reference' in config.config_dict.keys():
             config.config_dict.pop("reference")
-        preset_inc_path = os.path.abspath(f'./presets/{preset}.inc')
+        preset_inc_path = os.path.abspath(f'./presets/{preset}.inc.html')
         if os.path.exists(preset_inc_path):
             preset_url = f'{args_manager.args.webroot}/file={preset_inc_path}'
         else:

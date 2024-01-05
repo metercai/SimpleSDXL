@@ -57,7 +57,7 @@ def select_gallery(choice, state_params, evt: gr.SelectData):
     state_params.update({"prompt_info": [choice, evt.index]})
     result = get_images_prompt(choice, evt.index)
     print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list.')
-    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 5 + [state_params]
+    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 4 + [state_params]
 
 
 def select_gallery_progress(state_params, evt: gr.SelectData):
@@ -66,7 +66,7 @@ def select_gallery_progress(state_params, evt: gr.SelectData):
     state_params.update({"prompt_info": [None, evt.index]})
     result = get_images_prompt(None, evt.index)
     print(f'[Gallery] Selected_gallery_progress: selected index {evt.index} of {output_list[0]} images_list.')
-    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 5 + [state_params]
+    return [gr.update(value=toolbox.make_infobox_markdown(result))] + [gr.update(visible=False)] * 4 + [state_params]
 
 
 def get_images_from_gallery_index(choice):
