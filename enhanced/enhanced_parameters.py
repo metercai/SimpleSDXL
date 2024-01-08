@@ -1,8 +1,8 @@
-translation_modifiable, translation_methods = [None] * 2
+backfill_prompt, translation_modifiable, translation_methods = [None] * 3
 
 def set_all_enhanced_parameters(*args):
-    global translation_modifiable, translation_methods
+    global backfill_prompt, translation_modifiable, translation_methods
 
-    translation_modifiable, translation_methods
+    backfill_prompt, translation_modifiable, translation_methods
 
     return

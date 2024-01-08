@@ -201,17 +201,17 @@ def get_system_message():
 def preset_instruction(state_params):
     preset = state_params["__preset"]
     preset_url = state_params["preset_url"]
-    head = "<div style='max-width:100%; height:120px; overflow:auto'>"
+    head = "<div style='max-width:100%; max-height:128px; overflow:hidden'>"
     foot = "</div>"
     p_name = preset
     if p_name == 'default':
         p_name = '默认'
-    body = f'"{p_name}"包说明:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
+    body = f'"{p_name}"预置包:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     preset_url_str = ''
     if preset_url:
-        append_str = f'__theme={config.theme}__lang={args_manager.args.language}'
+        append_str = f'__theme={config.theme}&__lang={args_manager.args.language}'
         preset_url_str = f'{preset_url}&{append_str}' if preset_url.count('?') else f'{preset_url}?{append_str}'
-    body += f'<iframe src="{preset_url_str}" frameborder="0" scrolling="no" height="100" width="100%"></iframe>'
+    body += f'<iframe src="{preset_url_str}" frameborder="0" scrolling="no" width="100%"></iframe>'
     return head + body + foot
 
 

@@ -142,8 +142,8 @@ def worker():
         inpaint_additional_prompt = args.pop()
         inpaint_mask_image_upload = args.pop()
 
-        prompt = translator.convert(prompt)
-        negative_prompt = translator.convert(negative_prompt)
+        #prompt = translator.convert(prompt)
+        #negative_prompt = translator.convert(negative_prompt)
 
         cn_tasks = {x: [] for x in flags.ip_list}
         for _ in range(4):
