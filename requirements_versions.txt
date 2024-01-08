@@ -6,7 +6,7 @@ accelerate==0.21.0
 pyyaml==6.0
 Pillow==9.2.0
 scipy==1.9.3
-tqdm==4.64.1
+tqdm==4.65.0
 psutil==5.9.5
 pytorch_lightning==1.9.4
 omegaconf==2.2.3
@@ -22,4 +22,4 @@ bcrypt==4.1.1
 base58==2.1.1
 download==0.3.5
 mistune==3.0.2
-translators==5.6.0
+translators==5.8.9

@@ -11,6 +11,7 @@ os.chdir(root)
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 os.environ["GRADIO_SERVER_PORT"] = "7865"
+os.environ["translators_default_region"] = "China"
 
 ssl._create_default_https_context = ssl._create_unverified_context
 

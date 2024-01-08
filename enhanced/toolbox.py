@@ -2,6 +2,7 @@ import os
 import json
 import copy
 import re
+import math
 import gradio as gr
 import modules.config as config
 import enhanced.topbar as topbar
@@ -146,10 +147,18 @@ def toggle_note_box(item, state_params):
     title_extra = ""
     if note_box_state[2]:
         title_extra = '\n' + toolbox_note_invalid_url
+    if item == 'delete':
+        [choice, selected] = state_params["prompt_info"]
+        info = gallery.get_images_prompt(choice, selected)
+        return gr.update(value=f'DELETE the image from output directory and logs!', visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'regen':
         return gr.update(value=toolbox_note_regenerate_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'preset':
         return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
+
+
+def toggle_note_box_delete(state_params):
+    return toggle_note_box('delete', state_params)
 
 
 def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
@@ -162,6 +171,72 @@ def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, l
     checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('preset', state_params)
+
+filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
+
+def delete_image(state_params):
+    [choice, selected] = state_params["prompt_info"]
+    info = gallery.get_images_prompt(choice, selected)
+    file_name = info["Filename"]
+    output_index = choice.split('/')
+    dir_path = os.path.join(config.path_outputs, '20' + output_index[0])
+    file_path = os.path.join(dir_path, file_name)
+    log_path = os.path.join(dir_path, 'log.html')
+    if os.path.exists(log_path):
+        file_text = ''
+        d_line_flag = False
+        with open(log_path, "r", encoding="utf-8") as log_file:
+            line = log_file.readline()
+            while line:
+                match = filename_regex.search(line)
+                if match:
+                    if match.group(1)==file_name[:-4]:
+                        d_line_flag = True
+                        line = log_file.readline()
+                        continue
+                    if d_line_flag:
+                        d_line_flag = False
+                if d_line_flag:
+                    line = log_file.readline()
+                    continue
+                file_text += line
+                line = log_file.readline()
+        with open(log_path, "w", encoding="utf-8") as log_file:
+            log_file.write(file_text)
+        print(f'[ToolBox] Delete item from log.html: {file_name}')
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    print(f'[ToolBox] Delete image file: {file_path}')
+
+    image_list_nums = len(gallery.refresh_images_list(output_index[0], True))
+    if image_list_nums<=0:
+        os.remove(log_path)
+        os.rmdir(dir_path)
+        index = gallery.output_list.index(choice)
+        gallery.refresh_output_list()
+        if index>= len(gallery.output_list):
+            index = len(gallery.output_list) -1
+            if index<0:
+                index = 0
+        choice = gallery.output_list[index]
+    elif image_list_nums<gallery.max_per_page:
+        if selected>image_list_nums-1:
+            selected = image_list_nums-1
+    else:
+        if image_list_nums % gallery.max_per_page == 0:
+            page = int(output_index[1])
+            if page>image_list_nums//gallery.max_per_page:
+                page = image_list_nums//gallery.max_per_page
+            if page == 1:
+                choice = output_index[0]
+            else:
+                choice = output_index[0] + '/' + page
+            gallery.refresh_output_list()
+
+    state_params.update({"prompt_info":[choice, selected]})
+    images_gallery = gallery.get_images_from_gallery_index(choice)
+    state_params.update({"note_box_state": ['',0,0]})
+    return gr.update(value=images_gallery), gr.update(choices=gallery.output_list, value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
 def reset_default_preset(state_params):

@@ -116,6 +116,7 @@ with shared.gradio_root:
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
                     params_note_input_name = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)
+                    params_note_delete_button = gr.Button(value='Enter', visible=False)
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
@@ -161,14 +162,13 @@ with shared.gradio_root:
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
+                prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_preset_button = gr.Button(value='SavePreset', size='sm', visible=True)
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True, interactive=False)
                 image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
-                gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar], outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
-                progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
-
+                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -542,11 +542,15 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):
-                translation_modifiable = gr.Checkbox(label='Modify after translation', value=True, info='You can modify the translated prompt before generate.')
+                backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                translation_modifiable = gr.Checkbox(label='Modify after translation', value=False, info='You can modify the translated prompt before generate.')
                 translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                 mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
-                ehps = [translation_modifiable, translation_methods]
+                ehps = [backfill_prompt, translation_modifiable, translation_methods]
+            
+            gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
+            progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
         performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11 +
                                                [gr.update(visible=x != 'Extreme Speed')] * 1,
@@ -692,6 +696,8 @@ with shared.gradio_root:
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
 
 
+    prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
+    params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box, state_topbar], show_progress=False)
     params_note_regen_button.click(toolbox.reset_default_preset, inputs=state_topbar, outputs=[system_params, state_topbar], queue=True, show_progress=False) \
         .then(fn=lambda x: x, inputs=system_params,  _js=toolbox.reset_preset_params_js) \
