@@ -26,5 +26,10 @@
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/bluePencilXL_v050.safetensors": "EtxaaF5qpbCBQpeEVjDP6VCzR6c73UNeP",
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/DreamShaper_8_pruned.safetensors": "CF9y4BTWLiidKyTW9WS5ktsiUqmrpYHQe",
     "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/unaestheticXLv31.safetensors": "81WhJ1ZA2vqosx6iw4SbaqMY1GCXP1Cmt",
-    "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin": "BKCc6XUAxSUcHChdY4KfJ9oQKvCuYbSpr"
+    "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin": "BKCc6XUAxSUcHChdY4KfJ9oQKvCuYbSpr",
+
+    "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/dreamshaperXL_turboDpmppSDE.safetensors": "EWREihfScvqwCmEypWFy1V49Yb3wnhj2h",
+    "https://civitai.com/api/download/models/288982?type=Model&format=SafeTensor&size=full&fp=fp16": "HUivLQfyvFdtUPzVzettxJbgGw5YatXBp",
+    "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=full&fp=fp16": "2B2riAyru6XyFnixb4eVJqdVAS4C9DsEQ",
+    "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/bluePencilXLV200.cXoH.safetensors": "8awdQ5rBjfpHctv1PFhvEvL265xQ8YHA3"
 }

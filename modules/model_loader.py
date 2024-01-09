@@ -8,7 +8,10 @@ urlmapping = {}
 urlmapping_path = os.path.abspath(f'./enhanced/urlmapping.json')
 with open(urlmapping_path, "r", encoding="utf-8") as json_file:
     urlmapping.update(json.load(json_file))
-
+accelerate_muid = []
+accelerate_muid_path = os.path.abspath(f'./enhanced/accelerate_muid.json')
+with open(accelerate_muid_path, "r", encoding="utf-8") as json_file:
+    accelerate_muid=json.load(json_file)
 
 def load_file_from_muid(
         filename: str,
@@ -20,18 +23,23 @@ def load_file_from_muid(
     cached_file = os.path.abspath(os.path.join(model_dir, filename))
     if not os.path.exists(cached_file):
         import requests
-        from enhanced.models_hub_host import models_hub_host
+        import enhanced.models_hub_host as hub
         import enhanced.token_did as token_did
         from enhanced.location import location
         try:
-            requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
+            if muid in accelerate_muid:
+                print(f'Get info from {hub.models_hub_host_2} and downloading: "{filename}" at location: {location}.')
+                requests.post(f'{hub.models_hub_host_2}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub_site2'))
+                filename2 = token_did.encrypt(hub.accelerate_DID, muid)
+                url2 = f'{hub.models_hub_host_2}/mfile/{token_did.DID}/{filename2}'
+            else:
+                print(f'Get info from {hub.models_hub_host} and downloading: "{filename}" at location: {location}.')
+                requests.post(f'{hub.models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
+                filename2 = token_did.encrypt_default(muid)
+                url2 = f'{hub.models_hub_host}/mfile/{token_did.DID}/{filename2}'
         except Exception as e:
             print(f'Connect the models hub site failed!')
             print(e)
-        print(f'Get info from {models_hub_host} and downloading: "{filename}" at location: {location}.')
-        filename2 = token_did.encrypt_default(muid)
-        url2 = f'{models_hub_host}/mfile/{token_did.DID}/{filename2}'
-        #url2 = f'{models_hub_host}/lmfile/{location}/{token_did.DID}/{filename2}'
         cached_file2 = os.path.abspath(os.path.join(model_dir, filename2))
         from download import download
         download(url2, cached_file2, progressbar=True)
