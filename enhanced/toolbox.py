@@ -347,8 +347,6 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
         if lora_model5 and lora_model5 != 'None':
             preset["lora_downloads"].update({lora_model5: get_muid_link("loras/"+lora_model5)})
 
-        if url:
-            preset["reference"] = url
 
         #print(f'preset:{preset}')
         save_path = 'presets/' + name + '.json'
@@ -356,12 +354,10 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
             json.dump(preset, json_file, indent=4)
 
         state_params.update({"__preset": name})
-        state_params.update({"preset_url": url})
         print(f'[ToolBox] Saved the current params and config to {save_path}.')
     state_params.update({"note_box_state": ['',0,0]})
     topbar.make_html()
     results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)]
-    results += [gr.update(visible=True if url else False, value=topbar.preset_instruction(state_params))]
 
     return results + [state_params]
 
