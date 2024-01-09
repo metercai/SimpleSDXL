@@ -296,6 +296,7 @@ def reset_context(state_params):
 
     preset = state_params.get("__preset")
     theme = state_params.get("__theme")
+    preset_url = state_params.get("preset_url", '')
     print(f'[Topbar] Reset_context: preset={config.preset}-->{preset}, theme={config.theme}-->{theme}')
     config_org = {}
     if isinstance(preset, str):
