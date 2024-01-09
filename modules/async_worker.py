@@ -33,6 +33,7 @@ def worker():
     import modules.constants as constants
     import modules.advanced_parameters as advanced_parameters
     import enhanced.translator as translator
+    import enhanced.enhanced_parameters as enhanced_parameters
     import extras.ip_adapter as ip_adapter
     import extras.face_crop
     import fooocus_version
@@ -142,8 +143,9 @@ def worker():
         inpaint_additional_prompt = args.pop()
         inpaint_mask_image_upload = args.pop()
 
-        #prompt = translator.convert(prompt)
-        #negative_prompt = translator.convert(negative_prompt)
+        if enhanced_parameters.translation_timing != 'No translation':
+            prompt = translator.convert(prompt)
+            negative_prompt = translator.convert(negative_prompt)
 
         cn_tasks = {x: [] for x in flags.ip_list}
         for _ in range(4):

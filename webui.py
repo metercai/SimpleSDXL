@@ -543,11 +543,11 @@ with shared.gradio_root:
 
             with gr.Tab(label='Enhanced'):
                 backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                translation_modifiable = gr.Checkbox(label='Modify after translation', value=False, info='You can modify the translated prompt before generate.')
+                translation_timing = gr.Radio(label='Timing of translation', choices=['No translation', 'Translate then generate', 'Modify after translation'], value='Translate then generate', info='The selection of timing for prompt translation.')
                 translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                 mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
-                ehps = [backfill_prompt, translation_modifiable, translation_methods]
+                ehps = [backfill_prompt, translation_timing, translation_methods]
             
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
@@ -611,7 +611,7 @@ with shared.gradio_root:
         
         system_params = gr.JSON({"__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
         state_is_generating = gr.State(False)
-        def parse_meta(raw_prompt_txt, is_generating, modifiable):
+        def parse_meta(raw_prompt_txt, is_generating, timing):
             loaded_json = None
             try:
                 if '{' in raw_prompt_txt:
@@ -626,12 +626,12 @@ with shared.gradio_root:
                 if is_generating:
                     return gr.update(), gr.update(), gr.update(), gr.update()
                 else:
-                    flag = modifiable and translator.is_chinese(raw_prompt_txt)
+                    flag = (timing=='Modify after translation' and translator.is_chinese(raw_prompt_txt))
                     return gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)
 
             return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
 
-        prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_modifiable], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
+        prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_timing], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
         
         translator_button.click(lambda x: [gr.update(value=translator.convert(x)), gr.update(visible=True), gr.update(visible=False)], inputs=prompt, outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
 
