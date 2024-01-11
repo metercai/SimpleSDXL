@@ -56,7 +56,7 @@ def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"prompt_info": [choice, evt.index]})
     result = get_images_prompt(choice, evt.index)
-    #print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
+    print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
     if backfill_prompt:
         return [gr.update(value=toolbox.make_infobox_markdown(result)), gr.update(value=result["Prompt"]), gr.update(value=result["Negative Prompt"])] + [gr.update(visible=False)] * 4 + [state_params]
     else:
@@ -103,7 +103,7 @@ def refresh_images_list(choice: str, passthrough = False):
     if not passthrough and choice in images_list_keys:
         images_list_keys.remove(choice)
         images_list_keys.append(choice)
-        print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[choice])} image_items of {choice}.')
+        #print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[choice])} image_items of {choice}.')
         return images_list[choice]
 
     images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, '20' + choice), ['.png'], None)], reverse=True)
