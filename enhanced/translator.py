@@ -80,11 +80,12 @@ def convert(text: str) -> str:
             if not os.path.exists(translator_path):
                 os.makedirs(translator_path)
                 url = 'https://gitee.com/metercai/SimpleSDXL/releases/download/win64/nllb_200_distilled_600m.tar.gz'
-                cached_file = os.path.abspath(os.path.join(translator_path, 'nllb_200_distilled_600m.tar.gz'))
+                cached_file = os.path.join(translator_path, 'nllb_200_distilled_600m.tar.gz')
                 download(url, cached_file, progressbar=True)
                 with tarfile.open(cached_file, 'r:gz') as tarf:
                     tarf.extractall(translator_path)
                 os.remove(cached_file)
+            if not os.path.exists(os.path.join(translator_path, 'pytorch_model.bin')):
                 load_file_from_url(
                     url='https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin',
                     model_dir=translator_path,
