@@ -56,7 +56,7 @@ def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"prompt_info": [choice, evt.index]})
     result = get_images_prompt(choice, evt.index)
-    print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
+    #print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
     if backfill_prompt:
         return [gr.update(value=toolbox.make_infobox_markdown(result)), gr.update(value=result["Prompt"]), gr.update(value=result["Negative Prompt"])] + [gr.update(visible=False)] * 4 + [state_params]
     else:

@@ -661,7 +661,7 @@ with shared.gradio_root:
             load_parameter_button
         ] + lora_ctrls, queue=False, show_progress=False)
 
-        reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name] + lora_ctrls
+        reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch] + lora_ctrls
         reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
@@ -709,9 +709,7 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js=toolbox.reset_preset_params_js)
 
     shared.gradio_root.load(fn=lambda x: [x, x], inputs=system_params, outputs=[system_params, state_topbar], _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
-                      .then(topbar.reset_context, inputs=state_topbar, outputs=[base_model, refiner_model, refiner_switch, guidance_scale, sharpness, \
-                             sampler_name, scheduler_name, performance_selection, prompt, negative_prompt, style_selections, aspect_ratios_selection] + \
-                             lora_ctrls + [gallery, gallery_index, preset_instruction, state_topbar], show_progress=False) \
+                      .then(topbar.reset_context, inputs=state_topbar, outputs=reset_preset + [gallery, gallery_index, preset_instruction, state_topbar], show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
