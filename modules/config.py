@@ -21,6 +21,12 @@ try:
         with open(config_path, "r", encoding="utf-8") as json_file:
             config_dict = json.load(json_file)
             always_save_keys = list(config_dict.keys())
+    else:
+        fooocus_config_path =  os.path.abspath("../Fooocus/config.txt")
+        if os.path.exists(fooocus_config_path):
+            with open(fooocus_config_path, "r", encoding="utf-8") as json_file:
+                config_dict = json.load(json_file)
+                always_save_keys = list(config_dict.keys())
 except Exception as e:
     print(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
     print('Please make sure that:')
@@ -336,6 +342,9 @@ possible_preset_keys = [
     "default_prompt_negative",
     "default_styles",
     "default_aspect_ratio",
+    "default_cfg_tsnr",
+    "default_overwrite_step",
+    "default_overwrite_switch",
     "checkpoint_downloads",
     "embeddings_downloads",
     "lora_downloads",

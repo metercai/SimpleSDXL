@@ -233,9 +233,6 @@ get_preset_params_js = '''
 function(preset_params) {
     var preset=preset_params["__preset"];
     var theme=preset_params["__theme"];
-    var nav_id_list=preset_params["__nav_id_list"];
-    var nav_preset_html = preset_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html);
     const params = new URLSearchParams(window.location.search);
     url_params = Object.fromEntries(params);
     if (url_params["__preset"]!=null) {
@@ -244,20 +241,25 @@ function(preset_params) {
     if (url_params["__theme"]!=null) {
         theme=url_params["__theme"];
     }
-    mark_position_for_topbar(nav_id_list,preset,theme);
     preset_params["__preset"]=preset;
     preset_params["__theme"]=theme;
-    return preset_params;
+    return preset_params, preset_params;
 }
 '''
 
 
 toggle_system_message_js = '''
 function(system_params) {
+    var nav_preset_html = system_params["__nav_preset_html"];
+    update_topbar("top_preset",nav_preset_html);
     var message=system_params["__message"];
     if (message!=null && message.length>60) {
         showSysMsg(message);
     }
+    var preset=system_params["__preset"];
+    var theme=system_params["__theme"];
+    var nav_id_list=system_params["__nav_id_list"];
+    mark_position_for_topbar(nav_id_list,preset,theme);
     return
 }
 '''
@@ -292,7 +294,7 @@ def sync_message(state_params):
     return state_params
 
 def reset_context(state_params):
-    global system_message
+    global system_message, nav_id_list, nav_preset_html
 
     preset = state_params.get("__preset")
     theme = state_params.get("__theme")
@@ -406,26 +408,30 @@ def reset_context(state_params):
     state_params.update({"preset_url":preset_url})
 
     results = []
-    results += [gr.update(value=config.default_base_model_name), \
-                gr.update(value=config.default_refiner_model_name), \
-                gr.update(value=config.default_refiner_switch), \
-                gr.update(value=config.default_cfg_scale), \
-                gr.update(value=config.default_sample_sharpness), \
-                gr.update(value=config.default_sampler), \
-                gr.update(value=config.default_scheduler), \
-                gr.update(value=config.default_performance), \
-                gr.update(value=config.default_prompt), \
+    results += [gr.update(value=config.default_prompt), \
                 gr.update(value=config.default_prompt_negative), \
                 gr.update(value=copy.deepcopy(config.default_styles)), \
-                gr.update(value=config.add_ratio(config.default_aspect_ratio))]
+                gr.update(value=config.default_performance), \
+                gr.update(value=config.add_ratio(config.default_aspect_ratio)), \
+                gr.update(value=config.default_sample_sharpness), \
+                gr.update(value=config.default_cfg_scale), \
+                gr.update(value=config.default_base_model_name), \
+                gr.update(value=config.default_refiner_model_name), \
+                gr.update(value=config.default_refiner_switch), \
+                gr.update(value=config.default_sampler), \
+                gr.update(value=config.default_scheduler), \
+                gr.update(value=config.default_cfg_tsnr), \
+                gr.update(value=config.default_overwrite_step), \
+                gr.update(value=config.default_overwrite_switch)]
     for i, (n, v) in enumerate(config.default_loras):
         results += [gr.update(value=n),gr.update(value=v)]
     results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
-    state_params.update({"__message":system_message})
+    state_params.update({"__message": system_message})
+    state_params.update({"__nav_id_list": nav_id_list})
+    state_params.update({"__nav_preset_html": nav_preset_html})
     results += [state_params]
     system_message = 'system message was displayed!'
-
     return results
 
 
