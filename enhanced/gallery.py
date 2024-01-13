@@ -163,6 +163,7 @@ def parse_html_log(choice: str, passthrough = False):
     images_prompt_list = []
     for info in prompt_infos:
         text = info.xpath('.//p//text()')
+        #print(f'log_parse_text1:{text}')
         if len(text)>20:
             def standardized(x):
                 if x.startswith(', '):
@@ -198,16 +199,21 @@ def parse_html_log(choice: str, passthrough = False):
                     info_dict[text[1+i*2]] = text[2+i*2]
         else:
             text = info.xpath('.//td//text()')
+            #print(f'log_parse_text2:{text}')
             if len(text)>10:
-                if text[2]=='\n':
+                if text[2]=='\n' or text[2]=='\r\n':
                     text.insert(2, '')
-                if text[5]=='\n':
+                if text[5]=='\n' or text[5]=='\r\n':
                     text.insert(5, '')
-                if text[8]=='\n':
+                if text[8]=='\n' or text[8]=='\r\n':
                     text.insert(8, '')
                 info_dict={"Filename":text[0]}
                 for i in range(0,int(len(text)/3)):
-                    info_dict[text[1+i*3]] = text[2+i*3]
+                    if text[1+i*3].startswith("LoRA "):
+                        [key, value] = text[2+i*3].split(':')
+                        info_dict.update({"LoRA ["+key.strip()+"] weight": value.strip()})
+                    else:
+                        info_dict[text[1+i*3]] = text[2+i*3]
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
         #print(f'{len(text)},info_dict={info_dict}')
