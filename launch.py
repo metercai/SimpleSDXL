@@ -137,7 +137,7 @@ import socket
 if '--listen' not in sys.argv:
     args.listen = socket.gethostbyname(socket.gethostname())
 if '--port' not in sys.argv:
-    args.port = 8188
+    args.port = 8186
 
 download_models()
 
