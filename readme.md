@@ -1,15 +1,23 @@
 ## SimpleSDXL - Fooocus中文孪生版
 <div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_02_01.png"></div>
-在Fooocus基础上增强功能，可无缝升级，两版本同时可用。经过了手机适配，PC和手机可同步使用。<br> Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronously. Adapted to mobile, PC and phone can be used synchronously.
 
-- **中英文混编提示词**: 离线在线自主选择，支持翻译后再编辑，更适于Tag表述。<br>
-  **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Tags.
-- **图片集浏览和管理**: 原生版仅能浏览当前生成的图片集。 <br>
-  **Finished image sets browsing and management**:  Fooocus only can browse the current generated image set.
-- **查看生成参数和提取重生**: 可即时查看历史图片的生成参数，也可提取参数回填界面，二次生成。 <br>
-  **View parameters and extract regeneration**:  Can view the generation parameters of historical images, and can also extract parameters to backfill for secondary generation.
-- **预置包切换和模型下载**: 预置包可在界面上主动切换和生成，加载预置包时会自动下载补齐本地缺失的模型文件。 <br>
-  **Switch preset and download missing files**:  The preset can be switched and generated through UI, and it wil download the missing local model files in loading.
+## 什么是SimpleSDXL？/ What's SimpleSDXL?
+- **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SDXL的出图质量很出色，Fooocus的易用性非常棒，站在巨人的肩膀上有了SimpleSDXL。SimpleSDXL会以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
+- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的原始初衷。
+- **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力，进一步简化流程操作，直接面对使用场景，发挥出SDXL的强大能力。
+
+## 对比Fooocus的增强特色 / Enhanced features of Fooocus
+在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
+Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronous iteration and parallel use. Adapted to mobile, PC and phone can be used synchronously.
+
+- **中英文混编提示词**: 在线离线自主选择，支持翻译后再编辑，更适于提示词表达。<br>
+  **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt.
+- **图片集浏览和管理**: 原生版仅能浏览当前生成的图片集，已生成图片管理非常简陋。 <br>
+  **Finished image sets browsing and management**:  Fooocus only can browse the current generated image set. Finished images management is very simple.
+- **查看参数和提取重生**: 可即时查看已出图片的生成参数，也可提取参数回填界面，二次生成。 <br>
+  **View parameters and extract regeneration**:  Can view the generation parameters of finished images, and can also extract parameters to backfill for secondary generation.
+- **增强预置包和模型下载**: 预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
+  **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 
 ## 🔔 更新 / Update
 - [2024.01.08] <b>新年第二版：图片工具增加新特性：浏览图片可自动回填提示词，联动删除坏图文件和日志记录。混编翻译器启动稳定性修补，增加不翻译模式。同步主线v2.1.861，新增风格选择浮层示意图。</b>
@@ -27,29 +35,50 @@
 - [2023.11.12] 同步Fooocus最新版到v2.1.789，修订界面汉化文字，新增离线多语言翻译器：**nllb-200**，Prompt支持中英文混编，自动识别中文并统一翻译到英文。此功能需提前下载翻译模型到 `models/translator/` 目录，源地址：https://huggingface.co/facebook/nllb-200-distilled-600M 。注：需要整目录下载，保留目录名。
 - [2023.10.16] 初始版本，界面文字汉化，新增 `--webroot` 参数，设定云端URL访问的根路径。如云端访问地址为：http://hostname/sdxl/ ，启动参数中需追加 `--webroot /sdxl` 。
 
-## 什么是SimpleSDXL？/ What's SimpleSDXL?
-- **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SDXL的出图质量很出色，Fooocus的易用性非常棒，站在巨人的肩膀上有了SimpleSDXL，更简洁更易用。
-- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的初衷之一。
-- **场景定制** 文生图和图生图有非常多的使用场景，需要出色的裁剪定制能力，进一步简化流程与操作，以接入更多使用场景，发挥SDXL的强大能力。
+## 增强功能 / Enhanced Features
+### 中英混编提示词
+- [x] **中英文混合编辑** 对提示词文本进行中英文切分后分别翻译再合并，适配提示词类的表达场景。
+- [x] **在线和离线翻译器** 可自动安装Meta(Facebook)的离线翻译大模型，也可选择第三方翻译接口。离线模型需自身算力支持，第三方接口接入便捷成本低，但增加了接口依赖。用户可根据情况自主配置选择。
+- [x] **支持翻译后再编辑** 机器翻译的结果质量都不可控，存在翻译质量差导致生成内容偏差的现象。翻译后再编辑可以显性化翻译质量，提供用户再优化调整处理的空间。
+- [x] **多大厂接口随机选** 选择国内大厂（百度、阿里和搜狗）的稳定接口，每次启动时随机选择，运行态相对固定。既避免对接口冲击又保持翻译的一致性。
 
-## 增强特性 / Enhanced Features
-已实现及计划实现的功能特性：
-- [x] **中文界面** SimpleSDXL的汉化翻译更贴合中文用户思维习惯。针对个别场景做了定制翻译，比如"Advanced"，在不同位置出现会有不同的文字翻译。 
-- [x] **中英混编提示词** SDXL模型是以英文标签词（Tag）为主的提示词系统，很多词汇比较生僻，不利于中文用户使用。SimpleSDXL使用Meta(Facebook)最新SOTA的多语种翻译模型 nllb-200 ，实现本地化的提示词中英文混编。方便中文用户利用已有英文提示词进行改编创作。社区中的在线翻译器是调用第三方Api接口，会有访问限制，也无法适应中英混编的Tag表述模式。
-- [x] **历史图片索引** Fooocus无法浏览前一次生成的图片，难以进行多次出图间的比对。SimpleSDXL新增了历史图片浏览功能，可以按照日期分组进行快速浏览比对。
-- [x] **生成参数管理** 对出图后的提示词等参数进行管理，可以查看和自动回填，方便对历史图片生成参数的借鉴使用。
-- [x] **场景预置包切换** 在主界面上可以对场景预置包进行切换，自动下载预置包相关资源，确保可用性，体验不同场景预置包的出图效果。
-- [ ] **图片预置包嵌入** 精选优质的已生成图片，嵌入生成参数和预置包信息，方便学习和交流。
-- [x] **访问根路径可设置** Fooocus的主场景在本机部署。当在云端部署配置前置转发后，会引起URL路径系统混乱。SimpleSDXL新增 `--webroot` 参数，可以设定访问URL的根路径，方便云端部署。
-- [ ] **前后端分离，算力云化** 实现操控端本机部署，模型端云化部署。让无GPU卡设备用户也可使用上SDXL。
-- [x] **模型打包，内外双源** 中文用户天然要面对复杂网络环境的处理。SimpleSDXL将使用到的模型文件打包，提供内外两个源供下载。
-- [x] **主线功能及时同步** SimpleSDXL新增代码会保持良好的结构，与Fooocus主线版本具备兼容性，可以及时同步主线新增能力和Bug修复。
+### 已出图集管理
+- [x] **已出图片检索** 对已出图片可以按照出图日期进行检索。单天出图量过大，则按照28张一个子目录分别索引，避免撑爆相册组件。
+- [x] **已出图片删除** 对崩坏的已出图片可以即时删除，联动删除出图参数日志，确保图片和参数日志保持一致性。删除图片的操作入口放在了“参数工具箱”。
+- [x] **自动回填提示词** 在浏览已出图片集过程中，可选择自动回填图片提示词，方便提示词的对照和修改，及图片的重生。
+- [x] **图片集交互优化** 已出图片集索引栏可根据状态适配，自动收起和调整，避免目录过多挤占页面空间，干扰图片生成创作。
+
+### 参数工具箱
+- [x] **查看参数** 从出图日志文件中提取当前图片的生成参数并用浮层完整展示。图集切换过程中，浮层内容跟随切换。
+- [x] **提参重生** 用当前图片的生成参数覆盖默认预置包的参数，提示词回填，可以修改参数或提示词后重新出图。
+- [x] **生成预置包** 将当前出图环境参数打包保存为新的预置包，将预置包文件存入presets目录下，顶部导航跟随切换。
+- [x] **扩展预置参数** 扩展主线的预置包参数范围，补充开发者模式的参数，以及风格样式的定义和通配符的定义。
+- [ ] **嵌参图片** 将当前出图环境参数打包嵌入图片文件中，保存到专属的嵌参图片目录。嵌参图片可通过图片描述工具提取参数形成新的出图环境配置。
+
+### 预置包与导航
+- [x] **预置包导航** 将presets目录下的预置包配置文件生成顶部导航入口，样式上适配明亮/暗黑两种背景。
+- [x] **背景样式导航** 在顶部导航可自主切换明亮/暗黑两种背景样式。
+- [x] **预置包加载** 用户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。
+- [x] **统一模型ID和下载** 对接模型信息库，使用以模型文件哈希为基础的统一模型MUID。可自动检测预置包出图环境的可用性，缺失模型文件可自动下载补齐。
+- [x] **出图保护** 当系统环境进入出图状态时，顶部导航不可点击，禁止加载预置包冲击出图环境。
+
+### 启动包和升级包
+- [x] **启动流程优化** 对接国内模型下载源，根据接入位置区分语言和下载源。国内IP默认中文，国内源；国外IP默认英文，国外源。提供启动参数可自定义覆盖默认值，满足科学魔法的适配需求。
+- [x] **启动包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到75M。
+- [x] **平行升级包** 构建与Fooocus主线平行目录的升级包，直接读取主线的模型配置文件，免配置直接运行。升级包瘦身到40M。
+- [x] **日志消息** 每次启动自动检测Fooocus主线和SimpleSDXL的更新日志，将更新消息显示到顶部消息浮层。
+- [x] **版本标识** 以发布日期和版本哈希值作为SimpleSDXL的版本标识，方便定位排错。
+
+### 其他
+- [x] **云化适配** 增加访问根路径启动参数，`--webroot`。当在云端服务器部署，并配置前置转发后，需要配置根路径参数，避免URL路径的混乱。
+- [x] **主线同步** SimpleSDXL的增强代码保持良好的结构，与Fooocus主线版本保持良好的兼容性和扩展性，可以及时同步主线的新增能力和Bug修复。
+- [ ] **算力云化** 前后端分离，本机的出图算力后端可支持远程的前端出图调用，实现前端操控和出图计算的分离，让无GPU卡设备也可使用SDXL模型出图。
 
 ## 安装使用 / Install & Usage
 ### Windows :
 分两种情况:<br>
 一，在现有Fooocus环境下安装，两个版本可同时使用:
-    点击下载**一键升级包**(40M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。注意必须用cmd的命令行运行。在第一次启动后，需要足够权限创建软连接，确保与Fooocus共享同一模型库和图片目录，从而让两个版本可同时使用。
+    点击下载**一键升级包**(40M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。然后启动命令行窗口`cmd`，进入到这个同级目录，用命令行运行`run_SimpleSDXL.bat`。在第一次启动后，会自动读取Fooocus的配置文件，两个版本共享相同的模型目录和图片输出目录，不用再次配置即可使用。
 
 二，全新安装SimpleSDXL:<br>
 1, 点击下载**一键启动包**(75M,可执行压缩包): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
@@ -63,10 +92,6 @@
     git clone https://github.com/metercai/SimpleSDXL.git
     #国内用户可换用gitee源: https://gitee.com/metercai/SimpleSDXL.git
     cd SimpleSDXL
-    rm -rf models
-    ln -s ../Fooocus/models models
-    ln -s ../Fooocus/outputs outputs
-    ln -s ../Fooocus/input input
     python entry_with_update.py 
     # 云端部署可以配置： ip, port, webroot 等参数
     # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --preset realistic
