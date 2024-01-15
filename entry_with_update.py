@@ -22,28 +22,30 @@ try:
 
     local_branch_ref = f'refs/heads/{branch_name}'
     local_branch = repo.lookup_reference(local_branch_ref)
+    local_commit = repo.revparse_single(local_branch_ref)
+
+    import enhanced.version as version
+    version.branch = f'{branch_name}'
+    version.commit_id = f'{local_commit.id}'[:7]
 
     remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
     remote_commit = repo.revparse_single(remote_reference)
 
-    import enhanced.version as version
-    version.commit_id = f'{remote_commit.id}'[:7]
-
     merge_result, _ = repo.merge_analysis(remote_commit.id)
 
     if merge_result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
-        print("Already up-to-date")
+        print(f'{branch_name}: Already up-to-date')
     elif merge_result & pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
         local_branch.set_target(remote_commit.id)
         repo.head.set_target(remote_commit.id)
         repo.checkout_tree(repo.get(remote_commit.id))
         repo.reset(local_branch.target, pygit2.GIT_RESET_HARD)
-        print("Fast-forward merge")
+        print(f'{branch_name}: Fast-forward merge')
     elif merge_result & pygit2.GIT_MERGE_ANALYSIS_NORMAL:
-        print("Update failed - Did you modify any file?")
+        print(f'{branch_name}: Update failed - Did you modify any file?')
 except Exception as e:
-    print('Update failed.')
+    print(f'{branch_name}: Update failed.')
     print(str(e))
 
-print('Update succeeded.')
+print(f'{branch_name}: Update succeeded.')
 from launch import *

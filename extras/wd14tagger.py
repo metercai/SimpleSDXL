@@ -24,7 +24,7 @@ global_model = None
 global_csv = None
 
 
-def default_interrogator(image_rgb, threshold=0.35, character_threshold=0.85, exclude_tags=""):
+def default_interrogator(image_path, threshold=0.35, character_threshold=0.85, exclude_tags=""):
     global global_model, global_csv
 
     model_name = "wd-v1-4-moat-tagger-v2"
@@ -50,7 +50,7 @@ def default_interrogator(image_rgb, threshold=0.35, character_threshold=0.85, ex
     input = model.get_inputs()[0]
     height = input.shape[1]
 
-    image = Image.fromarray(image_rgb)  # RGB
+    image = Image.open(image_path)
     ratio = float(height)/max(image.size)
     new_size = tuple([int(x*ratio) for x in image.size])
     image = image.resize(new_size, Image.LANCZOS)

@@ -3,6 +3,7 @@ import args_manager
 import modules.config
 import json
 import urllib.parse
+import modules.advanced_parameters as ads
 
 from PIL import Image
 from modules.util import generate_temp_filename
@@ -104,5 +105,24 @@ def log(img, dic):
     print(f'Image generated with private log at: {html_name}')
 
     log_cache[html_name] = middle_part
+    
+    log_ext(local_temp_filename)
 
     return
+
+
+def log_ext(file_name):
+    dirname, filename = os.path.split(file_name)
+    log_name = os.path.join(dirname, "log_ads.json")
+    
+    log_ext = {}
+    if os.path.exists(log_name):
+        with open(log_name, "r", encoding="utf-8") as log_file:
+            log_ext.update(json.load(log_file))
+    
+    log_ext.update({filename: ads.get_diff_for_log_ext()})
+
+    with open(log_name, 'w', encoding='utf-8') as log_file:
+        json.dump(log_ext, log_file)
+
+    print(f'Image generated with params log at: {log_name}')

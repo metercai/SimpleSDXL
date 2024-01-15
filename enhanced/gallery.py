@@ -17,11 +17,12 @@ images_list = {}
 images_list_keys = []
 images_prompt = {}
 images_prompt_keys = []
+images_ads = {}
 
 def refresh_output_list():
     global output_list, max_per_page
 
-    listdirs = [f for f in os.listdir(config.path_outputs) if os.path.isdir(os.path.join(config.path_outputs,f))]
+    listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
         return
     listdirs1 = listdirs.copy()
@@ -125,7 +126,7 @@ def refresh_images_list(choice: str, passthrough = False):
 
 
 def get_images_prompt(choice, selected):
-    global max_per_page, images_prompt, images_prompt_keys
+    global max_per_page, images_prompt, images_prompt_keys, images_ads
 
     if choice is None:
         choice = output_list[0]
@@ -145,11 +146,14 @@ def get_images_prompt(choice, selected):
             selected = nums-max_per_page + selected
     images_prompt_keys.remove(choice)
     images_prompt_keys.append(choice)
-    return images_prompt[choice][selected]
+    info = images_prompt[choice][selected]
+    if choice in images_ads.keys() and info['Filename'] in images_ads[choice].keys():
+        info.update({"Advanced_parameters": images_ads[choice][info['Filename']]})
+    return info
 
 
 def parse_html_log(choice: str, passthrough = False):
-    global images_prompt, images_prompt_keys
+    global images_prompt, images_prompt_keys, images_ads
     
     choice = choice.split('/')[0]
     if not passthrough and choice in images_prompt_keys and images_prompt[choice]:
@@ -222,13 +226,27 @@ def parse_html_log(choice: str, passthrough = False):
         if choice in images_prompt.keys():
             images_prompt_keys.pop(images_prompt_keys.index(choice))
             images_prompt.pop(choice)
+            if choice in images_ads.keys():
+                images_ads.pop(choice)
         return
     if choice in images_prompt_keys:
         images_prompt_keys.pop(images_prompt_keys.index(choice))
     if len(images_prompt.keys())>15:
-        images_prompt.pop(images_prompt_keys.pop(0))
+        key = images_prompt_keys.pop(0)
+        images_prompt.pop(key)
+        if key in images_ads.keys():
+            images_ads.pop(key)
     images_prompt.update({choice: images_prompt_list})
     images_prompt_keys.append(choice)
+    
+    dirname, filename = os.path.split(html_file)
+    log_name = os.path.join(dirname, "log_ads.json")
+    log_ext = {}
+    if os.path.exists(log_name):
+        with open(log_name, "r", encoding="utf-8") as log_file:
+            log_ext.update(json.load(log_file))
+    images_ads.update({choice: log_ext})
+    
     print(f'[Gallery] Parse_html_log: loaded {len(images_prompt[choice])} image_infos of {choice}.')
     return
 
