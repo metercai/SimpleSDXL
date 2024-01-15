@@ -116,8 +116,7 @@ def make_html():
     global nav_id_list, nav_preset_html
 
     path_preset = os.path.abspath(f'./presets/')
-    presets = util.get_files_from_folder(path_preset, ['.json'], None)
-    del presets[presets.index('default.json')]
+    presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.') and p!='default.json']
     file_times = [(f, os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
     sorted_file_times = sorted(file_times, key=lambda x: x[1], reverse=True)
     sorted_files = [f[0] for f in sorted_file_times]

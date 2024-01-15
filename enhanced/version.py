@@ -1,5 +1,6 @@
 import os
 
+branch = ''
 commit_id = ''
 simplesdxl_ver = ''
 

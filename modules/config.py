@@ -5,6 +5,7 @@ import numbers
 import args_manager
 import modules.flags
 import modules.sdxl_styles
+import modules.advanced_parameters as ads
 
 from modules.model_loader import load_file_from_url
 from modules.util import get_files_from_folder
@@ -212,12 +213,12 @@ default_sample_sharpness = get_config_item_or_set_default(
 )
 default_sampler = get_config_item_or_set_default(
     key='default_sampler',
-    default_value='dpmpp_2m_sde_gpu',
+    default_value=ads.default['sampler_name'],
     validator=lambda x: x in modules.flags.sampler_list
 )
 default_scheduler = get_config_item_or_set_default(
     key='default_scheduler',
-    default_value='karras',
+    default_value=ads.default['scheduler_name'],
     validator=lambda x: x in modules.flags.scheduler_list
 )
 default_styles = get_config_item_or_set_default(
@@ -298,22 +299,22 @@ default_aspect_ratio = get_config_item_or_set_default(
 )
 default_inpaint_engine_version = get_config_item_or_set_default(
     key='default_inpaint_engine_version',
-    default_value='v2.6',
+    default_value=ads.default['inpaint_engine'],
     validator=lambda x: x in modules.flags.inpaint_engine_versions
 )
 default_cfg_tsnr = get_config_item_or_set_default(
     key='default_cfg_tsnr',
-    default_value=7.0,
+    default_value=ads.default['adaptive_cfg'],
     validator=lambda x: isinstance(x, numbers.Number)
 )
 default_overwrite_step = get_config_item_or_set_default(
     key='default_overwrite_step',
-    default_value=-1,
+    default_value=ads.default['overwrite_step'],
     validator=lambda x: isinstance(x, int)
 )
 default_overwrite_switch = get_config_item_or_set_default(
     key='default_overwrite_switch',
-    default_value=-1,
+    default_value=ads.default['overwrite_switch'],
     validator=lambda x: isinstance(x, int)
 )
 example_inpaint_prompts = get_config_item_or_set_default(

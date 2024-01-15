@@ -40,7 +40,7 @@ def prepare_environment():
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
-    print(f'SimpleSDXL version: {version.get_simplesdxl_ver()}')
+    print(f'{version.branch} version: {version.get_simplesdxl_ver()}')
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
@@ -111,6 +111,9 @@ def ini_args():
     return args
 
 
+def is_ipynb():
+    return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
+
 prepare_environment()
 #build_launcher()
 args = ini_args()
@@ -135,7 +138,10 @@ if location.location !='CN':
 
 import socket
 if '--listen' not in sys.argv:
-    args.listen = socket.gethostbyname(socket.gethostname())
+    if is_ipynb():
+        args.listen = '127.0.0.1'
+    else:
+        args.listen = socket.gethostbyname(socket.gethostname())
 if '--port' not in sys.argv:
     args.port = 8186
 

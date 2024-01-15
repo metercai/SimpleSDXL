@@ -3,17 +3,21 @@ import json
 import copy
 import re
 import math
+import piexif
 import gradio as gr
 import modules.config as config
+import modules.advanced_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
+from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from enhanced.models_info import models_info
 
 css = '''
 .toolbox {
     height: auto;
     position: absolute;
-    top: 230px;
+    top: 210px;
     left: 86%;
     width: 100px !important;
     z-index: 20;
@@ -81,8 +85,8 @@ css = '''
 # app context
 toolbox_note_preset_title='Save a new preset for the current params and configuration.'
 toolbox_note_regenerate_title='Extract parameters to backfill for regeneration. Please note that some parameters will be modified!'
+toolbox_note_embed_title='Embed parameters into images for easy identification of image sources and communication and learning.'
 toolbox_note_invalid_url='The model in the params and configuration is missing MUID. For usability and transferability, please click "Sync model info" in the right model tab.'
-
 
 def make_infobox_markdown(info):
     bgcolor = '#ddd'
@@ -91,7 +95,7 @@ def make_infobox_markdown(info):
     html = f'<div style="background: {bgcolor}">'
     if info:
         for key in info:
-            if key == 'Filename':
+            if key == 'Filename' or key == 'Advanced_parameters':
                 continue
             html += f'<b>{key}:</b> {info[key]}<br/>'
     else:
@@ -155,7 +159,8 @@ def toggle_note_box(item, state_params):
         return gr.update(value=toolbox_note_regenerate_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'preset':
         return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
-
+    if item == 'embed':
+        return gr.update(value=toolbox_note_embed_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
 
 def toggle_note_box_delete(state_params):
     return toggle_note_box('delete', state_params)
@@ -172,6 +177,14 @@ def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, l
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('preset', state_params)
 
+
+def toggle_note_box_embed(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
+    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+    state_params = check_preset_models(checklist, state_params)
+    return toggle_note_box('embed', state_params)
+
+
+
 filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
 
 def delete_image(state_params):
@@ -180,7 +193,7 @@ def delete_image(state_params):
     file_name = info["Filename"]
     output_index = choice.split('/')
     dir_path = os.path.join(config.path_outputs, '20' + output_index[0])
-    file_path = os.path.join(dir_path, file_name)
+    
     log_path = os.path.join(dir_path, 'log.html')
     if os.path.exists(log_path):
         file_text = ''
@@ -204,6 +217,18 @@ def delete_image(state_params):
         with open(log_path, "w", encoding="utf-8") as log_file:
             log_file.write(file_text)
         print(f'[ToolBox] Delete item from log.html: {file_name}')
+
+    log_name = os.path.join(dirname, "log_ads.json")
+    log_ext = {}
+    if os.path.exists(log_name):
+        log_ext = {}
+        with open(log_name, "r", encoding="utf-8") as log_file:
+            log_ext.update(json.load(log_file))
+        log_ext.pop(file_name)
+        with open(log_name, 'w', encoding='utf-8') as log_file:
+            json.dump(log_ext, log_file)
+
+    file_path = os.path.join(dir_path, file_name)
     if os.path.exists(file_path):
         os.remove(file_path)
     print(f'[ToolBox] Delete image file: {file_path}')
@@ -267,12 +292,31 @@ function(system_params) {
 
 
 def reset_params(state_params):
-
     [choice, selected] = state_params["prompt_info"]
     info = gallery.get_images_prompt(choice, selected)
+    results = _reset_params(info)
+    print(f'[ToolBox] Reset_params: update {len(info.keys())} params from current image log file.')
+    return results + [gr.update(visible=False)] * 2
+
+def _reset_params(info):
+    print(f'[ToolBox] Get params to reset:{info}')
     aspect_ratios = info['Resolution'][1:-1].replace(', ', '*')
     adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in info['ADM Guidance'][1:-1].split(', ')]
     refiner_model = None if info['Refiner Model']=='' else info['Refiner Model']
+    
+    if info['Advanced_parameters'] and 'adaptive_cfg' in info['Advanced_parameters'].keys():
+        adaptive_cfg = info['Advanced_parameters']['adaptive_cfg']
+    else:
+        adaptive_cfg = ads.default['adaptive_cfg']
+    if info['Advanced_parameters'] and 'overwrite_step' in info['Advanced_parameters'].keys():
+        overwrite_step = info['Advanced_parameters']['overwrite_step']
+    else:
+        overwrite_step = ads.default['overwrite_step']
+    if info['Advanced_parameters'] and 'overwrite_switch' in info['Advanced_parameters'].keys():
+        overwrite_switch = info['Advanced_parameters']['overwrite_switch']
+    else:
+        overwrite_switch = ads.default['overwrite_switch']
+
     lora_results = []
     for k in range(0,5):
         lora_results += [gr.update(value='None'), gr.update(value=1.0)]
@@ -291,11 +335,10 @@ def reset_params(state_params):
             gr.update(value=info['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(info['Sharpness'])), \
             gr.update(value=float(info['Guidance Scale'])), gr.update(value=info['Base Model']), gr.update(value=refiner_model), \
             gr.update(value=float(info['Refiner Switch'])), gr.update(value=info['Sampler']), gr.update(value=info['Scheduler']), \
-            gr.update(), gr.update(), gr.update()]
+            gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch)]
     results += lora_results
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
-    print(f'[ToolBox] Reset_params: update {len(results)} params from current image log file.')
-    return results + [gr.update(visible=False)] * 2
+    return results
 
 
 def save_preset(name, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
@@ -361,7 +404,40 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
         print(f'[ToolBox] Saved the current params and config to {save_path}.')
     state_params.update({"note_box_state": ['',0,0]})
     topbar.make_html()
-    results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)]
+    return [gr.update(visible=False)] * 4 + [state_params]
 
-    return results + [state_params]
 
+def embed_params(state_params):
+    [choice, selected] = state_params["prompt_info"]
+    info = gallery.get_images_prompt(choice, selected)
+    #print(f'info:{info}')
+    filename = info['Filename']
+    file_path = os.path.join(os.path.join(config.path_outputs, '20' + choice.split('/')[0]), filename)
+    img = Image.open(file_path)
+    metadata = PngInfo()
+    for x in info.keys():
+        metadata.add_text(x, json.dumps(info[x]), True)
+
+    embed_dirs = os.path.join(config.path_outputs, 'embed')
+    if not os.path.exists(embed_dirs):
+        os.mkdir(embed_dirs)
+    embed_file = os.path.join(embed_dirs, filename)
+    img.save(embed_file, pnginfo=metadata)
+    print(f'[ToolBox] Embed_params: embed {len(info.keys())} params to image and save to {embed_file}.')
+    return [gr.update(visible=False)] * 2 + [state_params]
+
+def extract_parameters(img_path, state_params):
+    img = Image.open(img_path)
+    metadata = {}
+    if hasattr(img,'text'):
+        for k in img.text:
+            metadata.update({k: json.loads(img.text[k])})
+    state_params.update({'image_params': metadata})
+    return state_params
+
+
+def reset_params_from_image(state_params):
+    info = state_params['image_params']
+    results = _reset_params(info)   
+    print(f'[ToolBox] Reset_params_from_image: update {len(info.keys())} params from input image.')
+    return results
