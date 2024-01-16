@@ -299,6 +299,8 @@ def reset_context(state_params):
     theme = state_params.get("__theme")
     preset_url = state_params.get("preset_url", '')
     print(f'[Topbar] Reset_context: preset={config.preset}-->{preset}, theme={config.theme}-->{theme}')
+    
+    # load preset config
     config_org = {}
     if isinstance(preset, str):
         preset_path = os.path.abspath(f'./presets/{preset}.json')
@@ -322,6 +324,7 @@ def reset_context(state_params):
         else:
             preset_url = ''
     
+    # download url with MUID
     down_muid = {}
     for k in config_org["checkpoint_downloads"].keys():
         if config_org["checkpoint_downloads"][k].startswith('MUID:'):
@@ -333,10 +336,12 @@ def reset_context(state_params):
         if config_org["lora_downloads"][k].startswith('MUID:'):
             down_muid.update({"loras/"+k: config_org["lora_downloads"][k][5:]})
 
+    # parse model filename in this preset
     embeddings = embeddings_model_split(config_org["default_prompt"], config_org["default_prompt_negative"])
     checklist = ["checkpoints/"+config_org["default_model"], "checkpoints/"+config_org["default_refiner"]] + ["loras/"+n for i, (n, v) in enumerate(config_org["default_loras"])]
     checklist += embeddings
 
+    # check model filename in local model path
     newlist = []
     downlist = []
     not_MUID = False
@@ -355,6 +360,7 @@ def reset_context(state_params):
                     not_MUID = True
         newlist += [filename]
 
+    # download the missing model
     if downlist:
         print(f'[Topbar] The model file in preset is not local, ready to download.')
         for f in downlist:
@@ -381,6 +387,7 @@ def reset_context(state_params):
     if not_MUID:
         print(f'[Topbar] The preset contains model file without MUID, need to sync model info for usability and transferability.')
     
+    # replace to local model filename
     new_loras = []
     for i in range(len(newlist)):
         if newlist[i] != checklist[i]:
