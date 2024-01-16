@@ -217,7 +217,7 @@ def delete_image(state_params):
             log_file.write(file_text)
         print(f'[ToolBox] Delete item from log.html: {file_name}')
 
-    log_name = os.path.join(dirname, "log_ads.json")
+    log_name = os.path.join(dir_path, "log_ads.json")
     log_ext = {}
     if os.path.exists(log_name):
         log_ext = {}
