@@ -3,7 +3,6 @@ import json
 import copy
 import re
 import math
-import piexif
 import gradio as gr
 import modules.config as config
 import modules.advanced_parameters as ads
