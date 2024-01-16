@@ -37,8 +37,8 @@ def get_diff_for_log_ext():
     log_ext = {}
     diff_ads =  get_diff_from_default()
     for k in diff_ads.keys():
-        if k!="adm_scaler_positive" and k!="adm_scaler_negative" and k!="adm_scaler_end" and k!="sampler_name" and k!="scheduler_name":
-            log_ext.update({f'{k}', diff_ads[k]})
+        if k!="adm_scaler_positive" and k!="adm_scaler_negative" and k!="adm_scaler_end" and k!="sampler_name" and k!="scheduler_name" and k!="inpaint_mask_upload_checkbox":
+            log_ext.update({f'{k}': diff_ads[k]})
     return log_ext
 
 default = {
