@@ -36,8 +36,9 @@ def set_all_advanced_parameters(*args):
 def get_diff_for_log_ext():
     log_ext = {}
     diff_ads =  get_diff_from_default()
+    ads_params_list = ['adaptive_cfg', 'overwrite_step', 'overwrite_switch', 'inpaint_engine']
     for k in diff_ads.keys():
-        if k!="adm_scaler_positive" and k!="adm_scaler_negative" and k!="adm_scaler_end" and k!="sampler_name" and k!="scheduler_name" and k!="inpaint_mask_upload_checkbox":
+        if k in ads_params_list:
             log_ext.update({f'{k}': diff_ads[k]})
     return log_ext
 
