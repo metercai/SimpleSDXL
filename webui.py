@@ -162,10 +162,10 @@ with shared.gradio_root:
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
-                prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_preset_button = gr.Button(value='SavePreset', size='sm', visible=True)
                 prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True)
+                prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
                 
@@ -549,6 +549,7 @@ with shared.gradio_root:
 
                 ehps = [backfill_prompt, translation_timing, translation_methods]
             
+            gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
@@ -661,13 +662,13 @@ with shared.gradio_root:
             load_parameter_button
         ] + lora_ctrls, queue=False, show_progress=False)
 
-        reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch] + lora_ctrls
+        reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls
         reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
         generate_button.click(topbar.sync_generating_state_true, inputs=state_topbar, outputs=[system_params, state_topbar], show_progress=False) \
             .then(fn=lambda x: None, inputs=system_params, _js=topbar.sync_generating_state_js) \
-            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False)), outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox], show_progress=False) \
+            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)), outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox], show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
@@ -694,18 +695,14 @@ with shared.gradio_root:
 
         desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
-        params_btn.click(toolbox.extract_parameters, inputs=[desc_input_image, state_topbar], outputs=state_topbar, show_progress=True, queue=True) \
-                   .then(toolbox.reset_default_preset, inputs=state_topbar, outputs=[system_params,state_topbar], queue=True, show_progress=False) \
-                   .then(fn=lambda x: x, inputs=system_params,  _js=toolbox.reset_preset_params_js) \
-                   .then(toolbox.reset_params_from_image, inputs=state_topbar, outputs=reset_params, show_progress=False)
+        params_btn.click(toolbox.extract_reset_image_params, inputs=desc_input_image, outputs=reset_params, show_progress=False, queue=True) \
+                   .then(fn=lambda: None, _js=toolbox.extract_reset_image_params_js)
 
     prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
     params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
     
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box, state_topbar], show_progress=False)
-    params_note_regen_button.click(toolbox.reset_default_preset, inputs=state_topbar, outputs=[system_params,state_topbar], queue=True, show_progress=False) \
-        .then(fn=lambda x: x, inputs=system_params,  _js=toolbox.reset_preset_params_js) \
-        .then(toolbox.reset_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_image_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box, state_topbar], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
     params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, state_topbar] + reset_preset, outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False) \
