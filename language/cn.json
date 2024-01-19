@@ -124,7 +124,7 @@
   "Type negative prompt here.": "在这里输入负向提示词。",
   "Advanced+": "高级选项",
   "Advanced Control": "高级控图: ImagePrompt-元素提示，PyraCanny-物体形状，CPDS-整体构图，FaceSwap-换脸",
-  "Preset:": "预置包:",
+  "Presets:": "预置包:",
   "Theme:": "背景:",
   "default": "默认",
   "realistic": "写实",

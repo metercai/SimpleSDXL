@@ -88,6 +88,24 @@ css = '''
 iframe::-webkit-scrollbar {
     display: none;
 }
+
+.preset_bar {
+    text-align: center;
+    padding: 0px;
+}
+
+.bar_title {
+    width: 60px !important;
+    padding: 0px;
+    position: absolute;
+    left: 5px;
+    top: 2px
+}
+
+.bar_button {
+    width: 80px !important;
+    padding: 0px;
+}
 '''
 
 
@@ -106,6 +124,7 @@ nav_html = '''
 
 
 # app context
+nav_name_list = ''
 nav_id_list = ''
 nav_preset_html = ''
 system_message = ''
@@ -113,7 +132,7 @@ config_ext = {}
 
 
 def make_html():
-    global nav_id_list, nav_preset_html
+    global nav_name_list, nav_id_list, nav_preset_html
 
     path_preset = os.path.abspath(f'./presets/')
     presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.') and p!='default.json']
@@ -127,6 +146,8 @@ def make_html():
     for i in range(len(presets)):
         item_list += f'<li class="top_nav_preset" id="preset_{presets[i][:-5]}" onmouseover="nav_mOver(this)" onmouseout="nav_mOut(this)" onclick="refresh_preset(\'{presets[i][:-5]}\')">{presets[i][:-5]}</li>'
         id_array += f'preset_{presets[i][:-5]},'
+        nav_name_list += f'{presets[i][:-5]},'
+    nav_name_list = nav_name_list[:-1]
     id_array += 'theme_light,theme_dark'
     nav_id_list = id_array
     nav_preset_html = item_list
@@ -251,14 +272,51 @@ toggle_system_message_js = '''
 function(system_params) {
     var nav_preset_html = system_params["__nav_preset_html"];
     update_topbar("top_preset",nav_preset_html);
+    var preset=system_params["__preset"];
+    var theme=system_params["__theme"];
+    var nav_name_list_str = system_params["__nav_name_list"];
+    var nav_name_list = new Array();
+    nav_name_list = nav_name_list_str.split(",")
+    console.log("nav_name_list_str:"+nav_name_list_str)
+    for (var i=0;i<nav_name_list.length;i++) {
+        var item_id = "bar"+i;
+        var item_name = nav_name_list[i];
+        var nav_item = gradioApp().getElementById(item_id);
+         console.log("item_id:"+item_id+", item_name:"+item_name+", nav_item:"+nav_item)
+        if (nav_item!=null) {
+            nav_item.innerHTML = item_name;
+            if (item_name != preset) {
+                if (theme == "light") {
+                    nav_item.style.color = 'var(--neutral-400)';
+                    nav_item.style.backgroundColor= 'var(--neutral-50)';
+                } else {
+                    nav_item.style.color = 'var(--neutral-400)';
+                    nav_item.style.backgroundColor= 'var(--neutral-950';
+                }
+            } else {
+                if (c_theme_id == 'theme_light') {
+                    nav_item.style.color = 'var(--neutral-800)';
+                    nav_item.style.backgroundColor= 'var(--secondary-200)';
+                } else {
+                    nav_item.style.color = 'var(--neutral-50)';
+                    nav_item.style.backgroundColor= 'var(--secondary-400';
+                }
+            }
+        }
+    }
     var message=system_params["__message"];
     if (message!=null && message.length>60) {
         showSysMsg(message);
     }
-    var preset=system_params["__preset"];
-    var theme=system_params["__theme"];
     var nav_id_list=system_params["__nav_id_list"];
     mark_position_for_topbar(nav_id_list,preset,theme);
+    //var infobox=gradioApp().getElementById("infobox");
+    //if (infobox!=null) {
+        //css = infobox.getAttribute("class")
+        //console.log("infobox.css="+css)
+        //if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
+          //  infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
+    //}
     return
 }
 '''
@@ -273,6 +331,18 @@ function(system_params) {
     return
 }
 '''
+
+
+def init_nav_bar(system_params, state_params):
+    preset_name_list = system_params["__nav_name_list"].split(',')
+    for i range(9-len(preset_name_list)):
+        preset_name_list.append('')
+    print(f'preset_name_list:{preset_name_list}')
+    state_params = system_params
+    results = []
+    for name in preset_name_list:
+        results += gr.update(value=name)
+    return results + [state_params]
 
 
 def sync_generating_state_true(state_params):
@@ -291,6 +361,13 @@ def sync_generating_state_false(state_params):
 def sync_message(state_params):
     state_params.update({"__message":system_message})
     return state_params
+
+
+def reset_params_for_preset(bar_button, state_params):
+    print(f'bar_button:{bar_button}')
+    state_params.update({"__preset": bar_button})
+    return reset_context(state_params)
+
 
 def reset_context(state_params):
     global system_message, nav_id_list, nav_preset_html
