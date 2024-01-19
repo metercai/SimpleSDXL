@@ -48,7 +48,7 @@ default_models_info = {
     
 
 def init_models_info():
-    global models_info, models_info_muid, models_info_rsync, models_info_file, models_info_path
+    global models_info, models_info_file, models_info_path
 
     if os.path.exists(models_info_path):
         file_mtime = time.localtime(os.path.getmtime(models_info_path)) 
@@ -60,7 +60,12 @@ def init_models_info():
             except Exception as e:
                 print(f'[ModelInfo] Load model info file [{models_info_path}] failed!')
                 print(e)
+    refresh_models_info_from_path()
+    return
     
+def refresh_models_info_from_path():
+    global models_info, models_info_file, models_info_path
+
     model_filenames = config.get_model_filenames(config.path_checkpoints)
     lora_filenames = config.get_model_filenames(config.path_loras)
     embedding_filenames = config.get_model_filenames(config.path_embeddings)
@@ -132,11 +137,28 @@ def get_file_sha256(file_path):
                 
 
 def sync_model_info_click(*args):
-    global models_info, models_info_rsync, models_info_file, models_info_path
+    global models_info
 
     downurls = list(args)
     #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
+    keylist = sync_model_info(downurls)
+    results = []
+    nums = 0
+    for k in keylist:
+        muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+        durl = None if models_info[k]['url'] is None else models_info[k]['url']
+        nums += 1 if models_info[k]['muid'] is None else 0
+        results += [gr.update(info=f'MUID={muid}', value=durl)]
+    if nums:
+        print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
+    return results
+
+
+def sync_model_info(downurls):
+    global models_info, models_info_rsync, models_info_file, models_info_path
+
     keys = sorted(models_info.keys())
+    # file hash completion
     for f in keys:
         if not models_info[f]['hash']:
             print(f'[ModelInfo] Computing file hash for {f}')
@@ -160,19 +182,19 @@ def sync_model_info_click(*args):
             keylist.append(keys[i])
 
     models_info_rsync = {}
+    models_info_update_flag = False
     for i in range(len(keylist)):
         #print(f'downurls: i={i}, k={keylist[i]}, {downurls[i]}')
-        durl = downurls[i]
+        durl = '' if i >= len(downurls) else downurls[i]
         if durl and models_info[keylist[i]]['url'] != durl:
-            models_info_rsync.update({keylist[i]: {"hash": models_info[keylist[i]]['hash'], "url": durl, "muid": models_info[keylist[i]]['muid']}})
+            models_info_rsync.update({keylist[i]: {"hash": models_info[keylist[i]]['hash'], "url": durl}})
             models_info[keylist[i]]['url'] = durl
+            models_info_update_flag = True
 
-    flag = len(models_info_rsync.keys())
     file_mtime = time.localtime(os.path.getmtime(models_info_path))
-
     for k in models_info.keys():
-        if not models_info[k]['muid']:
-            models_info_rsync.update({k: {"hash": models_info[k]['hash'], "url": models_info[k]['url']}})
+        if not models_info[k]['muid'] and k not in models_info_rsync.keys():
+            models_info_rsync.update({k: {"hash": models_info[k]['hash'], "url": ""}})
     try:
         response = requests.post(f'{models_hub_host}/register_claim/', data = token_did.get_register_claim('SimpleSDXLHub'))
         rsync_muid_msg = { "files": token_did.encrypt_default(json.dumps(models_info_rsync)) }
@@ -193,22 +215,11 @@ def sync_model_info_click(*args):
             print(e)
 
     file_mtime2 = time.localtime(os.path.getmtime(models_info_path))
-    if (flag and file_mtime == file_mtime2):
+    if (models_info_update_flag and file_mtime == file_mtime2):
         with open(models_info_path, "w", encoding="utf-8") as json_file:
             json.dump(models_info, json_file, indent=4)
         models_info_file[1] = time.localtime(os.path.getmtime(models_info_path))
-
-    results = []
-    nums = 0
-    for k in keylist:
-        muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
-        durl = None if models_info[k]['url'] is None else models_info[k]['url']
-        nums += 1 if models_info[k]['muid'] is None else 0
-        results += [gr.update(info=f'MUID={muid}', value=durl)]
-    if nums:
-        print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
-    return results
-
+    return keylist
 
 init_models_info()
 
