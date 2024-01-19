@@ -96,12 +96,23 @@ shared.gradio_root = gr.Blocks(
     css=modules.html.css + topbar.css + toolbox.css).queue()
 
 with shared.gradio_root:
+    with gr.Row(variant='compact'):
+        topbar_html = gr.HTML(value=topbar.make_html(), visible=True, elem_id='top_nav', elem_classes='top_nav')
+        state_topbar = gr.State({})
     with gr.Row():
         with gr.Column(scale=2):
             with gr.Group():
-                with gr.Row(variant='compact'):
-                    topbar_html = gr.HTML(value=topbar.make_html(), visible=True, elem_id='top_nav', elem_classes='top_nav')
-                    state_topbar = gr.State({})
+                with gr.Row():
+                    bar_title = gr.Markdown('<b>Presets:</b>', visible=True, elem_id='bar_title', elem_classes='bar_title')
+                    bar0_button = gr.Button(value='default', size='sm', visible=True, min_width=70, elem_id='bar0', elem_classes='bar_button')
+                    bar1_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar1', elem_classes='bar_button')
+                    bar2_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar2', elem_classes='bar_button')
+                    bar3_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar3', elem_classes='bar_button')
+                    bar4_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar4', elem_classes='bar_button')
+                    bar5_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar5', elem_classes='bar_button')
+                    bar6_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar6', elem_classes='bar_button')
+                    bar7_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar7', elem_classes='bar_button')
+                    bar8_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar8', elem_classes='bar_button')
                 with gr.Row():
                     progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=520, elem_id='preview_generating',
                                             elem_classes=['main_view'])
@@ -609,7 +620,7 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
         ctrls += ip_ctrls
         
-        system_params = gr.JSON({"__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
+        system_params = gr.JSON({"__nav_name_list": topbar.nav_name_list, "__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
         state_is_generating = gr.State(False)
         def parse_meta(raw_prompt_txt, is_generating, timing):
             loaded_json = None
@@ -715,7 +726,13 @@ with shared.gradio_root:
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
 
-    shared.gradio_root.load(fn=lambda x: [x, x], inputs=system_params, outputs=[system_params, state_topbar], _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
+    reset_preset_all = reset_preset + [gallery, gallery_index, preset_instruction, state_topbar]
+    bar1_button.click(topbar.reset_params_for_preset, inputs=[bar1_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
+
+    shared.gradio_root.load(topbar.init_nav_bar, inputs=system_params, outputs=[system_params, state_topbar], _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
                       .then(topbar.reset_context, inputs=state_topbar, outputs=reset_preset + [gallery, gallery_index, preset_instruction, state_topbar], show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
