@@ -120,9 +120,13 @@ def log_ext(file_name):
         with open(log_name, "r", encoding="utf-8") as log_file:
             log_ext.update(json.load(log_file))
     
-    log_ext.update({filename: ads.get_diff_for_log_ext()})
+    ads_ext = ads.get_diff_for_log_ext()
+    if len(ads_ext.keys())==0:
+        return
+
+    log_ext.update({filename: ads_ext})
 
     with open(log_name, 'w', encoding='utf-8') as log_file:
         json.dump(log_ext, log_file)
 
-    print(f'Image generated with params log at: {log_name}')
+    print(f'Image generated with advanced params log at: {log_name}')
