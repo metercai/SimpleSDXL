@@ -1,10 +1,10 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_02_01.png"></div>
+<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_01_21.png"></div>
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
-- **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SDXL的出图质量很出色，Fooocus的易用性非常棒，站在巨人的肩膀上有了SimpleSDXL。SimpleSDXL会以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
+- **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
 - **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的原始初衷。
-- **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力，进一步简化流程操作，直接面对使用场景，发挥出SDXL的强大能力。
+- **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力。SimpleSDXL以预置包和嵌参图片为基础，面向场景提升Fooocus的开放性和可定制性，发挥出SDXL的强大能力。
 
 ## 对比Fooocus的增强特色 / Enhanced features of Fooocus
 在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
@@ -14,8 +14,8 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
   **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt.
 - **图片集浏览和管理**: 原生版仅能浏览当前生成的图片集，已生成图片管理非常简陋。 <br>
   **Finished image sets browsing and management**:  Fooocus only can browse the current generated image set. Finished images management is very simple.
-- **查看参数和提取重生**: 可即时查看已出图片的生成参数，也可提取参数回填界面，二次生成。 <br>
-  **View parameters and extract regeneration**:  Can view the generation parameters of finished images, and can also extract parameters to backfill for secondary generation.
+- **嵌参图片和提参重生**: 增强的参数管理，可即时查看可嵌入图片，也可提取参数回填界面，二次生成。 <br>
+  **Embeded images and extract regeneration**:  Enhanced parameter management for instant viewing and embedding of images, and can also extract parameters to backfill for secondary generation.
 - **增强预置包和模型下载**: 预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
   **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 
