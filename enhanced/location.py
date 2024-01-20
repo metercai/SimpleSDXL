@@ -11,3 +11,6 @@ def init_location():
     except Exception as e:
         print(f'Init location error: {e}')
     return
+
+def language_radio(language):
+    return '中文' if language=='cn' else 'En'

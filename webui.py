@@ -28,6 +28,7 @@ import enhanced.toolbox  as toolbox
 import enhanced.translator  as translator
 import enhanced.enhanced_parameters as enhanced_parameters
 import enhanced.version as version
+import enhanced.location as location
 from enhanced.models_info import models_info, sync_model_info_click 
 
 def generate_clicked(*args):
@@ -96,14 +97,12 @@ shared.gradio_root = gr.Blocks(
     css=modules.html.css + topbar.css + toolbox.css).queue()
 
 with shared.gradio_root:
-    with gr.Row(variant='compact'):
-        topbar_html = gr.HTML(value=topbar.make_html(), visible=True, elem_id='top_nav', elem_classes='top_nav')
-        state_topbar = gr.State({})
+    state_topbar = gr.State({})
     with gr.Row():
         with gr.Column(scale=2):
             with gr.Group():
                 with gr.Row():
-                    bar_title = gr.Markdown('<b>Presets:</b>', visible=True, elem_id='bar_title', elem_classes='bar_title')
+                    bar_title = gr.Markdown('<b>Presets:</b>', visible=False, elem_id='bar_title', elem_classes='bar_title')
                     bar0_button = gr.Button(value='default', size='sm', visible=True, min_width=70, elem_id='bar0', elem_classes='bar_button')
                     bar1_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar1', elem_classes='bar_button')
                     bar2_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar2', elem_classes='bar_button')
@@ -169,7 +168,7 @@ with shared.gradio_root:
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
-                image_tools_checkbox = gr.Checkbox(label='Params Tools', value=False, container=False, elem_classes='min_check')
+                image_tools_checkbox = gr.Checkbox(label='ParamsTools', value=False, container=False, elem_classes='min_check')
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
@@ -553,12 +552,18 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):
-                backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                translation_timing = gr.Radio(label='Timing of translation', choices=['No translation', 'Translate then generate', 'Modify after translation'], value='Translate then generate', info='The selection of timing for prompt translation.')
-                translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
-                mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
+                with gr.Row():
+                    language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=location.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
+                    background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
+                with gr.Group():
+                    backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                    translation_timing = gr.Radio(label='Timing of translation', choices=['No translation', 'Translate then generate', 'Modify after translation'], value='Translate then generate', info='The selection of timing for prompt translation.')
+                    translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                    mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
-                ehps = [backfill_prompt, translation_timing, translation_methods]
+            ehps = [backfill_prompt, translation_timing, translation_methods]
+            language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
+            background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
             
             gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
@@ -621,7 +626,7 @@ with shared.gradio_root:
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
         ctrls += ip_ctrls
         
-        system_params = gr.JSON({"__nav_name_list": topbar.nav_name_list, "__nav_id_list":topbar.nav_id_list, "__nav_preset_html":topbar.nav_preset_html}, visible=False)
+        system_params = gr.JSON({"__nav_name_list": topbar.nav_name_list, "__webpath": f'{args_manager.args.webroot}/file={os.path.dirname(__file__)}'}, visible=False)
         state_is_generating = gr.State(False)
         def parse_meta(raw_prompt_txt, is_generating, timing):
             loaded_json = None
@@ -677,17 +682,12 @@ with shared.gradio_root:
         reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
-        generate_button.click(topbar.sync_generating_state_true, inputs=state_topbar, outputs=[system_params, state_topbar], show_progress=False) \
-            .then(fn=lambda x: None, inputs=system_params, _js=topbar.sync_generating_state_js) \
-            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)), outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox], show_progress=False) \
+        generate_button.click(topbar.process_before_generation, inputs=state_topbar, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button], show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(advanced_parameters.set_all_advanced_parameters, inputs=adps) \
             .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
             .then(fn=generate_clicked, inputs=ctrls, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False), outputs=[generate_button, stop_button, skip_button, state_is_generating]) \
-            .then(lambda: (gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)), outputs=[gallery_index, index_radio], show_progress=False) \
-            .then(topbar.sync_generating_state_false, inputs=state_topbar, outputs=[system_params, state_topbar], show_progress=False) \
-            .then(fn=lambda x: None, inputs=system_params, _js=topbar.sync_generating_state_js) \
+            .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button], show_progress=False) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
@@ -724,13 +724,46 @@ with shared.gradio_root:
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
 
     reset_preset_all = reset_preset + [gallery, gallery_index, preset_instruction, state_topbar]
+    bar0_button.click(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar1_button.click(topbar.reset_params_for_preset, inputs=[bar1_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
-               .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar2_button.click(topbar.reset_params_for_preset, inputs=[bar2_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar3_button.click(topbar.reset_params_for_preset, inputs=[bar3_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar4_button.click(topbar.reset_params_for_preset, inputs=[bar4_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar5_button.click(topbar.reset_params_for_preset, inputs=[bar5_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar6_button.click(topbar.reset_params_for_preset, inputs=[bar6_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar7_button.click(topbar.reset_params_for_preset, inputs=[bar7_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
+    bar8_button.click(topbar.reset_params_for_preset, inputs=[bar8_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
+               .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
+               .then(fn=lambda: None, _js='refresh_grid_delayed')
 
-    shared.gradio_root.load(topbar.init_nav_bar, inputs=system_params, outputs=[system_params, state_topbar], _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
-                      .then(topbar.reset_context, inputs=state_topbar, outputs=reset_preset + [gallery, gallery_index, preset_instruction, state_topbar], show_progress=False) \
+    shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_preset_params_js, queue=False, show_progress=False) \
+                      .then(topbar.init_nav_bar, inputs=state_topbar, outputs=[bar_title, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button, language_ui, background_theme], show_progress=False) \
+                      .then(topbar.reset_context, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
@@ -741,7 +774,7 @@ def dump_default_english_config():
     dump_english_config(grh.all_components)
 
 
-# dump_default_english_config()
+#dump_default_english_config()
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

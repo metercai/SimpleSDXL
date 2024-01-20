@@ -72,7 +72,7 @@ function processNode(node) {
     }
 
     textNodesUnder(node).forEach(function(node) {
-        processTextNode(node);
+	processTextNode(node);
     });
 }
 
@@ -81,6 +81,7 @@ function refresh_style_localization() {
 }
 
 function localizeWholePage() {
+    console.log("in localize")
     processNode(gradioApp());
 
     function elem(comp) {

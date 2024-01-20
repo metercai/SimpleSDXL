@@ -15,52 +15,12 @@ import modules.advanced_parameters as ads
 import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
+import enhanced.location as location
 from enhanced.models_info import models_info, models_info_muid
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
 
 css = '''
-.top_nav{
-    height: 18px;
-    position: relative;
-}
-
-.top_nav_left {
-    position:absolute;
-    left: 0;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-.top_nav_right {
-    position:absolute;
-    right:0;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.top_nav_preset {
-    display: inline-block;
-    text-align: center;
-    width: 60px;
-    cursor:pointer;
-    border-right: 1px solid rgb(161, 158, 158);
-}
-.top_nav_preset:hover {
-    background-color: rgb(161, 158, 158);
-}
-.top_nav_preset:last-child{
-     border-right: 0;
-}
-
-.top_nav_theme {
-    display: inline-block;
-    text-align: center;
-    width: 40px;
-    cursor:pointer;
-}
-
 .systemMsg {
     position: absolute;
     z-index: 1002;
@@ -113,32 +73,13 @@ iframe::-webkit-scrollbar {
 }
 '''
 
-
-nav_html = '''
-<div class="top_nav">
-    <ul class="top_nav_left" id="top_preset">
-    *item_list*
-    </ul>
-    <ul class="top_nav_right" id="top_theme">
-    <b>Theme:</b>
-    <li class="top_nav_theme" id="theme_light" onmouseover="nav_mOver(this)" onmouseout="nav_mOut(this)" onclick="refresh_theme('light')">light</li>
-    <li class="top_nav_theme" id="theme_dark" onmouseover="nav_mOver(this)" onmouseout="nav_mOut(this)" onclick="refresh_theme('dark')">dark</li>
-    </ul>
-</div>
-'''
-
-
 # app context
 nav_name_list = ''
-nav_id_list = ''
-nav_preset_html = ''
 system_message = ''
 config_ext = {}
 
 
-def make_html():
-    global nav_name_list, nav_id_list, nav_preset_html
-
+def get_preset_name_list():
     path_preset = os.path.abspath(f'./presets/')
     presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.') and p!='default.json']
     file_times = [(f, os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
@@ -146,17 +87,11 @@ def make_html():
     sorted_files = [f[0] for f in sorted_file_times]
     sorted_files.insert(0, 'default.json')
     presets = sorted_files[:9]
-    item_list = '<b>Preset:</b>'
-    id_array = ''
+    name_list = ''
     for i in range(len(presets)):
-        item_list += f'<li class="top_nav_preset" id="preset_{presets[i][:-5]}" onmouseover="nav_mOver(this)" onmouseout="nav_mOut(this)" onclick="refresh_preset(\'{presets[i][:-5]}\')">{presets[i][:-5]}</li>'
-        id_array += f'preset_{presets[i][:-5]},'
-        nav_name_list += f'{presets[i][:-5]},'
-    nav_name_list = nav_name_list[:-1]
-    id_array += 'theme_light,theme_dark'
-    nav_id_list = id_array
-    nav_preset_html = item_list
-    return nav_html.replace('*item_list*', item_list)
+        name_list += f'{presets[i][:-5]},'
+    name_list = name_list[:-1]
+    return name_list
 
 
 def get_system_message():
@@ -223,6 +158,7 @@ def get_system_message():
     return body if body else ''
 
 
+
 def preset_instruction(state_params):
     preset = state_params["__preset"]
     preset_url = state_params["preset_url"]
@@ -255,112 +191,133 @@ def embeddings_model_split(prompt, prompt_negative):
 
 
 get_preset_params_js = '''
-function(preset_params) {
-    var preset=preset_params["__preset"];
-    var theme=preset_params["__theme"];
+function(system_params) {
+    webpath = system_params["__webpath"];
     const params = new URLSearchParams(window.location.search);
-    url_params = Object.fromEntries(params);
-    if (url_params["__preset"]!=null) {
-        preset=url_params["__preset"];
+    const url_params = Object.fromEntries(params);
+    if (url_params["__lang"]!=null) {
+        lang=url_params["__lang"];
+        system_params["__lang"]=lang;
     }
     if (url_params["__theme"]!=null) {
         theme=url_params["__theme"];
+        system_params["__theme"]=theme;
     }
-    preset_params["__preset"]=preset;
-    preset_params["__theme"]=theme;
-    return preset_params, preset_params;
+    return system_params;
 }
 '''
 
 
 toggle_system_message_js = '''
 function(system_params) {
-    var nav_preset_html = system_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html);
-    var preset=system_params["__preset"];
-    var theme=system_params["__theme"];
-    var nav_name_list_str = system_params["__nav_name_list"];
-    var nav_name_list = new Array();
+    const preset=system_params["__preset"];
+    const theme=system_params["__theme"];
+    const nav_name_list_str = system_params["__nav_name_list"];
+    let nav_name_list = new Array();
     nav_name_list = nav_name_list_str.split(",")
-    console.log("nav_name_list_str:"+nav_name_list_str)
-    for (var i=0;i<nav_name_list.length;i++) {
-        var item_id = "bar"+i;
-        var item_name = nav_name_list[i];
-        var nav_item = gradioApp().getElementById(item_id);
-         console.log("item_id:"+item_id+", item_name:"+item_name+", nav_item:"+nav_item)
+    for (let i=0;i<nav_name_list.length;i++) {
+        let item_id = "bar"+i;
+        let item_name = nav_name_list[i];
+        let nav_item = gradioApp().getElementById(item_id);
         if (nav_item!=null) {
-            nav_item.innerHTML = item_name;
             if (item_name != preset) {
                 if (theme == "light") {
                     nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.backgroundColor= 'var(--neutral-50)';
+                    nav_item.style.background= 'var(--neutral-100)';
                 } else {
                     nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.backgroundColor= 'var(--neutral-950';
+                    nav_item.style.background= 'var(--neutral-700)';
                 }
             } else {
-                if (c_theme_id == 'theme_light') {
+                if (theme == 'light') {
                     nav_item.style.color = 'var(--neutral-800)';
-                    nav_item.style.backgroundColor= 'var(--secondary-200)';
+                    nav_item.style.background= 'var(--secondary-200)';
                 } else {
                     nav_item.style.color = 'var(--neutral-50)';
-                    nav_item.style.backgroundColor= 'var(--secondary-400';
+                    nav_item.style.background= 'var(--secondary-400)';
                 }
             }
         }
     }
-    var message=system_params["__message"];
+    const message=system_params["__message"];
     if (message!=null && message.length>60) {
-        showSysMsg(message);
+        showSysMsg(message, theme);
     }
-    var nav_id_list=system_params["__nav_id_list"];
-    mark_position_for_topbar(nav_id_list,preset,theme);
-    //var infobox=gradioApp().getElementById("infobox");
-    //if (infobox!=null) {
-        //css = infobox.getAttribute("class")
-        //console.log("infobox.css="+css)
-        //if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
-          //  infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
-    //}
+    let infobox=gradioApp().getElementById("infobox");
+    if (infobox!=null) {
+        let css = infobox.getAttribute("class")
+        if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
+            infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
+    }
+    const lang=system_params["__lang"];
+    if (lang!=null) {
+        set_language(lang)
+    }
     return
 }
 '''
 
 
-sync_generating_state_js = '''
-function(system_params) {
-    if (system_params["__generating_state"])
-        c_generating_state = 1;
-    else
-        c_generating_state = 0;
-    return
-}
-'''
-
-
-def init_nav_bar(system_params, state_params):
-    preset_name_list = system_params["__nav_name_list"].split(',')
-    for i range(9-len(preset_name_list)):
+def init_nav_bar(state_params, request: gr.Request):
+    #print(f'request.headers:{request.headers}')
+    if "__lang" not in state_params.keys():
+        if request.headers["accept-language"].startswith('zh-CN') and args_manager.args.language == 'default':
+            args_manager.args.language = 'cn'
+        state_params.update({"__lang": args_manager.args.language}) 
+    if "__theme" not in state_params.keys():
+        state_params.update({"__theme": args_manager.args.theme})
+    if "__preset" not in state_params.keys():
+        state_params.update({"__preset": config.preset})
+    if "__session" not in state_params.keys():
+        cookies = dict([(s.split('=')[0], s.split('=')[1]) for s in request.headers["cookie"].split('; ')])
+        if "SESSION" in cookies.keys():
+            state_params.update({"__session": cookies["SESSION"]})
+    user_agent = request.headers["user-agent"]
+    is_mobile = True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False
+    #print(f'system_params:{state_params}')
+    preset_name_list = state_params["__nav_name_list"].split(',')
+    for i in range(9-len(preset_name_list)):
         preset_name_list.append('')
-    print(f'preset_name_list:{preset_name_list}')
-    state_params = system_params
     results = []
-    for name in preset_name_list:
-        results += gr.update(value=name)
-    return results + [state_params]
+    if is_mobile:
+        results += [gr.update(visible=False)]
+    else:
+        results += [gr.update(visible=True)]
+    for i in range(len(preset_name_list)):
+        name = preset_name_list[i]
+        visible_flag = i<5 if is_mobile else 9
+        if name:
+            results += [gr.update(value=name, visible=visible_flag)]
+        else: 
+            results += [gr.update(value='', interactive=False, visible=visible_flag)]
+    results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
+    return results
+
+def process_before_generation(state_params):
+    # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
+    results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
+    # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    preset_nums = len(state_params["__nav_name_list"].split(','))
+    results += [gr.update(interactive=False)] * (preset_nums + 1)
+    results += [gr.update()] * (9-preset_nums)
+    return results
 
 
-def sync_generating_state_true(state_params):
-    state_params.update({'__generating_state':1})
-    return state_params, state_params
-
-
-def sync_generating_state_false(state_params):
-    state_params.update({'__generating_state':0})
+def process_after_generation(state_params):
+    # generate_button, stop_button, skip_button, state_is_generating
+    results = [gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
+    # gallery_index, index_radio
+    results += [gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)]
+    # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    preset_nums = len(state_params["__nav_name_list"].split(','))
+    results += [gr.update(interactive=True)] * (preset_nums + 1)
+    results += [gr.update()] * (9-preset_nums)
+    
     output_index = gallery_util.output_list[0].split('/')[0]
     gallery_util.refresh_images_list(output_index, True)
     gallery_util.parse_html_log(output_index, True)
-    return state_params, state_params
+    
+    return results
 
 
 def sync_message(state_params):
@@ -369,7 +326,6 @@ def sync_message(state_params):
 
 
 def reset_params_for_preset(bar_button, state_params):
-    print(f'bar_button:{bar_button}')
     state_params.update({"__preset": bar_button})
     return reset_context(state_params)
 
@@ -468,8 +424,6 @@ def reset_context(state_params):
     results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
     state_params.update({"__message": system_message})
-    state_params.update({"__nav_id_list": nav_id_list})
-    state_params.update({"__nav_preset_html": nav_preset_html})
     results += [state_params]
     system_message = 'system message was displayed!'
     return results
@@ -610,5 +564,5 @@ def reset_params(info):
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
     return results
                                                                                                                                             
-
+nav_name_list = get_preset_name_list()
 system_message = get_system_message()
