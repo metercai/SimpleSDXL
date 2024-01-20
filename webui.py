@@ -171,10 +171,10 @@ with shared.gradio_root:
                 image_tools_checkbox = gr.Checkbox(label='ParamsTools', value=False, container=False, elem_classes='min_check')
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
-                prompt_info_button = gr.Button(value='ViewInfo', size='sm', visible=True)
+                prompt_info_button = gr.Button(value='ViewMeta', size='sm', visible=True)
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_preset_button = gr.Button(value='SavePreset', size='sm', visible=True)
-                prompt_embed_button = gr.Button(value='EmbedInfo', size='sm', visible=True)
+                prompt_embed_button = gr.Button(value='EmbedMeta', size='sm', visible=True)
                 prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)

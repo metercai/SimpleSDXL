@@ -126,7 +126,7 @@ def refresh_images_list(choice: str, passthrough = False):
 
 
 def get_images_prompt(choice, selected):
-    global max_per_page, images_prompt, images_prompt_keys, images_ads
+    global max_per_page, images_list, images_prompt, images_prompt_keys, images_ads
 
     if choice is None:
         choice = output_list[0]
@@ -146,7 +146,7 @@ def get_images_prompt(choice, selected):
             selected = nums-max_per_page + selected
     images_prompt_keys.remove(choice)
     images_prompt_keys.append(choice)
-    info = images_prompt[choice][selected]
+    info = images_prompt[choice][images_list[choice][selected]]
     if choice in images_ads.keys() and info['Filename'] in images_ads[choice].keys():
         info.update({"Advanced_parameters": images_ads[choice][info['Filename']]})
     return info
@@ -164,7 +164,7 @@ def parse_html_log(choice: str, passthrough = False):
     html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
     html = etree.parse(html_file, etree.HTMLParser(encoding='utf-8'))
     prompt_infos = html.xpath('/html/body/div')
-    images_prompt_list = []
+    images_prompt_list = {}
     for info in prompt_infos:
         text = info.xpath('.//p//text()')
         #print(f'log_parse_text1:{text}')
@@ -221,8 +221,8 @@ def parse_html_log(choice: str, passthrough = False):
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
         #print(f'{len(text)},info_dict={info_dict}')
-        images_prompt_list.append(info_dict)
-    if len(images_prompt_list)==0:
+        images_prompt_list.update({info_dict["Filename"]: info_dict})
+    if len(images_prompt_list.keys())==0:
         if choice in images_prompt.keys():
             images_prompt_keys.pop(images_prompt_keys.index(choice))
             images_prompt.pop(choice)
