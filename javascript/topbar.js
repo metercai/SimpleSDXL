@@ -14,7 +14,7 @@ const browser={
 let webpath = 'file';
 
 async function set_language_by_ui(newLanguage) {
-    if (newLanguage === "English") {
+    if (newLanguage === "En") {
 	newLocale="cn"
     } else {
 	newLocale="en"
