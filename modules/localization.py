@@ -25,8 +25,7 @@ def localization_js(filename):
 
     # current_translation = {k: 'XXX' for k in current_translation.keys()}  # use this to see if all texts are covered
 
-    return f"window.localization = {json.dumps(current_translation)}"
-
+    return f'let locale_lang = "{filename}"; window.localization = {json.dumps(current_translation)}'
 
 def dump_english_config(components):
     all_texts = []

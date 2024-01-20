@@ -45,8 +45,7 @@ def javascript_html():
     head += f'<meta name="samples-path" content="{samples_path}"></meta>\n'
 
     theme = args_manager.args.theme if args_manager.args.theme else "light"
-    preset = modules.config.preset if modules.config.preset else "default"
-    head += f'<script type="text/javascript">set_theme_preset(\"{theme}\",\"{preset}\");</script>\n'
+    head += f'<script type="text/javascript">set_theme(\"{theme}\");</script>\n'
 
     return head
 

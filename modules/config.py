@@ -23,9 +23,9 @@ try:
             config_dict = json.load(json_file)
             always_save_keys = list(config_dict.keys())
     else:
-        fooocus_config_path =  os.path.abspath("../Fooocus/config.txt")
-        if os.path.exists(fooocus_config_path):
-            with open(fooocus_config_path, "r", encoding="utf-8") as json_file:
+        config_path =  os.path.abspath("../Fooocus/config.txt")
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as json_file:
                 config_dict = json.load(json_file)
                 always_save_keys = list(config_dict.keys())
 except Exception as e:
