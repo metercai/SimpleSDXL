@@ -304,7 +304,7 @@ def reset_image_params(state_params):
     return results + [gr.update(visible=False)] * 2 + [state_params]
 
 
-def save_preset(name, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5):
+def save_preset(name, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed):
 
     if name is not None and name != '':
         preset = {}
@@ -321,14 +321,22 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
         preset["default_prompt_negative"] = negative_prompt
         preset["default_styles"] = style_selections
         preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
+        if ads.default["adm_scaler_positive"] != adm_scaler_positive:
+            preset["default_adm_scaler_positive"] = adm_scaler_positive
+        if ads.default["adm_scaler_negative"] != adm_scaler_negative:
+            preset["default_adm_scaler_negative"] = adm_scaler_negative
+        if ads.default["adm_scaler_end"] != adm_scaler_end:
+            preset["default_adm_scaler_end"] = adm_scaler_end
         if ads.default["adaptive_cfg"] != adaptive_cfg:
-            preset["default_cfg_tsnr"]=adaptive_cfg
+            preset["default_cfg_tsnr"] = adaptive_cfg
         if ads.default["overwrite_step"] != overwrite_step:
-            preset["default_overwrite_step"]=overwrite_step
+            preset["default_overwrite_step"] = overwrite_step
         if ads.default["overwrite_switch"] != overwrite_switch:
-            preset["default_overwrite_switch"]=overwrite_switch
+            preset["default_overwrite_switch"] = overwrite_switch
         if ads.default["inpaint_engine"] != inpaint_engine:
-            preset["default_inpaint_engine"]=inpaint_engine
+            preset["default_inpaint_engine"] = inpaint_engine
+        if not seed_random:
+            preset["default_image_seed"] = image_seed
 
         def get_muid_link(k):
             muid = models_info[k]['muid']

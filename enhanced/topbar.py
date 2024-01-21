@@ -371,43 +371,47 @@ def reset_context(state_params):
         "Performance": 'Speed' if 'default_performance' not in keys else config_preset["default_performance"],
         "Sharpness": '2.0' if 'default_sample_sharpness' not in keys else f'{config_preset["default_sample_sharpness"]}',
         "Guidance Scale": '4.0' if 'default_cfg_scale' not in keys else f'{config_preset["default_cfg_scale"]}',
-        "ADM Guidance": f'({ads.default["adm_scaler_positive"]}, {ads.default["adm_scaler_negative"]}, {ads.default["adm_scaler_end"]})',
         "Base Model": 'juggernautXL_version6Rundiffusion.safetensors' if 'default_model' not in keys else config_preset["default_model"],
         "Refiner Model": 'None' if 'default_refiner' not in keys else config_preset["default_refiner"],
         "Refiner Switch": '0.5' if 'default_refiner_switch' not in keys else f'{config_preset["default_refiner_switch"]}', 
         "Sampler": f'{ads.default["sampler_name"]}' if 'default_sampler' not in keys else config_preset["default_sampler"],
-        "Scheduler": f'{ads.default["scheduler_name"]}' if 'default_scheduler' not in keys else config_preset["default_scheduler"],
-        "Seed": f'{random.randint(constants.MIN_SEED, constants.MAX_SEED)}' if 'default_seed' not in keys else f'{config_preset["default_seed"]}'
+        "Scheduler": f'{ads.default["scheduler_name"]}' if 'default_scheduler' not in keys else config_preset["default_scheduler"]
         })
     if "default_aspect_ratio" in keys and config.add_ratio(config_preset["default_aspect_ratio"]) in config.available_aspect_ratios:
         aspect_ratio = config_preset["default_aspect_ratio"].split('*')
         info_preset.update({'Resolution': f'({aspect_ratio[0]}, {aspect_ratio[1]})'})
     else:
         info_preset.update({"Resolution": '(1152, 896)'})
+    adm_scaler_positive = ads.default["adm_scaler_positive"] if "default_adm_scaler_positive" not in keys else config_preset["default_adm_scaler_positive"]
+    adm_scaler_negative = ads.default["adm_scaler_negative"] if "default_adm_scaler_negative" not in keys else config_preset["default_adm_scaler_negative"]
+    adm_scaler_end = ads.default["adm_scaler_end"] if "default_adm_scaler_end" not in keys else config_preset["default_adm_scaler_end"]
+    info_preset.update({"ADM Guidance": f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'})
     if "default_loras" in keys:
         loras = [(n,v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
         for (n,v) in loras:
-            info_preset.update({f'LoRA [{n}] weight': f'{v}'})
+            info_preset.update({f"LoRA [{n}] weight": f'{v}'})
+    if "Seed" in keys:
+        info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
     if "checkpoint_downloads" in keys:
-        info_preset.update({'checkpoint_downloads': config_preset["checkpoint_downloads"]})
+        info_preset.update({"checkpoint_downloads": config_preset["checkpoint_downloads"]})
     if "lora_downloads" in keys:
-        info_preset.update({'lora_downloads': config_preset["lora_downloads"]})
+        info_preset.update({"lora_downloads": config_preset["lora_downloads"]})
     if "embeddings_downloads" in keys:
-        info_preset.update({'embeddings_downloads': config_preset["embeddings_downloads"]})
+        info_preset.update({"embeddings_downloads": config_preset["embeddings_downloads"]})
     if "styles_description" in keys:
-        info_preset.update({'styles_description': config_preset["styles_description"]})
+        info_preset.update({"styles_description": config_preset["styles_description"]})
 
     ads_params = {}
-    if 'default_cfg_tsnr' in keys:
+    if "default_cfg_tsnr" in keys:
         ads_params.update({"adaptive_cfg": f'{config_preset["default_cfg_tsnr"]}'})
-    if 'default_overwrite_step' in keys:
+    if "default_overwrite_step" in keys:
         ads_params.update({"overwrite_step": f'{config_preset["default_overwrite_step"]}'})
-    if 'default_overwrite_switch' in keys:
+    if "default_overwrite_switch" in keys:
         ads_params.update({"overwrite_switch": f'{config_preset["default_overwrite_switch"]}'})
-    if 'default_inpaint_engine' in keys:
+    if "default_inpaint_engine" in keys:
         ads_params.update({"inpaint_engine": config_preset["default_inpaint_engine"]})
     if len(ads_params.keys())>0:
-        info_preset.update({'Advanced_parameters': ads_params})
+        info_preset.update({"Advanced_parameters": ads_params})
 
 #other
 #"available_aspect_ratios": []
@@ -415,7 +419,7 @@ def reset_context(state_params):
 #"default_max_image_number": 32,
 #"default_image_number": 2,
 #"example_inpaint_prompts":[]
-    results = reset_params(check_prepare_for_reset(info_preset))[:26]
+    results = reset_params(check_prepare_for_reset(info_preset))
 
     config.theme = theme
     config.preset = preset
@@ -536,7 +540,7 @@ def check_prepare_for_reset(info):
     return info
 
 def reset_params(info):
-    print(f'[Topbar] Ready to reset generation params session based.')
+    print(f'[Topbar] Ready to reset generation params session based.\n{info}')
     aspect_ratios = info['Resolution'][1:-1].replace(', ', '*')
     adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in info['ADM Guidance'][1:-1].split(', ')]
     get_ads_value_or_default = lambda x: ads.default[x] if 'Advanced_parameters' not in info.keys() or x not in info['Advanced_parameters'].keys() else info['Advanced_parameters'][x]
@@ -562,7 +566,11 @@ def reset_params(info):
             gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
     for i, (n, v) in enumerate(info['loras']):
         results += [gr.update(value=n),gr.update(value=v)]
-    results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end), gr.update(value=int(info['Seed']))]
+    results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
+    if "Seed" in info.keys():
+        results += [gr.update(value=False), gr.update(value=info['Seed'])]
+    else:
+        results += [gr.update(value=True), gr.update()]
     return results
                                                                                                                                             
 nav_name_list = get_preset_name_list()
