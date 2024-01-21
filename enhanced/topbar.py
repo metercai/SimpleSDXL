@@ -190,7 +190,7 @@ def embeddings_model_split(prompt, prompt_negative):
     return embeds
 
 
-get_preset_params_js = '''
+get_system_params_js = '''
 function(system_params) {
     webpath = system_params["__webpath"];
     const params = new URLSearchParams(window.location.search);
@@ -208,7 +208,7 @@ function(system_params) {
 '''
 
 
-toggle_system_message_js = '''
+refresh_topbar_status_js = '''
 function(system_params) {
     const preset=system_params["__preset"];
     const theme=system_params["__theme"];
@@ -258,7 +258,7 @@ function(system_params) {
 '''
 
 
-def init_nav_bar(state_params, request: gr.Request):
+def init_nav_bars(state_params, request: gr.Request):
     #print(f'request.headers:{request.headers}')
     if "__lang" not in state_params.keys():
         if request.headers["accept-language"].startswith('zh-CN') and args_manager.args.language == 'default':
@@ -273,25 +273,35 @@ def init_nav_bar(state_params, request: gr.Request):
         if "SESSION" in cookies.keys():
             state_params.update({"__session": cookies["SESSION"]})
     user_agent = request.headers["user-agent"]
-    is_mobile = True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False
+    if "__is_mobile" not in state_params.keys():
+        state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
+    if "__webpath" not in state_params.keys():
+        state_params.update({"__webpath": f'{args_manager.args.webroot}/file={os.path.dirname(__file__)}'})
     #print(f'system_params:{state_params}')
+    results = refresh_nav_bars(state_params)
+    results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
+    return results
+
+
+def refresh_nav_bars(state_params):
+    state_params.update({"__nav_name_list": get_preset_name_list()})
     preset_name_list = state_params["__nav_name_list"].split(',')
     for i in range(9-len(preset_name_list)):
         preset_name_list.append('')
     results = []
-    if is_mobile:
+    if state_params["__is_mobile"]:
         results += [gr.update(visible=False)]
     else:
         results += [gr.update(visible=True)]
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
-        visible_flag = i<5 if is_mobile else 9
+        visible_flag = i<(5 if state_params["__is_mobile"] else 9)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
         else: 
             results += [gr.update(value='', interactive=False, visible=visible_flag)]
-    results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     return results
+
 
 def process_before_generation(state_params):
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
@@ -314,7 +324,7 @@ def process_after_generation(state_params):
     results += [gr.update()] * (9-preset_nums)
     
     output_index = gallery_util.output_list[0].split('/')[0]
-    gallery_util.refresh_images_list(output_index, True)
+    gallery_util.refresh_images_catalog(output_index, True)
     gallery_util.parse_html_log(output_index, True)
     
     return results
@@ -390,7 +400,7 @@ def reset_context(state_params):
         loras = [(n,v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
         for (n,v) in loras:
             info_preset.update({f"LoRA [{n}] weight": f'{v}'})
-    if "Seed" in keys:
+    if "default_seed" in keys:
         info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
     if "checkpoint_downloads" in keys:
         info_preset.update({"checkpoint_downloads": config_preset["checkpoint_downloads"]})
@@ -398,8 +408,8 @@ def reset_context(state_params):
         info_preset.update({"lora_downloads": config_preset["lora_downloads"]})
     if "embeddings_downloads" in keys:
         info_preset.update({"embeddings_downloads": config_preset["embeddings_downloads"]})
-    if "styles_description" in keys:
-        info_preset.update({"styles_description": config_preset["styles_description"]})
+    if "styles_definition" in keys:
+        info_preset.update({"styles_definition": config_preset["styles_definition"]})
 
     ads_params = {}
     if "default_cfg_tsnr" in keys:
@@ -413,12 +423,13 @@ def reset_context(state_params):
     if len(ads_params.keys())>0:
         info_preset.update({"Advanced_parameters": ads_params})
 
+
 #other
 #"available_aspect_ratios": []
 #"default_advanced_checkbox": true,
 #"default_max_image_number": 32,
-#"default_image_number": 2,
 #"example_inpaint_prompts":[]
+    info_preset.update({"task_from": f'preset:{preset}'})
     results = reset_params(check_prepare_for_reset(info_preset))
 
     config.theme = theme
@@ -430,6 +441,17 @@ def reset_context(state_params):
     state_params.update({"__message": system_message})
     results += [state_params]
     system_message = 'system message was displayed!'
+
+    if "default_image_number" in keys:
+        results += [gr.update(value=config_preset["default_image_number"])]
+    else:
+        results += [gr.update()]
+
+    if "default_inpaint_mask_upload_checkbox" in keys:
+        results += [gr.update(value=config_preset["default_inpaint_mask_upload_checkbox"])]
+    else:
+        results += [gr.update()]
+
     return results
 
 
@@ -529,30 +551,30 @@ def check_prepare_for_reset(info):
     loras = new_loras
 
     styles_update_flag = False
-    if "styles_description" in info.keys():
-        for key in info["styles_description"].keys():
+    if "styles_definition" in info.keys():
+        for key in info["styles_definition"].keys():
             if key not in sdxl_styles.styles.keys():
-                sdxl_styles.styles.update({key: info["styles_description"][key]})
+                sdxl_styles.styles.update({key: info["styles_definition"][key]})
                 styles_update_flag = True
                 print(f'[Topbar] New styles: {key} to be loaded in reset process!')
     info.update({'loras': loras})
     info.update({'styles_update_flag': styles_update_flag})
     return info
 
-def reset_params(info):
-    print(f'[Topbar] Ready to reset generation params session based.\n{info}')
-    aspect_ratios = info['Resolution'][1:-1].replace(', ', '*')
-    adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in info['ADM Guidance'][1:-1].split(', ')]
-    get_ads_value_or_default = lambda x: ads.default[x] if 'Advanced_parameters' not in info.keys() or x not in info['Advanced_parameters'].keys() else info['Advanced_parameters'][x]
+def reset_params(metadata):
+    print(f'[Topbar] Ready to reset generation params session based by {metadata["task_from"]}.')
+    aspect_ratios = metadata['Resolution'][1:-1].replace(', ', '*')
+    adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in metadata['ADM Guidance'][1:-1].split(', ')]
+    get_ads_value_or_default = lambda x: ads.default[x] if 'Advanced_parameters' not in metadata.keys() or x not in metadata['Advanced_parameters'].keys() else metadata['Advanced_parameters'][x]
     adaptive_cfg = get_ads_value_or_default('adaptive_cfg')
     overwrite_step = get_ads_value_or_default('overwrite_step')
     overwrite_switch = get_ads_value_or_default('overwrite_switch')
     inpaint_engine = get_ads_value_or_default('inpaint_engine')
-    styles = [f[1:-1] for f in info['Styles'][1:-1].split(', ')]
+    styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
 
     results = []
-    results += [gr.update(value=info['Prompt']), gr.update(value=info['Negative Prompt'])]
-    if 'styles_update_flag' in info.keys() and info['styles_update_flag']:
+    results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
+    if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
         keys_list = list(sdxl_styles.styles.keys())
         style_sorter.try_load_sorted_styles(
                     style_names=[sdxl_styles.fooocus_expansion] + keys_list,
@@ -560,15 +582,15 @@ def reset_params(info):
         results += [gr.update(value=copy.deepcopy(styles), choices=copy.deepcopy(style_sorter.all_styles))]
     else:
         results += [gr.update(value=copy.deepcopy(styles))]
-    results += [gr.update(value=info['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(info['Sharpness'])), \
-            gr.update(value=float(info['Guidance Scale'])), gr.update(value=info['Base Model']), gr.update(value=info['Refiner Model']), \
-            gr.update(value=float(info['Refiner Switch'])), gr.update(value=info['Sampler']), gr.update(value=info['Scheduler']), \
+    results += [gr.update(value=metadata['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(metadata['Sharpness'])), \
+            gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model']), gr.update(value=metadata['Refiner Model']), \
+            gr.update(value=float(metadata['Refiner Switch'])), gr.update(value=metadata['Sampler']), gr.update(value=metadata['Scheduler']), \
             gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
-    for i, (n, v) in enumerate(info['loras']):
+    for i, (n, v) in enumerate(metadata['loras']):
         results += [gr.update(value=n),gr.update(value=v)]
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
-    if "Seed" in info.keys():
-        results += [gr.update(value=False), gr.update(value=info['Seed'])]
+    if "Seed" in metadata.keys():
+        results += [gr.update(value=False), gr.update(value=metadata['Seed'])]
     else:
         results += [gr.update(value=True), gr.update()]
     return results

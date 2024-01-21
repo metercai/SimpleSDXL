@@ -10,9 +10,10 @@
 ## 预置包里都包含哪些内容
 - 生成图片所需的模型，比如主模型，精炼模型，LoRa局部或风格模型等。
 - 运行模型的参数配置，比如采样器、调度器，引导系数、采样锐度等。
-- 设定的生成图片规格，比如图片数量、图片尺寸。
-- 默认正反提示词示例，示范样张的正反提示词。
+- 系统功能的默认设置，比如默认的出图数量、图片尺寸、是否支持蒙板上传等。
+- 默认正反提示词示例，包括示范样张的正反提示词。
 - 图片生成的流程设置，针对某种场景和目标的特殊执行流程。(计划中)
+- 预置包所涉及的资源，包括模型的MUID及下载源，风格样式的定义等。
 - 预置包的来源和说明，说明使用方法和来源作者的链接。
 
 ## SimpleSDXL比Fooocus在预置包上有哪些增强
@@ -24,10 +25,41 @@
 
 ## 如何制作预置包？
 - 首先在SimpleSDXL上把生成图片所需模型和参数都配置好，尝试生成图片，直到满意。
-- 从界面底部打开"图片工具"选项，在图片工具箱中选择"生成预置包"，根据提示输入预置包名称后，系统会在presets目录自动生成名称对应的预置包json配置文件。
+- 从界面底部打开"参数工具"选项，在工具箱中选择"生成预置包"，根据提示输入预置包名称后，系统会在presets目录自动生成名称对应的预置包json配置文件。
 - 为了让更多人认识、了解和使用你创作的预置包，可以人工添加预置包的说明页和整体展示页。说明页和展示页都是html文件，可以放在presets目录下，也可以提供URL加入配置文件里。
 - 配置文件和说明文件放到位后，系统每次启动都会在顶部预置包导航展示入口，可以选择使用。
 - 原创的预置包，可以推荐到社区，发布到公共的presets目录下，供大家分享学习和使用。
+- 目前SimpleSDXL支持的预置包配置参数如下，后续可以根据使用场景进行添加，可以在Github Issues和QQ群:938075852 提出需求。
+
+  ```
+  default_prompt
+  default_prompt_negative
+  default_styles
+  default_aspect_ratio
+  default_image_number
+  default_performance
+  default_model
+  default_refiner
+  default_refiner_switch
+  default_loras
+  default_sampler
+  default_scheduler
+  default_cfg_scale
+  default_sample_sharpness
+  default_adm_scaler_positive
+  default_adm_scaler_negative
+  default_adm_scaler_end
+  default_cfg_tsnr
+  default_overwrite_step
+  default_overwrite_switch
+  default_inpaint_engine
+  default_seed
+  checkpoint_downloads
+  lora_downloads
+  embeddings_downloads
+  styles_definition
+  reference
+  default_inpaint_mask_upload_checkbox
 
 ## 如何配置预置包说明？
 - 预置包说明是对预置包能力和效果的说明与展示，包括两个页面：概要说明页和整体展示页。

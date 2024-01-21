@@ -97,7 +97,7 @@ def make_infobox_markdown(info):
     html = f'<div style="background: {bgcolor}">'
     if info:
         for key in info:
-            if key == 'Filename' or key == 'Advanced_parameters':
+            if key == 'Advanced_parameters':
                 continue
             html += f'<b>{key}:</b> {info[key]}<br/>'
     else:
@@ -235,7 +235,7 @@ def delete_image(state_params):
         os.remove(file_path)
     print(f'[ToolBox] Delete image file: {file_path}')
 
-    image_list_nums = len(gallery.refresh_images_list(output_index[0], True))
+    image_list_nums = len(gallery.refresh_images_catalog(output_index[0], True))
     if image_list_nums<=0:
         os.remove(log_path)
         os.rmdir(dir_path)
@@ -266,41 +266,22 @@ def delete_image(state_params):
     return gr.update(value=images_gallery), gr.update(choices=gallery.output_list, value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
-def reset_preset_params(state_params):
-    state_params.update({"__nav_id_list": topbar.nav_id_list})
-    state_params.update({"__nav_preset_html": topbar.nav_preset_html})
-    #print(f'preset_params_out:{state_params}')
-    return state_params, state_params
-
-
-reset_preset_params_js = '''
-function(system_params) {
-    var preset=system_params["__preset"];
-    var theme=system_params["__theme"];
-    var nav_id_list=system_params["__nav_id_list"];
-    var nav_preset_html = system_params["__nav_preset_html"];
-    update_topbar("top_preset",nav_preset_html)
-    mark_position_for_topbar(nav_id_list,preset,theme);
-    return
-}
-'''
-
-
 def reset_image_params(state_params):
     [choice, selected] = state_params["prompt_info"]
-    info = gallery.get_images_prompt(choice, selected)
-    new_info = copy.deepcopy(info)
-    new_info['Refiner Model'] = None if info['Refiner Model']=='' else info['Refiner Model']
+    metainfo = gallery.get_images_prompt(choice, selected)
+    metadata = copy.deepcopy(metainfo)
+    metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
     loras = [['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0]]
-    for key in info:
+    for key in metainfo:
         i=0
         if key.startswith('LoRA ['):
-            loras.insert(i, [key[6:-8], float(info[key])])
+            loras.insert(i, [key[6:-8], float(metainfo[key])])
     loras = loras[:5]
-    new_info.update({"loras": loras})
-    results = topbar.reset_params(new_info)
+    metadata.update({"loras": loras})
+    metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
+    results = topbar.reset_params(metadata)
     state_params.update({"note_box_state": ['',0,0]})
-    print(f'[ToolBox] Reset_params: update {len(info.keys())} params from current image log file.')
+    print(f'[ToolBox] Reset_params: update {len(metainfo.keys())} params from current image log file.')
     return results + [gr.update(visible=False)] * 2 + [state_params]
 
 
@@ -369,7 +350,13 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
             preset["lora_downloads"].update({lora_model4: get_muid_link("loras/"+lora_model4)})
         if lora_model5 and lora_model5 != 'None':
             preset["lora_downloads"].update({lora_model5: get_muid_link("loras/"+lora_model5)})
-
+        
+        m_dict = {}
+        for key in style_selections:
+            if key!='Fooocus V2':
+                m_dict.update({key: sdxl_styles.styles[key]})
+        if len(m_dict.keys())>0:
+            preset["styles_definition"] = m_dict
 
         #print(f'preset:{preset}')
         save_path = 'presets/' + name + '.json'
@@ -379,8 +366,9 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
         state_params.update({"__preset": name})
         print(f'[ToolBox] Saved the current params and reset to {save_path}.')
     state_params.update({"note_box_state": ['',0,0]})
-    topbar.make_html()
-    return [gr.update(visible=False)] * 4 + [state_params]
+    results = [gr.update(visible=False)] * 3 + [state_params]
+    results += topbar.refresh_nav_bars(state_params)
+    return results
 
 
 def embed_params(state_params):
@@ -422,7 +410,7 @@ def embed_params(state_params):
         if key!='Fooocus V2':
             m_dict.update({key: sdxl_styles.styles[key]})
     if len(m_dict.keys())>0:
-        metadata.add_text('styles_description', json.dumps(m_dict), True)
+        metadata.add_text('styles_definition', json.dumps(m_dict), True)
 
     embed_dirs = os.path.join(config.path_outputs, 'embed')
     if not os.path.exists(embed_dirs):
@@ -440,6 +428,7 @@ def extract_reset_image_params(img_path):
             metadata.update({k: json.loads(img.text[k])})
     refresh_models_info_from_path()
     sync_model_info([])
+    metadata.update({"task_from": f'embed_image:{img_path}'})
     results = topbar.reset_params(topbar.check_prepare_for_reset(metadata))   
     print(f'[ToolBox] Reset_params_from_image: update {len(metadata.keys())} params from input image.')
     return results
