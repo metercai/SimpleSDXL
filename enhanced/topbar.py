@@ -366,20 +366,20 @@ def reset_context(state_params):
     keys = config_preset.keys()
     info_preset.update({
         "Prompt": '' if 'default_prompt' not in keys else config_preset["default_prompt"],
-        "Negative Prompt": '' if 'default_prompt_negativ' not in keys else config_preset["default_prompt_negative"],
-        "Styles": "['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp']" if 'default_prompt_negativ' not in keys else config_preset["default_styles"],
+        "Negative Prompt": '' if 'default_prompt_negative' not in keys else config_preset["default_prompt_negative"],
+        "Styles": "['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp']" if 'default_styles' not in keys else f'{config_preset["default_styles"]}',
         "Performance": 'Speed' if 'default_performance' not in keys else config_preset["default_performance"],
-        "Sharpness": '2.0' if 'default_sample_sharpness' not in keys else config_preset["default_sample_sharpness"],
-        "Guidance Scale": '4.0' if 'default_cfg_scale' not in keys else config_preset["default_cfg_scale"],
+        "Sharpness": '2.0' if 'default_sample_sharpness' not in keys else f'{config_preset["default_sample_sharpness"]}',
+        "Guidance Scale": '4.0' if 'default_cfg_scale' not in keys else f'{config_preset["default_cfg_scale"]}',
         "ADM Guidance": f'({ads.default["adm_scaler_positive"]}, {ads.default["adm_scaler_negative"]}, {ads.default["adm_scaler_end"]})',
         "Base Model": 'juggernautXL_version6Rundiffusion.safetensors' if 'default_model' not in keys else config_preset["default_model"],
         "Refiner Model": 'None' if 'default_refiner' not in keys else config_preset["default_refiner"],
-        "Refiner Switch": '0.5' if 'default_refiner_switch' not in keys else config_preset["default_refiner_switch"], 
+        "Refiner Switch": '0.5' if 'default_refiner_switch' not in keys else f'{config_preset["default_refiner_switch"]}', 
         "Sampler": f'{ads.default["sampler_name"]}' if 'default_sampler' not in keys else config_preset["default_sampler"],
         "Scheduler": f'{ads.default["scheduler_name"]}' if 'default_scheduler' not in keys else config_preset["default_scheduler"],
-        "Seed": f'{random.randint(constants.MIN_SEED, constants.MAX_SEED)}' if 'default_seed' not in keys else config_preset["default_seed"]
+        "Seed": f'{random.randint(constants.MIN_SEED, constants.MAX_SEED)}' if 'default_seed' not in keys else f'{config_preset["default_seed"]}'
         })
-    if "default_aspect_ratio" in keys and config_preset["default_aspect_ratio"] in config.available_aspect_ratios:
+    if "default_aspect_ratio" in keys and config.add_ratio(config_preset["default_aspect_ratio"]) in config.available_aspect_ratios:
         aspect_ratio = config_preset["default_aspect_ratio"].split('*')
         info_preset.update({'Resolution': f'({aspect_ratio[0]}, {aspect_ratio[1]})'})
     else:
@@ -399,11 +399,11 @@ def reset_context(state_params):
 
     ads_params = {}
     if 'default_cfg_tsnr' in keys:
-        ads_params.update({"adaptive_cfg": config_preset["default_cfg_tsnr"]})
+        ads_params.update({"adaptive_cfg": f'{config_preset["default_cfg_tsnr"]}'})
     if 'default_overwrite_step' in keys:
-        ads_params.update({"overwrite_step": config_preset["default_overwrite_step"]})
+        ads_params.update({"overwrite_step": f'{config_preset["default_overwrite_step"]}'})
     if 'default_overwrite_switch' in keys:
-        ads_params.update({"overwrite_switch": config_preset["default_overwrite_switch"]})
+        ads_params.update({"overwrite_switch": f'{config_preset["default_overwrite_switch"]}'})
     if 'default_inpaint_engine' in keys:
         ads_params.update({"inpaint_engine": config_preset["default_inpaint_engine"]})
     if len(ads_params.keys())>0:
@@ -430,6 +430,7 @@ def reset_context(state_params):
 
 
 def check_prepare_for_reset(info):
+    #print(f'[Topbar] Check_prepare_for_reset: {info}')
     # download urls with MUID
     down_muid = {}
     if "checkpoint_downloads" in info.keys():
