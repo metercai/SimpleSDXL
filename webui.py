@@ -679,7 +679,7 @@ with shared.gradio_root:
         ] + lora_ctrls, queue=False, show_progress=False)
 
         reset_preset = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls
-        reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, image_seed]
+        reset_params = reset_preset + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
 
         generate_button.click(topbar.process_before_generation, inputs=state_topbar, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button], show_progress=False) \
@@ -716,14 +716,14 @@ with shared.gradio_root:
     params_note_regen_button.click(toolbox.reset_image_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box, state_topbar], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
-    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, state_topbar] + reset_preset, outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False) \
+    params_note_preset_button.click(toolbox.save_preset, inputs= [params_note_input_name, state_topbar] + reset_params, outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False) \
         .then(toolbox.reset_preset_params, inputs=state_topbar, outputs=[system_params, state_topbar], queue=False, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js=toolbox.reset_preset_params_js)
 
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
 
-    reset_preset_all = reset_preset + [gallery, gallery_index, preset_instruction, state_topbar]
+    reset_preset_all = reset_params + [gallery, gallery_index, preset_instruction, state_topbar]
     bar0_button.click(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: None, inputs=system_params, _js=topbar.toggle_system_message_js) \
