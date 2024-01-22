@@ -192,7 +192,6 @@ def embeddings_model_split(prompt, prompt_negative):
 
 get_system_params_js = '''
 function(system_params) {
-    webpath = system_params["__webpath"];
     const params = new URLSearchParams(window.location.search);
     const url_params = Object.fromEntries(params);
     if (url_params["__lang"]!=null) {
@@ -249,11 +248,12 @@ function(system_params) {
         if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
             infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
     }
+    webpath = system_params["__webpath"];
     const lang=system_params["__lang"];
     if (lang!=null) {
         set_language(lang)
     }
-    return
+    return {}
 }
 '''
 
@@ -268,7 +268,7 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__theme": args_manager.args.theme})
     if "__preset" not in state_params.keys():
         state_params.update({"__preset": config.preset})
-    if "__session" not in state_params.keys():
+    if "__session" not in state_params.keys() and "cookie" in request.headers.keys():
         cookies = dict([(s.split('=')[0], s.split('=')[1]) for s in request.headers["cookie"].split('; ')])
         if "SESSION" in cookies.keys():
             state_params.update({"__session": cookies["SESSION"]})
@@ -277,9 +277,16 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
     if "__webpath" not in state_params.keys():
         state_params.update({"__webpath": f'{args_manager.args.webroot}/file={os.path.dirname(__file__)}'})
+    if "__max_per_page" not in state_params.keys():
+        if state_params["__is_mobile"]:
+            state_params.update({"__max_per_page": 9})
+        else:
+            state_params.update({"__max_per_page": 18})
+    state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
     #print(f'system_params:{state_params}')
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
+    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     return results
 
 
@@ -314,16 +321,17 @@ def process_before_generation(state_params):
 
 
 def process_after_generation(state_params):
+    state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
-    results += [gr.update(choices=gallery_util.output_list, value=None), gr.update(visible=len(gallery_util.output_list)>0, open=False)]
+    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 1)
     results += [gr.update()] * (9-preset_nums)
     
-    output_index = gallery_util.output_list[0].split('/')[0]
+    output_index = state_params["__output_list"][0].split('/')[0]
     gallery_util.refresh_images_catalog(output_index, True)
     gallery_util.parse_html_log(output_index, True)
     
@@ -336,6 +344,9 @@ def sync_message(state_params):
 
 
 def reset_params_for_preset(bar_button, state_params):
+    if state_params["__preset"]==bar_button:
+        return [gr.update()] * 37
+    print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": bar_button})
     return reset_context(state_params)
 
@@ -344,9 +355,7 @@ def reset_context(state_params):
     global system_message, nav_id_list, nav_preset_html
 
     preset = state_params.get("__preset")
-    theme = state_params.get("__theme")
     preset_url = state_params.get("preset_url", '')
-    print(f'[Topbar] Reset_context: preset={config.preset}-->{preset}, theme={config.theme}-->{theme}')
     
     # load preset config
     config_preset = {}
@@ -432,11 +441,9 @@ def reset_context(state_params):
     info_preset.update({"task_from": f'preset:{preset}'})
     results = reset_params(check_prepare_for_reset(info_preset))
 
-    config.theme = theme
-    config.preset = preset
     state_params.update({"preset_url":preset_url})
 
-    results += [gr.update(), gr.update(choices=gallery_util.output_list, value=None if len(gallery_util.output_list)==0 else gallery_util.output_list[0])]
+    results += [gr.update(), gr.update(choices=state_params["__output_list"], value=None if len(state_params["__output_list"])==0 else state_params["__output_list"][0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
     state_params.update({"__message": system_message})
     results += [state_params]
