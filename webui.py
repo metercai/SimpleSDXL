@@ -246,12 +246,15 @@ with shared.gradio_root:
                             with gr.Column():
                                 desc_input_image = grh.Image(label='Drag any image to here', source='upload', type='filepath')
                             with gr.Column():
-                                desc_method = gr.Radio(
-                                    label='Content Type',
-                                    choices=[flags.desc_type_photo, flags.desc_type_anime],
-                                    value=flags.desc_type_photo)
-                                desc_btn = gr.Button(value='Describe this Image into Prompt')
-                                params_btn = gr.Button(value='Extract params from Image and Reset')
+                                with gr.Group():
+                                    desc_method = gr.Radio(
+                                        label='Content Type',
+                                        choices=[flags.desc_type_photo, flags.desc_type_anime],
+                                        value=flags.desc_type_photo)
+                                    desc_btn = gr.Button(value='Describe this Image into Prompt')
+                                with gr.Group():
+                                    embed_image_readme = gr.Markdown(value='Extract the parameters of the embedded parameter image and then reset the working environment.', elem_classes='note_text')
+                                    params_btn = gr.Button(value='Extract params from Image and Reset')
             switch_js = "(x) => {if(x){viewer_to_bottom(100);viewer_to_bottom(500);}else{viewer_to_top();} return x;}"
             down_js = "() => {viewer_to_bottom();}"
 
@@ -555,8 +558,8 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                    translation_timing = gr.Radio(label='Timing of translation', choices=['No translation', 'Translate then generate', 'Modify after translation'], value='Translate then generate', info='The selection of timing for prompt translation.')
-                    translation_methods = gr.Radio(label='Translation methods', choices=['Model in local','APIs on third'], value='APIs on third', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                    translation_timing = gr.Radio(label='Timing of translation', choices=['No translate', 'Translate then generate', 'Modify after translate'], value='Translate then generate', info='The selection of timing for prompt translation.')
+                    translation_methods = gr.Radio(label='Translation methods', choices=['Slim Model', 'Big Model', 'Third APIs'], value='Slim Model', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
             ehps = [backfill_prompt, translation_timing, translation_methods]
@@ -648,7 +651,7 @@ with shared.gradio_root:
 
         prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_timing], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
         
-        translator_button.click(lambda x: [gr.update(value=translator.convert(x)), gr.update(visible=True), gr.update(visible=False)], inputs=prompt, outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
+        translator_button.click(lambda x, y: [gr.update(value=translator.convert(x, y)), gr.update(visible=True), gr.update(visible=False)], inputs=[prompt, translation_methods], outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating], outputs=[
             advanced_checkbox,
@@ -761,7 +764,7 @@ with shared.gradio_root:
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio], show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio, inpaint_mask_upload_checkbox], show_progress=False) \
                       .then(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \

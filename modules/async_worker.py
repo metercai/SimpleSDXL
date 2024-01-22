@@ -144,8 +144,8 @@ def worker():
         inpaint_mask_image_upload = args.pop()
 
         if enhanced_parameters.translation_timing != 'No translation':
-            prompt = translator.convert(prompt)
-            negative_prompt = translator.convert(negative_prompt)
+            prompt = translator.convert(prompt, enhanced_parameters.translation_methods)
+            negative_prompt = translator.convert(negative_prompt, enhanced_parameters.translation_methods)
 
         cn_tasks = {x: [] for x in flags.ip_list}
         for _ in range(4):

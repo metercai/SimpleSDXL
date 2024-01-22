@@ -22,4 +22,5 @@ bcrypt==4.1.1
 base58==2.1.1
 download==0.3.5
 mistune==3.0.2
+sacremoses==0.1.1
 translators==5.8.9

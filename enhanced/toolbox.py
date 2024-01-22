@@ -78,6 +78,10 @@ css = '''
     padding: 8px;
 }
 
+.note_text {
+    padding: 2px;
+    text-align: center;
+}
 .preset_input textarea {
     width: 120px;
 }
@@ -426,6 +430,10 @@ def extract_reset_image_params(img_path):
     if hasattr(img,'text'):
         for k in img.text:
             metadata.update({k: json.loads(img.text[k])})
+    else:
+        print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image.')
+        return [gr.update()] * 31
+    print(f'[ToolBox] Extraction successful and ready to reset: {metadata}') 
     refresh_models_info_from_path()
     sync_model_info([])
     metadata.update({"task_from": f'embed_image:{img_path}'})
