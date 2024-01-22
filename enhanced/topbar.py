@@ -276,7 +276,7 @@ def init_nav_bars(state_params, request: gr.Request):
     if "__is_mobile" not in state_params.keys():
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
     if "__webpath" not in state_params.keys():
-        state_params.update({"__webpath": f'{args_manager.args.webroot}/file={os.path.dirname(__file__)}'})
+        state_params.update({"__webpath": f'{args_manager.args.webroot}/file={os.getcwd()}'})
     if "__max_per_page" not in state_params.keys():
         if state_params["__is_mobile"]:
             state_params.update({"__max_per_page": 9})
@@ -287,6 +287,7 @@ def init_nav_bars(state_params, request: gr.Request):
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
+    results += [gr.update(value=not state_params["__is_mobile"])]
     return results
 
 
@@ -526,11 +527,11 @@ def check_prepare_for_reset(info):
                     file_path = os.path.abspath(f'./models/{f}')
                 model_dir, filename = os.path.split(file_path)
                 load_file_from_muid(filename, down_muid[f], model_dir)
-            elif f[12:] in info["checkpoint_downloads"]:
+            elif "checkpoint_downloads" in info.keys() and f[12:] in info["checkpoint_downloads"]:
                 load_file_from_url(url=info["checkpoint_downloads"][f[12:]], model_dir=config.path_checkpoints, file_name=f[12:])
-            elif f[6:] in info["lora_downloads"]:
+            elif "lora_downloads" in info.keys() and f[6:] in info["lora_downloads"]:
                 load_file_from_url(url=info["lora_downloads"][f[6:]], model_dir=config.path_loras, file_name=f[6:])
-            elif f[11:] in info["embeddings_downloads"]:
+            elif "embeddings_downloads" in info.keys() and f[11:] in info["embeddings_downloads"]:
                 load_file_from_url(url=info["embeddings_downloads"][f[11:]], model_dir=config.path_embeddings, file_name=f[11:])
             else:
                 print(f'[Topbar] The model is not local and cannot be download.')
