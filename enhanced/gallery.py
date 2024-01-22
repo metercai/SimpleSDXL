@@ -53,6 +53,8 @@ def select_index(choice, state_params, evt: gr.SelectData):
 def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"prompt_info": [choice, evt.index]})
+    if choice is None and len(state_params["__output_list"]) > 0:
+        choice = state_params["__output_list"][0]
     result = get_images_prompt(choice, evt.index, state_params["__max_per_page"], True)
     #print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
     if backfill_prompt:
@@ -119,6 +121,8 @@ def refresh_images_catalog(choice: str, passthrough = False):
 def get_images_prompt(choice, selected, max_per_page, display_index=False):
     global images_list, images_prompt, images_prompt_keys, images_ads
 
+    if choice is None:
+        return None
     page = 0
     _page = choice.split("/")
     if len(_page) > 1:
