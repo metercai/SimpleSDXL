@@ -81,7 +81,6 @@ def generate_clicked(*args):
 
     execution_time = time.perf_counter() - execution_start_time
     print(f'Total time: {execution_time:.2f} seconds')
-    gallery_util.refresh_output_list()
     return
 
 
@@ -130,8 +129,8 @@ with shared.gradio_root:
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
-                with gr.Accordion("Finished Images Index:", open=False, visible=len(gallery_util.output_list)>0) as index_radio:
-                    gallery_index = gr.Radio(gallery_util.output_list, label="Gallery_Index", value=None, show_label=False)
+                with gr.Accordion("Finished Images Index:", open=False, visible=False) as index_radio:
+                    gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
@@ -726,46 +725,46 @@ with shared.gradio_root:
     reset_preset_all = reset_params + [gallery, gallery_index, preset_instruction, state_topbar, image_number, inpaint_mask_upload_checkbox]
     bar0_button.click(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar1_button.click(topbar.reset_params_for_preset, inputs=[bar1_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar2_button.click(topbar.reset_params_for_preset, inputs=[bar2_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar3_button.click(topbar.reset_params_for_preset, inputs=[bar3_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar4_button.click(topbar.reset_params_for_preset, inputs=[bar4_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar5_button.click(topbar.reset_params_for_preset, inputs=[bar5_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar6_button.click(topbar.reset_params_for_preset, inputs=[bar6_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar7_button.click(topbar.reset_params_for_preset, inputs=[bar7_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar8_button.click(topbar.reset_params_for_preset, inputs=[bar8_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme], show_progress=False) \
-                      .then(topbar.reset_context, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio], show_progress=False) \
+                      .then(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-                      .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js) \
+                      .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
 
 

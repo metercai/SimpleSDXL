@@ -97,7 +97,7 @@ def make_infobox_markdown(info):
     html = f'<div style="background: {bgcolor}">'
     if info:
         for key in info:
-            if key == 'Advanced_parameters':
+            if key == 'Filename' or key == 'Advanced_parameters':
                 continue
             html += f'<b>{key}:</b> {info[key]}<br/>'
     else:
@@ -118,7 +118,7 @@ def toggle_prompt_info(state_params):
     state_params.update({"infobox_state": infobox_state})
     #print(f'[ToolBox] Toggle_image_info: {infobox_state}')
     [choice, selected] = state_params["prompt_info"]
-    prompt_info = gallery.get_images_prompt(choice, selected)
+    prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state), state_params
 
 
@@ -155,7 +155,7 @@ def toggle_note_box(item, state_params):
         title_extra = '\n' + toolbox_note_missing_muid
     if item == 'delete':
         [choice, selected] = state_params["prompt_info"]
-        info = gallery.get_images_prompt(choice, selected)
+        info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
         return gr.update(value=f'DELETE the image from output directory and logs!', visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'regen':
         return gr.update(value=toolbox_note_regenerate_title, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
@@ -191,7 +191,7 @@ filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
 
 def delete_image(state_params):
     [choice, selected] = state_params["prompt_info"]
-    info = gallery.get_images_prompt(choice, selected)
+    info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     file_name = info["Filename"]
     output_index = choice.split('/')
     dir_path = os.path.join(config.path_outputs, '20' + output_index[0])
@@ -239,36 +239,36 @@ def delete_image(state_params):
     if image_list_nums<=0:
         os.remove(log_path)
         os.rmdir(dir_path)
-        index = gallery.output_list.index(choice)
-        gallery.refresh_output_list()
-        if index>= len(gallery.output_list):
-            index = len(gallery.output_list) -1
+        index = state_params["__output_list"].index(choice)
+        state_params.update({"__output_list": gallery.refresh_output_list(state_params["__max_per_page"])})
+        if index>= len(state_params["__output_list"]):
+            index = len(state_params["__output_list"]) -1
             if index<0:
                 index = 0
-        choice = gallery.output_list[index]
-    elif image_list_nums<gallery.max_per_page:
-        if selected>image_list_nums-1:
+        choice = state_params["__output_list"][index]
+    elif image_list_nums < state_params["__max_per_page"]:
+        if selected > image_list_nums-1:
             selected = image_list_nums-1
     else:
-        if image_list_nums % gallery.max_per_page == 0:
+        if image_list_nums % state_params["__max_per_page"] == 0:
             page = int(output_index[1])
-            if page>image_list_nums//gallery.max_per_page:
-                page = image_list_nums//gallery.max_per_page
+            if page > image_list_nums//state_params["__max_per_page"]:
+                page = image_list_nums//state_params["__max_per_page"]
             if page == 1:
                 choice = output_index[0]
             else:
                 choice = output_index[0] + '/' + str(page)
-            gallery.refresh_output_list()
+            state_params.update({"__output_list": gallery.refresh_output_list(state_params["__max_per_page"])})
 
     state_params.update({"prompt_info":[choice, selected]})
-    images_gallery = gallery.get_images_from_gallery_index(choice)
+    images_gallery = gallery.get_images_from_gallery_index(choice, state_params["__max_per_page"])
     state_params.update({"note_box_state": ['',0,0]})
-    return gr.update(value=images_gallery), gr.update(choices=gallery.output_list, value=choice), gr.update(visible=False), gr.update(visible=False), state_params
+    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
 def reset_image_params(state_params):
     [choice, selected] = state_params["prompt_info"]
-    metainfo = gallery.get_images_prompt(choice, selected)
+    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
     loras = [['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0]]
@@ -375,7 +375,7 @@ def embed_params(state_params):
     refresh_models_info_from_path()
     sync_model_info([])
     [choice, selected] = state_params["prompt_info"]
-    info = gallery.get_images_prompt(choice, selected)
+    info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     #print(f'info:{info}')
     filename = info['Filename']
     file_path = os.path.join(os.path.join(config.path_outputs, '20' + choice.split('/')[0]), filename)
