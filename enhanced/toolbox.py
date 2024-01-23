@@ -386,7 +386,8 @@ def embed_params(state_params):
     img = Image.open(file_path)
     metadata = PngInfo()
     for x in info.keys():
-        metadata.add_text(x, json.dumps(info[x]), True)
+        if x != 'Filename':
+            metadata.add_text(x, json.dumps(info[x]), True)
 
     # the models(checkpoint, lora, embeddings) and styles referenced by the image
     resource_id = lambda x:f'HASH:{models_info[x]["hash"]}' if not models_info[x]['muid'] else f'MUID:{models_info[x]["muid"]}'
