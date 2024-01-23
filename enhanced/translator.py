@@ -112,15 +112,16 @@ def convert(text: str, methods: str = 'Slim Model') -> str:
                     file_name='pytorch_model.bin')
             print(f'[Translator] load slim model form : {translator_slim_path}')
             tokenizer_tt0en = AutoTokenizer.from_pretrained(translator_slim_path)
-            model_tt0en = AutoModelForSeq2SeqLM.from_pretrained(translator_slim_path)
-            TToEN = pipeline("translation", model=model_tt0en, tokenizer=tokenizer_tt0en)
+            model_tt0en = AutoModelForSeq2SeqLM.from_pretrained(translator_slim_path).eval()
         else:
             print(f'[Translator] Using an online translation APIs.')
 
 
         def T_ZH2EN(text_zh):
             if methods=="Slim Model":
-                return 'Slim Model', TToEN(text_zh)[0]['translation_text']
+                encoded = tokenizer_tt0en([text_zh], return_tensors="pt")
+                sequences = model_tt0en.generate(**encoded)
+                return 'Slim Model', tokenizer_tt0en.batch_decode(sequences, skip_special_tokens=True)[0]
             elif methods=="Big Model":
                 return 'Big Model', translate2en_model(model, tokenizer, text_zh)
             else:

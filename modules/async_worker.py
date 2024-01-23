@@ -143,7 +143,7 @@ def worker():
         inpaint_additional_prompt = args.pop()
         inpaint_mask_image_upload = args.pop()
 
-        if enhanced_parameters.translation_timing != 'No translation':
+        if enhanced_parameters.translation_timing != 'No translate':
             prompt = translator.convert(prompt, enhanced_parameters.translation_methods)
             negative_prompt = translator.convert(negative_prompt, enhanced_parameters.translation_methods)
 

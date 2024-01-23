@@ -187,7 +187,7 @@
   "Positive value will make white area in the mask larger, negative value will make white area smaller.(default is 0, always process before any mask invert)": "正值使蒙板白色区域扩大，负值缩小。默认值0，总是在蒙板翻转前处理。",
   "Enable Mask Upload": "激活蒙板上传",
   "Invert Mask": "翻转蒙板", 
-  "Backfill prompt while switching images": "切换已出图片集图片时回填提示词",
+  "Backfill prompt while switching images": "切换已出图集图片时回填提示词",
   "Extract and backfill prompt and negative prompt while switching historical gallery images.": "在浏览历史已出图片集的图片时，自动提取并回填正反向提示词。",
   "DeleteImage": "坏图删除",
   "DELETE the image from output directory and logs!": "将当前出坏的图片从目录和日志中**删除**!!! 重新点击'工具箱'对应菜单项可以取消本次操作。",

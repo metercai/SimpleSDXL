@@ -1,33 +1,5 @@
 {
-    "https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_expansion.bin": "2g2PFrxLyvXyuFir24aFdn53avdc9XxJC",
     "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors": "71HjjChr6wn5EBCYiYZ4ZAPWzQD4VH4tM",
-    "https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/fooocus_inpaint_head.pth": "5K2Td2bfdaPEjrWvwsNgMj3Z38VEkcCT3",
-    "https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint.fooocus.patch": "F8c2siRft4xjPJXh7dwbtw1WDScJoNTTJ",
-    "https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v25.fooocus.patch": "MvnAtT8n3jGSKDYLN7eeqpweKdqJjbuph",
-    "https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v26.fooocus.patch": "5MYuRvDq1mTH1kvsLjLsubPsspEPRBMxL",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/sdxl_lcm_lora.safetensors": "DVGxS7aYJbwFbe3e7MhVY9BZkwfxFyzaH",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors": "JMNsZM5wr2EtsDyTaQKFs6JMbXucz4RTn",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_xl_cpds_128.safetensors": "48Meg7TAQ6392MYagiaub3GiAonRcrQtS",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/clip_vision_vit_h.safetensors": "EwRVqkYBRYqkM3LNgHqWB2ydjq2obJ4MA",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_ip_negative.safetensor": "P8nV1JKLizNwkft3QvohSpwfJJ5dJh4g2",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin": "6wzQHudkAyfLvcQ3mG3rVGe9ZKjspSgD5",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus-face_sdxl_vit-h.bin": "MDyK6vdrdksM1MssyiBX7cn6p6FMA2jV3",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_upscaler_s409985e5.bi": "CNUeXBMgBPByfxsPCRRpCqtWRRAXcyGqG",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/xlvaeapp.pth": "ADdavK2Pvq3Tcyyx8ymNBovyZyTKkk8xy",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/vaeapp_sd15.pt": "9buKe7aXzXN2uGvLyYq3hUiSqWcWqzjQN",
-    "https://huggingface.co/lllyasviel/misc/resolve/main/xl-to-v1_interposer-v3.1.safetensors": "PNYLG2ZQG8dzg2bTf1DQ9CwXuBz2aQvnX",
-
-    "https://huggingface.co/lllyasviel/misc/resolve/main/model_base_caption_capfilt_large.pth": "Pe98SR7fkmHimFhk4yH8qQPY9UV2NKPF5",
-    "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors": "2HZJi3EqeCkknh3CJHveF3MacqBFPcBww",
-    "https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors": "3Hc1RyAchCQ6yETCGPwF6CnTZWf1wPc4F",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/realisticStockPhoto_v10.safetensors": "8tWppfd1kPzabHs3VzD3Eony9CrcmnKPF",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/SDXL_FILM_PHOTOGRAPHY_STYLE_BetaV0.4.safetensors": "3EisPvThTxkiF3t5rTx8Hr7K1irGkgmgw",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/bluePencilXL_v050.safetensors": "EtxaaF5qpbCBQpeEVjDP6VCzR6c73UNeP",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/DreamShaper_8_pruned.safetensors": "CF9y4BTWLiidKyTW9WS5ktsiUqmrpYHQe",
-    "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/unaestheticXLv31.safetensors": "81WhJ1ZA2vqosx6iw4SbaqMY1GCXP1Cmt",
-    "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin": "BKCc6XUAxSUcHChdY4KfJ9oQKvCuYbSpr",
-
     "https://civitai.com/api/download/models/288982?type=Model&format=SafeTensor&size=full&fp=fp16": "HUivLQfyvFdtUPzVzettxJbgGw5YatXBp",
-    "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=full&fp=fp16": "2B2riAyru6XyFnixb4eVJqdVAS4C9DsEQ",
-    "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/bluePencilXLV200.cXoH.safetensors": "8awdQ5rBjfpHctv1PFhvEvL265xQ8YHA3"
+    "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=full&fp=fp16": "2B2riAyru6XyFnixb4eVJqdVAS4C9DsEQ"
 }
