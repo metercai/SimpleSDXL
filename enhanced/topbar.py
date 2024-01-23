@@ -574,9 +574,9 @@ def reset_params(metadata):
     aspect_ratios = metadata['Resolution'][1:-1].replace(', ', '*')
     adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in metadata['ADM Guidance'][1:-1].split(', ')]
     get_ads_value_or_default = lambda x: ads.default[x] if 'Advanced_parameters' not in metadata.keys() or x not in metadata['Advanced_parameters'].keys() else metadata['Advanced_parameters'][x]
-    adaptive_cfg = get_ads_value_or_default('adaptive_cfg')
-    overwrite_step = get_ads_value_or_default('overwrite_step')
-    overwrite_switch = get_ads_value_or_default('overwrite_switch')
+    adaptive_cfg = float(get_ads_value_or_default('adaptive_cfg'))
+    overwrite_step = int(get_ads_value_or_default('overwrite_step'))
+    overwrite_switch = int(get_ads_value_or_default('overwrite_switch'))
     inpaint_engine = get_ads_value_or_default('inpaint_engine')
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
 
