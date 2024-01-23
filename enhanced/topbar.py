@@ -77,15 +77,22 @@ iframe::-webkit-scrollbar {
 nav_name_list = ''
 system_message = ''
 config_ext = {}
+enhanced_config = os.path.abspath(f'./enhanced/config.json')
+if os.path.exists(enhanced_config):
+    with open(enhanced_config, "r", encoding="utf-8") as json_file:
+        config_ext.update(json.load(json_file))
+else:
+    config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
 
 def get_preset_name_list():
     path_preset = os.path.abspath(f'./presets/')
-    presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.') and p!='default.json']
+    presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
     file_times = [(f, os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
     sorted_file_times = sorted(file_times, key=lambda x: x[1], reverse=True)
     sorted_files = [f[0] for f in sorted_file_times]
-    sorted_files.insert(0, 'default.json')
+    sorted_files.pop(sorted_files.index(f'{config.preset}.json'))
+    sorted_files.insert(0, f'{config.preset}.json')
     presets = sorted_files[:9]
     name_list = ''
     for i in range(len(presets)):
@@ -95,14 +102,10 @@ def get_preset_name_list():
 
 
 def get_system_message():
+    global config_ext
+
     fooocus_log = os.path.abspath(f'./update_log.md')
     simplesdxl_log = os.path.abspath(f'./simplesdxl_log.md')
-    enhanced_config = os.path.abspath(f'./enhanced/config.json')
-    if os.path.exists(enhanced_config):
-        with open(enhanced_config, "r", encoding="utf-8") as json_file:
-            config_ext.update(json.load(json_file))
-    else:
-        config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
     update_msg_f = ''
     first_line_f = None
     if os.path.exists(fooocus_log):
@@ -165,8 +168,6 @@ def preset_instruction(state_params):
     head = "<div style='max-width:100%; max-height:128px; overflow:hidden'>"
     foot = "</div>"
     p_name = preset
-    if p_name == 'default':
-        p_name = '默认'
     body = f'"{p_name}"预置包:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     preset_url_str = ''
     if preset_url:
@@ -312,6 +313,8 @@ def refresh_nav_bars(state_params):
 
 
 def process_before_generation(state_params):
+    if "__nav_name_list" not in state_params.keys():
+        state_params.update({"__nav_name_list": get_preset_name_list()})
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
     # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
@@ -322,6 +325,8 @@ def process_before_generation(state_params):
 
 
 def process_after_generation(state_params):
+    if "__max_per_page" not in state_params.keys():
+        state_params.update({"__max_per_page": 18})
     state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
@@ -356,7 +361,6 @@ def reset_context(state_params):
     global system_message, nav_id_list, nav_preset_html
 
     preset = state_params.get("__preset")
-    preset_url = state_params.get("preset_url", '')
     
     # load preset config
     config_preset = {}
@@ -381,7 +385,8 @@ def reset_context(state_params):
             preset_url = f'{args_manager.args.webroot}/file={preset_inc_path}'
         else:
             preset_url = ''
-    
+    state_params.update({"preset_url":preset_url})
+
     info_preset = {}
     keys = config_preset.keys()
     info_preset.update({
@@ -440,9 +445,8 @@ def reset_context(state_params):
 #"default_max_image_number": 32,
 #"example_inpaint_prompts":[]
     info_preset.update({"task_from": f'preset:{preset}'})
+    
     results = reset_params(check_prepare_for_reset(info_preset))
-
-    state_params.update({"preset_url":preset_url})
 
     results += [gr.update(), gr.update(choices=state_params["__output_list"], value=None if len(state_params["__output_list"])==0 else state_params["__output_list"][0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
@@ -513,7 +517,7 @@ def check_prepare_for_reset(info):
         newlist += [filename]
 
     # download the missing model
-    if False or downlist:
+    if downlist:
         print(f'[Topbar] The model is not local, ready to download.')
         for f in downlist:
             if f in down_muid:

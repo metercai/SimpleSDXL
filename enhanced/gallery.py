@@ -35,6 +35,8 @@ def refresh_output_list(max_per_page):
 
 
 def images_list_update(choice, state_params):
+    if "__output_list" not in state_params.keys():
+        return  gr.update(), gr.update(), state_params
     output_list = state_params["__output_list"]
     if choice is None and len(output_list) > 0:
         choice = output_list[0]
@@ -44,13 +46,16 @@ def images_list_update(choice, state_params):
 
 
 def select_index(choice, state_params, evt: gr.SelectData):
-    state_params.update({"infobox_state": 0})
-    state_params.update({"note_box_state": ['',0,0]})
+    if "__output_list" in state_params.keys():
+        state_params.update({"infobox_state": 0})
+        state_params.update({"note_box_state": ['',0,0]})
     print(f'[Gallery] Selected_gallery_catalog: change image catalog:{choice}.')
     return [gr.update(visible=True)] + [gr.update(visible=False)] * 3 + [gr.update(interactive=True) , state_params]
 
 
 def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
+    if "__output_list" not in state_params.keys():
+        return  [gr.update()] * 7 + [state_params]
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"prompt_info": [choice, evt.index]})
     if choice is None and len(state_params["__output_list"]) > 0:
