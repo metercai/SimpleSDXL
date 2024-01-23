@@ -345,7 +345,7 @@ def sync_message(state_params):
 
 
 def reset_params_for_preset(bar_button, state_params):
-    if state_params["__preset"]==bar_button:
+    if '__preset' not in state_params.keys() or state_params["__preset"]==bar_button:
         return [gr.update()] * 37
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": bar_button})
@@ -513,7 +513,7 @@ def check_prepare_for_reset(info):
         newlist += [filename]
 
     # download the missing model
-    if downlist:
+    if False or downlist:
         print(f'[Topbar] The model is not local, ready to download.')
         for f in downlist:
             if f in down_muid:
