@@ -558,7 +558,7 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                    translation_timing = gr.Radio(label='Timing of translation', choices=['No translate', 'Translate then generate', 'Modify after translate'], value='Translate then generate', info='The selection of timing for prompt translation.')
+                    translation_timing = gr.Radio(label='Timing of translation', choices=['Translate then generate', 'Modify after translate', 'No translate'], value='Translate then generate', info='The selection of timing for prompt translation.')
                     translation_methods = gr.Radio(label='Translation methods', choices=['Slim Model', 'Big Model', 'Third APIs'], value='Slim Model', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
@@ -644,7 +644,7 @@ with shared.gradio_root:
                 if is_generating:
                     return gr.update(), gr.update(), gr.update(), gr.update()
                 else:
-                    flag = (timing=='Modify after translation' and translator.is_chinese(raw_prompt_txt))
+                    flag = (timing=='Modify after translate' and translator.is_chinese(raw_prompt_txt))
                     return gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)
 
             return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
