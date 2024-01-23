@@ -804,7 +804,8 @@ def worker():
                     for li, (n, w) in enumerate(loras):
                         if n != 'None':
                             d.append((f'LoRA {li + 1}', f'{n} : {w}'))
-                    d.append(('Version', 'v' + fooocus_version.version))
+                    import enhanced.version as version
+                    d.append(('Version', 'v' + fooocus_version.version + f' {version.branch}_{version.get_simplesdxl_ver()}'))
                     log(x, d)
 
                 yield_result(async_task, imgs, do_not_show_finished_images=len(tasks) == 1)

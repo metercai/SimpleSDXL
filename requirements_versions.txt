@@ -24,3 +24,4 @@ download==0.3.5
 mistune==3.0.2
 sacremoses==0.1.1
 translators==5.8.9
+sentencepiece==0.1.99
