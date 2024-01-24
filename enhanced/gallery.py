@@ -145,10 +145,11 @@ def get_images_prompt(choice, selected, max_per_page, display_index=False):
             selected = nums-max_per_page + selected
     images_prompt_keys.remove(choice)
     images_prompt_keys.append(choice)
-    metainfo = images_prompt[choice][images_list[choice][selected]]
+    filename = images_list[choice][selected]
+    metainfo = {"Filename": filename} if filename not in images_prompt[choice].keys() else images_prompt[choice][filename]
     if display_index:
-        print(f'[Gallery] The image selected: catalog={choice}, page={page_choice}, in_page={page_index}, in_catalog={selected}, filename={metainfo["Filename"]}')
-    if choice in images_ads.keys() and metainfo['Filename'] in images_ads[choice].keys():
+        print(f'[Gallery] The image selected: catalog={choice}, page={page_choice}, in_page={page_index}, in_catalog={selected}, filename={filename}')
+    if choice in images_ads.keys() and filename in images_ads[choice].keys():
         metainfo.update({"Advanced_parameters": images_ads[choice][metainfo['Filename']]})
     return metainfo
 
