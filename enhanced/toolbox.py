@@ -230,7 +230,8 @@ def delete_image(state_params):
         log_ext = {}
         with open(log_name, "r", encoding="utf-8") as log_file:
             log_ext.update(json.load(log_file))
-        log_ext.pop(file_name)
+        if file_name in log_ext.keys():
+            log_ext.pop(file_name)
         with open(log_name, 'w', encoding='utf-8') as log_file:
             json.dump(log_ext, log_file)
 
