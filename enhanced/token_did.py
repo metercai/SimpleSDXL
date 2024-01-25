@@ -97,6 +97,15 @@ def init_local_did(name):
     return
 
 
+def urlsafe_patch(text, method):
+    if method == 'encode':
+        return text.trip(r'=+')
+    elif method == 'decode':
+        return text + "===="[:len(text)%4]
+    else:
+        return text
+
+
 def encrypt(did, text):
     global prikey_user, DID_claims
     system_name = b'model_file_hub_sys'
@@ -119,7 +128,7 @@ def encrypt(did, text):
     encryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(iv)).encryptor()
     padder = padding.PKCS7(128).padder()
     ct = iv + encryptor.update(padder.update(text.encode('utf-8')) + padder.finalize()) + encryptor.finalize()
-    return base64.urlsafe_b64encode(ct).decode('utf-8')
+    return urlsafe_patch(base64.urlsafe_b64encode(ct).decode('utf-8'), "encode")
 
 
 def encrypt_default(text):
@@ -148,7 +157,7 @@ def decrypt(did, text):
         salt=salt0[:16],
         info=system_name,
     ).derive(prikey_self.exchange(exkey))
-    ct = base64.urlsafe_b64decode(text.encode('utf-8'))
+    ct = base64.urlsafe_b64decode(urlsafe_patch(text, "decode").encode('utf-8'))
     decryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(ct[:16])).decryptor()
     unpadder = padding.PKCS7(128).unpadder()
     flag = False
@@ -165,7 +174,7 @@ def decrypt(did, text):
             salt=salt0[:16],
             info=system_name,
         ).derive(prikey_self.exchange(exkey))
-        ct = base64.urlsafe_b64decode(text.encode('utf-8'))
+        ct = base64.urlsafe_b64decode(urlsafe_patch(text, "decode").encode('utf-8'))
         decryptor = Cipher(algorithms.AES(derivedkey), modes.CBC(ct[:16])).decryptor()
         unpadder = padding.PKCS7(128).unpadder()
         try:
