@@ -99,7 +99,7 @@ def init_local_did(name):
 
 def urlsafe_patch(text, method):
     if method == 'encode':
-        return text.trip(r'=+')
+        return text.strip(r'=+')
     elif method == 'decode':
         return text + "===="[:len(text)%4]
     else:
