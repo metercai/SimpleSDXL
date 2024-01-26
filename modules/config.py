@@ -326,6 +326,25 @@ example_inpaint_prompts = get_config_item_or_set_default(
 )
 
 example_inpaint_prompts = [[x] for x in example_inpaint_prompts]
+
+default_inpaint_mask_model = get_config_item_or_set_default(
+    key='default_inpaint_mask_model',
+    default_value='isnet-general-use',
+    validator=lambda x: x in modules.flags.inpaint_mask_models
+)
+
+default_inpaint_mask_cloth_category = get_config_item_or_set_default(
+    key='default_inpaint_mask_cloth_category',
+    default_value='full',
+    validator=lambda x: x in modules.flags.inpaint_mask_cloth_category
+)
+
+default_inpaint_mask_sam_model = get_config_item_or_set_default(
+    key='default_inpaint_mask_sam_model',
+    default_value='sam_vit_b_01ec64',
+    validator=lambda x: x in modules.flags.inpaint_mask_sam_model
+)
+
 config_dict["default_loras"] = default_loras = default_loras[:5] + [['None', 1.0] for _ in range(5 - len(default_loras))]
 
 possible_preset_keys = [

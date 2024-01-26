@@ -86,7 +86,9 @@ vae_approx_filenames = [
 def download_models():
     from modules.model_loader import load_file_from_url
     from modules.config import path_checkpoints, path_loras, path_vae_approx, path_fooocus_expansion, \
-        checkpoint_downloads, path_embeddings, embeddings_downloads, lora_downloads
+        path_inpaint, checkpoint_downloads, path_embeddings, embeddings_downloads, lora_downloads
+    
+    os.environ["U2NET_HOME"] = path_inpaint
 
     for file_name, url in embeddings_downloads.items():
         load_file_from_url(url=url, model_dir=path_embeddings, file_name=file_name)
