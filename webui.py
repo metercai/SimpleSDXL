@@ -558,11 +558,12 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                    embed_metadata_checkbox = gr.Checkbox(label='Default to generate image embedding parameters', value=False, interactive=True, info='All generated images come with generation environment parameters.')
                     translation_timing = gr.Radio(label='Timing of translation', choices=['Translate then generate', 'Modify after translate', 'No translate'], value='Translate then generate', info='The selection of timing for prompt translation.')
                     translation_methods = gr.Radio(label='Translation methods', choices=['Slim Model', 'Big Model', 'Third APIs'], value='Slim Model', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
-            ehps = [backfill_prompt, translation_timing, translation_methods]
+            ehps = [backfill_prompt, embed_metadata_checkbox, translation_timing, translation_methods]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
             

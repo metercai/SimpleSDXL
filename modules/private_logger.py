@@ -4,8 +4,11 @@ import modules.config
 import json
 import urllib.parse
 import modules.advanced_parameters as ads
+import enhanced.enhanced_parameters as ehs
+import enhanced.toolbox as toolbox
 
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 from modules.util import generate_temp_filename
 
 
@@ -25,7 +28,14 @@ def log(img, dic):
 
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=modules.config.path_outputs, extension='png')
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
-    Image.fromarray(img).save(local_temp_filename)
+    if ehs.embed_metadata_checkbox:
+        pnginfo = PngInfo()
+        metadata = toolbox.get_embed_metadata(dict(dic))
+        pnginfo.add_text("Comment", json.dumps(metadata), True)
+    else:
+        pnginfo = None
+    Image.fromarray(img).save(local_temp_filename, pnginfo=pnginfo)
+
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
 
     css_styles = (

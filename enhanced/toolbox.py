@@ -3,12 +3,16 @@ import json
 import copy
 import re
 import math
+import time
 import gradio as gr
 import modules.config as config
 import modules.sdxl_styles as sdxl_styles
 import modules.advanced_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
+import enhanced.token_did as token_did
+import enhanced.version as version
+
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
@@ -385,46 +389,59 @@ def embed_params(state_params):
     filename = info['Filename']
     file_path = os.path.join(os.path.join(config.path_outputs, '20' + choice.split('/')[0]), filename)
     img = Image.open(file_path)
-    metadata = PngInfo()
+    embed_dirs = os.path.join(config.path_outputs, 'embed')
+    if not os.path.exists(embed_dirs):
+        os.mkdir(embed_dirs)
+    embed_file = os.path.join(embed_dirs, filename)
+    metadata = get_embed_metadata(info)
+    pnginfo = PngInfo()
+    pnginfo.add_text("Comment", json.dumps(metadata), True)
+    img.save(embed_file, pnginfo=pnginfo)
+    print(f'[ToolBox] Embed_params: embed {len(metadata.keys())} params to image and save to {embed_file}.')
+    return [gr.update(visible=False)] * 2 + [state_params]
+
+def get_embed_metadata(info, extra=None):
+    metadata = {}
     for x in info.keys():
         if x != 'Filename':
-            metadata.add_text(x, json.dumps(info[x]), True)
+            metadata.update({x: info[x]})
 
     # the models(checkpoint, lora, embeddings) and styles referenced by the image
     resource_id = lambda x:f'HASH:{models_info[x]["hash"]}' if not models_info[x]['muid'] else f'MUID:{models_info[x]["muid"]}'
     m_dict = {info["Base Model"]: resource_id("checkpoints/" + info["Base Model"])}
     if info['Refiner Model'] and info['Refiner Model'] != 'None':
         m_dict.update({info["Refiner Model"]: resource_id("checkpoints/" + info["Refiner Model"])})
-    metadata.add_text('checkpoint_downloads', json.dumps(m_dict), True) 
+    metadata.update({'checkpoint_downloads': m_dict}) 
     
     m_dict = {}
     for key in info:
         if key.startswith('LoRA ['):
             m_dict.update({key[6:-8]: resource_id("loras/" + key[6:-8])})
     if len(m_dict.keys())>0:
-        metadata.add_text('lora_downloads', json.dumps(m_dict), True)
+        metadata.update({'lora_downloads': m_dict})
 
     embeddings = topbar.embeddings_model_split(info["Prompt"], info["Negative Prompt"])
     m_dict = {}
     for key in embeddings:
         m_dict.update({key[11:]: resource_id(key)})
     if len(m_dict.keys())>0:
-        metadata.add_text('embeddings_downloads', json.dumps(m_dict), True)
+        metadata.update({'embeddings_downloads': m_dict})
 
     styles_name = [f[1:-1] for f in info['Styles'][1:-1].split(', ')]
     for key in styles_name:
         if key!='Fooocus V2':
             m_dict.update({key: sdxl_styles.styles[key]})
     if len(m_dict.keys())>0:
-        metadata.add_text('styles_definition', json.dumps(m_dict), True)
+        metadata.update({'styles_definition': m_dict})
+    metadata.update({'created_by': token_did.DID})
+    metadata.update({'created_timestamp': time.time()})
+    metadata.update({'software': f'{version.branch}_{version.get_simplesdxl_ver()}'})
+    metadata.update({'version': 'v1.0'})
+    if "Version" in metadata.keys():
+        metadata.pop("Version")
 
-    embed_dirs = os.path.join(config.path_outputs, 'embed')
-    if not os.path.exists(embed_dirs):
-        os.mkdir(embed_dirs)
-    embed_file = os.path.join(embed_dirs, filename)
-    img.save(embed_file, pnginfo=metadata)
-    print(f'[ToolBox] Embed_params: embed {len(info.keys())} params to image and save to {embed_file}.')
-    return [gr.update(visible=False)] * 2 + [state_params]
+    return metadata
+
 
 def extract_reset_image_params(img_path):
     img = Image.open(img_path)
@@ -432,15 +449,15 @@ def extract_reset_image_params(img_path):
     if hasattr(img,'text'):
         for k in img.text:
             metadata.update({k: json.loads(img.text[k])})
-    else:
-        print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image.')
+    if "Comment" not in metadata.keys():
+        print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image. \nmetadata:{metadata}')
         return [gr.update()] * 31
     print(f'[ToolBox] Extraction successful and ready to reset: {metadata}') 
     refresh_models_info_from_path()
     sync_model_info([])
-    metadata.update({"task_from": f'embed_image:{img_path}'})
-    results = topbar.reset_params(topbar.check_prepare_for_reset(metadata))   
-    print(f'[ToolBox] Reset_params_from_image: update {len(metadata.keys())} params from input image.')
+    metadata["Comment"].update({"task_from": f'embed_image:{img_path}'})
+    results = topbar.reset_params(topbar.check_prepare_for_reset(metadata["Comment"]))   
+    print(f'[ToolBox] Reset_params_from_image: update {len(metadata["Comment"].keys())} params from input image.')
     return results
 
 extract_reset_image_params_js = '''
