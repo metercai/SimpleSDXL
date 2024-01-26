@@ -265,7 +265,7 @@ default_image_number = get_config_item_or_set_default(
 checkpoint_downloads = get_config_item_or_set_default(
     key='checkpoint_downloads',
     default_value={
-        "juggernautXL_v8Rundiffusion.safetensors": "https://civitai.com/api/download/models/288982"
+        "juggernautXL_v8Rundiffusion.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/juggernautXL_v8Rundiffusion.safetensors"
     },
     validator=lambda x: isinstance(x, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in x.items())
 )
