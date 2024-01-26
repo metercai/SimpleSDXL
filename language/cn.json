@@ -195,6 +195,10 @@
   "Theme of background": "背景主题",
   "Default to generate image embedding parameters": "默认为生成图片嵌入参数",
   "All generated images come with generation environment parameters.": "在所有生成的图片中都嵌入生成环境的参数。",
+  "Mask generation model": "蒙板生成模型",
+  "Cloth category": "衣服类别",
+  "Segmentation prompt": "部位提示",
+  "Generate mask from image": "从图片生成蒙板",
 
     "Image Style": "图片风格",
     "Fooocus V2": "Fooocus V2",
