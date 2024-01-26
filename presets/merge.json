@@ -1,0 +1,46 @@
+{
+    "default_model": "albedobaseXL_v20.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 8,
+    "default_sample_sharpness": 2,
+    "default_sampler": "dpmpp_2m_sde_gpu",
+    "default_scheduler": "karras",
+    "default_performance": "Speed",
+    "default_prompt": "",
+    "default_prompt_negative": "Cartoon, vector, clipart, artifacts, ugly",
+    "default_styles": [
+        "Fooocus V2",
+        "Fooocus Enhance",
+        "Fooocus Sharp"
+    ],
+    "default_aspect_ratio": "1152*896",
+    "default_overwrite_step": 24,
+    "checkpoint_downloads": {
+        "albedobaseXL_v20.safetensors": "https://civitai-delivery-worker-prod.5ac0637cfd0766c97916cefa3764fbdf.r2.cloudflarestorage.com/model/929872/albedobasexlV20.M9p3.safetensors?X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22albedobaseXL_v20.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=e01358d793ad6966166af8b3064953ad/20240115/us-east-1/s3/aws4_request&X-Amz-Date=20240115T072729Z&X-Amz-SignedHeaders=host&X-Amz-Signature=4c1af91ed8c3a691a37c59d13a61f5b6bdbf8807347df887000a7250e0d36447"
+    },
+    "embeddings_downloads": {},
+    "lora_downloads": {}
+}
