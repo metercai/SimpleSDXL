@@ -20,7 +20,7 @@ def refresh_output_list(max_per_page):
 
     listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
-        return
+        return None
     listdirs1 = listdirs.copy()
     for index in listdirs:
         path_gallery = os.path.join(config.path_outputs, index)

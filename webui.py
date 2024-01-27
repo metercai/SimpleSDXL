@@ -819,7 +819,7 @@ with shared.gradio_root:
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio, inpaint_mask_upload_checkbox], show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio, image_tools_checkbox, inpaint_mask_upload_checkbox], show_progress=False) \
                       .then(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
