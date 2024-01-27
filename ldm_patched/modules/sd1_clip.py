@@ -1,6 +1,6 @@
 import os
 
-from transformers import CLIPTokenizer
+from transformers.models.clip import CLIPTokenizer
 import ldm_patched.modules.ops
 import torch
 import traceback

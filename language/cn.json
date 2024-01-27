@@ -198,6 +198,11 @@
   "Mask generation model": "蒙板生成模型",
   "Cloth category": "衣服类别",
   "Segmentation prompt": "部位提示",
+  "Advanced options": "高级设置",
+  "SAM model": "SAM模型",
+  "Quantization": "量化版",
+  "Box Threshold": "物体阈值",
+  "Text Threshold": "文字阈值",
   "Generate mask from image": "从图片生成蒙板",
 
     "Image Style": "图片风格",
