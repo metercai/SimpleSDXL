@@ -288,6 +288,7 @@ def init_nav_bars(state_params, request: gr.Request):
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
+    results += [gr.update(value=False, interactive=False)]
     results += [gr.update(value=not state_params["__is_mobile"])]
     return results
 
@@ -337,9 +338,10 @@ def process_after_generation(state_params):
     results += [gr.update(interactive=True)] * (preset_nums + 1)
     results += [gr.update()] * (9-preset_nums)
     
-    output_index = state_params["__output_list"][0].split('/')[0]
-    gallery_util.refresh_images_catalog(output_index, True)
-    gallery_util.parse_html_log(output_index, True)
+    if len(state_params["__output_list"]) > 0:
+        output_index = None if  state_params["__output_list"][0].split('/')[0]
+        gallery_util.refresh_images_catalog(output_index, True)
+        gallery_util.parse_html_log(output_index, True)
     
     return results
 
