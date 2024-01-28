@@ -339,7 +339,7 @@ def process_after_generation(state_params):
     results += [gr.update()] * (9-preset_nums)
     
     if len(state_params["__output_list"]) > 0:
-        output_index = None if  state_params["__output_list"][0].split('/')[0]
+        output_index = state_params["__output_list"][0].split('/')[0]
         gallery_util.refresh_images_catalog(output_index, True)
         gallery_util.parse_html_log(output_index, True)
     

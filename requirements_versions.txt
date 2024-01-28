@@ -26,4 +26,4 @@ sacremoses==0.1.1
 translators==5.8.9
 sentencepiece==0.1.99
 rembg==2.0.53
-./enhanced/groundingdino-py-0.4.1.tar.gz
+./enhanced/groundingdino_py-0.4.1-py2.py3-none-any.whl
