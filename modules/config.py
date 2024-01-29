@@ -140,7 +140,7 @@ path_inpaint = get_dir_or_set_default('path_inpaint', '../models/inpaint/')
 path_controlnet = get_dir_or_set_default('path_controlnet', '../models/controlnet/')
 path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
-path_translator = get_dir_or_set_default('path_translator','../models/translator/')
+path_llms = get_dir_or_set_default('path_llms','../models/llms/')
 path_outputs = get_dir_or_set_default('path_outputs', '../outputs/')
 
 

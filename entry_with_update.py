@@ -14,6 +14,20 @@ try:
     repo = pygit2.Repository(os.path.abspath(os.path.dirname(__file__)))
 
     branch_name = repo.head.shorthand
+    
+    origin_name = 'main'
+    main_name = 'SimpleSDXL'
+    dev_name = 'SimpleSDXL_dev'
+    if '__dev' in (sys.argv):
+        if branch_name != dev_name:
+            repo.checkout(dev_name)
+            branch_name = repo.head.shorthand
+            print(f'in dev, branch_name:{branch_name}')
+    else:
+        if branch_name != main_name:
+            repo.checkout(main_name)
+            branch_name = repo.head.shorthand
+            print(f'not dev, branch_name:{branch_name}')
 
     remote_name = 'origin'
     remote = repo.remotes[remote_name]

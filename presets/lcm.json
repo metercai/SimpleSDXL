@@ -41,7 +41,7 @@
         "juggernautXL_v8Rundiffusion.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/juggernautXL_v8Rundiffusion.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {}
+    "lora_downloads": {},
     "previous_default_models": [
         "juggernautXL_version8Rundiffusion.safetensors",
         "juggernautXL_version7Rundiffusion.safetensors",

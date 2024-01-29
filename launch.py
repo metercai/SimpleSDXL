@@ -127,6 +127,7 @@ def download_models():
     from modules import config
 
     os.environ["U2NET_HOME"] = config.path_inpaint
+    os.environ["HUF_MIRROR"] = 'hf-mirror.com'
 
     for file_name, url in vae_approx_filenames:
         load_file_from_url(url=url, model_dir=config.path_vae_approx, file_name=file_name)
