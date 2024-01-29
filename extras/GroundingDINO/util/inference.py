@@ -28,7 +28,7 @@ class GroundingDinoModel(Model):
     ) -> Tuple[sv.Detections, List[str]]:
         if self.model is None:
             filename = load_file_from_url(
-                url="https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth",
+                url="https://huggingface.co/metercai/rembg/resolve/main/inpaint/groundingdino_swint_ogc.pth",
                 file_name='groundingdino_swint_ogc.pth',
                 model_dir=path_inpaint)
             model = load_model(model_config_path=self.config_file, model_checkpoint_path=filename)
