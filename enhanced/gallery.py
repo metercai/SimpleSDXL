@@ -68,6 +68,8 @@ def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
         return [gr.update(value=toolbox.make_infobox_markdown(result)), gr.update(), gr.update()] + [gr.update(visible=False)] * 4 + [state_params]
 
 def select_gallery_progress(state_params, evt: gr.SelectData):
+    #if "__output_list" not in state_params.keys():
+    #    return  [gr.update()] * 5 + [state_params]
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"prompt_info": [None, evt.index]})
     result = get_images_prompt(state_params["__output_list"][0], evt.index, state_params["__max_per_page"])

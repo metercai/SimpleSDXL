@@ -142,6 +142,7 @@ def worker():
         inpaint_input_image = args.pop()
         inpaint_additional_prompt = args.pop()
         inpaint_mask_image_upload = args.pop()
+        realtime_input_image = args.pop()
 
         if enhanced_parameters.translation_timing != 'No translate':
             prompt = translator.convert(prompt, enhanced_parameters.translation_methods)
@@ -335,6 +336,10 @@ def worker():
                     clip_vision_path, ip_negative_path, ip_adapter_face_path = modules.config.downloading_ip_adapters(
                         'face')
                 progressbar(async_task, 1, 'Loading control models ...')
+            if current_tab == 'paint' and realtime_input_image is not None:
+                uov_input_image = HWC3(realtime_input_image)
+                goals.append('vary')
+                uov_method = 'strong'
 
         # Load or unload CNs
         pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
