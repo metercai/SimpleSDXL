@@ -29,20 +29,21 @@
     "default_sampler": "dpmpp_2m_sde_gpu",
     "default_scheduler": "karras",
     "default_performance": "Speed",
-    "default_prompt": "",
+    "default_prompt": "Happy New Year 2024",
     "default_prompt_negative": "",
     "default_styles": [
         "Fooocus V2",
         "Fooocus Enhance",
-        "Fooocus Sharp"
+        "Fooocus Sharp",
+        "Leo Dragonyear"
     ],
     "default_aspect_ratio": "1152*896",
     "checkpoint_downloads": {
-        "juggernautXL_v8Rundiffusion.safetensors": ""
+        "juggernautXL_v8Rundiffusion.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/juggernautXL_v8Rundiffusion.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {
-        "sd_xl_offset_example-lora_1.0.safetensors": ""
+        "sd_xl_offset_example-lora_1.0.safetensors": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors"
     },
     "styles_definition": {
         "Fooocus Enhance": [
@@ -52,6 +53,10 @@
         "Fooocus Sharp": [
             "cinematic still {prompt} . emotional, harmonious, vignette, 4k epic detailed, shot on kodak, 35mm photo, sharp focus, high budget, cinemascope, moody, epic, gorgeous, film grain, grainy",
             "anime, cartoon, graphic, (blur, blurry, bokeh), text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured"
+        ],
+        "Leo Dragonyear": [
+            "Chinese New Year of the Dragon {prompt} . Festival, traditional, lively, lantern-lit, cultural, celebratory, family-oriented, rich colors, auspicious, joyous, graceful, Dragon Year, abstract, surreal, papercut, couplets",
+            "dark, gloomy, futuristic, chaotic, industrial, desolate, monochromatic, eerie, apocalyptic, unsettling, anime, cartoon, graphic, text, painting, crayon, deformed, mutated, ugly, disfigured"
         ]
     }
 }
