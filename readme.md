@@ -1,5 +1,5 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_03.png"></div>
+<div align=center><img src="https://v2.token.tm/img/SimpleSDXL_2024_03_00.png"></div>
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
@@ -25,7 +25,8 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
   **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 
 ## 🔔 更新 / Update
-- [2023.01.20] <b>预置包优化版：预置包导航重构，实现session based的预置包加载，没有浏览器重载过程，更轻量更快速。预置包、嵌参图片和提参重生接口优化，扩充可预置和嵌参的范围，支持Turbo类模型和自定义风格样式的嵌参和预置。</b>
+- [2023.01.31] <b>贺春版：新增智能抠图，基于Bert+Sam和U2net实现在语义理解上图片分割，生成蒙板后进行重绘。新增翻译小模型，降低本地翻译的算力要求。进一步优化测试预置包和嵌参图片，先已支持28个预置参数。升级默认预置包主模型到v8版，添加了Turbo模型预置包（加速）、albedobaseXL模型预置包（融合）和社群活跃用户LEO贡献的DragonYear预置包（龙年贺春），内含龙年拜年定制风格。值此新春之际，用全新的SimpleSDX贺春版，感谢朋友们的厚爱。祝大家新春快乐，龙年腾达！</b>
+- [2023.01.20] 预置包优化版：预置包导航重构，实现session based的预置包加载，没有浏览器重载过程，更轻量更快速。预置包、嵌参图片和提参重生接口优化，扩充可预置和嵌参的范围，支持Turbo类模型和自定义风格样式的嵌参和预置。
 - [2023.01.16] 新年第三版：嵌参图片上线，可以生成嵌参图片，可以上传识别嵌参图片。从参数查看到提参重生，从预置包导航到预置包生成，最后到嵌参图片，这一些列简化参数配置和使用的功能终于闭环了。启动流程优化，平行升级版支持自动获取主线配置，免配置模型目录和出图目录，新增国内下载源。界面多处优化，混编翻译器增加不翻译选项等。
 - [2024.01.08] 新年第二版：图片工具增加新特性：浏览图片可自动回填提示词，联动删除坏图文件和日志记录。混编翻译器启动稳定性修补，增加不翻译模式。同步主线v2.1.861，新增风格选择浮层示意图。
 - [2024.01.01] 新年新版本：界面交互优化，状态信息迁移到会话(session)，多浏览器访问互不干扰。优化了手机访问界面，PC和手机可同步使用。生成图片过程中禁止预置包切换，保障出图过程的完整。增加相册缓存，提升历史图片索引切换速度。修复模型路径bug，同步主线版本v2.1.859。

@@ -50,7 +50,7 @@ def select_index(choice, state_params, evt: gr.SelectData):
         state_params.update({"infobox_state": 0})
         state_params.update({"note_box_state": ['',0,0]})
     print(f'[Gallery] Selected_gallery_catalog: change image catalog:{choice}.')
-    return [gr.update(visible=True)] + [gr.update(visible=False)] * 3 + [gr.update(interactive=True) , state_params]
+    return [gr.update(visible=True)] + [gr.update(visible=False)] * 4 + [gr.update(interactive=True) , state_params]
 
 
 def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):

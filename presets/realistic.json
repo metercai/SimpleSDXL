@@ -45,4 +45,4 @@
         "SDXL_FILM_PHOTOGRAPHY_STYLE_BetaV0.4.safetensors": "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/SDXL_FILM_PHOTOGRAPHY_STYLE_BetaV0.4.safetensors"
     },
     "previous_default_models": ["realisticStockPhoto_v10.safetensors"]
-}
+} 
