@@ -277,18 +277,6 @@ with shared.gradio_root:
 
                                     return generate_mask_from_image(image, mask_model, extras)
 
-                                generate_mask_button.click(fn=generate_mask,
-                                                           inputs=[
-                                                               inpaint_input_image, inpaint_mask_model,
-                                                               inpaint_mask_cloth_category,
-                                                               inpaint_mask_sam_prompt_text,
-                                                               inpaint_mask_sam_model,
-                                                               inpaint_mask_sam_quant,
-                                                               inpaint_mask_box_threshold,
-                                                               inpaint_mask_text_threshold
-                                                           ],
-                                                           outputs=inpaint_mask_image, show_progress=True, queue=True)
-
                             inpaint_mask_model.change(lambda x: [gr.update(visible=x == 'u2net_cloth_seg'), gr.update(visible=x == 'sam'), gr.update(visible=x == 'sam')],
                                                       inputs=inpaint_mask_model,
                                                       outputs=[inpaint_mask_cloth_category, inpaint_mask_sam_prompt_text, inpaint_mask_advanced_options],
@@ -620,7 +608,18 @@ with shared.gradio_root:
             ehps = [backfill_prompt, embed_metadata_checkbox, translation_timing, translation_methods]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
-            
+           
+            generate_mask_button.click(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
+                                 .then(fn=generate_mask,inputs=[
+                                                               inpaint_input_image, inpaint_mask_model,
+                                                               inpaint_mask_cloth_category,
+                                                               inpaint_mask_sam_prompt_text,
+                                                               inpaint_mask_sam_model,
+                                                               inpaint_mask_sam_quant,
+                                                               inpaint_mask_box_threshold,
+                                                               inpaint_mask_text_threshold
+                                                           ], outputs=inpaint_mask_image, show_progress=True, queue=True)
+
             gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_window, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
