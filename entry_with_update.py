@@ -24,13 +24,15 @@ try:
     main_name = 'SimpleSDXL'
     dev_name = 'SimpleSDXL_dev'
     checkout_flag = False
-    if '__dev' in (sys.argv):
+    if '--dev' in (sys.argv):
         if branch_name != dev_name:
             branch_name = dev_name
+            checkout_flag = True
             print(f'Ready to checkout {branch_name}')
     else:
         if branch_name != main_name:
             branch_name = main_name
+            checkout_flag = True
             print(f'Ready to checkout {branch_name}')
 
     local_branch_ref = f'refs/heads/{branch_name}'
