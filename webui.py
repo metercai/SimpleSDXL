@@ -17,6 +17,7 @@ import modules.meta_parser
 import args_manager
 import copy
 
+from PIL import Image
 from modules.sdxl_styles import legal_style_names
 from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
@@ -759,9 +760,24 @@ with shared.gradio_root:
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
                 return default_interrogator_anime(img), ["Fooocus V2", "Fooocus Masterpiece"]
             return mode, ["Fooocus V2"]
+        
+        def trigger_describe_pre(mode, img_path):
+            img_rgb = Image.open(img_path).convert('RGB')
+            return trigger_describe(mode, img_rgb)
 
-        desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
+        desc_btn.click(trigger_describe_pre, inputs=[desc_method, desc_input_image],
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
+
+        def trigger_uov_describe(mode, img, prompt):
+            # keep prompt if not empty
+            if prompt == '':
+                return trigger_describe(mode, img)
+            return gr.update(), gr.update()
+
+        uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
+                       outputs=[prompt, style_selections], show_progress=True, queue=True)
+
+
         params_btn.click(toolbox.extract_reset_image_params, inputs=desc_input_image, outputs=reset_params, show_progress=False, queue=True) \
                    .then(fn=lambda: None, _js=toolbox.extract_reset_image_params_js)
 

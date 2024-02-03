@@ -24,8 +24,7 @@ class Interrogator:
 
     @torch.no_grad()
     @torch.inference_mode()
-    def interrogate(self, img_path):
-        img_rgb = Image.open(img_path).convert('RGB') 
+    def interrogate(self, img_rgb):
         if self.blip_model is None:
             filename = load_file_from_url(
                 url='https://huggingface.co/lllyasviel/misc/resolve/main/model_base_caption_capfilt_large.pth',
