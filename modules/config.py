@@ -325,6 +325,13 @@ default_overwrite_switch = get_config_item_or_set_default(
     default_value=ads.default['overwrite_switch'],
     validator=lambda x: isinstance(x, int)
 )
+
+default_inpaint_mask_upload_checkbox = get_config_item_or_set_default(
+    key='default_inpaint_mask_upload_checkbox',
+    default_value=ads.default['inpaint_mask_upload_checkbox'],
+    validator=lambda x: isinstance(x, bool)
+)
+
 example_inpaint_prompts = get_config_item_or_set_default(
     key='example_inpaint_prompts',
     default_value=[
