@@ -15,28 +15,29 @@ try:
 
     branch_name = repo.head.shorthand
     
-    origin_name = 'main'
-    main_name = 'SimpleSDXL'
-    dev_name = 'SimpleSDXL_dev'
-    if '__dev' in (sys.argv):
-        if branch_name != dev_name:
-            repo.checkout(dev_name)
-            branch_name = repo.head.shorthand
-            print(f'in dev, branch_name:{branch_name}')
-    else:
-        if branch_name != main_name:
-            repo.checkout(main_name)
-            branch_name = repo.head.shorthand
-            print(f'not dev, branch_name:{branch_name}')
-
     remote_name = 'origin'
     remote = repo.remotes[remote_name]
 
     remote.fetch()
 
+    origin_name = 'main'
+    main_name = 'SimpleSDXL'
+    dev_name = 'SimpleSDXL_dev'
+    checkout_flag = False
+    if '__dev' in (sys.argv):
+        if branch_name != dev_name:
+            branch_name = dev_name
+            print(f'Ready to checkout {branch_name}')
+    else:
+        if branch_name != main_name:
+            branch_name = main_name
+            print(f'Ready to checkout {branch_name}')
+
     local_branch_ref = f'refs/heads/{branch_name}'
     local_branch = repo.lookup_reference(local_branch_ref)
     local_commit = repo.revparse_single(local_branch_ref)
+    if checkout_flag:
+        repo.checkout(local_branch_ref)
 
     import enhanced.version as version
     version.branch = f'{branch_name}'

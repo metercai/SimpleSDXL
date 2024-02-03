@@ -1,0 +1,7 @@
+[
+    {
+        "name": "LEO DragonYear",
+        "prompt": "Chinese New Year of the Dragon {prompt} . Festival, traditional, lively, lantern-lit, cultural, celebratory, family-oriented, rich colors, auspicious, joyous, graceful, Dragon Year, abstract, surreal, papercut, couplets",
+        "negative_prompt": "dark, gloomy, futuristic, chaotic, industrial, desolate, monochromatic, eerie, apocalyptic, unsettling, anime, cartoon, graphic, text, painting, crayon, deformed, mutated, ugly, disfigured"
+    }
+]

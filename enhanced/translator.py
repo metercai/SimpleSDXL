@@ -25,7 +25,7 @@ translator_slim_path = os.path.join(path_llms, 'Helsinki-NLP/opus-mt-zh-en')
 is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
 
 translator_path_old = os.path.join(path_llms, '../translator')
-if os.path.exists(translator_path_old):
+if os.path.exists(translator_path_old) and not os.path.exists(path_llms):
     os.rename(translator_path_old, path_llms)
 
 def Q2B_number_punctuation(text):
