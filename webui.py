@@ -292,7 +292,7 @@ with shared.gradio_root:
                                     desc_method = gr.Radio(
                                         label='Content Type',
                                         choices=[flags.desc_type_photo, flags.desc_type_anime],
-                                        value=flags.desc_type_photo)
+                                        value=flags.desc_type_anime)
                                     desc_btn = gr.Button(value='Describe this Image into Prompt')
                                 with gr.Group():
                                     embed_image_readme = gr.Markdown(value='Extract the parameters of the embedded parameter image and then reset the working environment.', elem_classes='note_text')
