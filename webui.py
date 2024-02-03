@@ -17,6 +17,7 @@ import modules.meta_parser
 import args_manager
 import copy
 
+from PIL import Image
 from modules.sdxl_styles import legal_style_names
 from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
@@ -112,15 +113,15 @@ with shared.gradio_root:
                     bar7_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar7', elem_classes='bar_button')
                     bar8_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar8', elem_classes='bar_button')
                 with gr.Row():
-                    progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=520, elem_id='preview_generating',
-                                            elem_classes=['main_view'])
+                    progress_window = grh.Image(label='Preview', show_label=True, visible=True, height=768, elem_id='preview_generating',
+                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png")
                     progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
-                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=True, height=520,
+                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                 elem_id='final_gallery', preview=True)
+                                 elem_id='final_gallery', preview=True )
                 prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None), visible=False, elem_id='infobox', elem_classes='infobox')
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
@@ -276,18 +277,6 @@ with shared.gradio_root:
                                         extras['text_threshold'] = text_threshold
 
                                     return generate_mask_from_image(image, mask_model, extras)
-
-                                generate_mask_button.click(fn=generate_mask,
-                                                           inputs=[
-                                                               inpaint_input_image, inpaint_mask_model,
-                                                               inpaint_mask_cloth_category,
-                                                               inpaint_mask_sam_prompt_text,
-                                                               inpaint_mask_sam_model,
-                                                               inpaint_mask_sam_quant,
-                                                               inpaint_mask_box_threshold,
-                                                               inpaint_mask_text_threshold
-                                                           ],
-                                                           outputs=inpaint_mask_image, show_progress=True, queue=True)
 
                             inpaint_mask_model.change(lambda x: [gr.update(visible=x == 'u2net_cloth_seg'), gr.update(visible=x == 'sam'), gr.update(visible=x == 'sam')],
                                                       inputs=inpaint_mask_model,
@@ -630,8 +619,19 @@ with shared.gradio_root:
             ehps = [backfill_prompt, embed_metadata_checkbox, translation_timing, translation_methods]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
-            
-            gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
+           
+            generate_mask_button.click(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
+                                 .then(fn=generate_mask,inputs=[
+                                                               inpaint_input_image, inpaint_mask_model,
+                                                               inpaint_mask_cloth_category,
+                                                               inpaint_mask_sam_prompt_text,
+                                                               inpaint_mask_sam_model,
+                                                               inpaint_mask_sam_quant,
+                                                               inpaint_mask_box_threshold,
+                                                               inpaint_mask_text_threshold
+                                                           ], outputs=inpaint_mask_image, show_progress=True, queue=True)
+
+            gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_window, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
@@ -774,9 +774,24 @@ with shared.gradio_root:
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
                 return default_interrogator_anime(img), ["Fooocus V2", "Fooocus Masterpiece"]
             return mode, ["Fooocus V2"]
+        
+        def trigger_describe_pre(mode, img_path):
+            img_rgb = Image.open(img_path).convert('RGB')
+            return trigger_describe(mode, img_rgb)
 
-        desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
+        desc_btn.click(trigger_describe_pre, inputs=[desc_method, desc_input_image],
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
+
+        def trigger_uov_describe(mode, img, prompt):
+            # keep prompt if not empty
+            if prompt == '':
+                return trigger_describe(mode, img)
+            return gr.update(), gr.update()
+
+        uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
+                       outputs=[prompt, style_selections], show_progress=True, queue=True)
+
+
         params_btn.click(toolbox.extract_reset_image_params, inputs=desc_input_image, outputs=reset_params, show_progress=False, queue=True) \
                    .then(fn=lambda: None, _js=toolbox.extract_reset_image_params_js)
 
@@ -833,7 +848,7 @@ with shared.gradio_root:
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [language_ui, background_theme, gallery_index, index_radio, image_tools_checkbox, inpaint_mask_upload_checkbox], show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, image_tools_checkbox, inpaint_mask_upload_checkbox], show_progress=False) \
                       .then(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \

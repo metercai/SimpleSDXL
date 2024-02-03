@@ -1,5 +1,5 @@
 {
-    "default_model": "animaPencilXL_v100.safetensors",
+    "default_model": "DreamShaperXL_Turbo_dpmppSdeKarras_half_pruned_6.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -24,23 +24,23 @@
             1.0
         ]
     ],
-    "default_cfg_scale": 7.0,
-    "default_sample_sharpness": 2.0,
+    "default_cfg_scale": 1.4,
+    "default_sample_sharpness": 3.0,
     "default_sampler": "dpmpp_2m_sde_gpu",
     "default_scheduler": "karras",
     "default_performance": "Speed",
-    "default_prompt": "1girl, ",
+    "default_prompt": "",
     "default_prompt_negative": "",
     "default_styles": [
         "Fooocus V2",
-        "Fooocus Negative",
-        "Fooocus Masterpiece"
+        "Fooocus Enhance",
+        "Fooocus Sharp"
     ],
-    "default_aspect_ratio": "896*1152",
+    "default_aspect_ratio": "1024*1024",
+    "default_overwrite_step": 6,
     "checkpoint_downloads": {
-        "animaPencilXL_v100.safetensors": "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/animaPencilXL_v100.safetensors"
+        "DreamShaperXL_Turbo_dpmppSdeKarras_half_pruned_6.safetensors": "https://huggingface.co/Lykon/dreamshaper-xl-turbo/resolve/main/DreamShaperXL_Turbo_dpmppSdeKarras_half_pruned_6.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {},
-    "previous_default_models": []
+    "lora_downloads": {}
 } 
