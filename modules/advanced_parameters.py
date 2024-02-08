@@ -75,7 +75,7 @@ default = {
     'inpaint_engine': 'v2.6',
     'inpaint_strength': 1,
     'inpaint_respective_field': 0.618,
-    'inpaint_mask_upload_checkbox': False,
+    'inpaint_mask_upload_checkbox': True,
     'invert_mask_checkbox': False,
     'inpaint_erode_or_dilate': 0
     }
