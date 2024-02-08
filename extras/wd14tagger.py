@@ -50,6 +50,8 @@ def default_interrogator(image, threshold=0.35, character_threshold=0.85, exclud
     input = model.get_inputs()[0]
     height = input.shape[1]
 
+    if type(image) == np.ndarray:
+        image = Image.fromarray(image)
     ratio = float(height)/max(image.size)
     new_size = tuple([int(x*ratio) for x in image.size])
     image = image.resize(new_size, Image.LANCZOS)

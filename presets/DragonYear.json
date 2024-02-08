@@ -31,6 +31,7 @@
     "default_performance": "Speed",
     "default_prompt": "Happy New Year 2024",
     "default_prompt_negative": "",
+    "default_image_number": 4,
     "default_styles": [
         "Fooocus V2",
         "Fooocus Enhance",
