@@ -16,7 +16,7 @@ args_parser.parser.add_argument("--disable-offload-from-vram", action="store_tru
                                 help="Force loading models to vram when the unload can be avoided. "
                                   "Some Mac users may need this.")
 
-args_parser.parser.add_argument("--theme", type=str, help="launches the UI with light or dark theme", default='dark')
+args_parser.parser.add_argument("--theme", type=str, help="Launches the UI with light or dark theme", default='dark')
 args_parser.parser.add_argument("--disable-image-log", action='store_true',
                                 help="Prevent writing images and logs to hard drive.")
 
@@ -31,6 +31,8 @@ args_parser.parser.add_argument("--always-download-new-model", action='store_tru
 
 args_parser.parser.add_argument("--dev", action='store_true',
                                 help="launch the dev branch", default=False)
+args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default='./')
+
 
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,

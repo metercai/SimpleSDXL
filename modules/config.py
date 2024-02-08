@@ -11,7 +11,7 @@ from modules.model_loader import load_file_from_url
 from modules.util import get_files_from_folder
 
 
-config_path = os.path.abspath("./config.txt")
+config_path = os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
 config_example_path = os.path.abspath("config_modification_tutorial.txt")
 config_dict = {}
 always_save_keys = []
@@ -29,12 +29,7 @@ try:
         with open(config_path, "r", encoding="utf-8") as json_file:
             config_dict.update(json.load(json_file))
             always_save_keys = list(config_dict.keys())
-    else:
-        fooocus_config_path =  os.path.abspath("../Fooocus/config.txt")
-        if os.path.exists(fooocus_config_path):
-            with open(fooocus_config_path, "r", encoding="utf-8") as json_file:
-                config_dict = json.load(json_file)
-                always_save_keys = list(config_dict.keys())
+        print(f'Load config data from {config_path}.')
 except Exception as e:
     print(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
     print('Please make sure that:')
