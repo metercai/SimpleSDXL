@@ -30,6 +30,7 @@ import enhanced.translator  as translator
 import enhanced.enhanced_parameters as enhanced_parameters
 import enhanced.version as version
 import enhanced.location as location
+import enhanced.wildcards as wildcards
 from enhanced.models_info import models_info, sync_model_info_click 
 
 def generate_clicked(*args):
@@ -133,41 +134,53 @@ with shared.gradio_root:
                 with gr.Accordion("Finished Images Index:", open=False, visible=False) as index_radio:
                     gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
-            with gr.Row(elem_classes='type_row'):
-                with gr.Column(scale=17):
-                    prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
+            with gr.Group():
+                with gr.Row(elem_classes='type_row'):
+                    with gr.Column(scale=17):
+                        prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
                                         container=False, autofocus=False, elem_classes='type_row', lines=1024)
 
-                    default_prompt = modules.config.default_prompt
-                    if isinstance(default_prompt, str) and default_prompt != '':
-                        shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
+                        default_prompt = modules.config.default_prompt
+                        if isinstance(default_prompt, str) and default_prompt != '':
+                            shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
 
-                with gr.Column(scale=3, min_width=0):
-                    generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
-                    load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False)
-                    translator_button = gr.Button(label="Translator", value="Translator", elem_classes='type_row', elem_id='translator_button', visible=False)
-                    skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
-                    stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
+                    with gr.Column(scale=3, min_width=0):
+                        generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
+                        load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False)
+                        translator_button = gr.Button(label="Translator", value="Translator", elem_classes='type_row', elem_id='translator_button', visible=False)
+                        skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
+                        stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
 
-                    def stop_clicked():
-                        import ldm_patched.modules.model_management as model_management
-                        shared.last_stop = 'stop'
-                        model_management.interrupt_current_processing()
-                        return [gr.update(interactive=False)] * 2
+                        def stop_clicked():
+                            import ldm_patched.modules.model_management as model_management
+                            shared.last_stop = 'stop'
+                            model_management.interrupt_current_processing()
+                            return [gr.update(interactive=False)] * 2
 
-                    def skip_clicked():
-                        import ldm_patched.modules.model_management as model_management
-                        shared.last_stop = 'skip'
-                        model_management.interrupt_current_processing()
-                        return
+                        def skip_clicked():
+                            import ldm_patched.modules.model_management as model_management
+                            shared.last_stop = 'skip'
+                            model_management.interrupt_current_processing()
+                            return
 
-                    stop_button.click(stop_clicked, outputs=[skip_button, stop_button],
+                        stop_button.click(stop_clicked, outputs=[skip_button, stop_button],
                                       queue=False, show_progress=False, _js='cancelGenerateForever')
-                    skip_button.click(skip_clicked, queue=False, show_progress=False)
+                        skip_button.click(skip_clicked, queue=False, show_progress=False)
+            
+                with gr.Accordion(label='Prompt Wildcard Arrays Tools', visible=False, open=True) as prompt_wildcards:
+                    wildcards_list = gr.Dataset(components=[prompt], label="All of wildcards:", samples=wildcards.get_wildcards_samples(), visible=False, samples_per_page=20)
+                    with gr.Accordion(label='Words of wildcard', visible=False, open=False) as words_in_wildcard:
+                        tag_name_selection = gr.Dataset(components=[prompt], label='Words:', samples=wildcards.get_words_of_wildcard_samples(), visible=False, samples_per_page=30)
+                    wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, tag_name_selection, words_in_wildcard], show_progress=False, queue=False)
+                    wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, tag_name_selection]
+                    wildcards_array_show =lambda x: [gr.update(visible=True)] * 2 + [gr.Dataset.update(visible=True, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=True, samples=wildcards.get_words_of_wildcard_samples(x["wildcard_in_wildcards"]))]
+                    wildcards_array_hidden = [gr.update(visible=False)] * 2 + [gr.Dataset.update(visible=False, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=False, samples=wildcards.get_words_of_wildcard_samples())]
+
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
                 image_tools_checkbox = gr.Checkbox(label='ParamsTools', value=False, container=False, elem_classes='min_check')
+            
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewMeta', size='sm', visible=True)
@@ -177,7 +190,7 @@ with shared.gradio_root:
                 prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
-                
+            
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -698,8 +711,15 @@ with shared.gradio_root:
         
         system_params = gr.JSON({}, visible=False)
         state_is_generating = gr.State(False)
-        def parse_meta(raw_prompt_txt, is_generating, timing):
+        def parse_meta(raw_prompt_txt, is_generating, timing, state_params):
             loaded_json = None
+            if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
+                return [gr.update()] * 4 + wildcards_array_show(state_params)
+            matchs = wildcards.array_regex.findall(raw_prompt_txt)
+            if len(matchs)>0:
+                wildcards_array_results =  wildcards_array_show(state_params)
+            else:
+                wildcards_array_results =  wildcards_array_hidden
             try:
                 if '{' in raw_prompt_txt:
                     if '}' in raw_prompt_txt:
@@ -711,14 +731,14 @@ with shared.gradio_root:
 
             if loaded_json is None:
                 if is_generating:
-                    return gr.update(), gr.update(), gr.update(), gr.update()
+                    return [gr.update()] * 4 + wildcards_array_results
                 else:
                     flag = (timing=='Modify after translate' and translator.is_chinese(raw_prompt_txt))
-                    return gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)
+                    return [gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)] + wildcards_array_results
 
-            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
+            return [json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)] + wildcards_array_results
 
-        prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_timing], outputs=[prompt, generate_button, load_parameter_button, translator_button], queue=False, show_progress=False)
+        prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_timing, state_topbar], outputs=[prompt, generate_button, load_parameter_button, translator_button] + wildcards_array, queue=False, show_progress=False)
         
         translator_button.click(lambda x, y: [gr.update(value=translator.convert(x, y)), gr.update(visible=True), gr.update(visible=False)], inputs=[prompt, translation_methods], outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
 

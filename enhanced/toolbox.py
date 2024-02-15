@@ -89,6 +89,28 @@ css = '''
 .preset_input textarea {
     width: 120px;
 }
+
+.tag_array {
+    height: auto;
+    position: absolute;
+    top: 180px;
+    left: 15%;
+    width: 580px !important;
+    z-index: 22;
+}
+
+.taglib_button {
+    height: 35px;
+    transform: translate(5%, 35%);
+}
+
+.min_pad0 {
+    padding: 0px !important;
+}
+
+.min_pad {
+    padding: 2px !important;
+}
 '''
 
 
