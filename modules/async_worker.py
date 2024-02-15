@@ -34,6 +34,7 @@ def worker():
     import modules.advanced_parameters as advanced_parameters
     import enhanced.translator as translator
     import enhanced.enhanced_parameters as enhanced_parameters
+    import enhanced.wildcards as wildcards
     import extras.ip_adapter as ip_adapter
     import extras.face_crop
     import fooocus_version
@@ -387,11 +388,17 @@ def worker():
 
             progressbar(async_task, 3, 'Processing prompts ...')
             tasks = []
-            for i in range(image_number):
-                task_seed = (seed + i) % (constants.MAX_SEED + 1)  # randint is inclusive, % is not
-                task_rng = random.Random(task_seed)  # may bind to inpaint noise in the future
+            task_rng = random.Random(seed % (constants.MAX_SEED + 1))
+            prompt, wildcards_arrays, arrays_mult = wildcards.compile_arrays(prompt, task_rng)
+            for i in range(image_number if len(wildcards_arrays)==0 else arrays_mult):
+                if len(wildcards_arrays)==0:
+                    task_seed = (seed + i) % (constants.MAX_SEED + 1)  # randint is inclusive, % is not
+                    task_rng = random.Random(task_seed)  # may bind to inpaint noise in the future
+                else:
+                    task_seed = seed % (constants.MAX_SEED + 1)
 
-                task_prompt = apply_wildcards(prompt, task_rng)
+                task_prompt = wildcards.apply_arrays(prompt, i, wildcards_arrays, arrays_mult)
+                task_prompt = apply_wildcards(task_prompt, task_rng)
                 task_negative_prompt = apply_wildcards(negative_prompt, task_rng)
                 task_extra_positive_prompts = [apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
                 task_extra_negative_prompts = [apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
