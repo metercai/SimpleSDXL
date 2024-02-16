@@ -3,13 +3,16 @@ import re
 import json
 import math
 import gradio as gr
+import enhanced.translator as translator
 
 from modules.util import get_files_from_folder
+from args_manager import args
 
 wildcards_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../wildcards/'))
 
 wildcards = {}
 wildcards_list = {}
+wildcards_translation = {}
 wildcards_template = {}
 wildcards_weight_range = {}
 
@@ -22,7 +25,7 @@ def set_wildcard_path_list(name, list_value):
         wildcards_list.update({name: [list_value]})
 
 def get_wildcards_samples(path="root"):
-    global wildcards, wildcards_list
+    global wildcards, wildcards_list, wildcards_translation
 
     if len(wildcards.keys()) == 0:
         wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None)])
@@ -63,13 +66,28 @@ def get_wildcards_samples(path="root"):
                 print(f'[Wildcards] The level of wildcards is too depth: {wildcards_path}.')
         #print(f'wildcards_list:{wildcards_list}')
         print(f'[Wildcards] Load {len(wildcards_list_all)} wildcards from {wildcards_path}.')
+    if args.language=='cn':
+        if len(wildcards_translation.keys())==0:
+            wildcards_translation_file = os.path.join(wildcards_path, 'cn.json')
+            if os.path.exists(wildcards_translation_file):
+                with open(wildcards_translation_file, "r", encoding="utf-8") as json_file:
+                    wildcards_translation.update(json.load(json_file))
+            else:
+                for wildcard in wildcards_list["root"]:
+                    wildcards_translation.update({f'list/{wildcard}': translator.convert(wildcard, 'Big Model', 'cn')})
+                #for wildcard in wildcards.keys():
+                #    for word in wildcards[wildcard]:
+                #        wildcards_translation.update({f'word/{wildcard}/{word}': translator.convert(word, 'Big Model', 'cn')})
+                with open(wildcards_translation_file, "w", encoding="utf-8") as json_file:
+                    json.dump(wildcards_translation, json_file)
+
     return [[x] for x in wildcards_list[path]]
 
 def get_words_of_wildcard_samples(wildcard="root"):
-    global wildcards
+    global wildcards, wildcards_translation
 
     if wildcard == "root":
-        return [[x] for x in wildcards[wildcards_list[wildcard][0]]]
+        return [['word'], ['phrase']]
     return [[x] for x in wildcards[wildcard]]
 
 def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
@@ -205,7 +223,7 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
             prompt = prompt[:-1]
     
     if state_params["array_wildcards_mode"] == '[':
-        new_tag = f'[__{wildcard}__:R1]'
+        new_tag = f'[__{wildcard}__]'
     else:
         new_tag = f'__{wildcard}__'
     prompt = f'{prompt.strip()} {new_tag}'

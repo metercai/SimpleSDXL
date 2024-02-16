@@ -235,7 +235,7 @@ onUiLoaded(async() => {
 
         // Reset zoom when uploading a new image
         const fileInput = gradioApp().querySelector(
-	    `${elemId} input[type="file"][accept="image/*"].svelte-izfbkb`
+	    `${elemId} input[type="file"][accept="image/*"].svelte-116rqfv`
         );
         fileInput.addEventListener("click", resetZoom);
 
