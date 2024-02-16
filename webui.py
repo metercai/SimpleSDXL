@@ -168,8 +168,8 @@ with shared.gradio_root:
                         skip_button.click(skip_clicked, queue=False, show_progress=False)
             
                 with gr.Accordion(label='Prompt Wildcard Arrays Tools', visible=False, open=True) as prompt_wildcards:
-                    wildcards_list = gr.Dataset(components=[prompt], label="All of wildcards:", samples=wildcards.get_wildcards_samples(), visible=False, samples_per_page=20)
-                    with gr.Accordion(label='Words of wildcard', visible=False, open=False) as words_in_wildcard:
+                    wildcards_list = gr.Dataset(components=[prompt], label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=False, samples_per_page=20)
+                    with gr.Accordion(label='Words/phrases of wildcard', visible=False, open=False) as words_in_wildcard:
                         tag_name_selection = gr.Dataset(components=[prompt], label='Words:', samples=wildcards.get_words_of_wildcard_samples(), visible=False, samples_per_page=30)
                     wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, tag_name_selection, words_in_wildcard], show_progress=False, queue=False)
                     wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, tag_name_selection]
@@ -310,14 +310,6 @@ with shared.gradio_root:
                                 with gr.Group():
                                     embed_image_readme = gr.Markdown(value='Extract the parameters of the embedded parameter image and then reset the working environment.', elem_classes='note_text')
                                     params_btn = gr.Button(value='Extract params from Image and Reset')
-                    with gr.TabItem(label='Realtime Canvas') as paint_tab:
-                        with gr.Row(equal_height=True):
-                            def aspect_ratios_selection_change(aspect_ratios_selection):
-                                width, height = aspect_ratios_selection.replace('×', ' ').split(' ')[:2]
-                                width, height = int(int(width)/2), int(int(height)/2)
-                                return gr.Paint(shape=(width, height), width=width, height=height)
-
-                            realtime_input_image = aspect_ratios_selection_change(modules.config.default_aspect_ratio)
 
             switch_js = "(x) => {if(x){viewer_to_bottom(100);viewer_to_bottom(500);}else{viewer_to_top();} return x;}"
             down_js = "() => {viewer_to_bottom();}"
@@ -331,7 +323,6 @@ with shared.gradio_root:
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            paint_tab.select(lambda: 'paint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
@@ -694,8 +685,6 @@ with shared.gradio_root:
             inpaint_strength, inpaint_respective_field
         ], show_progress=False, queue=False)
 
-        realtime_input_image.change(lambda: (gr.update(value='Extreme Speed'), gr.update(value=1), gr.update(value=False)), outputs=[performance_selection, image_number, seed_random], queue=False, show_progress=False, _js="() => {document.getElementById('generate_button').click();}")
-        aspect_ratios_selection.change(aspect_ratios_selection_change, inputs=aspect_ratios_selection, outputs=realtime_input_image, queue=False, show_progress=False)
 
         ctrls = [
             prompt, negative_prompt, style_selections,
@@ -706,7 +695,6 @@ with shared.gradio_root:
         ctrls += [input_image_checkbox, current_tab]
         ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
-        ctrls += [realtime_input_image]
         ctrls += ip_ctrls
         
         system_params = gr.JSON({}, visible=False)

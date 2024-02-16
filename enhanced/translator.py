@@ -28,6 +28,11 @@ translator_path_old = os.path.join(path_llms, '../translator')
 if os.path.exists(translator_path_old) and not os.path.exists(path_llms):
     os.rename(translator_path_old, path_llms)
 
+
+g_tokenizer = ''
+g_model = ''
+g_model_type = ''
+
 def Q2B_number_punctuation(text):
     global Q_punct, B_punct
 
@@ -54,7 +59,14 @@ def Q2B_alphabet(text):
 def translate2en_model(model, tokenizer, text_zh):
     inputs = tokenizer(text_zh, return_tensors="pt")
     translated_tokens = model.generate(
-        **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=30
+        **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=60
+    )
+    return tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
+
+def translate2zh_model(model, tokenizer, text_en):
+    inputs = tokenizer(text_en, return_tensors="pt")
+    translated_tokens = model.generate(
+        **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["zho_Hans"], max_length=60
     )
     return tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
 
@@ -75,15 +87,11 @@ def translate2en_apis(text):
             print(f'[Translator] Error during translation of APIs methods: {e}')
             return text
 
+def init_or_load_translator_model(method='Slim Model'):
+    global g_tokenizer, g_model, g_model_type
 
-def convert(text: str, methods: str = 'Slim Model') -> str:
-    global Q_alphabet, B_puncti, is_chinese
-
-    start = time.perf_counter()
-    is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
-    #text = Q2B_number_punctuation(text)
-    if is_chinese(text):
-        if methods == "Big Model":
+    if method != g_model_type or g_tokenizer is None or g_model is None:
+        if method == "Big Model":
             if not os.path.exists(translator_path):
                 os.makedirs(translator_path)
                 url = 'https://gitee.com/metercai/SimpleSDXL/releases/download/win64/nllb_200_distilled_600m.tar.gz'
@@ -98,9 +106,9 @@ def convert(text: str, methods: str = 'Slim Model') -> str:
                     model_dir=translator_path,
                     file_name='pytorch_model.bin')
             print(f'[Translator] load model form : {translator_path}')
-            tokenizer = AutoTokenizer.from_pretrained(translator_path, src_lang="zho_Hans")
-            model = AutoModelForSeq2SeqLM.from_pretrained(translator_path)
-        elif methods == "Slim Model":
+            g_tokenizer = AutoTokenizer.from_pretrained(translator_path, src_lang="zho_Hans")
+            g_model = AutoModelForSeq2SeqLM.from_pretrained(translator_path)
+        else:
             if not os.path.exists(translator_slim_path):
                 os.makedirs(translator_slim_path)
                 url = 'https://gitee.com/metercai/SimpleSDXL/releases/download/win64/opus_mt_zh_en.tar.gz'
@@ -115,19 +123,46 @@ def convert(text: str, methods: str = 'Slim Model') -> str:
                     model_dir=translator_slim_path,
                     file_name='pytorch_model.bin')
             print(f'[Translator] load slim model form : {translator_slim_path}')
-            tokenizer_tt0en = AutoTokenizer.from_pretrained(translator_slim_path)
-            model_tt0en = AutoModelForSeq2SeqLM.from_pretrained(translator_slim_path).eval()
-        else:
+            g_tokenizer = AutoTokenizer.from_pretrained(translator_slim_path)
+            g_model = AutoModelForSeq2SeqLM.from_pretrained(translator_slim_path).eval()
+        g_model_type = method
+    return g_tokenizer, g_model
+
+def free_translator_model():
+    global g_tokenizer, g_model
+    del g_tokenizer
+    del g_model
+    return
+
+def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
+    global Q_alphabet, B_puncti, is_chinese
+
+    start = time.perf_counter()
+
+    if lang=='cn':
+        tokenizer, model = init_or_load_translator_model('Big Model')
+        text_zh = translate2zh_model(model, tokenizer, text)
+        stop = time.perf_counter()
+        print(f'[Translator] Translate by "Big Model" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
+        return text_zh
+    is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
+    #text = Q2B_number_punctuation(text)
+    if is_chinese(text):
+        if method == 'Third APIs':
             print(f'[Translator] Using an online translation APIs.')
+        else:
+            tokenizer, model = init_or_load_translator_model('Big Model')
 
 
         def T_ZH2EN(text_zh):
-            if methods=="Slim Model":
-                encoded = tokenizer_tt0en([text_zh], return_tensors="pt")
-                sequences = model_tt0en.generate(**encoded)
-                return 'Slim Model', tokenizer_tt0en.batch_decode(sequences, skip_special_tokens=True)[0]
-            elif methods=="Big Model":
-                return 'Big Model', translate2en_model(model, tokenizer, text_zh)
+            if method=="Slim Model":
+                encoded = tokenizer([text_zh], return_tensors="pt")
+                sequences = model.generate(**encoded)
+                return 'Slim Model', tokenizer.batch_decode(sequences, skip_special_tokens=True)[0]
+            elif method=="Big Model":
+                inputs = tokenizer(text_zh, return_tensors="pt")
+                translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=60)
+                return 'Big Model', tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
             else:
                 return translator_default, translate2en_apis(text_zh)
 
