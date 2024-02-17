@@ -167,8 +167,8 @@ with shared.gradio_root:
                                       queue=False, show_progress=False, _js='cancelGenerateForever')
                         skip_button.click(skip_clicked, queue=False, show_progress=False)
             
-                with gr.Accordion(label='Prompt Wildcard Arrays Tools', visible=False, open=True) as prompt_wildcards:
-                    wildcards_list = gr.Dataset(components=[prompt], label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=False, samples_per_page=20)
+                with gr.Accordion(label='Wildcards & Batch Prompts', visible=False, open=True) as prompt_wildcards:
+                    wildcards_list = gr.Dataset(components=[prompt], label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=False, samples_per_page=14 if args_manager.args.language=='cn' else 20)
                     with gr.Accordion(label='Words/phrases of wildcard', visible=False, open=False) as words_in_wildcard:
                         tag_name_selection = gr.Dataset(components=[prompt], label='Words:', samples=wildcards.get_words_of_wildcard_samples(), visible=False, samples_per_page=30)
                     wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, tag_name_selection, words_in_wildcard], show_progress=False, queue=False)

@@ -207,7 +207,7 @@
   "turbo": "Turbo加速",
   "merge": "融合",
   "DragonYear": "龙年贺春",
-  "Prompt Wildcard Arrays Tools": "通配符提示词工具",
+  "Wildcards & Batch Prompts": "通配符和批量提示词",
   "Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.": "通配符: [__color__:L3:4] 从color里第4个词开始按顺序取3个词, [__color__:3] 从color中随机抽取3个词, [__color__] 从color中随机抽取1个词。",
   "Words/phrases of wildcard": "通配符包含的词或短语",
   "Pages:": "页码:",
