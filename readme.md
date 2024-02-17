@@ -13,6 +13,9 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 
 - **中英文混编提示词**: 在线离线自主选择，支持翻译后再编辑，更适于提示词表达。<br>
   **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt.
+ <img with="400" align=right src="https://v2.token.tm/img/SimpleSDXL_2024_03_04.png">
+- **通配符批量提示词**: 支持通配符词组表达和触发展示，可随机批量生成同Seed下的一组图片。<br>
+  **Wildcard batch prompt words**: Supports wildcard phrase expressions and triggering display, allowing for random batch generate a set of images under the same seed.
 - **嵌参图片和提参重生**: 增强的参数管理，可即时查看可嵌入图片，也可提取参数回填界面，二次生成。 <br>
   **Embeded images and extract regeneration**:  Enhanced parameter management for instant viewing and embedding of images, and can also extract parameters to backfill for secondary generation.<br>
   <img width="600"  src="https://github.com/metercai/SimpleSDXL/assets/5652458/29decc97-fb60-4ccc-b93d-64223aa8488f">
@@ -25,9 +28,10 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
   **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 
 ## 🔔 更新 / Update
-- [2023.01.31] <b>贺春版：新增智能抠图，基于Bert+Sam和U2net实现在语义理解上图片分割，生成蒙板后进行重绘。新增翻译小模型，降低本地翻译的算力要求。进一步优化测试预置包和嵌参图片，现已支持28个预置参数。升级默认预置包主模型到v8版，添加了Turbo模型预置包（加速）、albedobaseXL模型预置包（融合）和社群活跃用户LEO贡献的DragonYear预置包（龙年贺春），内含龙年拜年定制风格。值此新春之际，用全新的SimpleSDX贺春版，感谢朋友们的厚爱。祝大家新春快乐，龙年腾达！</b>
-- [2023.01.20] 预置包优化版：预置包导航重构，实现session based的预置包加载，没有浏览器重载过程，更轻量更快速。预置包、嵌参图片和提参重生接口优化，扩充可预置和嵌参的范围，支持Turbo类模型和自定义风格样式的嵌参和预置。
-- [2023.01.16] 新年第三版：嵌参图片上线，可以生成嵌参图片，可以上传识别嵌参图片。从参数查看到提参重生，从预置包导航到预置包生成，最后到嵌参图片，这一些列简化参数配置和使用的功能终于闭环了。启动流程优化，平行升级版支持自动获取主线配置，免配置模型目录和出图目录，新增国内下载源。界面多处优化，混编翻译器增加不翻译选项等。
+- [2024.02.18] <b>节后第一版：新增通配符和批量提示词工具，提示词支持[]形式的词组，在同一seed下从词组中抽词进行组合批量生成图片，词组支持通配符，可以随机抽，也可以指定位置顺序抽。提示词框增加通配符辅助输入工具，可识别输入内容自动弹出，可展示和点击输入所有通配符及其包含词组。详情参见[通配符ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/wildcards/)。从[OneButtonPrompt](https://github.com/AIrjen/OneButtonPrompt)同步20+通配符内容集，并进行了裁剪适配。增加Fooocus配置文件设置的启动参数`--config`，可与Fooocus共享模型配置文件，取代原来的升级包功能。增加启动参数`--dev`，可以快捷启动SimpleSDXL开发版，参与新功能的体验和反馈。修复主线重绘中refiner切换和step计算错误，by xhoxye。</b>
+- [2024.01.31] 贺春版：新增智能抠图，基于Bert+Sam和U2net实现在语义理解上图片分割，生成蒙板后进行重绘。新增翻译小模型，降低本地翻译的算力要求。进一步优化测试预置包和嵌参图片，现已支持28个预置参数。升级默认预置包主模型到v8版，添加了Turbo模型预置包（加速）、albedobaseXL模型预置包（融合）和社群活跃用户LEO贡献的DragonYear预置包（龙年贺春），内含龙年拜年定制风格。值此新春之际，用全新的SimpleSDX贺春版，感谢朋友们的厚爱。祝大家新春快乐，龙年腾达！
+- [2024.01.20] 预置包优化版：预置包导航重构，实现session based的预置包加载，没有浏览器重载过程，更轻量更快速。预置包、嵌参图片和提参重生接口优化，扩充可预置和嵌参的范围，支持Turbo类模型和自定义风格样式的嵌参和预置。
+- [2024.01.16] 新年第三版：嵌参图片上线，可以生成嵌参图片，可以上传识别嵌参图片。从参数查看到提参重生，从预置包导航到预置包生成，最后到嵌参图片，这一些列简化参数配置和使用的功能终于闭环了。启动流程优化，平行升级版支持自动获取主线配置，免配置模型目录和出图目录，新增国内下载源。界面多处优化，混编翻译器增加不翻译选项等。
 - [2024.01.08] 新年第二版：图片工具增加新特性：浏览图片可自动回填提示词，联动删除坏图文件和日志记录。混编翻译器启动稳定性修补，增加不翻译模式。同步主线v2.1.861，新增风格选择浮层示意图。
 - [2024.01.01] 新年新版本：界面交互优化，状态信息迁移到会话(session)，多浏览器访问互不干扰。优化了手机访问界面，PC和手机可同步使用。生成图片过程中禁止预置包切换，保障出图过程的完整。增加相册缓存，提升历史图片索引切换速度。修复模型路径bug，同步主线版本v2.1.859。
 - [2023.12.30] 提示词翻译器升级：支持中英文混合编辑，支持翻译后再编辑，可自主选择本地模型翻译还是第三方接口翻译，提升提示词翻译器的总体可用性和可控性，翻译质量也能得到保障，应该是目前文生图提示词翻译器的最佳实践了。同步主线v2.1.856。
@@ -39,6 +43,13 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 - [x] **在线和离线翻译器** 可自动安装离线翻译大模型和小尺寸的瘦模型，也可选择第三方翻译接口。离线模型需自身算力支持，第三方接口接入便捷成本低，但增加了接口依赖。用户可根据情况自主配置选择。
 - [x] **支持翻译后再编辑** 机器翻译的结果质量都不可控，存在翻译质量差导致生成内容偏差的现象。翻译后再编辑可以显性化翻译质量，提供用户再优化调整处理的空间。
 - [x] **多大厂接口随机选** 选择国内大厂（百度、阿里和搜狗）的稳定接口，每次启动时随机选择，运行态相对固定。既避免对接口冲击又保持翻译的一致性。
+
+### 通配符批量提示词
+- [x] **词组语法** 支持[Words]词组，以","分割的词列表。表示在同一seed下从每个words词组抽词进行组合批量生成图片。每种组合1张图片，总量是各词组词数的乘积，以实际需要的数量为准，不受出图数量参数的限制。
+- [x] **通配符组词** 格式为:[__wildcard__:R|Lnumber:start]，R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。
+- [x] **自动触发输入** 提示词框在输入'['或'_'时可自动触发通配符输入工具，可以通过界面选择追加通配符到提示词框。
+- [ ] **通配符分组与嵌套** 支持通配符多级目录的管理设置，可根据语义分组。支持多级通配符嵌套表达和通配符模版，增强通配符表达能力。
+- [ ] **通配符定制和推送** 支持自主定制通配符快捷方式，并推送给朋友使用。
 
 ### 参数工具箱
 - [x] **查看参数** 从出图日志文件中提取当前图片的生成参数并用浮层完整展示。图集切换过程中，浮层内容跟随切换。
@@ -55,7 +66,7 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 ### 预置包与导航
 - [x] **预置包导航** 将presets目录下的预置包配置文件生成顶部导航入口，样式上适配明亮/暗黑两种背景。
 - [x] **背景样式导航** 在顶部导航可自主切换明亮/暗黑两种背景样式。
-- [x] **预置包加载** 用户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。支持的预置包参数见[Readme](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
+- [x] **预置包加载** 用户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。支持的预置包参数见[预置包ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
 - [x] **统一模型ID和下载** 对接模型信息库，使用以模型文件哈希为基础的统一模型MUID。可自动检测预置包出图环境的可用性，缺失模型文件可自动下载补齐。
 - [x] **出图保护** 当系统环境进入出图状态时，顶部导航不可点击，禁止加载预置包冲击出图环境。
 
@@ -67,8 +78,7 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 
 ### 启动包和升级包
 - [x] **启动流程优化** 对接国内模型下载源，根据接入位置区分语言和下载源。国内IP默认中文，国内源；国外IP默认英文，国外源。提供启动参数可自定义覆盖默认值，满足科学魔法的适配需求。
-- [x] **安装包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到81M。
-- [x] **平行升级包** 构建与Fooocus主线平行目录的升级包，直接读取主线的模型配置文件，免配置直接运行。
+- [x] **安装包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到81M。支持Fooocus配置文件设置，共享模型和图片输出目录。
 - [x] **整合完全包** 整合所有必要资源文件打包形成的完全包，一次下载，运行后就可直接出图。
 - [x] **日志消息** 每次启动自动检测Fooocus主线和SimpleSDXL的更新日志，将更新消息显示到顶部消息浮层。
 - [x] **版本标识** 以发布日期和版本哈希值作为SimpleSDXL的版本标识，方便定位排错。
@@ -80,32 +90,14 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 
 ## 安装使用 / Install & Usage
 ### Windows :
-分两种情况:<br>
-一，全新安装SimpleSDXL:<br>
 1, 点击下载**安装包**(81M,可执行压缩包): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
-2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会同步项目代码，安装基础组件，然后下载相关的模型和主模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。如果本地已经有模型文件，可以在根目录下配置`config.txt`来指定相关模型的目录位置。<br>
+2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会同步项目代码，安装基础组件，然后下载相关的模型和主模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。如果本地已经有模型目录，可以在根目录下配置`config.txt`来指定模型目录位置。如果已安装Fooocus，可以加启动参数`--config`来指定Fooocus的config.txt路径，实现与Fooocus共享模型和图片输出目录配置。<br>
 3, 启动成功后，会自动打开浏览器，进入主界面。
 或
 1，点击下载**完全包**(28G,ZIP压缩包): [SimpleSDXL_win64_all_in](https://v2.token.tm/img/SimpleSDXL_win64_all_in.zip)。<br>
 2, 解压缩到工作目录后，点击运行：`run.bat` 。完全包已经带运行时的所有组件和模型资源，不用再下载，点击运行进入主界面后就可以直接出图。
 
-二，在现有Fooocus环境下升级，两个版本可同时使用:
-    点击下载**升级包**(55M,可执行压缩包): [SimpleSDXL_win64_upgrade_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_upgrade_in.exe)。下载后点击运行将包内文件解压到现有Fooocus目录的父目录，即保证SimpleSDXL目录与Fooocus目录同级。点击行运行`run_SimpleSDXL.bat`。在第一次运行会自动读取平行目录Fooocus的配置文件，共享相同的模型目录和图片输出目录，不必二次配置即可使用。
-
 ### Linux :
-一，在现有Fooocus环境下安装，两个版本可同时使用:<br>
-1, 进入与现有Fooocus目录的父目录，即保证新建的SimpleSDXL目录与Fooocus目录同级。
-
-    git clone https://github.com/metercai/SimpleSDXL.git
-    #国内用户可换用gitee源: https://gitee.com/metercai/SimpleSDXL.git
-    cd SimpleSDXL
-    python entry_with_update.py 
-    # 云端部署可以配置： ip, port, webroot 等参数
-    # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --preset realistic
-    # Enter English UI : --language en
-    # python entry_with_update.py --language en
-
-二，全新安装SimpleSDXL:<br>
 1, 安装 Anaconda 
 
     curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh 
@@ -126,15 +118,9 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
     # Enter English UI : --language en
     # python entry_with_update.py --language en
 
-模型库文件同步: 条件允许的可以直接同步模型库，不用一个个下载了。
-
-    git lfs install
-    git clone https://huggingface.co/metercai/SimpleSDXL models
-    # 国内用户可以换魔搭社区的源
-    # git clone https://www.modelscope.cn/metercai/SimpleSDXL-models.git models
 
 ## 在线交流：qq群：938075852  新年新版本，需要增加哪些新功能，进群畅聊
-<div align=center><img width="250" src="https://v2.token.tm/img/qqgroup.jpg"></div>
+<div align=center><img width="250" src="https://v2.token.tm/img/qqgroup1.jpg"></div>
 
 ---
 <div align=center>

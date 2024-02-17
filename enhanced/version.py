@@ -24,3 +24,13 @@ def get_simplesdxl_ver():
             simplesdxl_ver += f'.{commit_id}'
     return simplesdxl_ver
 
+def get_branch():
+    global branch, commit_id
+    if not branch:
+        import pygit2
+        pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
+        repo = pygit2.Repository(os.path.abspath(os.path.dirname(__file__)))
+        branch = repo.head.shorthand
+        commit_id = repo.head.target.hex[:7]
+    return branch
+
