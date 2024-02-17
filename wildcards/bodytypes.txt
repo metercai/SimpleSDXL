@@ -1,0 +1,50 @@
+curvy;female
+voluptuous;female
+chubby;both
+buxom;female
+heavyset;both
+full-figured;female
+fat;both
+plump;both
+overweight;both
+burly;both
+obese;both
+morbidly obese;both
+thick;female
+thicc;female
+hourglass figure;female
+pear-shaped figure;female
+stout;both
+rotund;both
+hefty;both
+large;both
+portly;both
+midweight;both
+beefy;both
+athletic;both
+fit;both
+muscular;both
+buff;both
+stocky;both
+well-built;both
+well-endowed;male
+thin;both
+slender;both
+skinny;both
+small;both
+petite;female
+tiny;both
+lanky;both
+slim;both
+slight;both
+light-weight;both
+flyweight;both
+short;both
+tall;both
+strong;both
+very tall, long legs;female
+busty;female
+busty petite;female
+ripped;male
+elegant;female
+broad-shouldered;both

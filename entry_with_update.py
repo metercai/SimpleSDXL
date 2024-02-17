@@ -30,14 +30,18 @@ try:
             checkout_flag = True
             print(f'Ready to checkout {branch_name}')
             local_branch_ref = f'refs/heads/{branch_name}'
-            repo.checkout(local_branch_ref)
+            branch_ref = repo.lookup_branch(branch_name)
+            print(f'branch_ref:{branch_ref}')
+            repo.checkout(branch_ref)
     else:
         if branch_name != main_name:
             branch_name = main_name
             checkout_flag = True
             print(f'Ready to checkout {branch_name}')
             local_branch_ref = f'refs/heads/{branch_name}'
-            repo.checkout(local_branch_ref)
+            branch_ref = repo.lookup_branch(branch_name)
+            print(f'branch_ref:{branch_ref}')
+            repo.checkout(branch_ref)
 
     local_branch = repo.lookup_reference(local_branch_ref)
     local_commit = repo.revparse_single(local_branch_ref)
