@@ -118,7 +118,7 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 
 
 ## 在线交流：qq群：938075852  新年新版本，需要增加哪些新功能，进群畅聊
-<div align=center><img width="250" src="https://v2.token.tm/img/qqgroup1.jpg"></div>
+<div align=center><img width="250" src="https://github.com/metercai/SimpleSDXL/assets/5652458/28f8c604-79eb-467d-956c-b9137c784194"></div>
 
 ---
 <div align=center>
