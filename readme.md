@@ -9,11 +9,9 @@
 ## 对比Fooocus的增强特色 / Enhanced features of Fooocus
 在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
 Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronous iteration and parallel use. Adapted to mobile, PC and phone can be used synchronously.
-
-
+<img width="350" align=right src="https://github.com/metercai/SimpleSDXL/assets/5652458/4b10e6de-b026-41ea-a206-77d6f9fdf1cd">
 - **中英文混编提示词**: 在线离线自主选择，支持翻译后再编辑，更适于提示词表达。<br>
-  **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt.
- <img with="400" align=right src="https://v2.token.tm/img/SimpleSDXL_2024_03_04.png">
+  **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt. <br>
 - **通配符批量提示词**: 支持通配符词组表达和触发展示，可随机批量生成同Seed下的一组图片。<br>
   **Wildcard batch prompt words**: Supports wildcard phrase expressions and triggering display, allowing for random batch generate a set of images under the same seed.
 - **嵌参图片和提参重生**: 增强的参数管理，可即时查看可嵌入图片，也可提取参数回填界面，二次生成。 <br>
@@ -21,7 +19,7 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
   <img width="600"  src="https://github.com/metercai/SimpleSDXL/assets/5652458/29decc97-fb60-4ccc-b93d-64223aa8488f">
   <img width="200" align=right src="https://v2.token.tm/img/SimpleSDXL_2024_03_02.png">
 - **智能抠图生成蒙板**: 具有语义识别的多种抠图算法，可自动生成蒙板，方便生成图片的组合加工。 <br>
-  **Intelligent cutout generation mask**:  Multiple cropping algorithms with semantic recognition that can automatically generate masks, facilitating the combination processing of generated images.
+  **Intelligent cutout generation mask**:  Multiple cropping algorithms with semantic recognition that can automatically generate masks, facilitating the combination processing of generated images.<br>
 - **图片集浏览和管理**: 原生版仅能浏览当前生成的图片集，已生成图片管理非常简陋。 <br>
   **Finished image sets browsing and management**:  Fooocus only can browse the current generated image set. Finished images management is very simple.
 - **增强预置包和模型下载**: 预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
