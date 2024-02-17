@@ -27,28 +27,27 @@ try:
     if '--dev' in (sys.argv):
         if branch_name != dev_name:
             branch_name = dev_name
-            checkout_flag = True
             print(f'Ready to checkout {branch_name}')
             local_branch_ref = f'refs/heads/{branch_name}'
-            branch_ref = repo.lookup_branch(branch_name)
-            print(f'branch_ref:{branch_ref}')
-            repo.checkout(branch_ref)
+            if local_branch_ref not in list(repo.references):
+                remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
+                remote_branch = repo.references[remote_reference]
+                new_branch = repo.create_branch(branch_name, repo[remote_branch.target.hex])
+                new_branch.upstream = remote_branch
+            else:
+                new_branch = repo.lookup_branch(branch_name)
+            repo.checkout(new_branch)
+            local_branch_ref = f'refs/heads/{branch_name}'
     else:
         if branch_name != main_name:
             branch_name = main_name
-            checkout_flag = True
             print(f'Ready to checkout {branch_name}')
             local_branch_ref = f'refs/heads/{branch_name}'
-            branch_ref = repo.lookup_branch(branch_name)
-            print(f'branch_ref:{branch_ref}')
-            repo.checkout(branch_ref)
+            new_branch = repo.lookup_branch(branch_name)
+            repo.checkout(new_branch)
 
     local_branch = repo.lookup_reference(local_branch_ref)
     local_commit = repo.revparse_single(local_branch_ref)
-
-    import enhanced.version as version
-    version.branch = f'{branch_name}'
-    version.commit_id = f'{local_commit.id}'[:7]
 
     remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
     remote_commit = repo.revparse_single(remote_reference)
