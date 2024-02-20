@@ -2,6 +2,7 @@ import os
 import sys
 import ssl
 
+#print('[System PATH] ' + str(sys.path))
 print('[System ARGV] ' + str(sys.argv))
 
 root = os.path.dirname(os.path.abspath(__file__))

@@ -18,13 +18,15 @@ wildcards_template = {}
 wildcards_weight_range = {}
 
 array_regex = re.compile(r'\[([\w\(\)\.\s,;:-]+)\]')
-array_regex1 = re.compile(r'\[([\w\(\),;-]+)\]')
+array_regex1 = re.compile(r'\[([\w\(\)\s,;-]+)\]')
 tag_regex0 = re.compile(r'([\s\w\(\);-]+)')
 tag_regex1 = re.compile(r'([\s\w\(\),-]+)')
 tag_regex2 = re.compile(r'__([\w-]+)__')
 tag_regex3 = re.compile(r'__([\w-]+)__:([\d]+)')
-tag_regex4 = re.compile(r'__([\w-]+)__:([RLr]){1}([\d]*)')
-tag_regex5 = re.compile(r'__([\w-]+)__:([RLr]){1}([\d]*):([\d]+)')
+tag_regex4 = re.compile(r'__([\w-]+)__:([RLrl]){1}([\d]*)')
+tag_regex5 = re.compile(r'__([\w-]+)__:([RLrl]){1}([\d]*):([\d]+)')
+tag_regex6 = re.compile(r'__([\w-]+)__:([\d]+):([\d]+)')
+
 wildcard_regex = re.compile(r'-([\w-]+)-')
 
 def set_wildcard_path_list(name, list_value):
@@ -149,9 +151,10 @@ def compile_arrays(text, rng):
 
     tag_arrays = array_regex.findall(text)
     if len(tag_arrays)==0:
-        return text, [], 0
+        return text, [], 0, True
     arrays = []
     mult = 1
+    seed_fixed = True
     for tag in tag_arrays:
         colon_counter = tag.count(':')
         wildcard = ''
@@ -167,6 +170,13 @@ def compile_arrays(text, rng):
                 if parts[2]:
                     number = int(parts[2])
                 start_at = int(parts[3])
+            else:
+                parts = tag_regex6.findall(tag)
+                if parts:
+                    parts = list(parts[0])
+                    wildcard = parts[0]
+                    number = int(parts[1])
+                    start_at = int(parts[2])
         elif colon_counter == 1:
             parts = tag_regex3.findall(tag)
             if parts:
@@ -202,26 +212,29 @@ def compile_arrays(text, rng):
                         text = text.replace(tag, ';'.join(words))
                         arrays.append(words)
                         mult *= len(words)
+                        seed_fixed = False
                         continue
         words = get_words_with_wildcard(wildcard, rng, method, number, start_at)
         delimiter = ',' if method.isupper() else ';'
         text = text.replace(tag, delimiter.join(words))
         arrays.append(words)
         mult *= len(words)
+        if delimiter == ';':
+            seed_fixed = False
     print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
-    return text, arrays, mult, ';' not in text
+    return text, arrays, mult, seed_fixed
 
 
 def get_words(arrays, totalMult, index):
     if(len(arrays) == 1):
         word = arrays[0][index]
-        if word[0] == '(' and word[:-1] == ')':
+        if word[0] == '(' and word[-1] == ')':
             word = word[1:-1]
         return [word]
     else:
         words = arrays[0]
         word = words[index % len(words)]
-        if word[0] == '(' and word[:-1] == ')':
+        if word[0] == '(' and word[-1] == ')':
             word = word[1:-1]
         index -= index % len(words)
         index /= len(words)
@@ -234,7 +247,7 @@ def apply_arrays(text, index, arrays, mult):
         return text
     
     tags = array_regex1.findall(text)
-
+    
     index %= mult
     chosen_words = get_words(arrays, mult, index)
 
