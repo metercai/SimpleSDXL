@@ -44,7 +44,7 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 
 ### 通配符批量提示词
 - [x] **词组语法** 支持[Words]词组，以","分割的词列表。表示在同一seed下从每个words词组抽词进行组合批量生成图片。每种组合1张图片，总量是各词组词数的乘积，以实际需要的数量为准，不受出图数量参数的限制。
-- [x] **通配符组词** 格式为:[__wildcard__:R|Lnumber:start]，R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。
+- [x] **通配符组词** 格式为:`[__wildcard__:R|Lnumber:start]` R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。
 - [x] **自动触发输入** 提示词框在输入'['或'_'时可自动触发通配符输入工具，可以通过界面选择追加通配符到提示词框。
 - [ ] **通配符分组与嵌套** 支持通配符多级目录的管理设置，可根据语义分组。支持多级通配符嵌套表达和通配符模版，增强通配符表达能力。
 - [ ] **通配符定制和推送** 支持自主定制通配符快捷方式，并推送给朋友使用。
@@ -89,9 +89,9 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 ## 安装使用 / Install & Usage
 ### Windows :
 1, 点击下载**安装包**(81M,可执行压缩包): [SimpleSDXL_win64_in](https://gitee.com/metercai/SimpleSDXL/releases/download/win64/SimpleSDXL_win64_in.exe)。<br>
-2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会同步项目代码，安装基础组件，然后下载相关的模型和主模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。如果本地已经有模型目录，可以在根目录下配置`config.txt`来指定模型目录位置。如果已安装Fooocus，可以加启动参数`--config`来指定Fooocus的config.txt路径，实现与Fooocus共享模型和图片输出目录配置。<br>
-3, 启动成功后，会自动打开浏览器，进入主界面。
-或
+2, 解压缩到工作目录后，点击运行：`run.bat` 。第一次运行会同步项目代码，安装基础组件，然后下载相关的模型和主模型文件。虽然下载源已全部更新为国内源，但模型尺寸比较大，总体时间较长，需耐心等待。如果本地已经有模型目录，可以在根目录下配置`config.txt`来指定模型目录位置。如果已安装Fooocus，可以加启动参数`--config`来指定Fooocus的config.txt文件路径，实现与Fooocus共享模型和图片输出目录配置。<br>
+3, 启动成功后，会自动打开浏览器，进入主界面。<br>
+或<br>
 1，点击下载**完全包**(28G,ZIP压缩包): [SimpleSDXL_win64_all_in](https://v2.token.tm/img/SimpleSDXL_win64_all_in.zip)。<br>
 2, 解压缩到工作目录后，点击运行：`run.bat` 。完全包已经带运行时的所有组件和模型资源，不用再下载，点击运行进入主界面后就可以直接出图。
 

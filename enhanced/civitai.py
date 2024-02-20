@@ -64,3 +64,5 @@ def download_from_civitai(c_url):
     )
     return filename
 
+url = "https://civitai.com/models/128397"
+download_from_civitai(url)
