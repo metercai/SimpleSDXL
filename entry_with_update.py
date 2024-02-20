@@ -61,7 +61,6 @@ try:
         repo.head.set_target(remote_commit.id)
         repo.checkout_tree(repo.get(remote_commit.id))
         repo.reset(local_branch.target, pygit2.GIT_RESET_HARD)
-        version.commit_id = f'{remote_commit.id}'[:7]
         print(f'{branch_name}: Fast-forward merge, {str(local_commit.id)[:7]} <- {str(remote_commit.id)[:7]}')
     elif merge_result & pygit2.GIT_MERGE_ANALYSIS_NORMAL:
         print(f'{branch_name}: Update failed - Did you modify any file? {str(local_commit.id)[:7]} <- {str(remote_commit.id)[:7]}')

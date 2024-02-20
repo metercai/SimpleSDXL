@@ -17,12 +17,14 @@ wildcards_translation = {}
 wildcards_template = {}
 wildcards_weight_range = {}
 
-array_regex = re.compile(r'\[([\w\.\s,:-]+)\]')
-tag_regex1 = re.compile(r'([\s\w,-]+)')
+array_regex = re.compile(r'\[([\w\(\)\.\s,;:-]+)\]')
+array_regex1 = re.compile(r'\[([\w\(\),;-]+)\]')
+tag_regex0 = re.compile(r'([\s\w\(\);-]+)')
+tag_regex1 = re.compile(r'([\s\w\(\),-]+)')
 tag_regex2 = re.compile(r'__([\w-]+)__')
 tag_regex3 = re.compile(r'__([\w-]+)__:([\d]+)')
-tag_regex4 = re.compile(r'__([\w-]+)__:([RL]){1}([\d]*)')
-tag_regex5 = re.compile(r'__([\w-]+)__:([RL]){1}([\d]*):([\d]+)')
+tag_regex4 = re.compile(r'__([\w-]+)__:([RLr]){1}([\d]*)')
+tag_regex5 = re.compile(r'__([\w-]+)__:([RLr]){1}([\d]*):([\d]+)')
 wildcard_regex = re.compile(r'-([\w-]+)-')
 
 def set_wildcard_path_list(name, list_value):
@@ -116,7 +118,7 @@ def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
     words = wildcards[wildcard]
     words_result = []
     number0 = number
-    if method=='L':
+    if method=='L' or method=='l':
         if number == 0:
             words_result = words
         else:
@@ -134,8 +136,10 @@ def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
             number = 1
         if number > len(words):
             number = len(words)
+        nums = 1 if start_at<=1 else start_at
         for i in range(number):
-            words_result.append(rng.choice(words))
+            words_each = rng.sample(words, nums)
+            words_result.append(words_each[0] if nums==1 else '('+' '.join(words_each)+')')
     print(f'[Wildcards] Get words from wildcard:__{wildcard}__, method:{method}, number:{number}, start_at:{start_at}, result:{words_result}')
     return words_result
 
@@ -190,20 +194,35 @@ def compile_arrays(text, rng):
                     arrays.append(words)
                     mult *= len(words)
                     continue
+                else:
+                    parts = tag_regex0.findall(tag)
+                    if parts:
+                        words = parts[0].split(';')
+                        words = [x.strip() for x in words]
+                        text = text.replace(tag, ';'.join(words))
+                        arrays.append(words)
+                        mult *= len(words)
+                        continue
         words = get_words_with_wildcard(wildcard, rng, method, number, start_at)
-        text = text.replace(tag, ','.join(words))
+        delimiter = ',' if method.isupper() else ';'
+        text = text.replace(tag, delimiter.join(words))
         arrays.append(words)
         mult *= len(words)
     print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
-    return text, arrays, mult 
+    return text, arrays, mult, ';' not in text
 
 
 def get_words(arrays, totalMult, index):
     if(len(arrays) == 1):
-        return [arrays[0][index]]
+        word = arrays[0][index]
+        if word[0] == '(' and word[:-1] == ')':
+            word = word[1:-1]
+        return [word]
     else:
         words = arrays[0]
         word = words[index % len(words)]
+        if word[0] == '(' and word[:-1] == ')':
+            word = word[1:-1]
         index -= index % len(words)
         index /= len(words)
         index = math.floor(index)
@@ -213,13 +232,15 @@ def get_words(arrays, totalMult, index):
 def apply_arrays(text, index, arrays, mult):
     if len(arrays) == 0:
         return text
+    
+    tags = array_regex1.findall(text)
 
     index %= mult
     chosen_words = get_words(arrays, mult, index)
 
     i = 0
     for arr in arrays:
-        text = text.replace(f'[{",".join(arr)}]', chosen_words[i], 1)
+        text = text.replace(f'[{tags[i]}]', chosen_words[i], 1)
         i = i+1
 
     return text
