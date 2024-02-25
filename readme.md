@@ -25,6 +25,9 @@ Enhanced features base on Fooocus, seamless upgrading and dual versions availabl
 - **增强预置包和模型下载**: 预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
   **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 
+<b>重要：如果喜欢项目的功能，以及给您带来了便利，请不要吝惜给加个星"⭐️"，以促进项目更好的发展，为大家提供更好的功能！😜<br>
+Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
+
 ## 🔔 更新 / Update
 - [2024.02.18] <b>节后第一版：新增通配符和批量提示词工具，提示词支持[]形式的词组，在同一seed下从词组中抽词进行组合批量生成图片，词组支持通配符，可以随机抽，也可以指定位置顺序抽。提示词框增加通配符辅助输入工具，可识别输入内容自动弹出，可展示和点击输入所有通配符及其包含词组。详情参见[通配符ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/wildcards/)。从[OneButtonPrompt](https://github.com/AIrjen/OneButtonPrompt)同步20+通配符内容集，并进行了裁剪适配。增加Fooocus配置文件设置的启动参数`--config`，可与Fooocus共享模型配置文件，取代原来的升级包功能。增加启动参数`--dev`，可以快捷启动SimpleSDXL开发版，参与新功能的体验和反馈。修复主线重绘中refiner切换和step计算错误，by xhoxye。</b>
 - [2024.01.31] 贺春版：新增智能抠图，基于Bert+Sam和U2net实现在语义理解上图片分割，生成蒙板后进行重绘。新增翻译小模型，降低本地翻译的算力要求。进一步优化测试预置包和嵌参图片，现已支持28个预置参数。升级默认预置包主模型到v8版，添加了Turbo模型预置包（加速）、albedobaseXL模型预置包（融合）和社群活跃用户LEO贡献的DragonYear预置包（龙年贺春），内含龙年拜年定制风格。值此新春之际，用全新的SimpleSDX贺春版，感谢朋友们的厚爱。祝大家新春快乐，龙年腾达！
