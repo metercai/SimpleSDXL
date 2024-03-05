@@ -14,6 +14,7 @@ logging.getLogger("xformers").addFilter(lambda record: 'A matching Triton is not
 
 re_requirement = re.compile(r"\s*([-_a-zA-Z0-9]+)\s*(?:==\s*([-+_.a-zA-Z0-9]+))?\s*")
 re_req_local_file = re.compile(r"\S*/([-_a-zA-Z0-9]+)-([0-9]+).([0-9]+).([0-9]+)[-_a-zA-Z0-9]*([\.tar\.gz|\.whl]+)\s*")
+#re_requirement = re.compile(r"\s*([-\w]+)\s*(?:==\s*([-+.\w]+))?\s*")
 
 python = sys.executable
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")

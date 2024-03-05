@@ -152,7 +152,7 @@
   "LoRAs": "局部模型",
   "Others": "其他模型",
   "\ud83d\udd04 Sync All Info": "\ud83d\udd04 全部同步",
-  "Describe": "反推与提参",
+  "Describe": "图片推参",
   "Content Type": "内容类型",
   "Photograph": "写实照片",
   "Art/Anime": "艺术/动漫",
@@ -211,6 +211,19 @@
   "Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.": "通配符: [__color__:L3:4] 从color里第4个词开始按顺序取3个词, [__color__:3] 从color中随机抽取3个词, [__color__] 从color中随机抽取1个词。",
   "Words/phrases of wildcard": "通配符包含的词或短语",
   "Pages:": "页码:",
+  "Output Format": "出图格式",
+  "Metadata": "图片提参",
+  "Apply Metadata": "提取图片生成参数",
+  "Disable intermediate results during generation, only show final gallery.": "在生成过程中禁用中间结果，仅显示最终图册。",
+  "Disable Intermediate Results": "禁止显示中间过程",
+  "Disable automatic seed increment when image number is > 1.": "当图片数量大于1时，禁用种子自动增量。",
+  "Disable seed increment": "禁用种子自增量",
+  "Adds parameters to generated images allowing manual regeneration.": "为生成的图像添加参数，允许手动重新生成。",
+  "Save Metadata to Images": "保存图片参数",
+  "Metadata Scheme": "参数保存方案",
+  "Image Prompt parameters are not included. Use png and a1111 for compatibility with Civitai.": "图像参数不包括在内。选择png和a1111可以与Civitai兼容。",
+
+
 
   "Leo Dragonyear": "LEO-龙年贺春",
 

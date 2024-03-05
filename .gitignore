@@ -68,3 +68,4 @@ Cargo.toml
 /outputs.1
 /test
 wd-v1-4-moat-tagger-v2.csv
+.DS_Store

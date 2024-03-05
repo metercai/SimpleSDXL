@@ -7,7 +7,7 @@ import time
 import gradio as gr
 import modules.config as config
 import modules.sdxl_styles as sdxl_styles
-import modules.advanced_parameters as ads
+import enhanced.all_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
 import enhanced.token_did as token_did
@@ -198,20 +198,34 @@ def toggle_note_box_delete(state_params):
     return toggle_note_box('delete', state_params)
 
 
-def toggle_note_box_regen(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
-    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+def toggle_note_box_regen(*args):
+    args = list(args)
+    state_params = args.pop()
+    for i in range(len(config.default_loras)):
+        del args[4+i]
+        del args[4+i+1]
+    checklist = args[2:]
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('regen', state_params)
 
-
-def toggle_note_box_preset(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
-    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+def toggle_note_box_preset(*args):
+    args = list(args)
+    state_params = args.pop()
+    for i in range(len(config.default_loras)):
+        del args[4+i]
+        del args[4+i+1]
+    checklist = args[2:]
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('preset', state_params)
 
 
-def toggle_note_box_embed(prompt, negative_prompt, base_model, refiner_model, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, state_params):
-    checklist = [base_model, refiner_model, lora_model1, lora_model2, lora_model3, lora_model4, lora_model5]
+def toggle_note_box_embed(*args):
+    args = list(args)
+    state_params = args.pop()
+    for i in range(len(config.default_loras)):
+        del args[4+i]
+        del args[4+i+1]
+    checklist = args[2:]
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('embed', state_params)
 
@@ -302,12 +316,12 @@ def reset_image_params(state_params):
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-    loras = [['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0]]
+    loras = config.default_loras[:]
     for key in metainfo:
         i=0
         if key.startswith('LoRA ['):
             loras.insert(i, [key[6:-8], float(metainfo[key])])
-    loras = loras[:5]
+    loras = loras[:len(config.default_loras)]
     metadata.update({"loras": loras})
     metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
     results = topbar.reset_params(metadata)
@@ -316,14 +330,49 @@ def reset_image_params(state_params):
     return results + [gr.update(visible=False)] * 2 + [state_params]
 
 
-def save_preset(name, state_params, prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine, lora_model1, lora_weight1, lora_model2, lora_weight2, lora_model3, lora_weight3, lora_model4, lora_weight4, lora_model5, lora_weight5, adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed):
+def apply_enabled_loras(loras):
+        enabled_loras = []
+        for lora_enabled, lora_model, lora_weight in loras:
+            if lora_enabled:
+                enabled_loras.append([lora_model, lora_weight])
+
+        return enabled_loras
+
+def save_preset(*args):    
+    args = list(args)
+    state_params = args.pop()
+    name = args.pop()
+    seed_random = args.pop()
+    params = ads.get_dict_args(args)
+    prompt = params['prompt']
+    negative_prompt = params['negative_prompt']
+    style_selections = params['style_selections']
+    performance_selection = params['performance_selection']
+    aspect_ratios_selection = params['aspect_ratios_selection']
+    sharpness = params['sharpness']
+    guidance_scale = params['guidance_scale']
+    base_model = params['base_model']
+    refiner_model = params['refiner_model']
+    refiner_switch = params['refiner_switch']
+    sampler_name = params['sampler_name']
+    scheduler_name = params['scheduler_name']
+    adaptive_cfg = params['adaptive_cfg']
+    overwrite_step = params['overwrite_step']
+    overwrite_switch = params['overwrite_switch']
+    inpaint_engine = params['inpaint_engine']
+    loras = params['loras']
+    adm_scaler_positive = params['adm_scaler_positive']
+    adm_scaler_negative = params['adm_scaler_negative']
+    adm_scaler_end = params['adm_scaler_end']
+    image_seed = params['image_seed']
+
 
     if name is not None and name != '':
         preset = {}
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model
         preset["default_refiner_switch"] = refiner_switch
-        preset["default_loras"] = [[lora_model1, lora_weight1], [lora_model2, lora_weight2], [lora_model3, lora_weight3], [lora_model4, lora_weight4], [lora_model5, lora_weight5]]
+        preset["default_loras"] = loras
         preset["default_cfg_scale"] = guidance_scale
         preset["default_sample_sharpness"] = sharpness
         preset["default_sampler"] = sampler_name
@@ -371,17 +420,10 @@ def save_preset(name, state_params, prompt, negative_prompt, style_selections, p
                 preset["embeddings_downloads"].update({k[11:]: get_muid_link(k)})
 
         preset["lora_downloads"] = {}
-        if lora_model1 and lora_model1 != 'None':
-            preset["lora_downloads"].update({lora_model1: get_muid_link("loras/"+lora_model1)})
-        if lora_model2 and lora_model2 != 'None':
-            preset["lora_downloads"].update({lora_model2: get_muid_link("loras/"+lora_model2)})
-        if lora_model3 and lora_model3 != 'None':
-            preset["lora_downloads"].update({lora_model3: get_muid_link("loras/"+lora_model3)})
-        if lora_model4 and lora_model4 != 'None':
-            preset["lora_downloads"].update({lora_model4: get_muid_link("loras/"+lora_model4)})
-        if lora_model5 and lora_model5 != 'None':
-            preset["lora_downloads"].update({lora_model5: get_muid_link("loras/"+lora_model5)})
-        
+        for m,w in loras:
+            if m != 'None':
+                preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
+
         m_dict = {}
         for key in style_selections:
             if key!='Fooocus V2':

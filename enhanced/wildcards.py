@@ -49,9 +49,9 @@ def get_wildcards_samples(path="root"):
             words = [x.split('?')[0] for x in words if x != '' and not wildcard_regex.findall(x)]
             words = [x.split(';')[0] for x in words]
 
-            templates = [x for x in words if ':' in x]  #  word:template:weight_range
+            templates = [x for x in words if '|' in x]  #  word|template|weight_range
             for line in templates:
-                parts = line.split(";")
+                parts = line.split("|")
                 word = parts[0]
                 template = parts[1]
                 weight_range = ''
@@ -65,7 +65,7 @@ def get_wildcards_samples(path="root"):
                     wildcards_template({wildcard+"/"+word: template})
                     if len(weight_range.strip())>0:
                         wildcards_weight_range.update({wildcard+"/"+word: weight_range})
-            words = [x.split(";")[0] for x in words]
+            words = [x.split("|")[0] for x in words]
             wildcards.update({wildcard: words})
             wildcard_path = wildcard.split("/")
             if len(wildcard_path)==1:
