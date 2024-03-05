@@ -1,7 +1,3 @@
--material- dragon
--color- dragon
--color- creature
--color- and -color- creature
 Animal
 Abyssinian Cat
 Albatross

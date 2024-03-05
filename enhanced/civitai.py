@@ -8,12 +8,12 @@ import requests
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from modules.model_loader import load_file_from_url
-from modules.config import path_checkpoints, path_loras
+from modules.config import paths_checkpoints, path_loras
 
 def download_from_civitai(c_url):
     allowed_types = ['Checkpoint', 'LORA']
     save_loactions = {
-        'Checkpoint': path_checkpoints,
+        'Checkpoint': paths_checkpoints[0],
         'LORA': path_loras
     }
 

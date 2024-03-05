@@ -11,7 +11,7 @@ import re
 import args_manager
 import random
 import modules.constants as constants
-import modules.advanced_parameters as ads
+import enhanced.all_parameters as ads
 import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
@@ -356,7 +356,7 @@ def sync_message(state_params):
 
 def reset_params_for_preset(bar_button, state_params):
     if '__preset' not in state_params.keys() or state_params["__preset"]==bar_button:
-        return [gr.update()] * 37
+        return [gr.update()] * 47
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": bar_button})
     return reset_context(state_params)
@@ -420,6 +420,7 @@ def reset_context(state_params):
         loras = [(n,v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
         for (n,v) in loras:
             info_preset.update({f"LoRA [{n}] weight": f'{v}'})
+
     if "default_seed" in keys:
         info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
     if "checkpoint_downloads" in keys:
@@ -438,16 +439,37 @@ def reset_context(state_params):
         ads_params.update({"overwrite_step": f'{config_preset["default_overwrite_step"]}'})
     if "default_overwrite_switch" in keys:
         ads_params.update({"overwrite_switch": f'{config_preset["default_overwrite_switch"]}'})
+    if "default_overwrite_width" in keys:
+        ads_params.update({"overwrite_width": f'{config_preset["default_overwrite_width"]}'})
+    if "default_overwrite_height" in keys:
+        ads_params.update({"overwrite_height": f'{config_preset["default_overwrite_height"]}'})
+    if "default_overwrite_vary_strength" in keys:
+        ads_params.update({"overwrite_vary_strength": f'{config_preset["default_overwrite_vary_strength"]}'})
+    if "default_overwrite_upscale_strength" in keys:
+        ads_params.update({"overwrite_upscale_strength": f'{config_preset["default_overwrite_upscale_strength"]}'})
+    if "default_mixing_image_prompt_and_vary_upscale" in keys:
+        ads_params.update({"mixing_image_prompt_and_vary_upscale": config_preset["default_mixing_image_prompt_and_vary_upscale"]})
+    if "default_mixing_image_prompt_and_inpaint" in keys:
+        ads_params.update({"mixing_image_prompt_and_inpaint": f'{config_preset["default_mixing_image_prompt_and_inpaint"]}'})
+    if "default_refiner_swap_method" in keys:
+        ads_params.update({"refiner_swap_method": f'{config_preset["default_refiner_swap_method"]}'})
+    if "default_controlnet_softness" in keys:
+        ads_params.update({"controlnet_softness": f'{config_preset["default_controlnet_softness"]}'})
     if "default_inpaint_engine" in keys:
         ads_params.update({"inpaint_engine": config_preset["default_inpaint_engine"]})
+    if "default_loras_min_weight" in keys:
+        ads_params.update({"loras_min_weight": f'{config_preset["default_loras_min_weight"]}'})
+    if "default_loras_max_weight" in keys:
+        ads_params.update({"loras_max_weight": f'{config_preset["default_loras_max_weight"]}'})
+    if "default_freeu" in keys:
+        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})    
     if len(ads_params.keys())>0:
         info_preset.update({"Advanced_parameters": ads_params})
-
+    
 
 #other
 #"available_aspect_ratios": []
 #"default_advanced_checkbox": true,
-#"default_max_image_number": 32,
 #"example_inpaint_prompts":[]
     info_preset.update({"task_from": f'preset:{preset}'})
     
@@ -459,8 +481,12 @@ def reset_context(state_params):
     results += [state_params]
     system_message = 'system message was displayed!'
 
-    if "default_image_number" in keys:
-        results += [gr.update(value=config_preset["default_image_number"])]
+    get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
+    max_image_number = get_value_or_default("max_image_number")
+    image_number = get_value_or_default("image_number")
+
+    if "default_image_number" in keys or "default_max_image_number" in keys:
+        results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     else:
         results += [gr.update()]
 
@@ -490,12 +516,13 @@ def check_prepare_for_reset(info):
 
     # the models to be checked 
     info['Refiner Model'] = None if info['Refiner Model']=='' else info['Refiner Model']
-    loras = [['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0], ['None', 1.0]]
+    loras = config.default_loras[:]
     for key in info:
         i=0
         if key.startswith('LoRA ['):
             loras.insert(i, [key[6:-8], float(info[key])])
-    loras = loras[:5]
+    loras = loras[:len(config.default_loras)]
+
     embeddings = embeddings_model_split(info["Prompt"], info["Negative Prompt"])
     checklist = ["checkpoints/"+info["Base Model"], "checkpoints/"+info["Refiner Model"]] + ["loras/"+n for i, (n, v) in enumerate(loras)]
     checklist += embeddings
@@ -526,9 +553,9 @@ def check_prepare_for_reset(info):
         for f in downlist:
             if f in down_muid:
                 if f.startswith("checkpoints/"):
-                    file_path = os.path.join(config.path_checkpoints, f[12:])
+                    file_path = os.path.join(config.paths_checkpoints[0], f[12:])
                 elif f.startswith("loras/"):
-                    file_path = os.path.join(config.path_loras, f[6:])
+                    file_path = os.path.join(config.paths_loras[0], f[6:])
                 elif f.startswith("embeddings/"):
                     file_path = os.path.join(config.path_embeddings, f[11:])
                 else:
@@ -536,9 +563,9 @@ def check_prepare_for_reset(info):
                 model_dir, filename = os.path.split(file_path)
                 load_file_from_muid(filename, down_muid[f], model_dir)
             elif "checkpoint_downloads" in info.keys() and f[12:] in info["checkpoint_downloads"]:
-                load_file_from_url(url=info["checkpoint_downloads"][f[12:]], model_dir=config.path_checkpoints, file_name=f[12:])
+                load_file_from_url(url=info["checkpoint_downloads"][f[12:]], model_dir=config.paths_checkpoints[0], file_name=f[12:])
             elif "lora_downloads" in info.keys() and f[6:] in info["lora_downloads"]:
-                load_file_from_url(url=info["lora_downloads"][f[6:]], model_dir=config.path_loras, file_name=f[6:])
+                load_file_from_url(url=info["lora_downloads"][f[6:]], model_dir=config.paths_loras[0], file_name=f[6:])
             elif "embeddings_downloads" in info.keys() and f[11:] in info["embeddings_downloads"]:
                 load_file_from_url(url=info["embeddings_downloads"][f[11:]], model_dir=config.path_embeddings, file_name=f[11:])
             else:
@@ -555,14 +582,14 @@ def check_prepare_for_reset(info):
                 info["Base Model"]=newlist[i][12:]
             elif i==1:
                 info["Refiner Model"]=newlist[i][12:]
-            elif i>1 and i<7:
+            elif i>1 and i<len(config.default_loras)+2:
                 new_loras += [[newlist[i][6:], loras[i-2][1]]]
             else:
                 embedding_new = newlist[i][11:].split('.')[0]
                 embedding_old = checklist[i][11:].split('.')[0]
                 info["Prompt"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
                 info["Negative Prompt"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
-        elif i>1 and i<7:
+        elif i>1 and i<len(config.default_loras)+2:
             new_loras += [[newlist[i][6:], loras[i-2][1]]]
     loras = new_loras
 
@@ -581,13 +608,20 @@ def reset_params(metadata):
     print(f'[Topbar] Ready to reset generation params session based by {metadata["task_from"]}.')
     aspect_ratios = metadata['Resolution'][1:-1].replace(', ', '*')
     adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in metadata['ADM Guidance'][1:-1].split(', ')]
-    get_ads_value_or_default = lambda x: ads.default[x] if 'Advanced_parameters' not in metadata.keys() or x not in metadata['Advanced_parameters'].keys() else metadata['Advanced_parameters'][x]
+    
+    get_ads_value_or_default = lambda x: f'{ads.default[x]}' if 'Advanced_parameters' not in metadata.keys() or x not in metadata['Advanced_parameters'].keys() else metadata['Advanced_parameters'][x]
+    get_ads_value_exist = lambda x: 'Advanced_parameters' in metadata.keys() and x in metadata['Advanced_parameters'].keys()
     adaptive_cfg = float(get_ads_value_or_default('adaptive_cfg'))
     overwrite_step = int(get_ads_value_or_default('overwrite_step'))
     overwrite_switch = int(get_ads_value_or_default('overwrite_switch'))
     inpaint_engine = get_ads_value_or_default('inpaint_engine')
+    loras_min_weight = int(get_ads_value_or_default('loras_min_weight'))
+    loras_max_weight = int(get_ads_value_or_default('loras_max_weight'))
+    freeu_b1, freeu_b2, freeu_s1, freeu_s2 = [float(f.strip()) for f in get_ads_value_or_default('freeu')[1:-1].split(',')]
+
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
 
+# [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
     results = []
     results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
@@ -603,12 +637,17 @@ def reset_params(metadata):
             gr.update(value=float(metadata['Refiner Switch'])), gr.update(value=metadata['Sampler']), gr.update(value=metadata['Scheduler']), \
             gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
     for i, (n, v) in enumerate(metadata['loras']):
-        results += [gr.update(value=n),gr.update(value=v)]
+        results += [gr.update(value=True), gr.update(value=n), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight)]
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
     if "Seed" in metadata.keys():
         results += [gr.update(value=False), gr.update(value=metadata['Seed'])]
     else:
         results += [gr.update(value=True), gr.update()]
+    if get_ads_value_exist('freeu'):
+        results += [gr.update(value=Ture)]
+    else:
+        results += [gr.update(value=False)]
+    results += [gr.update(value=freeu_b1), gr.update(value=freeu_b2), gr.update(value=freeu_s1), gr.update(value=freeu_s2) ]
     return results
                                                                                                                                             
 nav_name_list = get_preset_name_list()

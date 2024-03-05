@@ -66,9 +66,9 @@ def init_models_info():
 def refresh_models_info_from_path():
     global models_info, models_info_file, models_info_path
 
-    model_filenames = config.get_model_filenames(config.path_checkpoints)
-    lora_filenames = config.get_model_filenames(config.path_loras)
-    embedding_filenames = config.get_model_filenames(config.path_embeddings)
+    model_filenames = config.get_model_filenames(config.paths_checkpoints)
+    lora_filenames = config.get_model_filenames(config.paths_loras)
+    embedding_filenames = config.get_model_filenames([config.path_embeddings])
     models_info_muid = {}
     new_filenames = []
     new_models_info = {}
@@ -102,9 +102,9 @@ def refresh_models_info_from_path():
         try:
             for f in new_filenames:
                 if f.startswith("checkpoints/"):
-                    file_path = os.path.join(config.path_checkpoints, f[12:])
+                    file_path = os.path.join(config.paths_checkpoints[0], f[12:])
                 elif f.startswith("loras/"):
-                    file_path = os.path.join(config.path_loras, f[6:])
+                    file_path = os.path.join(config.paths_loras[0], f[6:])
                 elif f.startswith("embeddings/"):
                     file_path = os.path.join(config.path_embeddings, f[11:])
                 else:
@@ -163,9 +163,9 @@ def sync_model_info(downurls):
         if not models_info[f]['hash']:
             print(f'[ModelInfo] Computing file hash for {f}')
             if f.startswith("checkpoints/"):
-                file_path = os.path.join(config.path_checkpoints, f[12:])
+                file_path = os.path.join(config.paths_checkpoints[0], f[12:])
             elif f.startswith("loras/"):
-                file_path = os.path.join(config.path_loras, f[6:])
+                file_path = os.path.join(config.paths_loras[0], f[6:])
             elif f.startswith("embeddings/"):
                 file_path = os.path.join(config.path_embeddings, f[11:])
             else:

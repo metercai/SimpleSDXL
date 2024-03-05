@@ -3,38 +3,60 @@ import args_manager
 import modules.config
 import json
 import urllib.parse
-import modules.advanced_parameters as ads
+import enhanced.all_parameters as ads
 import enhanced.enhanced_parameters as ehs
 import enhanced.toolbox as toolbox
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from modules.util import generate_temp_filename
-
+from modules.meta_parser import MetadataParser, get_exif
 
 log_cache = {}
 
 
-def get_current_html_path():
+def get_current_html_path(output_format=None):
+    output_format = output_format if output_format else modules.config.default_output_format
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=modules.config.path_outputs,
-                                                                         extension='png')
+                                                                         extension=output_format)
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
     return html_name
 
 
-def log(img, dic):
-    if args_manager.args.disable_image_log:
-        return
-
-    date_string, local_temp_filename, only_name = generate_temp_filename(folder=modules.config.path_outputs, extension='png')
+def log(img, metadata, metadata_parser: MetadataParser | None = None, output_format=None) -> str:
+    path_outputs = args_manager.args.temp_path if args_manager.args.disable_image_log else modules.config.path_outputs
+    output_format = output_format if output_format else modules.config.default_output_format
+    date_string, local_temp_filename, only_name = generate_temp_filename(folder=path_outputs, extension=output_format)
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
-    if ehs.embed_metadata_checkbox:
-        pnginfo = PngInfo()
-        metadata = toolbox.get_embed_metadata(dict(dic))
-        pnginfo.add_text("Comment", json.dumps(metadata), True)
+
+    parsed_parameters = metadata_parser.parse_string(metadata.copy()) if metadata_parser is not None else ''
+    #print(f'parsed_parameters:{parsed_parameters}')
+
+    image = Image.fromarray(img)
+
+    if output_format == 'png':
+        if ehs.embed_metadata_checkbox:
+            pnginfo = PngInfo()
+            metadata = toolbox.get_embed_metadata(dict(dic))
+            pnginfo.add_text("Comment", json.dumps(metadata), True)
+        else:
+            if parsed_parameters != '':
+                pnginfo = PngInfo()
+                pnginfo.add_text('parameters', parsed_parameters)
+                pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
+            else:
+                pnginfo = None
+        image.save(local_temp_filename, pnginfo=pnginfo)
+    elif output_format == 'jpg':
+        image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_parser.get_scheme().value) if metadata_parser else Image.Exif())
+    elif output_format == 'webp':
+        image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_parser.get_scheme().value) if metadata_parser else Image.Exif())
     else:
-        pnginfo = None
-    Image.fromarray(img).save(local_temp_filename, pnginfo=pnginfo)
+        image.save(local_temp_filename)
+
+    if args_manager.args.disable_image_log:
+        return local_temp_filename
+
 
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
 
@@ -43,7 +65,7 @@ def log(img, dic):
         "body { background-color: #121212; color: #E0E0E0; } "
         "a { color: #BB86FC; } "
         ".metadata { border-collapse: collapse; width: 100%; } "
-        ".metadata .key { width: 15%; } "
+        ".metadata .label { width: 15%; } "
         ".metadata .value { width: 85%; font-weight: bold; } "
         ".metadata th, .metadata td { border: 1px solid #4d4d4d; padding: 4px; } "
         ".image-container img { height: auto; max-width: 512px; display: block; padding-right:10px; } "
@@ -79,7 +101,7 @@ def log(img, dic):
         </script>"""
     )
 
-    begin_part = f"<html><head><title>Fooocus Log {date_string}</title>{css_styles}</head><body>{js}<p>Fooocus Log {date_string} (private)</p>\n<p>All images are clean, without any hidden data/meta, and safe to share with others.</p><!--fooocus-log-split-->\n\n"
+    begin_part = f"<!DOCTYPE html><html><head><title>Fooocus Log {date_string}</title>{css_styles}</head><body>{js}<p>Fooocus Log {date_string} (private)</p>\n<p>Metadata is embedded if enabled in the config or developer debug mode. You can find the information for each image in line Metadata Scheme.</p><!--fooocus-log-split-->\n\n"
     end_part = f'\n<!--fooocus-log-split--></body></html>'
 
     middle_part = log_cache.get(html_name, "")
@@ -94,14 +116,14 @@ def log(img, dic):
 
     div_name = only_name.replace('.', '_')
     item = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
-    item += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'></img></a><div>{only_name}</div></td>"
+    item += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
     item += "<td><table class='metadata'>"
-    for key, value in dic:
+    for label, key, value in metadata:
         value_txt = str(value).replace('\n', ' </br> ')
-        item += f"<tr><td class='key'>{key}</td><td class='value'>{value_txt}</td></tr>\n"
+        item += f"<tr><td class='label'>{label}</td><td class='value'>{value_txt}</td></tr>\n"
     item += "</table>"
 
-    js_txt = urllib.parse.quote(json.dumps({k: v for k, v in dic}, indent=0), safe='')
+    js_txt = urllib.parse.quote(json.dumps({k: v for _, k, v in metadata}, indent=0), safe='')
     item += f"</br><button onclick=\"to_clipboard('{js_txt}')\">Copy to Clipboard</button>"
 
     item += "</td>"
@@ -118,7 +140,7 @@ def log(img, dic):
     
     log_ext(local_temp_filename)
 
-    return
+    return local_temp_filename
 
 
 def log_ext(file_name):
@@ -130,7 +152,7 @@ def log_ext(file_name):
         with open(log_name, "r", encoding="utf-8") as log_file:
             log_ext.update(json.load(log_file))
     
-    ads_ext = ads.get_diff_for_log_ext()
+    ads_ext = {} #ads.get_diff_for_log_ext()
     if len(ads_ext.keys())==0:
         return
 
@@ -140,3 +162,4 @@ def log_ext(file_name):
         json.dump(log_ext, log_file)
 
     print(f'Image generated with advanced params log at: {log_name}')
+    return 
