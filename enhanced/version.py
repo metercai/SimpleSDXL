@@ -31,6 +31,8 @@ def get_branch():
         pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
         repo = pygit2.Repository(os.path.abspath(os.path.dirname(__file__)))
         branch = repo.head.shorthand
+        if branch=="main":
+            branch = "Fooocus"
         commit_id = repo.head.target.hex[:7]
     return branch
 
