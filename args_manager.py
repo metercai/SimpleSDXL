@@ -36,6 +36,8 @@ args_parser.parser.add_argument("--always-download-new-model", action='store_tru
 
 args_parser.parser.add_argument("--dev", action='store_true',
                                 help="launch the dev branch", default=False)
+args_parser.parser.add_argument("--main", action='store_true',
+                                help="launch the Fooocus branch", default=False)
 args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default='./')
 
 
