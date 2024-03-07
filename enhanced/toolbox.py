@@ -238,7 +238,7 @@ def delete_image(state_params):
     info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     file_name = info["Filename"]
     output_index = choice.split('/')
-    dir_path = os.path.join(config.path_outputs, '20' + output_index[0])
+    dir_path = os.path.join(config.path_outputs, "20{}".format(output_index[0]))
     
     log_path = os.path.join(dir_path, 'log.html')
     if os.path.exists(log_path):
@@ -451,7 +451,7 @@ def embed_params(state_params):
     info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     #print(f'info:{info}')
     filename = info['Filename']
-    file_path = os.path.join(os.path.join(config.path_outputs, '20' + choice.split('/')[0]), filename)
+    file_path = os.path.join(os.path.join(config.path_outputs, "20{}".format(choice.split('/')[0])), filename)
     img = Image.open(file_path)
     embed_dirs = os.path.join(config.path_outputs, 'embed')
     if not os.path.exists(embed_dirs):
@@ -465,6 +465,7 @@ def embed_params(state_params):
     return [gr.update(visible=False)] * 2 + [state_params]
 
 def get_embed_metadata(info, extra=None):
+
     metadata = {}
     for x in info.keys():
         if x != 'Filename':

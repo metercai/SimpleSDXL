@@ -80,6 +80,10 @@ def get_list(key: str, fallback: str | None, source_dict: dict, results: list, d
         results.append(h)
     except:
         results.append(gr.update())
+    if key in ['styles', 'Styles']:
+        for k in h:
+            if k not in modules.sdxl_styles.styles and k in source_dict.get('styles_definition', default):
+                modules.sdxl_styles.styles.update({k: source_dict["styles_definition"][k]})
 
 
 def get_float(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
@@ -231,6 +235,7 @@ class MetadataParser(ABC):
         self.refiner_model_name: str = ''
         self.refiner_model_hash: str = ''
         self.loras: list = []
+        self.styles_definition = {}
 
     @abstractmethod
     def get_scheme(self) -> MetadataScheme:
@@ -245,7 +250,7 @@ class MetadataParser(ABC):
         raise NotImplementedError
 
     def set_data(self, raw_prompt, full_prompt, raw_negative_prompt, full_negative_prompt, steps, base_model_name,
-                 refiner_model_name, loras):
+                 refiner_model_name, loras, styles_definition):
         self.raw_prompt = raw_prompt
         self.full_prompt = full_prompt
         self.raw_negative_prompt = raw_negative_prompt
@@ -267,6 +272,9 @@ class MetadataParser(ABC):
                 lora_path = get_file_from_folder_list(lora_name, modules.config.paths_loras)
                 lora_hash = get_sha256(lora_path)
                 self.loras.append((Path(lora_name).stem, lora_weight, lora_hash))
+
+        if styles_definition != 'None':
+            self.styles_definition = styles_definition
 
 
 class A1111MetadataParser(MetadataParser):
@@ -515,6 +523,98 @@ class FooocusMetadataParser(MetadataParser):
             elif value == path.stem:
                 return filename
 
+class SIMPLEMetadataParser(MetadataParser):
+    def get_scheme(self) -> MetadataScheme:
+        return MetadataScheme.SIMPLE
+
+    simple_to_fooocus = {
+        'Full Prompt': 'full_prompt',
+        'Full Negative Prompt': 'full_negative_prompt',
+        'Prompt': 'prompt',
+        'Negative Prompt': 'negative_prompt',
+        'Fooocus V2 Expansion': 'prompt_expansion',
+        'Styles': 'styles',
+        'Performance': 'performance',
+        'Steps': 'steps',
+        'Resolution': 'resolution',
+        'Guidance Scale': 'guidance_scale',
+        'Sharpness': 'sharpness',
+        'ADM Guidance adm_guidance': 'adm_guidance',
+        'Base Model': 'base_model',
+        'Refiner Model': 'refiner_model',
+        'Refiner Switch': 'refiner_switch',
+        'Overwrite Switch': 'overwrite_switch',
+        'Refiner Swap Method': 'refiner_swap_method',
+        'CFG Mimicking from TSNR': 'adaptive_cfg',
+        'Sampler': 'sampler',
+        'Scheduler': 'scheduler',
+        'Seed': 'seed',
+        'FreeU': 'freeu',
+        'User': 'created_by',
+        'Version': 'version',
+        'LoRAs': 'loras',
+    }
+
+    def parse_json(self, metadata: dict) -> dict:
+
+        model_filenames = modules.config.model_filenames.copy()
+        lora_filenames = modules.config.lora_filenames.copy()
+        if modules.config.sdxl_lcm_lora in lora_filenames:
+            lora_filenames.remove(modules.config.sdxl_lcm_lora)
+
+        for key, value in metadata.items():
+            if value in ['', 'None']:
+                continue
+            if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
+                metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
+            elif key.startswith('LoRA ['):
+                metadata[key] = self.replace_value_with_filename(key, value, lora_filenames)
+            else:
+                continue
+
+        return metadata
+
+    def parse_string(self, metadata: list) -> str:
+        for li, (label, key, value) in enumerate(metadata):
+            # remove model folder paths from metadata
+            if key.startswith('lora_combined_'):
+                name, weight = value.split(' : ')
+                name = Path(name).stem
+                value = f'{name} : {weight}'
+                metadata[li] = (label, key, value)
+
+        res = {k: v for k, _, v in metadata if not k.startswith('LoRA ')}
+
+        res['Full Prompt'] = self.full_prompt
+        res['Full Negative Prompt'] = self.full_negative_prompt
+        res['Steps'] = self.steps
+        res['Base Model'] = self.base_model_name
+        res['Base Model Hash'] = self.base_model_hash
+
+        if self.refiner_model_name not in ['', 'None']:
+            res['Refiner Model'] = self.refiner_model_name
+            res['Refiner Model Hash'] = self.refiner_model_hash
+
+        res.update({f'LoRA [{n}] weight': w for (n, w, _) in self.loras})
+        res['LoRAs'] = self.loras
+        res['styles_definition'] = self.styles_definition
+
+        if modules.config.metadata_created_by != '':
+            res['User'] = modules.config.metadata_created_by
+
+        return json.dumps(dict(sorted(res.items())))
+
+    @staticmethod
+    def replace_value_with_filename(key, value, filenames):
+        for filename in filenames:
+            path = Path(filename)
+            if key.startswith('LoRA ['):
+                name, weight = key[6:-8], value
+                if name == path.stem:
+                    return f'{filename} : {weight}'
+            elif value == path.stem:
+                return filename
+
 
 def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
     match metadata_scheme:
@@ -522,6 +622,8 @@ def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
             return FooocusMetadataParser()
         case MetadataScheme.A1111:
             return A1111MetadataParser()
+        case MetadataScheme.SIMPLE:
+            return SIMPLEMetadataParser()
         case _:
             raise NotImplementedError
 
@@ -533,6 +635,9 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
     parameters = items.pop('parameters', None)
     metadata_scheme = items.pop('fooocus_scheme', None)
     exif = items.pop('exif', None)
+    if not parameters and 'Comment' in items:
+        metadata_scheme = 'simple'
+        parameters = items.pop('Comment', None)
 
     if parameters is not None and is_json(parameters):
         parameters = json.loads(parameters)
@@ -552,8 +657,8 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
         metadata_scheme = None
 
         # broad fallback
-        if isinstance(parameters, dict):
-            metadata_scheme = MetadataScheme.FOOOCUS
+        #if isinstance(parameters, dict):
+        #    metadata_scheme = MetadataScheme.FOOOCUS
 
         if isinstance(parameters, str):
             metadata_scheme = MetadataScheme.A1111
@@ -567,7 +672,8 @@ def get_exif(metadata: str | None, metadata_scheme: str):
     # 0x9286 = UserComment
     exif[0x9286] = metadata
     # 0x0131 = Software
-    exif[0x0131] = 'Fooocus v' + fooocus_version.version
+    import enhanced.version as version
+    exif[0x0131] = f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'
     # 0x927C = MakerNote
     exif[0x927C] = metadata_scheme
     return exif

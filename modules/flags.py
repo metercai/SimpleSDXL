@@ -90,11 +90,13 @@ desc_type_anime = 'Art/Anime'
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'
     A1111 = 'a1111'
+    SIMPLE = 'simple'
 
 
 metadata_scheme = [
-    (f'{MetadataScheme.FOOOCUS.value} (json)', MetadataScheme.FOOOCUS.value),
-    (f'{MetadataScheme.A1111.value} (plain text)', MetadataScheme.A1111.value),
+    (f'{MetadataScheme.SIMPLE.value}', MetadataScheme.SIMPLE.value),
+    (f'{MetadataScheme.FOOOCUS.value}', MetadataScheme.FOOOCUS.value),
+    (f'{MetadataScheme.A1111.value}', MetadataScheme.A1111.value),
 ]
 
 lora_count = 5

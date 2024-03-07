@@ -284,6 +284,8 @@ def init_nav_bars(state_params, request: gr.Request):
         else:
             state_params.update({"__max_per_page": 18})
     state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
+    state_params.update({"infobox_state": 0})
+    state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     #print(f'system_params:{state_params}')
@@ -622,6 +624,9 @@ def reset_params(metadata):
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
 
 # [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
+
+# overwrite_width, overwrite_height, refiner_swap_method
+
     results = []
     results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:

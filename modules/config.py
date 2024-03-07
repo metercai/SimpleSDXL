@@ -389,7 +389,7 @@ default_save_metadata_to_images = get_config_item_or_set_default(
 )
 default_metadata_scheme = get_config_item_or_set_default(
     key='default_metadata_scheme',
-    default_value=MetadataScheme.FOOOCUS.value,
+    default_value=MetadataScheme.SIMPLE.value,
     validator=lambda x: x in [y[1] for y in modules.flags.metadata_scheme if y[1] == x]
 )
 metadata_created_by = get_config_item_or_set_default(

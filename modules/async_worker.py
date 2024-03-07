@@ -874,13 +874,15 @@ def worker():
 
                     metadata_parser = None
                     if save_metadata_to_images:
+                        styles_name = [f[1:-1] for f in str(raw_style_selections)[1:-1].split(', ')]
+                        styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
                         metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                         metadata_parser.set_data(task['log_positive_prompt'], task['positive'],
                                                  task['log_negative_prompt'], task['negative'],
-                                                 steps, base_model_name, refiner_model_name, loras)
+                                                 steps, base_model_name, refiner_model_name, loras, '')
                     d.append(('Metadata Scheme', 'metadata_scheme', metadata_scheme.value if save_metadata_to_images else save_metadata_to_images))
                     import enhanced.version as version
-                    d.append(('Version', 'version', 'Fooocus v' + fooocus_version.version + f' {version.branch}_{version.get_simplesdxl_ver()}'))
+                    d.append(('Version', 'version', f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'))
                     img_paths.append(log(x, d, metadata_parser, output_format))
 
                 yield_result(async_task, img_paths, do_not_show_finished_images=len(tasks) == 1 or disable_intermediate_results)
