@@ -50,5 +50,6 @@
         "juggernautXL_v7Rundiffusion.safetensors",
         "juggernautXL_version6Rundiffusion.safetensors",
         "juggernautXL_v6Rundiffusion.safetensors"
-    ]
+    ],
+    "default_save_metadata_to_images": true
 }

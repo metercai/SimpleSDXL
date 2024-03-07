@@ -30,27 +30,25 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
 
     parsed_parameters = metadata_parser.parse_string(metadata.copy()) if metadata_parser is not None else ''
-    #print(f'parsed_parameters:{parsed_parameters}')
+    metadata_scheme = metadata_parser.get_scheme().value if metadata_parser is not None else ''
 
     image = Image.fromarray(img)
 
     if output_format == 'png':
-        if ehs.embed_metadata_checkbox:
+        if metadata_scheme == 'simple':
             pnginfo = PngInfo()
-            metadata = toolbox.get_embed_metadata(dict(dic))
-            pnginfo.add_text("Comment", json.dumps(metadata), True)
+            pnginfo.add_text("Comment", parsed_parameters)
+        elif metadata_parser:
+            pnginfo = PngInfo()
+            pnginfo.add_text('parameters', parsed_parameters)
+            pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
         else:
-            if parsed_parameters != '':
-                pnginfo = PngInfo()
-                pnginfo.add_text('parameters', parsed_parameters)
-                pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
-            else:
-                pnginfo = None
+            pnginfo = None
         image.save(local_temp_filename, pnginfo=pnginfo)
     elif output_format == 'jpg':
-        image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_parser.get_scheme().value) if metadata_parser else Image.Exif())
+        image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
     elif output_format == 'webp':
-        image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_parser.get_scheme().value) if metadata_parser else Image.Exif())
+        image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
     else:
         image.save(local_temp_filename)
 

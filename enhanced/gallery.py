@@ -27,7 +27,7 @@ def refresh_output_list(max_per_page):
         nums = len(util.get_files_from_folder(path_gallery, ['.png'], None))
         if nums > max_per_page:
             for i in range(1,math.ceil(nums/max_per_page)+1):
-                listdirs1.append(index + "/" + str(i))
+                listdirs1.append("{}/{}".format(index, i))
             listdirs1.remove(index)
     output_list = sorted([f[2:] for f in listdirs1], reverse=True)
     print(f'[Gallery] Refresh_output_catalog: loaded {len(output_list)} images_catalogs.')
@@ -93,7 +93,7 @@ def get_images_from_gallery_index(choice, max_per_page):
             images_gallery = images_list[choice][(page-1)*max_per_page:page*max_per_page]
         else:
             images_gallery = images_list[choice][nums-max_per_page:]
-    images_gallery = [os.path.join(os.path.join(config.path_outputs, '20' + choice), f) for f in images_gallery]
+    images_gallery = [os.path.join(os.path.join(config.path_outputs, "20{}".format(choice)), f) for f in images_gallery]
     #print(f'[Gallery]Get images from index: choice={choice}, page={page}, images_gallery={images_gallery}')
     return images_gallery
 
@@ -107,7 +107,7 @@ def refresh_images_catalog(choice: str, passthrough = False):
         #print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[choice])} image_items of {choice}.')
         return images_list[choice]
 
-    images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, '20' + choice), ['.png'], None)], reverse=True)
+    images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, "20{}".format(choice)), ['.png'], None)], reverse=True)
     if len(images_list_new)==0:
         parse_html_log(choice, passthrough)
         if choice in images_list_keys:
@@ -165,7 +165,7 @@ def parse_html_log(choice: str, passthrough = False):
         images_prompt_keys.append(choice)
         #print(f'[Gallery] Parse_html_log: hit cache {len(images_prompt[choice])} image_infos of {choice}.')
         return
-    html_file = os.path.join(os.path.join(config.path_outputs, '20' + choice), 'log.html')
+    html_file = os.path.join(os.path.join(config.path_outputs, "20{}".format(choice)), 'log.html')
     html = etree.parse(html_file, etree.HTMLParser(encoding='utf-8'))
     prompt_infos = html.xpath('/html/body/div')
     images_prompt_list = {}
