@@ -127,7 +127,7 @@ def make_infobox_markdown(info):
     html = f'<div style="background: {bgcolor}">'
     if info:
         for key in info:
-            if key == 'Filename' or key == 'Advanced_parameters':
+            if key in ['Filename', 'Advanced_parameters', 'Fooocus V2 Expansion', 'Metadata Scheme', 'Version', 'Upscale (Fast)'] or info[key] in [None, '', 'None']:
                 continue
             html += f'<b>{key}:</b> {info[key]}<br/>'
     else:

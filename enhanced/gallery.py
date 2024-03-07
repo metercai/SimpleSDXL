@@ -224,6 +224,8 @@ def parse_html_log(choice: str, passthrough = False):
                         info_dict[text[1+i*3]] = text[2+i*3]
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
+                info_dict={"Filename":text[1]}
+                info_dict[text[2]] = text[3]
         #print(f'{len(text)},info_dict={info_dict}')
         images_prompt_list.update({info_dict["Filename"]: info_dict})
     if len(images_prompt_list.keys())==0:
