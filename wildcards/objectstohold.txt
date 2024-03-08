@@ -2,17 +2,14 @@ Lantern
 Candle
 Light
 Plushy
--animal- Plushy
 Sword
 Shield
 Sword and Shield
 Cup of Coffee
 Cup of Tea
 Pet
-Pet -animal-
 Spear
 Gun
--element-
 Musical Instrument
 Ball
 Bouquet of Flowers

@@ -40,47 +40,47 @@ def set_wildcard_path_list(name, list_value):
 def get_wildcards_samples(path="root"):
     global wildcards_path, wildcards, wildcards_list, wildcards_translation, wildcards_template, wildcards_weight_range, wildcard_regex
 
-    if len(wildcards.keys()) == 0:
-        wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None)])
-        wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
-        #print(f'wildcards_list:{wildcards_list_all}')
-        for wildcard in wildcards_list_all:
-            words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
-            words = [x.split('?')[0] for x in words if x != '' and not wildcard_regex.findall(x)]
-            words = [x.split(';')[0] for x in words]
+    wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None, variation=True)])
+    wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
+    #print(f'wildcards_list:{wildcards_list_all}')
+    for wildcard in wildcards_list_all:
+        words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
+        words = [x.split('?')[0] for x in words if x != '' and not wildcard_regex.findall(x)]
+        words = [x.split(';')[0] for x in words]
 
-            templates = [x for x in words if '|' in x]  #  word|template|weight_range
-            for line in templates:
-                parts = line.split("|")
-                word = parts[0]
-                template = parts[1]
-                weight_range = ''
-                if len(parts)>2:
-                    weight_range = parts[2]
-                if word is None or word == '':
-                    wildcards_template.update({wildcard: template})
-                    if len(weight_range.strip())>0:
-                        wildcards_weight_range.update({wildcard: weight_range})
-                else:
-                    wildcards_template({wildcard+"/"+word: template})
-                    if len(weight_range.strip())>0:
-                        wildcards_weight_range.update({wildcard+"/"+word: weight_range})
-            words = [x.split("|")[0] for x in words]
-            wildcards.update({wildcard: words})
-            wildcard_path = wildcard.split("/")
-            if len(wildcard_path)==1:
-                set_wildcard_path_list("root", wildcard_path[0])
-            elif len(wildcard_path)==2:
-                set_wildcard_path_list(wildcard_path[0], wildcard_path[1])
-                #set_wildcard_path_list("root", wildcard_path[0])
-            elif len(wildcard_path)==3:
-                set_wildcard_path_list(wildcard_path[0]+'/'+wildcard_path[1], wildcard_path[2])
-                set_wildcard_path_list(wildcard_path[0], wildcard_path[1])
-                #set_wildcard_path_list("root", wildcard_path[0])
+        templates = [x for x in words if '|' in x]  #  word|template|weight_range
+        for line in templates:
+            parts = line.split("|")
+            word = parts[0]
+            template = parts[1]
+            weight_range = ''
+            if len(parts)>2:
+                weight_range = parts[2]
+            if word is None or word == '':
+                wildcards_template.update({wildcard: template})
+                if len(weight_range.strip())>0:
+                    wildcards_weight_range.update({wildcard: weight_range})
             else:
-                print(f'[Wildcards] The level of wildcards is too depth: {wildcards_path}.')
-        #print(f'wildcards_list:{wildcards_list}')
-        print(f'[Wildcards] Load {len(wildcards_list_all)} wildcards from {wildcards_path}.')
+                wildcards_template({f'{wildcard}/{word}': template})
+                if len(weight_range.strip())>0:
+                    wildcards_weight_range.update({f'{wildcard}/{word}': weight_range})
+        words = [x.split("|")[0] for x in words]
+        wildcards.update({wildcard: words})
+        wildcard_path = wildcard.split("/")
+        if len(wildcard_path)==1:
+            set_wildcard_path_list("root", wildcard_path[0])
+        elif len(wildcard_path)==2:
+            set_wildcard_path_list(wildcard_path[0], wildcard_path[1])
+            #set_wildcard_path_list("root", wildcard_path[0])
+        elif len(wildcard_path)==3:
+            set_wildcard_path_list(f'{wildcard_path[0]}/{wildcard_path[1]}', wildcard_path[2])
+            set_wildcard_path_list(wildcard_path[0], wildcard_path[1])
+            #set_wildcard_path_list("root", wildcard_path[0])
+        else:
+            print(f'[Wildcards] The level of wildcards is too depth: {wildcards_path}.')
+    #print(f'wildcards_list:{wildcards_list}')
+    if wildcards_list_all:
+        print(f'[Wildcards] Refresh and Load {len(wildcards_list_all)}/{len(wildcards.keys())} wildcards: {", ".join(wildcards_list_all)}.')
     if args.language=='cn':
         if len(wildcards_translation.keys())==0:
             wildcards_translation_file = os.path.join(wildcards_path, 'cn.json')
@@ -89,7 +89,7 @@ def get_wildcards_samples(path="root"):
                     wildcards_translation.update(json.load(json_file))
                 update_flag = False
                 for x in wildcards_list[path]:
-                    if 'list/'+x not in wildcards_translation.keys():
+                    if f'list/{x}' not in wildcards_translation.keys():
                         wildcards_translation.update({f'list/{x}': translator.convert(x, 'Big Model', 'cn')})
                         update_flag = True
                 if update_flag:
@@ -103,7 +103,7 @@ def get_wildcards_samples(path="root"):
                 #        wildcards_translation.update({f'word/{wildcard}/{word}': translator.convert(word, 'Big Model', 'cn')})
                 with open(wildcards_translation_file, "w", encoding="utf-8") as json_file:
                     json.dump(wildcards_translation, json_file)
-        return [[x+'|'+wildcards_translation['list/'+x]] for x in wildcards_list[path]]
+        return [['{}|{}'.format(x, wildcards_translation[f'list/{x}'])] for x in wildcards_list[path]]
 
     return [[x] for x in wildcards_list[path]]
 
@@ -141,61 +141,57 @@ def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
         nums = 1 if start_at<=1 else start_at
         for i in range(number):
             words_each = rng.sample(words, nums)
-            words_result.append(words_each[0] if nums==1 else '('+' '.join(words_each)+')')
+            words_result.append(words_each[0] if nums==1 else f'({" ".join(words_each)})')
     print(f'[Wildcards] Get words from wildcard:__{wildcard}__, method:{method}, number:{number}, start_at:{start_at}, result:{words_result}')
     return words_result
 
 
 def compile_arrays(text, rng):
-    global array_regex, tag_regex1, tag_regex2, tag_regex3, tag_regex4, tag_regex5
+    global wildcards, wildcards_max_bfs_depth, array_regex, tag_regex1, tag_regex2, tag_regex3, tag_regex4, tag_regex5
 
+    _ = get_wildcards_samples()
     tag_arrays = array_regex.findall(text)
-    if len(tag_arrays)==0:
-        return text, [], 0, True
     arrays = []
     mult = 1
     seed_fixed = True
-    for tag in tag_arrays:
-        colon_counter = tag.count(':')
-        wildcard = ''
-        number = 1
-        method = 'R'
-        start_at = 1
-        if colon_counter == 2:
-            parts = tag_regex5.findall(tag)
-            if parts:
-                parts = list(parts[0])
-                wildcard = parts[0]
-                method = parts[1]
-                if parts[2]:
-                    number = int(parts[2])
-                start_at = int(parts[3])
-            else:
-                parts = tag_regex6.findall(tag)
-                if parts:
-                    parts = list(parts[0])
-                    wildcard = parts[0]
-                    number = int(parts[1])
-                    start_at = int(parts[2])
-        elif colon_counter == 1:
-            parts = tag_regex3.findall(tag)
-            if parts:
-                parts = list(parts[0])
-                wildcard = parts[0]
-                number = int(parts[1])
-            else:
-                parts = tag_regex4.findall(tag)
+    if len(tag_arrays)>0:
+        for tag in tag_arrays:
+            colon_counter = tag.count(':')
+            wildcard = ''
+            number = 1
+            method = 'R'
+            start_at = 1
+            if colon_counter == 2:
+                parts = tag_regex5.findall(tag)
                 if parts:
                     parts = list(parts[0])
                     wildcard = parts[0]
                     method = parts[1]
                     if parts[2]:
                         number = int(parts[2])
-        elif colon_counter == 0:
-            parts = tag_regex2.findall(tag)
-            if parts:
-                wildcard = parts[0]
-            else:
+                    start_at = int(parts[3])
+                else:
+                    parts = tag_regex6.findall(tag)
+                    if parts:
+                        parts = list(parts[0])
+                        wildcard = parts[0]
+                        number = int(parts[1])
+                        start_at = int(parts[2])
+            elif colon_counter == 1:
+                parts = tag_regex3.findall(tag)
+                if parts:
+                    parts = list(parts[0])
+                    wildcard = parts[0]
+                    number = int(parts[1])
+                else:
+                    parts = tag_regex4.findall(tag)
+                    if parts:
+                        parts = list(parts[0])
+                        wildcard = parts[0]
+                        method = parts[1]
+                        if parts[2]:
+                            number = int(parts[2])
+            elif colon_counter == 0:
                 parts = tag_regex1.findall(tag)
                 if parts:
                     words = parts[0].split(',')
@@ -214,13 +210,26 @@ def compile_arrays(text, rng):
                         mult *= len(words)
                         seed_fixed = False
                         continue
-        words = get_words_with_wildcard(wildcard, rng, method, number, start_at)
-        delimiter = ',' if method.isupper() else ';'
-        text = text.replace(tag, delimiter.join(words))
-        arrays.append(words)
-        mult *= len(words)
-        if delimiter == ';':
-            seed_fixed = False
+            words = get_words_with_wildcard(wildcard, rng, method, number, start_at)
+            delimiter = ',' if method.isupper() else ';'
+            text = text.replace(tag, delimiter.join(words), 1)
+            arrays.append(words)
+            mult *= len(words)
+            if delimiter == ';':
+                seed_fixed = False
+    else:
+        mult = 0
+    
+    parts = tag_regex2.findall(text)
+    i = 1
+    while parts:
+        for wildcard in parts:
+            text = text.replace(f'__{wildcard}__', rng.choice(wildcards[wildcard]), 1)
+        parts = tag_regex2.findall(text)
+        i += 1
+        if i > wildcards_max_bfs_depth:
+            break
+
     print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
     return text, arrays, mult, seed_fixed
 
@@ -253,7 +262,10 @@ def apply_arrays(text, index, arrays, mult):
 
     i = 0
     for arr in arrays:
-        text = text.replace(f'[{tags[i]}]', chosen_words[i], 1)
+        if not tag_regex2.findall(chosen_words[i]):
+            text = text.replace(f'[{tags[i]}]', chosen_words[i], 1)
+        else:
+            text = text.replace(f'[{tags[i]}]', tags[i], 1)
         i = i+1
 
     return text

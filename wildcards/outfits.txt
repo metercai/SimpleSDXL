@@ -1,7 +1,3 @@
--age- outfit
--age- armor
--material- outfit
--material- plate armor
 1920s flapper dress
 1950s poodle skirts
 1960s mod fashion

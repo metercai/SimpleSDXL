@@ -151,7 +151,7 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
         if method == 'Third APIs':
             print(f'[Translator] Using an online translation APIs.')
         else:
-            tokenizer, model = init_or_load_translator_model('Big Model')
+            tokenizer, model = init_or_load_translator_model(method)
 
 
         def T_ZH2EN(text_zh):

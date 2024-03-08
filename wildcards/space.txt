@@ -84,7 +84,6 @@ Planetary rotation
 Cosmic background radiation
 Lagrange point
 Galactic halo
--color- planet
 Alien planet
 Planet Mercury
 Planet Venus

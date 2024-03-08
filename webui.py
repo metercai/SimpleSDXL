@@ -125,7 +125,7 @@ with shared.gradio_root:
                     bar8_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar8', elem_classes='bar_button')
                 with gr.Row():
                     progress_window = grh.Image(label='Preview', show_label=True, visible=True, height=768, elem_id='preview_generating',
-                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png")
+                                            elem_classes=['main_view'], value="enhanced/attached/welcome.jpg")
                     progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
@@ -664,10 +664,10 @@ with shared.gradio_root:
                     language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=location.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
-                    backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=False, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                    backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
-                    translation_timing = gr.Radio(label='Timing of translation', choices=['Translate then generate', 'Modify after translate', 'No translate'], value='Translate then generate', info='The selection of timing for prompt translation.')
-                    translation_methods = gr.Radio(label='Translation methods', choices=['Slim Model', 'Big Model', 'Third APIs'], value='Slim Model', info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                    translation_timing = gr.Radio(label='Timing of translation', choices=modules.flags.translation_timing, value=modules.config.default_translation_timing, info='The selection of timing for prompt translation.')
+                    translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
 
             ehps = [backfill_prompt, translation_timing, translation_methods]
@@ -840,18 +840,18 @@ with shared.gradio_root:
         def trigger_describe(mode, img):
             if mode == flags.desc_type_photo:
                 from extras.interrogate import default_interrogator as default_interrogator_photo
-                return default_interrogator_photo(img), ["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"]
+                return default_interrogator_photo(img)
             if mode == flags.desc_type_anime:
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
-                return default_interrogator_anime(img), ["Fooocus V2", "Fooocus Masterpiece"]
-            return mode, ["Fooocus V2"]
+                return default_interrogator_anime(img)
+            return mode
         
         def trigger_describe_pre(mode, img_path):
             img_rgb = Image.open(img_path).convert('RGB')
             return trigger_describe(mode, img_rgb)
 
         desc_btn.click(trigger_describe_pre, inputs=[desc_method, desc_input_image],
-                       outputs=[prompt, style_selections], show_progress=True, queue=True)
+                       outputs=[prompt], show_progress=True, queue=True)
 
         def trigger_uov_describe(mode, img, prompt):
             # keep prompt if not empty
@@ -860,7 +860,7 @@ with shared.gradio_root:
             return gr.update(), gr.update()
 
         uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
-                       outputs=[prompt, style_selections], show_progress=True, queue=True)
+                       outputs=[prompt], show_progress=True, queue=True)
 
 
     prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
@@ -877,7 +877,7 @@ with shared.gradio_root:
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
 
-    reset_preset_all = reset_params + [gallery, gallery_index, preset_instruction, state_topbar, image_number, inpaint_mask_upload_checkbox]
+    reset_preset_all = reset_params + [preset_instruction, state_topbar, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_timing, translation_methods]
     bar0_button.click(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
@@ -920,7 +920,7 @@ with shared.gradio_root:
                       .then(topbar.reset_params_for_preset, inputs=[bar0_button, state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
-                      .then(topbar.sync_message, inputs=state_topbar, outputs=state_topbar).then(fn=lambda: None, _js='refresh_grid_delayed')
+                      .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]).then(fn=lambda: None, _js='refresh_grid_delayed')
 
 
 def dump_default_english_config():

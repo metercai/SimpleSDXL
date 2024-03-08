@@ -256,6 +256,25 @@ def worker():
             adm_scaler_negative = 1.0
             adm_scaler_end = 0.0
 
+        elif performance_selection == Performance.LIGHTNING:
+            print('Enter Lightning mode.')
+            progressbar(async_task, 1, 'Downloading Lightning components ...')
+            loras += [(modules.config.downloading_sdxl_lightning_lora(), 1.0)]
+
+            if refiner_model_name != 'None':
+                print(f'Refiner disabled in Lightning mode.')
+
+            refiner_model_name = 'None'
+            sampler_name = 'euler'
+            scheduler_name = 'sgm_uniform'
+            sharpness = 0.0
+            guidance_scale = 1.0
+            adaptive_cfg = 1.0
+            refiner_switch = 1.0
+            adm_scaler_positive = 1.0
+            adm_scaler_negative = 1.0
+            adm_scaler_end = 0.0
+
         print(f'[Parameters] Adaptive CFG = {adaptive_cfg}')
         print(f'[Parameters] Sharpness = {sharpness}')
         print(f'[Parameters] ControlNet Softness = {controlnet_softness}')
@@ -435,7 +454,6 @@ def worker():
                     task_seed = seed % (constants.MAX_SEED + 1)
 
                 task_prompt = wildcards.apply_arrays(prompt, i, wildcards_arrays, arrays_mult)
-                task_prompt = wildcards.apply_wildcards(task_prompt, task_rng)
                 task_negative_prompt = wildcards.apply_wildcards(negative_prompt, task_rng)
                 task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
                 task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
@@ -875,7 +893,7 @@ def worker():
                     metadata_parser = None
                     if save_metadata_to_images:
                         styles_name = [f[1:-1] for f in str(raw_style_selections)[1:-1].split(', ')]
-                        styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
+                        styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k and k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
                         metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                         metadata_parser.set_data(task['log_positive_prompt'], task['positive'],
                                                  task['log_negative_prompt'], task['negative'],

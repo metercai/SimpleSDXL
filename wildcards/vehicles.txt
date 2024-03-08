@@ -65,7 +65,6 @@ Submarine
 Mega yacht
 Seaplane carrier
 Horse-drawn carriage
--animal--drawn carriage
 Icebreaker
 Nuclear submarine
 bathysphere

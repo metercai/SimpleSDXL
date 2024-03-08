@@ -290,7 +290,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"wildcard_in_wildcards": 'root'})
     #print(f'system_params:{state_params}')
     results = refresh_nav_bars(state_params)
-    results += [gr.update(value="enhanced/attached/welcome_m.png")] if state_params["__is_mobile"] else [gr.update()]
+    results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     results += [gr.update(value=False, interactive=False)]
@@ -354,11 +354,12 @@ def process_after_generation(state_params):
 def sync_message(state_params):
     state_params.update({"__message":system_message})
     return state_params
+    #return gr.update(), gr.update(choices=state_params["__output_list"], value=None if len(state_params["__output_list"])==0 else state_params["__output_list"][0]), state_params
 
 
 def reset_params_for_preset(bar_button, state_params):
     if '__preset' not in state_params.keys() or state_params["__preset"]==bar_button:
-        return [gr.update()] * 47
+        return [gr.update()] * 50
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": bar_button})
     return reset_context(state_params)
@@ -476,8 +477,6 @@ def reset_context(state_params):
     info_preset.update({"task_from": f'preset:{preset}'})
     
     results = reset_params(check_prepare_for_reset(info_preset))
-
-    results += [gr.update(), gr.update(choices=state_params["__output_list"], value=None if len(state_params["__output_list"])==0 else state_params["__output_list"][0])]
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
     state_params.update({"__message": system_message})
     results += [state_params]
@@ -492,10 +491,9 @@ def reset_context(state_params):
     else:
         results += [gr.update()]
 
-    if "default_inpaint_mask_upload_checkbox" in keys:
-        results += [gr.update(value=config_preset["default_inpaint_mask_upload_checkbox"])]
-    else:
-        results += [gr.update()]
+    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update()]
+    results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
+    results += update_in_keys("backfill_prompt") + update_in_keys("translation_timing") + update_in_keys("translation_methods") 
     return results
 
 
@@ -518,12 +516,12 @@ def check_prepare_for_reset(info):
 
     # the models to be checked 
     info['Refiner Model'] = None if info['Refiner Model']=='' else info['Refiner Model']
-    loras = config.default_loras[:]
+    loras = [['None', 1.0]] * config.default_max_lora_number
     for key in info:
         i=0
         if key.startswith('LoRA ['):
             loras.insert(i, [key[6:-8], float(info[key])])
-    loras = loras[:len(config.default_loras)]
+    loras = loras[:config.default_max_lora_number]
 
     embeddings = embeddings_model_split(info["Prompt"], info["Negative Prompt"])
     checklist = ["checkpoints/"+info["Base Model"], "checkpoints/"+info["Refiner Model"]] + ["loras/"+n for i, (n, v) in enumerate(loras)]
@@ -594,6 +592,7 @@ def check_prepare_for_reset(info):
         elif i>1 and i<len(config.default_loras)+2:
             new_loras += [[newlist[i][6:], loras[i-2][1]]]
     loras = new_loras
+    info.update({'loras': loras})
 
     styles_update_flag = False
     if "styles_definition" in info.keys():
@@ -602,7 +601,6 @@ def check_prepare_for_reset(info):
                 sdxl_styles.styles.update({key: info["styles_definition"][key]})
                 styles_update_flag = True
                 print(f'[Topbar] New styles: {key} to be loaded in reset process!')
-    info.update({'loras': loras})
     info.update({'styles_update_flag': styles_update_flag})
     return info
 
@@ -627,8 +625,10 @@ def reset_params(metadata):
 
 # overwrite_width, overwrite_height, refiner_swap_method
 
+    update_not_null = lambda x: gr.update(value=x) if x else gr.update()
     results = []
-    results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
+    
+    results += [update_not_null(metadata['Prompt']), update_not_null(metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
         keys_list = list(sdxl_styles.styles.keys())
         style_sorter.try_load_sorted_styles(
@@ -649,7 +649,7 @@ def reset_params(metadata):
     else:
         results += [gr.update(value=True), gr.update()]
     if get_ads_value_exist('freeu'):
-        results += [gr.update(value=Ture)]
+        results += [gr.update(value=True)]
     else:
         results += [gr.update(value=False)]
     results += [gr.update(value=freeu_b1), gr.update(value=freeu_b2), gr.update(value=freeu_s1), gr.update(value=freeu_s2) ]

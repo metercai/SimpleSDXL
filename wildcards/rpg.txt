@@ -1,6 +1,5 @@
 Warrior
 Mage
--element- Mage
 Princess
 Prince
 King

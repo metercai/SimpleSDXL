@@ -418,6 +418,24 @@ default_inpaint_mask_sam_model = get_config_item_or_set_default(
     validator=lambda x: x in modules.flags.inpaint_mask_sam_model
 )
 
+default_translation_methods = get_config_item_or_set_default(
+    key='default_translation_methods',
+    default_value='Big Model',
+    validator=lambda x: x in modules.flags.translation_methods
+)
+
+default_translation_timing = get_config_item_or_set_default(
+    key='default_translation_timing',
+    default_value='Translate then generate',
+    validator=lambda x: x in modules.flags.translation_timing
+)
+
+default_backfill_prompt = get_config_item_or_set_default(
+    key='default_backfill_prompt',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool)
+)
+
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [['None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
 possible_preset_keys = [
@@ -501,6 +519,7 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 model_filenames = []
 lora_filenames = []
 sdxl_lcm_lora = 'sdxl_lcm_lora.safetensors'
+sdxl_lightning_lora = 'sdxl_lightning_4step_lora.safetensors'
 
 
 def get_model_filenames(folder_paths, name_filter=None):
@@ -564,6 +583,13 @@ def downloading_sdxl_lcm_lora():
     )
     return sdxl_lcm_lora
 
+def downloading_sdxl_lightning_lora():
+    load_file_from_url(
+        url='https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_4step_lora.safetensors',
+        model_dir=paths_loras[0],
+        file_name=sdxl_lightning_lora
+    )
+    return sdxl_lightning_lora
 
 def downloading_controlnet_canny():
     load_file_from_url(
