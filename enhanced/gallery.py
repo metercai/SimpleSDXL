@@ -62,7 +62,7 @@ def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
         choice = state_params["__output_list"][0]
     result = get_images_prompt(choice, evt.index, state_params["__max_per_page"], True)
     #print(f'[Gallery] Selected_gallery: selected index {evt.index} of {choice} images_list:{result["Filename"]}.')
-    if backfill_prompt:
+    if backfill_prompt and 'Prompt' in result:
         return [gr.update(value=toolbox.make_infobox_markdown(result)), gr.update(value=result["Prompt"]), gr.update(value=result["Negative Prompt"])] + [gr.update(visible=False)] * 4 + [state_params]
     else:
         return [gr.update(value=toolbox.make_infobox_markdown(result)), gr.update(), gr.update()] + [gr.update(visible=False)] * 4 + [state_params]

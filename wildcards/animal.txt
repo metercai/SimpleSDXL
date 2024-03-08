@@ -1,3 +1,4 @@
+Dogs
 Animal
 Abyssinian Cat
 Albatross

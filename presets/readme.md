@@ -32,34 +32,44 @@
 - 目前SimpleSDXL支持的预置包配置参数如下，后续可以根据使用场景进行添加，可以在Github Issues和QQ群:938075852 提出需求。
 
   ```
-  default_prompt
-  default_prompt_negative
-  default_styles
-  default_aspect_ratio
-  default_image_number
-  default_performance
-  default_model
-  default_refiner
-  default_refiner_switch
-  default_loras
-  default_sampler
-  default_scheduler
-  default_cfg_scale
-  default_sample_sharpness
-  default_adm_scaler_positive
-  default_adm_scaler_negative
-  default_adm_scaler_end
-  default_cfg_tsnr
-  default_overwrite_step
-  default_overwrite_switch
-  default_inpaint_engine
-  default_seed
-  checkpoint_downloads
-  lora_downloads
-  embeddings_downloads
-  styles_definition
-  reference
-  default_inpaint_mask_upload_checkbox
+  default_prompt                                    # 默认提示词
+  default_prompt_negative                           # 默认负向提示词
+  default_styles                                    # 默认风格
+  default_aspect_ratio                              # 默认宽高比
+  default_image_number                              # 默认出图数量
+  default_max_image_number                          # 默认最大出图数量
+  default_performance                               # 默认生成模式
+  default_model                                     # 默认基础模型
+  default_refiner                                   # 默认精炼模型
+  default_refiner_switch                            # 默认精炼切入点
+  default_loras                                     # 默认LoRA
+  default_loras_min_weight                          # 默认LoRA的最小值
+  default_loras_max_weight                          # 默认LoRA的最大值
+  default_sampler                                   # 默认采样器
+  default_scheduler                                 # 默认调度器
+  default_cfg_scale                                 # 默认引导系数CFG
+  default_sample_sharpness                          # 默认采样锐度
+  default_adm_scaler_positive                       # 默认正向ADM引导系数
+  default_adm_scaler_negative                       # 默认反向ADM引导系数
+  default_adm_scaler_end                            # 默认ADM引导结束点
+  default_cfg_tsnr                                  # 默认TSNR模拟CFG
+  default_overwrite_step                            # 默认重写采样步数STEP
+  default_overwrite_switch                          # 默认重写精炼器切入步数
+  default_inpaint_engine                            # 默认重绘引擎版本
+  default_mixing_image_prompt_and_vary_upscale      # 默认图像提示与增强变化混合
+  default_mixing_image_prompt_and_inpaint           # 默认图像提示与重绘混合
+  default_inpaint_mask_upload_checkbox              # 默认开启重绘蒙板
+  default_freeu                                     # 默认FreeU参数: [b1, b2, s1, s2]
+  default_seed                                      # 默认种子
+  default_backfill_prompt                           # 默认浏览图片回填提示词
+  default_translation_timing                        # 默认翻译器介入时点
+  default_translation_methods                       # 默认翻译器模型
+  checkpoint_downloads                              # 模型下载
+  lora_downloads                                    # LoRA下载
+  embeddings_downloads                              # 嵌入模型下载
+  styles_definition                                 # 自定义风格
+  reference                                         # 预置包说明链接
+  
 
 ## 如何配置预置包说明？
 - 预置包说明是对预置包能力和效果的说明与展示，包括两个页面：概要说明页和整体展示页。

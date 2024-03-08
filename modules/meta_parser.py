@@ -647,8 +647,8 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
         parameters = exif.get(0x9286, None)
         # 0x927C = MakerNote
         metadata_scheme = exif.get(0x927C, None)
-
-        if is_json(parameters):
+        
+        if parameters and is_json(parameters):
             parameters = json.loads(parameters)
 
     try:

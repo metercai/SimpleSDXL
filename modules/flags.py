@@ -86,6 +86,8 @@ inpaint_options = [inpaint_option_default, inpaint_option_detail, inpaint_option
 desc_type_photo = 'Photograph'
 desc_type_anime = 'Art/Anime'
 
+translation_timing = ['Translate then generate', 'Modify after translate', 'No translate']
+translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'
@@ -99,7 +101,6 @@ metadata_scheme = [
     (f'{MetadataScheme.A1111.value}', MetadataScheme.A1111.value),
 ]
 
-lora_count = 5
 
 controlnet_image_count = 4
 
@@ -108,18 +109,21 @@ class Steps(IntEnum):
     QUALITY = 60
     SPEED = 30
     EXTREME_SPEED = 8
+    LIGHTNING = 4
 
 
 class StepsUOV(IntEnum):
     QUALITY = 36
     SPEED = 18
     EXTREME_SPEED = 8
+    LIGHTNING = 4
 
 
 class Performance(Enum):
     QUALITY = 'Quality'
     SPEED = 'Speed'
     EXTREME_SPEED = 'Extreme Speed'
+    LIGHTNING = 'Lightning'
 
     @classmethod
     def list(cls) -> list:

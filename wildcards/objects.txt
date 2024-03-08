@@ -279,9 +279,7 @@ Hedge trimmer
 Chainsaw
 Fractal
 Pentagram
--conceptsuffix-potion
 Roast beef
--object- in a -container-
 Faberge egg
 Quilt
 Circlet
@@ -323,7 +321,6 @@ Mobius strip
 Klein bottle
 Sphericon
 Totem
--material- Totem
 Doll
 matryoshka doll
 Crystal Ball
