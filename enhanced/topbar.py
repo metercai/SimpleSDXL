@@ -354,12 +354,15 @@ def process_after_generation(state_params):
 def sync_message(state_params):
     state_params.update({"__message":system_message})
     return state_params
-    #return gr.update(), gr.update(choices=state_params["__output_list"], value=None if len(state_params["__output_list"])==0 else state_params["__output_list"][0]), state_params
 
 
 def reset_params_for_preset(bar_button, state_params):
+    global system_message
+
+    state_params.update({"__message": system_message})
+    system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or state_params["__preset"]==bar_button:
-        return [gr.update()] * 50
+        return [gr.update()] * 49 + [state_params]
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": bar_button})
     return reset_context(state_params)
@@ -478,9 +481,6 @@ def reset_context(state_params):
     
     results = reset_params(check_prepare_for_reset(info_preset))
     results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
-    state_params.update({"__message": system_message})
-    results += [state_params]
-    system_message = 'system message was displayed!'
 
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
     max_image_number = get_value_or_default("max_image_number")
@@ -494,6 +494,11 @@ def reset_context(state_params):
     update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update()]
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_timing") + update_in_keys("translation_methods") 
+    
+    state_params.update({"__message": system_message})
+    results += [state_params]
+    system_message = 'system message was displayed!'
+
     return results
 
 
