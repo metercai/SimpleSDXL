@@ -1,6 +1,6 @@
 # 2024-03-09
-* 新增lightning出图模式，自动下载和加载字节跳动的加速模型`sdxl_lightning_4step_lora.safetensors`。
-* 优化增强原通配符模块，通配符可嵌套，可动态加载。
+* 新增lightning出图模式，自动下载和加载加速模型`sdxl_lightning_4step_lora.safetensors`。
+* 优化增强通配符模块，通配符可嵌套，可动态加载。
 * 与主线2.2.1版本合版，新增LoRA取值范围可定制，支持png/jpg/webp图片格式，嵌参图片信息可与Civitai兼容等主线带入功能。
 * 整合新的嵌参和提参模块，保障前后版本一致性和可用性。调整UI，取消冗余选项，将预置包生成入口调入"增强"Tab。
 * 梳理参数流程，预置包新增FreeU和翻译器配置等9项预置参数，具体见preset/readme.md

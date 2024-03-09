@@ -637,7 +637,7 @@ def reset_params(metadata):
     update_not_null = lambda x: gr.update(value=x) if x else gr.update()
     results = []
     
-    results += [update_not_null(metadata['Prompt']), update_not_null(metadata['Negative Prompt'])]
+    results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
         keys_list = list(sdxl_styles.styles.keys())
         style_sorter.try_load_sorted_styles(

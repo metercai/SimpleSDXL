@@ -43,6 +43,7 @@
   "Image Number": "出图数量",
   "Negative Prompt": "反向提示词",
   "Describing what you do not want to see.": "描述你不想看到的",
+  "Type prompt here.": "输入反向提示词",
   "Random": "随机数",
   "Seed": "种子",
   "\ud83d\udcda History Log": "\uD83D\uDCDA 历史记录",
