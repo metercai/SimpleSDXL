@@ -162,13 +162,11 @@ def get_system_message():
 
 
 
-def preset_instruction(state_params):
-    preset = state_params["__preset"]
-    preset_url = state_params["preset_url"]
+def preset_instruction(preset, preset_url):
     head = "<div style='max-width:100%; max-height:128px; overflow:hidden'>"
     foot = "</div>"
     p_name = preset
-    body = f'"{p_name}"预置包:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
+    body = f'预置包简介:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     preset_url_str = ''
     if preset_url:
         append_str = f'__theme={config.theme}&__lang={args_manager.args.language}'
@@ -295,8 +293,18 @@ def init_nav_bars(state_params, request: gr.Request):
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     results += [gr.update(value=False, interactive=False)]
     results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_mask_upload_checkbox)]
+    preset = 'default'
+    preset_url = get_preset_inc_url(preset)
+    results += [gr.update(visible=True if preset_url else False, value=preset_instruction(preset, preset_url))]
+    
     return results
 
+def get_preset_inc_url(preset_name):
+    preset_inc_path = os.path.abspath(f'./presets/html/{preset_name}.inc.html')
+    if os.path.exists(preset_inc_path):
+        return f'{args_manager.args.webroot}/file={preset_inc_path}'
+    else:
+        return '' 
 
 def refresh_nav_bars(state_params):
     state_params.update({"__nav_name_list": get_preset_name_list()})
@@ -391,11 +399,7 @@ def reset_context(state_params):
     else:
         if 'reference' in config.config_dict.keys():
             config.config_dict.pop("reference")
-        preset_inc_path = os.path.abspath(f'./presets/{preset}.inc.html')
-        if os.path.exists(preset_inc_path):
-            preset_url = f'{args_manager.args.webroot}/file={preset_inc_path}'
-        else:
-            preset_url = ''
+        preset_url = get_preset_inc_url(preset)
     state_params.update({"preset_url":preset_url})
 
     info_preset = {}
@@ -480,7 +484,7 @@ def reset_context(state_params):
     info_preset.update({"task_from": f'preset:{preset}'})
     
     results = reset_params(check_prepare_for_reset(info_preset))
-    results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params))]
+    results += [gr.update(visible=True if preset_url else False, value=preset_instruction(state_params["__preset"], state_params["preset_url"]))]
 
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
     max_image_number = get_value_or_default("max_image_number")
