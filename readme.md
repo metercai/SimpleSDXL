@@ -1,10 +1,9 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/2a31325c-2488-45a1-82d7-47ff45f11a50"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/e0ca205d-6d7a-42c7-855e-f4a937e65fb1"></div>
+
 ## 🔔 更新 / Update
-- [2024.03.09] <b>新增lightning出图模式，自动下载和加载字节跳动的加速模型`sdxl_lightning_4step_lora.safetensors`。优化增强原通配符模块，通
-配符可嵌套，可动态加载。与主线2.2.1版本合版，新增LoRA取值范围可定制，支持png/jpg/webp图片格式，嵌参图片信息可与Civitai兼容等主线带入功能。
-整合新的嵌参和提参模块，保障前后版本兼容。调整UI，取消冗余选项，将预置包生成入口调入"增强"Tab。梳理参数流程，预置包新增FreeU和翻译器配置等
-9项预置参数，具体见preset/readme.md 。</b>
+- [2024.03.09] <b>新增lightning出图模式，自动下载和加载字节跳动的加速模型`sdxl_lightning_4step_lora.safetensors`。优化增强通配符模块，通配符可嵌套，可动态加载。与主线2.2.1版本合版，新增LoRA取值范围可定制，支持png/jpg/webp图片格式，嵌参图片信息可与Civitai兼容等主线带入功能。整合新的嵌参和提参模块，保障前后版本兼容。调整UI，取消冗余选项，将预置包生成入口调入"增强" Tab。梳理参数流程，预置包新增FreeU和翻译器配置等9项预置参数，具体见preset/readme.md 。</b>
+
 <b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
 Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
 
@@ -17,54 +16,64 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
 Enhanced features base on Fooocus, seamless upgrading and dual versions available synchronous iteration and parallel use. Adapted to mobile, PC and phone can be used synchronously.
 
-### **中英文混编提示词**: 在线离线自主选择，支持翻译后再编辑，更适于提示词表达。<br>
-  **Chinese English mixed prompts**:  Offline and online autonomous selection, support editing after translation, more suitable for Prompt. <br>
-  - [x] **中英文混合编辑** 对提示词文本进行中英文切分后分别翻译再合并，适配提示词类的表达场景。
-  - [x] **在线和离线翻译器** 可自动安装离线翻译大模型和小尺寸的瘦模型，也可选择第三方翻译接口。离线模型需自身算力支持，第三方接口接入便捷成本低，但增加了接口依赖。用户可根据情况自主配置选>择。
-  - [x] **支持翻译后再编辑** 机器翻译的结果质量都不可控，存在翻译质量差导致生成内容偏差的现象。翻译后再编辑可以显性化翻译质量，提供用户再优化调整处理的空间。
-  - [x] **多大厂接口随机选** 选择国内大厂（百度、阿里和搜狗）的稳定接口，每次启动时随机选择，运行态相对固定。既避免对接口冲击又保持翻译的一致性。
+### 中英文混编提示词 / Chinese English mixed prompts
+在线离线自主选择，支持翻译后再编辑，更适于提示词表达。<br>
+Offline and online autonomous selection, support editing after translation, more suitable for Prompt. <br>
 
-### **智能抠图生成蒙板**: 具有语义识别的多种抠图算法，可自动生成蒙板，方便生成图片的组合加工。 <br>
-  **Intelligent cutout generation mask**:  Multiple cropping algorithms with semantic recognition that can automatically generate masks, facilitating the combination processing of generated images.<br>
-  - [x] **智能算法抠图** 可以基于u2net进行图像分割，对重绘图片进行前后景分割，人物主体分割，并生成对应蒙板进行重绘。
-  - [x] **语义识别抠图** 可以基于bert+Sam，在语义理解基础上识别图片内容，再进行自动分割，生成蒙板后进行重绘。
-  - [ ] **点击识别抠图** 点击图片某个区域，基于Sam算法对点击所在主体进行自动识别和分割，生成蒙板后进行重绘。
+<img width="300" align=right src="https://github.com/metercai/SimpleSDXL/assets/5652458/707999e5-c776-4321-9048-5ad275263ff0">
 
-<img width="350" align=right src="https://github.com/metercai/SimpleSDXL/assets/5652458/4b10e6de-b026-41ea-a206-77d6f9fdf1cd">
-### **通配符批量提示词**: 支持通配符词组表达和触发展示，可随机批量生成同Seed下的一组图片。<br>
-  **Wildcard batch prompt words**: Supports wildcard phrase expressions and triggering display, allowing for random batch generate a set of images under the same seed.
-  - [x] **词组语法** 支持[Words]词组，以","分割的词列表。表示在同一seed下从每个words词组抽词进行组合批量生成图片。每种组合1张图片，总量是各词组词数的乘积，以实际需要的数量为准，不受出图数量参数的限制。
-  - [x] **通配符组词** 格式为:`[__wildcard__:R|Lnumber:start]` R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。
-  - [x] **自动触发输入** 提示词框在输入'['或'_'时可自动触发通配符输入工具，可以通过界面选择追加通配符到提示词框。
-  - [ ] **通配符分组与嵌套** 支持通配符多级目录的管理设置，可根据语义分组。支持多级通配符嵌套表达和通配符模版，增强通配符表达能力。
-  - [ ] **通配符定制和推送** 支持自主定制通配符快捷方式，并推送给朋友使用。
+- [x] **中英文混合编辑** 对提示词文本进行中英文切分后分别翻译再合并，适配提示词类的表达场景。
+- [x] **在线和离线翻译器** 可自动安装离线翻译大模型和小尺寸的瘦模型，也可选择第三方翻译接口。离线模型需自身算力支持，第三方接口接入便捷成本低，但增加了接口依赖。用户可根据情况自主配置选>择。
+- [x] **支持翻译后再编辑** 机器翻译的结果质量都不可控，存在翻译质量差导致生成内容偏差的现象。翻译后再编辑可以显性化翻译质量，提供用户再优化调整处理的空间。
+- [x] **多大厂接口随机选** 选择国内大厂（百度、阿里和搜狗）的稳定接口，每次启动时随机选择，运行态相对固定。既避免对接口冲击又保持翻译的一致性。
+- [ ] **私有翻译接口定制** 可以配置私有接口，对接OpenAI等大语言模型的翻译能力。
 
-### **增强预置包和模型下载**: 预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
-  **Enhanced preset and adapted for download**:  The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
-  - [x] **预置包导航** 将presets目录下的预置包配置文件生成顶部导航入口，样式上适配明亮/暗黑两种背景。
-  - [x] **预置包加载** 用户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。支持的预置包参数见[预置包ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
-  - [x] **生成预置包** 将当前出图环境参数打包保存为新的预置包，将预置包文件存入presets目录下，自动加入顶部导航。
-  - [x] **统一模型ID和下载** 对接模型信息库，使用以模型文件哈希为基础的统一模型MUID。可自动检测预置包出图环境的可用性，缺失模型文件可自动下载补齐。
-  - [x] **出图保护** 当系统环境进入出图状态时，顶部导航不可点击，禁止加载预置包冲击出图环境。
+### 智能抠图生成蒙板 / Intelligent cutout generation mask
+具有语义识别的多种抠图算法，可自动生成蒙板，方便生成图片的组合加工。 <br>
+Multiple cropping algorithms with semantic recognition that can automatically generate masks, facilitating the combination processing of generated images.<br>
+- [x] **智能算法抠图** 可以基于u2net进行图像分割，对重绘图片进行前后景分割，人物主体分割，并生成对应蒙板进行重绘。
+- [x] **语义识别抠图** 可以基于bert+Sam，在语义理解基础上识别图片内容，再进行自动分割，生成蒙板后进行重绘。
+- [ ] **点击识别抠图** 点击图片某个区域，基于Sam算法对点击所在主体进行自动识别和分割，生成蒙板后进行重绘。
 
-### **图片集浏览和管理**: 原生版仅能浏览当前生成的图片集，已生成图片管理非常简陋。 <br>
-  **Finished image sets browsing and management**:  Fooocus only can browse the current generated image set. Finished images management is very simple.
-  - [x] **已出图片检索** 对已出图片可以按照出图日期进行检索。单天出图量过大，则按照28张一个子目录分别索引，避免撑爆相册组件。
-  - [x] **已出图片删除** 对崩坏的已出图片可以即时删除，联动删除出图参数日志，确保图片和参数日志保持一致性。删除图片的操作入口放在了“参数工具箱”。
-  - [x] **自动回填提示词** 在浏览已出图片集过程中，可选择自动回填图片提示词，方便提示词的对照和修改，及图片的重生。
-  - [x] **图片集交互优化** 已出图片集索引栏可根据状态适配，自动收起和调整，避免目录过多挤占页面空间，干扰图片生成创作。
+### 通配符批量提示词 / Wildcard batch prompt words
+支持通配符词组表达和触发展示，可随机批量生成同Seed下的一组图片。<br>
+Supports wildcard phrase expressions and triggering display, allowing for random batch generate a set of images under the same seed.
 
-### **嵌参图片和提参重生**: 增强的参数管理，可即时查看可嵌入图片，也可提取参数回填界面，二次生成。 <br>
-  **Embeded images and extract regeneration**:  Enhanced parameter management for instant viewing and embedding of images, and can also extract parameters to backfill for secondary generation.<br>
-  - [x] **查看参数** 从出图日志文件中提取当前图片的生成参数并用浮层完整展示。图集切换过程中，浮层内容跟随切换。
-  - [x] **提参重生** 用当前图片的生成参数覆盖默认预置包的参数，提示词回填，可以修改参数或提示词后重新出图。
-  - [x] **生成预置包** 将当前出图环境参数打包保存为新的预置包，将预置包文件存入presets目录下，顶部导航跟随切换。
-  - [x] **扩展预置参数** 扩展主线的预置包参数范围，补充开发者模式的参数，以及风格样式的定义和通配符的定义。
-  - [x] **嵌参图片** 将当前出图环境参数打包嵌入图片文件中，保存到专属的嵌参图片目录。嵌参图片可通过图片描述工具提取参数形成新的出图环境配置。
+<img width="380" align=right src="https://github.com/metercai/SimpleSDXL/assets/5652458/4b10e6de-b026-41ea-a206-77d6f9fdf1cd">
+
+- [x] **词组语法** 支持[Words]词组，以","分割的词列表。表示在同一seed下从每个words词组抽词进行组合批量生成图片。每种组合1张图片，总量是各词组词数的乘积，以实际需要的数量为准，不受出图数量参数的限制。
+- [x] **通配符组词** 格式为:`[__wildcard__:R|Lnumber:start]` R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。
+- [x] **自动触发输入** 提示词框在输入'['或'_'时可自动触发通配符输入工具，可以通过界面选择追加通配符到提示词框。
+- [ ] **通配符分组与嵌套** 支持通配符多级目录的管理设置，可根据语义分组。支持多级通配符嵌套表达和通配符模版，增强通配符表达能力。
+- [ ] **通配符定制和推送** 支持自主定制通配符快捷方式，并推送给朋友使用。
+
+### 增强预置包和模型下载 / Enhanced preset and adapted for download
+预置包可通过界面切换和生成，模型下载会根据IP自动选择内外源。 <br>
+The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
+- [x] **预置包导航** 将presets目录下的预置包配置文件生成顶部导航入口，户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。
+- [x] **生成预置包** 将当前出图环境参数打包保存为新的预置包，将预置包文件存入presets目录下，自动加入顶部导航。
+- [x] **扩展预置参数** 扩展主线的预置包参数范围，补充开发者模式的参数，以及风格样式的定义和通配符的定义。支持的预置包参数见[预置包ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
+- [x] **统一模型ID和下载** 对接模型信息库，使用以模型文件哈希为基础的统一模型MUID。可自动检测预置包出图环境的可用性，缺失模型文件可自动下载补齐。
+- [x] **出图保护** 当系统环境进入出图状态时，顶部导航不可点击，禁止加载预置包冲击出图环境。
+
+### 图片集浏览和管理 / Finished image sets browsing and management
+原生版仅能浏览当前生成的图片集，已生成图片管理非常简陋。 <br>
+Fooocus only can browse the current generated image set. Finished images management is very simple.
+- [x] **已出图片检索** 对已出图片可以按照出图日期进行检索。单天出图量过大，则根据屏幕适配分组为子目录索引，避免撑爆相册组件。
+- [x] **已出图片删除** 对崩坏的已出图片可以即时删除，联动删除出图参数日志，确保图片和参数日志保持一致性。删除图片的操作入口放在了“参数工具箱”。
+- [x] **自动回填提示词** 在浏览已出图片集过程中，可选择自动回填图片提示词，方便提示词的对照和修改，及图片的重生。
+- [x] **图片集交互优化** 已出图片集索引栏可根据状态适配，自动收起和调整，避免目录过多挤占页面空间，干扰图片生成创作。
+
+### 嵌参图片和提参重生 / Embeded images and extract regeneration
+增强的参数管理，可即时查看可嵌入图片，也可提取参数回填界面，二次生成。 <br>
+Enhanced parameter management for instant viewing and embedding of images, and can also extract parameters to backfill for secondary generation.<br>
+- [x] **查看参数** 从出图日志文件中提取当前图片的生成参数并用浮层完整展示。图集切换过程中，浮层内容跟随切换。
+- [x] **提参重生** 用当前图片的生成参数覆盖默认预置包的参数，提示词回填，可以修改参数或提示词后重新出图。
+- [x] **嵌参图片** 将当前出图环境参数打包嵌入图片文件中，保存到专属的嵌参图片目录。嵌参图片可通过图片描述工具提取参数形成新的出图环境配置。
 
 ### 启动包和升级包
 - [x] **启动流程优化** 对接国内模型下载源，根据接入位置区分语言和下载源。国内IP默认中文，国内源；国外IP默认英文，国外源。提供启动参数可自定义覆盖默认值，满足科学魔法的适配需求。
-- [x] **安装包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到81M。支持Fooocus配置文件设置，共享模型和图片输出目录。
+- [x] **安装包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到81M。支持Fooocus配置文件的设置，可以共享模型和图片输出目录。
 - [x] **整合完全包** 整合所有必要资源文件打包形成的完全包，一次下载，运行后就可直接出图。
 - [x] **日志消息** 每次启动自动检测Fooocus主线和SimpleSDXL的更新日志，将更新消息显示到顶部消息浮层。
 - [x] **版本标识** 以发布日期和版本哈希值作为SimpleSDXL的版本标识，方便定位排错。
