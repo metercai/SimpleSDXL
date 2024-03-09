@@ -2,7 +2,7 @@
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/e0ca205d-6d7a-42c7-855e-f4a937e65fb1"></div>
 
 ## 🔔 更新 / Update
-- [2024.03.09] <b>新增lightning出图模式，自动下载和加载加速模型`sdxl_lightning_4step_lora.safetensors`。优化增强通配符模块，通配符可嵌套，可动态加载。与主线2.2.1版本合版，新增LoRA取值范围可定制，支持png/jpg/webp图片格式，嵌参图片信息可与Civitai兼容等主线带入功能。整合新的嵌参和提参模块，保障前后版本兼容。调整UI，取消冗余选项，将预置包生成入口调入"增强" Tab。梳理参数流程，预置包新增FreeU和翻译器配置等9项预置参数，具体见[预置包ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/preset/) 。</b>
+- [2024.03.09] <b>新增lightning出图模式，自动下载和加载加速模型`sdxl_lightning_4step_lora.safetensors`。优化增强通配符模块，通配符可嵌套，可动态加载。与主线2.2.1版本合版，新增LoRA取值范围可定制，支持png/jpg/webp图片格式，嵌参图片信息可与Civitai兼容等主线带入功能。整合新的嵌参和提参模块，保障前后版本兼容。调整UI，取消冗余选项，将预置包生成入口调入"增强" Tab。梳理参数流程，预置包新增FreeU和翻译器配置等9项预置参数，具体见[预置包ReadMe](https://github.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/) 。</b>
 
 <b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
 Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
@@ -42,7 +42,7 @@ Supports wildcard phrase expressions and triggering display, allowing for random
 <img width="380" align=right src="https://github.com/metercai/SimpleSDXL/assets/5652458/4b10e6de-b026-41ea-a206-77d6f9fdf1cd">
 
 - [x] **词组语法** 支持[Words]词组，以","分割的词列表。表示在同一seed下从每个words词组抽词进行组合批量生成图片。每种组合1张图片，总量是各词组词数的乘积，以实际需要的数量为准，不受出图数量参数的限制。
-- [x] **通配符组词** 用通配符定义词组，格式为:`[__wildcard__:R|Lnumber:start]` R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。具体语法说明见[通配符ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/wildcards/)
+- [x] **通配符组词** 用通配符定义词组，格式为:`[__wildcard__:R|Lnumber:start]` R表示随机抽，L表示按顺序抽，默认=R；number是抽取的数量，默认=1；start是在顺序抽取时从第几个开始抽，默认=1。具体语法说明见[通配符ReadMe](https://github.com/metercai/SimpleSDXL/tree/SimpleSDXL/wildcards/)
 - [x] **自动触发输入** 提示词框在输入'['或'_'时可自动触发通配符输入工具，可以通过界面选择追加通配符到提示词框。
 - [ ] **嵌套及动态加载** 支持通配符的多级嵌套和动态加载，增强通配符的表达能力。
 - [ ] **定制和推送** 支持自主定制通配符快捷方式，并推送给朋友使用。
@@ -52,7 +52,7 @@ Supports wildcard phrase expressions and triggering display, allowing for random
 The preset can be switched and generated through UI, and the model download will automatically select sources based on the access IP.
 - [x] **预置包导航** 将presets目录下的预置包配置文件生成顶部导航入口，户点击顶部预置包导航后，调取对应配置文件，重置出图环境参数和相关配置。
 - [x] **生成预置包** 将当前出图环境参数打包保存为新的预置包，将预置包文件存入presets目录下，自动加入顶部导航。
-- [x] **扩展预置参数** 扩展主线的预置包参数范围，补充开发者模式的参数，以及风格样式的定义和通配符的定义。支持的预置包参数见[预置包ReadMe](https://gitee.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
+- [x] **扩展预置参数** 扩展主线的预置包参数范围，补充开发者模式的参数，以及风格样式的定义和通配符的定义。支持的预置包参数见[预置包ReadMe](https://github.com/metercai/SimpleSDXL/tree/SimpleSDXL/presets/)
 - [x] **统一模型ID和下载** 对接模型信息库，使用以模型文件哈希为基础的统一模型MUID。可自动检测预置包出图环境的可用性，缺失模型文件可自动下载补齐。
 - [x] **出图保护** 当系统环境进入出图状态时，顶部导航不可点击，禁止加载预置包冲击出图环境。
 
