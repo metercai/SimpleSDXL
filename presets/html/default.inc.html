@@ -11,7 +11,7 @@
     .text {
       position:fixed;
       left: 0;
-      right: 37%;
+      right: 25%;
       margin: 0;
       padding: 0;
     }
@@ -21,17 +21,16 @@
       margin: 0;
       padding: 0;
       display: grid;
-      left: 63%;
+      left: 75%;
       max-width: 140px;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(1, 1fr);
       justify-items: center;
       align-items: center;
       grid-gap: 1px;
     }
     .imgbox img {
-      width: 100%;
-      max-height: 55px;
+      width: 72px;
       object-fit: cover;
     }
   </style>
@@ -59,13 +58,10 @@
 <body style="width: 100%;margin: 0;padding: 0;display: flex;flex-direction: column;flex-grow: 1;">
 <div id="imgtext" class="imgtext">
     <div class="text" id="text">
-        <span id="descr" style="float: left; color: white; font-size: 12px;">由Fooocus官方制作，选JuggernautXL与SD官方LoRa的模型组合，无需精炼模型参与即可生成高质量图片。该包的场景泛化和表现力都很强，对肤质、光影等细节的处理也很到位，兼顾了通用性和出图效率，不愧为入门首选的默认预置包。<a id="more" style="color: white;position: absolute;right: 3px;" href="https://civitai.com/models/133005/AlbedoBase-XL">>>了解更多</a></span>
+        <span id="descr" style="float: left; color: white; font-size: 12px;">系统的默认预置包选择了在Civitai网站下载量排名第一的JuggernautXL模型。该模型的综合素质优异，出图质量高，在场景泛化和表现力上都属一流，并且对肤质、光影等细节的处理也都非常到位。该模型同时兼顾了通用性和出图效率，不愧为文生图入门的首选出图模型。 具体细节可以<a id="more" style="color: white;position: absolute;right: 3px;" href="https://civitai.com/models/133005/juggernaut-xl">>>点击了解更多</a></span>
     </div>
     <div class="imgbox">
-        <img src="html/default/imgs/img1.png" />
-        <img src="html/default/imgs/img2.png" />
-        <img src="html/default/imgs/img3.png" />
-        <img src="html/default/imgs/img4.png" />
+        <img src="../image/default/juggernaut_xl.jpg" />
     </div>
 </div>
 <script>
