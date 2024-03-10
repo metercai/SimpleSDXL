@@ -131,6 +131,8 @@ def worker():
         for lora_enabled, lora_model, lora_weight in loras:
             if lora_enabled:
                 enabled_loras.append([lora_model, lora_weight])
+            else:
+                enabled_loras.append(['None', 1.0])
 
         return enabled_loras
 
