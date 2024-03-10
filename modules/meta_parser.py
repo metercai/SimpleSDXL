@@ -58,7 +58,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
     get_freeu('freeu', 'FreeU', loaded_parameter_dict, results)
 
     for i in range(modules.config.default_max_lora_number):
-        get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results)
+       get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results)
 
     return results
 
@@ -82,7 +82,7 @@ def get_list(key: str, fallback: str | None, source_dict: dict, results: list, d
         results.append(gr.update())
     if key in ['styles', 'Styles']:
         for k in h:
-            if k not in modules.sdxl_styles.styles and k in source_dict.get('styles_definition', default):
+            if k and 'styles_definition' in source_dict and k not in modules.sdxl_styles.styles and k in source_dict.get('styles_definition', default):
                 modules.sdxl_styles.styles.update({k: source_dict["styles_definition"][k]})
 
 
@@ -182,6 +182,20 @@ def get_lora(key: str, fallback: str | None, source_dict: dict, results: list):
         results.append(True)
         results.append('None')
         results.append(1)
+
+def get_loras_simple(loras: dict, results: list):
+    nums = len(loras) if len(loras) <= modules.config.default_max_lora_number else modules.config.default_max_lora_number
+    loras = loras[:nums]
+    for n, w in loras:
+        results.append(True)
+        results.append(n)
+        results.append(float(w))
+    if nums < modules.config.default_max_lora_number:
+        for i in range(modules.config.default_max_lora_number - nums):
+            results.append(True)
+            results.append('None')
+            results.append(1)
+ 
 
 
 def get_sha256(filepath):
@@ -567,7 +581,7 @@ class SIMPLEMetadataParser(MetadataParser):
                 continue
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
                 metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
-            elif key.startswith('LoRA ['):
+            elif key.startswith('LoRA '):
                 metadata[key] = self.replace_value_with_filename(key, value, lora_filenames)
             else:
                 continue
@@ -583,7 +597,7 @@ class SIMPLEMetadataParser(MetadataParser):
                 value = f'{name} : {weight}'
                 metadata[li] = (label, key, value)
 
-        res = {k: v for k, _, v in metadata if not k.startswith('LoRA ')}
+        res = {k: v for k, _, v in metadata}
 
         res['Full Prompt'] = self.full_prompt
         res['Full Negative Prompt'] = self.full_negative_prompt
@@ -595,7 +609,6 @@ class SIMPLEMetadataParser(MetadataParser):
             res['Refiner Model'] = self.refiner_model_name
             res['Refiner Model Hash'] = self.refiner_model_hash
 
-        res.update({f'LoRA [{n}] weight': w for (n, w, _) in self.loras})
         res['LoRAs'] = self.loras
         res['styles_definition'] = self.styles_definition
 
@@ -608,8 +621,8 @@ class SIMPLEMetadataParser(MetadataParser):
     def replace_value_with_filename(key, value, filenames):
         for filename in filenames:
             path = Path(filename)
-            if key.startswith('LoRA ['):
-                name, weight = key[6:-8], value
+            if key.startswith('LoRA '):
+                name, weight = value.split(' : ')
                 if name == path.stem:
                     return f'{filename} : {weight}'
             elif value == path.stem:
@@ -641,6 +654,7 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
 
     if parameters is not None and is_json(parameters):
         parameters = json.loads(parameters)
+        parameters = params_lora_fixed(parameters)
     elif exif is not None:
         exif = image.getexif()
         # 0x9286 = UserComment
@@ -650,6 +664,7 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
         
         if parameters and is_json(parameters):
             parameters = json.loads(parameters)
+            parameters = params_lora_fixed(parameters)
 
     try:
         metadata_scheme = MetadataScheme(metadata_scheme)
@@ -665,6 +680,14 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
 
     return parameters, metadata_scheme
 
+def params_lora_fixed(parameters):
+    loras_p = {k: v for k, v in parameters.items() if k.startswith("LoRA [")}
+    if loras_p:
+        for k, _ in loras_p.items():
+            del parameters[k]
+        loras_p = {f'LoRA {i}': f'{k[6:-8]} : {v}' for i, (k, v) in enumerate(loras_p.items(), 1)}
+        parameters.update(loras_p)
+    return parameters
 
 def get_exif(metadata: str | None, metadata_scheme: str):
     exif = Image.Exif()
