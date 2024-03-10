@@ -16,7 +16,11 @@ images_prompt = {}
 images_prompt_keys = []
 images_ads = {}
 
+
+image_types = ['.png', '.jpg', '.webp']
+
 def refresh_output_list(max_per_page):
+    global image_types
 
     listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
@@ -24,7 +28,7 @@ def refresh_output_list(max_per_page):
     listdirs1 = listdirs.copy()
     for index in listdirs:
         path_gallery = os.path.join(config.path_outputs, index)
-        nums = len(util.get_files_from_folder(path_gallery, ['.png'], None))
+        nums = len(util.get_files_from_folder(path_gallery, image_types, None))
         if nums > max_per_page:
             for i in range(1,math.ceil(nums/max_per_page)+1):
                 listdirs1.append("{}/{}".format(index, i))
@@ -99,7 +103,7 @@ def get_images_from_gallery_index(choice, max_per_page):
 
 
 def refresh_images_catalog(choice: str, passthrough = False):
-    global images_list, images_list_keys
+    global images_list, images_list_keys, image_types
 
     if not passthrough and choice in images_list_keys:
         images_list_keys.remove(choice)
@@ -107,7 +111,7 @@ def refresh_images_catalog(choice: str, passthrough = False):
         #print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[choice])} image_items of {choice}.')
         return images_list[choice]
 
-    images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, "20{}".format(choice)), ['.png'], None)], reverse=True)
+    images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(config.path_outputs, "20{}".format(choice)), image_types, None)], reverse=True)
     if len(images_list_new)==0:
         parse_html_log(choice, passthrough)
         if choice in images_list_keys:
@@ -217,11 +221,7 @@ def parse_html_log(choice: str, passthrough = False):
                     text.insert(8, '')
                 info_dict={"Filename":text[0]}
                 for i in range(0,int(len(text)/3)):
-                    if text[1+i*3].startswith("LoRA "):
-                        [key, value] = text[2+i*3].split(':')
-                        info_dict.update({"LoRA ["+key.strip()+"] weight": value.strip()})
-                    else:
-                        info_dict[text[1+i*3]] = text[2+i*3]
+                    info_dict[text[1+i*3]] = text[2+i*3]
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
                 info_dict={"Filename":text[1]}

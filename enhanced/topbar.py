@@ -427,9 +427,10 @@ def reset_context(state_params):
     adm_scaler_end = ads.default["adm_scaler_end"] if "default_adm_scaler_end" not in keys else config_preset["default_adm_scaler_end"]
     info_preset.update({"ADM Guidance": f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'})
     if "default_loras" in keys:
-        loras = [(n,v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
-        for (n,v) in loras:
-            info_preset.update({f"LoRA [{n}] weight": f'{v}'})
+        loras = [(n, v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
+        for i, (n, v) in enumerate(loras, 1):
+            info_preset.update({f'LoRA {i}': f'{n} : {v}'})
+            lora = f'LoRA {i}'
 
     if "default_seed" in keys:
         info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
@@ -525,12 +526,14 @@ def check_prepare_for_reset(info):
 
     # the models to be checked 
     info['Refiner Model'] = None if info['Refiner Model']=='' else info['Refiner Model']
-    loras = [['None', 1.0]] * config.default_max_lora_number
-    for key in info:
-        i=0
-        if key.startswith('LoRA ['):
-            loras.insert(i, [key[6:-8], float(info[key])])
-    loras = loras[:config.default_max_lora_number]
+    
+    loras = []
+    for i in range(config.default_max_lora_number):
+        if f'LoRA {i + 1}' in info:
+            n, w = info[f'LoRA {i + 1}'].split(' : ')
+            loras.append([n, float(w)])
+        else:
+            loras.append(['None', 1.0])
 
     embeddings = embeddings_model_split(info["Prompt"], info["Negative Prompt"])
     checklist = ["checkpoints/"+info["Base Model"], "checkpoints/"+info["Refiner Model"]] + ["loras/"+n for i, (n, v) in enumerate(loras)]

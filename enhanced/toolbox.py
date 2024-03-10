@@ -316,12 +316,15 @@ def reset_image_params(state_params):
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-    loras = config.default_loras[:]
-    for key in metainfo:
-        i=0
-        if key.startswith('LoRA ['):
-            loras.insert(i, [key[6:-8], float(metainfo[key])])
-    loras = loras[:len(config.default_loras)]
+
+    loras = []
+    for i in range(config.default_max_lora_number):
+        if f'LoRA {i + 1}' in metainfo:
+            n, w = metainfo[f'LoRA {i + 1}'].split(' : ')
+            loras.append([n, float(w)])
+        else:
+            loras.append(['None', 1.0])
+
     metadata.update({"loras": loras})
     metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
     results = topbar.reset_params(metadata)
