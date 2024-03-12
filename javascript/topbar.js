@@ -65,6 +65,22 @@ function set_theme_by_ui(theme) {
     }
 }
 
+function set_iframe_src(theme, lang, url) {
+    const url_params = Object.fromEntries(new URLSearchParams(window.location.search));
+    var theme_ifr = url_params['__theme'] || theme;
+    var lang_ifr = url_params['__lang'] || lang;
+    var newIframeUrl = url;
+    if (newIframeUrl.includes('?')) {
+        newIframeUrl += '&';
+    } else {
+        newIframeUrl += '?';
+    }
+    newIframeUrl += "__theme="+theme_ifr+"&__lang="+lang_ifr;
+    const instruction = gradioApp().getElementById('instruction');
+    if (instruction!=null) {
+	    instruction.src = newIframeUrl;
+    }
+}
 
 function closeSysMsg() {
     gradioApp().getElementById("sys_msg").style.display = "none";
