@@ -355,7 +355,7 @@ with shared.gradio_root:
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
-                preset_instruction = gr.HTML(visible=False)
+                preset_instruction = gr.HTML(visible=False, value=topbar.preset_instruction())
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=modules.flags.performance_selections,
                                                  value=modules.config.default_performance)
@@ -858,10 +858,10 @@ with shared.gradio_root:
             # keep prompt if not empty
             if prompt == '':
                 return trigger_describe(mode, img)
-            return gr.update(), gr.update()
+            return prompt
 
         uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
-                       outputs=[prompt], show_progress=True, queue=True)
+                       outputs=[prompt], show_progress=False, queue=True)
 
 
     prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
