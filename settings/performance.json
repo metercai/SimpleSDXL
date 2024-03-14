@@ -1,0 +1,26 @@
+{
+  "Speed": {
+    "custom_steps": 30,
+    "cfg": 8,
+    "sampler_name": "dpmpp_2m_sde_gpu",
+    "scheduler": "karras"
+  },
+  "Quality": {
+    "custom_steps": 60,
+    "cfg": 8,
+    "sampler_name": "dpmpp_2m_sde_gpu",
+    "scheduler": "karras"
+  },
+  "Lcm": {
+    "custom_steps": 4,
+    "cfg": 1.5,
+    "sampler_name": "lcm",
+    "scheduler": "sgm_uniform"
+  },
+  "Lightning": {
+    "custom_steps": 4,
+    "cfg": 2,
+    "sampler_name": "dpmpp_sde",
+    "scheduler": "karras"
+  }
+}

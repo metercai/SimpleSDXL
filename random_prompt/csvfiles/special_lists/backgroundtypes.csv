@@ -1,0 +1,4 @@
+OR(background is;at;near;inside a) OR(;-descriptor-;normal) OR(-location-;-building-;-minilocation-)
+OR(;-descriptor-;normal) OR(-location-;-building-;-minilocation-) in background
+OR(;plain;simple;detailed;complex;centered;normal) OR(;-descriptor-;-color-;-color- and -color-;-colorscheme-;normal) background
+OR(-culture-;-space-;-flora-;-minilocation- and -flora-;-season-) background
