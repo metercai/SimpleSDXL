@@ -3,23 +3,25 @@ import json
 import threading
 from modules.civit import Civit
 import time
-
+import os
+from custom.OneButtonPrompt.utils import path_fixed, root_path_fixed
 
 class PathManager:
     DEFAULT_PATHS = {
-        "path_checkpoints": "../models/checkpoints/",
-        "path_loras": "../models/loras/",
-        "path_controlnet": "../models/controlnet/",
-        "path_vae_approx": "../models/vae_approx/",
-        "path_preview": "../outputs/preview.jpg",
-        "path_upscalers": "../models/upscale_models",
-        "path_outputs": "../outputs/",
-        "path_clip": "../models/clip/",
+        "path_checkpoints": root_path_fixed("../models/checkpoints/"),
+        "path_loras": root_path_fixed("../models/loras/"),
+        "path_controlnet": root_path_fixed("../models/controlnet/"),
+        "path_vae_approx": root_path_fixed("../models/vae_approx/"),
+        "path_preview": root_path_fixed("../outputs/preview.jpg"),
+        "path_upscalers": root_path_fixed("../models/upscale_models"),
+        "path_outputs": root_path_fixed("../outputs/"),
+        "path_clip": root_path_fixed("../models/clip/"),
     }
 
     EXTENSIONS = [".pth", ".ckpt", ".bin", ".safetensors"]
 
     civit_worker_folders = []
+    loras_keywords_path = path_fixed("models/loras/")
 
     def __init__(self):
         self.paths = self.load_paths()
@@ -29,7 +31,7 @@ class PathManager:
 
     def load_paths(self):
         paths = self.DEFAULT_PATHS.copy()
-        settings_path = Path("settings/paths.json")
+        settings_path = Path(path_fixed("settings/paths.json"))
         if settings_path.exists():
             with settings_path.open() as f:
                 paths.update(json.load(f))
@@ -78,12 +80,13 @@ class PathManager:
         civit = Civit()
         for path in folder_path.rglob("*"):
             if path.suffix.lower() in self.EXTENSIONS:
-                txtcheck = path.with_suffix(".txt")
+                txtcheck = Path(os.path.join(self.loras_keywords_path, path.with_suffix(".txt").name))
                 if not txtcheck.exists():
                     hash = civit.model_hash(str(path))
-                    print(f"Downloading LoRA keywords for {path}")
+                    print(f"[OneButtonPrompt] Downloading LoRA keywords for {path.name}")
                     models = civit.get_models_by_hash(hash)
                     keywords = civit.get_keywords(models)
+                    txtcheck.parent.mkdir(parents=True, exist_ok=True)
                     with open(txtcheck, "w") as f:
                         f.write(", ".join(keywords))
                     time.sleep(1)

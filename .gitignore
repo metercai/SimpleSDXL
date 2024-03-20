@@ -69,3 +69,6 @@ Cargo.toml
 /test
 wd-v1-4-moat-tagger-v2.csv
 .DS_Store
+/custom/OneButtonPrompt/settings/paths.json
+/custom/OneButtonPrompt/settings/settings.json
+/custom/OneButtonPrompt/models/loras/

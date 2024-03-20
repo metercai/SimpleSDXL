@@ -1,7 +1,9 @@
 import json
 from os.path import exists
+from pathlib import Path
 
-from shared import path_manager
+from custom.OneButtonPrompt.shared import path_manager
+from custom.OneButtonPrompt.utils import path_fixed
 
 DEFAULT_SETTINGS = {
     "advanced_mode": False,
@@ -31,8 +33,9 @@ DEFAULT_SETTINGS = {
 
 
 def load_settings():
-    if exists("settings/settings.json"):
-        with open("settings/settings.json") as f:
+    settings_path = Path(path_fixed("settings/settings.json"))
+    if settings_path.exists():
+        with settings_path.open() as f:
             settings = json.load(f)
     else:
         settings = {}
@@ -45,7 +48,7 @@ def load_settings():
             changed = True
 
     if changed:
-        with open("settings/settings.json", "w") as f:
+        with settings_path.open("w") as f:
             json.dump(settings, f, indent=2)
 
     return settings
