@@ -1,6 +1,7 @@
 import gradio as gr
+import custom.OneButtonPrompt.shared
 
-from shared import add_ctrl
+from custom.OneButtonPrompt.shared import add_ctrl
 
 from random_prompt.build_dynamic_prompt import build_dynamic_prompt
 

@@ -32,8 +32,6 @@ import enhanced.version as version
 import enhanced.location as location
 import enhanced.wildcards as wildcards
 from enhanced.models_info import models_info, sync_model_info_click 
-import ui_onebutton
-
 
 def get_task(*args):
     args = list(args)
@@ -111,7 +109,6 @@ shared.gradio_root = gr.Blocks(
 with shared.gradio_root:
     state_topbar = gr.State({})
     currentTask = gr.State(worker.AsyncTask(args=[]))
-    run_event = gr.Number(visible=False, value=0)
     with gr.Row():
         with gr.Column(scale=2):
             with gr.Group():
@@ -501,8 +498,6 @@ with shared.gradio_root:
                 info_progress = gr.Markdown('Note: If MUID is not obtained after synchronizing, it means that it is a new model file. You need to add an available download URL before.', visible=False)
                 sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
                 info_sync_button.click(sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
-                
-
 
             with gr.Tab(label='Advanced'):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=1.0, maximum=30.0, step=0.01,
@@ -675,25 +670,10 @@ with shared.gradio_root:
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
                 
+                # custom plugin "OneButtonPrompt"
+                import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
+                run_event = gr.Number(visible=False, value=0)
                 ui_onebutton.ui_onebutton(prompt, run_event)
-            
-
-            # run_event.change(
-            #     fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed
-            # ).then(
-            #     fn=generate_clicked,
-            #     inputs=state["ctrls_obj"],
-            #     outputs=[
-            #         run_button,
-            #         stop_button,
-            #         progress_html,
-            #         main_view,
-            #         inpaint_view,
-            #         inpaint_toggle,
-            #         gallery,
-            #         metadata_json,
-            #     ],
-            # )    
             
             translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
             ehps = [backfill_prompt, translation_timing, translation_methods]

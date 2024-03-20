@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
 import shutil
-
+from custom.OneButtonPrompt.utils import path_fixed
 
 class OneButtonPresets:
-    DEFAULT_OBP_FILE = Path("random_prompt/presets/obp_presets.default")
-    OBP_FILE = Path("random_prompt/userfiles/obp_presets.json")
+    DEFAULT_OBP_FILE = Path(path_fixed("random_prompt/presets/obp_presets.default"))
+    OBP_FILE = Path(path_fixed("random_prompt/userfiles/obp_presets.json"))
     CUSTOM_OBP = "Custom..."
     RANDOM_PRESET_OBP = "All (random)..."
 
