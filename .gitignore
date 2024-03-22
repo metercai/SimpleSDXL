@@ -52,3 +52,14 @@ user_path_config-deprecated.txt
 /.coverage*
 /auth.json
 .DS_Store
+.github/workflows/
+.token_user.pem
+.user_Pq69KpDwNenAq2aA33kyo9rw15xrEgiPn.did
+Cargo.toml
+custom/
+enhanced/
+models/models_info.json
+outputs.1/
+pyproject.toml
+src/
+test/
