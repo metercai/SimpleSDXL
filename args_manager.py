@@ -34,6 +34,12 @@ args_parser.parser.add_argument("--disable-preset-download", action='store_true'
 args_parser.parser.add_argument("--always-download-new-model", action='store_true',
                                 help="Always download newer models ", default=False)
 
+args_parser.parser.add_argument("--dev", action='store_true',
+                                help="launch the dev branch", default=False)
+args_parser.parser.add_argument("--main", action='store_true',
+                                help="launch the Fooocus branch", default=False)
+args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default=None)
+
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,
     in_browser=True,
