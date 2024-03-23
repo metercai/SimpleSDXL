@@ -7,19 +7,19 @@
             "sd_xl_offset_example-lora_1.0.safetensors",
             0.1
         ],
-        [
+	[
+	    "None",
+	    1.0
+	],
+	[
             "None",
             1.0
         ],
-        [
+	[
             "None",
             1.0
         ],
-        [
-            "None",
-            1.0
-        ],
-        [
+	[
             "None",
             1.0
         ]

@@ -1,4 +1,5 @@
 import threading
+import re
 from modules.patch import PatchSettings, patch_settings, patch_all
 
 patch_all()
@@ -48,8 +49,8 @@ def worker():
     from modules.sdxl_styles import apply_style, apply_wildcards, fooocus_expansion, apply_arrays
     from modules.private_logger import log
     from extras.expansion import safe_str
-    from modules.util import remove_empty_str, HWC3, resize_image, \
-        get_image_shape_ceil, set_image_shape_ceil, get_shape_ceil, resample_image, erode_or_dilate, ordinal_suffix
+    from modules.util import remove_empty_str, HWC3, resize_image, get_image_shape_ceil, set_image_shape_ceil, \
+        get_shape_ceil, resample_image, erode_or_dilate, ordinal_suffix, get_enabled_loras
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
@@ -126,16 +127,6 @@ def worker():
         async_task.results = async_task.results + [wall]
         return
 
-    def apply_enabled_loras(loras):
-        enabled_loras = []
-        for lora_enabled, lora_model, lora_weight in loras:
-            if lora_enabled:
-                enabled_loras.append([lora_model, lora_weight])
-            else:
-                enabled_loras.append(['None', 1.0])
-
-        return enabled_loras
-
     @torch.no_grad()
     @torch.inference_mode()
     def handler(async_task):
@@ -153,12 +144,13 @@ def worker():
         image_number = args.pop()
         output_format = args.pop()
         image_seed = args.pop()
+        read_wildcards_in_order = args.pop()
         sharpness = args.pop()
         guidance_scale = args.pop()
         base_model_name = args.pop()
         refiner_model_name = args.pop()
         refiner_switch = args.pop()
-        loras = apply_enabled_loras([[bool(args.pop()), str(args.pop()), float(args.pop()), ] for _ in range(modules.config.default_max_lora_number)])
+        loras = get_enabled_loras([[bool(args.pop()), str(args.pop()), float(args.pop())] for _ in range(modules.config.default_max_lora_number)])
         input_image_checkbox = args.pop()
         current_tab = args.pop()
         uov_method = args.pop()
@@ -883,7 +875,7 @@ def worker():
 
                     d.append(('Sampler', 'sampler', sampler_name))
                     d.append(('Scheduler', 'scheduler', scheduler_name))
-                    d.append(('Seed', 'seed', task['task_seed']))
+                    d.append(('Seed', 'seed', str(task['task_seed'])))
 
                     if freeu_enabled:
                         d.append(('FreeU', 'freeu', str((freeu_b1, freeu_b2, freeu_s1, freeu_s2))))

@@ -5,6 +5,8 @@ from tempfile import gettempdir
 
 args_parser.parser.add_argument("--share", action='store_true', help="Set whether to share on Gradio.")
 args_parser.parser.add_argument("--preset", type=str, default='default', help="Apply specified UI preset.")
+args_parser.parser.add_argument("--disable-preset-selection", action='store_true', default=True,
+                                help="Disables preset selection in Gradio.")
 
 args_parser.parser.add_argument("--language", type=str, default='cn',
                                 help="Translate UI using json files in [language] folder. "
@@ -38,7 +40,7 @@ args_parser.parser.add_argument("--dev", action='store_true',
                                 help="launch the dev branch", default=False)
 args_parser.parser.add_argument("--main", action='store_true',
                                 help="launch the Fooocus branch", default=False)
-args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default='./')
+args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default=None)
 
 
 args_parser.parser.set_defaults(
@@ -58,8 +60,5 @@ if args_parser.args.disable_analytics:
 
 if args_parser.args.disable_in_browser:
     args_parser.args.in_browser = False
-
-if args_parser.args.temp_path is None:
-    args_parser.args.temp_path = os.path.join(gettempdir(), 'Fooocus')
 
 args = args_parser.args

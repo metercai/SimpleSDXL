@@ -449,11 +449,11 @@ def ui_onebutton(prompt, run_event):
 
         return prompt
 
-    with gr.Tab(label="One Button"):
+    with gr.Tab(label="OneButtonPrompt"):
         with gr.Row():
             # instant_obp = gr.Button(value="Instant OBP", size="sm", min_width = 1)
             random_button = gr.Button(value="Random Prompt", size="sm", min_width = 1)
-            add_random_button = gr.Button(value="+", size="sm", min_width=1)
+            add_random_button = gr.Button(value="+More", size="sm", min_width=1)
 
         with gr.Row():
             assumedirectcontrol = gr.Checkbox(
@@ -599,7 +599,7 @@ def ui_onebutton(prompt, run_event):
         with gr.Row():
             gr.Markdown(
                 """
-                Proud to be powered by [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt)
+                Proud to be powered by [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt) / ༻颩⑴様锝騛༻
                 """
             )
 
