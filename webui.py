@@ -931,7 +931,7 @@ with shared.gradio_root:
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
     reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_timing, translation_methods]
-    reset_preset_all = reset_params + reset_preset_fun + [state_topbar]
+    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [state_topbar]
     
     preset_down_confirm_button.click(topbar.down_absent_model, inputs=state_topbar, outputs=[preset_down_note, state_topbar]) \
                .then(topbar.reset_params_for_preset, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
