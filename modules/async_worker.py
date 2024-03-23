@@ -448,6 +448,7 @@ def worker():
                     task_seed = seed % (constants.MAX_SEED + 1)
 
                 task_prompt = wildcards.apply_arrays(prompt, i, wildcards_arrays, arrays_mult)
+                task_prompt = wildcards.replace_wildcard(task_prompt, task_rng)
                 task_negative_prompt = wildcards.apply_wildcards(negative_prompt, task_rng)
                 task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
                 task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]

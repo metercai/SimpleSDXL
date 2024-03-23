@@ -582,7 +582,7 @@ with shared.gradio_root:
                         disable_seed_increment = gr.Checkbox(label='Disable seed increment',
                                                              info='Disable automatic seed increment when image number is > 1.',
                                                              value=False)
-                        read_wildcards_in_order = gr.Checkbox(label="Read wildcards in order", value=False)
+                        read_wildcards_in_order = gr.Checkbox(label="Read wildcards in order", value=False, visible=False)
 
                         if not args_manager.args.disable_metadata:
                             save_metadata_to_images = gr.Checkbox(label='Save Metadata to Images', value=modules.config.default_save_metadata_to_images,
@@ -830,7 +830,8 @@ with shared.gradio_root:
             if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
                 return [gr.update()] * 4 + wildcards_array_show(state_params)
             matchs = wildcards.array_regex.findall(raw_prompt_txt)
-            if len(matchs)>0:
+            matchs2 = wildcards.tag_regex2.findall(raw_prompt_txt)
+            if len(matchs)>0 or len(matchs2)>0:
                 wildcards_array_results =  wildcards_array_show(state_params)
             else:
                 wildcards_array_results =  wildcards_array_hidden
