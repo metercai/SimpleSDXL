@@ -16,7 +16,7 @@ import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.location as location
-from enhanced.models_info import models_info, models_info_muid
+from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
 
@@ -374,6 +374,7 @@ def process_after_generation(state_params):
         gallery_util.refresh_images_catalog(output_index, True)
         gallery_util.parse_html_log(output_index, True)
     
+    refresh_models_info_from_path() 
     return results
 
 

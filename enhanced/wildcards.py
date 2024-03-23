@@ -41,7 +41,7 @@ def get_wildcards_samples(path="root"):
     global wildcards_path, wildcards, wildcards_list, wildcards_translation, wildcards_template, wildcards_weight_range, wildcard_regex
 
     wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None, variation=True)])
-    wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
+    #wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
     #print(f'wildcards_list:{wildcards_list_all}')
     for wildcard in wildcards_list_all:
         words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
@@ -142,6 +142,7 @@ def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
         for i in range(number):
             words_each = rng.sample(words, nums)
             words_result.append(words_each[0] if nums==1 else f'({" ".join(words_each)})')
+    words_result = [replace_wildcard(txt, rng) for txt in words_result]
     print(f'[Wildcards] Get words from wildcard:__{wildcard}__, method:{method}, number:{number}, start_at:{start_at}, result:{words_result}')
     return words_result
 
@@ -220,6 +221,12 @@ def compile_arrays(text, rng):
     else:
         mult = 0
     
+
+    print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
+    return text, arrays, mult, seed_fixed
+
+def replace_wildcard(text, rng):
+    global wildcards_max_bfs_depth, tag_regex2, wildcards
     parts = tag_regex2.findall(text)
     i = 1
     while parts:
@@ -229,9 +236,7 @@ def compile_arrays(text, rng):
         i += 1
         if i > wildcards_max_bfs_depth:
             break
-
-    print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
-    return text, arrays, mult, seed_fixed
+    return text
 
 
 def get_words(arrays, totalMult, index):
@@ -307,6 +312,8 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
         state_params["array_wildcards_mode"] = '_'
         if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
             prompt = prompt[:-1]
+    else:
+        state_params["array_wildcards_mode"] = '_'
     
     if state_params["array_wildcards_mode"] == '[':
         new_tag = f'[__{wildcard}__]'
