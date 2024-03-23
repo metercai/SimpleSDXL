@@ -100,6 +100,19 @@ def get_preset_name_list():
     name_list = name_list[:-1]
     return name_list
 
+def is_models_file_absent(preset_name):
+    preset_path = os.path.abspath(f'./presets/{preset_name}.json')
+    if os.path.exists(preset_path):
+        with open(preset_path, "r", encoding="utf-8") as json_file:
+            config_preset = json.load(json_file)
+        if config_preset["default_model"] and config_preset["default_model"] != 'None':
+            if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
+                return True
+        if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
+            if "checkpoints/"+config_preset["default_refiner"] not in models_info.keys():
+                return True
+    return False
+
 
 def get_system_message():
     global config_ext
@@ -286,6 +299,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
+    state_params.update({"bar_button": config.preset})
     #print(f'system_params:{state_params}')
     results = refresh_nav_bars(state_params)
     results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
@@ -321,6 +335,7 @@ def refresh_nav_bars(state_params):
         results += [gr.update(visible=True)]
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
+        name += '\u2B07' if is_models_file_absent(name) else ''
         visible_flag = i<(5 if state_params["__is_mobile"] else 9)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
@@ -366,16 +381,28 @@ def sync_message(state_params):
     state_params.update({"__message":system_message})
     return state_params
 
+preset_down_note_info = 'The preset package being loaded has model files that need to be downloaded, and it will take some time to wait...'
+def check_absent_model(bar_button, state_params):
+    #print(f'check_absent_model,state_params:{state_params}')
+    state_params.update({'bar_button': bar_button})
+    return gr.update(visible=False), state_params
 
-def reset_params_for_preset(bar_button, state_params):
-    global system_message
+def down_absent_model(state_params):
+    state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
+    return gr.update(visible=False), state_params
+
+def reset_params_for_preset(state_params):
+    global system_message, preset_down_note_info
 
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
-    if '__preset' not in state_params.keys() or state_params["__preset"]==bar_button:
+    if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
         return [gr.update()] * 49 + [state_params]
-    print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{bar_button}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
-    state_params.update({"__preset": bar_button})
+    if '\u2B07' in state_params["bar_button"]:
+        gr.Info(preset_down_note_info)
+    preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
+    print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
+    state_params.update({"__preset": preset})
     return reset_context(state_params)
 
 
@@ -430,10 +457,12 @@ def reset_context(state_params):
     adm_scaler_end = ads.default["adm_scaler_end"] if "default_adm_scaler_end" not in keys else config_preset["default_adm_scaler_end"]
     info_preset.update({"ADM Guidance": f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'})
     if "default_loras" in keys:
-        loras = [(n, v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
+        if len(config_preset["default_loras"][0])==3:
+            loras = [(n, v) for i, (e, n, v) in enumerate(config_preset["default_loras"]) if n!='None']
+        else:
+            loras = [(n, v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
         for i, (n, v) in enumerate(loras, 1):
             info_preset.update({f'LoRA {i}': f'{n} : {v}'})
-            lora = f'LoRA {i}'
 
     if "default_seed" in keys:
         info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
@@ -506,7 +535,6 @@ def reset_context(state_params):
     state_params.update({"__message": system_message})
     results += [state_params]
     system_message = 'system message was displayed!'
-
     return results
 
 

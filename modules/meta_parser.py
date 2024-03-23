@@ -27,7 +27,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
 
-    results = [len(loaded_parameter_dict) > 0, 1]
+    results = [True, 1] if len(loaded_parameter_dict) > 0 else [gr.update(), gr.update()]
 
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
     get_str('negative_prompt', 'Negative Prompt', loaded_parameter_dict, results)
@@ -81,9 +81,10 @@ def get_list(key: str, fallback: str | None, source_dict: dict, results: list, d
     except:
         results.append(gr.update())
     if key in ['styles', 'Styles']:
-        for k in h:
-            if k and 'styles_definition' in source_dict and k not in modules.sdxl_styles.styles and k in source_dict.get('styles_definition', default):
-                modules.sdxl_styles.styles.update({k: source_dict["styles_definition"][k]})
+        if h:
+            for k in h:
+                if k and 'styles_definition' in source_dict and k not in modules.sdxl_styles.styles and k in source_dict.get('styles_definition', default):
+                    modules.sdxl_styles.styles.update({k: source_dict["styles_definition"][k]})
 
 
 def get_float(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
@@ -173,11 +174,20 @@ def get_freeu(key: str, fallback: str | None, source_dict: dict, results: list, 
 
 def get_lora(key: str, fallback: str | None, source_dict: dict, results: list):
     try:
-        n, w = source_dict.get(key, source_dict.get(fallback)).split(' : ')
-        w = float(w)
-        results.append(True)
-        results.append(n)
-        results.append(w)
+        split_data = source_dict.get(key, source_dict.get(fallback)).split(' : ')
+        enabled = True
+        name = split_data[0]
+        weight = split_data[1]
+
+        if len(split_data) == 3:
+            enabled = split_data[0] == 'True'
+            name = split_data[1]
+            weight = split_data[2]
+
+        weight = float(weight)
+        results.append(enabled)
+        results.append(name)
+        results.append(weight)
     except:
         results.append(True)
         results.append('None')
@@ -228,9 +238,8 @@ def parse_meta_from_preset(preset_content):
                 height = height[:height.index(" ")]
             preset_prepared[meta_key] = (width, height)
         else:
-            preset_prepared[meta_key] = items[settings_key] if settings_key in items and items[
-                settings_key] is not None else getattr(modules.config, settings_key)
-
+            preset_prepared[meta_key] = items[settings_key] if settings_key in items and items[settings_key] is not None else getattr(modules.config, settings_key)
+        
         if settings_key == "default_styles" or settings_key == "default_aspect_ratio":
             preset_prepared[meta_key] = str(preset_prepared[meta_key])
 
@@ -399,7 +408,7 @@ class A1111MetadataParser(MetadataParser):
                         data[key] = filename
                         break
 
-        if 'lora_hashes' in data:
+        if 'lora_hashes' in data and data['lora_hashes'] != '':
             lora_filenames = modules.config.lora_filenames.copy()
             if modules.config.sdxl_lcm_lora in lora_filenames:
                 lora_filenames.remove(modules.config.sdxl_lcm_lora)
@@ -453,16 +462,15 @@ class A1111MetadataParser(MetadataParser):
             if key in data:
                 generation_params[self.fooocus_to_a1111[key]] = data[key]
 
-        lora_hashes = []
-        for index, (lora_name, lora_weight, lora_hash) in enumerate(self.loras):
-            # workaround for Fooocus not knowing LoRA name in LoRA metadata
-            lora_hashes.append(f'{lora_name}: {lora_hash}: {lora_weight}')
-        lora_hashes_string = ', '.join(lora_hashes)
+        if len(self.loras) > 0:
+            lora_hashes = []
+            for index, (lora_name, lora_weight, lora_hash) in enumerate(self.loras):
+                # workaround for Fooocus not knowing LoRA name in LoRA metadata
+                lora_hashes.append(f'{lora_name}: {lora_hash}: {lora_weight}')
+            lora_hashes_string = ', '.join(lora_hashes)
+            generation_params[self.fooocus_to_a1111['lora_hashes']] = lora_hashes_string
 
-        generation_params |= {
-            self.fooocus_to_a1111['lora_hashes']: lora_hashes_string,
-            self.fooocus_to_a1111['version']: data['version']
-        }
+        generation_params[self.fooocus_to_a1111['version']] = data['version']
 
         if modules.config.metadata_created_by != '':
             generation_params[self.fooocus_to_a1111['created_by']] = modules.config.metadata_created_by

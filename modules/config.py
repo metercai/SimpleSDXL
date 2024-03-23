@@ -3,13 +3,15 @@ import json
 import math
 import numbers
 import args_manager
+import tempfile
 import modules.flags
 import modules.sdxl_styles
 import enhanced.all_parameters as ads
 
 from modules.model_loader import load_file_from_url
 from modules.util import get_files_from_folder, makedirs_with_log
-from modules.flags import Performance, MetadataScheme
+from modules.flags import OutputFormat, Performance, MetadataScheme
+
 
 def get_config_path(key, default_value):
     env = os.getenv(key)
@@ -19,7 +21,8 @@ def get_config_path(key, default_value):
     else:
         return os.path.abspath(default_value)
 
-config_path = os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
+config_path = get_config_path('config_path', "./config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
+
 config_example_path = get_config_path('config_example_path', "config_modification_tutorial.txt")
 config_dict = {}
 always_save_keys = []
@@ -99,19 +102,35 @@ try_load_deprecated_user_path_config()
 preset = args_manager.args.preset
 theme = args_manager.args.theme
 
-if isinstance(preset, str):
-    preset_path = os.path.abspath(f'./presets/{preset}.json')
-    try:
-        if os.path.exists(preset_path):
-            with open(preset_path, "r", encoding="utf-8") as json_file:
-                config_dict.update(json.load(json_file))
-                print(f'Loaded preset: {preset_path}')
-        else:
-            raise FileNotFoundError
-    except Exception as e:
-        print(f'Load preset [{preset_path}] failed')
-        print(e)
+def get_presets():
+    preset_folder = 'presets'
+    presets = ['initial']
+    if not os.path.exists(preset_folder):
+        print('No presets found.')
+        return presets
 
+    return presets + [f[:f.index('.json')] for f in os.listdir(preset_folder) if f.endswith('.json')]
+
+
+def try_get_preset_content(preset):
+    if isinstance(preset, str):
+        preset_path = os.path.abspath(f'./presets/{preset}.json')
+        try:
+            if os.path.exists(preset_path):
+                with open(preset_path, "r", encoding="utf-8") as json_file:
+                    json_content = json.load(json_file)
+                    print(f'Loaded preset: {preset_path}')
+                    return json_content
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            print(f'Load preset [{preset_path}] failed')
+            print(e)
+    return {}
+
+available_presets = get_presets()
+preset = args_manager.args.preset
+config_dict.update(try_get_preset_content(preset))
 
 def get_path_output() -> str:
     """
@@ -120,7 +139,7 @@ def get_path_output() -> str:
     global config_dict
     path_output = get_dir_or_set_default('path_outputs', '../outputs/', make_directory=True)
     if args_manager.args.output_path:
-        print(f'[CONFIG] Overriding config value path_outputs with {args_manager.args.output_path}')
+        print(f'Overriding config value path_outputs with {args_manager.args.output_path}')
         config_dict['path_outputs'] = path_output = args_manager.args.output_path
     return path_output
 
@@ -180,7 +199,9 @@ path_controlnet = get_dir_or_set_default('path_controlnet', '../models/controlne
 path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
 path_llms = get_dir_or_set_default('path_llms','../models/llms/')
+path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_outputs = get_path_output()
+
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False):
     global config_dict, visited_keys
@@ -209,19 +230,80 @@ def get_config_item_or_set_default(key, default_value, validator, disable_empty_
         config_dict[key] = default_value
         return default_value
 
+def init_temp_path(path: str | None, default_path: str) -> str:
+    if args_manager.args.temp_path:
+        path = args_manager.args.temp_path
+
+    if path != '' and path != default_path:
+        try:
+            if not os.path.isabs(path):
+                path = os.path.abspath(path)
+            os.makedirs(path, exist_ok=True)
+            print(f'Using temp path {path}')
+            return path
+        except Exception as e:
+            print(f'Could not create temp path {path}. Reason: {e}')
+            print(f'Using default temp path {default_path} instead.')
+
+    os.makedirs(default_path, exist_ok=True)
+    return default_path
+
+
 default_loras = get_config_item_or_set_default(
     key='default_loras',
-    default_value=[["None",1.0],["None",1.0],["None",1.0],["None",1.0],["None",1.0]],
-    validator=lambda x: isinstance(x, list) and all(len(y) == 2 and isinstance(y[0], str) and isinstance(y[1], numbers.Number) for y in x)
+    default_value=[
+        [
+            True,
+            "None",
+            1.0
+        ],
+        [
+            True,
+            "None",
+            1.0
+        ],
+        [
+            True,
+            "None",
+            1.0
+        ],
+        [
+            True,
+            "None",
+            1.0
+        ],
+        [
+            True,
+            "None",
+            1.0
+        ]
+    ],
+    validator=lambda x: isinstance(x, list) and all(
+        len(y) == 3 and isinstance(y[0], bool) and isinstance(y[1], str) and isinstance(y[2], numbers.Number)
+        or len(y) == 2 and isinstance(y[0], str) and isinstance(y[1], numbers.Number)
+        for y in x)
 )
+default_loras = [(y[0], y[1], y[2]) if len(y) == 3 else (True, y[0], y[1]) for y in default_loras]
 default_max_lora_number = get_config_item_or_set_default(
     key='default_max_lora_number',
     default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else 5,
     validator=lambda x: isinstance(x, int) and x >= 1
 )
+
 ads.init_all_params_index(default_max_lora_number, args_manager.args.disable_metadata)
 
-default_base_model_name = get_config_item_or_set_default(
+default_temp_path = os.path.join(tempfile.gettempdir(), 'fooocus')
+temp_path = init_temp_path(get_config_item_or_set_default(
+    key='temp_path',
+    default_value=default_temp_path,
+    validator=lambda x: isinstance(x, str),
+), default_temp_path)
+temp_path_cleanup_on_launch = get_config_item_or_set_default(
+    key='temp_path_cleanup_on_launch',
+    default_value=True,
+    validator=lambda x: isinstance(x, bool)
+)
+default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',
     default_value='model.safetensors',
     validator=lambda x: isinstance(x, str)
@@ -231,7 +313,7 @@ previous_default_models = get_config_item_or_set_default(
     default_value=[],
     validator=lambda x: isinstance(x, list) and all(isinstance(k, str) for k in x)
 )
-default_refiner_model_name = get_config_item_or_set_default(
+default_refiner_model_name = default_refiner = get_config_item_or_set_default(
     key='default_refiner',
     default_value='None',
     validator=lambda x: isinstance(x, str)
@@ -310,7 +392,7 @@ default_max_image_number = get_config_item_or_set_default(
 default_output_format = get_config_item_or_set_default(
     key='default_output_format',
     default_value='png',
-    validator=lambda x: x in modules.flags.output_formats
+    validator=lambda x: x in OutputFormat.list()
 )
 default_image_number = get_config_item_or_set_default(
     key='default_image_number',
@@ -436,34 +518,35 @@ default_backfill_prompt = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool)
 )
 
-config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [['None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
+config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
-possible_preset_keys = [
-    "default_model",
-    "default_refiner",
-    "default_refiner_switch",
-    "default_loras_min_weight",
-    "default_loras_max_weight",
-    "default_loras",
-    "default_max_lora_number",
-    "default_cfg_scale",
-    "default_sample_sharpness",
-    "default_sampler",
-    "default_scheduler",
-    "default_performance",
-    "default_prompt",
-    "default_prompt_negative",
-    "default_styles",
-    "default_aspect_ratio",
-    "default_cfg_tsnr",
-    "default_overwrite_step",
-    "default_overwrite_switch",
-    "default_save_metadata_to_images",
-    "checkpoint_downloads",
-    "embeddings_downloads",
-    "lora_downloads",
-]
-
+# mapping config to meta parameter 
+possible_preset_keys = {
+    "default_model": "base_model",
+    "default_refiner": "refiner_model",
+    "default_refiner_switch": "refiner_switch",
+    "previous_default_models": "previous_default_models",
+    "default_loras_min_weight": "default_loras_min_weight",
+    "default_loras_max_weight": "default_loras_max_weight",
+    "default_loras": "<processed>",
+    "default_cfg_scale": "guidance_scale",
+    "default_sample_sharpness": "sharpness",
+    "default_sampler": "sampler",
+    "default_scheduler": "scheduler",
+    "default_overwrite_step": "steps",
+    "default_performance": "performance",
+    "default_prompt": "prompt",
+    "default_prompt_negative": "negative_prompt",
+    "default_styles": "styles",
+    "default_aspect_ratio": "resolution",
+    "default_cfg_tsnr": "cfg_tsnr",
+    "default_overwrite_step": "overwrite_step",
+    "default_overwrite_switch": "overwrite_switch",
+    "default_save_metadata_to_images": "default_save_metadata_to_images",
+    "checkpoint_downloads": "checkpoint_downloads",
+    "embeddings_downloads": "embeddings_downloads",
+    "lora_downloads": "lora_downloads"
+}
 
 REWRITE_PRESET = False
 
@@ -518,22 +601,27 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 
 model_filenames = []
 lora_filenames = []
+wildcard_filenames = []
+
 sdxl_lcm_lora = 'sdxl_lcm_lora.safetensors'
 sdxl_lightning_lora = 'sdxl_lightning_4step_lora.safetensors'
 
 
-def get_model_filenames(folder_paths, name_filter=None):
-    extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch']
+def get_model_filenames(folder_paths, extensions=None, name_filter=None):
+    if extensions is None:
+        extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch']
     files = []
     for folder in folder_paths:
         files += get_files_from_folder(folder, extensions, name_filter)
     return files
 
 
-def update_all_model_names():
-    global model_filenames, lora_filenames
+def update_files():
+    global model_filenames, lora_filenames, wildcard_filenames, available_presets
     model_filenames = get_model_filenames(paths_checkpoints)
     lora_filenames = get_model_filenames(paths_loras)
+    wildcard_filenames = get_files_from_folder(path_wildcards, ['.txt'])
+    available_presets = get_presets()
     return
 
 
@@ -656,4 +744,4 @@ def downloading_upscale_model():
     return os.path.join(path_upscale_models, 'fooocus_upscaler_s409985e5.bin')
 
 
-update_all_model_names()
+update_files()
