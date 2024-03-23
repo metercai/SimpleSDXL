@@ -310,16 +310,14 @@ class MetadataParser(ABC):
                 lora_hash = get_sha256(lora_path)
                 self.loras.append((Path(lora_name).stem, lora_weight, lora_hash))
 
-<<<<<<< HEAD
         if styles_definition != 'None':
             self.styles_definition = styles_definition
-=======
+
     @staticmethod
     def remove_special_loras(lora_filenames):
         for lora_to_remove in modules.config.loras_metadata_remove:
             if lora_to_remove in lora_filenames:
                 lora_filenames.remove(lora_to_remove)
->>>>>>> main
 
 
 class A1111MetadataParser(MetadataParser):
