@@ -42,7 +42,6 @@ args_parser.parser.add_argument("--main", action='store_true',
                                 help="launch the Fooocus branch", default=False)
 args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default=None)
 
-
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,
     in_browser=True,
