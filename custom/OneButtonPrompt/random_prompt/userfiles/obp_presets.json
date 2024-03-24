@@ -358,23 +358,5 @@
     "suffixprompt": "",
     "giventypeofimage": "",
     "antistring": ""
-  },
-  "\u6211\u7684\u98ce\u666f1": {
-    "insanitylevel": 5,
-    "subject": "landscape",
-    "artist": "all",
-    "chosensubjectsubtypeobject": "all",
-    "chosensubjectsubtypehumanoid": "all",
-    "chosensubjectsubtypeconcept": "all",
-    "chosengender": "all",
-    "imagetype": "all",
-    "imagemodechance": 20,
-    "givensubject": "",
-    "smartsubject": true,
-    "givenoutfit": "",
-    "prefixprompt": "Mountains, lakes, meadows, snow mountains, autumn, summer, winter, spring, flowers, sea of flowers, rivers, forests",
-    "suffixprompt": "",
-    "giventypeofimage": "",
-    "antistring": ""
   }
 }
