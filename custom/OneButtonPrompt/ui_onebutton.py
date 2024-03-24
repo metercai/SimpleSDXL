@@ -457,7 +457,7 @@ def ui_onebutton(prompt, run_event):
 
         with gr.Row():
             assumedirectcontrol = gr.Checkbox(
-                label="BYPASS SAFETY PROTOCOLS", value=False
+                label="BYPASS SAFETY PROTOCOLS", value=False, visible=False,
             )
             add_ctrl("obp_assume_direct_control", assumedirectcontrol)
         
@@ -599,7 +599,7 @@ def ui_onebutton(prompt, run_event):
         with gr.Row():
             gr.Markdown(
                 """
-                Proud to be powered by [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt) / ༻颩⑴様锝騛༻
+                Powered by AIrjen [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt) / ༻颩⑴様锝騛༻
                 """
             )
 
