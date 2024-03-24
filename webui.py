@@ -696,7 +696,9 @@ with shared.gradio_root:
                 import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
                 run_event = gr.Number(visible=False, value=0)
                 ui_onebutton.ui_onebutton(prompt, run_event)
-            
+                with gr.Row():
+                    gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
+
             translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
             ehps = [backfill_prompt, translation_timing, translation_methods]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
