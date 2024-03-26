@@ -26,7 +26,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
 
-    results = [True, 1] if len(loaded_parameter_dict) > 0 else [gr.update(), gr.update()]
+    results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
@@ -59,7 +59,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
 
     for i in range(modules.config.default_max_lora_number):
        get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results)
-
+    
     return results
 
 

@@ -41,7 +41,7 @@ def get_wildcards_samples(path="root"):
     global wildcards_path, wildcards, wildcards_list, wildcards_translation, wildcards_template, wildcards_weight_range, wildcard_regex
 
     wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None, variation=True)])
-    #wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
+    wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
     #print(f'wildcards_list:{wildcards_list_all}')
     for wildcard in wildcards_list_all:
         words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
