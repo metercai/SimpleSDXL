@@ -393,7 +393,7 @@
     "Overwrite outfit:": "覆盖服装",
     "Prompt fields": "提示词前后缀",
     "Place this in front of generated prompt (prefix)": "将该文本放置在生成的提示前面（前缀）",
-    "Place this at back of generated prompt (suffix)": "将该文本放置在生成的提示前面（后缀）",
+    "Place this at back of generated prompt (suffix)": "将该文本放置在生成的提示后面（后缀）",
     "Additional options": "附加选项",
     "Overwrite type of image:": "覆盖图像类型：",
     "Filter out following properties (comma seperated). Example film grain, purple, cat": "过滤掉以下属性（用逗号分隔）。例如：film grain, purple, cat（胶片颗粒感、紫色、猫）",
