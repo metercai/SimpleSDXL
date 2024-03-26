@@ -77,6 +77,8 @@ class PathManager:
         self.civit_worker_folders.append(folder_path)
         if not isLora:  # We only do LoRAs at the moment
             return
+        else:
+            return
         civit = Civit()
         for path in folder_path.rglob("*"):
             if path.suffix.lower() in self.EXTENSIONS:
