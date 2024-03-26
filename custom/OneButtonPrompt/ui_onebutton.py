@@ -455,11 +455,11 @@ def ui_onebutton(prompt, run_event):
             random_button = gr.Button(value="Random Prompt", size="sm", min_width = 1)
             add_random_button = gr.Button(value="+More", size="sm", min_width=1)
 
-        with gr.Row():
-            assumedirectcontrol = gr.Checkbox(
-                label="BYPASS SAFETY PROTOCOLS", value=False, visible=False,
-            )
-            add_ctrl("obp_assume_direct_control", assumedirectcontrol)
+        ##with gr.Row():
+        ##    assumedirectcontrol = gr.Checkbox(
+        ##        label="BYPASS SAFETY PROTOCOLS", value=False, visible=False,
+        ##    )
+        ##    add_ctrl("obp_assume_direct_control", assumedirectcontrol)
         
         # Part of presets
         with gr.Row():
@@ -802,12 +802,12 @@ def ui_onebutton(prompt, run_event):
                 add_random_button: gr.update(visible=enable),
             }
 
-        assumedirectcontrol.change(
-            assumedirectcontrolflip,
-            [assumedirectcontrol],
+        ##assumedirectcontrol.change(
+        ##    assumedirectcontrolflip,
+        ##    [assumedirectcontrol],
             # [instant_obp, random_button, add_random_button],
-            [random_button, add_random_button],
-        )
+        ##    [random_button, add_random_button],
+        ##)
 
         # instant_obp.click(
         #     instant_gen_prompt,
