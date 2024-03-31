@@ -398,7 +398,7 @@ def reset_params_for_preset(state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params]
+        return [gr.update()] * 60 + [state_params]
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -519,7 +519,7 @@ def reset_context(state_params):
     
     results = reset_params(check_prepare_for_reset(info_preset))
     results += [gr.update(visible=True if preset_url else False)]
-
+    
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
     max_image_number = get_value_or_default("max_image_number")
     image_number = get_value_or_default("image_number")
@@ -528,13 +528,15 @@ def reset_context(state_params):
         results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     else:
         results += [gr.update()]
-
+    
+    # if default_X in config_prese then update the value to gr.X
     update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update()]
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_timing") + update_in_keys("translation_methods") 
     
     state_params.update({"__message": system_message})
     results += refresh_nav_bars(state_params)
+    results += update_in_keys("output_format")
     results += [state_params]
     system_message = 'system message was displayed!'
     return results

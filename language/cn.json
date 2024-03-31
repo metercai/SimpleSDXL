@@ -261,6 +261,7 @@
   "All (random)...": "全部随机...",
   "Custom...": "定制自己的内容模版...",
   "Name of new preset": "新预设名称",
+
     "Save as preset": "保存为预设",
     "all": "全部",
     "all (wild)": "全部（wild）",
@@ -398,7 +399,7 @@
     "Overwrite type of image:": "覆盖图像类型：",
     "Filter out following properties (comma seperated). Example film grain, purple, cat": "过滤掉以下属性（用逗号分隔）。例如：film grain, purple, cat（胶片颗粒感、紫色、猫）",
 
-  "Leo Dragonyear": "LEO-龙年贺春",
+    "Leo Dragonyear": "LEO-龙年贺春",
 
     "Image Style": "图片风格",
     "Fooocus V2": "Fooocus V2",
@@ -408,7 +409,7 @@
     "Fooocus Photograph": "Fooocus-摄影",
     "Fooocus Negative": "Fooocus-反向词",
     "Fooocus Cinematic": "Fooocus-电影",
-    "Fooocus Semi Realistic": "Fooocus 半写实",
+    "Fooocus Semi Realistic": "Fooocus-半写实",
     "SAI 3D Model": "SAI-3D模型",
     "SAI Analog Film": "SAI-胶片模拟",
     "SAI Anime": "SAI-动漫",
