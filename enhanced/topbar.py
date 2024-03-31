@@ -665,6 +665,8 @@ def reset_params(metadata):
     freeu_b1, freeu_b2, freeu_s1, freeu_s2 = [float(f.strip()) for f in get_ads_value_or_default('freeu')[1:-1].split(',')]
 
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
+    if styles == ['']:
+        styles = []
 
 # [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
 
