@@ -17,7 +17,7 @@ images_prompt_keys = []
 images_ads = {}
 
 
-image_types = ['.png', '.jpg', '.webp']
+image_types = ['.png', '.jpg', '.jpeg', '.webp']
 
 def refresh_output_list(max_per_page):
     global image_types

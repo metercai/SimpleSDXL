@@ -36,6 +36,7 @@
   default_prompt_negative                           # 默认负向提示词
   default_styles                                    # 默认风格
   default_aspect_ratio                              # 默认宽高比
+  defautl_output_format                             # 默认图片格式
   default_image_number                              # 默认出图数量
   default_max_image_number                          # 默认最大出图数量
   default_performance                               # 默认生成模式
