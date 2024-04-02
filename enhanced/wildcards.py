@@ -18,7 +18,7 @@ wildcards_template = {}
 wildcards_weight_range = {}
 
 array_regex = re.compile(r'\[([\w\(\)\.\s,;:-]+)\]')
-array_regex1 = re.compile(r'\[([\w\(\)\s,;-]+)\]')
+array_regex1 = re.compile(r'\[([\w\(\)\s,;.:\"-]+)\]')
 tag_regex0 = re.compile(r'([\s\w\(\);-]+)')
 tag_regex1 = re.compile(r'([\s\w\(\),-]+)')
 tag_regex2 = re.compile(r'__([\w-]+)__')
@@ -46,7 +46,7 @@ def get_wildcards_samples(path="root"):
     for wildcard in wildcards_list_all:
         words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
         words = [x.split('?')[0] for x in words if x != '' and not wildcard_regex.findall(x)]
-        words = [x.split(';')[0] for x in words]
+        #words = [x.split(';')[0] for x in words]
 
         templates = [x for x in words if '|' in x]  #  word|template|weight_range
         for line in templates:
@@ -267,10 +267,11 @@ def apply_arrays(text, index, arrays, mult):
 
     i = 0
     for arr in arrays:
-        if not tag_regex2.findall(chosen_words[i]):
-            text = text.replace(f'[{tags[i]}]', chosen_words[i], 1)
-        else:
-            text = text.replace(f'[{tags[i]}]', tags[i], 1)
+        if i<len(tags) and i<len(chosen_words):
+            if not tag_regex2.findall(chosen_words[i]):
+                text = text.replace(f'[{tags[i]}]', chosen_words[i], 1)
+            else:
+                text = text.replace(f'[{tags[i]}]', tags[i], 1)
         i = i+1
 
     return text
