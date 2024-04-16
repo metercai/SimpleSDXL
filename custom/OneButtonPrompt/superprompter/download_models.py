@@ -11,7 +11,7 @@ def download_models():
     os.makedirs(modelDir, exist_ok=True)
     tokenizer.save_pretrained(modelDir)
     model.save_pretrained(modelDir)
-    print("Downloaded SuperPrompt-v1 model files to", modelDir)
+    print("[SuperPrompt] Downloaded SuperPrompt-v1 model files to", modelDir)
     return modelDir
 
 if __name__ == '__main__':
