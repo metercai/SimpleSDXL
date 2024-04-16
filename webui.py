@@ -270,6 +270,7 @@ with shared.gradio_root:
                             mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint', value=False)
                             inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
                             invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
+                        with gr.Row():
                             with gr.Column():
                                 inpaint_input_image = grh.Image(label='Drag inpaint or outpaint image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
                                 inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.flags.inpaint_option_default, label='Method')
