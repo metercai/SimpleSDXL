@@ -12,7 +12,7 @@ modelDir = os.path.join(script_dir, "./model_files/" )
 def load_models():
  
     if not all(os.path.exists(modelDir) for file in modelDir):
-        print("Model files not found. Downloading...\n")
+        print("[SuperPrompt] Model files not found. Downloading...\n")
         download_models()
     # else:
         # print("Model files found. Skipping download.\n")
