@@ -25,5 +25,7 @@ mistune==3.0.2
 sacremoses==0.1.1
 translators==5.8.9
 sentencepiece==0.1.99
+face-alignment
+rtmlib
 ./enhanced/libs/rembg-2.0.54-py3-none-any.whl
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
