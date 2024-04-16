@@ -31,6 +31,7 @@ def csv_to_list(csvfilename, antilist=[], directory="./csvfiles/", lowerandstrip
         full_path = os.path.join(script_dir, directory )
         userfilesfolder = os.path.join(script_dir, userfilesdirectory )
         directoryfilesfolder = os.path.join(script_dir, directory )
+        
         # check if there is a replace file
         if(directory=="./csvfiles/" or directory=="./csvfiles/special_lists/" or directory=="./csvfiles/templates/"):      
                 for filename in os.listdir(userfilesfolder):
@@ -81,7 +82,27 @@ def csv_to_list(csvfilename, antilist=[], directory="./csvfiles/", lowerandstrip
                                                                 csvlist.append(row[0].lower().strip())        
                                                         else:
                                                                 csvlist.append(row[0])
-                
+        # dirty hack for possible .txt files
+        if(os.path.isfile(full_path + csvfilename + ".txt")):
+                with open(full_path + csvfilename + ".txt", "r", newline="",encoding="utf8") as file:
+                        reader = csv.reader(file, delimiter=delimiter)
+                        if(skipheader==True):
+                                next(reader)
+                        if(listoflistmode==True):
+                                csvlist = list(reader)
+                        else:
+                                for row in reader:
+                                        value = row[0]
+                                        if( 
+                                                gender != "all" and (row[1] == gender or row[1] == "genderless" or row[1] == "both")
+                                                or gender == "all"
+                                                ):
+                                                if(value.lower().strip() not in antilist):
+                                                        if(lowerandstrip == 1):
+                                                                csvlist.append(row[0].lower().strip())        
+                                                        else:
+                                                                csvlist.append(row[0])
+
         # do the add ons!
         if(directory=="./csvfiles/" or directory=="./csvfiles/special_lists/"):
                 if(os.path.isfile(userfilesfolder + csvfilename + "_addon" + ".csv")):
@@ -121,6 +142,8 @@ def csv_to_list(csvfilename, antilist=[], directory="./csvfiles/", lowerandstrip
 
 def artist_category_by_category_csv_to_list(csvfilename,artist):
         csvlist = []
+        mediumlist = []
+        descriptionlist = []
         script_dir = os.path.dirname(os.path.abspath(__file__))
         full_path = os.path.join(script_dir, "./csvfiles/" )
         with open(full_path + csvfilename + ".csv", "r", newline="",encoding="utf8") as file:
@@ -128,7 +151,9 @@ def artist_category_by_category_csv_to_list(csvfilename,artist):
                 for row in reader:
                         if(row["Artist"] == artist):
                                 csvlist.append(row["Tags"])
-        return csvlist
+                                mediumlist.append(row["Medium"])
+                                descriptionlist.append(row["Description"])
+        return csvlist, mediumlist, descriptionlist
 
 def artist_category_csv_to_list(csvfilename,category):
         csvlist = []
@@ -139,6 +164,16 @@ def artist_category_csv_to_list(csvfilename,category):
                 for row in reader:
                         if(row[category] == "1"):
                                 csvlist.append(row["Artist"])
+        return csvlist
+
+def artist_descriptions_csv_to_list(csvfilename):
+        csvlist = []
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        full_path = os.path.join(script_dir, "./csvfiles/" )
+        with open(full_path + csvfilename + ".csv", "r", newline="",encoding="utf8") as file:
+                reader = csv.DictReader(file, delimiter=",")
+                for row in reader:
+                        csvlist.append(row["Description"])
         return csvlist
 
 def load_config_csv():
@@ -219,4 +254,26 @@ def load_all_artist_and_category():
 
         return artistlist, categorylist
 
+def sort_and_dedupe_csv_file():
+        tokenlist = csv_to_list(csvfilename="tokens",skipheader=False)
+        tokenlist = sorted(set(tokenlist))
+        newlist = []
+        for i in tokenlist:
+                j = i.lower()
+                result = all(c == i[0] for c in i)
+                if result:
+                        print("String {} have all characters same".format(i))
+                else:
+                        newlist.append(j)
         
+        
+        newlist = sorted(set(newlist))
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        full_path = os.path.join(script_dir, "./csvfiles/special_lists/tokenwriter.csv" )
+        with open(full_path, 'w', encoding="utf8") as fp:
+                for item in newlist:
+                        # write each item on a new line
+                        fp.write("%s\n" % item)
+

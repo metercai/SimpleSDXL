@@ -394,3 +394,84 @@ progress::after {
   border-radius-top: 5px;
   display: none; /* 删除此以在预览图像中启用工具提示 */
 }
+
+.systemMsg {
+    position: absolute;
+    z-index: 1002;
+    top: 0%;
+    left: 5%;
+    right: 5%;
+    height: 45px;
+    overflow: auto;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.systemMsgBox {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 2px;
+    font-size: 12px;
+}
+.systemMsgBox::-webkit-scrollbar {
+    border: 1px !important;
+}
+
+.systemMsgClose {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+}
+
+iframe::-webkit-scrollbar {
+    display: none;
+}
+
+.preset_bar {
+    text-align: center;
+    padding: 0px;
+}
+
+.bar_title {
+    width: 60px !important;
+    padding: 0px;
+    position: absolute;
+    left: 5px;
+    top: 2px
+}
+
+.bar_button {
+    width: 80px !important;
+    padding: 0px;
+}
+
+#presetPreviewOverlay {
+    opacity: 0;
+    pointer-events: none;
+    width: 128px;
+    height: 128px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    border: solid 1px lightgrey;
+    transform: translate(-140px, 20px);
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    z-index: 100;
+    transition: transform 0.1s ease, opacity 0.3s ease;
+}
+
+.preset-tooltip {
+  background-color: #fff8;
+  font-family: monospace;
+  text-align: center;
+  border-radius-top: 5px;
+  font-size: 12px;
+  max-width: 128px;
+  overflow: hidden;
+  line-height: 18px;
+}
+

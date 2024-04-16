@@ -110,6 +110,62 @@ function showSysMsg(message, theme) {
     sysmsg.style.display = "block";
 }
 
+function initPresetPreviewOverlay() {
+    let overlayVisible = false;
+    const samplesPath = document.querySelector("meta[name='preset-samples-path']").getAttribute("content")
+    const overlay = document.createElement('div');
+    const tooltip = document.createElement('div');
+    tooltip.className = 'preset-tooltip';
+    overlay.appendChild(tooltip);
+    overlay.id = 'presetPreviewOverlay';
+    document.body.appendChild(overlay);
+    document.addEventListener('mouseover', async function (e) {
+        const label = e.target.closest('.bar_button');
+        if (!label) return;
+        label.removeEventListener("mouseout", onMouseLeave);
+        label.addEventListener("mouseout", onMouseLeave);
+        const originalText = label.getAttribute("data-original-text");
+        let name = originalText || label.textContent;
+	if (name!=" ") {
+	    let download = false;
+	    if (name.endsWith('\u2B07')) {
+    	   	name = name.slice(0, -1);
+    		download = true;
+	    }
+	    overlayVisible = true;
+	    overlay.style.opacity = "1";
+            overlay.style.backgroundImage = `url("${samplesPath.replace(
+                "default",
+                name.toLowerCase().replaceAll(" ", "_")
+            ).replaceAll("\\", "\\\\")}")`;
+	
+            let text = await fetchPresetDataFor(name);
+	    if (download) text += ' '+'\u2B07'+"需要下载模型";
+	    tooltip.textContent = text;
+	}
+        function onMouseLeave() {
+            overlayVisible = false;
+            overlay.style.opacity = "0";
+            overlay.style.backgroundImage = "";
+            label.removeEventListener("mouseout", onMouseLeave);
+        }
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!overlayVisible) return;
+        overlay.style.left = `${e.clientX}px`;
+        overlay.style.top = `${e.clientY}px`;
+        overlay.className = e.clientY > window.innerHeight / 2 ? "lower-half" : "upper-half";
+    });
+}
+
+async function fetchPresetDataFor(name) {
+    let time_ver = "t="+Date.now()+"."+Math.floor(Math.random() * 10000)
+    const response = await fetch(`${webpath}/presets/${name}.json?${time_ver}`);
+    const data = await response.json();
+    let pos = data.default_model.lastIndexOf('.');
+    return data.default_model.substring(0,pos);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const sysmsg = document.createElement('div');
     sysmsg.id = "sys_msg";
@@ -153,6 +209,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     document.body.appendChild(sysmsg);
-
+    initPresetPreviewOverlay();
 });
 

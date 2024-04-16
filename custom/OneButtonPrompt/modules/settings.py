@@ -1,6 +1,5 @@
 import json
 from os.path import exists
-from pathlib import Path
 
 from custom.OneButtonPrompt.shared import path_manager
 from custom.OneButtonPrompt.utils import path_fixed
@@ -28,14 +27,14 @@ DEFAULT_SETTINGS = {
     "lora_5_weight": path_manager.default_model_names["default_lora_weight"],
     "theme": "None",
     "auto_negative_prompt": True,
-    "OBP_preset": "Standard"
+    "OBP_preset": "Standard",
+    "hint_chance": 25
 }
 
 
 def load_settings():
-    settings_path = Path(path_fixed("settings/settings.json"))
-    if settings_path.exists():
-        with settings_path.open() as f:
+    if exists(path_fixed("settings/settings.json")):
+        with open(path_fixed("settings/settings.json")) as f:
             settings = json.load(f)
     else:
         settings = {}
@@ -48,7 +47,7 @@ def load_settings():
             changed = True
 
     if changed:
-        with settings_path.open("w") as f:
+        with open(path_fixed("settings/settings.json"), "w") as f:
             json.dump(settings, f, indent=2)
 
     return settings
