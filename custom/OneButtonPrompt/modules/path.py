@@ -13,6 +13,7 @@ class PathManager:
         "path_controlnet": root_path_fixed("../models/controlnet/"),
         "path_vae_approx": root_path_fixed("../models/vae_approx/"),
         "path_preview": root_path_fixed("../outputs/preview.jpg"),
+        "path_faceswap": root_path_fixed("../models/faceswap/"),
         "path_upscalers": root_path_fixed("../models/upscale_models"),
         "path_outputs": root_path_fixed("../outputs/"),
         "path_clip": root_path_fixed("../models/clip/"),
@@ -50,6 +51,7 @@ class PathManager:
             "vae_approx_path": self.get_abspath_folder(self.paths["path_vae_approx"]),
             "temp_outputs_path": self.get_abspath_folder(self.paths["path_outputs"]),
             "temp_preview_path": self.get_abspath(self.paths["path_preview"]),
+            "faceswap_path": self.get_abspath_folder(self.paths["path_faceswap"]),
             "upscaler_path": self.get_abspath_folder(self.paths["path_upscalers"]),
             "clip_path": self.get_abspath_folder(self.paths["path_clip"]),
         }
@@ -85,7 +87,7 @@ class PathManager:
                 txtcheck = Path(os.path.join(self.loras_keywords_path, path.with_suffix(".txt").name))
                 if not txtcheck.exists():
                     hash = civit.model_hash(str(path))
-                    print(f"[OneButtonPrompt] Downloading LoRA keywords for {path.name}")
+                    print(f"[OneButtonPrompt] Downloading LoRA keywords for {path}")
                     models = civit.get_models_by_hash(hash)
                     keywords = civit.get_keywords(models)
                     txtcheck.parent.mkdir(parents=True, exist_ok=True)

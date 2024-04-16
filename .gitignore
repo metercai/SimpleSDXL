@@ -73,6 +73,7 @@ wd-v1-4-moat-tagger-v2.csv
 /custom/OneButtonPrompt/settings/settings.json
 /custom/OneButtonPrompt/models/loras/
 /custom/OneButtonPrompt/random_prompt/userfiles/obp_presets.json
+/custom/OneButtonPrompt/superprompter/model_files/
 .github/workflows/
 .token_user.pem
 .user_Pq69KpDwNenAq2aA33kyo9rw15xrEgiPn.did
@@ -84,3 +85,4 @@ outputs.1/
 pyproject.toml
 src/
 test/
+repos/

@@ -1,6 +1,7 @@
 import os
 import ssl
 import sys
+from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
 print('[System ARGV] ' + str(sys.argv))
@@ -22,7 +23,7 @@ import fooocus_version
 import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, repo_dir
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
@@ -38,9 +39,20 @@ def prepare_environment():
     if is_win32_standalone_build:
         torch_command += f' -t {target_path_win}'
 
+    comfy_repo = os.environ.get(
+        "COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git"
+    )
+    comfy_commit_hash = os.environ.get(
+        "COMFY_COMMIT_HASH", "30abc324c2f73e6b648093ccd4741dece20be1e5"
+    )
+
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
+
+    comfyui_name = "ComfyUI-SAI"
+    git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
+    sys.path.append(str(repo_dir(comfyui_name)))
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)

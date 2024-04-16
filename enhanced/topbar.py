@@ -21,56 +21,6 @@ from modules.model_loader import load_file_from_url, load_file_from_muid
 
 
 css = '''
-.systemMsg {
-    position: absolute;
-    z-index: 1002;
-    top: 0%;
-    left: 5%;
-    right: 5%;
-    height: 45px;
-    overflow: auto;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-.systemMsgBox {
-    position: absolute;
-    left: 24px;
-    right: 24px;
-    top: 2px;
-    font-size: 12px;
-}
-.systemMsgBox::-webkit-scrollbar {
-    border: 1px !important;
-}
-
-.systemMsgClose {
-    position: absolute;
-    top: 0px;
-    right: 5px;
-}
-
-iframe::-webkit-scrollbar {
-    display: none;
-}
-
-.preset_bar {
-    text-align: center;
-    padding: 0px;
-}
-
-.bar_title {
-    width: 60px !important;
-    padding: 0px;
-    position: absolute;
-    left: 5px;
-    top: 2px
-}
-
-.bar_button {
-    width: 80px !important;
-    padding: 0px;
-}
 '''
 
 # app context

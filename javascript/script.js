@@ -169,7 +169,7 @@ function initStylePreviewOverlay() {
             name.toLowerCase().replaceAll(" ", "_")
         ).replaceAll("\\", "\\\\")}")`;
 
-        tooltip.textContent = name;
+        tooltip.textContent = label.querySelector("span").textContent || name;
 
         function onMouseLeave() {
             overlayVisible = false;

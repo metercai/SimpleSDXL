@@ -219,8 +219,9 @@ with shared.gradio_root:
                             with gr.Column():
                                 uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
                             with gr.Column():
+                                mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale', value=False)
                                 uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
-                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
+                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a> ')
                     with gr.TabItem(label='Image Prompt') as ip_tab:
                         with gr.Row():
                             ip_images = []
@@ -266,6 +267,9 @@ with shared.gradio_root:
                                            queue=False, show_progress=False)
                     with gr.TabItem(label='Inpaint or Outpaint') as inpaint_tab:
                         with gr.Row():
+                            mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint', value=False)
+                            inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
+                            invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
                             with gr.Column():
                                 inpaint_input_image = grh.Image(label='Drag inpaint or outpaint image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
                                 inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.flags.inpaint_option_default, label='Method')
@@ -599,10 +603,10 @@ with shared.gradio_root:
                         skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
                                                                info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
 
-                        mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale',
-                                                                           value=False)
-                        mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint',
-                                                                      value=False)
+                        #mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale',
+                        #                                                   value=False)
+                        #mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint',
+                        #                                              value=False)
 
                         controlnet_softness = gr.Slider(label='Softness of ControlNet', minimum=0.0, maximum=1.0,
                                                         step=0.001, value=0.25,
@@ -638,8 +642,8 @@ with shared.gradio_root:
                                                             info='Positive value will make white area in the mask larger, '
                                                                  'negative value will make white area smaller.'
                                                                  '(default is 0, always process before any mask invert)')
-                        inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
-                        invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
+                        #inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
+                        #invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
 
                         inpaint_ctrls = [debugging_inpaint_preprocessor, inpaint_disable_initial_latent, inpaint_engine,
                                          inpaint_strength, inpaint_respective_field,
