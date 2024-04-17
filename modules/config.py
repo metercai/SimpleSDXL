@@ -745,6 +745,17 @@ def downloading_upscale_model():
     )
     return os.path.join(path_upscale_models, 'fooocus_upscaler_s409985e5.bin')
 
+
+def downloading_superprompter_model():
+    path_superprompter = os.path.join(path_llms, "superprompt-v1")
+    load_file_from_url(
+        url='https://huggingface.co/roborovski/superprompt-v1/resolve/main/model.safetensors',
+        model_dir=path_superprompter,
+        file_name='model.safetensors'
+    )
+    return os.path.join(path_superprompter, 'model.safetensors')
+
+
 def downloading_dwposeprocess_model():
     results = []
     # yolox_l.onnx
