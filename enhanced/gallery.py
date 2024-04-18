@@ -22,7 +22,7 @@ image_types = ['.png', '.jpg', '.jpeg', '.webp']
 def refresh_output_list(max_per_page):
     global image_types
 
-    listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and os.path.isdir(os.path.join(config.path_outputs,f))]
+    listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and f!="temp_out" and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
         return None
     listdirs1 = listdirs.copy()

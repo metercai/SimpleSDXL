@@ -238,6 +238,7 @@
   "Generate Engine": "生图引擎",
   "Local": "本机",
   "SD3 Api": "SD3接口",
+  "SD3Turbo Api": "SD3Turbo接口",
 
   "SuperPrompter": "超级提示词扩展",
   "Replace Fooocus V2 to expand the prompt text.": "启用超级提示词扩展，增强细节，同时禁用Fooocus V2。",

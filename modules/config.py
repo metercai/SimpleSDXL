@@ -589,6 +589,8 @@ def add_ratio(x):
 default_aspect_ratio = add_ratio(default_aspect_ratio)
 available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 
+sd3_default_aspect_ratio = '16:9'
+sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
 
 # Only write config in the first launch.
 if not os.path.exists(config_path):

@@ -395,9 +395,8 @@ with shared.gradio_root:
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
                 image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
-                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
-                                                   value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)',
-                                                   elem_classes='aspect_ratios')
+                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios_sd3')
                 output_format = gr.Radio(label='Output Format',
                                             choices=flags.OutputFormat.list(),
                                             value=modules.config.default_output_format)
@@ -723,7 +722,7 @@ with shared.gradio_root:
                     gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
 
             translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
-            ehps = [backfill_prompt, translation_timing, translation_methods, super_prompter, super_prompter_prompt]
+            ehps = [backfill_prompt, translation_timing, translation_methods, super_prompter, super_prompter_prompt, backend_selection, sd3_aspect_ratios_selection]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -783,7 +782,15 @@ with shared.gradio_root:
                                          scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
                                      ], queue=False, show_progress=False)
         
-        
+        def toggle_engine(x):
+            if x=='SD3 Api' or x=='SD3Turbo Api':
+                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True)]
+            else:
+                results = [gr.update(interactive=True), gr.update(visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False)]
+            return results
+
+        backend_selection.change(toggle_engine, inputs=backend_selection, outputs = [input_image_checkbox, performance_selection, image_number, aspect_ratios_selection, sd3_aspect_ratios_selection], queue=False, show_progress=False)
+
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         
         advanced_checkbox.change(lambda x: gr.update(visible=x), advanced_checkbox, advanced_column,

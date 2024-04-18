@@ -113,6 +113,18 @@ progress::after {
     margin-left: -5px !important;
 }
 
+.aspect_ratios_sd3 label {
+    width: 100px !important;
+}
+
+.aspect_ratios_sd3 label span {
+    white-space: nowrap !important;
+}
+
+.aspect_ratios_sd3 label input {
+    margin-left: -5px !important;
+}
+
 .lora_enable label {
   height: 100%;
 }
