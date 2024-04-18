@@ -80,3 +80,4 @@ wd-v1-4-moat-tagger-v2.csv
 /models/controlnet/huggingface/
 /models/controlnet/matplotlib/
 /models/controlnet/torch/
+enhanced/api_token.json

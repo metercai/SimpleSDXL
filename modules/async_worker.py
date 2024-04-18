@@ -39,7 +39,7 @@ def worker():
     import modules.inpaint_worker as inpaint_worker
     import modules.constants as constants
     import enhanced.translator as translator
-    import enhanced.enhanced_parameters as enhanced_parameters
+    import enhanced.enhanced_parameters as ehps
     import enhanced.wildcards as wildcards
     import extras.ip_adapter as ip_adapter
     import extras.face_crop
@@ -199,9 +199,31 @@ def worker():
         save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
         metadata_scheme = MetadataScheme(args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
 
-        if enhanced_parameters.translation_timing != 'No translate':
-            prompt = translator.convert(prompt, enhanced_parameters.translation_methods)
-            negative_prompt = translator.convert(negative_prompt, enhanced_parameters.translation_methods)
+        if ehps.translation_timing != 'No translate':
+            prompt = translator.convert(prompt, ehps.translation_methods)
+            negative_prompt = translator.convert(negative_prompt, ehps.translation_methods)
+        
+        import enhanced.sd3_handle as sd3_handle
+        if ehps.backend_selection == 'SD3 Api' or ehps.backend_selection == 'SD3Turbo Api':
+            if ehps.backend_selection == 'SD3 Api':
+                model = 'sd3'
+            else:
+                model = 'sd3-turbo'
+            out_path_filename = sd3_handle.sd3_generate_api(prompt=prompt, model=model, aspect_ratio=ehps.sd3_aspect_ratios_selection, negative_prompt=negative_prompt, seed=int(image_seed), output_format=output_format)
+
+            from PIL import Image
+            with Image.open(out_path_filename) as image:
+                img = np.array(image)
+            width, height = image.size
+            d = [('Prompt', 'prompt', prompt),
+                 ('Negative Prompt', 'negative_prompt', negative_prompt),
+                 ('Base Model', 'base_model', model),
+                 ('Resolution', 'resolution', str((width, height))),
+                 ('Seed', 'seed', image_seed)]
+            sd3_image_path = log(img, d, output_format=output_format)
+            yield_result(async_task, sd3_image_path, do_not_show_finished_images=True)    
+            async_task.processing = False
+            return
 
         cn_tasks = {x: [] for x in flags.ip_list}
         for _ in range(flags.controlnet_image_count):
@@ -492,10 +514,10 @@ def worker():
                     log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 ))
             
-            if enhanced_parameters.super_prompter:
+            if ehps.super_prompter:
                 import enhanced.superprompter as superprompter
                 for i, t in enumerate(tasks):
-                    question = f'{enhanced_parameters.super_prompter_prompt} {t["task_prompt"]}'
+                    question = f'{ehps.super_prompter_prompt} {t["task_prompt"]}'
                     progressbar(async_task, 5, f'Preparing SuperPrompt text #{i + 1} ...')
                     superpromptresult = superprompter.answer(input_text=question, max_new_tokens=77, repetition_penalty=2.0, temperature=0.8, top_p=1, top_k=10, seed=t['task_seed'])
                     print(f'[SuperPrompt] {superpromptresult}')
