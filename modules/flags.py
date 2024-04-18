@@ -93,6 +93,8 @@ desc_type_anime = 'Art/Anime'
 translation_timing = ['Translate then generate', 'Modify after translate', 'No translate']
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
+backend_engine_list = ['Local', 'SD3 Api']
+
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'
     A1111 = 'a1111'

@@ -160,6 +160,8 @@ function(system_params) {
         theme=url_params["__theme"];
         system_params["__theme"]=theme;
     }
+    setObserver();
+
     return system_params;
 }
 '''
@@ -653,6 +655,56 @@ def reset_params(metadata):
         results += [gr.update(value=False)]
     results += [gr.update(value=freeu_b1), gr.update(value=freeu_b2), gr.update(value=freeu_s1), gr.update(value=freeu_s2) ]
     return results
-                                                                                                                                            
+
+
+def prompt_token_prediction(text, style_selections):
+    import shared
+    return len(shared.tokenizer.tokenize(text))
+
+    from extras.expansion import safe_str
+    from modules.util import remove_empty_str
+    import enhanced.translator as translator
+    import enhanced.enhanced_parameters as enhanced_parameters
+    import enhanced.wildcards as wildcards
+    from modules.sdxl_styles import apply_style, fooocus_expansion
+
+    prompt = translator.convert(text, enhanced_parameters.translation_methods)
+    return len(shared.tokenizer.tokenize(prompt))
+    
+    if fooocus_expansion in style_selections:
+        use_expansion = True
+        style_selections.remove(fooocus_expansion)
+    else:
+        use_expansion = False
+
+    use_style = len(style_selections) > 0
+    prompts = remove_empty_str([safe_str(p) for p in prompt.splitlines()], default='')
+
+    prompt = prompts[0]
+
+    if prompt == '':
+        # disable expansion when empty since it is not meaningful and influences image prompt
+        use_expansion = False
+
+    extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
+    task_rng = random.Random(random.randint(constants.MIN_SEED, constants.MAX_SEED))
+    prompt, wildcards_arrays, arrays_mult, seed_fixed = wildcards.compile_arrays(prompt, task_rng)
+    task_prompt = wildcards.apply_arrays(prompt, 0, wildcards_arrays, arrays_mult)
+    task_prompt = wildcards.replace_wildcard(task_prompt, task_rng)
+    task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
+    positive_basic_workloads = []
+    use_style = False
+    if use_style:
+        for s in style_selections:
+            p, n = apply_style(s, positive=task_prompt)
+            positive_basic_workloads = positive_basic_workloads + p
+    else:
+        positive_basic_workloads.append(task_prompt)
+    positive_basic_workloads = positive_basic_workloads + task_extra_positive_prompts
+    positive_basic_workloads = remove_empty_str(positive_basic_workloads, default=task_prompt)
+    #print(f'positive_basic_workloads:{positive_basic_workloads}')
+    return len(shared.tokenizer.tokenize(positive_basic_workloads[0]))
+
+
 nav_name_list = get_preset_name_list()
 system_message = get_system_message()
