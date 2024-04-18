@@ -518,6 +518,12 @@ default_backfill_prompt = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool)
 )
 
+default_backend = get_config_item_or_set_default(
+    key='default_backend',
+    default_value='Local',
+    validator=lambda x: x in modules.flags.backend_engine_list
+)
+
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
 # mapping config to meta parameter 

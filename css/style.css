@@ -475,3 +475,23 @@ iframe::-webkit-scrollbar {
   line-height: 18px;
 }
 
+div.block.tokenCounter {
+  width: auto;
+  position: absolute;
+  right: 0.4em;
+  bottom: 0.4em;
+  padding: 0 0.5em;
+  opacity: 0.5;
+  color: var(--neutral-100);
+  background-color: var(--secondary-400);
+  border-radius: var(--radius-md);
+}
+
+div.block.tokenCounter div.wrap.center.full {
+  display: none !important;
+}
+
+div.prose.tokenCounter {
+  min-height: auto;
+}
+

@@ -160,6 +160,17 @@ with shared.gradio_root:
                     with gr.Column(scale=17):
                         prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
                                         container=False, autofocus=False, elem_classes='type_row', lines=1024)
+                        def calculateTokenCounter(text, style_selections):
+                            if len(text) < 1:
+                                return 0
+                            num=topbar.prompt_token_prediction(text, style_selections)
+                            return str(num)
+                        prompt_token_counter = gr.HTML(
+                            visible=True,
+                            value=0,
+                            elem_classes=["tokenCounter"],
+                            elem_id='token_counter',
+                        )
 
                         default_prompt = modules.config.default_prompt
                         if isinstance(default_prompt, str) and default_prompt != '':
@@ -379,6 +390,7 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 interactive=True)
+                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engine_list, value=modules.config.default_backend)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
@@ -456,6 +468,7 @@ with shared.gradio_root:
                                                        queue=False,
                                                        show_progress=False).then(
                     lambda: None, _js='()=>{refresh_style_localization();}')
+                prompt.change(lambda x,y: calculateTokenCounter(x,y), inputs=[prompt, style_selections], outputs=prompt_token_counter)
 
             with gr.Tab(label='Model'):
                 with gr.Group():
@@ -703,11 +716,14 @@ with shared.gradio_root:
                 import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
                 run_event = gr.Number(visible=False, value=0)
                 ui_onebutton.ui_onebutton(prompt, run_event)
+                with gr.Tab(label="SuperPrompter"):
+                    super_prompter = gr.Checkbox(label='Enable SuperPrompter', value=False, info='Replace Fooocus V2 to expand the prompt text.')
+                    super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
                     gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
 
             translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
-            ehps = [backfill_prompt, translation_timing, translation_methods]
+            ehps = [backfill_prompt, translation_timing, translation_methods, super_prompter, super_prompter_prompt]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -766,6 +782,7 @@ with shared.gradio_root:
                                          adm_scaler_negative, refiner_switch, refiner_model, sampler_name,
                                          scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
                                      ], queue=False, show_progress=False)
+        
         
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         

@@ -491,18 +491,28 @@ def worker():
                     log_positive_prompt='\n'.join([task_prompt] + task_extra_positive_prompts),
                     log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 ))
-
-            if use_expansion:
+            
+            if enhanced_parameters.super_prompter:
+                import enhanced.superprompter as superprompter
                 for i, t in enumerate(tasks):
-                    progressbar(async_task, 5, f'Preparing Fooocus text #{i + 1} ...')
-                    expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
-                    print(f'[Prompt Expansion] {expansion}')
-                    t['expansion'] = expansion
-                    t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
+                    question = f'{enhanced_parameters.super_prompter_prompt} {t["task_prompt"]}'
+                    progressbar(async_task, 5, f'Preparing SuperPrompt text #{i + 1} ...')
+                    superpromptresult = superprompter.answer(input_text=question, max_new_tokens=77, repetition_penalty=2.0, temperature=0.8, top_p=1, top_k=10, seed=t['task_seed'])
+                    print(f'[SuperPrompt] {superpromptresult}')
+                    t['positive'] = copy.deepcopy([superpromptresult])
+            else:
+                if use_expansion:
+                    for i, t in enumerate(tasks):
+                        progressbar(async_task, 5, f'Preparing Fooocus text #{i + 1} ...')
+                        expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
+                        print(f'[Prompt Expansion] {expansion}')
+                        t['expansion'] = expansion
+                        t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
 
             for i, t in enumerate(tasks):
                 progressbar(async_task, 7, f'Encoding positive #{i + 1} ...')
                 t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
+                print(f'clip_encode text: {t["positive"]}')
 
             for i, t in enumerate(tasks):
                 if abs(float(cfg_scale) - 1.0) < 1e-4:
