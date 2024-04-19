@@ -236,7 +236,7 @@
   "Preview Metadata": "参数预览",
   "The preset package being loaded has model files that need to be downloaded, and it will take some time to wait...": "正在加载的预置包中有需要下载的模型文件，需要耐心等待一段时间。",
   "Generate Engine": "生图引擎",
-  "Local": "本机",
+  "SDXL": "SDXL",
   "SD3 Api": "SD3接口",
   "SD3Turbo Api": "SD3Turbo接口",
 

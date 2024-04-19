@@ -1,6 +1,5 @@
 import os
 from transformers import CLIPTokenizer
-from modules.config import path_clip_vision
 
 gradio_root = None
 

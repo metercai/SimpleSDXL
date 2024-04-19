@@ -13,7 +13,7 @@ def answer(input_text="", max_new_tokens=512, repetition_penalty=1.2, temperatur
     global tokenizer, model
 
     if tokenizer is None or model is None:
-        if not all(os.path.exists(os.path.join(modelDir, "model.safetensors")) for file in modelDir):
+        if not os.path.exists(os.path.join(modelDir, "model.safetensors")):
             config.downloading_superprompter_model()
             print("[SuperPrompt] Downloaded the model file for superprompter. \n")
 

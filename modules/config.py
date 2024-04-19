@@ -520,7 +520,7 @@ default_backfill_prompt = get_config_item_or_set_default(
 
 default_backend = get_config_item_or_set_default(
     key='default_backend',
-    default_value='Local',
+    default_value='SDXL',
     validator=lambda x: x in modules.flags.backend_engine_list
 )
 
