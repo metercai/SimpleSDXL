@@ -252,7 +252,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
-    #print(f'system_params:{state_params}')
+    print(f'in init nav bars')
     results = refresh_nav_bars(state_params)
     results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -350,13 +350,15 @@ def reset_params_for_preset(state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 60 + [state_params]
+        return [gr.update()] * 61 + [state_params]
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": preset})
-    return reset_context(state_params)
+    results = [gr.update(value='SDXL')]
+    results += reset_context(state_params)
+    return results
 
 
 def reset_context(state_params):
