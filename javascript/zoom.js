@@ -91,21 +91,21 @@ onUiLoaded(async() => {
             const hotkeysInfo = [
                 {
                     configKey: "canvas_hotkey_zoom",
-                    action: "Zoom canvas",
+                    action: "缩放画布",
                     keySuffix: " + wheel"
                 },
                 {
                     configKey: "canvas_hotkey_adjust",
-                    action: "Adjust brush size",
+                    action: "调整笔刷大小",
                     keySuffix: " + wheel"
                 },
-                {configKey: "canvas_zoom_hotkey_undo", action: "Undo last action", keyPrefix: `${hotkeysConfig.canvas_zoom_undo_extra_key} + ` },
-                {configKey: "canvas_hotkey_reset", action: "Reset zoom"},
+                {configKey: "canvas_zoom_hotkey_undo", action: "回退上一步", keyPrefix: `${hotkeysConfig.canvas_zoom_undo_extra_key} + ` },
+                {configKey: "canvas_hotkey_reset", action: "重置画布"},
                 {
                     configKey: "canvas_hotkey_fullscreen",
-                    action: "Fullscreen mode"
+                    action: "全屏模式"
                 },
-                {configKey: "canvas_hotkey_move", action: "Move canvas"}
+                {configKey: "canvas_hotkey_move", action: "移动画布"}
             ];
 
             // Create hotkeys array based on the config values

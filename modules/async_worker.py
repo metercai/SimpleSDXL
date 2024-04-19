@@ -479,7 +479,18 @@ def worker():
                 task_negative_prompt = wildcards.apply_wildcards(negative_prompt, task_rng)
                 task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
                 task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
-            
+           
+                if ehps.super_prompter:
+                    import enhanced.superprompter as superprompter
+                    question = f'{ehps.super_prompter_prompt} {task_prompt}'
+                    progressbar(async_task, 5, f'Preparing SuperPrompt text #{i + 1} ...')
+                    superpromptresult = superprompter.answer(input_text=question, max_new_tokens=77, repetition_penalty=2.0, temperature=0.8, top_p=1, top_k=10, seed=task_seed)
+                    print(f'[SuperPrompt] {superpromptresult}')
+                    task_prompt = superpromptresult
+                    if fooocus_expansion in raw_style_selections:
+                        raw_style_selections.remove(fooocus_expansion)
+                        use_expansion = False
+
                 positive_basic_workloads = []
                 negative_basic_workloads = []
 
@@ -514,22 +525,13 @@ def worker():
                     log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 ))
             
-            if ehps.super_prompter:
-                import enhanced.superprompter as superprompter
+            if use_expansion:
                 for i, t in enumerate(tasks):
-                    question = f'{ehps.super_prompter_prompt} {t["task_prompt"]}'
-                    progressbar(async_task, 5, f'Preparing SuperPrompt text #{i + 1} ...')
-                    superpromptresult = superprompter.answer(input_text=question, max_new_tokens=77, repetition_penalty=2.0, temperature=0.8, top_p=1, top_k=10, seed=t['task_seed'])
-                    print(f'[SuperPrompt] {superpromptresult}')
-                    t['positive'] = copy.deepcopy([superpromptresult])
-            else:
-                if use_expansion:
-                    for i, t in enumerate(tasks):
-                        progressbar(async_task, 5, f'Preparing Fooocus text #{i + 1} ...')
-                        expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
-                        print(f'[Prompt Expansion] {expansion}')
-                        t['expansion'] = expansion
-                        t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
+                    progressbar(async_task, 5, f'Preparing Fooocus text #{i + 1} ...')
+                    expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
+                    print(f'[Prompt Expansion] {expansion}')
+                    t['expansion'] = expansion
+                    t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
 
             for i, t in enumerate(tasks):
                 progressbar(async_task, 7, f'Encoding positive #{i + 1} ...')
