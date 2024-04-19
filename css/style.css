@@ -75,6 +75,8 @@ progress::after {
 
 .type_row_half{
   height: 32px !important;
+  font-size: 14px !important; 
+  white-space: nowrap;
 }
 
 .scroll-hide{

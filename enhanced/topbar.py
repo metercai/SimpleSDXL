@@ -252,7 +252,6 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
-    print(f'in init nav bars')
     results = refresh_nav_bars(state_params)
     results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
     results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -658,10 +657,20 @@ def reset_params(metadata):
     results += [gr.update(value=freeu_b1), gr.update(value=freeu_b2), gr.update(value=freeu_s1), gr.update(value=freeu_s2) ]
     return results
 
+from transformers import CLIPTokenizer
+import shared
+import shutil
+
+cur_clip_path = os.path.join(config.path_clip_vision, "clip-vit-large-patch14")
+if not os.path.exists(cur_clip_path):
+    org_clip_path = os.path.join(shared.root, 'models/clip_vision/clip-vit-large-patch14')
+    shutil.copytree(org_clip_path, cur_clip_path)
+tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
+ 
 
 def prompt_token_prediction(text, style_selections):
-    import shared
-    return len(shared.tokenizer.tokenize(text))
+    global tokenizer
+    return len(tokenizer.tokenize(text))
 
     from extras.expansion import safe_str
     from modules.util import remove_empty_str
@@ -671,7 +680,7 @@ def prompt_token_prediction(text, style_selections):
     from modules.sdxl_styles import apply_style, fooocus_expansion
 
     prompt = translator.convert(text, enhanced_parameters.translation_methods)
-    return len(shared.tokenizer.tokenize(prompt))
+    return len(tokenizer.tokenize(prompt))
     
     if fooocus_expansion in style_selections:
         use_expansion = True
@@ -705,7 +714,7 @@ def prompt_token_prediction(text, style_selections):
     positive_basic_workloads = positive_basic_workloads + task_extra_positive_prompts
     positive_basic_workloads = remove_empty_str(positive_basic_workloads, default=task_prompt)
     #print(f'positive_basic_workloads:{positive_basic_workloads}')
-    return len(shared.tokenizer.tokenize(positive_basic_workloads[0]))
+    return len(tokenizer.tokenize(positive_basic_workloads[0]))
 
 
 nav_name_list = get_preset_name_list()
