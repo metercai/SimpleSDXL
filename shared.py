@@ -5,3 +5,5 @@ gradio_root = None
 
 root = launch.root
 
+torch_device = ''
+
