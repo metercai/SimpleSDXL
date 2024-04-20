@@ -11,8 +11,8 @@ model = None
 modelDir = os.path.join(config.path_llms, "superprompt-v1" )
 
 
-def answer(input_text="", max_new_tokens=512, repetition_penalty=1.2, temperature=0.5, top_p=1, top_k = 1 , seed=-1):
-    global tokenizer, model
+def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperature=0.5, top_p=1, top_k = 1 , seed=-1):
+    global tokenizer, model, modelDir
 
     if tokenizer is None or model is None:
         if not os.path.exists(modelDir):
@@ -23,21 +23,10 @@ def answer(input_text="", max_new_tokens=512, repetition_penalty=1.2, temperatur
             print("[SuperPrompt] Downloaded the model file for superprompter. \n")
 
         tokenizer = T5Tokenizer.from_pretrained(modelDir)
-        model = T5ForConditionalGeneration.from_pretrained(modelDir, torch_dtype=torch.float16)
+        model = T5ForConditionalGeneration.from_pretrained(modelDir, torch_dtype=torch.float16).to(shared.torch_device)
 
-    if seed == -1:
-        seed = random.randint(1, 1000000)
 
-    torch.manual_seed(seed)
-
-    if torch.cuda.is_available():
-        device = 'cuda'
-    else:
-        device = 'cpu'
-
-    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-    if torch.cuda.is_available():
-        model.to('cuda')
+    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(shared.torch_device)
 
     outputs = model.generate(input_ids, max_new_tokens=max_new_tokens, repetition_penalty=repetition_penalty,
                             do_sample=True, temperature=temperature, top_p=top_p, top_k=top_k)

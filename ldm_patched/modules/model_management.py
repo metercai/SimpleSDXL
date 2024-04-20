@@ -258,6 +258,8 @@ def get_torch_device_name(device):
 
 try:
     print("Device:", get_torch_device_name(get_torch_device()))
+    import shared
+    shared.torch_device = "{}".format(get_torch_device())
 except:
     print("Could not pick default device.")
 
