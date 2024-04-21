@@ -716,13 +716,15 @@ with shared.gradio_root:
                 run_event = gr.Number(visible=False, value=0)
                 ui_onebutton.ui_onebutton(prompt, run_event)
                 with gr.Tab(label="SuperPrompter"):
-                    super_prompter = gr.Checkbox(label='Enable SuperPrompter', value=False, info='Replace Fooocus V2 to expand the prompt text.')
+                    super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                     super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
                     gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
 
             translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
-            ehps = [backfill_prompt, translation_timing, translation_methods, super_prompter, super_prompter_prompt, backend_selection, sd3_aspect_ratios_selection]
+            import enhanced.superprompter
+            super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
+            ehps = [backfill_prompt, translation_timing, translation_methods, backend_selection, sd3_aspect_ratios_selection]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
