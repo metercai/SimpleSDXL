@@ -242,8 +242,7 @@
   "Zoom canvas": "缩放面板",
 
   "SuperPrompter": "超级提示词扩展",
-  "Replace Fooocus V2 to expand the prompt text.": "启用超级提示词扩展，增强细节，同时禁用Fooocus V2。",
-  "Enable SuperPrompter": "超级提示词扩展",
+  "<<SuperPrompt": "<<采用下面前缀扩展当前提示词",
   "Prompt prefix": "扩展提示前缀",
   "OneButtonPrompt": "一键提示OBP",
   "Random Prompt": "<<随机抽取提示",
