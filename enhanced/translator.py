@@ -134,6 +134,14 @@ def free_translator_model():
     del g_model
     return
 
+def toggle(text: str, method: str = 'Slim Model') -> str:
+    is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1
+    if is_chinese(text):
+        return convert(text, method)
+    else:
+        return convert(text, method, 'cn')
+
+
 def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
     global Q_alphabet, B_puncti, is_chinese
 
