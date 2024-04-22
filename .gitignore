@@ -77,7 +77,4 @@ wd-v1-4-moat-tagger-v2.csv
 .token_user.pem
 .user_Pq69KpDwNenAq2aA33kyo9rw15xrEgiPn.did
 /repos/
-/models/controlnet/huggingface/
-/models/controlnet/matplotlib/
-/models/controlnet/torch/
 enhanced/api_token.json

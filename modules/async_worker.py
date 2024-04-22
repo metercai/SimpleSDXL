@@ -330,7 +330,6 @@ def worker():
 
         controlnet_canny_path = None
         controlnet_cpds_path = None
-        controlnet_pose_info = [None]
         clip_vision_path, ip_negative_path, ip_adapter_path, ip_adapter_face_path = None, None, None, None
 
         seed = int(image_seed)
@@ -413,14 +412,10 @@ def worker():
                 if len(cn_tasks[flags.cn_ip_face]) > 0:
                     clip_vision_path, ip_negative_path, ip_adapter_face_path = modules.config.downloading_ip_adapters(
                         'face')
-                if len(cn_tasks[flags.cn_pose]) > 0:
-                    controlnet_pose_info = modules.config.downloading_openposeprocess_model()
-                    controlnet_dwpose_info = modules.config.downloading_dwposeprocess_model()
                 progressbar(async_task, 1, 'Loading control models ...')
 
         # Load or unload CNs
-        #pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
-        pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path] + controlnet_pose_info)
+        pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
         ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_path)
         ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_face_path)
 
@@ -525,7 +520,6 @@ def worker():
             for i, t in enumerate(tasks):
                 progressbar(async_task, 7, f'Encoding positive #{i + 1} ...')
                 t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
-                print(f'clip_encode text: {t["positive"]}')
 
             for i, t in enumerate(tasks):
                 if abs(float(cfg_scale) - 1.0) < 1e-4:
@@ -750,27 +744,6 @@ def worker():
                 if debugging_cn_preprocessor:
                     yield_result(async_task, cn_img, do_not_show_finished_images=True)
                     return
-            # add pose
-            for task in cn_tasks[flags.cn_pose]:
-                cn_img, cn_stop, cn_weight = task
-                cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-                from extras.controlnet_preprocess_model.dwpose import DWposeDetector, DWposeDetectorTrans
-                # pose_model = OpenPose(controlnet_pose_info)
-                if mixing_image_prompt_and_inpaint and inpaint_input_image is not None:
-                    pose_model = DWposeDetectorTrans(controlnet_dwpose_info)
-                    cn_img = preprocessors.poset(cn_img, HWC3(inpaint_input_image['image']), pose_model)
-                elif mixing_image_prompt_and_vary_upscale and uov_input_image is not None:
-                    pose_model = DWposeDetectorTrans(controlnet_dwpose_info)
-                    cn_img = preprocessors.poset(cn_img, HWC3(uov_input_image), pose_model)
-                else:
-                    pose_model = DWposeDetector(controlnet_dwpose_info)
-                    cn_img = preprocessors.pose(cn_img, pose_model)
-                cn_img = HWC3(cn_img)
-                task[0] = core.numpy_to_pytorch(cn_img)
-
-                if debugging_cn_preprocessor:
-                    yield_result(async_task, cn_img, do_not_show_finished_images=True)
-                    return
 
             for task in cn_tasks[flags.cn_ip]:
                 cn_img, cn_stop, cn_weight = task
@@ -863,8 +836,7 @@ def worker():
                 if 'cn' in goals:
                     for cn_flag, cn_path in [
                         (flags.cn_canny, controlnet_canny_path),
-                        (flags.cn_cpds, controlnet_cpds_path),
-                        (flags.cn_pose, controlnet_pose_info[0])
+                        (flags.cn_cpds, controlnet_cpds_path)
                     ]:
                         for cn_img, cn_stop, cn_weight in cn_tasks[cn_flag]:
                             positive_cond, negative_cond = core.apply_controlnet(
