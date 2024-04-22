@@ -304,7 +304,7 @@ if generateconceptmixer:
     subjectsubtypesconcept.append("concept mixer")
 
 
-def ui_onebutton(prompt, run_event):
+def ui_onebutton(prompt, run_event, random_button):
     def gen_prompt(
         insanitylevel,
         subject,
@@ -467,7 +467,7 @@ def ui_onebutton(prompt, run_event):
     with gr.Tab(label="OneButtonPrompt"):
         with gr.Row():
             # instant_obp = gr.Button(value="Instant OBP", size="sm", min_width = 1)
-            random_button = gr.Button(value="Random Prompt", size="sm", min_width = 1)
+            #random_button = gr.Button(value="Random Prompt", size="sm", min_width = 1)
             add_random_button = gr.Button(value="+More", size="sm", min_width=1)
 
         ##with gr.Row():

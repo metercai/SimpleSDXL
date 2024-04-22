@@ -157,7 +157,7 @@ with shared.gradio_root:
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
             with gr.Group():
                 with gr.Row(elem_classes='type_row'):
-                    with gr.Column(scale=17):
+                    with gr.Column(scale=12):
                         prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
                                         container=False, autofocus=False, elem_classes='type_row', lines=1024)
                         def calculateTokenCounter(text, style_selections):
@@ -175,11 +175,13 @@ with shared.gradio_root:
                         default_prompt = modules.config.default_prompt
                         if isinstance(default_prompt, str) and default_prompt != '':
                             shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
-
-                    with gr.Column(scale=3, min_width=0):
+                    with gr.Column(scale=2, min_width=0):
+                        random_button = gr.Button(value="RandomPrompt", elem_classes='type_row_third', size="sm", min_width = 1)
+                        translator_button = gr.Button(value="Translator", elem_classes='type_row_third', size='sm', min_width = 1)
+                        super_prompter = gr.Button(value="SuperPrompt", elem_classes='type_row_third', size="sm", min_width = 1)
+                    with gr.Column(scale=2, min_width=0):
                         generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
                         load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False)
-                        translator_button = gr.Button(label="Translator", value="Translator", elem_classes='type_row', elem_id='translator_button', visible=False)
                         skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
                         stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
 
@@ -714,9 +716,9 @@ with shared.gradio_root:
                 # custom plugin "OneButtonPrompt"
                 import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
                 run_event = gr.Number(visible=False, value=0)
-                ui_onebutton.ui_onebutton(prompt, run_event)
+                ui_onebutton.ui_onebutton(prompt, run_event, random_button)
                 with gr.Tab(label="SuperPrompter"):
-                    super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
+                    #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                     super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
                     gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
@@ -860,7 +862,7 @@ with shared.gradio_root:
         
         system_params = gr.JSON({}, visible=False)
         state_is_generating = gr.State(False)
-        def parse_meta(raw_prompt_txt, is_generating, timing, state_params):
+        def parse_meta(raw_prompt_txt, is_generating, state_params):
             loaded_json = None
             if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
                 return [gr.update()] * 4 + wildcards_array_show(state_params)
@@ -883,14 +885,13 @@ with shared.gradio_root:
                 if is_generating:
                     return [gr.update()] * 4 + wildcards_array_results
                 else:
-                    flag = (timing=='Modify after translate' and translator.is_chinese(raw_prompt_txt))
-                    return [gr.update(), gr.update(visible=not flag), gr.update(visible=False), gr.update(visible=flag)] + wildcards_array_results
+                    return [gr.update(), gr.update(visible=True), gr.update(visible=False)] + wildcards_array_results
 
-            return [json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)] + wildcards_array_results
+            return [json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True)] + wildcards_array_results
 
-        prompt.input(parse_meta, inputs=[prompt, state_is_generating, translation_timing, state_topbar], outputs=[prompt, generate_button, load_parameter_button, translator_button] + wildcards_array, queue=False, show_progress=False)
+        prompt.input(parse_meta, inputs=[prompt, state_is_generating, state_topbar], outputs=[prompt, generate_button, load_parameter_button] + wildcards_array, queue=False, show_progress=False)
         
-        translator_button.click(lambda x, y: [gr.update(value=translator.convert(x, y)), gr.update(visible=True), gr.update(visible=False)], inputs=[prompt, translation_methods], outputs=[prompt, generate_button, translator_button], queue=False, show_progress=False)
+        translator_button.click(lambda x, y: translator.convert(x, y), inputs=[prompt, translation_methods], outputs=prompt, queue=False, show_progress=False)
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=False)
 
