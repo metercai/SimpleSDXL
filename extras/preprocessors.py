@@ -82,10 +82,3 @@ def cpds(x):
 
 
 
-def pose(x, apply_openpose):
-    detected_map = apply_openpose(x)
-    return detected_map
-
-def poset(x, r, apply_openpose):
-    detected_map = apply_openpose(x, r)
-    return detected_map

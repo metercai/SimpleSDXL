@@ -268,7 +268,6 @@ with shared.gradio_root:
 
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
-                        #ip_advanced = gr.Checkbox(label='Advanced Control', value=False, container=False)
                         gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Document</a>')
 
                         def ip_advance_checked(x):
@@ -620,10 +619,6 @@ with shared.gradio_root:
                         skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
                                                                info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
 
-                        #mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale',
-                        #                                                   value=False)
-                        #mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint',
-                        #                                              value=False)
 
                         controlnet_softness = gr.Slider(label='Softness of ControlNet', minimum=0.0, maximum=1.0,
                                                         step=0.001, value=0.25,
@@ -659,8 +654,6 @@ with shared.gradio_root:
                                                             info='Positive value will make white area in the mask larger, '
                                                                  'negative value will make white area smaller.'
                                                                  '(default is 0, always process before any mask invert)')
-                        #inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
-                        #invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
 
                         inpaint_ctrls = [debugging_inpaint_preprocessor, inpaint_disable_initial_latent, inpaint_engine,
                                          inpaint_strength, inpaint_respective_field,
@@ -865,7 +858,7 @@ with shared.gradio_root:
         def parse_meta(raw_prompt_txt, is_generating, state_params):
             loaded_json = None
             if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
-                return [gr.update()] * 4 + wildcards_array_show(state_params)
+                return [gr.update()] * 3 + wildcards_array_show(state_params)
             matchs = wildcards.array_regex.findall(raw_prompt_txt)
             matchs2 = wildcards.tag_regex2.findall(raw_prompt_txt)
             if len(matchs)>0 or len(matchs2)>0:
@@ -883,7 +876,7 @@ with shared.gradio_root:
 
             if loaded_json is None:
                 if is_generating:
-                    return [gr.update()] * 4 + wildcards_array_results
+                    return [gr.update()] * 3 + wildcards_array_results
                 else:
                     return [gr.update(), gr.update(visible=True), gr.update(visible=False)] + wildcards_array_results
 

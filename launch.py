@@ -152,7 +152,6 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
 
     os.environ["U2NET_HOME"] = config.path_inpaint
     os.environ["HUF_MIRROR"] = 'hf-mirror.com'
-    os.environ["XDG_CACHE_HOME"] = config.path_controlnet
 
     for file_name, url in vae_approx_filenames:
         load_file_from_url(url=url, model_dir=config.path_vae_approx, file_name=file_name)
