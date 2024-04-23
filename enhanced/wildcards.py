@@ -112,7 +112,8 @@ def get_words_of_wildcard_samples(wildcard="root"):
 
     if wildcard == "root":
         return [[x] for x in wildcards[wildcards_list[wildcard][0]]]
-    return [[x] for x in wildcards[wildcard]]
+    words = [[x] for x in wildcards[wildcard]]
+    return words
 
 def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
     global wildcards
@@ -313,8 +314,6 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
         state_params["array_wildcards_mode"] = '_'
         if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
             prompt = prompt[:-1]
-    else:
-        state_params["array_wildcards_mode"] = '_'
     
     if state_params["array_wildcards_mode"] == '[':
         new_tag = f'[__{wildcard}__]'
@@ -322,3 +321,13 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
         new_tag = f'__{wildcard}__'
     prompt = f'{prompt.strip()} {new_tag}'
     return gr.update(value=prompt), gr.Dataset.update(label=f'{wildcard}:', samples=get_words_of_wildcard_samples(wildcard)), gr.update(open=True)
+
+def add_word_to_prompt(wildcard, index, prompt):
+    global wildcards, wildcards_list
+
+    wildcard = wildcard[0].split('|')[0]
+    words = wildcards[wildcard]
+    word = words[index]
+    prompt = f'{prompt.strip()} {word}'
+    return gr.update(value=prompt)
+

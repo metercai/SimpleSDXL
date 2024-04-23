@@ -298,11 +298,11 @@ def refresh_nav_bars(state_params):
 def process_before_generation(state_params):
     if "__nav_name_list" not in state_params.keys():
         state_params.update({"__nav_name_list": get_preset_name_list()})
-    # prompt, stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
-    results = [gr.update(interactive=False), gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
-    # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
+    results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
+    # prompt, random_button, translator_button, super_prompter, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=False)] * (preset_nums + 1)
+    results += [gr.update(interactive=False)] * (preset_nums + 5)
     results += [gr.update()] * (9-preset_nums)
     return results
 
@@ -311,13 +311,13 @@ def process_after_generation(state_params):
     if "__max_per_page" not in state_params.keys():
         state_params.update({"__max_per_page": 18})
     state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
-    # generate_button, prompt, stop_button, skip_button, state_is_generating
-    results = [gr.update(visible=True, interactive=True), gr.update(interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
+    # generate_button, stop_button, skip_button, state_is_generating
+    results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    # background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # prompt, random_button, translator_button, super_prompter, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=True)] * (preset_nums + 1)
+    results += [gr.update(interactive=True)] * (preset_nums + 5)
     results += [gr.update()] * (9-preset_nums)
     
     if len(state_params["__output_list"]) > 0:
