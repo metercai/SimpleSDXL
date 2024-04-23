@@ -1,5 +1,5 @@
 ## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/e0ca205d-6d7a-42c7-855e-f4a937e65fb1"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/c6088225-4006-4e0a-a1d4-979a61aefda4"></div>
 
 ## 🔔 更新 / Update
 - [2024.04.23] <b>升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。<b>
