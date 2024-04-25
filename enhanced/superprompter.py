@@ -42,7 +42,9 @@ def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperatur
 def remove_superprompt():
     global tokenizer, model
 
-    del model
-    del tokenizer
+    if 'tokenizer' not in globals():
+        del tokenizer
+    if 'model' not in globals():
+        del model
     return
 
