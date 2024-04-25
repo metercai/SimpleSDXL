@@ -672,7 +672,9 @@ tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
  
 def remove_tokenizer():
     global tokenizer
-    del tokenizer
+
+    if 'tokenizer' in globals():
+        del tokenizer
     return
 
 def prompt_token_prediction(text, style_selections):
