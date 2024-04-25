@@ -14,6 +14,9 @@ modelDir = os.path.join(config.path_llms, "superprompt-v1" )
 def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperature=0.5, top_p=1, top_k = 1 , seed=-1):
     global tokenizer, model, modelDir
 
+    if 'tokenizer' not in globals() or 'model' not in globals():
+        globals()['tokenizer'] = None
+        globals()['model'] = None
     if tokenizer is None or model is None:
         if not os.path.exists(modelDir):
             org_modelDir = os.path.join(shared.root, "models/llms/superprompt-v1")
@@ -35,3 +38,11 @@ def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperatur
     text = dirty_text.replace("<pad>", "").replace("</s>", "").strip()
     
     return text
+
+def remove_superprompt():
+    global tokenizer, model
+
+    del model
+    del tokenizer
+    return
+
