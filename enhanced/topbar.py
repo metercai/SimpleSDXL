@@ -16,6 +16,7 @@ import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.location as location
+import enhanced.superprompter as superprompter
 from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
@@ -298,6 +299,8 @@ def refresh_nav_bars(state_params):
 def process_before_generation(state_params):
     if "__nav_name_list" not in state_params.keys():
         state_params.update({"__nav_name_list": get_preset_name_list()})
+    superprompter.remove_superprompt()
+    remove_tokenizer()
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
     # prompt, random_button, translator_button, super_prompter, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
@@ -667,9 +670,17 @@ if not os.path.exists(cur_clip_path):
     shutil.copytree(org_clip_path, cur_clip_path)
 tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
  
+def remove_tokenizer():
+    global tokenizer
+    del tokenizer
+    return
 
 def prompt_token_prediction(text, style_selections):
-    global tokenizer
+    global tokenizer, cur_clip_path
+    if 'tokenizer' not in globals():
+        globals()['tokenizer'] = None
+    if tokenizer is None:
+        tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
     return len(tokenizer.tokenize(text))
 
     from extras.expansion import safe_str

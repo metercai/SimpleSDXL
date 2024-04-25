@@ -6,6 +6,7 @@ import copy
 import modules.util as util
 import modules.config as config
 import enhanced.toolbox as toolbox
+import re
 from lxml import etree
 
 
@@ -18,11 +19,12 @@ images_ads = {}
 
 
 image_types = ['.png', '.jpg', '.jpeg', '.webp']
+output_images_regex = re.compile(r'\d{4}-\d{2}-\d{2}')
 
 def refresh_output_list(max_per_page):
     global image_types
 
-    listdirs = [f for f in os.listdir(config.path_outputs) if f!="embed" and f!="temp_out" and os.path.isdir(os.path.join(config.path_outputs,f))]
+    listdirs = [f for f in os.listdir(config.path_outputs) if output_images_regex.findall(f) and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
         return None
     listdirs1 = listdirs.copy()
