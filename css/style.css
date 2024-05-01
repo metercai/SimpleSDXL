@@ -70,18 +70,18 @@ progress::after {
 }
 
 .type_row{
-  height: 80px !important;
+  height: 100px !important;
 }
 
 .type_row_half{
-  height: 40px !important;
+  height: 50px !important;
   font-size: 14px !important;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .type_row_third{
-  height: 26px !important;
+  height: 33px !important;
   font-size: 14px !important; 
   white-space: nowrap;
   overflow: hidden;
