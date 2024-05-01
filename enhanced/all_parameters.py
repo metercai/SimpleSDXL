@@ -91,7 +91,10 @@ default = {
     'save_metadata_to_images': False,
     'metadata_scheme': 'fooocus',
     'input_image_checkbox': False,
-    'advanced_checkbox': True
+    'advanced_checkbox': True,
+    'backfill_prompt': False,
+    'translation_timing': 'Translate then generate',
+    'translation_methods': 'Big Model'
     }
 
 

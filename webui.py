@@ -392,7 +392,7 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 interactive=True)
-                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engine_list, value=modules.config.default_backend)
+                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engine_list, value=modules.config.default_backend, info='Api engine needs to configure the api key before use')
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)

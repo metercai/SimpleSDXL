@@ -485,8 +485,8 @@ def reset_context(state_params):
     else:
         results += [gr.update()]
     
-    # if default_X in config_prese then update the value to gr.X
-    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update()]
+    # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
+    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_timing") + update_in_keys("translation_methods") 
     

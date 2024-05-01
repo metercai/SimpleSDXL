@@ -238,7 +238,7 @@
   "SDXL": "SDXL",
   "SD3 Api": "SD3接口",
   "SD3Turbo Api": "SD3Turbo接口",
-  "Zoom canvas": "缩放面板",
+  "Api engine needs to configure the api key before use": "使用接口引擎需要事先配置接口密钥。密钥从stability.ai官网申请。",
 
   "SuperPrompter": "超级提示词扩展",
   "SuperPrompt": "超级扩展",
