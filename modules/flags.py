@@ -89,7 +89,9 @@ desc_type_anime = 'Art/Anime'
 translation_timing = ['Translate then generate', 'Modify after translate', 'No translate']
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
-backend_engine_list = ['SDXL', 'SD3 Api', 'SD3Turbo Api']
+backend_engines = ['SDXL', 'HyDiT', 'SD3 Api']
+
+language_radio = lambda x: '中文' if x=='cn' else 'En'
 
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'

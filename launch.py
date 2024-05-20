@@ -1,6 +1,7 @@
 import os
 import ssl
 import sys
+import json
 from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
@@ -23,43 +24,37 @@ import fooocus_version
 import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, repo_dir
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
 
 
 def prepare_environment():
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
-    torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
-    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
-    if is_win32_standalone_build:
-        torch_command += f' -t {target_path_win}'
-
-    comfy_repo = os.environ.get(
-        "COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git"
-    )
-    comfy_commit_hash = os.environ.get(
-        "COMFY_COMMIT_HASH", "30abc324c2f73e6b648093ccd4741dece20be1e5"
-    )
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
+    #comfy_repo = os.environ.get("COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git")
+    #comfy_path = os.path.join(root, "comfy")
+    #git_clone(comfy_repo, comfy_path, "SimpleAI")
+    #sys.path.append(comfy_path)
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    comfyui_name = "ComfyUI-SAI"
-    git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
-    sys.path.append(str(repo_dir(comfyui_name)))
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
+    torch_command = os.environ.get('TORCH_COMMAND',
+                                   f"pip install torch==2.2.1 torchvision==0.17.1 --extra-index-url {torch_index_url}")
+    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    #torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
+    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
+    if is_win32_standalone_build:
+        torch_command += f' -t {target_path_win}'
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
     if TRY_INSTALL_XFORMERS:
         if REINSTALL_ALL or not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.23')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.25')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
                     run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
@@ -103,35 +98,52 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+comfy_path = os.path.join(root, "comfy")
+sys.path.append(comfy_path)
+
+sys.path.append(os.path.join(root, "hydit"))
+
 prepare_environment()
 #build_launcher()
 args = ini_args()
+
+from enhanced.simpleai import token, sysinfo
+print(f'[SimpleAI] Generated local did/生成本地身份ID: {token.get_did()}')
+print(f'sysinfo:{sysinfo}')
 
 if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-import enhanced.token_did as token_did
-token_did.init_local_did(f'SimpleSDXL_User')
+if args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192:
+    env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
+    if env_var is None:
+        env_var = "backend:cudaMallocAsync"
+    else:
+        env_var += ",backend:cudaMallocAsync"
 
-import enhanced.location as location 
-location.init_location()
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
+
+
+import warnings
+import logging
+logging.basicConfig(level=logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
 
 if '--location' in sys.argv:
-        location.location = args.location
+        sysinfo["location"] = args.location
 
-if location.location !='CN':
+if sysinfo["location"] !='CN':
     if '--language' not in sys.argv:
         args.language='default'
 
-import socket
 if '--listen' not in sys.argv:
     if is_ipynb():
         args.listen = '127.0.0.1'
     else:
-        args.listen = socket.gethostbyname(socket.gethostname())
+        args.listen = sysinfo["local_ip"]
 if '--port' not in sys.argv:
-    args.port = 8186
+    args.port = sysinfo["local_port"]
 
 from modules import config
 

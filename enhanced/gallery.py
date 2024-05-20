@@ -32,8 +32,9 @@ def refresh_output_list(max_per_page):
         path_gallery = os.path.join(config.path_outputs, index)
         nums = len(util.get_files_from_folder(path_gallery, image_types, None))
         if nums > max_per_page:
-            for i in range(1,math.ceil(nums/max_per_page)+1):
-                listdirs1.append("{}/{}".format(index, i))
+            max_page_no = math.ceil(nums/max_per_page)
+            for i in range(1,max_page_no+1):
+                listdirs1.append("{}/{}".format(index, str(i).zfill(len(str(max_page_no)))))
             listdirs1.remove(index)
     output_list = sorted([f[2:] for f in listdirs1], reverse=True)
     print(f'[Gallery] Refresh_output_catalog: loaded {len(output_list)} images_catalogs.')
@@ -51,12 +52,13 @@ def images_list_update(choice, state_params):
     return gr.update(value=images_gallery), gr.update(open=False, visible=len(output_list)>0), state_params
 
 
-def select_index(choice, state_params, evt: gr.SelectData):
+def select_index(choice, image_tools_checkbox, state_params, evt: gr.SelectData):
     if "__output_list" in state_params.keys():
         state_params.update({"infobox_state": 0})
         state_params.update({"note_box_state": ['',0,0]})
     print(f'[Gallery] Selected_gallery_catalog: change image catalog:{choice}.')
-    return [gr.update(visible=True)] + [gr.update(visible=False)] * 4 + [gr.update(interactive=True) , state_params]
+    state_params.update({"gallery_state": 'finished_index'})
+    return [gr.update(visible=True)] + [gr.update(visible=image_tools_checkbox)] + [gr.update(visible=False)] * 8 + [state_params]
 
 
 def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
