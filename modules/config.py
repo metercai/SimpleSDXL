@@ -201,7 +201,7 @@ path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../mo
 path_llms = get_dir_or_set_default('path_llms','../models/llms/')
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_outputs = get_path_output()
-
+path_t2i = get_dir_or_set_default('path_t2i', '../models/')
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False):
     global config_dict, visited_keys
@@ -521,7 +521,7 @@ default_backfill_prompt = get_config_item_or_set_default(
 default_backend = get_config_item_or_set_default(
     key='default_backend',
     default_value='SDXL',
-    validator=lambda x: x in modules.flags.backend_engine_list
+    validator=lambda x: x in modules.flags.backend_engines
 )
 
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
@@ -583,6 +583,10 @@ def add_ratio(x):
             c, d = 21, 9
     else:
         c, d = a // g, b // g
+    if (a, b) == (768, 1280):
+        c, d = 9, 16
+    elif (a, b) == (1280, 768):
+        c, d = 16, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
@@ -591,6 +595,13 @@ available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 
 sd3_default_aspect_ratio = '16:9'
 sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+
+hydit_default_aspect_ratio = add_ratio('1152*864')
+hydit_available_aspect_ratios = [
+        '768*768', '768*1024', '768*1280', '864*1152', '960*1280', '1024*768',
+        '1024*1024', '1152*864', '1280*768', '1280*960', '1280*1280', 
+    ]
+hydit_available_aspect_ratios = [add_ratio(x) for x in hydit_available_aspect_ratios]
 
 # Only write config in the first launch.
 if not os.path.exists(config_path):
@@ -765,3 +776,9 @@ def downloading_superprompter_model():
 
 
 update_files()
+from enhanced.simpleai import simpleai_config, init_models_info 
+simpleai_config.paths_checkpoints = paths_checkpoints
+simpleai_config.paths_loras = paths_loras
+simpleai_config.path_embeddings = path_embeddings
+
+init_models_info()

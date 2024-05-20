@@ -99,7 +99,7 @@ progress::after {
 }
 
 .advanced_check_row{
-  width: 320px !important;
+  width: 250px !important;
 }
 
 .min_check{
@@ -517,3 +517,9 @@ div.prose.tokenCounter {
   min-height: auto;
 }
 
+.identity_input textarea {
+    width: 180px;
+    padding: 3px 3px;
+    height: 32px;
+    margin: 3px 3px;
+}
