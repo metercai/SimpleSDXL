@@ -1,0 +1,12 @@
+
+This uses code from:
+
+Bilateral Blur:
+- kornia (https://github.com/kornia/kornia)
+  (released under Apache 2.0 license)
+
+Gaussian Latent Noise:
+- city96 (https://github.com/city96/SD-Advanced-Noise)
+  (released under Apache 2.0 license)
+
+Changes were made by Searge in August 2023 for the project https://github.com/SeargeDP/SeargeSDXL

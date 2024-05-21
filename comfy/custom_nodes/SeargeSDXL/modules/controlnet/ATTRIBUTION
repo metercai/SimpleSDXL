@@ -1,0 +1,20 @@
+
+This uses code from:
+
+Leres Depth Map:
+- Bob Thiry (https://github.com/thygate/stable-diffusion-webui-depthmap-script)
+  (released under MIT license)
+
+Controlnet Aux:
+- Fannovel16 (https://github.com/Fannovel16/comfyui_controlnet_aux)
+  (released under Apache 2.0 license)
+
+Controlnet:
+- lllyasviel (https://github.com/lllyasviel/ControlNet/tree/main/annotator)
+  (released under Apache 2.0 license)
+
+Functions block_reduce and view_as_blocks:
+- scikit-image (https://github.com/scikit-image/scikit-image)
+  (released under BSD 3-clause license)
+
+Changes were made by Searge in August 2023 for the project https://github.com/SeargeDP/SeargeSDXL
