@@ -11,7 +11,7 @@ psutil==5.9.5
 pytorch_lightning==1.9.4
 omegaconf==2.2.3
 gradio==3.41.2
-pygit2==1.12.2
+#pygit2==1.12.2
 opencv-contrib-python==4.8.0.74
 httpx==0.24.1
 onnxruntime==1.16.3
@@ -30,4 +30,5 @@ simpleai-base==0.3.5
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
 #./enhanced/libs/simpleai_base-0.3.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 kornia>=0.7.1
-diffusers
+diffusers==0.2
+flash-attn==2.5.8
