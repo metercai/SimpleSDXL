@@ -193,7 +193,7 @@ class HunYuanDiT(ModelMixin, ConfigMixin):
 
         use_flash_attn = args.infer_mode == 'fa'
         if use_flash_attn:
-            log_fn(f"    Enable Flash Attention.")
+            #log_fn(f"    Enable Flash Attention.")
         qk_norm = True  # See http://arxiv.org/abs/2302.05442 for details.
 
         self.mlp_t5 = nn.Sequential(
