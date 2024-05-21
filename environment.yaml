@@ -1,4 +1,4 @@
-name: fooocus
+name: simpleai
 channels:
   - defaults
 dependencies:

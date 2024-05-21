@@ -34,7 +34,7 @@ import enhanced.wildcards as wildcards
 import enhanced.simpleai as simpleai
 import enhanced.comfy_task as comfy_task
 import enhanced.hydit_task as hydit_task
-from enhanced.simpleai import models_info  
+from enhanced.simpleai import models_info, comfyd, args_comfyd, sysinfo  
 
 def get_task(*args):
     args = list(args)
@@ -739,10 +739,14 @@ with shared.gradio_root:
             def toggle_image_tab(tab, styles):
                 result = []
                 if 'layer' in tab:
+                    if not comfyd.is_running():
+                        comfyd.start(args_comfyd)
                     result = [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion])]
                     result += [gr.update(value=False, interactive=False)]
                     result += [gr.update(interactive=False)] * 17
                 else:
+                    if comfyd.is_running():
+                        comfyd.stop()
                     result = [gr.update(choices=flags.Performance.list()), gr.update()]
                     result += [gr.update(interactive=True)] * 18
                 return result
@@ -1067,14 +1071,15 @@ def dump_default_english_config():
 
 #dump_default_english_config()
 
-from simpleai_base.comfyd import *
-
 import logging
 import httpx
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)
 hydit_logger = logging.getLogger("hydit")
 hydit_logger.setLevel(logging.WARNING)
+
+if args_manager.args.enable_comfyd:
+    comfyd.start(args_comfyd)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

@@ -81,3 +81,4 @@ enhanced/api_token.json
 client.toml
 /models
 comfy/input/
+comfy/temp/
