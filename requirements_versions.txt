@@ -1,18 +1,26 @@
+--extra-index-url https://download.pytorch.org/whl/cu121 
+--extra-index-url https://pypi.ngc.nvidia.com
+packaging
+diffusers==0.25
+torchsde==0.2.5
+transformers==4.37.2
+#flash-attn==2.5.8
+
 accelerate==0.29.3
 apex
 colour-science
 cuda-python==11.7.1
-diffusers==0.25
 download==0.3.5
 einops==0.7.0
 facexlib
-flash-attn==2.5.8
+ftfy
 gradio==3.41.2
 httpx==0.24.1
 insightface
 kornia>=0.7.1
 loguru==0.7.2
 lxml==4.9.3
+mistune
 numba
 nvidia-pyindex==1.0.9
 opencv-contrib-python==4.8.0.74
@@ -37,8 +45,6 @@ sentencepiece==0.1.99
 simpleai-base==0.3.5
 tqdm==4.65.0
 timm==0.9.5
-torchsde==0.2.5
-transformers==4.37.2
 translators==5.8.9
 websocket-client
 xformers==0.0.25

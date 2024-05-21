@@ -42,9 +42,9 @@ def prepare_environment():
 
     torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.2.1 torchvision==0.17.1 --extra-index-url {torch_index_url}")
+                                   f"pip install torch==2.2.1 torchvision==0.17.1 xformers==0.0.25 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    #torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
+    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
     if is_win32_standalone_build:
         torch_command += f' -t {target_path_win}'
