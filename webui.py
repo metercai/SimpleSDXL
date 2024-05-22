@@ -825,7 +825,7 @@ with shared.gradio_root:
             if x==flags.backend_engines[2]:
                 results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)] + [gr.update()] * 19
             elif x==flags.backend_engines[1]:
-                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 19
+                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=1, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 19
             else:
                 results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 19
             return results
