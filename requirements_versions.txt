@@ -7,16 +7,15 @@ transformers==4.37.2
 flash-attn==2.5.8
 
 accelerate==0.29.3
-apex
+#apex
 colour-science
 cuda-python==11.7.1
 download==0.3.5
 einops==0.7.0
-facexlib
-ftfy
+#facexlib
 gradio==3.41.2
 httpx==0.24.1
-insightface
+#insightface
 kornia>=0.7.1
 loguru==0.7.2
 lxml==4.9.3
@@ -47,7 +46,7 @@ tqdm==4.65.0
 timm==0.9.5
 translators==5.8.9
 websocket-client
-xformers==0.0.25
+xformers==0.0.26
 ./enhanced/libs/rembg-2.0.54-py3-none-any.whl
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
 #./enhanced/libs/simpleai_base-0.3.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl

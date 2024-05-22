@@ -26,7 +26,7 @@ import enhanced.version as version
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone
 
-REINSTALL_ALL = False
+REINSTALL_ALL = True
 TRY_INSTALL_XFORMERS = False
 
 
@@ -40,9 +40,9 @@ def prepare_environment():
     #sys.path.append(comfy_path)
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu122")
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.2.1 torchvision==0.17.1 xformers==0.0.25 --extra-index-url {torch_index_url}")
+                                   f"pip install torch==2.2.2 torchvision==0.17.2 xformers==0.0.26 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
     torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
