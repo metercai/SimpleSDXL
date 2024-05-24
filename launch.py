@@ -109,8 +109,8 @@ prepare_environment()
 args = ini_args()
 
 from enhanced.simpleai import token, sysinfo
-print(f'[SimpleAI] Generated local did/生成本地身份ID: {token.get_did()}')
-print(f'sysinfo:{sysinfo}')
+print(f'[SimpleAI] local did/本地身份ID: {token.get_did()}')
+print(f'sysinfo/基础环境信息:{sysinfo}')
 
 if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
