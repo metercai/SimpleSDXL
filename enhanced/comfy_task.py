@@ -31,7 +31,9 @@ def get_comfy_task(method, default_params, input_images):
             "width": width,
             "height": height,
             })
-        images = {"input_image": input_images[0]}
+        if input_images is None:
+            raise ValueError("input_images cannot be None for this method")
+        images = {"input_image": input_images[0]} 
         return ComfyTask(task_name[method], comfy_params, images)
     else:
         comfy_params = ComfyTaskParams(default_params)
@@ -41,6 +43,8 @@ def get_comfy_task(method, default_params, input_images):
             "width": width,
             "height": height,
             })
+        if input_images is None:
+            raise ValueError("input_images cannot be None for this method")
         images = {"input_image": input_image[0]}
         return ComfyTask(task_name[method], comfy_params, images)
 

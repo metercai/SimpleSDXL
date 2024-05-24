@@ -5,6 +5,7 @@ from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import init_models_info, models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
 
 simpleai_config = config
+print("Checking ...")
 token = simpleai_base.init_local(f'SimpleSDXL_User')
 sysinfo = json.loads(token.get_sysinfo().to_json())
 sysinfo.update(dict(
