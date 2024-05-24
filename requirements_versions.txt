@@ -38,7 +38,7 @@ pytorch_lightning==1.9.4
 pyyaml==6.0
 sacremoses==0.1.1
 safetensors==0.4.3
-scipy==1.9.3
+scipy==1.13.1
 sentencepiece==0.1.99
 #simpleai-base==0.3.6
 tqdm==4.65.0
