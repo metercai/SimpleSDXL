@@ -596,7 +596,7 @@ available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 sd3_default_aspect_ratio = '16:9'
 sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
 
-hydit_default_aspect_ratio = add_ratio('1152*864')
+hydit_default_aspect_ratio = add_ratio('1024*1024')
 hydit_available_aspect_ratios = [
         '768*768', '768*1024', '768*1280', '864*1152', '960*1280', '1024*768',
         '1024*1024', '1152*864', '1280*768', '1280*960', '1280*1280', 

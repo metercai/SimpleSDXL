@@ -34,6 +34,7 @@ def prepare_environment():
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
+    print(f"Comfy version: 073a576")
     #comfy_repo = os.environ.get("COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git")
     #comfy_path = os.path.join(root, "comfy")
     #git_clone(comfy_repo, comfy_path, "SimpleAI")

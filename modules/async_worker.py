@@ -881,12 +881,21 @@ def worker():
                         denoise=denoising_strength,
                         seed=task['task_seed'],
                         )
-                    input_images = [layer_input_image]
+                    if layer_input_image is None:
+                        input_images = None
+                    else:
+                        input_images = [HWC3(layer_input_image)]
                     comfy_method = layer_method
 
-                    comfy_task = get_comfy_task(comfy_method, default_params, input_images)
-                    imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback_comfytask)
-                
+                    try:
+                        comfy_task = get_comfy_task(comfy_method, default_params, input_images)
+                        imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback_comfytask)
+                    except ValueError as e:
+                        print(f"comfy_task: input_image is None: {e}")
+                        empty_path = [np.zeros((width, height), dtype=np.uint8)]
+                        yield_result(async_task, empty_path, do_not_show_finished_images=True)
+                        imgs = empty_path
+
                 elif is_hydit_task:
                     print(f'hydit_aspect_ratios_selection:{ehps.hydit_aspect_ratios_selection}')
                     imgs = hydit_task.inferencer(
