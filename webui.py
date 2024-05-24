@@ -713,7 +713,7 @@ with shared.gradio_root:
 
             with gr.Tab(label='Enhanced'):
                 with gr.Row():
-                    binding_id_button = gr.Button(value='Binding Identity')
+                    binding_id_button = gr.Button(value='Binding Identity', visible=False)
                 with gr.Row():
                     language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
