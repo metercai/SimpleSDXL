@@ -82,3 +82,4 @@ client.toml
 /models
 comfy/input/
 comfy/temp/
+comfy/extra_model_paths.yaml
