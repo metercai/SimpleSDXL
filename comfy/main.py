@@ -1,7 +1,12 @@
+import os
+import sys
+root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(root)
+#os.chdir(root)
+
 import comfy.options
 comfy.options.enable_args_parsing()
 
-import os
 import importlib.util
 import folder_paths
 import time
