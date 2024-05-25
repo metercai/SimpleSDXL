@@ -1,15 +1,22 @@
-from hydit.constants import SAMPLER_FACTORY
-from hydit.config import get_args
-from hydit.inference import End2End
-from modules.config import path_t2i
+import os
 import tarfile
-from pathlib import Path
 import numpy as np
 from io import BytesIO
 from PIL import Image
-import os
+from pathlib import Path
+from hydit.constants import SAMPLER_FACTORY
+from hydit.config import get_args
+from hydit.inference import End2End
+from modules.config import path_t2i, add_ratio
 from modules.model_loader import load_file_from_url
 
+
+default_aspect_ratio = add_ratio('1024*1024')
+available_aspect_ratios = [
+        '768*768', '768*1024', '768*1280', '864*1152', '960*1280', '1024*768',
+        '1024*1024', '1152*864', '1280*768', '1280*960', '1280*1280',
+    ]
+available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 
 SAMPLERS = list(SAMPLER_FACTORY.keys())
 default_sampler=SAMPLERS[0]
@@ -20,9 +27,12 @@ gen = None
 def init_load_model():
     global hydit_args, gen
 
+    check_files_exist = lambda fs, ph: all(os.path.exists(os.path.join(ph, f)) for f in fs)
+
+    files = ["clip_text_encoder/pytorch_model.bin", "model/pytorch_model_module.pt", "mt5/pytorch_model.bin", "sdxl-vae-fp16-fix/diffusion_pytorch_model.bin"]
     hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
-    if not hydit_models_root.exists():
-        print(f"`hydit_models_root` not exists: {hydit_models_root}")
+    if not hydit_models_root.exists() or check_files_exist(hydit_models_root, files):
+        print(f"hydit_models not exists: {hydit_models_root}")
         hydit_models_root.mkdir(parents=True, exist_ok=True)
         downloading_hydit_model(hydit_models_root)
     if gen is None:
