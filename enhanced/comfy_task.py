@@ -45,7 +45,7 @@ def get_comfy_task(method, default_params, input_images):
             })
         if input_images is None:
             raise ValueError("input_images cannot be None for this method")
-        images = {"input_image": input_image[0]}
+        images = {"input_image": input_images[0]}
         return ComfyTask(task_name[method], comfy_params, images)
 
 def fixed_width_height(width, height, factor): 

@@ -2,25 +2,20 @@
 diffusers==0.25
 torchsde==0.2.5
 transformers==4.37.2
-#flash-attn==2.5.8
 
 accelerate==0.29.3
-#apex
 colour-science
 cuda-python==11.7.1
 download==0.3.5
 einops==0.7.0
-#facexlib
 ftfy
 gradio==3.41.2
 httpx==0.24.1
-#insightface
 kornia>=0.7.1
 loguru==0.7.2
 lxml==4.9.3
 mistune
 numba
-#nvidia-pyindex==1.0.9
 opencv-contrib-python==4.8.0.74
 omegaconf==2.2.3
 onnx==1.12.0
@@ -40,14 +35,11 @@ sacremoses==0.1.1
 safetensors==0.4.3
 scipy==1.13.1
 sentencepiece==0.1.99
-#simpleai-base==0.3.6
 tqdm==4.65.0
 timm==0.9.5
 translators==5.8.9
 websocket-client
-#xformers==0.0.26
 ./enhanced/libs/rembg-2.0.54-py3-none-any.whl
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
-#./enhanced/libs/simpleai_base-0.3.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 
  

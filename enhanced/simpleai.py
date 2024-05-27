@@ -1,15 +1,14 @@
 import json
+import launch
 import gradio as gr
 from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import init_models_info, models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
 
 simpleai_config = config
-print("Checking ...")
-token = simpleai_base.init_local(f'SimpleSDXL_User')
-sysinfo = json.loads(token.get_sysinfo().to_json())
+token = launch.token
+sysinfo = launch.sysinfo
 sysinfo.update(dict(
-    did=token.get_did(),
     torch_version=torch_version,
     xformers_version=xformers_version,
     cuda_version=cuda_version))

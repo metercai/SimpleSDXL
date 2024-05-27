@@ -21,8 +21,9 @@ re_req_local_file = re.compile(r"\S*/([-_a-zA-Z0-9]+)-([0-9]+).([0-9]+).([0-9]+)
 
 python = sys.executable
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")
-index_url = os.environ.get('INDEX_URL', "https://pypi.org/simple")
-#index_url = os.environ.get('INDEX_URL', "https://pypi.tuna.tsinghua.edu.cn/simple")
+index_url = os.environ.get('INDEX_URL', "https://pypi.tuna.tsinghua.edu.cn/simple")
+
+target_path_install = f'-t {os.path.join(python_embeded_path, "Lib/site-packages")}' if sys.platform.startswith("win") else ''
 
 modules_path = os.path.dirname(os.path.realpath(__file__))
 script_path = os.path.dirname(modules_path)
@@ -119,7 +120,7 @@ def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_
 def run_pip(command, desc=None, live=default_command_live):
     try:
         index_url_line = f' --index-url {index_url}' if index_url != '' else ''
-        return run(f'"{python}" -m pip {command} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
+        return run(f'"{python}" -m pip {command} {target_path_install} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
                    errdesc=f"Couldn't install {desc}", live=live)
     except Exception as e:
         print(e)
