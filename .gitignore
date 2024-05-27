@@ -78,4 +78,12 @@ wd-v1-4-moat-tagger-v2.csv
 .user_Pq69KpDwNenAq2aA33kyo9rw15xrEgiPn.did
 /repos/
 enhanced/api_token.json
-enhanced/comfy/
+Cargo.toml
+models/models_info.json
+outputs.1/
+pyproject.toml
+src/
+test/
+*.did
+client.toml
+/models/t2i

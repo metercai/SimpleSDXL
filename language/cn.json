@@ -239,6 +239,15 @@
   "SD3 Api": "SD3接口",
   "SD3Turbo Api": "SD3Turbo接口",
   "Api engine needs to configure the api key before use": "使用接口引擎需要事先配置接口密钥。密钥从stability.ai官网申请。",
+  "Image Size and Recommended Size": "图片尺寸和推荐尺寸",
+  "Inpaint brush color": "画笔颜色",
+  "VAE": "变分自编码器",
+  "Black Out NSFW": "禁止NSFW",
+  "Use black image if NSFW is detected.": "用黑色图像替换检测到的NSFW内容。",
+  "Hyper-SD": "超速",
+  "CLIP Skip": "CLIP跳过系统",
+  "Bypass CLIP layers to avoid overfitting (use 1 to not skip any layers, 2 is recommended).": "旁路CLIP层系数，避免过拟合，1=不跳过，2=推荐值",
+
 
   "SuperPrompter": "超级提示词扩展",
   "SuperPrompt": "超级扩展",
