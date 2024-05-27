@@ -63,3 +63,7 @@ outputs.1/
 pyproject.toml
 src/
 test/
+*.did
+client.toml
+/repos
+/models/t2i
