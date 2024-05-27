@@ -7,7 +7,7 @@ from random_prompt.build_dynamic_prompt import build_dynamic_prompt
 
 from random_prompt.csv_reader import load_config_csv
 
-from modules.settings import default_settings
+from .modules.settings import default_settings
 from random_prompt.one_button_presets import OneButtonPresets
 
 OBPresets = OneButtonPresets()

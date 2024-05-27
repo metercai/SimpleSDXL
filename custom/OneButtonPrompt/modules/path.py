@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 import threading
-from modules.civit import Civit
+from ..modules.civit import Civit
 import time
 import os
 from custom.OneButtonPrompt.utils import path_fixed, root_path_fixed

@@ -43,8 +43,8 @@ def javascript_html():
     head += f'<script type="text/javascript" src="{viewer_js_path}"></script>\n'
     head += f'<script type="text/javascript" src="{image_viewer_js_path}"></script>\n'
     head += f'<script type="text/javascript" src="{topbar_js_path}"></script>\n'
-    head += f'<meta name="samples-path" content="{samples_path}"></meta>\n'
-    head += f'<meta name="preset-samples-path" content="{preset_samples_path}"></meta>\n'
+    head += f'<meta name="samples-path" content="{samples_path}">\n'
+    head += f'<meta name="preset-samples-path" content="{preset_samples_path}">\n'
 
     theme = args_manager.args.theme if args_manager.args.theme else "light"
     head += f'<script type="text/javascript">set_theme(\"{theme}\");</script>\n'
