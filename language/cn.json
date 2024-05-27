@@ -245,8 +245,8 @@
   "Black Out NSFW": "禁止NSFW",
   "Use black image if NSFW is detected.": "用黑色图像替换检测到的NSFW内容。",
   "Hyper-SD": "超速",
-  "CLIP Skip": "CLIP Skip 跳过层数",
-  "Bypass CLIP layers to avoid overfitting (use 1 to not skip any layers, 2 is recommended).": "跳过一些CLIP层，避免过拟合，1=不跳过，2=推荐值",
+  "CLIP Skip": "跳过层数 CLIP Skip",
+  "Bypass CLIP layers to avoid overfitting (use 1 to not skip any layers, 2 is recommended).": "提前停止以跳过一些CLIP层，避免过拟合，1=不跳过，2=推荐值",
   "Reconnect": "重连服务器",
 
 
