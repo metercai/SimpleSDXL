@@ -44,7 +44,7 @@ def check_base_environment():
 
     if not is_installed("simpleai_base"):
         run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
-        if platform.system() == 'Windows' and is_installed("rembg") and is_installed("translators"):
+        if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
             print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
             print(f'受Windows限制，SimpleSDXL新版本需要下载新安装包，更新系统环境后再运行。下载地址：https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
             print(f'If not updated, you can run the old version using the following scripte: run_SimpleSDXL_old.bat')
