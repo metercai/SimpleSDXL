@@ -31,7 +31,7 @@ def init_load_model():
 
     files = ["clip_text_encoder/pytorch_model.bin", "model/pytorch_model_module.pt", "mt5/pytorch_model.bin", "sdxl-vae-fp16-fix/diffusion_pytorch_model.bin"]
     hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
-    if not hydit_models_root.exists() or check_files_exist(hydit_models_root, files):
+    if not hydit_models_root.exists() or not check_files_exist(hydit_models_root, files):
         print(f"hydit_models not exists: {hydit_models_root}")
         hydit_models_root.mkdir(parents=True, exist_ok=True)
         downloading_hydit_model(hydit_models_root)
