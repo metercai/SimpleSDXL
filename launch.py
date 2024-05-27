@@ -20,35 +20,58 @@ if "GRADIO_SERVER_PORT" not in os.environ:
 ssl._create_default_https_context = ssl._create_unverified_context
 
 import platform
-import fooocus_version
-import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
 
+target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-def prepare_environment():
+def check_base_environment():
+    sys.path.append(os.path.join(root, "comfy"))
+    sys.path.append(os.path.join(root, "hydit"))
+
+    import fooocus_version
+    import comfy_version
+    import enhanced.version as version
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
-    print(f"Comfy version: 073a576")
-    #comfy_repo = os.environ.get("COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git")
-    #comfy_path = os.path.join(root, "comfy")
-    #git_clone(comfy_repo, comfy_path, "SimpleAI")
-    #sys.path.append(comfy_path)
+    print(f"Comfy version: {comfy_version.version}")
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
+    if not is_installed("simpleai_base"):
+        run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
+        if platform.system() == 'Windows' and is_installed("rembg") and is_installed("translators"):
+            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
+            print(f'受Windows限制，SimpleSDXL新版本需要下载新安装包，更新系统环境后再运行。下载地址：https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
+            print(f'If not updated, you can run the old version using the following scripte: run_SimpleSDXL_old.bat')
+            print(f'如果不更新，可点击：run_SimpleSDXL_old.bat 将直接运行旧的版本。')
+            sys.exit(0)
+
+    from simpleai_base import simpleai_base
+    print("Checking ...")
+    token = simpleai_base.init_local(f'SimpleSDXL_User')
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    sysinfo.update(dict(did=token.get_did()))
+    return token, sysinfo
+
+
+def prepare_environment():
+    global sysinfo
+
+    if sysinfo['gpu_brand'] == 'NVIDIA':
+        torch_index_url = "https://download.pytorch.org/whl/cu121"
+    else:
+        torch_index_url = "https://download.pytorch.org/whl/"
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
     torch_command = os.environ.get('TORCH_COMMAND',
                                    f"pip install torch==2.2.2 torchvision==0.17.2 xformers==0.0.26 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
-    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
-    if is_win32_standalone_build:
-        torch_command += f' -t {target_path_win}'
+    torch_command += target_path_install
+    torch_command += f' -i {index_url} '
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
@@ -80,6 +103,11 @@ def prepare_environment():
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
+    patch_requirements = "requirements_patch.txt"
+    if REINSTALL_ALL or not requirements_met(patch_requirements):
+        run_pip(f"install -r \"{patch_requirements}\"", "requirements patching")
+
+
     return
 
 
@@ -99,18 +127,13 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
-comfy_path = os.path.join(root, "comfy")
-sys.path.append(comfy_path)
-
-sys.path.append(os.path.join(root, "hydit"))
+token, sysinfo = check_base_environment()
+print(f'[SimpleAI] local did/本地身份ID: {token.get_did()}')
+print(f'sysinfo/基础环境信息:{sysinfo}')
 
 prepare_environment()
 #build_launcher()
 args = ini_args()
-
-from enhanced.simpleai import token, sysinfo
-print(f'[SimpleAI] local did/本地身份ID: {token.get_did()}')
-print(f'sysinfo/基础环境信息:{sysinfo}')
 
 if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)

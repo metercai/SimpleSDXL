@@ -19,12 +19,13 @@ from comfy.cli_args import args
 import comfy.ops
 ops = comfy.ops.disable_weight_init
 
+FORCE_UPCAST_ATTENTION_DTYPE = model_management.force_upcast_attention_dtype()
 
 def get_attn_precision(attn_precision):
     if args.dont_upcast_attention:
         return None
-    if attn_precision is None and args.force_upcast_attention:
-        return torch.float32
+    if FORCE_UPCAST_ATTENTION_DTYPE is not None:
+        return FORCE_UPCAST_ATTENTION_DTYPE
     return attn_precision
 
 def exists(val):
@@ -313,9 +314,19 @@ except:
 def attention_xformers(q, k, v, heads, mask=None, attn_precision=None):
     b, _, dim_head = q.shape
     dim_head //= heads
+
+    disabled_xformers = False
+
     if BROKEN_XFORMERS:
         if b * heads > 65535:
-            return attention_pytorch(q, k, v, heads, mask)
+            disabled_xformers = True
+
+    if not disabled_xformers:
+        if torch.jit.is_tracing() or torch.jit.is_scripting():
+            disabled_xformers = True
+
+    if disabled_xformers:
+        return attention_pytorch(q, k, v, heads, mask)
 
     q, k, v = map(
         lambda t: t.reshape(b, -1, heads, dim_head),

@@ -27,7 +27,7 @@ gen = None
 def init_load_model():
     global hydit_args, gen
 
-    check_files_exist = lambda fs, ph: all(os.path.exists(os.path.join(ph, f)) for f in fs)
+    check_files_exist = lambda ph, fs: all(os.path.exists(os.path.join(ph, f)) for f in fs)
 
     files = ["clip_text_encoder/pytorch_model.bin", "model/pytorch_model_module.pt", "mt5/pytorch_model.bin", "sdxl-vae-fp16-fix/diffusion_pytorch_model.bin"]
     hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
