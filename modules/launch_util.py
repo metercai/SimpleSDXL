@@ -10,6 +10,8 @@ import importlib.metadata
 import packaging.version
 import pygit2
 from pathlib import Path
+from build_launcher import python_embeded_path
+
 pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
 
 logging.getLogger("torch.distributed.nn").setLevel(logging.ERROR)  # sshh...
