@@ -972,7 +972,8 @@ def worker():
 
                     metadata_parser = None
                     if save_metadata_to_images:
-                        styles_name = [f[1:-1] for f in str(raw_style_selections)[1:-1].split(', ')]
+                        styles_name = task['styles'] if not use_expansion else [fooocus_expansion] + task['styles']
+                        #styles_name = [f[1:-1] for f in str(raw_style_selections)[1:-1].split(', ')]
                         styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k and k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
                         metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                         metadata_parser.set_data(task['log_positive_prompt'], task['positive'],
