@@ -38,7 +38,7 @@
   "Performance": "性能模式",
   "Speed": "速度",
   "Quality": "质量",
-  "Aspect Ratios": "尺寸与宽高比",
+  "Aspect Ratios": "尺寸|宽高比",
   "Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)": "竖屏(9:16), 肖像(4:5), 照片(4:3), 风景(3:2), 宽屏(16:9), 电影(21:9)",
   "Image Number": "出图数量",
   "Negative Prompt": "反向提示词",
