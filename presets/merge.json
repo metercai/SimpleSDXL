@@ -1,5 +1,5 @@
 { 
-    "default_model": "albedobaseXL_v20.safetensors",
+    "default_model": "albedobaseXL_v21.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [

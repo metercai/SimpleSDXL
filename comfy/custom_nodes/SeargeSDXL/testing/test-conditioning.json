@@ -1,0 +1,2114 @@
+{
+  "last_node_id": 54,
+  "last_link_id": 133,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "Reroute",
+      "pos": [
+        20,
+        70
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 11,
+      "type": "Reroute",
+      "pos": [
+        20,
+        1010
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 12,
+      "type": "Reroute",
+      "pos": [
+        1810,
+        1010
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 13,
+      "type": "Reroute",
+      "pos": [
+        1810,
+        70
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 16,
+      "type": "PreviewImage",
+      "pos": [
+        1400,
+        130
+      ],
+      "size": {
+        "0": 400,
+        "1": 370
+      },
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 3,
+      "type": "KSampler",
+      "pos": [
+        800,
+        130
+      ],
+      "size": {
+        "0": 300,
+        "1": 270
+      },
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 34
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        1,
+        "fixed",
+        25,
+        7.5,
+        "dpmpp_2m",
+        "karras",
+        1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "EmptyLatentImage",
+      "pos": [
+        -500,
+        830
+      ],
+      "size": {
+        "0": 300,
+        "1": 170
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ]
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -600,
+        630
+      ],
+      "size": {
+        "0": 500,
+        "1": 120
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            16
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            8
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "sd_xl_base_1.0.safetensors"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "SeargePromptText",
+      "pos": [
+        -700,
+        -170
+      ],
+      "size": {
+        "0": 300,
+        "1": 120
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            17
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Empty Text",
+      "properties": {
+        "Node name for S&R": "SeargePromptText"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 26,
+      "type": "SeargeConditioningMuxer2",
+      "pos": [
+        300,
+        630
+      ],
+      "size": {
+        "0": 300,
+        "1": 74
+      },
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input0",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "input1",
+          "type": "CONDITIONING",
+          "link": 22
+        },
+        {
+          "name": "input_selector",
+          "type": "INT",
+          "link": 21,
+          "widget": {
+            "name": "input_selector",
+            "config": [
+              "INT",
+              {
+                "default": 0,
+                "min": 0,
+                "max": 1
+              }
+            ]
+          },
+          "slot_index": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "CONDITIONING",
+          "links": [
+            34
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeConditioningMuxer2"
+      },
+      "widgets_values": [
+        0
+      ]
+    },
+    {
+      "id": 28,
+      "type": "SeargeImageSave",
+      "pos": [
+        1450,
+        580
+      ],
+      "size": {
+        "0": 350,
+        "1": 120
+      },
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 35
+        },
+        {
+          "name": "state",
+          "type": "ENABLE_STATE",
+          "link": 37
+        },
+        {
+          "name": "save_to",
+          "type": "SAVE_FOLDER",
+          "link": 36
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeImageSave"
+      },
+      "widgets_values": [
+        "SeargeSDXL-%date%/Image"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        1150,
+        130
+      ],
+      "size": {
+        "0": 200,
+        "1": 70
+      },
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13,
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 30,
+      "type": "SeargeSaveFolderInputs",
+      "pos": [
+        1500,
+        830
+      ],
+      "size": {
+        "0": 250,
+        "1": 70
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "save_to",
+          "type": "SAVE_FOLDER",
+          "links": [
+            36
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeSaveFolderInputs"
+      },
+      "widgets_values": [
+        "output folder"
+      ]
+    },
+    {
+      "id": 29,
+      "type": "SeargeEnablerInputs",
+      "pos": [
+        1200,
+        830
+      ],
+      "size": {
+        "0": 250,
+        "1": 70
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "state",
+          "type": "ENABLE_STATE",
+          "links": [
+            37
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeEnablerInputs"
+      },
+      "widgets_values": [
+        "enabled"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Reroute",
+      "pos": [
+        -300,
+        -100
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "STRING",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 20,
+      "type": "Reroute",
+      "pos": [
+        -300,
+        0
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 16,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "CLIP",
+          "links": [
+            20,
+            64,
+            113,
+            123,
+            124
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 27,
+      "type": "PrimitiveNode",
+      "pos": [
+        500,
+        830
+      ],
+      "size": {
+        "0": 210,
+        "1": 82
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            21
+          ],
+          "widget": {
+            "name": "input_selector",
+            "config": [
+              "INT",
+              {
+                "default": 0,
+                "min": 0,
+                "max": 1
+              }
+            ]
+          }
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "CLIPTextEncode",
+      "pos": [
+        100,
+        830
+      ],
+      "size": {
+        "0": 300,
+        "1": 170
+      },
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 20,
+          "slot_index": 0
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 19,
+          "widget": {
+            "name": "text",
+            "config": [
+              "STRING",
+              {
+                "multiline": true
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18,
+            24,
+            98,
+            99,
+            100,
+            101,
+            102
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 19,
+      "type": "SeargeConditioningMuxer5",
+      "pos": [
+        800,
+        730
+      ],
+      "size": {
+        "0": 300,
+        "1": 170
+      },
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input0",
+          "type": "CONDITIONING",
+          "link": 98
+        },
+        {
+          "name": "input1",
+          "type": "CONDITIONING",
+          "link": 100,
+          "slot_index": 1
+        },
+        {
+          "name": "input2",
+          "type": "CONDITIONING",
+          "link": 101,
+          "slot_index": 2
+        },
+        {
+          "name": "input3",
+          "type": "CONDITIONING",
+          "link": 99,
+          "slot_index": 3
+        },
+        {
+          "name": "input4",
+          "type": "CONDITIONING",
+          "link": 24
+        },
+        {
+          "name": "input_selector",
+          "type": "INT",
+          "link": 15,
+          "widget": {
+            "name": "input_selector",
+            "config": [
+              "INT",
+              {
+                "default": 0,
+                "min": 0,
+                "max": 4
+              }
+            ]
+          },
+          "slot_index": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "CONDITIONING",
+          "links": [
+            22
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeConditioningMuxer5"
+      },
+      "widgets_values": [
+        0
+      ]
+    },
+    {
+      "id": 17,
+      "type": "SeargeConditioningMuxer5",
+      "pos": [
+        800,
+        480
+      ],
+      "size": {
+        "0": 300,
+        "1": 170
+      },
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input0",
+          "type": "CONDITIONING",
+          "link": 67
+        },
+        {
+          "name": "input1",
+          "type": "CONDITIONING",
+          "link": 106,
+          "slot_index": 1
+        },
+        {
+          "name": "input2",
+          "type": "CONDITIONING",
+          "link": 122,
+          "slot_index": 2
+        },
+        {
+          "name": "input3",
+          "type": "CONDITIONING",
+          "link": 131,
+          "slot_index": 3
+        },
+        {
+          "name": "input4",
+          "type": "CONDITIONING",
+          "link": 102,
+          "slot_index": 4
+        },
+        {
+          "name": "input_selector",
+          "type": "INT",
+          "link": 14,
+          "widget": {
+            "name": "input_selector",
+            "config": [
+              "INT",
+              {
+                "default": 0,
+                "min": 0,
+                "max": 4
+              }
+            ]
+          },
+          "slot_index": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "CONDITIONING",
+          "links": [
+            23
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargeConditioningMuxer5"
+      },
+      "widgets_values": [
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        800,
+        -270
+      ],
+      "size": {
+        "0": 300,
+        "1": 220
+      },
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 64,
+          "slot_index": 0
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 114,
+          "widget": {
+            "name": "text_g",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_G"
+              }
+            ]
+          }
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 115,
+          "widget": {
+            "name": "text_l",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_L"
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            67
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "G / L",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        0,
+        0,
+        1024,
+        1024,
+        "CLIP_G",
+        "CLIP_L"
+      ]
+    },
+    {
+      "id": 48,
+      "type": "SeargePromptCombiner",
+      "pos": [
+        300,
+        -570
+      ],
+      "size": {
+        "0": 300,
+        "1": 120
+      },
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt1",
+          "type": "STRING",
+          "link": 107,
+          "widget": {
+            "name": "prompt1",
+            "config": [
+              "STRING",
+              {
+                "default": "",
+                "multiline": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "prompt2",
+          "type": "STRING",
+          "link": 110,
+          "widget": {
+            "name": "prompt2",
+            "config": [
+              "STRING",
+              {
+                "default": "",
+                "multiline": true
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "combined prompt",
+          "type": "STRING",
+          "links": [
+            111,
+            112
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargePromptCombiner"
+      },
+      "widgets_values": [
+        "",
+        " ",
+        ""
+      ]
+    },
+    {
+      "id": 45,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        800,
+        -570
+      ],
+      "size": {
+        "0": 300,
+        "1": 220
+      },
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 113,
+          "slot_index": 0
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 111,
+          "widget": {
+            "name": "text_g",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_G"
+              }
+            ]
+          }
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 112,
+          "widget": {
+            "name": "text_l",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_L"
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            106
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "G / L",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        0,
+        0,
+        1024,
+        1024,
+        "CLIP_G",
+        "CLIP_L"
+      ]
+    },
+    {
+      "id": 46,
+      "type": "SeargePromptCombiner",
+      "pos": [
+        300,
+        -270
+      ],
+      "size": [
+        300,
+        120
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt1",
+          "type": "STRING",
+          "link": 108,
+          "widget": {
+            "name": "prompt1",
+            "config": [
+              "STRING",
+              {
+                "default": "",
+                "multiline": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "prompt2",
+          "type": "STRING",
+          "link": 109,
+          "widget": {
+            "name": "prompt2",
+            "config": [
+              "STRING",
+              {
+                "default": "",
+                "multiline": true
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "combined prompt",
+          "type": "STRING",
+          "links": [
+            114,
+            115
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargePromptCombiner"
+      },
+      "widgets_values": [
+        "",
+        ", ",
+        ""
+      ]
+    },
+    {
+      "id": 33,
+      "type": "Reroute",
+      "pos": [
+        100,
+        -200
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 132
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "STRING",
+          "links": [
+            107,
+            108,
+            116,
+            117
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 51,
+      "type": "ConditioningConcat",
+      "pos": [
+        1200,
+        -870
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning_to",
+          "type": "CONDITIONING",
+          "link": 120
+        },
+        {
+          "name": "conditioning_from",
+          "type": "CONDITIONING",
+          "link": 121
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            122
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningConcat"
+      }
+    },
+    {
+      "id": 32,
+      "type": "Reroute",
+      "pos": [
+        100,
+        -100
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 133
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "STRING",
+          "links": [
+            109,
+            110,
+            118,
+            119
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 24,
+      "type": "SeargePromptText",
+      "pos": [
+        100,
+        130
+      ],
+      "size": {
+        "0": 400,
+        "1": 170
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            125
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargePromptText"
+      },
+      "widgets_values": [
+        "wrinkled face of a middle aged woman"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "SeargePromptText",
+      "pos": [
+        100,
+        380
+      ],
+      "size": {
+        "0": 400,
+        "1": 170
+      },
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            127
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeargePromptText"
+      },
+      "widgets_values": [
+        "poorly lit photo"
+      ]
+    },
+    {
+      "id": 50,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        800,
+        -1170
+      ],
+      "size": {
+        "0": 300,
+        "1": 220
+      },
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 124,
+          "slot_index": 0
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 116,
+          "widget": {
+            "name": "text_g",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_G"
+              }
+            ]
+          }
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 117,
+          "widget": {
+            "name": "text_l",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_L"
+              }
+            ]
+          },
+          "slot_index": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            120,
+            129
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "G / L",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        0,
+        0,
+        1024,
+        1024,
+        "CLIP_G",
+        "CLIP_L"
+      ]
+    },
+    {
+      "id": 49,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        800,
+        -870
+      ],
+      "size": {
+        "0": 300,
+        "1": 220
+      },
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 123,
+          "slot_index": 0
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 118,
+          "widget": {
+            "name": "text_g",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_G"
+              }
+            ]
+          },
+          "slot_index": 1
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 119,
+          "widget": {
+            "name": "text_l",
+            "config": [
+              "STRING",
+              {
+                "multiline": true,
+                "default": "CLIP_L"
+              }
+            ]
+          },
+          "slot_index": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            121,
+            130
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "G / L",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        0,
+        0,
+        1024,
+        1024,
+        "CLIP_G",
+        "CLIP_L"
+      ]
+    },
+    {
+      "id": 54,
+      "type": "ConditioningCombine",
+      "pos": [
+        1200,
+        -670
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning_1",
+          "type": "CONDITIONING",
+          "link": 129
+        },
+        {
+          "name": "conditioning_2",
+          "type": "CONDITIONING",
+          "link": 130
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            131
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningCombine"
+      }
+    },
+    {
+      "id": 52,
+      "type": "Reroute",
+      "pos": [
+        -100,
+        -200
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 125
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "STRING",
+          "links": [
+            132
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 53,
+      "type": "Reroute",
+      "pos": [
+        -90,
+        -100
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 127
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "STRING",
+          "links": [
+            133
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 18,
+      "type": "PrimitiveNode",
+      "pos": [
+        1200,
+        630
+      ],
+      "size": {
+        "0": 210,
+        "1": 82
+      },
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            14,
+            15
+          ],
+          "widget": {
+            "name": "input_selector",
+            "config": [
+              "INT",
+              {
+                "default": 0,
+                "min": 0,
+                "max": 4
+              }
+            ]
+          },
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        0,
+        "fixed"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      4,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      5,
+      0,
+      3,
+      3,
+      "LATENT"
+    ],
+    [
+      7,
+      3,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      8,
+      4,
+      2,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      13,
+      8,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      18,
+      0,
+      17,
+      5,
+      "INT"
+    ],
+    [
+      15,
+      18,
+      0,
+      19,
+      5,
+      "INT"
+    ],
+    [
+      16,
+      4,
+      1,
+      20,
+      0,
+      "*"
+    ],
+    [
+      17,
+      21,
+      0,
+      22,
+      0,
+      "*"
+    ],
+    [
+      18,
+      23,
+      0,
+      3,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      22,
+      0,
+      23,
+      1,
+      "STRING"
+    ],
+    [
+      20,
+      20,
+      0,
+      23,
+      0,
+      "CLIP"
+    ],
+    [
+      21,
+      27,
+      0,
+      26,
+      2,
+      "INT"
+    ],
+    [
+      22,
+      19,
+      0,
+      26,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      23,
+      17,
+      0,
+      26,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      23,
+      0,
+      19,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      26,
+      0,
+      3,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      35,
+      8,
+      0,
+      28,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      30,
+      0,
+      28,
+      2,
+      "SAVE_FOLDER"
+    ],
+    [
+      37,
+      29,
+      0,
+      28,
+      1,
+      "ENABLE_STATE"
+    ],
+    [
+      64,
+      20,
+      0,
+      38,
+      0,
+      "CLIP"
+    ],
+    [
+      67,
+      38,
+      0,
+      17,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      98,
+      23,
+      0,
+      19,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      99,
+      23,
+      0,
+      19,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      100,
+      23,
+      0,
+      19,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      101,
+      23,
+      0,
+      19,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      102,
+      23,
+      0,
+      17,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      106,
+      45,
+      0,
+      17,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      107,
+      33,
+      0,
+      48,
+      0,
+      "STRING"
+    ],
+    [
+      108,
+      33,
+      0,
+      46,
+      0,
+      "STRING"
+    ],
+    [
+      109,
+      32,
+      0,
+      46,
+      1,
+      "STRING"
+    ],
+    [
+      110,
+      32,
+      0,
+      48,
+      1,
+      "STRING"
+    ],
+    [
+      111,
+      48,
+      0,
+      45,
+      1,
+      "STRING"
+    ],
+    [
+      112,
+      48,
+      0,
+      45,
+      2,
+      "STRING"
+    ],
+    [
+      113,
+      20,
+      0,
+      45,
+      0,
+      "CLIP"
+    ],
+    [
+      114,
+      46,
+      0,
+      38,
+      1,
+      "STRING"
+    ],
+    [
+      115,
+      46,
+      0,
+      38,
+      2,
+      "STRING"
+    ],
+    [
+      116,
+      33,
+      0,
+      50,
+      1,
+      "STRING"
+    ],
+    [
+      117,
+      33,
+      0,
+      50,
+      2,
+      "STRING"
+    ],
+    [
+      118,
+      32,
+      0,
+      49,
+      1,
+      "STRING"
+    ],
+    [
+      119,
+      32,
+      0,
+      49,
+      2,
+      "STRING"
+    ],
+    [
+      120,
+      50,
+      0,
+      51,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      121,
+      49,
+      0,
+      51,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      122,
+      51,
+      0,
+      17,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      123,
+      20,
+      0,
+      49,
+      0,
+      "CLIP"
+    ],
+    [
+      124,
+      20,
+      0,
+      50,
+      0,
+      "CLIP"
+    ],
+    [
+      125,
+      24,
+      0,
+      52,
+      0,
+      "*"
+    ],
+    [
+      127,
+      25,
+      0,
+      53,
+      0,
+      "*"
+    ],
+    [
+      129,
+      50,
+      0,
+      54,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      130,
+      49,
+      0,
+      54,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      131,
+      54,
+      0,
+      17,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      132,
+      52,
+      0,
+      33,
+      0,
+      "*"
+    ],
+    [
+      133,
+      53,
+      0,
+      32,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

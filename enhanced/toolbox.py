@@ -10,14 +10,13 @@ import modules.sdxl_styles as sdxl_styles
 import enhanced.all_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
-import enhanced.token_did as token_did
 import enhanced.version as version
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
+from enhanced.simpleai import models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-
+from enhanced.simpleai import sysinfo
 
 css = '''
 .toolbox {
@@ -70,6 +69,21 @@ css = '''
     left: 50%;
     transform: translateX(-50%);
     width: 300px !important;
+    z-index: 21;
+    text-align: left;
+    opacity: 1;
+    border-radius: 8px;
+    padding: 0px;
+    border: groove;
+}
+
+.identity_note {
+    height: auto;
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px !important;
     z-index: 21;
     text-align: left;
     opacity: 1;
@@ -137,9 +151,10 @@ def make_infobox_markdown(info):
 
 
 def toggle_toolbox(state, state_params):
-    state_params.update({"infobox_state": 0})
-    state_params.update({"note_box_state": ['',0,0]})
-    return [gr.update(visible=state)] + [gr.update(visible=False)] * 5 + [state_params]
+    if "gallery_state" in state_params and state_params["gallery_state"] == 'finished_index':
+        return [gr.update(visible=state)]
+    else:
+        return [gr.update(visible=False)] 
 
 
 def toggle_prompt_info(state_params):
@@ -501,7 +516,7 @@ def get_embed_metadata(info, extra=None):
             m_dict.update({key: sdxl_styles.styles[key]})
     if len(m_dict.keys())>0:
         metadata.update({'styles_definition': m_dict})
-    metadata.update({'created_by': token_did.DID})
+    metadata.update({'created_by': sysinfo['did']})
     metadata.update({'created_timestamp': time.time()})
     metadata.update({'software': f'{version.branch}_{version.get_simplesdxl_ver()}'})
     metadata.update({'version': 'v1.0'})
@@ -533,4 +548,20 @@ function() {
 refresh_style_localization()
 }
 '''
+
+def sync_model_info_click(*args):
+
+    downurls = list(args)
+    #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
+    keylist = sync_model_info(downurls)
+    results = []
+    nums = 0
+    for k in keylist:
+        muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+        durl = None if models_info[k]['url'] is None else models_info[k]['url']
+        nums += 1 if models_info[k]['muid'] is None else 0
+        results += [gr.update(info=f'MUID={muid}', value=durl)]
+    if nums:
+        print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
+    return results
 

@@ -3,7 +3,6 @@ import sys
 import custom.shared as shared
 module_name, module_root = shared.init_module(os.path.abspath(__file__))
 
-print(f'path:{sys.path}')
 from .modules.path import PathManager
 path_manager = PathManager()
 

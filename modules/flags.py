@@ -94,7 +94,6 @@ desc_type_anime = 'Art/Anime'
 translation_timing = ['Translate then generate', 'Modify after translate', 'No translate']
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
-backend_engine_list = ['SDXL', 'SD3 Api', 'SD3Turbo Api']
 sdxl_aspect_ratios = [
     '704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
     '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960',
@@ -102,6 +101,9 @@ sdxl_aspect_ratios = [
     '1344*768', '1344*704', '1408*704', '1472*704', '1536*640', '1600*640',
     '1664*576', '1728*576'
 ]
+backend_engines = ['SDXL', 'HyDiT', 'SD3 Api']
+
+language_radio = lambda x: '中文' if x=='cn' else 'En'
 
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'

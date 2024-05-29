@@ -15,11 +15,13 @@ import enhanced.all_parameters as ads
 import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
-import enhanced.location as location
 import enhanced.superprompter as superprompter
-from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path
+from enhanced.simpleai import models_info, models_info_muid, refresh_models_info_from_path
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
+#models_info_muid =  models_info.models_info_muid
+#refresh_models_info_from_path = models_info.refresh_models_info_from_path
+#models_info = models_info.models_info
 
 css = '''
 '''
@@ -255,9 +257,8 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"bar_button": config.preset})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
-    results += [gr.update(value=location.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
+    results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    results += [gr.update(value=False, interactive=False)]
     results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_mask_upload_checkbox)]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
@@ -301,12 +302,13 @@ def process_before_generation(state_params):
         state_params.update({"__nav_name_list": get_preset_name_list()})
     superprompter.remove_superprompt()
     remove_tokenizer()
-    # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox
-    results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(value=False, interactive=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
+    results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
+    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=False)] * (preset_nums + 5)
+    results += [gr.update(interactive=False)] * (preset_nums + 6)
     results += [gr.update()] * (9-preset_nums)
+    state_params["gallery_state"]='preview'
     return results
 
 
@@ -318,9 +320,9 @@ def process_after_generation(state_params):
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=True)] * (preset_nums + 5)
+    results += [gr.update(interactive=True)] * (preset_nums + 6)
     results += [gr.update()] * (9-preset_nums)
     
     if len(state_params["__output_list"]) > 0:
@@ -488,7 +490,7 @@ def reset_context(state_params):
     # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
     update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
-    results += update_in_keys("backfill_prompt") + update_in_keys("translation_timing") + update_in_keys("translation_methods") 
+    results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
     
     state_params.update({"__message": system_message})
     results += refresh_nav_bars(state_params)

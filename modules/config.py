@@ -4,6 +4,7 @@ import math
 import numbers
 import args_manager
 import tempfile
+import shared
 import modules.flags
 import modules.sdxl_styles
 import enhanced.all_parameters as ads
@@ -203,6 +204,8 @@ path_llms = get_dir_or_set_default('path_llms','../models/llms/')
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
 path_outputs = get_path_output()
+path_t2i = get_dir_or_set_default('path_t2i', '../models/')
+path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
 
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False):
@@ -532,7 +535,7 @@ default_backfill_prompt = get_config_item_or_set_default(
 default_backend = get_config_item_or_set_default(
     key='default_backend',
     default_value='SDXL',
-    validator=lambda x: x in modules.flags.backend_engine_list
+    validator=lambda x: x in modules.flags.backend_engines
 )
 
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
@@ -596,6 +599,10 @@ def add_ratio(x):
             c, d = 21, 9
     else:
         c, d = a // g, b // g
+    if (a, b) == (768, 1280):
+        c, d = 9, 16
+    elif (a, b) == (1280, 768):
+        c, d = 16, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
@@ -604,6 +611,7 @@ available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
 sd3_default_aspect_ratio = '16:9'
 sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+
 
 # Only write config in the first launch.
 if not os.path.exists(config_path):
@@ -620,6 +628,24 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
                     + 'Remember to split the paths with "\\\\" rather than "\\", '
                       'and there is no "," before the last "}". \n\n\n')
     json.dump({k: config_dict[k] for k in visited_keys}, json_file, indent=4)
+
+config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
+config_comfy_formatted_text = '''
+comfyui:
+     checkpoints: {checkpoints} 
+     clip_vision: {clip_vision}
+     controlnet: {controlnet}
+     embeddings: {embeddings}
+     loras: {loras}
+     upscale_models: {upscale_models}
+     layer_model: {layer_model}
+     '''
+
+paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, layer_model=path_layer_model)
+with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
+    comfy_file.write(config_comfy_text)
+
 
 model_filenames = []
 lora_filenames = []
@@ -815,3 +841,9 @@ def downloading_superprompter_model():
 
 
 update_files()
+from enhanced.simpleai import simpleai_config, init_models_info 
+simpleai_config.paths_checkpoints = paths_checkpoints
+simpleai_config.paths_loras = paths_loras
+simpleai_config.path_embeddings = path_embeddings
+
+init_models_info()
