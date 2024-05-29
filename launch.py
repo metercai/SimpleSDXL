@@ -1,6 +1,7 @@
 import os
 import ssl
 import sys
+import json
 from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
@@ -19,47 +20,77 @@ if "GRADIO_SERVER_PORT" not in os.environ:
 ssl._create_default_https_context = ssl._create_unverified_context
 
 import platform
-import fooocus_version
-import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, repo_dir
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
 
+target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-def prepare_environment():
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
-    torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
-    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
-    if is_win32_standalone_build:
-        torch_command += f' -t {target_path_win}'
+def check_base_environment():
+    sys.path.append(os.path.join(root, "comfy"))
+    sys.path.append(os.path.join(root, "hydit"))
 
-    comfy_repo = os.environ.get(
-        "COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git"
-    )
-    comfy_commit_hash = os.environ.get(
-        "COMFY_COMMIT_HASH", "30abc324c2f73e6b648093ccd4741dece20be1e5"
-    )
+    import fooocus_version
+    import comfy_version
+    import enhanced.version as version
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
+    print(f"Comfy version: {comfy_version.version}")
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    comfyui_name = "ComfyUI-SAI"
-    git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
-    sys.path.append(str(repo_dir(comfyui_name)))
+    if not is_installed("simpleai_base"):
+        run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
+        if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
+            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
+            print(f'受Windows限制，SimpleSDXL新版本需要下载新安装包，更新系统环境后再运行。下载地址：https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
+            print(f'If not updated, you can run the old version using the following scripte: run_SimpleSDXL_old.bat')
+            print(f'如果不更新，可点击：run_SimpleSDXL_old.bat 将直接运行旧的版本。')
+            sys.exit(0)
+
+    from simpleai_base import simpleai_base
+    print("Checking ...")
+    token = simpleai_base.init_local(f'SimpleSDXL_User')
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    sysinfo.update(dict(did=token.get_did()))
+    return token, sysinfo
+
+#Intel Arc
+#conda install pkg-config libuv
+#python -m pip install torch==2.1.0.post2 torchvision==0.16.0.post2 torchaudio==2.1.0.post2 intel-extension-for-pytorch==2.1.30 --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/
+
+def prepare_environment():
+    global sysinfo
+
+    if sysinfo['gpu_brand'] == 'NVIDIA':
+        torch_index_url = "https://download.pytorch.org/whl/cu121"
+    elif sysinfo['gpu_brand'] == 'AMD':
+        if platform.system() == "Windows":
+            #pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
+            #pip install torch-directml
+            torch_index_url = "https://download.pytorch.org/whl/"
+        else:
+            torch_index_url = "https://download.pytorch.org/whl/rocm5.7/"
+    elif sysinfo['gpu_brand'] == 'INTEL':
+            torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
+    else:
+        torch_index_url = "https://download.pytorch.org/whl/"
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
+    torch_command = os.environ.get('TORCH_COMMAND',
+                                   f"pip install torch==2.2.2 torchvision==0.17.2 xformers==0.0.26 --extra-index-url {torch_index_url}")
+    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    torch_command += target_path_install
+    torch_command += f' -i {index_url} '
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
     if TRY_INSTALL_XFORMERS:
         if REINSTALL_ALL or not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.23')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.26')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
                     run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
@@ -84,6 +115,11 @@ def prepare_environment():
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
+    patch_requirements = "requirements_patch.txt"
+    if (REINSTALL_ALL or not requirements_met(patch_requirements)) and not is_win32_standalone_build:
+        run_pip(f"install -r \"{patch_requirements}\"", "requirements patching")
+
+
     return
 
 
@@ -103,35 +139,47 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+build_launcher()
+token, sysinfo = check_base_environment()
+print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
+#print(f'sysinfo/基础环境信息:{sysinfo}')
+
 prepare_environment()
-#build_launcher()
 args = ini_args()
 
 if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-import enhanced.token_did as token_did
-token_did.init_local_did(f'SimpleSDXL_User')
+if args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192:
+    env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
+    if env_var is None:
+        env_var = "backend:cudaMallocAsync"
+    else:
+        env_var += ",backend:cudaMallocAsync"
 
-import enhanced.location as location 
-location.init_location()
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
+
+
+import warnings
+import logging
+logging.basicConfig(level=logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
 
 if '--location' in sys.argv:
-        location.location = args.location
+        sysinfo["location"] = args.location
 
-if location.location !='CN':
+if sysinfo["location"] !='CN':
     if '--language' not in sys.argv:
         args.language='default'
 
-import socket
 if '--listen' not in sys.argv:
     if is_ipynb():
         args.listen = '127.0.0.1'
     else:
-        args.listen = socket.gethostbyname(socket.gethostname())
+        args.listen = sysinfo["local_ip"]
 if '--port' not in sys.argv:
-    args.port = 8186
+    args.port = sysinfo["local_port"]
 if args.hf_mirror is not None : 
     os.environ['HF_MIRROR'] = str(args.hf_mirror)
     print("Set hf_mirror to:", args.hf_mirror)

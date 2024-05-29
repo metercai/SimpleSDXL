@@ -86,7 +86,7 @@ function refresh_aspect_ratios_label(value) {
     if (typeof translation == "undefined") {
         translation = "Aspect Ratios";
     }
-    label.textContent = translation + " " + htmlDecode(value);
+    label.textContent = translation + " - " + htmlDecode(value);
 }
 
 function localizeWholePage() {

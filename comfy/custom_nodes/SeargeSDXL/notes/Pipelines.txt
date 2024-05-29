@@ -1,0 +1,58 @@
+old_settings = {
+ ... all previous ui settings ...
+}
+new_settings = {
+ ... all current ui settings ...
+}
+override_settings = { ... clear each run ...
+ ... all pre processed ui settings ...
+}
+cache = { ... reset changed flag each run ...
+ ... stage outputs ...
+ { changed, data }
+ ...
+}
+pipeline = { ... clear each run ...
+  prompts changed
+    main prompt
+    secondary prompt
+    style prompt
+    neg prompt
+    neg secondary prompt
+    neg style prompt
+
+  base model changed
+    base model
+
+  refiner model changed
+    refiner model
+
+  vae changed
+    vae
+
+  hires upscaler changed
+    hires upscaler
+
+  upscalers changed
+    main upscaler
+    support upscaler
+
+  cond changed
+    pos base cond
+    neg base cond
+    pos ref cond
+    neg ref cond
+
+  style cond changed
+    style cond
+    neg style cond
+
+  latent changed
+    latent
+
+  image changed
+    image
+	
+  mask changed
+    mask
+}

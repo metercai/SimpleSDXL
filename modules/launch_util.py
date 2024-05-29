@@ -10,6 +10,8 @@ import importlib.metadata
 import packaging.version
 import pygit2
 from pathlib import Path
+from build_launcher import python_embeded_path
+
 pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
 
 logging.getLogger("torch.distributed.nn").setLevel(logging.ERROR)  # sshh...
@@ -23,28 +25,53 @@ python = sys.executable
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")
 index_url = os.environ.get('INDEX_URL', "https://pypi.tuna.tsinghua.edu.cn/simple")
 
+target_path_install = f'-t {os.path.join(python_embeded_path, "Lib/site-packages")}' if sys.platform.startswith("win") else ''
+
 modules_path = os.path.dirname(os.path.realpath(__file__))
 script_path = os.path.dirname(modules_path)
 dir_repos = "repos"
 
-def git_clone(url, dir, name, hash=None):
+def git_clone(url, dir, name=None, hash=None):
     try:
         try:
             repo = pygit2.Repository(dir)
         except:
             Path(dir).parent.mkdir(exist_ok=True)
             repo = pygit2.clone_repository(url, str(dir))
-            print(f"{name} cloned.")
 
-        remote = repo.remotes["origin"]
+        remote_name = 'origin'
+        remote = repo.remotes[remote_name]
         remote.fetch()
 
-        commit = repo.get(hash)
+        branch_name = repo.head.shorthand
+        local_branch_ref = f'refs/heads/{branch_name}'
+
+        if branch_name != name:
+            branch_name = name
+            local_branch_ref = f'refs/heads/{branch_name}'
+            if local_branch_ref not in list(repo.references):
+                remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
+                remote_branch = repo.references[remote_reference]
+                new_branch = repo.create_branch(branch_name, repo[remote_branch.target.hex])
+                new_branch.upstream = remote_branch
+            else:
+                new_branch = repo.lookup_branch(branch_name)
+            repo.checkout(new_branch)
+            local_branch_ref = f'refs/heads/{branch_name}'
+
+        local_branch = repo.lookup_reference(local_branch_ref)
+        if hash is None:
+            commit = repo.revparse_single(local_branch_ref)
+        else:
+            commit = repo.get(hash)
+
+        remote_url = repo.remotes[remote_name].url
+        repo_name = remote_url.split('/')[-1].split('.git')[0]
 
         repo.checkout_tree(commit, strategy=pygit2.GIT_CHECKOUT_FORCE)
-        print(f"{name} {str(commit.id)[:7]} update check complete.")
+        print(f"{repo_name} {str(commit.id)[:7]} update check complete.")
     except Exception as e:
-        print(f"Git clone failed for {name}: {str(e)}")
+        print(f"Git clone failed for {url}: {str(e)}")
 
 
 def repo_dir(name):
@@ -95,7 +122,7 @@ def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_
 def run_pip(command, desc=None, live=default_command_live):
     try:
         index_url_line = f' --index-url {index_url}' if index_url != '' else ''
-        return run(f'"{python}" -m pip {command} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
+        return run(f'"{python}" -m pip {command} {target_path_install} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
                    errdesc=f"Couldn't install {desc}", live=live)
     except Exception as e:
         print(e)

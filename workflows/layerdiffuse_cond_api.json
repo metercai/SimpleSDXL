@@ -1,0 +1,188 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 396688477523130,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": [
+        "28",
+        0
+      ],
+      "positive": [
+        "28",
+        1
+      ],
+      "negative": [
+        "28",
+        2
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_v8Rundiffusion.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "aspect_ratios_size"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "old man sitting, high quality\n\n",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "text, watermark",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "20": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "28": {
+    "inputs": {
+      "config": "SDXL, Background",
+      "weight": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "cond": [
+        "6",
+        0
+      ],
+      "uncond": [
+        "7",
+        0
+      ],
+      "latent": [
+        "29",
+        0
+      ]
+    },
+    "class_type": "LayeredDiffusionCondApply",
+    "_meta": {
+      "title": "layer_diffuse_cond_apply"
+    }
+  },
+  "29": {
+    "inputs": {
+      "pixels": [
+        "33",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "30": {
+    "inputs": {
+      "image": "2024-05-12_18-00-23_7251.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "input_image"
+    }
+  },
+  "33": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "nearest",
+      "keep_proportion": false,
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "resize_input_image "
+    }
+  },
+  "36": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  }
+}

@@ -1,0 +1,177 @@
+
+Prompting and Styles:
+
+==================
+Inputs (text out):
+==================
+
+Base Text Inputs:
+-----------------
+- Main Prompt
+- Secondary Prompt
+- Style Prompt
+
+- Negative Main Prompt
+- Negative Secondary Prompt
+- Negative Style Prompt
+
+Refiner Text Inputs:
+--------------------
+- Prompt
+- Style Prompt
+
+- Negative Prompt
+- Negative Style Prompt
+
+
+=====================================
+Text Templates (text in -> text out):
+=====================================
+
+Base Text Manipulation:
+-----------------------
+
+- Pass-Through (Ignore)
+
+- Placeholder Main Template, Placeholder Secondary Template
+
+- Append Main Template, Append Secondary Template
+- Prepend Main Template, Prepend Secondary Template
+
+- Placeholder Main Template, Append Secondary Template
+- Append Main Template, Placeholder Secondary Template
+
+- Placeholder Main Template, Prepend Secondary Template
+- Prepend Main Template, Placeholder Secondary Template
+
+- Append Main Template, Prepend Secondary Template
+- Prepend Main Template, Append Secondary Template
+
+- Placeholder Main Template, Pass-Through Secondary Template
+- Pass-Through Main Template, Placeholder Secondary Template
+
+- Append Main Template, Pass-Through Secondary Template
+- Pass-Through Main Template, Append Secondary Template
+
+- Prepend Main Template, Pass-Through Secondary Template
+- Pass-Through Main Template, Prepend Secondary Template
+
+Refiner Text Manipulation:
+--------------------------
+
+- Pass-Through (Ignore)
+- Placeholder Template
+- Append Template
+- Prepend Template
+
+
+========================================
+Text Style Prompt (text in -> text out):
+========================================
+
+Base Text:
+----------
+
+Style Prompt:
+- Pass-Through (Ignore)
+
+- Append Main Style, Append Secondary Style
+- Prepend Main Style, Prepend Secondary Style
+
+- Append Main Style, Prepend Secondary Style
+- Prepend Main Style, Append Secondary Style
+
+- Append Main Style, Pass-Through Secondary Style
+- Pass-Through Main Style, Append Secondary Style
+
+- Prepend Main Style, Pass-Through Secondary Style
+- Pass-Through Main Style, Prepend Secondary Style
+
+Refiner Text:
+-------------
+
+Style Prompt:
+- Pass-Through (Ignore)
+- Append Style
+- Prepend Style
+
+===================================
+Text Styling (text in -> text out):
+===================================
+
+Modes:
+------
+- Pass-Through
+- Template
+
+Inputs:
+-------
+<pos_main>
+<pos_secondary>
+<pos_style>
+<neg_main>
+<neg_secondary>
+<neg_style>
+
+Outputs:
+--------
+base_pos_main
+base_pos_secondary
+base_pos_style
+base_neg_main
+base_neg_secondary
+base_neg_style
+refiner_pos_prompt
+refiner_pos_style
+refiner_neg_prompt
+refiner_neg_style
+
+Template format:
+----------------
+- Lines starting with # are comments
+- Lines starting with = start a new style definition
+- Lines starting with + set a rule for a parameter
+  (parameters without rules are passed through unmodified)
+- Empty lines are ignored
+- Refiner parameters can access base parameters
+
+Example Templates:
+------------------
+# The neutral template is the same as selecting pass-through mode
+= neutral
++ base_pos_main: <pos_main>
++ base_pos_secondary: <pos_secondary>
++ base_pos_style: <pos_style>
++ base_neg_main: <neg_main>
++ base_neg_secondary: <neg_secondary>
++ base_neg_style: <neg_style>
++ refiner_pos_prompt: <pos_main}, <pos_secondary>
++ refiner_pos_style: <pos_style>
++ refiner_neg_prompt: <neg_main}, <neg_secondary>
++ refiner_neg_style: <neg_style>
+
+# The opposite template uses positives as negatives and negatives as positives
+= opposite
++ base_pos_main: <neg_main>
++ base_pos_secondary: <neg_secondary>
++ base_pos_style: <neg_style>
++ base_neg_main: <pos_main>
++ base_neg_secondary: <pos_secondary>
++ base_neg_style: <pos_style>
++ refiner_pos_prompt: <neg_main}, <neg_secondary>
++ refiner_pos_style: <neg_style>
++ refiner_neg_prompt: <pos_main}, <pos_secondary>
++ refiner_neg_style: <pos_style>
+
+# The base_feeds_refiner template builds the refiner prompt from styled base prompts
+= base_feeds_refiner
++ base_pos_main: <pos_main>
++ base_pos_secondary: <pos_secondary>
++ base_pos_style: <pos_style>
++ base_neg_main: <neg_main>
++ base_neg_secondary: <neg_secondary>
++ base_neg_style: <neg_style>
++ refiner_pos_prompt: <base_pos_main}, <base_pos_secondary>
++ refiner_pos_style: <base_pos_style>
++ refiner_neg_prompt: <base_neg_main}, <base_neg_secondary>
++ refiner_neg_style: <base_neg_style>
