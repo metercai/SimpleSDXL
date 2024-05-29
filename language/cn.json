@@ -38,6 +38,7 @@
   "Performance": "性能模式",
   "Speed": "速度",
   "Quality": "质量",
+  "Exquisite": "精细",
   "Aspect Ratios": "尺寸与宽高比",
   "Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)": "竖屏(9:16), 肖像(4:5), 照片(4:3), 风景(3:2), 宽屏(16:9), 电影(21:9)",
   "Image Number": "出图数量",
@@ -178,7 +179,7 @@
   "Translate then generate": "译后生成",
   "Modify after translate": "译后修改",
   "The selection of timing for prompt translation.": "提示词翻译时机的选择。",
-  "Translation methods": "翻译方式",
+  "Translation methods": "翻译引擎",
   "Slim Model": "瘦模型",
   "Big Model": "大模型",
   "Third APIs": "三方接口",
@@ -259,7 +260,8 @@
   "Bind identity": "绑定身份",
   "Confirm identity": "确认身份",
   "Enable Comfyd always active": "启用Comfyd服务常驻",
-  "Enabling will improve execution speed but occupy some memory.": "启用Comfyd服务常驻会提高执行速度，但会多占用一些内存。",
+  "Enabling will improve execution speed but occupy some memory.": "启用服务常驻会提高执行速度，但会多占用一些GPU内存。",
+  "Enable HyDiT always active": "启用HyDiT引擎常驻",
 
 
   "SuperPrompter": "超级提示词扩展",
