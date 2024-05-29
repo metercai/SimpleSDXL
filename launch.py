@@ -58,12 +58,24 @@ def check_base_environment():
     sysinfo.update(dict(did=token.get_did()))
     return token, sysinfo
 
+#Intel Arc
+#conda install pkg-config libuv
+#python -m pip install torch==2.1.0.post2 torchvision==0.16.0.post2 torchaudio==2.1.0.post2 intel-extension-for-pytorch==2.1.30 --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/
 
 def prepare_environment():
     global sysinfo
 
     if sysinfo['gpu_brand'] == 'NVIDIA':
         torch_index_url = "https://download.pytorch.org/whl/cu121"
+    elif sysinfo['gpu_brand'] == 'AMD':
+        if platform.system() == "Windows":
+            #pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
+            #pip install torch-directml
+            torch_index_url = "https://download.pytorch.org/whl/"
+        else:
+            torch_index_url = "https://download.pytorch.org/whl/rocm5.7/"
+    elif sysinfo['gpu_brand'] == 'INTEL':
+            torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
     else:
         torch_index_url = "https://download.pytorch.org/whl/"
     torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)

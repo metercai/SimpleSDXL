@@ -719,6 +719,7 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
+                    hydit_active_checkbox = gr.Checkbox(label='Enable HyDiT always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
                     image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
@@ -759,10 +760,11 @@ with shared.gradio_root:
             
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
             comfyd_active_checkbox.change(lambda x: comfyd.start(args_comfyd) if x else comfyd.stop(), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
+            hydit_active_checkbox.change(lambda x: hydit_task.init_load_model() if x else hydit_task.unload_free_model(), inputs=hydit_active_checkbox, queue=False, show_progress=False)
             #translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection]
+            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, hydit_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -824,14 +826,14 @@ with shared.gradio_root:
         
         def toggle_engine(x):
             if x==flags.backend_engines[2]:
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)] + [gr.update()] * 19
+                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)] + [gr.update()] * 20
             elif x==flags.backend_engines[1]:
-                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=1, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 19
+                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=1, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
             else:
-                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 19
+                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 18
             return results
 
-        backend_selection.change(toggle_engine, inputs=backend_selection, outputs = [input_image_checkbox, performance_selection, image_number, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, sampler_name, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False)
+        backend_selection.change(toggle_engine, inputs=backend_selection, outputs = [input_image_checkbox, performance_selection, image_number, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, style_selections, sampler_name, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False)
 
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         

@@ -897,7 +897,6 @@ def worker():
                         imgs = empty_path
 
                 elif is_hydit_task:
-                    print(f'hydit_aspect_ratios_selection:{ehps.hydit_aspect_ratios_selection}')
                     imgs = hydit_task.inferencer(
                         prompt=task["positive"][0],
                         negative_prompt=task["negative"][0],
@@ -1018,7 +1017,7 @@ def worker():
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
         async_task.processing = False
-        if is_hydit_task:
+        if is_hydit_task and not ehps.hydit_active_checkbox :
             hydit_task.unload_free_model()
         return
 

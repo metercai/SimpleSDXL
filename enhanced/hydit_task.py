@@ -9,18 +9,20 @@ from hydit.config import get_args
 from hydit.inference import End2End
 from modules.config import path_t2i, add_ratio
 from modules.model_loader import load_file_from_url
-
+from modules.launch_util import is_installed
+import ldm_patched.modules.model_management
 
 default_aspect_ratio = add_ratio('1024*1024')
 available_aspect_ratios = [
-        '768*768', '768*1024', '768*1280', '864*1152', '960*1280', '1024*768',
-        '1024*1024', '1152*864', '1280*768', '1280*960', '1280*1280',
+        '768*1280', '960*1280', '1024*1024', 
+        '1280*768', '1280*960', '1280*1280',
     ]
 available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 
 SAMPLERS = list(SAMPLER_FACTORY.keys())
-default_sampler=SAMPLERS[0]
-new_args = ["--use_fp16", "--lang", "zh", "--load-key", "module", "--infer-mode", "fa"]
+default_sampler = SAMPLERS[0]
+infer_mode = "fa" if is_installed("flash-attn") else "torch"
+new_args = ["--use_fp16", "--lang", "zh", "--load-key", "module", "--infer-mode", infer_mode]
 hydit_args = get_args(new_args)
 gen = None
 
@@ -32,16 +34,21 @@ def init_load_model():
     files = ["clip_text_encoder/pytorch_model.bin", "model/pytorch_model_module.pt", "mt5/pytorch_model.bin", "sdxl-vae-fp16-fix/diffusion_pytorch_model.bin"]
     hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
     if not hydit_models_root.exists() or not check_files_exist(hydit_models_root, files):
-        print(f"hydit_models not exists: {hydit_models_root}")
         hydit_models_root.mkdir(parents=True, exist_ok=True)
         downloading_hydit_model(hydit_models_root)
+    if 'gen' not in globals():
+        globals()['gen'] = None
     if gen is None:
         gen = End2End(hydit_args, path_t2i)
+        print("[HyDiT] Initialized the HyDit environment and loaded model files.")
 
 def unload_free_model():
     global gen
-    if gen is not None:
-        gen = None
+
+    if 'gen' in globals():
+        del gen
+        ldm_patched.modules.model_management.unload_all_models()
+        print("[HyDiT] Freed the GPU Ram occupyed by the HyDit.")
 
 def get_scheduler_name(sampler):
     params = SAMPLER_FACTORY[sampler]
