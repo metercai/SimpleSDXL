@@ -3,6 +3,8 @@ import sys
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
 #os.chdir(root)
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 import comfy.options
 comfy.options.enable_args_parsing()
