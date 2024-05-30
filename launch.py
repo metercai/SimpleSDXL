@@ -54,6 +54,12 @@ def prepare_environment():
     git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
     sys.path.append(str(repo_dir(comfyui_name)))
 
+    if not is_installed("simpleai_base"):
+        run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
+    from simpleai_base import simpleai_base
+    print("Checking ...")
+    token = simpleai_base.init_local(f'SimpleSDXL_User')
+
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
@@ -111,8 +117,8 @@ if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-import enhanced.token_did as token_did
-token_did.init_local_did(f'SimpleSDXL_User')
+#import enhanced.token_did as token_did
+#token_did.init_local_did(f'SimpleSDXL_User')
 
 import enhanced.location as location 
 location.init_location()
