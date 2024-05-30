@@ -520,12 +520,6 @@ default_translation_methods = get_config_item_or_set_default(
     validator=lambda x: x in modules.flags.translation_methods
 )
 
-default_translation_timing = get_config_item_or_set_default(
-    key='default_translation_timing',
-    default_value='Translate then generate',
-    validator=lambda x: x in modules.flags.translation_timing
-)
-
 default_backfill_prompt = get_config_item_or_set_default(
     key='default_backfill_prompt',
     default_value=False,

@@ -1036,11 +1036,12 @@ def worker():
                         d.append(
                             ('CFG Mimicking from TSNR', 'adaptive_cfg', modules.patch.patch_settings[pid].adaptive_cfg))
 
-                    if clip_skip > 1:
+                    if clip_skip > 1 and not is_comfy_task and not is_hydit_task:
                         d.append(('CLIP Skip', 'clip_skip', clip_skip))
                     d.append(('Sampler', 'sampler', sampler_name))
                     d.append(('Scheduler', 'scheduler', scheduler_name))
-                    d.append(('VAE', 'vae', vae_name))
+                    if not is_comfy_task and not is_hydit_task:
+                        d.append(('VAE', 'vae', vae_name))
                     d.append(('Seed', 'seed', str(task['task_seed'])))
 
                     if freeu_enabled:

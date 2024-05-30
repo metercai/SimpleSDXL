@@ -87,4 +87,4 @@ WEB_DIRECTORY = "./web"
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', "WEB_DIRECTORY"]
 
 
-print(f'\033[34mComfy-Easy-Use v{__version__}: \033[92mLoaded\033[0m')
+#print(f'\033[34mComfy-Easy-Use v{__version__}: \033[92mLoaded\033[0m')

@@ -155,15 +155,19 @@ def requirements_met(requirements_file):
                 version_required = f'{m1.group(2)}.{m1.group(3)}.{m1.group(4)}'
             
             #print(f'requirement:{package}, {version_required}')
-            if version_required == "":
+            if line.startswith("--"):
                 continue
 
             try:
                 version_installed = importlib.metadata.version(package)
             except Exception:
+                met_diff.update({package:'-'})
                 result = False
                 continue
-
+            
+            if version_required=='' and version_installed:
+                continue
+            
             if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
                 met_diff.update({package:version_installed})
                 print(f"Version mismatch for {package}: Installed version {version_installed} does not meet requirement {version_required}")

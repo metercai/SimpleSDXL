@@ -1,5 +1,5 @@
 --extra-index-url https://pypi.ngc.nvidia.com
-diffusers==0.25
+diffusers==0.27
 torchsde==0.2.5
 transformers==4.37.2
 
