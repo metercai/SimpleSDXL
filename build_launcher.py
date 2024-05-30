@@ -6,7 +6,9 @@ python_embeded_path = os.path.join(win32_root, 'python_embeded')
 is_win32_standalone_build = os.path.exists(python_embeded_path) and os.path.isdir(python_embeded_path)
 
 win32_cmd = '''
-.\python_embeded\python.exe -s SimpleSDXL\entry_with_update.py {cmds} %*
+@echo off
+.\python_embeded\python.exe -s SimpleSDXL\{cmds} %*
+echo All done.
 pause
 '''
 
@@ -15,11 +17,11 @@ def build_launcher():
     if not is_win32_standalone_build:
         return
 
-    presets = [None, 'anime', 'realistic']
+    branchs = {"SimpleSDXL_dev": "entry_with_update.py --dev", "SimpleSDXL_without_update": "launch.py", "SimpleSDXL_commit": "launch_with_commit.py"}
 
-    for preset in presets:
-        win32_cmd_preset = win32_cmd.replace('{cmds}', '' if preset is None else f'--preset {preset}')
-        bat_path = os.path.join(win32_root, 'run.bat' if preset is None else f'run_{preset}.bat')
+    for (name, cmd) in branchs.items():
+        win32_cmd_preset = win32_cmd.replace('{cmds}', f'{cmd}')
+        bat_path = os.path.join(win32_root, f'run_{name}.bat')
         if not os.path.exists(bat_path):
             with open(bat_path, "w", encoding="utf-8") as f:
                 f.write(win32_cmd_preset)
