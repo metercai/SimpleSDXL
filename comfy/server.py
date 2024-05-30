@@ -120,7 +120,7 @@ class PromptServer():
 
         @routes.get("/")
         async def get_root(request):
-            return web.FileResponse(os.path.join(self.web_root, "index.html"))
+            return web.FileResponse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "index.html"))
 
         @routes.get("/embeddings")
         def get_embeddings(self):

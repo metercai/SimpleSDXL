@@ -225,7 +225,10 @@ def parse_html_log(choice: str, passthrough = False):
                     text.insert(8, '')
                 info_dict={"Filename":text[0]}
                 for i in range(0,int(len(text)/3)):
-                    info_dict[text[1+i*3]] = text[2+i*3]
+                    key = text[1+i*3].strip()
+                    if key == '' or key is None or key == 'Full raw prompt':
+                        continue
+                    info_dict[key] = text[2+i*3]
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
                 info_dict={"Filename":text[1]}

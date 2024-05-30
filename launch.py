@@ -104,7 +104,6 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
-       
         if is_win32_standalone_build:
             import modules.launch_util as launch_util
             if len(launch_util.met_diff.keys())>0:
