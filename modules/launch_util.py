@@ -25,7 +25,7 @@ python = sys.executable
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")
 index_url = os.environ.get('INDEX_URL', "https://pypi.tuna.tsinghua.edu.cn/simple")
 
-target_path_install = f'-t {os.path.join(python_embeded_path, "Lib/site-packages")}' if sys.platform.startswith("win") else ''
+target_path_install = f' -t {os.path.join(python_embeded_path, "Lib/site-packages")}' if sys.platform.startswith("win") else ''
 
 modules_path = os.path.dirname(os.path.realpath(__file__))
 script_path = os.path.dirname(modules_path)
