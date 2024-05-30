@@ -19,7 +19,7 @@ def build_launcher():
 
     branchs = {"SimpleSDXL_dev": "entry_with_update.py --dev", "SimpleSDXL_no_update": "launch.py", "SimpleSDXL_old": "launch_with_commit.py"}
 
-    for (name, cmd) in branchs:
+    for (name, cmd) in branchs.items():
         win32_cmd_preset = win32_cmd.replace('{cmds}', f'{cmd}')
         bat_path = os.path.join(win32_root, f'run_{name}.bat')
         if not os.path.exists(bat_path):
