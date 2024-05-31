@@ -2,6 +2,7 @@ import os
 import ssl
 import sys
 import json
+import importlib
 from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
@@ -25,7 +26,7 @@ from build_launcher import build_launcher, is_win32_standalone_build, python_emb
 from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install
 
 REINSTALL_ALL = False
-TRY_INSTALL_XFORMERS = False
+TRY_INSTALL_XFORMERS = True
 
 target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
@@ -80,7 +81,7 @@ def prepare_environment():
         torch_index_url = "https://download.pytorch.org/whl/"
     torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.2.2 torchvision==0.17.2 xformers==0.0.26 --extra-index-url {torch_index_url}")
+                                   f"pip install torch==2.2.2 torchvision==0.17.2 --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
     torch_command += target_path_install
     torch_command += f' -i {index_url} '
@@ -89,11 +90,13 @@ def prepare_environment():
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
     if TRY_INSTALL_XFORMERS:
-        if REINSTALL_ALL or not is_installed("xformers"):
+        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
+        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-manylinux2014_x86_64.whl'
+        if not is_installed("xformers"):
             xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.26')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26", live=True)
                 else:
                     print("Installation of xformers is not supported in this version of Python.")
                     print(
@@ -101,7 +104,18 @@ def prepare_environment():
                     if not is_installed("xformers"):
                         exit(0)
             elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
+                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
+        else:
+            version_installed = importlib.metadata.version('xformers')
+            if version_installed!='0.0.26':
+                print(f'Upgrade xformers from {version_installed} to 0.0.26')
+                run(f'"{python}" -m pip uninstall -y xformers')
+                if platform.system() == "Windows":
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26")
+                elif platform.system() == "Linux":
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
+                else:
+                    run_pip(f"install -U -I --no-deps xformers==0.0.26", "xformers 0.0.26")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if is_win32_standalone_build:

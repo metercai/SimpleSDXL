@@ -899,15 +899,18 @@ def worker():
                 int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
                 f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{image_number} ...', y)])
 
+        task_type = ''
         if is_hydit_task or is_comfy_task:
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
+            task_type = 'Comfy'
             if is_hydit_task:
                 hydit_task.init_load_model()
+                task_type = 'HyDiT'
 
         for current_task_id, task in enumerate(tasks):
             current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(current_task_id * steps) / float(all_steps))
-            progressbar(async_task, current_progress, f'Preparing task {current_task_id + 1}/{image_number} ...')
+            progressbar(async_task, current_progress, f'Preparing {task_type} task {current_task_id + 1}/{image_number} ...')
             execution_start_time = time.perf_counter()
 
             try:
