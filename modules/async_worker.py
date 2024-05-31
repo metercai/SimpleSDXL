@@ -218,7 +218,7 @@ def worker():
         is_SD3_task = ehps.backend_selection == flags.backend_engines[2]
         is_SD3T_task = ehps.backend_selection == flags.backend_engines[2]
         is_hydit_task =  ehps.backend_selection == flags.backend_engines[1]
-        is_comfy_task = 'layer' in current_tab
+        is_comfy_task = 'layer' in current_tab and input_image_checkbox
         if is_hydit_task:
             aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
         

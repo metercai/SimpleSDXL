@@ -40,7 +40,10 @@ try:
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as json_file:
             config_dict.update(json.load(json_file))
-            always_save_keys = list(config_dict.keys())
+        always_save_keys = list(config_dict.keys())
+        for key in always_save_keys:
+            if key.startswith('default_') and key[8:] in ads.default:
+                ads.default[key[8:]] = config_dict[key]
         print(f'Load config data from {config_path}.')
 except Exception as e:
     print(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
