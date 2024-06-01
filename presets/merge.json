@@ -1,5 +1,5 @@
 { 
-    "default_model": "albedobaseXL_v20.safetensors",
+    "default_model": "albedobaseXL_v21.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -39,8 +39,11 @@
     "default_aspect_ratio": "1152*896",
     "default_overwrite_step": 24,
     "checkpoint_downloads": {
-        "albedobaseXL_v20.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/albedobaseXL_v20.safetensors"
+        "albedobaseXL_v21.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/albedobaseXL_v21.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {}
+    "lora_downloads": {},
+    "previous_default_models": [
+    	"albedobaseXL_v20.safetensors"
+    ]
 } 
