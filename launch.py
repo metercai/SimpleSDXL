@@ -55,7 +55,7 @@ def prepare_environment():
     sys.path.append(str(repo_dir(comfyui_name)))
 
     if not is_installed("simpleai_base"):
-        run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
+        run(f'"{python}" -m pip install simpleai_base -i https://pypi.org/simple', "Installing simpleai_base")
     from simpleai_base import simpleai_base
     print("Checking ...")
     token = simpleai_base.init_local(f'SimpleSDXL_User')
