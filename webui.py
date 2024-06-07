@@ -347,14 +347,24 @@ with shared.gradio_root:
                                                       outputs=[inpaint_mask_cloth_category, inpaint_mask_sam_prompt_text, inpaint_mask_advanced_options],
                                                       queue=False, show_progress=False)
 
-                    with gr.TabItem(label='Layerdiffuse') as layer_tab:
+                    with gr.TabItem(label='Layer_iclight') as layer_tab:
                         with gr.Row():
-                            layer_method = gr.Radio(label='Layer Method ', choices=comfy_task.method_names, value=comfy_task.method_names[0])
+                            layer_method = gr.Radio(label='Layer case', choices=comfy_task.method_names, value=comfy_task.method_names[0])
                         with gr.Row():
-                            layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
+                            with gr.Column():
+                                layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
+                            with gr.Column():
+                                with gr.Group():
+                                    iclight_enable = gr.Checkbox(label='Enable IC-Light', value=True)
+                                    iclight_source_radio = gr.Radio(show_label=False, choices=comfy_task.iclight_source_names, value=comfy_task.iclight_source_names[0])
+                                gr.HTML('* The module derived from <a href="https://github.com/lllyasviel/IC-Light" target="_blank">IC-Light</a> <a href="https://github.com/layerdiffusion/LayerDiffuse" target="_blank">LayerDiffuse</a>')
                         with gr.Row():
-                            gr.HTML('* The Layerdiffuse module originates from <a href="https://github.com/huchenlei/ComfyUI-layerdiffuse" target="_blank">ComfyUI-layerdiffuse</a>')
-                    layer_method.change(lambda x: gr.update(visible=x != comfy_task.method_names[2]), inputs=layer_method, outputs=layer_input_image, queue=False, show_progress=False)
+                            example_quick_subjects = gr.Dataset(samples=comfy_task.quick_subjects, label='Subject Quick List', samples_per_page=1000, components=[prompt])
+                        with gr.Row():
+                            example_quick_prompts = gr.Dataset(samples=comfy_task.quick_prompts, label='Lighting Quick List', samples_per_page=1000, components=[prompt])
+                    iclight_enable.change(lambda x: gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), inputs=iclight_enable, outputs=iclight_source_radio, queue=False, show_progress=False)
+                    example_quick_prompts.click(lambda x, y: ', '.join(y.split(', ')[:2] + [x[0]]), inputs=[example_quick_prompts, prompt], outputs=prompt, show_progress=False, queue=False)
+                    example_quick_subjects.click(lambda x: x[0], inputs=example_quick_subjects, outputs=prompt, show_progress=False, queue=False)
 
                     with gr.TabItem(label='Describe') as desc_tab:
                         with gr.Row():
@@ -924,7 +934,7 @@ with shared.gradio_root:
         ctrls += [input_image_checkbox, current_tab]
         ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
-        ctrls += [layer_method, layer_input_image]
+        ctrls += [layer_method, layer_input_image, iclight_enable, iclight_source_radio]
         ctrls += [disable_preview, disable_intermediate_results, disable_seed_increment, black_out_nsfw]
         ctrls += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg, clip_skip]
         ctrls += [sampler_name, scheduler_name, vae_name]
@@ -1140,6 +1150,8 @@ httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)
 hydit_logger = logging.getLogger("hydit")
 hydit_logger.setLevel(logging.WARNING)
+
+launch.reset_env_args()
 
 if args_manager.args.enable_comfyd:
     comfyd.start(args_comfyd)

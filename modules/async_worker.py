@@ -171,6 +171,8 @@ def worker():
         inpaint_mask_image_upload = args.pop()
         layer_method = args.pop()
         layer_input_image = args.pop()
+        iclight_enable = args.pop()
+        iclight_source_radio = args.pop()
         disable_preview = args.pop()
         disable_intermediate_results = args.pop()
         disable_seed_increment = args.pop()
@@ -939,9 +941,12 @@ def worker():
                     else:
                         input_images = [HWC3(layer_input_image)]
                     comfy_method = layer_method
-
+                    options = dict(
+                        iclight_enable=iclight_enable,
+                        iclight_source_radio=iclight_source_radio
+                        )
                     try:
-                        comfy_task = get_comfy_task(comfy_method, default_params, input_images)
+                        comfy_task = get_comfy_task(comfy_method, default_params, input_images, options)
                         imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback_comfytask)
                     except ValueError as e:
                         print(f"comfy_task: input_image is None: {e}")

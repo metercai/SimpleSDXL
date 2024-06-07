@@ -1,19 +1,24 @@
 import json
-import launch
 import gradio as gr
 from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import init_models_info, models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
 
 simpleai_config = config
-token = launch.token
-sysinfo = launch.sysinfo
-sysinfo.update(dict(
-    torch_version=torch_version,
-    xformers_version=xformers_version,
-    cuda_version=cuda_version))
+token = None
+sysinfo = {}
+args_comfyd = [[]]
 
-args_comfyd = [["--port", f'{sysinfo["loopback_port"]}']]
+def reset_simpleai_args(launch_token, launch_sysinfo):
+    global token, sysinfo, args_comfyd
+    token = launch_token
+    sysinfo = launch_sysinfo
+    sysinfo.update(dict(
+        torch_version=torch_version,
+        xformers_version=xformers_version,
+        cuda_version=cuda_version))
+    comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
+    args_comfyd = [["--listen", "--port", f'{sysinfo["loopback_port"]}']]
 
 identity_note = '将手机号与身份私钥绑定，获得固定的可信数字身份标识，就可以存储、找回和分享非公开资源，也可以具备云端登录和算力共享的能力，详情可见。'
 
