@@ -13,9 +13,12 @@ from nodes import MAX_RESOLUTION
 from comfy.model_patcher import ModelPatcher
 import model_management
 
+from load_file_from_url import load_file_from_url, load_model_for_iclight
+
 class LoadAndApplyICLightUnet:
     @classmethod
     def INPUT_TYPES(s):
+        load_model_for_iclight()
         return {
             "required": {
                 "model": ("MODEL",),
@@ -36,10 +39,11 @@ Used with ICLightConditioning -node
 
     def load(self, model, model_path):
         type_str = str(type(model.model.model_config).__name__)
+
         if "SD15" not in type_str:
             raise Exception(f"Attempted to load {type_str} model, IC-Light is only compatible with SD 1.5 models.")
 
-        print("LoadAndApplyICLightUnet: Checking IC-Light Unet path")
+        print("LoadAndApplyICLightUnet: Checking and Loading IC-Light Unet path")
         model_full_path = folder_paths.get_full_path("unet", model_path)
         if not os.path.exists(model_full_path):
             raise Exception("Invalid model path")
@@ -48,9 +52,9 @@ Used with ICLightConditioning -node
             model_clone = model.clone()
 
             iclight_state_dict = load_torch_file(model_full_path)
-            
+
             print("LoadAndApplyICLightUnet: Attempting to add patches with IC-Light Unet weights")
-            try:          
+            try:
                 if 'conv_in.weight' in iclight_state_dict:
                     iclight_state_dict = convert_iclight_unet(iclight_state_dict)
                     in_channels = iclight_state_dict["diffusion_model.input_blocks.0.0.weight"].shape[1]
@@ -76,11 +80,12 @@ Used with ICLightConditioning -node
                  return ICLight.extra_conds(self, **kwargs)
             new_extra_conds = types.MethodType(bound_extra_conds, model_clone.model)
             model_clone.add_object_patch("extra_conds", new_extra_conds)
-            
 
-            model_clone.model.model_config.unet_config["in_channels"] = in_channels        
+
+            model_clone.model.model_config.unet_config["in_channels"] = in_channels
 
             return (model_clone, )
+
 
 import comfy
 class ICLight:

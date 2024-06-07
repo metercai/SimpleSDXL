@@ -17,12 +17,14 @@ from comfy.utils import load_torch_file
 from comfy_extras.nodes_compositing import JoinImageWithAlpha
 from comfy.conds import CONDRegular
 from .lib_layerdiffusion.utils import (
-    load_file_from_url,
+#    load_file_from_url,
     to_lora_patch_dict,
 )
 from .lib_layerdiffusion.models import TransparentVAEDecoder
 from .lib_layerdiffusion.attention_sharing import AttentionSharingPatcher
 from .lib_layerdiffusion.enums import StableDiffusionVersion
+
+from load_file_from_url import load_file_from_url
 
 if "layer_model" in folder_paths.folder_names_and_paths:
     layer_model_root = get_folder_paths("layer_model")[0]

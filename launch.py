@@ -3,6 +3,7 @@ import ssl
 import sys
 import json
 import importlib
+import packaging.version
 from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
@@ -43,13 +44,21 @@ def check_base_environment():
     print(f"Comfy version: {comfy_version.version}")
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    if not is_installed("simpleai_base"):
-        run_pip(f"install simpleai_base -i https://pypi.org/simple", "simpleai_base")
-        if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
+    base_pkg = "simpleai_base"
+    ver_required = "0.3.9"
+    if not is_installed(base_pkg):
+        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+    else:
+        version_installed = importlib.metadata.version(base_pkg)
+        if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+            run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
+            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+
+    if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
             print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
             print(f'受Windows限制，SimpleSDXL新版本需要下载新安装包，更新系统环境后再运行。下载地址：https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
-            print(f'If not updated, you can run the old version using the following scripte: run_SimpleSDXL_old.bat')
-            print(f'如果不更新，可点击：run_SimpleSDXL_old.bat 将直接运行旧的版本。')
+            print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
+            print(f'如果不更新，可点击：run_SimpleSDXL_commit.bat 将运行旧的某个指定版本。')
             sys.exit(0)
 
     from simpleai_base import simpleai_base
@@ -152,11 +161,10 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
-build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
-#print(f'sysinfo/基础环境信息:{sysinfo}')
 
+build_launcher()
 prepare_environment()
 args = ini_args()
 
@@ -179,20 +187,6 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
 
-if '--location' in sys.argv:
-        sysinfo["location"] = args.location
-
-if sysinfo["location"] !='CN':
-    if '--language' not in sys.argv:
-        args.language='default'
-
-if '--listen' not in sys.argv:
-    if is_ipynb():
-        args.listen = '127.0.0.1'
-    else:
-        args.listen = sysinfo["local_ip"]
-if '--port' not in sys.argv:
-    args.port = sysinfo["local_port"]
 if args.hf_mirror is not None : 
     os.environ['HF_MIRROR'] = str(args.hf_mirror)
     print("Set hf_mirror to:", args.hf_mirror)
@@ -255,5 +249,33 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
 config.default_base_model_name, config.checkpoint_downloads = download_models(
     config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
     config.embeddings_downloads, config.lora_downloads)
+
+
+def reset_env_args():
+    global token, sysinfo
+
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    sysinfo.update(dict(did=token.get_did()))
+    #print(f'sysinfo/基础环境信息:{sysinfo}')
+
+    if '--location' in sys.argv:
+        sysinfo["location"] = args.location
+
+    if sysinfo["location"] !='CN':
+        if '--language' not in sys.argv:
+            args.language='default'
+
+    if '--listen' not in sys.argv:
+        if is_ipynb():
+            args.listen = '127.0.0.1'
+        else:
+            args.listen = sysinfo["local_ip"]
+    if '--port' not in sys.argv:
+        args.port = sysinfo["local_port"]
+
+    from enhanced.simpleai import reset_simpleai_args
+    reset_simpleai_args(token, sysinfo)
+
+reset_env_args()
 
 from webui import *
