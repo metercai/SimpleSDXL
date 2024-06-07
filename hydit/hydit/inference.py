@@ -15,14 +15,13 @@ from loguru import logger
 from transformers import BertModel, BertTokenizer
 from transformers.modeling_utils import logger as tf_logger
 
-from .constants import SAMPLER_FACTORY, NEGATIVE_PROMPT
+from .constants import SAMPLER_FACTORY, NEGATIVE_PROMPT, TRT_MAX_WIDTH, TRT_MAX_HEIGHT, TRT_MAX_BATCH_SIZE
 from .diffusion.pipeline import StableDiffusionPipeline
 from .modules.models import HunYuanDiT, HUNYUAN_DIT_CONFIG
 from .modules.posemb_layers import get_2d_rotary_pos_embed, get_fill_resize_and_crop
 from .modules.text_encoder import MT5Embedder
 from .utils.tools import set_seeds
 
-#logger.add(sys.stdout, format="[HyDiT] {message}", level="INFO")
 
 class Resolution:
     def __init__(self, width, height):
@@ -36,7 +35,6 @@ class Resolution:
 class ResolutionGroup:
     def __init__(self):
         self.data = [
-            Resolution(768, 768),   # 1:1
             Resolution(1024, 1024), # 1:1
             Resolution(1280, 1280), # 1:1
             Resolution(1024, 768),  # 4:3
@@ -62,9 +60,9 @@ STANDARD_RATIO = np.array([
     9.0 / 16.0, # 9:16
 ])
 STANDARD_SHAPE = [
-    [(768, 768), (1024, 1024), (1280, 1280)],   # 1:1
-    [(1024, 768), (1152, 864), (1280, 960)],    # 4:3
-    [(768, 1024), (864, 1152), (960, 1280)],    # 3:4
+    [(1024, 1024), (1280, 1280)],   # 1:1
+    [(1280, 960)],                # 4:3
+    [(960, 1280)],                   # 3:4
     [(1280, 768)],                              # 16:9
     [(768, 1280)],                              # 9:16
 ]
@@ -167,9 +165,6 @@ class End2End(object):
         tf_logger.setLevel('ERROR')
 
         # ========================================================================
-        model_dir = self.root / "model"
-
-        # ========================================================================
         #logger.info(f"Loading CLIP Text Encoder...")
         text_encoder_path = self.root / "clip_text_encoder"
         self.clip_text_encoder = BertModel.from_pretrained(str(text_encoder_path), False, revision=None).to(self.device)
@@ -206,6 +201,7 @@ class End2End(object):
 
         self.infer_mode = self.args.infer_mode
         if self.infer_mode in ['fa', 'torch']:
+            model_dir = self.root / "model"
             model_path = model_dir / f"pytorch_model_{self.args.load_key}.pt"
             if not model_path.exists():
                 raise ValueError(f"model_path not exists: {model_path}")
@@ -216,12 +212,30 @@ class End2End(object):
                                     log_fn=logger.info,
                                     ).half().to(self.device)    # Force to use fp16
             # Load model checkpoint
-            #logger.info(f"Loading model checkpoint {model_path}...")
+            #logger.info(f"Loading torch model {model_path}...")
             state_dict = torch.load(model_path, map_location=lambda storage, loc: storage)
             self.model.load_state_dict(state_dict)
             self.model.eval()
+            #logger.info(f"Loading torch model finished")
         elif self.infer_mode == 'trt':
-            raise NotImplementedError("TensorRT model is not supported yet.")
+            from .modules.trt.hcf_model import TRTModel
+
+            trt_dir = self.root / "model_trt"
+            engine_dir = trt_dir / "engine"
+            plugin_path = trt_dir / "fmha_plugins/9.2_plugin_cuda11/fMHAPlugin.so"
+            model_name = "model_onnx"
+
+            #logger.info(f"Loading TensorRT model {engine_dir}/{model_name}...")
+            self.model = TRTModel(model_name=model_name,
+                                  engine_dir=str(engine_dir),
+                                  image_height=TRT_MAX_HEIGHT,
+                                  image_width=TRT_MAX_WIDTH,
+                                  text_maxlen=args.text_len,
+                                  embedding_dim=args.text_states_dim,
+                                  plugin_path=str(plugin_path),
+                                  max_batch_size=TRT_MAX_BATCH_SIZE,
+                                  )
+            #logger.info(f"Loading TensorRT model finished")
         else:
             raise ValueError(f"Unknown infer_mode: {self.infer_mode}")
 
@@ -299,10 +313,10 @@ class End2End(object):
             # We must force height and width to align to 16 and to be an integer.
             target_height = int((height // 16) * 16)
             target_width = int((width // 16) * 16)
-            #logger.info(f"Align to 16: (height, width) = ({target_height}, {target_width})")
+            logger.info(f"Align to 16: (height, width) = ({target_height}, {target_width})")
         elif self.infer_mode == 'trt':
             target_width, target_height = get_standard_shape(width, height)
-            #logger.info(f"Align to standard shape: (height, width) = ({target_height}, {target_width})")
+            logger.info(f"Align to standard shape: (height, width) = ({target_height}, {target_width})")
         else:
             raise ValueError(f"Unknown infer_mode: {self.infer_mode}")
 
