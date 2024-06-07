@@ -22,7 +22,7 @@ available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 SAMPLERS = list(SAMPLER_FACTORY.keys())
 default_sampler = SAMPLERS[0]
 infer_mode = "fa" if is_installed("flash-attn") else "torch"
-new_args = ["--use_fp16", "--lang", "zh", "--load-key", "module", "--infer-mode", infer_mode]
+new_args = ["--use_fp16", "--lang", "zh", "--load-key", "distill", "--infer-mode", infer_mode]
 hydit_args = get_args(new_args)
 gen = None
 
