@@ -32,7 +32,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
     get_str('negative_prompt', 'Negative Prompt', loaded_parameter_dict, results)
     get_list('styles', 'Styles', loaded_parameter_dict, results)
-    get_str('performance', 'Performance', loaded_parameter_dict, results)
+    performance = get_str('performance', 'Performance', loaded_parameter_dict, results)
     get_steps('steps', 'Steps', loaded_parameter_dict, results)
     get_number('overwrite_switch', 'Overwrite Switch', loaded_parameter_dict, results)
     get_resolution('resolution', 'Resolution', loaded_parameter_dict, results)
@@ -59,19 +59,27 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
 
     get_freeu('freeu', 'FreeU', loaded_parameter_dict, results)
 
+    # prevent performance LoRAs to be added twice, by performance and by lora
+    performance_filename = None
+    if performance is not None and performance in Performance.list():
+        performance = Performance(performance)
+        performance_filename = performance.lora_filename()
+
     for i in range(modules.config.default_max_lora_number):
-       get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results)
-    
+        get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results, performance_filename)
+
     return results
 
 
-def get_str(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
+def get_str(key: str, fallback: str | None, source_dict: dict, results: list, default=None) -> str | None:
     try:
         h = source_dict.get(key, source_dict.get(fallback, default))
         assert isinstance(h, str)
         results.append(h)
+        return h
     except:
         results.append(gr.update())
+        return None
 
 
 def get_list(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
@@ -186,7 +194,7 @@ def get_freeu(key: str, fallback: str | None, source_dict: dict, results: list, 
         results.append(gr.update())
 
 
-def get_lora(key: str, fallback: str | None, source_dict: dict, results: list):
+def get_lora(key: str, fallback: str | None, source_dict: dict, results: list, performance_filename: str | None):
     try:
         split_data = source_dict.get(key, source_dict.get(fallback)).split(' : ')
         enabled = True
@@ -197,6 +205,9 @@ def get_lora(key: str, fallback: str | None, source_dict: dict, results: list):
             enabled = split_data[0] == 'True'
             name = split_data[1]
             weight = split_data[2]
+
+        if name == performance_filename:
+            raise Exception
 
         weight = float(weight)
         results.append(enabled)
@@ -267,7 +278,7 @@ class MetadataParser(ABC):
         self.full_prompt: str = ''
         self.raw_negative_prompt: str = ''
         self.full_negative_prompt: str = ''
-        self.steps: int = 30
+        self.steps: int = Steps.SPEED.value
         self.base_model_name: str = ''
         self.base_model_hash: str = ''
         self.refiner_model_name: str = ''
@@ -281,11 +292,11 @@ class MetadataParser(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def parse_json(self, metadata: dict | str) -> dict:
+    def to_json(self, metadata: dict | str) -> dict:
         raise NotImplementedError
 
     @abstractmethod
-    def parse_string(self, metadata: dict) -> str:
+    def to_string(self, metadata: dict) -> str:
         raise NotImplementedError
 
     def set_data(self, raw_prompt, full_prompt, raw_negative_prompt, full_negative_prompt, steps, base_model_name,
@@ -350,7 +361,7 @@ class A1111MetadataParser(MetadataParser):
         'version': 'Version'
     }
 
-    def parse_json(self, metadata: str) -> dict:
+    def to_json(self, metadata: str) -> dict:
         metadata_prompt = ''
         metadata_negative_prompt = ''
 
@@ -404,9 +415,9 @@ class A1111MetadataParser(MetadataParser):
         data['styles'] = str(found_styles)
 
         # try to load performance based on steps, fallback for direct A1111 imports
-        if 'steps' in data and 'performance' not in data:
+        if 'steps' in data and 'performance' in data is None:
             try:
-                data['performance'] = Performance[Steps(int(data['steps'])).name].value
+                data['performance'] = Performance.by_steps(data['steps']).value
             except ValueError | KeyError:
                 pass
 
@@ -436,7 +447,7 @@ class A1111MetadataParser(MetadataParser):
                 lora_split = lora.split(': ')
                 lora_name = lora_split[0]
                 lora_weight = lora_split[2] if len(lora_split) == 3 else lora_split[1]
-                for filename in modules.config.lora_filenames_no_special:
+                for filename in modules.config.lora_filenames:
                     path = Path(filename)
                     if lora_name == path.stem:
                         data[f'lora_combined_{li + 1}'] = f'{filename} : {lora_weight}'
@@ -444,7 +455,7 @@ class A1111MetadataParser(MetadataParser):
 
         return data
 
-    def parse_string(self, metadata: dict) -> str:
+    def to_string(self, metadata: dict) -> str:
         data = {k: v for _, k, v in metadata}
 
         width, height = eval(data['resolution'])
@@ -524,14 +535,14 @@ class FooocusMetadataParser(MetadataParser):
     def get_scheme(self) -> MetadataScheme:
         return MetadataScheme.FOOOCUS
 
-    def parse_json(self, metadata: dict) -> dict:
+    def to_json(self, metadata: dict) -> dict:
         for key, value in metadata.items():
             if value in ['', 'None']:
                 continue
             if key in ['base_model', 'refiner_model']:
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.model_filenames)
             elif key.startswith('lora_combined_'):
-                metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames_no_special)
+                metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
             elif key == 'vae':
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.vae_filenames)
             else:
@@ -539,7 +550,7 @@ class FooocusMetadataParser(MetadataParser):
 
         return metadata
 
-    def parse_string(self, metadata: list) -> str:
+    def to_string(self, metadata: list) -> str:
         for li, (label, key, value) in enumerate(metadata):
             # remove model folder paths from metadata
             if key.startswith('lora_combined_'):
@@ -579,6 +590,8 @@ class FooocusMetadataParser(MetadataParser):
             elif value == path.stem:
                 return filename
 
+        return None
+
 class SIMPLEMetadataParser(MetadataParser):
     def get_scheme(self) -> MetadataScheme:
         return MetadataScheme.SIMPLE
@@ -611,7 +624,7 @@ class SIMPLEMetadataParser(MetadataParser):
         'LoRAs': 'loras',
     }
 
-    def parse_json(self, metadata: dict) -> dict:
+    def to_json(self, metadata: dict) -> dict:
 
         model_filenames = modules.config.model_filenames.copy()
         lora_filenames = modules.config.lora_filenames.copy()
@@ -630,7 +643,7 @@ class SIMPLEMetadataParser(MetadataParser):
 
         return metadata
 
-    def parse_string(self, metadata: list) -> str:
+    def to_string(self, metadata: list) -> str:
         for li, (label, key, value) in enumerate(metadata):
             # remove model folder paths from metadata
             if key.startswith('lora_combined_'):
@@ -669,6 +682,7 @@ class SIMPLEMetadataParser(MetadataParser):
                     return f'{filename} : {weight}'
             elif value == path.stem:
                 return filename
+        return None
 
 
 def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
