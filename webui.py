@@ -768,7 +768,7 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
-                    hydit_active_checkbox = gr.Checkbox(label='Enable HyDiT always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
+                    hydit_active_checkbox = gr.Checkbox(label='Enable HyDiT always active', value=False, info='Enabling will improve execution speed but occupy some memory.')
                     image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
