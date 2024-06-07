@@ -17,7 +17,7 @@ def build_launcher():
     if not is_win32_standalone_build:
         return
 
-    branchs = {"SimpleSDXL_dev": "entry_with_update.py --dev", "SimpleSDXL_without_update": "launch.py", "SimpleSDXL_commit": "launch_with_commit.py"}
+    branchs = {"SimpleSDXL": "entry_with_update.py", "SimpleSDXL_without_update": "launch.py", "SimpleSDXL_commit": "launch_with_commit.py"}
 
     for (name, cmd) in branchs.items():
         win32_cmd_preset = win32_cmd.replace('{cmds}', f'{cmd}')
