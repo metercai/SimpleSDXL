@@ -166,6 +166,7 @@ print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
 build_launcher()
 prepare_environment()
+build_launcher()
 args = ini_args()
 
 if args.gpu_device_id is not None:
