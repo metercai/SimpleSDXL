@@ -1,6 +1,8 @@
 import os
 import ssl
 import sys
+import importlib
+import packaging.version
 from pathlib import Path
 
 #print('[System PATH] ' + str(sys.path))
@@ -54,8 +56,16 @@ def prepare_environment():
     git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
     sys.path.append(str(repo_dir(comfyui_name)))
 
-    if not is_installed("simpleai_base"):
-        run(f'"{python}" -m pip install simpleai_base -i https://pypi.org/simple', "Installing simpleai_base")
+    base_pkg = "simpleai_base"
+    ver_required = "0.3.9"
+    if not is_installed(base_pkg):
+        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+    else:
+        version_installed = importlib.metadata.version(base_pkg)
+        if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+            run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
+            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+
     from simpleai_base import simpleai_base
     print("Checking ...")
     token = simpleai_base.init_local(f'SimpleSDXL_User')

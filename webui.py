@@ -160,6 +160,9 @@ with shared.gradio_root:
                     with gr.Column(scale=12):
                         prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
                                         container=False, autofocus=False, elem_classes='type_row', lines=1024)
+                        #prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
+                        #                autofocus=True, lines=3)
+
                         def calculateTokenCounter(text, style_selections):
                             if len(text) < 1:
                                 return 0
@@ -615,9 +618,8 @@ with shared.gradio_root:
                         disable_preview = gr.Checkbox(label='Disable Preview', value=modules.config.default_black_out_nsfw,
                                                       interactive=not modules.config.default_black_out_nsfw,
                                                       info='Disable preview during generation.')
-                        disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results', 
-                                                      value=modules.config.default_performance == flags.Performance.EXTREME_SPEED.value,
-                                                      interactive=modules.config.default_performance != flags.Performance.EXTREME_SPEED.value,
+                        disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results',
+                                                      value=flags.Performance.has_restricted_features(modules.config.default_performance),
                                                       info='Disable intermediate results during generation, only show final gallery.')
                         disable_seed_increment = gr.Checkbox(label='Disable seed increment',
                                                              info='Disable automatic seed increment when image number is > 1.',
@@ -807,7 +809,7 @@ with shared.gradio_root:
 
         performance_selection.change(lambda x: [gr.update(interactive=not flags.Performance.has_restricted_features(x))] * 11 +
                                                [gr.update(visible=not flags.Performance.has_restricted_features(x))] * 1 +
-                                               [gr.update(interactive=not flags.Performance.has_restricted_features(x), value=flags.Performance.has_restricted_features(x))] * 1,
+                                               [gr.update(value=flags.Performance.has_restricted_features(x))] * 1,
                                      inputs=performance_selection,
                                      outputs=[
                                          guidance_scale, sharpness, adm_scaler_end, adm_scaler_positive,
@@ -931,7 +933,8 @@ with shared.gradio_root:
                 parsed_parameters = {}
             else:
                 metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
-                parsed_parameters = metadata_parser.parse_json(parameters)
+                parsed_parameters = metadata_parser.to_json(parameters)
+
             return modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating)
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=True) \
