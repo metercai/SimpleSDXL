@@ -1,6 +1,10 @@
 import os
 import tarfile
 import numpy as np
+import torch
+import gc
+import ldm_patched.modules.model_management as model_management
+
 from io import BytesIO
 from PIL import Image
 from pathlib import Path
@@ -10,7 +14,8 @@ from hydit.inference import End2End
 from modules.config import path_t2i, add_ratio
 from modules.model_loader import load_file_from_url
 from modules.launch_util import is_installed
-import ldm_patched.modules.model_management
+from diffusers import HunyuanDiTPipeline
+from transformers import T5EncoderModel
 
 default_aspect_ratio = add_ratio('1024*1024')
 available_aspect_ratios = [
@@ -26,29 +31,51 @@ new_args = ["--use_fp16", "--lang", "zh", "--load-key", "distill", "--infer-mode
 hydit_args = get_args(new_args)
 gen = None
 
+hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
+hydit_text_encoder = None
+hydit_pipe = None
+
 def init_load_model():
-    global hydit_args, gen
+    global hydit_models_root, hydit_pipe
 
     check_files_exist = lambda ph, fs: all(os.path.exists(os.path.join(ph, f)) for f in fs)
 
     files = ["clip_text_encoder/pytorch_model.bin", "model/pytorch_model_module.pt", "mt5/pytorch_model.bin", "sdxl-vae-fp16-fix/diffusion_pytorch_model.bin"]
-    hydit_models_root = Path(os.path.join(path_t2i, "t2i"))
     if not hydit_models_root.exists() or not check_files_exist(hydit_models_root, files):
         hydit_models_root.mkdir(parents=True, exist_ok=True)
         downloading_hydit_model(hydit_models_root)
-    if 'gen' not in globals():
-        globals()['gen'] = None
-    if gen is None:
-        gen = End2End(hydit_args, path_t2i)
-        print("[HyDiT] Initialized the HyDit environment and loaded model files.")
+    
+    if 'hydit_text_encoder' not in globals():
+        globals()['hydit_text_encoder'] = None
+    if hydit_text_encoder is None:
+        hydit_text_encoder = T5EncoderModel.from_pretrained(
+            hydit_models_root,
+            subfolder="text_encoder_2",
+            load_in_8bit=True,
+            device_map="auto",
+        )
+    if 'hydit_pipe' not in globals():
+        globals()['hydit_pipe'] = None
+    if hydit_pipe is None:
+        hydit_pipe = HunyuanDiTPipeline.from_pretrained(
+            hydit_models_root, 
+            text_encoder_2=text_encoder_2,
+            transformer=None,
+            vae=None,
+            torch_dtype=torch.float16,
+            device_map="balanced",
+        )
+    print("[HyDiT] Initialized the HyDit environment and loaded model files.")
 
 def unload_free_model():
-    global gen
+    global hydit_pipe
 
-    if 'gen' in globals():
-        del gen
-        ldm_patched.modules.model_management.unload_all_models()
-        print("[HyDiT] Freed the GPU Ram occupyed by the HyDit.")
+    if 'hydit_pipe' in globals():
+        del hydit_pipe
+    model_management.unload_all_models()
+    gc.collect()
+    torch.cuda.empty_cache()
+    print("[HyDiT] Freed the GPU Ram occupyed by the HyDit.")
 
 def get_scheduler_name(sampler):
     params = SAMPLER_FACTORY[sampler]
@@ -64,23 +91,76 @@ def inferencer(
     width, height,
     sampler,
 ):
+    global hydit_models_root
+
+    if 'hydit_pipe' not in globals():
+        globals()['hydit_pipe'] = None
+    if hydit_pipe is None:
+        init_load_model()
+
     seed = seed & 0xFFFFFFFF
     enhanced_prompt = None
     params = SAMPLER_FACTORY[sampler]
     print(f'[HyDiT] Ready to HyDiT Task:\n    prompt={prompt}\n    negative_prompt={negative_prompt}\n    seed={seed}\n    cfg_scale={cfg_scale}\n    steps={infer_steps}\n    width,height={width},{height}\n    scheduler={params["scheduler"]}\n    sampler={params["name"]}')
-    results = gen.predict(prompt,
-                          height=height,
-                          width=width,
-                          seed=seed,
-                          enhanced_prompt=enhanced_prompt,
-                          negative_prompt=negative_prompt,
-                          infer_steps=infer_steps,
-                          guidance_scale=cfg_scale,
-                          batch_size=1,
-                          src_size_cond=(width, height),
-                          sampler=sampler,
-                          )
-    image = results['images'][0]
+
+    
+    with torch.no_grad():
+        prompt_embeds, negative_prompt_embeds, prompt_attention_mask, negative_prompt_attention_mask = hydit_pipe.encode_prompt(prompt)
+        (
+            prompt_embeds_2,
+            negative_prompt_embeds_2,
+            prompt_attention_mask_2,
+            negative_prompt_attention_mask_2,
+        ) = hydit_pipe.encode_prompt(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            prompt_embeds=None,
+            negative_prompt_embeds=None,
+            prompt_attention_mask=None,
+            negative_prompt_attention_mask=None,
+            max_sequence_length=256,
+            text_encoder_index=1,
+        )
+    unload_free_model()
+
+    if sampler=='ddpm':
+        scheduler = DDPMScheduler.from_config(params['kwargs'])
+    elif sampler=='ddim':
+        scheduler = DDIMScheduler.from_config(params['kwargs'])
+    elif sampler=='dpmms':
+        scheduler = DPMSolverMultistepScheduler.from_config(params['kwargs'])
+    else:
+        raise ValueError(f'The sampler:{sampler} is not in SAMPLER_FACTORY')
+
+    device = model_management.get_torch_device()
+    pipe = HunyuanDiTPipeline.from_pretrained(
+        hydit_models_root,
+        text_encoder=None,
+        text_encoder_2=None,
+        scheduler=params["scheduler"],
+        torch_dtype=torch.float16,
+        )
+    pipe.scheduler = scheduler
+    pipe.to(device)
+
+    image = pipe(
+        height=height,
+        width=width,
+        num_inference_steps=infer_steps,
+        guidance_scale=cfg_scale,
+        num_images_per_prompt=1,
+        generator=torch.Generator(device=device).manual_seed(seed)
+        negative_prompt=None,
+        prompt_embeds=prompt_embeds,
+        prompt_embeds_2=prompt_embeds_2,
+        negative_prompt_embeds=negative_prompt_embeds,
+        negative_prompt_embeds_2=negative_prompt_embeds_2,
+        prompt_attention_mask=prompt_attention_mask,
+        prompt_attention_mask_2=prompt_attention_mask_2,
+        negative_prompt_attention_mask=negative_prompt_attention_mask,
+        negative_prompt_attention_mask_2=negative_prompt_attention_mask_2,
+    ).images[0]
+
     return [np.array(image)]
 
 def downloading_hydit_model(path_root):

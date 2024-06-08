@@ -313,10 +313,10 @@ class End2End(object):
             # We must force height and width to align to 16 and to be an integer.
             target_height = int((height // 16) * 16)
             target_width = int((width // 16) * 16)
-            logger.info(f"Align to 16: (height, width) = ({target_height}, {target_width})")
+            #logger.info(f"Align to 16: (height, width) = ({target_height}, {target_width})")
         elif self.infer_mode == 'trt':
             target_width, target_height = get_standard_shape(width, height)
-            logger.info(f"Align to standard shape: (height, width) = ({target_height}, {target_width})")
+            #logger.info(f"Align to standard shape: (height, width) = ({target_height}, {target_width})")
         else:
             raise ValueError(f"Unknown infer_mode: {self.infer_mode}")
 
