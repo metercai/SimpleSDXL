@@ -154,7 +154,6 @@ def requirements_met(requirements_file):
                     package = package.replace('_', '-')
                 version_required = f'{m1.group(2)}.{m1.group(3)}.{m1.group(4)}'
             
-            #print(f'requirement:{package}, {version_required}')
             if line.startswith("--"):
                 continue
 
@@ -164,7 +163,8 @@ def requirements_met(requirements_file):
                 met_diff.update({package:'-'})
                 result = False
                 continue
-            
+           
+            #print(f'requirement:{package}, required:{version_required}, installed:{version_installed}')
             if version_required=='' and version_installed:
                 continue
             

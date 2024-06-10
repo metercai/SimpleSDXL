@@ -24,7 +24,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import platform
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = True
@@ -128,15 +128,14 @@ def prepare_environment():
                     run_pip(f"install -U -I --no-deps xformers==0.0.26", "xformers 0.0.26")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
-        if is_win32_standalone_build:
-            import modules.launch_util as launch_util
-            if len(launch_util.met_diff.keys())>0:
-                for p in launch_util.met_diff.keys():
-                    print(f'Uninstall {p}.{launch_util.met_diff[p]} ...')
-                    run(f'"{python}" -m pip uninstall -y {p}=={launch_util.met_diff[p]}')
-            run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
-        else:
-            run_pip(f"install -r \"{requirements_file}\"", "requirements")
+        if len(met_diff.keys())>0:
+            for p in met_diff.keys():
+                print(f'Uninstall {p}.{met_diff[p]} ...')
+                run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
+            if is_win32_standalone_build:
+                run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
+            else:
+                run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
     patch_requirements = "requirements_patch.txt"
     if (REINSTALL_ALL or not requirements_met(patch_requirements)) and not is_win32_standalone_build:

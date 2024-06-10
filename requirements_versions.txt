@@ -1,6 +1,6 @@
 --extra-index-url https://pypi.ngc.nvidia.com
 git+https://github.com/huggingface/diffusers
-#diffusers==0.27
+#diffusers>=0.27
 torchsde==0.2.5
 transformers==4.37.2
 
