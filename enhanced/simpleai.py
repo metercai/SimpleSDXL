@@ -6,7 +6,7 @@ from simpleai_base.models_info import init_models_info, models_info, models_info
 
 simpleai_config = config
 token = None
-sysinfo = {}
+sysinfo = {"location": "CN"}
 args_comfyd = [[]]
 
 def reset_simpleai_args(launch_token, launch_sysinfo):
