@@ -920,6 +920,21 @@ def worker():
             async_task.yields.append(['preview', (
                 int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
                 f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{image_number} ...', y)])
+        
+        def callback_hydittask(pipe, step, time_steps, callback_kwargs):
+            from enhanced.latent_preview import get_previewer
+            from ldm_patched.modules.latent_formats import SDXL as SDXL_format
+
+            latents = callback_kwargs["latents"]
+            preview_format = "JPEG"
+            latent_format = SDXL_format()
+            previewer = get_previewer(latent_format)
+            y=previewer.decode_latent_to_preview_image(preview_format, latents)
+            done_steps = current_task_id * steps + step
+            async_task.yields.append(['preview', (
+                int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
+                f'Sampling step {step + 1}/{steps}, image {current_task_id + 1}/{image_number} ...', y)])
+            return callback_kwargs
 
         task_type = ''
         if is_hydit_task or is_comfy_task:
@@ -984,6 +999,7 @@ def worker():
                         width=width, 
                         height=height,
                         sampler=final_sampler_name,
+                        callback=callback_hydittask
                     )
                     scheduler_name, sampler_name = hydit_task.get_scheduler_name(final_sampler_name)
 
@@ -1030,6 +1046,8 @@ def worker():
                     progressbar(async_task, current_progress, 'Checking for NSFW content ...')
                     imgs = default_censor(imgs)
 
+                if ldm_patched.modules.model_management.get_torch_device().is_nvidia():
+                    print(f'[Fooocus] Max_memory_allocated: {torch.cuda.max_memory_allocated()/ 1024 / 1024 / 1024:.2f}GB')
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
                 for x in imgs:
                     d = [('Prompt', 'prompt', task['log_positive_prompt']),

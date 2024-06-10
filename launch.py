@@ -46,13 +46,14 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.9"
+    #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i {index_url}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
         if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i {index_url}', f'Install {base_pkg} {ver_required}')
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
             print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
