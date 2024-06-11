@@ -348,7 +348,7 @@ def down_absent_model(state_params):
     state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
     return gr.update(visible=False), state_params
 
-def reset_params_for_preset(state_params):
+def reset_params_for_preset(prompt, negative_prompt, state_params):
     global system_message, preset_down_note_info
 
     state_params.update({"__message": system_message})
@@ -360,6 +360,8 @@ def reset_params_for_preset(state_params):
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": preset})
+    state_params.update({"__prompt": prompt})
+    state_params.update({"__negative_prompt": negative_prompt})
     results = [gr.update(value='SDXL')]
     results += reset_context(state_params)
     return results
@@ -394,8 +396,8 @@ def reset_context(state_params):
     info_preset = {}
     keys = config_preset.keys()
     info_preset.update({
-        "Prompt": '' if 'default_prompt' not in keys else config_preset["default_prompt"],
-        "Negative Prompt": '' if 'default_prompt_negative' not in keys else config_preset["default_prompt_negative"],
+        "Prompt": state_params.get("__prompt") if 'default_prompt' not in keys else config_preset["default_prompt"],
+        "Negative Prompt": state_params.get("__negative_prompt") if 'default_prompt_negative' not in keys else config_preset["default_prompt_negative"],
         "Styles": "['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp']" if 'default_styles' not in keys else f'{config_preset["default_styles"]}',
         "Performance": 'Speed' if 'default_performance' not in keys else config_preset["default_performance"],
         "Sharpness": '2.0' if 'default_sample_sharpness' not in keys else f'{config_preset["default_sample_sharpness"]}',

@@ -549,7 +549,7 @@ with shared.gradio_root:
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 with gr.Row():
-                    sync_model_info = gr.Checkbox(label='Sync model info', info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
+                    sync_model_info = gr.Checkbox(label='Sync model info', interactive=False, info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
                     with gr.Column(visible=False) as info_sync_texts:
                         models_infos = []
                         keylist = sorted(models_info.keys())
@@ -878,7 +878,7 @@ with shared.gradio_root:
             if x==flags.backend_engines[2]:
                 results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios] + [gr.update()] * 20
             elif x==flags.backend_engines[1]:
-                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=1, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
+                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
             else:
                 results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 18
             return results
@@ -1074,54 +1074,54 @@ with shared.gradio_root:
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 
     bar0_button.click(topbar.check_absent_model, inputs=[bar0_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar1_button.click(topbar.check_absent_model, inputs=[bar1_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar2_button.click(topbar.check_absent_model, inputs=[bar2_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar3_button.click(topbar.check_absent_model, inputs=[bar3_button, state_topbar], outputs=[state_topbar], show_progress=False) \
-               .then(topbar.reset_params_for_preset, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar4_button.click(topbar.check_absent_model, inputs=[bar4_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar5_button.click(topbar.check_absent_model, inputs=[bar5_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar6_button.click(topbar.check_absent_model, inputs=[bar6_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar7_button.click(topbar.check_absent_model, inputs=[bar7_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
     bar8_button.click(topbar.check_absent_model, inputs=[bar8_button, state_topbar], outputs=[state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
                       .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_mask_upload_checkbox, preset_instruction], show_progress=False) \
-                      .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+                      .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]).then(fn=lambda: None, _js='refresh_grid_delayed')

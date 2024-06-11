@@ -11,7 +11,7 @@ from pathlib import Path
 from hydit.constants import SAMPLER_FACTORY
 from hydit.config import get_args
 from hydit.inference import End2End
-from modules.config import path_t2i, add_ratio
+from modules.config import path_models_root, add_ratio
 from modules.model_loader import load_file_from_url
 from modules.launch_util import is_installed
 from diffusers import HunyuanDiTPipeline, DDPMScheduler, DDIMScheduler, DPMSolverMultistepScheduler
@@ -31,7 +31,7 @@ default_sampler = SAMPLERS[0]
 #hydit_args = get_args(new_args)
 #gen = None
 
-hydit_models_root = Path(os.path.join(path_t2i, "hydit"))
+hydit_models_root = Path(os.path.join(path_models_root, "hydit"))
 hydit_text_encoder = None
 hydit_pipe = None
 
@@ -174,11 +174,11 @@ def inferencer(
 
 def downloading_hydit_model(path_root):
     load_file_from_url(
-        url='https://huggingface.co/metercai/backup/resolve/main/models_hydit.tgz',
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_hydit_fp16.tgz',
         model_dir=path_root,
-        file_name='models_hydit.tgz'
+        file_name='models_hydit_fp16.tgz'
     )
-    downfile = os.path.join(path_root, 'models_hydit.tgz')
+    downfile = os.path.join(path_root, 'models_hydit_fp16.tgz')
     with tarfile.open(downfile, 'r:gz') as tarf:
         tarf.extractall(path_root)
     os.remove(downfile)

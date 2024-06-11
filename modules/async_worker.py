@@ -1067,8 +1067,12 @@ def worker():
                               modules.patch.patch_settings[pid].positive_adm_scale,
                               modules.patch.patch_settings[pid].negative_adm_scale,
                               modules.patch.patch_settings[pid].adm_scaler_end)))]
-                    if not is_comfy_task and not is_hydit_task:
-                        d += [
+                    if is_comfy_task or is_hydit_task:
+                        refiner_model_name = ''
+                        refiner_switch = 1.0
+                        if is_hydit_task:
+                            base_model_name = ''
+                    d += [
                           ('Base Model', 'base_model', base_model_name),
                           ('Refiner Model', 'refiner_model', refiner_model_name),
                           ('Refiner Switch', 'refiner_switch', refiner_switch)]
@@ -1096,6 +1100,8 @@ def worker():
                     for li, (n, w) in enumerate(loras):
                         if n != 'None' and not is_hydit_task and not is_comfy_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
+                    if is_hydit_task or is_comfy_task:
+                        loras = []
 
                     metadata_parser = None
                     if save_metadata_to_images:
