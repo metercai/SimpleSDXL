@@ -223,12 +223,17 @@ def parse_html_log(choice: str, passthrough = False):
                     text.insert(5, '')
                 if text[8]=='\n' or text[8]=='\r\n':
                     text.insert(8, '')
+                if text[29]=='\n' or text[29]=='\r\n':
+                    text.insert(29, '')
+                if text[32]=='\n' or text[32]=='\r\n':
+                    text.insert(32, '')
                 info_dict={"Filename":text[0]}
                 for i in range(0,int(len(text)/3)):
                     key = text[1+i*3].strip()
+                    value = text[2+i*3].strip()
                     if key == '' or key is None or key == 'Full raw prompt':
                         continue
-                    info_dict[key] = text[2+i*3]
+                    info_dict[key] = value
             else:
                 print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
                 info_dict={"Filename":text[1]}

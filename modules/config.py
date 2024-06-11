@@ -208,7 +208,7 @@ path_llms = get_dir_or_set_default('path_llms','../models/llms/')
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
 path_outputs = get_path_output()
-path_t2i = get_dir_or_set_default('path_t2i', '../models/')
+path_models_root = get_dir_or_set_default('path_models_root', '../models/')
 path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
 
 

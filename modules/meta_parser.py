@@ -1,3 +1,4 @@
+import os
 import json
 import re
 from abc import ABC, abstractmethod
@@ -235,6 +236,8 @@ def get_loras_simple(loras: dict, results: list):
 
 def get_sha256(filepath):
     global hash_cache
+    if not os.path.isfile(filepath):
+        return ''
     if filepath not in hash_cache:
         hash_cache[filepath] = sha256(filepath)
 
