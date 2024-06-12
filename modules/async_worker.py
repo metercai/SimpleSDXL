@@ -217,13 +217,16 @@ def worker():
         metadata_scheme = MetadataScheme(
             args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
 
-        is_SD3_task = ehps.backend_selection == flags.backend_engines[2]
-        is_SD3T_task = ehps.backend_selection == flags.backend_engines[2]
+        is_SD3_task = False #ehps.backend_selection == flags.backend_engines[2]
+        is_SD3T_task = False #ehps.backend_selection == flags.backend_engines[2]
         is_hydit_task =  ehps.backend_selection == flags.backend_engines[1]
         is_comfy_task = 'layer' in current_tab and input_image_checkbox
+        is_SD3m_task = ehps.backend_selection == flags.backend_engines[2]
+
         if is_hydit_task:
             aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
-        
+        if is_SD3_task:
+            aspect_ratios_selection = ehps.sd3_aspect_ratios_selection
         if not is_hydit_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
             negative_prompt = translator.convert(negative_prompt, ehps.translation_methods)
@@ -502,7 +505,7 @@ def worker():
             extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
             extra_negative_prompts = negative_prompts[1:] if len(negative_prompts) > 1 else []
 
-            if not is_comfy_task:
+            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
                 progressbar(async_task, 2, 'Loading models ...')
 
                 lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames, performance_selection)
@@ -580,7 +583,7 @@ def worker():
                     t['expansion'] = expansion
                     t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
 
-            if not is_comfy_task and not is_hydit_task:
+            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
                 for i, t in enumerate(tasks):
                     progressbar(async_task, 5, f'Encoding positive #{i + 1} ...')
                     t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
@@ -906,6 +909,8 @@ def worker():
             async_task.yields.append(['preview', (flags.preparation_step_count, 'Process Comfy Task ...', None)])
         elif is_hydit_task:
             async_task.yields.append(['preview', (flags.preparation_step_count, 'Process HyDiT Task ...', None)])
+        elif is_SD3m_task:
+            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process SD3m Task ...', None)])
         else:
             async_task.yields.append(['preview', (flags.preparation_step_count, 'Moving model to GPU ...', None)])
 
@@ -937,13 +942,15 @@ def worker():
             return callback_kwargs
 
         task_type = ''
-        if is_hydit_task or is_comfy_task:
+        if is_hydit_task or is_comfy_task or is_SD3m_task:
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
             task_type = 'Comfy'
             if is_hydit_task:
                 hydit_task.init_load_model()
                 task_type = 'HyDiT'
+            if is_SD3m_task:
+                task_type = 'SD3m'
 
         for current_task_id, task in enumerate(tasks):
             current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(current_task_id * steps) / float(all_steps))
@@ -954,7 +961,7 @@ def worker():
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
 
-                if is_comfy_task:
+                if is_comfy_task or is_SD3m_task:
                     from enhanced.simpleai import comfyclient_pipeline as comfypipeline
                     from enhanced.comfy_task import get_comfy_task
                     
@@ -975,11 +982,15 @@ def worker():
                         input_images = None
                     else:
                         input_images = [HWC3(layer_input_image)]
-                    comfy_method = layer_method
-                    options = dict(
-                        iclight_enable=iclight_enable,
-                        iclight_source_radio=iclight_source_radio
-                        )
+                    if is_SD3m_task:
+                        comfy_method = 'SD3m'
+                        options = dict()
+                    else:
+                        comfy_method = layer_method
+                        options = dict(
+                            iclight_enable=iclight_enable,
+                            iclight_source_radio=iclight_source_radio
+                            )
                     try:
                         comfy_task = get_comfy_task(comfy_method, default_params, input_images, options)
                         imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback_comfytask)
@@ -1067,7 +1078,7 @@ def worker():
                               modules.patch.patch_settings[pid].positive_adm_scale,
                               modules.patch.patch_settings[pid].negative_adm_scale,
                               modules.patch.patch_settings[pid].adm_scaler_end)))]
-                    if is_comfy_task or is_hydit_task:
+                    if is_comfy_task or is_hydit_task or is_SD3m_task:
                         refiner_model_name = ''
                         refiner_switch = 1.0
                         if is_hydit_task:
@@ -1090,7 +1101,7 @@ def worker():
                         d.append(('CLIP Skip', 'clip_skip', clip_skip))
                     d.append(('Sampler', 'sampler', sampler_name))
                     d.append(('Scheduler', 'scheduler', scheduler_name))
-                    if not is_comfy_task and not is_hydit_task:
+                    if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
                         d.append(('VAE', 'vae', vae_name))
                     d.append(('Seed', 'seed', str(task['task_seed'])))
 
@@ -1100,7 +1111,7 @@ def worker():
                     for li, (n, w) in enumerate(loras):
                         if n != 'None' and not is_hydit_task and not is_comfy_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
-                    if is_hydit_task or is_comfy_task:
+                    if is_hydit_task or is_comfy_task or is_SD3m_task:
                         loras = []
 
                     metadata_parser = None

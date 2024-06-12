@@ -101,7 +101,7 @@ sdxl_aspect_ratios = [
     '1216*832', '1254*836', '1280*768', '1344*768', '1344*704', '1366*768',
     '1408*704', '1472*704', '1536*640', '1564*670', '1600*640', '1664*576'
 ]
-backend_engines = ['SDXL', 'HyDiT', 'SD3 Api']
+backend_engines = ['SDXL', 'HyDiT', 'SD3m']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 

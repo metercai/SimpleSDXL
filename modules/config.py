@@ -557,7 +557,7 @@ default_inpaint_mask_sam_model = get_config_item_or_set_default(
 
 default_translation_methods = get_config_item_or_set_default(
     key='default_translation_methods',
-    default_value='Big Model',
+    default_value='Third APIs', #'Big Model',
     validator=lambda x: x in modules.flags.translation_methods
 )
 
