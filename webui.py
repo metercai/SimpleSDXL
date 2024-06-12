@@ -428,7 +428,7 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 interactive=True)
-                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engines, value=modules.config.default_backend, info='Api engine needs to configure the api key before use')
+                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engines, value=modules.config.default_backend)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
@@ -876,15 +876,15 @@ with shared.gradio_root:
         
         def toggle_engine(x, aspect_ratios, sd3_aspect_ratios, hydit_aspect_ratios):
             if x==flags.backend_engines[2]:
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios] + [gr.update()] * 20
+                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=5.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(), 'euler', 'sgm_uniform', 'sd3_medium_incl_clips_t5xxlfp8.safetensors'] + [gr.update()] * 16
             elif x==flags.backend_engines[1]:
-                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
+                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=6), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
             else:
-                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 18
+                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_cfg_scale), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 18
             return results
 
         current_aspect_ratios = gr.Textbox(value='', visible=False)
-        backend_selection.change(toggle_engine, inputs=[backend_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection], outputs = [input_image_checkbox, performance_selection, image_number, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, current_aspect_ratios, style_selections, sampler_name, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False).then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+        backend_selection.change(toggle_engine, inputs=[backend_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection], outputs = [input_image_checkbox, performance_selection, guidance_scale, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, current_aspect_ratios, style_selections, sampler_name, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False).then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
 
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         

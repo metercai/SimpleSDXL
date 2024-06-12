@@ -56,7 +56,14 @@ class ComfyTask:
 def get_comfy_task(method, default_params, input_images, options={}):
     global method_name, task_name
 
-    if method == method_names[1]:
+    if method == 'SD3m':
+        comfy_params = ComfyTaskParams(default_params)
+        comfy_params.set_mapping_rule({
+            'width': 'EmptyLatentImage:aspect_ratios_size:width;EmptySD3LatentImage:aspect_ratios_size:width;ImageResize:resize_input_image:width',
+            'height': 'EmptyLatentImage:aspect_ratios_size:height;EmptySD3LatentImage:aspect_ratios_size:height;ImageResize:resize_input_image:height',
+            })
+        return ComfyTask('sd3_base', comfy_params)
+    elif method == method_names[1]:
         comfy_params = ComfyTaskParams(default_params)
         comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
         return ComfyTask(task_name[method], comfy_params)
