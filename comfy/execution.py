@@ -398,6 +398,9 @@ class PromptExecutor:
             self.server.last_node_id = None
             if comfy.model_management.DISABLE_SMART_MEMORY:
                 comfy.model_management.unload_all_models()
+            if comfy.model_management.is_nvidia():
+                    print(f'[Comfyd] Max_memory_allocated: {torch.cuda.max_memory_allocated()/ 1024 / 1024 / 1024:.2f}GB')
+
 
 
 
