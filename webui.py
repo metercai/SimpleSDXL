@@ -1154,6 +1154,9 @@ httpx_logger.setLevel(logging.WARNING)
 hydit_logger = logging.getLogger("hydit")
 hydit_logger.setLevel(logging.WARNING)
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 launch.reset_env_args()
 
 if args_manager.args.enable_comfyd:

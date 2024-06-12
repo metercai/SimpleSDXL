@@ -32,11 +32,11 @@ TRY_INSTALL_XFORMERS = True
 target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
 def check_base_environment():
-    sys.path.append(os.path.join(root, "comfy"))
+#    sys.path.append(os.path.join(root, "comfy"))
     sys.path.append(os.path.join(root, "hydit"))
 
     import fooocus_version
-    import comfy_version
+    import comfy.comfy_version as comfy_version
     import enhanced.version as version
 
     print(f"Python {sys.version}")

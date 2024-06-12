@@ -73,6 +73,7 @@ def get_comfy_task(method, default_params, input_images, options={}):
                     "light_source_text_switch": True,
                     "light_source_text": iclight_source_text[options["iclight_source_radio"]]
                     })
+            #comfy_params.update_params({"base_model": "realisticVisionV60B1_v51VAE.safetensors"})
             return ComfyTask(task_name[method], comfy_params, images)
         else:
             width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
