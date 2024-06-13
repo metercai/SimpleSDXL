@@ -58,6 +58,7 @@ def worker():
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
     import enhanced.hydit_task as hydit_task
+    from enhanced.simpleai import comfyd, args_comfyd
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -945,7 +946,8 @@ def worker():
         if is_hydit_task or is_comfy_task or is_SD3m_task:
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
-            task_type = 'Comfy'
+            if is_comfy_task:
+                task_type = 'Comfy'
             if is_hydit_task:
                 hydit_task.init_load_model()
                 task_type = 'HyDiT'
@@ -1144,7 +1146,7 @@ def worker():
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
         async_task.processing = False
-        if is_hydit_task and not ehps.hydit_active_checkbox :
+        if is_hydit_task and not ehps.hydit_active_checkbox:
             hydit_task.unload_free_model()
         return
 
