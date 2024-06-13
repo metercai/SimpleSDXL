@@ -812,7 +812,7 @@ with shared.gradio_root:
             #translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, hydit_active_checkbox]
+            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, hydit_active_checkbox, comfyd_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -877,6 +877,7 @@ with shared.gradio_root:
         def toggle_engine(x, aspect_ratios, sd3_aspect_ratios, hydit_aspect_ratios):
             if x==flags.backend_engines[2]:
                 results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=5.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(), 'euler', 'sgm_uniform', 'sd3_medium_incl_clips_t5xxlfp8.safetensors'] + [gr.update()] * 16
+                comfyd.start(args_comfyd)
             elif x==flags.backend_engines[1]:
                 results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=6), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
             else:
