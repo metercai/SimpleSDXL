@@ -1,5 +1,19 @@
-## SimpleSDXL - Fooocus中文孪生版
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/c6088225-4006-4e0a-a1d4-979a61aefda4"></div>
+## SimpleSDXL - 最新支持混元HyDiT和SD3medium模型，6G显存可快速出图。
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/1805fb54-a207-4cf4-92f7-d08482a62055"></div>
+
+## 最新测试版分支：SimpleSDXL_dev
+在原版本基础上新增Comfy后端，在同一套Fooocus风格前端交互界面下，同时支持SDXL、混元、SD3和Playground-v2.5的本地模型，最低6G显卡内存可用，保持简洁、高效和稳定的出图风格。Windows用户参与测试需重新下载安装：
+### 下载：
+- 程序包，环境和程序：https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe
+- 基本模型包，辅助模型和缺省出图模型：https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base.zip
+- 出图模型包，预置包出图模型和混元模型：https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt.zip
+- SD3需下载：https://hf-mirror.com/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium_incl_clips_t5xxlfp8.safetensors
+### 安装：
+- 新建目录解压SimpleSDXL2_win.exe，严禁与正式版混装。
+- 解压2个zip包覆盖models目录。如有共享库，可自行配置config.txt。
+- 点击启动 run_SimpleSDXL_dev.bat。第一次运行较慢，要耐心等待。
+
+Linux用户在启动命令后加 `--dev` 参数启动测试版。
 
 ## 🔔 更新 / Update
 - [2024.04.23] <b>升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。</b>
