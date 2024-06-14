@@ -1,5 +1,5 @@
 ## SimpleSDXL - 最新支持混元HyDiT和SD3medium模型，6G显存可快速出图。
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/c6088225-4006-4e0a-a1d4-979a61aefda4"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/1805fb54-a207-4cf4-92f7-d08482a62055"></div>
 
 ## 最新测试版说明：SimpleSDXL2
 在原版本基础上新增Comfy后端，在同一套Fooocus风格前端交互界面下，同时支持SDXL、混元、SD3和Playground-v2.5的本地模型，最低6G显卡内存可用，保持简洁、高效和稳定的出图风格。Windows用户参与测试需重新下载安装：
@@ -24,7 +24,8 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
-- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的原始初衷。
+- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL
+的原始初衷。
 - **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力。SimpleSDXL以**预置包和嵌参图片**为基础，面向场景提升Fooocus的**开放性和可定制性**，发挥出SDXL的强大能力。
 
 ## 对比Fooocus的增强特色 / Enhanced features of Fooocus
