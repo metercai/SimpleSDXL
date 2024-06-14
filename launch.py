@@ -117,7 +117,7 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
         else:
             version_installed = importlib.metadata.version('xformers')
-            if version_installed!='0.0.26':
+            if not version_installed.startswith('0.0.26'):
                 print(f'Upgrade xformers from {version_installed} to 0.0.26')
                 run(f'"{python}" -m pip uninstall -y xformers')
                 if platform.system() == "Windows":
@@ -132,15 +132,14 @@ def prepare_environment():
             for p in met_diff.keys():
                 print(f'Uninstall {p}.{met_diff[p]} ...')
                 run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
-            if is_win32_standalone_build:
-                run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
-            else:
-                run_pip(f"install -r \"{requirements_file}\"", "requirements")
+        if is_win32_standalone_build:
+            run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
+        else:
+            run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
     patch_requirements = "requirements_patch.txt"
     if (REINSTALL_ALL or not requirements_met(patch_requirements)) and not is_win32_standalone_build:
         run_pip(f"install -r \"{patch_requirements}\"", "requirements patching")
-
 
     return
 

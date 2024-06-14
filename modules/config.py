@@ -634,9 +634,9 @@ def add_ratio(x):
             c, d = 21, 9
     else:
         c, d = a // g, b // g
-    if (a, b) == (768, 1280):
+    if (a, b) == (768, 1280) or (a, b) == (576, 1344):
         c, d = 9, 16
-    elif (a, b) == (1280, 768):
+    elif (a, b) == (1280, 768) or (a, b) == (1344, 576):
         c, d = 16, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
@@ -644,8 +644,15 @@ def add_ratio(x):
 default_aspect_ratio = add_ratio(default_aspect_ratio)
 available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
-sd3_default_aspect_ratio = '16:9'
-sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+#sd3_default_aspect_ratio = '16:9'
+#sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+sd3_default_aspect_ratio = add_ratio('1024*1024')
+sd3_available_aspect_ratios = [
+        '576*1344', '768*1152', '896*1152', '960*1280',  
+        '1024*1024', '1024*1280', '1280*1280', '1280*1024',
+        '1280*960', '1152*896', '1152*768', '1344*576'
+    ]
+sd3_available_aspect_ratios = [add_ratio(x) for x in sd3_available_aspect_ratios]
 
 
 # Only write config in the first launch.

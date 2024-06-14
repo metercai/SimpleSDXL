@@ -14,6 +14,8 @@ iclight_source_text = {
     iclight_source_names[8]: "Bottom Right Light",
     }
 
+default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
+
 quick_prompts = [
     'sunshine from window',
     'neon light, city',
@@ -73,6 +75,7 @@ def get_comfy_task(method, default_params, input_images, options={}):
             raise ValueError("input_images cannot be None for this method")
         images = {"input_image": input_images[0]}
         if 'iclight_enable' in options and options["iclight_enable"]:
+            comfy_params.update_params({"base_model": default_base_SD15_name})
             if options["iclight_source_radio"] == 'CenterLight':
                 comfy_params.update_params({"light_source_text_switch": False})
             else:
