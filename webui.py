@@ -365,7 +365,6 @@ with shared.gradio_root:
                             example_quick_subjects = gr.Dataset(samples=comfy_task.quick_subjects, label='Subject Quick List', samples_per_page=1000, components=[prompt])
                         with gr.Row():
                             example_quick_prompts = gr.Dataset(samples=comfy_task.quick_prompts, label='Lighting Quick List', samples_per_page=1000, components=[prompt])
-                    iclight_enable.change(lambda x: gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), inputs=iclight_enable, outputs=iclight_source_radio, queue=False, show_progress=False)
                     example_quick_prompts.click(lambda x, y: ', '.join(y.split(', ')[:2] + [x[0]]), inputs=[example_quick_prompts, prompt], outputs=prompt, show_progress=False, queue=False)
                     example_quick_subjects.click(lambda x: x[0], inputs=example_quick_subjects, outputs=prompt, show_progress=False, queue=False)
 
@@ -436,7 +435,7 @@ with shared.gradio_root:
                     image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
                     with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
                         aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                        sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios_sd3')
+                        sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
                         hydit_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=hydit_task.available_aspect_ratios, visible=False, value=hydit_task.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
                         aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                         hydit_aspect_ratios_selection.change(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
@@ -785,6 +784,7 @@ with shared.gradio_root:
                 with gr.Row():
                     gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
 
+            iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selection], queue=False, show_progress=False)
             pre4comfy = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
             def toggle_image_tab(tab, styles, comfyd_active):
                 result = []
@@ -876,12 +876,12 @@ with shared.gradio_root:
         
         def toggle_engine(x, aspect_ratios, sd3_aspect_ratios, hydit_aspect_ratios):
             if x==flags.backend_engines[2]:
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=5.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(), 'euler', 'sgm_uniform', 'sd3_medium_incl_clips_t5xxlfp8.safetensors'] + [gr.update()] * 16
+                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=4.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(), 'dpmpp_2m', 'sgm_uniform', 'sd3_medium_incl_clips_t5xxlfp8.safetensors'] + [gr.update()] * 16
                 comfyd.start(args_comfyd)
             elif x==flags.backend_engines[1]:
                 results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=6), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler)] + [gr.update(interactive=False)] * 18
             else:
-                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_cfg_scale), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler)] + [gr.update(interactive=True)] * 18
+                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_cfg_scale), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler), gr.update(choices=flags.scheduler_list, value=modules.config.default_scheduler), modules.config.default_base_model_name] + [gr.update(interactive=True)] * 16
             return results
 
         current_aspect_ratios = gr.Textbox(value='', visible=False)

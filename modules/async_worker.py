@@ -226,7 +226,7 @@ def worker():
 
         if is_hydit_task:
             aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
-        if is_SD3_task:
+        if is_SD3m_task:
             aspect_ratios_selection = ehps.sd3_aspect_ratios_selection
         if not is_hydit_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
@@ -512,7 +512,7 @@ def worker():
                 lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames, performance_selection)
                 loras, prompt = parse_lora_references_from_prompt(prompt, loras, modules.config.default_max_lora_number, lora_filenames=lora_filenames)
                 loras += performance_loras
-
+                print(f'refiner_model_name:{refiner_model_name}, base_model_name={base_model_name},  base_model_additional_loras:{ base_model_additional_loras}, use_synthetic_refiner:{use_synthetic_refiner}, vae_name:{vae_name}')
                 pipeline.refresh_everything(refiner_model_name=refiner_model_name, base_model_name=base_model_name,
                                         loras=loras, base_model_additional_loras=base_model_additional_loras,
                                         use_synthetic_refiner=use_synthetic_refiner, vae_name=vae_name)
