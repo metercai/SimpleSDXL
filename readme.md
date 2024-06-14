@@ -1,8 +1,8 @@
-## SimpleSDXL - Fooocus中文孪生版，最新版支持混元HyDiT和SD3medium模型，6G显存可快速出图。
+## SimpleSDXL - 最新支持混元HyDiT和SD3medium模型，6G显存可快速出图。
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/c6088225-4006-4e0a-a1d4-979a61aefda4"></div>
 
 ## 最新测试版说明：SimpleSDXL2
-在原有Fooocus孪生版基础上新增Comfy后端，在一套Fooocus风格的前端交互界面下，同时支持SDXL、混元、SD3和Playground-v2.5的本地模型，最低6G显卡内存可用，保持简洁、高效和稳定的出图风格。Windows用户参与测试需重新下载安装：
+在原版本基础上新增Comfy后端，在同一套Fooocus风格前端交互界面下，同时支持SDXL、混元、SD3和Playground-v2.5的本地模型，最低6G显卡内存可用，保持简洁、高效和稳定的出图风格。Windows用户参与测试需重新下载安装：
 ### 下载：
 - 程序包，环境和程序：https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe
 - 基本模型包，辅助模型和缺省出图模型：https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base.zip
