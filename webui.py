@@ -876,7 +876,7 @@ with shared.gradio_root:
         
         def toggle_engine(x, aspect_ratios, sd3_aspect_ratios, hydit_aspect_ratios):
             if x==flags.backend_engines[2]:
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=4.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(), 'dpmpp_2m', 28, gr.update(interactive=True, value='sgm_uniform'), gr.update(interactive=True, value='sd3_medium_incl_clips_t5xxlfp8.safetensors')] + [gr.update()] * 16
+                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=4.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(value=[]), 'dpmpp_2m', 28, gr.update(interactive=True, value='sgm_uniform'), gr.update(interactive=True, value='sd3_medium_incl_clips_t5xxlfp8.safetensors')] + [gr.update()] * 16
                 comfyd.start(args_comfyd)
             elif x==flags.backend_engines[1]:
                 results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=6), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler), -1] + [gr.update(interactive=False)] * 18

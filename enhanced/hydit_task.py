@@ -101,7 +101,7 @@ def inferencer(
     sampler,
     callback=None
 ):
-    global hydit_models_root
+    global hydit_models_root, hydit_pipe
 
     if 'hydit_pipe' not in globals():
         globals()['hydit_pipe'] = None

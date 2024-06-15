@@ -82,7 +82,7 @@ inpaint_mask_cloth_category = ['full', 'upper', 'lower']
 
 inpaint_mask_sam_model = ['sam_vit_b_01ec64', 'sam_vit_h_4b8939', 'sam_vit_l_0b3195']
 
-inpaint_engine_versions = ['None', 'v1', 'v2.5', 'v2.6']
+inpaint_engine_versions = ['None', 'v2.5', 'v2.6']
 inpaint_option_default = 'Inpaint or Outpaint (default)'
 inpaint_option_detail = 'Improve Detail (face, hand, eyes, etc.)'
 inpaint_option_modify = 'Modify Content (add objects, change background, etc.)'
