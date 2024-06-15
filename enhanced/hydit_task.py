@@ -174,7 +174,7 @@ def inferencer(
 
 def downloading_hydit_model(path_root):
     load_file_from_url(
-        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_hydit_fp16.tgz',
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_hydit_v1.1_fp16.tgz',
         model_dir=path_root,
         file_name='models_hydit_fp16.tgz'
     )
