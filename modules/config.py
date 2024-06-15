@@ -634,10 +634,10 @@ def add_ratio(x):
             c, d = 21, 9
     else:
         c, d = a // g, b // g
-    if (a, b) == (768, 1280) or (a, b) == (576, 1344):
-        c, d = 9, 16
-    elif (a, b) == (1280, 768) or (a, b) == (1344, 576):
-        c, d = 16, 9
+    if (a, b) == (576, 1344):
+        c, d = 9, 21
+    elif (a, b) == (1344, 576):
+        c, d = 21, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 

@@ -403,7 +403,6 @@ class PromptExecutor:
 
 
 
-
 def validate_inputs(prompt, item, validated):
     unique_id = item
     if unique_id in validated:
