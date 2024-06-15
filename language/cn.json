@@ -260,7 +260,7 @@
   "Drag given image to here": "将前景图片拽到此处",
   "Subject Quick List": "主体快捷词",
   "Lighting Quick List": "光照快捷词",
-  "Enable IC-Light": "启用重新打光：使用默认SD15模型，尺寸变为1024*1024",
+  "Enable IC-Light": "启用打光。默认SD15，不打光尺寸固定1024*1024",
   "Top -  Left": "左上光源",
   "Top - Light": "顶部光源",
   "Top - Right": "右上光源",

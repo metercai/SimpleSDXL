@@ -620,24 +620,15 @@ def add_ratio(x):
     a, b = x.replace('*', ' ').split(' ')[:2]
     a, b = int(a), int(b)
     g = math.gcd(a, b)
-    c, d = 1, 1
-    if g<8:
-        if (a, b) == (768, 1366):
-            c, d = 9, 16
-        elif (a, b) == (915, 1144):
-            c, d = 4, 5
-        elif (a, b) == (1182, 886):
-            c, d = 4, 3
-        elif (a, b) == (1366, 768):
-            c, d = 16, 9
-        elif (a, b) == (1564, 670):
-            c, d = 21, 9
-    else:
-        c, d = a // g, b // g
+    c, d = a // g, b // g
     if (a, b) == (576, 1344):
         c, d = 9, 21
     elif (a, b) == (1344, 576):
         c, d = 21, 9
+    elif (a, b) == (768, 1280):
+        c, d = 9, 15
+    elif (a, b) == (1280, 768):
+        c, d = 15, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
@@ -648,9 +639,9 @@ available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 #sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
 sd3_default_aspect_ratio = add_ratio('1024*1024')
 sd3_available_aspect_ratios = [
-        '576*1344', '768*1152', '896*1152', '960*1280',  
+        '576*1344', '768*1152', '896*1152', '768*1280', '960*1280',  
         '1024*1024', '1024*1280', '1280*1280', '1280*1024',
-        '1280*960', '1152*896', '1152*768', '1344*576'
+        '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'
     ]
 sd3_available_aspect_ratios = [add_ratio(x) for x in sd3_available_aspect_ratios]
 
