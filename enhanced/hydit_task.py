@@ -53,6 +53,7 @@ def init_load_model():
                 hydit_models_root,
                 subfolder="text_encoder_2",
                 load_in_8bit=True,
+                llm_int8_enable_fp32_cpu_offload=True,
                 device_map="auto",
             )
         else:
