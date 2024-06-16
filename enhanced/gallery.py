@@ -231,7 +231,7 @@ def parse_html_log(choice: str, passthrough = False):
                 for i in range(0,int(len(text)/3)):
                     key = text[1+i*3].strip()
                     value = text[2+i*3].strip()
-                    if key == '' or key is None or key == 'Full raw prompt':
+                    if key == '' or key is None or key == 'Full raw prompt' or key == 'Positive' or key == 'Negative':
                         continue
                     info_dict[key] = value
             else:

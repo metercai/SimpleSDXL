@@ -116,6 +116,7 @@ def inferencer(
     
     with torch.no_grad():
         prompt_embeds, negative_prompt_embeds, prompt_attention_mask, negative_prompt_attention_mask = hydit_pipe.encode_prompt(prompt)
+        print(f'prompt_embeds:{prompt_embeds.device}, negative_prompt_embeds:{negative_prompt_embeds.device}, prompt_attention_mask:{prompt_attention_mask.device}, negative_prompt_attention_mask:{negative_prompt_attention_mask.device}')
         (
             prompt_embeds_2,
             negative_prompt_embeds_2,
