@@ -43,7 +43,7 @@ def init_load_model():
     files = ["text_encoder_2/model.safetensors", "text_encoder/model.safetensors", "transformer/diffusion_pytorch_model.safetensors", "vae/diffusion_pytorch_model.safetensors"]
     if not hydit_models_root.exists() or not check_files_exist(hydit_models_root, files):
         hydit_models_root.mkdir(parents=True, exist_ok=True)
-        downloading_hydit_model(hydit_models_root)
+        downloading_hydit_model(path_models_root)
     
     if 'hydit_text_encoder' not in globals():
         globals()['hydit_text_encoder'] = None
@@ -53,7 +53,7 @@ def init_load_model():
                 hydit_models_root,
                 subfolder="text_encoder_2",
                 load_in_8bit=True,
-                llm_int8_enable_fp32_cpu_offload=True,
+                #llm_int8_enable_fp32_cpu_offload=True,
                 device_map="auto",
             )
         else:
@@ -62,6 +62,10 @@ def init_load_model():
                 subfolder="text_encoder_2",
                 device_map="auto",
             )
+    #hydit_text_encoder = hydit_text_encoder.to(model_management.get_torch_device())
+    #for name, param in hydit_text_encoder.named_parameters():
+    #    print(f"{name}: {param.device}")
+
     if 'hydit_pipe' not in globals():
         globals()['hydit_pipe'] = None
     if hydit_pipe is None:
@@ -117,7 +121,6 @@ def inferencer(
     
     with torch.no_grad():
         prompt_embeds, negative_prompt_embeds, prompt_attention_mask, negative_prompt_attention_mask = hydit_pipe.encode_prompt(prompt)
-        print(f'prompt_embeds:{prompt_embeds.device}, negative_prompt_embeds:{negative_prompt_embeds.device}, prompt_attention_mask:{prompt_attention_mask.device}, negative_prompt_attention_mask:{negative_prompt_attention_mask.device}')
         (
             prompt_embeds_2,
             negative_prompt_embeds_2,
@@ -171,6 +174,9 @@ def inferencer(
         negative_prompt_attention_mask=negative_prompt_attention_mask,
         negative_prompt_attention_mask_2=negative_prompt_attention_mask_2,
     ).images[0]
+    
+    del pipe
+    unload_free_model()
 
     return [np.array(image)]
 
