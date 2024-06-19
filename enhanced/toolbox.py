@@ -14,7 +14,7 @@ import enhanced.version as version
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from enhanced.simpleai import models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
+from enhanced.simpleai import models_info, models_info_muid, refresh_models_info, sync_model_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
 from enhanced.simpleai import sysinfo
 
@@ -463,7 +463,7 @@ def save_preset(*args):
 
 
 def embed_params(state_params):
-    refresh_models_info_from_path()
+    refresh_models_info()
     sync_model_info([])
     [choice, selected] = state_params["prompt_info"]
     info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
@@ -536,7 +536,7 @@ def extract_reset_image_params(img_path):
         print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image. \nmetadata:{metadata}')
         return [gr.update()] * 31
     print(f'[ToolBox] Extraction successful and ready to reset: {metadata}') 
-    refresh_models_info_from_path()
+    refresh_models_info()
     sync_model_info([])
     metadata["Comment"].update({"task_from": f'embed_image:{img_path}'})
     results = topbar.reset_params(topbar.check_prepare_for_reset(metadata["Comment"]))   

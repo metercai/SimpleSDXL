@@ -16,12 +16,9 @@ import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
-from enhanced.simpleai import models_info, models_info_muid, refresh_models_info_from_path
+from enhanced.simpleai import models_info, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
-#models_info_muid =  models_info.models_info_muid
-#refresh_models_info_from_path = models_info.refresh_models_info_from_path
-#models_info = models_info.models_info
 
 css = '''
 '''
@@ -54,6 +51,7 @@ def get_preset_name_list():
     return name_list
 
 def is_models_file_absent(preset_name):
+    refresh_models_info()
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
@@ -330,7 +328,7 @@ def process_after_generation(state_params):
         gallery_util.refresh_images_catalog(output_index, True)
         gallery_util.parse_html_log(output_index, True)
     
-    refresh_models_info_from_path() 
+    refresh_models_info() 
     return results
 
 
