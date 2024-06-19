@@ -13,6 +13,8 @@ import modules.sdxl_styles
 from modules.flags import MetadataScheme, Performance, Steps
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
+from enhanced.simpleai import models_info
+
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
@@ -239,8 +241,10 @@ def get_sha256(filepath):
     if not os.path.isfile(filepath):
         return ''
     if filepath not in hash_cache:
+        #if filepath in models_info_file:
+        #    hash_cache[filepath] = models_info[models_info_file[filepath]]['muid']
+        #else:
         hash_cache[filepath] = sha256(filepath)
-
     return hash_cache[filepath]
 
 
