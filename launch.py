@@ -172,10 +172,11 @@ def remove_models_info_file():
                     print("[ModelsInfo] Remove incompatible models_info.json.")
                     break
 
+remove_models_info_file()
+
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
-remove_models_info_file()
 prepare_environment()
 build_launcher()
 args = ini_args()
