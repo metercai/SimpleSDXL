@@ -16,6 +16,8 @@ import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
+import enhanced.hydit_task as hydit_task
+import enhanced.comfy_task as comfy_task
 from enhanced.simpleai import models_info, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
@@ -56,6 +58,8 @@ def is_models_file_absent(preset_name):
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
             config_preset = json.load(json_file)
+        if config_preset["default_model"] and config_preset["default_model"] == 'hydit_v1.1_fp16.safetensors':
+            return False
         if config_preset["default_model"] and config_preset["default_model"] != 'None':
             if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
                 return True
@@ -253,6 +257,12 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
+    state_params.update({f'{modules.flags.backend_engines[0]}_preset_value': ['', config.default_performance, config.default_styles, config.default_cfg_scale, config.default_overwrite_step, config.default_sampler, config.default_scheduler, config.default_base_model_name]})
+    state_params.update({f'{modules.flags.backend_engines[1]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 6, config.default_overwrite_step, hydit_task.default_sampler, '', '']})
+    state_params.update({f'{modules.flags.backend_engines[2]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 4.5, 28, 'dpmpp_2m', 'sgm_uniform', comfy_task.get_default_base_SD3m_name()]})
+    state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -352,7 +362,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 60 + [state_params]
+        return [gr.update()] * 59 + [state_params] + [gr.update()]
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -360,8 +370,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__preset": preset})
     state_params.update({"__prompt": prompt})
     state_params.update({"__negative_prompt": negative_prompt})
-    results = [gr.update(value='SDXL')]
-    results += reset_context(state_params)
+    results = reset_context(state_params)
     return results
 
 
@@ -475,27 +484,42 @@ def reset_context(state_params):
 #"example_inpaint_prompts":[]
     info_preset.update({"task_from": f'preset:{preset}'})
     
+    get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
+    # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
+    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
+
     results = reset_params(check_prepare_for_reset(info_preset))
     results += [gr.update(visible=True if preset_url else False)]
-    
-    get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
-    max_image_number = get_value_or_default("max_image_number")
-    image_number = get_value_or_default("image_number")
 
     if "default_image_number" in keys or "default_max_image_number" in keys:
         results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     else:
         results += [gr.update()]
     
-    # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
-    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
     
     state_params.update({"__message": system_message})
+
     results += refresh_nav_bars(state_params)
     results += update_in_keys("output_format")
     results += [state_params]
+    
+    backend_engine = 'SDXL' if 'default_backend' not in keys else config_preset["default_backend"]
+    engine_preset = state_params[f'{backend_engine}_preset_value']
+    engine_preset[1] = engine_preset[1] if 'default_performance' not in keys else config_preset["default_performance"]
+    engine_preset[2] = engine_preset[2] if 'default_styles' not in keys else config_preset["default_styles"]
+    engine_preset[3] = engine_preset[3] if 'default_cfg_scale' not in keys else config_preset["default_cfg_scale"]
+    engine_preset[4] = engine_preset[4] if 'default_overwrite_step' not in keys else config_preset["default_overwrite_step"]
+    engine_preset[5] = engine_preset[5] if 'default_sampler' not in keys else config_preset["default_sampler"]
+    engine_preset[6] = engine_preset[6] if 'default_scheduler' not in keys else config_preset["default_scheduler"]
+    engine_preset[7] = engine_preset[7] if 'default_model' not in keys else config_preset["default_model"]
+    state_params[f'{backend_engine}_preset_value'] = engine_preset
+    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
+    engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])
+    state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+    results += [backend_engine]
+
     system_message = 'system message was displayed!'
     return results
 
@@ -543,7 +567,7 @@ def check_prepare_for_reset(info):
             if f not in models_info.keys():
                 if f in down_muid.keys() and down_muid[f] in models_info_muid.keys():
                     filename = models_info_muid[down_muid[f]]
-                    print(f'[Topbar] The local file {filename.split("/")[1]} is the same as in reset data {f.split("/")[1]}, replace it with the local file.')
+                    #print(f'[Topbar] The local file {filename.split("/")[1]} is the same as in reset data {f.split("/")[1]}, replace it with the local file.')
                 else:
                     downlist += [f]
             else:
@@ -566,7 +590,7 @@ def check_prepare_for_reset(info):
                 else:
                     file_path = os.path.abspath(f'./models/{f}')
                 model_dir, filename = os.path.split(file_path)
-                load_file_from_muid(filename, down_muid[f], model_dir)
+                #load_file_from_muid(filename, down_muid[f], model_dir)
             elif "checkpoint_downloads" in info.keys() and f[12:] in info["checkpoint_downloads"]:
                 load_file_from_url(url=info["checkpoint_downloads"][f[12:]], model_dir=config.paths_checkpoints[0], file_name=f[12:])
             elif "lora_downloads" in info.keys() and f[6:] in info["lora_downloads"]:
@@ -577,7 +601,8 @@ def check_prepare_for_reset(info):
                 print(f'[Topbar] The model is not local and cannot be download.')
 
     if not_MUID:
-        print(f'[Topbar] The reset request contains model file without MUID, need to sync model info for usability and transferability.')
+        #print(f'[Topbar] The reset request contains model file without MUID, need to sync model info for usability and transferability.')
+        pass
 
     # replace to local model filename
     new_loras = []

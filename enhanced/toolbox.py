@@ -11,6 +11,7 @@ import enhanced.all_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
 import enhanced.version as version
+import modules.flags as flags
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -358,6 +359,7 @@ def apply_enabled_loras(loras):
 
 def save_preset(*args):    
     args = list(args)
+    backend_selection = args.pop()
     state_params = args.pop()
     name = args.pop()
     seed_random = args.pop()
@@ -387,6 +389,12 @@ def save_preset(*args):
 
     if name is not None and name != '':
         preset = {}
+        if backend_selection != flags.backend_engines[0]:
+            preset["default_backend"] = backend_selection
+            aspect_ratios_selection = state_params[f'{backend_selection}_current_aspect_ratios']
+            if backend_selection == flags.backend_engines[1]:
+                base_model = "hydit_v1.1_fp16.safetensors"
+
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model
         preset["default_refiner_switch"] = refiner_switch
@@ -418,7 +426,9 @@ def save_preset(*args):
             preset["default_image_seed"] = image_seed
 
         def get_muid_link(k):
-            muid = models_info[k]['muid']
+            muid = ''
+            if k in models_info.keys():
+                muid = models_info[k]['muid']
             return '' if muid is None else f'MUID:{muid}'
 
         preset["checkpoint_downloads"] = {base_model: get_muid_link("checkpoints/"+base_model)}

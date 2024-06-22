@@ -1,4 +1,4 @@
-from enhanced.simpleai import ComfyTaskParams
+from enhanced.simpleai import ComfyTaskParams, models_info
 
 method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
 #method_names = ['Blending given FG', 'Blending given BG', 'Blending given FG & BG', 'Generate foreground with Conv Injection']
@@ -15,6 +15,15 @@ iclight_source_text = {
     }
 
 default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
+
+default_base_SD3m_name_list = ['sd3_medium_incl_clips.safetensors', 'sd3_medium_incl_clips_t5xxlfp8.safetensors', 'sd3_medium_incl_clips_t5xxlfp16.safetensors']
+
+def get_default_base_SD3m_name():
+    for sd3name in default_base_SD3m_name_list:
+        if f'checkpoints/{sd3name}' in models_info:
+            return sd3name
+    return default_base_SD3m_name_list[0]
+
 
 quick_prompts = [
     'sunshine from window',
@@ -60,10 +69,6 @@ def get_comfy_task(method, default_params, input_images, options={}):
 
     if method == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
-        comfy_params.set_mapping_rule({
-            'width': 'EmptyLatentImage:aspect_ratios_size:width;EmptySD3LatentImage:aspect_ratios_size:width;ImageResize:resize_input_image:width',
-            'height': 'EmptyLatentImage:aspect_ratios_size:height;EmptySD3LatentImage:aspect_ratios_size:height;ImageResize:resize_input_image:height',
-            })
         return ComfyTask('sd3_base', comfy_params)
     elif method == method_names[1]:
         comfy_params = ComfyTaskParams(default_params)

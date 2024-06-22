@@ -573,6 +573,12 @@ default_backend = get_config_item_or_set_default(
     validator=lambda x: x in modules.flags.backend_engines
 )
 
+default_comfyd_active_checkbox = get_config_item_or_set_default(
+    key='default_comfyd_active_checkbox',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool)
+)
+
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
 # mapping config to meta parameter 
@@ -858,9 +864,9 @@ def downloading_superprompter_model():
 
 
 update_files()
-from enhanced.simpleai import simpleai_config, init_models_info 
+from enhanced.simpleai import simpleai_config, refresh_models_info 
 simpleai_config.paths_checkpoints = paths_checkpoints
 simpleai_config.paths_loras = paths_loras
 simpleai_config.path_embeddings = path_embeddings
 
-init_models_info()
+refresh_models_info()

@@ -359,7 +359,7 @@ with shared.gradio_root:
                             with gr.Column():
                                 with gr.Group():
                                     iclight_enable = gr.Checkbox(label='Enable IC-Light', value=True)
-                                    iclight_source_radio = gr.Radio(show_label=False, choices=comfy_task.iclight_source_names, value=comfy_task.iclight_source_names[0])
+                                    iclight_source_radio = gr.Radio(show_label=False, choices=comfy_task.iclight_source_names, value=comfy_task.iclight_source_names[0], elem_classes='iclight_source', elem_id='iclight_source')
                                 gr.HTML('* The module derived from <a href="https://github.com/lllyasviel/IC-Light" target="_blank">IC-Light</a> <a href="https://github.com/layerdiffusion/LayerDiffuse" target="_blank">LayerDiffuse</a>')
                         with gr.Row():
                             example_quick_subjects = gr.Dataset(samples=comfy_task.quick_subjects, label='Subject Quick List', samples_per_page=1000, components=[prompt])
@@ -437,9 +437,13 @@ with shared.gradio_root:
                         aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
                         sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
                         hydit_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=hydit_task.available_aspect_ratios, visible=False, value=hydit_task.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                        aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                        hydit_aspect_ratios_selection.change(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                        sd3_aspect_ratios_selection.change(lambda x: None, inputs=sd3_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        def set_current_aspect_ratios(x,y,z):
+                            y[f'{x}_current_aspect_ratios']=z
+                            return y
+
+                        aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, aspect_ratios_selection])
+                        hydit_aspect_ratios_selection.change(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, hydit_aspect_ratios_selection])
+                        sd3_aspect_ratios_selection.change(lambda x: None, inputs=sd3_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, sd3_aspect_ratios_selection])
                         shared.gradio_root.load(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                     output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
@@ -767,7 +771,6 @@ with shared.gradio_root:
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
-                    hydit_active_checkbox = gr.Checkbox(label='Enable HyDiT always active', value=False, info='Enabling will improve execution speed but occupy some memory.')
                     image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
@@ -808,11 +811,10 @@ with shared.gradio_root:
             
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
             comfyd_active_checkbox.change(lambda x: comfyd.start(args_comfyd) if x else comfyd.stop(), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
-            hydit_active_checkbox.change(lambda x: hydit_task.init_load_model() if x else hydit_task.unload_free_model(), inputs=hydit_active_checkbox, queue=False, show_progress=False)
             #translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, hydit_active_checkbox, comfyd_active_checkbox]
+            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, comfyd_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -874,18 +876,52 @@ with shared.gradio_root:
                                          scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
                                      ], queue=False, show_progress=False)
         
-        def toggle_engine(x, aspect_ratios, sd3_aspect_ratios, hydit_aspect_ratios):
+
+        def toggle_layer_interactive(x):
             if x==flags.backend_engines[2]:
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=4.5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), sd3_aspect_ratios, gr.update(value=[]), 'dpmpp_2m', 28, gr.update(interactive=True, value='sgm_uniform'), gr.update(interactive=True, value='sd3_medium_incl_clips.safetensors')] + [gr.update()] * 16
+                results = [gr.update(), gr.update(choices=flags.sampler_list), gr.update(interactive=False)] + [gr.update(interactive=True)] * 18
                 comfyd.start(args_comfyd)
             elif x==flags.backend_engines[1]:
-                results = [gr.update(value=False, interactive=False), gr.update(choices=flags.Performance.list()[:2], visible=True), gr.update(value=6), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), hydit_aspect_ratios,  gr.update(value=[]), gr.update(choices=hydit_task.SAMPLERS, value=hydit_task.default_sampler), -1] + [gr.update(interactive=False)] * 18
+                results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
             else:
-                results = [gr.update(interactive=True), gr.update(choices=flags.Performance.list(), visible=True), gr.update(value=modules.config.default_cfg_scale), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), aspect_ratios, gr.update(value=copy.deepcopy(modules.config.default_styles)), gr.update(choices=flags.sampler_list, value=modules.config.default_sampler), -1, gr.update(choices=flags.scheduler_list, value=modules.config.default_scheduler, interactive=True), gr.update(interactive=True, value=modules.config.default_base_model_name)] + [gr.update(interactive=True)] * 16
+                results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
             return results
 
-        current_aspect_ratios = gr.Textbox(value='', visible=False)
-        backend_selection.change(toggle_engine, inputs=[backend_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection], outputs = [input_image_checkbox, performance_selection, guidance_scale, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, current_aspect_ratios, style_selections, sampler_name, overwrite_step, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False).then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+        def toggle_layer_visible(x):
+            if x==flags.backend_engines[2]:
+                results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)]
+            elif x==flags.backend_engines[1]:
+                results = [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)]
+            else:
+                results = [gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)]
+            return results
+
+        def toggle_preset_value(x, state_params):
+            results = []
+            for v in state_params[f'{x}_preset_value']:
+                if v is None or v=='':
+                    results += [gr.update()]
+                else:
+                    results += [v]
+            return results + [state_params[f'{x}_current_aspect_ratios']+f',{x}']
+        
+        def reset_aspect_ratios(c_aspect_ratios):
+            engine = c_aspect_ratios.split(',')[1]
+            aspect_ratios = c_aspect_ratios.split(',')[0]
+            if engine==flags.backend_engines[2]:
+                results = [gr.update(), gr.update(), aspect_ratios]
+            elif engine==flags.backend_engines[1]:
+                results = [gr.update(), aspect_ratios, gr.update()]
+            else:
+                results = [aspect_ratios, gr.update(), gr.update()]
+            return results
+
+        current_aspect_ratios = gr.Textbox(value='', visible=False)    
+        current_aspect_ratios.change(reset_aspect_ratios, inputs=current_aspect_ratios, outputs=[aspect_ratios_selection, hydit_aspect_ratios_selection, sd3_aspect_ratios_selection], queue=False, show_progress=False)
+        backend_selection.change(toggle_layer_interactive, inputs=backend_selection, outputs=[performance_selection, sampler_name, input_image_checkbox, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False) \
+                .then(toggle_layer_visible, inputs=backend_selection, outputs=[performance_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection], queue=False, show_progress=False) \
+                .then(toggle_preset_value, inputs=[backend_selection, state_topbar], outputs=[input_image_checkbox, performance_selection, style_selections, guidance_scale, overwrite_step, sampler_name, scheduler_name, base_model, current_aspect_ratios], queue=False, show_progress=False) \
+                .then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
 
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         
@@ -1062,7 +1098,7 @@ with shared.gradio_root:
     params_note_regen_button.click(toolbox.reset_image_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box, state_topbar], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
-    params_note_preset_button.click(toolbox.save_preset, inputs= reset_params_in + [params_note_input_name, state_topbar], outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar] + nav_bars, show_progress=False) \
+    params_note_preset_button.click(toolbox.save_preset, inputs= reset_params_in + [params_note_input_name, state_topbar, backend_selection], outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar] + nav_bars, show_progress=False) \
         .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, queue=False, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js)
 
@@ -1070,7 +1106,7 @@ with shared.gradio_root:
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
     reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
-    reset_preset_all = [backend_selection] + reset_params + reset_preset_fun + nav_bars + [output_format] + [state_topbar]
+    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [output_format, state_topbar, backend_selection]
     
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 
