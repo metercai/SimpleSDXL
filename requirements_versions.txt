@@ -1,4 +1,4 @@
-diffusers>=0.29
+diffusers>=0.29.0
 torchsde==0.2.5
 transformers==4.37.2
 
