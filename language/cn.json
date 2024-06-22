@@ -283,7 +283,6 @@
   "Confirm identity": "确认身份",
   "Enable Comfyd always active": "启用Comfyd服务常驻",
   "Enabling will improve execution speed but occupy some memory.": "启用服务常驻会提高执行速度，但会多占用一些GPU内存。",
-  "Enable HyDiT always active": "启用HyDiT引擎常驻",
 
 
   "SuperPrompter": "超级提示词扩展",
@@ -295,6 +294,7 @@
   "One Button Preset": "预设的内容模版",
   "HYPERPROMPTING": "超级提示扩展",
   "hyperprompt": "超级提示",
+  "Model type": "模型类型",
   "Standard": "标准",
   "Consistent results": "一致性结果?",
   "Unique People Portraits": "独特的人物肖像",
