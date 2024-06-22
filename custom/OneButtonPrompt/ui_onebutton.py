@@ -1,6 +1,5 @@
 import gradio as gr
 import custom.OneButtonPrompt.shared
-
 from custom.OneButtonPrompt.shared import add_ctrl
 
 from random_prompt.build_dynamic_prompt import build_dynamic_prompt
@@ -20,6 +19,7 @@ subjects = ["all"]
 subjectsubtypesobject = ["all"]
 subjectsubtypeshumanoid = ["all"]
 subjectsubtypesconcept = ["all"]
+modeltypelist = ["SDXL"] #, "Anime Model"]
 artists = [
     "all",
     "all (wild)",
@@ -101,13 +101,15 @@ artists = [
 imagetypes = [
     "all",
     "all - force multiple",
+    "all - anime",
+    "none",
     "photograph",
     "octane render",
     "digital art",
     "concept art",
     "painting",
     "portrait",
-    "anime key visual",
+    "anime",
     "only other types",
     "only templates mode",
     "dynamic templates mode",
@@ -143,7 +145,15 @@ generatefood = True
 generatebuilding = True
 generatespace = True
 generateflora = True
+
 generateanimal = True
+generatebird = True
+generatecat = True
+generatedog = True
+generateinsect = True
+generatepokemon = True
+generatemarinelife = True
+
 generatemanwoman = True
 generatemanwomanrelation = True
 generatemanwomanmultiple = True
@@ -152,7 +162,15 @@ generatenonfictionalcharacter = True
 generatehumanoids = True
 generatejob = True
 generatefirstnames = True
+
 generatelandscape = True
+generatelocation = True
+generatelocationfantasy = True
+generatelocationscifi = True
+generatelocationvideogame = True
+generatelocationbiome = True
+generatelocationcity = True
+
 generateevent = True
 generateconcepts = True
 generatepoemline = True
@@ -178,8 +196,20 @@ for item in config:
     if item[0] == "subject_flora" and item[1] != "on":
         generateflora = False
     # animals
-    if item[0] == "subject_animal" and item[1] != "on":
+    if item[0] == 'subject_animal' and item[1] != 'on':
         generateanimal = False
+    if item[0] == 'subject_bird' and item[1] != 'on':
+        generatebird = False
+    if item[0] == 'subject_cat' and item[1] != 'on':
+        generatecat = False
+    if item[0] == 'subject_dog' and item[1] != 'on':
+        generatedog = False
+    if item[0] == 'subject_insect' and item[1] != 'on':
+        generateinsect = False
+    if item[0] == 'subject_pokemon' and item[1] != 'on':
+        generatepokemon = False
+    if item[0] == 'subject_marinelife' and item[1] != 'on':
+        generatemarinelife = False
     # humanoids
     if item[0] == "subject_manwoman" and item[1] != "on":
         generatemanwoman = False
@@ -198,8 +228,18 @@ for item in config:
     if item[0] == "subject_firstnames" and item[1] != "on":
         generatefirstnames = False
     # landscape
-    if item[0] == "subject_landscape" and item[1] != "on":
-        generatelandscape = False
+    if item[0] == 'subject_location' and item[1] != 'on':
+        generatelocation = False
+    if item[0] == 'subject_location_fantasy' and item[1] != 'on':
+        generatelocationfantasy = False
+    if item[0] == 'subject_location_scifi' and item[1] != 'on':
+        generatelocationscifi = False
+    if item[0] == 'subject_location_videogame' and item[1] != 'on':
+        generatelocationvideogame = False
+    if item[0] == 'subject_location_biome' and item[1] != 'on':
+        generatelocationbiome = False
+    if item[0] == 'subject_location_city' and item[1] != 'on':
+        generatelocationcity = False
     # concept
     if item[0] == "subject_event" and item[1] != "on":
         generateevent = False
@@ -217,37 +257,88 @@ for item in config:
         generateconceptmixer = False
 
 # build up all subjects we can choose based on the loaded config file
-if (
-    generatevehicle
-    or generateobject
-    or generatefood
-    or generatebuilding
-    or generatespace
-):
-    subjects.append("object")
-if generateanimal:
-    subjects.append("animal")
-if (
-    generatemanwoman
-    or generatemanwomanrelation
-    or generatefictionalcharacter
-    or generatenonfictionalcharacter
-    or generatehumanoids
-    or generatejob
-):
-    subjects.append("humanoid")
-if generatelandscape:
-    subjects.append("landscape")
-if (
-    generateevent
-    or generateconcepts
-    or generatepoemline
-    or generatesongline
-    or generatecardname
-    or generateepisodetitle
-    or generateconceptmixer
-):
-    subjects.append("concept")
+if(generatevehicle or generateobject or generatefood or generatebuilding or generatespace or generateflora):
+    subjects.append("--- object - all")
+    if(generateobject):
+          subjects.append("object - generic")
+    if(generatevehicle):
+          subjects.append("object - vehicle")
+    if(generatefood):
+          subjects.append("object - food")
+    if(generatebuilding):
+          subjects.append("object - building")
+    if(generatespace):
+          subjects.append("object - space")
+    if(generateflora):
+          subjects.append("object - flora")
+          
+if(generateanimal or generatebird or generatecat or generatedog or generateinsect or generatepokemon or generatemarinelife):
+    subjects.append("--- animal - all")
+    if(generateanimal):
+        subjects.append("animal - generic")
+    if(generatebird):
+        subjects.append("animal - bird")
+    if(generatecat):
+        subjects.append("animal - cat")
+    if(generatedog):
+        subjects.append("animal - dog")
+    if(generateinsect):
+        subjects.append("animal - insect")
+    if(generatemarinelife):
+        subjects.append("animal - marine life")
+    if(generatepokemon):
+        subjects.append("animal - pokémon")
+
+if(generatemanwoman or generatemanwomanrelation or generatefictionalcharacter or generatenonfictionalcharacter or generatehumanoids or generatejob or generatemanwomanmultiple):
+    subjects.append("--- human - all")
+    if(generatemanwoman):
+        subjects.append("human - generic")
+    if(generatemanwomanrelation):
+        subjects.append("human - relations")
+    if(generatenonfictionalcharacter):
+        subjects.append("human - celebrity")
+    if(generatefictionalcharacter):
+        subjects.append("human - fictional")
+    if(generatehumanoids):
+        subjects.append("human - humanoids")
+    if(generatejob):
+        subjects.append("human - job/title")
+    if(generatefirstnames):
+        subjects.append("human - first name")
+    if(generatemanwomanmultiple):
+        subjects.append("human - multiple")
+
+if(generatelandscape or generatelocation or generatelocationfantasy or generatelocationscifi or generatelocationvideogame or generatelocationbiome or generatelocationcity):
+    subjects.append("--- landscape - all")
+    if(generatelocation):
+        subjects.append("landscape - generic")
+    if(generatelocationfantasy):
+        subjects.append("landscape - fantasy")
+    if(generatelocationscifi):
+        subjects.append("landscape - sci-fi")
+    if(generatelocationvideogame):
+        subjects.append("landscape - videogame")
+    if(generatelocationbiome):
+        subjects.append("landscape - biome")
+    if(generatelocationcity):
+        subjects.append("landscape - city")
+
+if(generateevent or generateconcepts or generatepoemline or generatesongline or generatecardname or generateepisodetitle or generateconceptmixer):
+    subjects.append("--- concept - all")
+    if(generateevent):
+        subjects.append("concept - event")
+    if(generateconcepts):
+        subjects.append("concept - the x of y")
+    if(generatepoemline):
+        subjects.append("concept - poem lines")
+    if(generatesongline):
+        subjects.append("concept - song lines")
+    if(generatecardname):
+        subjects.append("concept - card names")
+    if(generateepisodetitle):
+        subjects.append("concept - episode titles")
+    if(generateconceptmixer):
+        subjects.append("concept - mixer")
 
 
 # do the same for the subtype subjects
@@ -324,6 +415,7 @@ def ui_onebutton(prompt, run_event, random_button):
         givenoutfit,
         OBP_preset,
         promptenhance,
+        modeltype,
     ):
         prompt = build_dynamic_prompt(
             insanitylevel,
@@ -349,7 +441,7 @@ def ui_onebutton(prompt, run_event, random_button):
             0,
             givenoutfit,
             False,
-            "SDXL",
+            modeltype,
             OBP_preset,
             promptenhance,
         )
@@ -375,6 +467,7 @@ def ui_onebutton(prompt, run_event, random_button):
         givenoutfit,
         OBP_preset,
         promptenhance,
+        modeltype,
         run_event,
     ):
         prompt = build_dynamic_prompt(
@@ -401,7 +494,7 @@ def ui_onebutton(prompt, run_event, random_button):
             0,
             givenoutfit,
             False,
-            "SDXL",
+            modeltype,
             OBP_preset,
             promptenhance, 
         )
@@ -428,6 +521,7 @@ def ui_onebutton(prompt, run_event, random_button):
         givenoutfit,
         OBP_preset,
         promptenhance,
+        modeltype,
     ):
         prompt = (
             prompt
@@ -456,7 +550,7 @@ def ui_onebutton(prompt, run_event, random_button):
                 0,
                 givenoutfit,
                 False,
-                "SDXL",
+                modeltype,
                 OBP_preset,
                 promptenhance,
             )
@@ -466,15 +560,15 @@ def ui_onebutton(prompt, run_event, random_button):
 
     with gr.Tab(label="OneButtonPrompt"):
         with gr.Row():
-            # instant_obp = gr.Button(value="Instant OBP", size="sm", min_width = 1)
+            #instant_obp = gr.Button(value="Instant OBP", size="sm", min_width = 1)
             #random_button = gr.Button(value="Random Prompt", size="sm", min_width = 1)
             add_random_button = gr.Button(value="+More", size="sm", min_width=1)
 
-        ##with gr.Row():
-        ##    assumedirectcontrol = gr.Checkbox(
-        ##        label="BYPASS SAFETY PROTOCOLS", value=False
-        ##    )
-        ##    add_ctrl("obp_assume_direct_control", assumedirectcontrol)
+        #with gr.Row():
+        #    assumedirectcontrol = gr.Checkbox(
+        #        label="BYPASS SAFETY PROTOCOLS", value=False
+        #    )
+        #    add_ctrl("obp_assume_direct_control", assumedirectcontrol)
         
         # Part of presets
         with gr.Row():
@@ -616,12 +710,17 @@ def ui_onebutton(prompt, run_event, random_button):
                 choices=promptenhancelist, label="HYPERPROMPTING", value="none"
             )
             add_ctrl("OBP_promptenhance", promptenhance)
-        with gr.Row():
-            gr.Markdown(
-                """
-                Powered by AIrjen [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt) / [RuinedFooocus](https://github.com/runew0lf/RuinedFooocus) 
-                """
+            
+            modeltype = gr.Dropdown(
+                choices=modeltypelist, label="Model type", value="SDXL"
             )
+            add_ctrl("OBP_modeltype", modeltype)
+        #with gr.Row():
+        #    gr.Markdown(
+        #        """
+        #        Proud to be powered by [One Button Prompt](https://github.com/AIrjen/OneButtonPrompt)
+        #        """
+        #    )
 
         obp_outputs = [
                     obp_preset_name,
@@ -773,7 +872,7 @@ def ui_onebutton(prompt, run_event, random_button):
         
         # turn things on and off for gender
         def subjectsvalue(subject):
-            enable = subject == "humanoid"
+            enable = "human" in subject
             return {
                 chosengender: gr.update(visible=enable),
             }
@@ -822,11 +921,11 @@ def ui_onebutton(prompt, run_event, random_button):
                 add_random_button: gr.update(visible=enable),
             }
 
-        ##assumedirectcontrol.change(
-        ##    assumedirectcontrolflip,
-        ##    [assumedirectcontrol],
-        ##    [instant_obp, random_button, add_random_button],
-        ##)
+        #assumedirectcontrol.change(
+        #    assumedirectcontrolflip,
+        #    [assumedirectcontrol],
+        #    [instant_obp, random_button, add_random_button],
+        #)
 
         #instant_obp.click(
         #    instant_gen_prompt,
@@ -849,6 +948,7 @@ def ui_onebutton(prompt, run_event, random_button):
         #        givenoutfit,
         #        OBP_preset,
         #        promptenhance,
+        #        modeltype,
         #        run_event,
         #    ],
         #    outputs=[prompt, run_event],
@@ -874,6 +974,7 @@ def ui_onebutton(prompt, run_event, random_button):
                 givenoutfit,
                 OBP_preset,
                 promptenhance,
+                modeltype,
             ],
             outputs=[prompt],
         )
@@ -899,6 +1000,7 @@ def ui_onebutton(prompt, run_event, random_button):
                 givenoutfit,
                 OBP_preset,
                 promptenhance,
+                modeltype,
             ],
             outputs=[prompt],
         )

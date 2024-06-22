@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 import threading
-from ..modules.civit import Civit
+from .civit import Civit
 import time
 import os
 from custom.OneButtonPrompt.utils import path_fixed, root_path_fixed
@@ -17,6 +17,7 @@ class PathManager:
         "path_upscalers": root_path_fixed("../models/upscale_models"),
         "path_outputs": root_path_fixed("../outputs/"),
         "path_clip": root_path_fixed("../models/clip/"),
+        "path_cache": root_path_fixed("../cache/"),
     }
 
     EXTENSIONS = [".pth", ".ckpt", ".bin", ".safetensors"]
@@ -54,6 +55,7 @@ class PathManager:
             "faceswap_path": self.get_abspath_folder(self.paths["path_faceswap"]),
             "upscaler_path": self.get_abspath_folder(self.paths["path_upscalers"]),
             "clip_path": self.get_abspath_folder(self.paths["path_clip"]),
+            "cache_path": self.get_abspath_folder(self.paths["path_cache"]),
         }
 
     def get_default_model_names(self):
@@ -72,20 +74,39 @@ class PathManager:
     def get_abspath(self, path):
         return Path(path) if Path(path).is_absolute() else Path(__file__).parent / path
 
-    def civit_update_worker(self, folder_path, isLora):
+    def civit_update_worker(self, folder_path, cache, isLora):
         if folder_path in self.civit_worker_folders:
             # Already working on this folder
             return
-        self.civit_worker_folders.append(folder_path)
-        if not isLora:  # We only do LoRAs at the moment
-            return
         else:
             return
+        if cache:
+            cache_path = Path(self.model_paths["cache_path"] / cache)
+        self.civit_worker_folders.append(folder_path)
         civit = Civit()
         for path in folder_path.rglob("*"):
             if path.suffix.lower() in self.EXTENSIONS:
                 txtcheck = Path(os.path.join(self.loras_keywords_path, path.with_suffix(".txt").name))
-                if not txtcheck.exists():
+                # get file name, add cache path change suffix
+                cache_file = Path(cache_path / path.name)
+
+                has_preview = False
+                suffixes = [".jpeg", ".jpg", ".png", ".gif"]
+                for suffix in suffixes:
+                    thumbcheck = cache_file.with_suffix(suffix)
+                    if Path(thumbcheck).is_file():
+                        has_preview = True
+                        break
+
+                if not has_preview:
+                    hash = civit.model_hash(str(path))
+                    print(f"Downloading model thumbnail for {path}")
+                    models = civit.get_models_by_hash(hash)
+                    civit.get_image(models, thumbcheck)
+                    time.sleep(1)
+
+                txtcheck = cache_file.with_suffix(".txt")
+                if isLora and not txtcheck.exists():
                     hash = civit.model_hash(str(path))
                     print(f"[OneButtonPrompt] Downloading LoRA keywords for {path}")
                     models = civit.get_models_by_hash(hash)
@@ -94,9 +115,10 @@ class PathManager:
                     with open(txtcheck, "w") as f:
                         f.write(", ".join(keywords))
                     time.sleep(1)
+
         self.civit_worker_folders.remove(folder_path)
 
-    def get_model_filenames(self, folder_path, isLora=False):
+    def get_model_filenames(self, folder_path, cache=None, isLora=False):
         folder_path = Path(folder_path)
         if not folder_path.is_dir():
             raise ValueError("Folder path is not a valid directory.")
@@ -104,6 +126,7 @@ class PathManager:
             target=self.civit_update_worker,
             args=(
                 folder_path,
+                cache,
                 isLora,
             ),
             daemon=True,
@@ -129,10 +152,13 @@ class PathManager:
 
     def update_all_model_names(self):
         self.model_filenames = self.get_model_filenames(
-            self.model_paths["modelfile_path"]
+            self.model_paths["modelfile_path"],
+            cache="checkpoints"
         )
         self.lora_filenames = self.get_model_filenames(
-            self.model_paths["lorafile_path"], True
+            self.model_paths["lorafile_path"], 
+            cache="loras",
+            isLora=True
         )
         self.upscaler_filenames = self.get_model_filenames(
             self.model_paths["upscaler_path"]

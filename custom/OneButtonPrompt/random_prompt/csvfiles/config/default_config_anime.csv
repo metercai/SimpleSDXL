@@ -51,20 +51,20 @@ subject_conceptmixer;on
 # always, common, normal, uncommon, rare, legendary, unique, extraordinary, novel, never;
 custominputprefixrepeats;2
 custominputprefixchance;uncommon
-imagetypechance;normal
-imagetypequalitychance;rare
+imagetypechance;legendary
+imagetypequalitychance;normal
 # some prefixes that happen rarely;
 minilocationadditionchance;unique
 artmovementprefixchance;unique
 minivomitprefix1chance;rare
 minivomitprefix2chance;unique
 # shot size generation;
-shotsizechance;uncommon
+shotsizechance;common
 # subject specific stuff;
 subjectdescriptor1chance;common
 subjectdescriptor2chance;uncommon
-subjectbodytypechance;normal
-subjectculturechance;normal
+subjectbodytypechance;common
+subjectculturechance;uncommon
 subjectconceptsuffixchance;unique
 # subjectlandscape specific stuff;
 subjectlandscapeinsideshotchance;unique
@@ -74,25 +74,25 @@ subjectlandscapeaddonlocationculturechance;rare
 # all additions;
 objectadditionsrepeats;2
 objectadditionschance;uncommon
-humanadditionchance;rare
+humanadditionchance;uncommon
 overalladditionchance;extraordinary
 # humanoid other stuff;
 emojichance;legendary
-buildfacechance;legendary
-humanexpressionchance;rare
-humanvomitchance;rare
-joboractivitychance;normal
+buildfacechance;uncommon
+humanexpressionchance;uncommon
+humanvomitchance;normal
+joboractivitychance;rare
 # things in the middle of the prompt;
 custominputmidrepeats;2
 custominputmidchance;uncommon
 minivomitmidchance;unique
 # humanoid main stuff;
-outfitchance;normal
-posechance;uncommon
-hairchance;normal
-accessorychance;normal
-humanoidinsideshotchance;legendary
-humanoidbackgroundchance;uncommon
+outfitchance;common
+posechance;common
+hairchance;common
+accessorychance;uncommon
+humanoidinsideshotchance;novel
+humanoidbackgroundchance;novel
 # minilocation stuff;
 landscapeminilocationchance;uncommon
 generalminilocationchance;rare
@@ -100,20 +100,20 @@ generalminilocationchance;rare
 timperiodchance;normal
 focuschance;normal
 directionchance;normal
-moodchance;normal
+moodchance;common
 minivomitsuffixchance;unique
-artmovementchance;normal
+artmovementchance;unique
 lightingchance;normal
-photoadditionchance;common
-lenschance;normal
+photoadditionchance;unique
+lenschance;unique
 colorschemechance;normal
-vomit1chance;uncommon
-vomit2chance;uncommon
-greatworkchance;novel
-poemlinechance;novel
-songlinechance;novel
-quality1chance;uncommon
-quality2chance;uncommon
+vomit1chance;rare
+vomit2chance;rare
+greatworkchance;never
+poemlinechance;never
+songlinechance;never
+quality1chance;normal
+quality2chance;normal
 # custom style list (lora and tis);
 customstyle1chance;uncommon
 customstyle2chance;uncommon

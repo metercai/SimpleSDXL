@@ -45,15 +45,19 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.11"
+    ver_required = "0.3.12"
+    base_file = {
+        "Windows": "enhanced/libs/simpleai_base-0.3.12-cp310-none-win_amd64.whl",
+        "Linux": "enhanced/libs/simpleai_base-0.3.12-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+        }
     #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i {index_url}', f'Install {base_pkg} {ver_required}')
+        run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
         if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i {index_url}', f'Install {base_pkg} {ver_required}')
+            run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
             print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
@@ -159,20 +163,6 @@ def ini_args():
 
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
-
-def remove_models_info_file():
-    models_info_path = os.path.join(os.path.join(root, "models"), "models_info.json")
-    if os.path.exists(models_info_path):
-        temp_info = {}
-        with open(models_info_path, "r", encoding="utf-8") as json_file:
-            temp_info.update(json.load(json_file))
-            for k in temp_info.keys():
-                if not 'file' in k:
-                    os.remove(models_info_path)
-                    print("[ModelsInfo] Remove incompatible models_info.json.")
-                    break
-
-#remove_models_info_file()
 
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
