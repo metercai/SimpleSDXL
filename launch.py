@@ -45,7 +45,7 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.10"
+    ver_required = "0.3.11"
     #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
         run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i {index_url}', f'Install {base_pkg} {ver_required}')

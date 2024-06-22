@@ -545,3 +545,7 @@ div.prose.tokenCounter {
     height: 32px;
     margin: 3px 3px;
 }
+
+.iclight_source {
+    max-width: 390px;
+}

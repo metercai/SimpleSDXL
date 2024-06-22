@@ -1084,7 +1084,7 @@ def worker():
                         refiner_model_name = ''
                         refiner_switch = 1.0
                         if is_hydit_task:
-                            base_model_name = ''
+                            base_model_name = 'hydit_v1.1_fp16.safetensors'
                     d += [
                           ('Base Model', 'base_model', base_model_name),
                           ('Refiner Model', 'refiner_model', refiner_model_name),
@@ -1126,7 +1126,11 @@ def worker():
                                                  task['log_negative_prompt'], task['negative'],
                                                  steps, base_model_name, refiner_model_name, loras, vae_name, '')
                     if is_hydit_task:
-                        d.append(('Generate Engine', 'generate_engine', 'Hunyuan-DiT'))
+                        d.append(('Backend Engine', 'backend_engine', 'Hunyuan-DiT'))
+                    elif is_SD3m_task:
+                        d.append(('Backend Engine', 'backend_engine', 'SD3-medium'))
+                    else:
+                        d.append(('Backend Engine', 'backend_engine', 'SDXL-Fooocus'))
                     d.append(('Metadata Scheme', 'metadata_scheme', metadata_scheme.value if save_metadata_to_images else save_metadata_to_images))
                     import enhanced.version as version
                     d.append(('Version', 'version', f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'))
@@ -1146,8 +1150,6 @@ def worker():
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
         async_task.processing = False
-        if is_hydit_task and not ehps.hydit_active_checkbox:
-            hydit_task.unload_free_model()
         return
 
     while True:
