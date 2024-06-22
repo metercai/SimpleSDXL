@@ -163,7 +163,7 @@ def is_ipynb():
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
-build_launcher()
+remove_models_info_file()
 prepare_environment()
 build_launcher()
 args = ini_args()
@@ -279,3 +279,16 @@ def reset_env_args():
 reset_env_args()
 
 from webui import *
+
+def remove_models_info_file():
+    models_info_path = os.path.join(os.path.join(root, "models"), "models_info.json")
+    if os.path.exists(models_info_path):
+        temp_info = {}
+        with open(models_info_path, "r", encoding="utf-8") as json_file:
+            temp_info.update(json.load(json_file))
+            for k in temp_info.keys():
+                if not 'file' in k:
+                    os.remove(models_info_path)
+                    print("[ModelsInfo] Remove incompatible models_info.json.")
+                    break
+

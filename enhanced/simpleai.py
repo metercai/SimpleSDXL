@@ -12,16 +12,6 @@ sysinfo = {"location": "CN"}
 #comfyd.echo_off = False
 args_comfyd = [[]]
 
-if os.path.exists(models_info_path):
-    temp_info = {}
-    with open(models_info_path, "r", encoding="utf-8") as json_file:
-        temp_info.update(json.load(json_file))
-        for k in temp_info.keys():
-            if not 'file' in k:
-                os.remove(models_info_path)
-                print("[ModelsInfo] Remove incompatible models_info.json.")
-                break
-
 models_info, models_info_muid, models_info_file = get_models_info()
 
 def refresh_models_info():
