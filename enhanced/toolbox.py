@@ -343,10 +343,35 @@ def reset_image_params(state_params):
 
     metadata.update({"loras": loras})
     metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
+    
+    get_meta_value = lambda x1,y: y if x1 not in metadata else metadata[x1]
+    backend_engine = get_meta_value('Backend Engine', 'SDXL-Fooocus')
+    if backend_engine=='Hunyuan-DiT':
+        backend_engine = flags.backend_engines[1]
+    elif backend_engine=='SD3-medium':
+        backend_engine = flags.backend_engines[2]
+    else:
+        backend_engine = flags.backend_engines[0]
+    engine_preset = state_params[f'{backend_engine}_preset_value']
+    engine_preset[1] = get_meta_value('Performance', engine_preset[1])
+    engine_preset[2] = get_meta_value('Styles', engine_preset[2])
+    engine_preset[3] = get_meta_value('Guidance Scale', engine_preset[3])
+    engine_preset[4] = get_meta_value('Steps', engine_preset[4])
+    engine_preset[5] = get_meta_value('Sampler', engine_preset[5])
+    engine_preset[6] = get_meta_value('Scheduler', engine_preset[6])
+    engine_preset[7] = get_meta_value('Base Model', engine_preset[7])
+    state_params[f'{backend_engine}_preset_value'] = engine_preset
+    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
+    aspect_ratio = get_meta_value('Resolution', '(0, 0)')
+    if aspect_ratio!='(0, 0)':
+        width, height = eval(aspect_ratio)
+        engine_aspect_ratio = config.add_ratio(f'{width}*{height}')
+        state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+
     results = topbar.reset_params(metadata)
     state_params.update({"note_box_state": ['',0,0]})
     print(f'[ToolBox] Reset_params: update {len(metainfo.keys())} params from current image log file.')
-    return results + [gr.update(visible=False)] * 2 + [state_params]
+    return results + [gr.update(visible=False)] * 2 + [state_params, backend_engine]
 
 
 def apply_enabled_loras(loras):
