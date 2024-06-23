@@ -863,6 +863,13 @@ def downloading_superprompter_model():
     )
     return os.path.join(path_superprompter, 'model.safetensors')
 
+def downloading_sd3_medium_model():
+    load_file_from_url(
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors',
+        model_dir=paths_checkpoints[0],
+        file_name='sd3_medium_incl_clips.safetensors'
+    )
+    return os.path.join(paths_checkpoints[0], 'sd3_medium_incl_clips.safetensors')
 
 update_files()
 from enhanced.simpleai import simpleai_config, refresh_models_info 

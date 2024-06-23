@@ -785,7 +785,7 @@ with shared.gradio_root:
                     #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                     super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
-                    gr.Markdown(value=f'OS: {sysinfo["os_name"]}, {sysinfo["cpu_arch"]}, {sysinfo["cuda_version"]}, Torch{sysinfo["torch_version"]}, XF{sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
+                    gr.Markdown(value=f'OS: {sysinfo["os_name"]}, {sysinfo["cpu_arch"]}, {sysinfo["cuda_version"]}, Torch{sysinfo["torch_version"]}, XF{sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {sysinfo["pyhash"]}, UIHash: {sysinfo["uihash"]}')
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selection], queue=False, show_progress=False)
             pre4comfy = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
@@ -1024,7 +1024,7 @@ with shared.gradio_root:
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=False)
 
-        def trigger_metadata_import(filepath, state_is_generating):
+        def trigger_metadata_import(filepath, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(filepath)
             if parameters is None:
                 print('Could not find metadata in the image!')
@@ -1032,10 +1032,36 @@ with shared.gradio_root:
             else:
                 metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                 parsed_parameters = metadata_parser.to_json(parameters)
+            
+            get_meta_value = lambda x1,x2,y: (y if x1 not in parsed_parameters else parsed_parameters[x1]) if x2 not in parsed_parameters else parsed_parameters[x2]
+
+            backend_engine = get_meta_value("Backend Engine", 'backend_engine', 'SDXL-Fooocus')
+            if backend_engine=='Hunyuan-DiT':
+                backend_engine = flags.backend_engines[1]
+            elif backend_engine=='SD3-medium':
+                backend_engine = flags.backend_engines[2]
+            else:
+                backend_engine = flags.backend_engines[0]
+            parsed_parameters.update({'backend_engine': backend_engine})
+            engine_preset = state_params[f'{backend_engine}_preset_value']
+            engine_preset[1] = get_meta_value('performance', 'Performance', engine_preset[1])
+            engine_preset[2] = get_meta_value('styles', 'Styles', engine_preset[2])
+            engine_preset[3] = get_meta_value('guidance_scale', 'Guidance Scale', engine_preset[3])
+            engine_preset[4] = get_meta_value('steps', 'Steps', engine_preset[4])
+            engine_preset[5] = get_meta_value('sampler', 'Sampler', engine_preset[5])
+            engine_preset[6] = get_meta_value('scheduler', 'Scheduler', engine_preset[6])
+            engine_preset[7] = get_meta_value('base_model', 'Base Model', engine_preset[7])
+            state_params[f'{backend_engine}_preset_value'] = engine_preset
+            engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
+            aspect_ratio = get_meta_value('resolution', 'Resolution', '(0, 0)')
+            if aspect_ratio!='(0, 0)':
+                width, height = eval(aspect_ratio)
+                engine_aspect_ratio = modules.config.add_ratio(f'{width}*{height}')
+                state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
 
             return modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating)
 
-        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=True) \
+        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=load_data_outputs+[backend_selection], queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         reset_params = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
