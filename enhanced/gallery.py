@@ -227,6 +227,8 @@ def parse_html_log(choice: str, passthrough = False):
                     text.insert(29, '')
                 if text[32]=='\n' or text[32]=='\r\n':
                     text.insert(32, '')
+                if text[35]=='\n' or text[35]=='\r\n':
+                    text.insert(35, '')
                 info_dict={"Filename":text[0]}
                 for i in range(0,int(len(text)/3)):
                     key = text[1+i*3].strip()
