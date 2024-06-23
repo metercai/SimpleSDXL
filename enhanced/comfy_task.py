@@ -1,3 +1,4 @@
+import modules.config
 from enhanced.simpleai import ComfyTaskParams, models_info
 
 method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
@@ -69,6 +70,8 @@ def get_comfy_task(method, default_params, input_images, options={}):
 
     if method == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
+        if f'checkpoints/{default_params["base_model"]}' not in models_info:
+            modules.config.downloading_sd3_medium_model()
         return ComfyTask('sd3_base', comfy_params)
     elif method == method_names[1]:
         comfy_params = ComfyTaskParams(default_params)

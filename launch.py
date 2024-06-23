@@ -46,6 +46,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.12"
+    REINSTALL_BASE = True
     base_file = {
         "Windows": "enhanced/libs/simpleai_base-0.3.12-cp310-none-win_amd64.whl",
         "Linux": "enhanced/libs/simpleai_base-0.3.12-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
@@ -55,7 +56,7 @@ def check_base_environment():
         run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
-        if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+        if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
