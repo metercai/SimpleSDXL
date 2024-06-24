@@ -509,10 +509,7 @@ def reset_context(state_params):
     backend_engine = get_preset_value('default_backend', 'SDXL')
     engine_preset = state_params[f'{backend_engine}_preset_value']
     engine_preset[1] = get_preset_value('default_performance', engine_preset[1])
-    engine_preset[2] = [f[1:-1] for f in get_preset_value('default_styles', str(engine_preset[2]))[1:-1].split(', ')]
-    if engine_preset[2] == ['']:
-        engine_preset[2] = []
-
+    engine_preset[2] = get_preset_value('default_styles', engine_preset[2])
     engine_preset[3] = float(get_preset_value('default_cfg_scale', engine_preset[3]))
     engine_preset[4] = int(get_preset_value('default_overwrite_step', engine_preset[4]))
     engine_preset[5] = get_preset_value('default_sampler', engine_preset[5])
