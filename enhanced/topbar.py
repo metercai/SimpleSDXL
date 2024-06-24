@@ -504,16 +504,20 @@ def reset_context(state_params):
     results += refresh_nav_bars(state_params)
     results += update_in_keys("output_format")
     results += [state_params]
-    
-    backend_engine = 'SDXL' if 'default_backend' not in keys else config_preset["default_backend"]
+   
+    get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
+    backend_engine = get_preset_value('default_backend', 'SDXL')
     engine_preset = state_params[f'{backend_engine}_preset_value']
-    engine_preset[1] = engine_preset[1] if 'default_performance' not in keys else config_preset["default_performance"]
-    engine_preset[2] = engine_preset[2] if 'default_styles' not in keys else config_preset["default_styles"]
-    engine_preset[3] = engine_preset[3] if 'default_cfg_scale' not in keys else config_preset["default_cfg_scale"]
-    engine_preset[4] = engine_preset[4] if 'default_overwrite_step' not in keys else config_preset["default_overwrite_step"]
-    engine_preset[5] = engine_preset[5] if 'default_sampler' not in keys else config_preset["default_sampler"]
-    engine_preset[6] = engine_preset[6] if 'default_scheduler' not in keys else config_preset["default_scheduler"]
-    engine_preset[7] = engine_preset[7] if 'default_model' not in keys else config_preset["default_model"]
+    engine_preset[1] = get_preset_value('default_performance', engine_preset[1])
+    engine_preset[2] = [f[1:-1] for f in get_preset_value('default_styles', str(engine_preset[2]))[1:-1].split(', ')]
+    if engine_preset[2] == ['']:
+        engine_preset[2] = []
+
+    engine_preset[3] = float(get_preset_value('default_cfg_scale', engine_preset[3]))
+    engine_preset[4] = int(get_preset_value('default_overwrite_step', engine_preset[4]))
+    engine_preset[5] = get_preset_value('default_sampler', engine_preset[5])
+    engine_preset[6] = get_preset_value('default_scheduler', engine_preset[6])
+    engine_preset[7] = get_preset_value('default_model', engine_preset[7])
     state_params[f'{backend_engine}_preset_value'] = engine_preset
     engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
     engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])

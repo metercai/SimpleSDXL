@@ -92,8 +92,8 @@ def unload_free_model():
     print("[HyDiT] Freed the GPU RAM occupyed by the HyDit.")
 
 def get_scheduler_name(sampler):
-    params = SAMPLER_FACTORY[sampler]
-    return params["scheduler"], params["name"]
+    params = SAMPLER_FACTORY[sampler.lower()]
+    return params["scheduler"], params["name"].lower()
 
 
 def inferencer(
@@ -115,6 +115,7 @@ def inferencer(
 
     seed = seed & 0xFFFFFFFF
     enhanced_prompt = None
+    sampler = sampler.lower()
     params = SAMPLER_FACTORY[sampler]
     print(f'[HyDiT] Ready to HyDiT Task:\n    prompt={prompt}\n    negative_prompt={negative_prompt}\n    seed={seed}\n    cfg_scale={cfg_scale}\n    steps={infer_steps}\n    width,height={width},{height}\n    scheduler={params["scheduler"]}\n    sampler={params["name"]}')
 
