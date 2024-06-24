@@ -1045,9 +1045,11 @@ with shared.gradio_root:
             parsed_parameters.update({'backend_engine': backend_engine})
             engine_preset = state_params[f'{backend_engine}_preset_value']
             engine_preset[1] = get_meta_value('performance', 'Performance', engine_preset[1])
-            engine_preset[2] = get_meta_value('styles', 'Styles', engine_preset[2])
-            engine_preset[3] = get_meta_value('guidance_scale', 'Guidance Scale', engine_preset[3])
-            engine_preset[4] = get_meta_value('steps', 'Steps', engine_preset[4])
+            engine_preset[2] = [f[1:-1] for f in get_meta_value('styles', 'Styles', str(engine_preset[2]))[1:-1].split(', ')]
+            if engine_preset[2] == ['']:
+                engine_preset[2] = []
+            engine_preset[3] = float(get_meta_value('guidance_scale', 'Guidance Scale', engine_preset[3]))
+            engine_preset[4] = int(get_meta_value('steps', 'Steps', engine_preset[4]))
             engine_preset[5] = get_meta_value('sampler', 'Sampler', engine_preset[5])
             engine_preset[6] = get_meta_value('scheduler', 'Scheduler', engine_preset[6])
             engine_preset[7] = get_meta_value('base_model', 'Base Model', engine_preset[7])
@@ -1058,6 +1060,8 @@ with shared.gradio_root:
                 width, height = eval(aspect_ratio)
                 engine_aspect_ratio = modules.config.add_ratio(f'{width}*{height}')
                 state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+            refiner_model = get_meta_value("Refiner Model", 'refiner_model', 'None')
+            parsed_parameters.update({'refiner_model': refiner_model})
 
             return modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating)
 

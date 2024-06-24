@@ -354,9 +354,11 @@ def reset_image_params(state_params):
         backend_engine = flags.backend_engines[0]
     engine_preset = state_params[f'{backend_engine}_preset_value']
     engine_preset[1] = get_meta_value('Performance', engine_preset[1])
-    engine_preset[2] = get_meta_value('Styles', engine_preset[2])
-    engine_preset[3] = get_meta_value('Guidance Scale', engine_preset[3])
-    engine_preset[4] = get_meta_value('Steps', engine_preset[4])
+    engine_preset[2] = [f[1:-1] for f in get_meta_value('Styles', str(engine_preset[2]))[1:-1].split(', ')]
+    if engine_preset[2] == ['']:
+        engine_preset[2] = []
+    engine_preset[3] = float(get_meta_value('Guidance Scale', engine_preset[3]))
+    engine_preset[4] = int(get_meta_value('Steps', engine_preset[4]))
     engine_preset[5] = get_meta_value('Sampler', engine_preset[5])
     engine_preset[6] = get_meta_value('Scheduler', engine_preset[6])
     engine_preset[7] = get_meta_value('Base Model', engine_preset[7])
@@ -367,6 +369,8 @@ def reset_image_params(state_params):
         width, height = eval(aspect_ratio)
         engine_aspect_ratio = config.add_ratio(f'{width}*{height}')
         state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+    refiner_model = get_meta_value("Refiner Model", 'None')
+    metadata.update({'Refiner Model': refiner_model})
 
     results = topbar.reset_params(metadata)
     state_params.update({"note_box_state": ['',0,0]})
