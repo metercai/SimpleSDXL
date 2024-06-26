@@ -89,12 +89,13 @@ default = {
     'image_number': 2,
     'output_format': 'jpeg',
     'save_metadata_to_images': False,
-    'metadata_scheme': 'fooocus',
+    'metadata_scheme': 'simple',
     'input_image_checkbox': False,
     'advanced_checkbox': True,
     'backfill_prompt': False,
-    'translation_timing': 'Translate then generate',
-    'translation_methods': 'Big Model'
+    'translation_methods': 'Third APIs',
+    'backend': 'SDXL',
+    'comfyd_active_checkbox': False
     }
 
 
