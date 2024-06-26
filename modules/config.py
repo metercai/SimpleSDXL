@@ -520,13 +520,13 @@ default_black_out_nsfw = get_config_item_or_set_default(
 )
 default_save_metadata_to_images = get_config_item_or_set_default(
     key='default_save_metadata_to_images',
-    default_value=False,
+    default_value=ads.default['save_metadata_to_images'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
 default_metadata_scheme = get_config_item_or_set_default(
     key='default_metadata_scheme',
-    default_value=MetadataScheme.SIMPLE.value,
+    default_value=ads.default['metadata_scheme'],
     validator=lambda x: x in [y[1] for y in modules.flags.metadata_scheme if y[1] == x],
     expected_type=str
 )
@@ -559,25 +559,25 @@ default_inpaint_mask_sam_model = get_config_item_or_set_default(
 
 default_translation_methods = get_config_item_or_set_default(
     key='default_translation_methods',
-    default_value='Third APIs', #'Big Model',
+    default_value=ads.default['translation_methods'],
     validator=lambda x: x in modules.flags.translation_methods
 )
 
 default_backfill_prompt = get_config_item_or_set_default(
     key='default_backfill_prompt',
-    default_value=False,
+    default_value=ads.default['backfill_prompt'],
     validator=lambda x: isinstance(x, bool)
 )
 
 default_backend = get_config_item_or_set_default(
     key='default_backend',
-    default_value='SDXL',
+    default_value=ads.default['backend'],
     validator=lambda x: x in modules.flags.backend_engines
 )
 
 default_comfyd_active_checkbox = get_config_item_or_set_default(
     key='default_comfyd_active_checkbox',
-    default_value=False,
+    default_value=ads.default['comfyd_active_checkbox'],
     validator=lambda x: isinstance(x, bool)
 )
 

@@ -91,7 +91,6 @@ inpaint_options = [inpaint_option_default, inpaint_option_detail, inpaint_option
 desc_type_photo = 'Photograph'
 desc_type_anime = 'Art/Anime'
 
-translation_timing = ['Translate then generate', 'Modify after translate', 'No translate']
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
 sdxl_aspect_ratios = [
