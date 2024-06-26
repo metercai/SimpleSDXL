@@ -1,0 +1,1258 @@
+{
+    "Note": {
+        "title": "注記"
+    },
+    "PrimitiveNode": {
+        "title": "Primitiveノード",
+        "outputs": {
+            "connect to widget input": "ウィジェット入力に接続"
+        }
+    },
+    "Reroute": {
+        "title": "リルート"
+    },
+    "KSampler": {
+        "title": "Kサンプラー",
+        "inputs": {
+            "model": "モデル",
+            "positive": "正面",
+            "negative": "负面",
+            "latent_image": "Latent"
+        },
+        "widgets": {
+            "seed": "乱数種",
+            "control_after_generate": "生成後の制御",
+                "fixed": "固定",
+                "increment": "増加",
+                "decrement": "減少",
+                "randomize": "ランダム",
+            "steps": "ステップ数",
+            "cfg": "CFG",
+            "sampler_name": "サンプラー名",
+            "scheduler": "スケジューラ",
+            "denoise": "ノイズ除去"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "KSamplerAdvanced": {
+        "title": "Kサンプラー（高さ）",
+        "inputs": {
+            "model": "モデル",
+            "positive": "正面",
+            "negative": "负面",
+            "latent_image": "Latent"
+        },
+        "widgets": {
+            "add_noise": "ノイズ追加",
+            "noise_seed": "乱数種",
+            "control_after_generate": "生成後の制御",
+                "fixed": "固定",
+                "increment": "増加",
+                "decrement": "減少",
+                "randomize": "ランダム",
+            "steps": "ステップ数",
+            "cfg": "CFG",
+            "sampler_name": "サンプラー名",
+            "scheduler": "スケジューラ",
+            "denoise": "ノイズ除去",
+            "start_at_step": "開始ステップ",
+            "end_at_step": "終了ステップ",
+            "return_with_leftover_noise": "残りのノイズを返す"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+
+
+
+    
+    "CheckpointLoaderSimple": {
+        "title": "チェックポイントローダー（簡易）",
+        "widgets": {
+            "ckpt_name": "CKPTモデル名"
+        },
+        "outputs": {
+            "MODEL": "モデル",
+            "CLIP": "CLIP",
+            "VAE": "VAE"
+        }
+    },
+    "VAELoader": {
+        "title": "VAEローダー",
+        "widgets": {
+            "vae_name": "VAE名"
+        },
+        "outputs": {
+            "vae": "VAE"
+        }
+    },
+    "LoraLoader": {
+        "title": "LoRAローダー",
+        "inputs": {
+            "model": "モデル",
+            "clip": "CLIP"
+        },
+        "widgets": {
+            "lora_name": "LoRA名",
+            "strength_model": "モデル強度",
+            "strength_clip": "CLIP強度"
+        },
+        "outputs": {
+            "MODEL": "モデル",
+            "CLIP": "CLIP"
+        }
+    },
+    "ControlNetLoader": {
+        "title": "ControlNetローダー",
+        "widgets": {
+            "control_net_name": "ControlNet名"
+        },
+        "outputs": {
+            "CONTROL_NET": "ControlNet"
+        }
+    },
+    "DiffControlNetLoader": {
+        "title": "DiffControlNetローダー",
+        "inputs": {
+            "MODEL": "モデル"
+        },
+        "widgets": {
+            "control_net_name": "ControlNet名"
+        },
+        "outputs": {
+            "CONTROL_NET": "ControlNet"
+        }
+    },
+    "StyleModelLoader": {
+        "title": "スタイルモデルローダー",
+        "widgets": {
+            "style_model_name": "スタイルモデル名"
+        },
+        "outputs": {
+            "STYLE_MODEL": "スタイルモデル",
+            "style_model": "スタイルモデル"
+        }
+    },
+    "CLIPVisionLoader": {
+        "title": "CLIPビジョンローダー",
+        "widgets": {
+            "clip_name": "CLIP名"
+        },
+        "outputs": {
+            "CLIP_VISION": "CLIPビジョン"
+        }
+    },
+    "unCLIPCheckpointLoader": {
+        "title": "unCLIPチェックポイントローダー",
+        "widgets": {
+            "ckpt_name": "CKPTモデル名"
+        },
+        "outputs": {
+            "MODEL": "モデル",
+            "CLIP": "CLIP",
+            "VAE": "VAE",
+            "CLIP_VISION": "CLIPビジョン"
+        }
+    },
+    "GLIGENLoader": {
+        "title": "GLIGENローダー",
+        "widgets": {
+            "gligen_name": "GLIGEN名"
+        },
+        "outputs": {
+            "GLIGEN": "GLIGENモデル"
+        }
+    },
+    "UpscaleModelLoader": {
+        "title": "アップスケールモデルローダー",
+        "widgets": {
+            "model_name": "アップスケールモデル名"
+        },
+        "outputs": {
+            "UPSCALE_MODEL": "アップスケールモデル"
+        }
+    },
+    "HypernetworkLoader": {
+        "title": "ハイパーネットワークローダー",
+        "inputs": {
+            "model": "モデル"
+        },
+        "widgets": {
+            "hypernetwork_name": "ハイパーネットワーク名",
+            "strength": "強度"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+       
+
+
+
+    "StyleModelApply": {
+        "title": "スタイルモデル適用",
+        "inputs": {
+            "conditioning": "条件",
+            "style_model": "スタイルモデル",
+            "clip_vision_output": "CLIPビジョン出力"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "GLIGENTextBoxApply": {
+        "title": "GLIGENテキストボックス適用",
+        "inputs": {
+            "conditioning_to": "条件",
+            "clip": "CLIP",
+            "gligen_textbox_model": "GLIGENモデル"
+        },
+        "widgets": {
+            "text": "テキスト",
+            "width": "幅",
+            "height": "高さ",
+            "x": "X",
+            "y": "Y"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "CLIPTextEncode": {
+        "title": "CLIPテキストエンコーダー",
+        "inputs": {
+            "clip": "CLIP"
+        },
+        "widgets": {
+            "text": "テキスト"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "CLIPSetLastLayer": {
+        "title": "CLIP最終レイヤー設定",
+        "inputs": {
+            "clip": "CLIP"
+        },
+        "widgets": {
+            "stop_at_clip_layer": "CLIPレイヤーで停止"
+        },
+        "outputs": {
+            "CLIP": "CLIP"
+        }
+    },
+    "Conditioning (Average)": {
+        "title": "条件（平均）",
+        "inputs": {
+            "conditioning_to": "条件先",
+            "conditioning_from": "条件元"
+        },
+        "widgets": {
+            "conditioning_to_strength": "強度"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningAverage": {
+        "title": "条件（平均）",
+        "inputs": {
+            "conditioning_to": "条件先",
+            "conditioning_from": "条件元"
+        },
+        "widgets": {
+            "conditioning_to_strength": "強度"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningCombine": {
+        "title": "条件結合",
+        "inputs": {
+            "conditioning_1": "条件1",
+            "conditioning_2": "条件2"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningConcat": {
+        "title": "条件連結",
+        "widgets": {
+            "conditioning_to": "条件先",
+            "conditioning_from": "条件元"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningSetArea": {
+        "title": "条件エリア設定",
+        "inputs": {
+            "conditioning": "条件"
+        },
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "x": "X",
+            "y": "Y",
+            "strength": "強度"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningSetAreaPercentage": {
+        "title": "係数による条件サンプリング領域の設定",
+        "inputs": {
+            "conditioning": "条件"
+        },
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "x": "X",
+            "y": "Y",
+            "strength": "強度"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningSetMask": {
+        "title": "条件マスク設定",
+        "inputs": {
+            "conditioning": "条件",
+            "mask": "マスク"
+        },
+        "widgets": {
+            "strength": "強度",
+            "set_cond_area": "条件エリア設定",
+                "default": "デフォルト",
+                "mask bounds": "マスク境界"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "CLIPVisionEncode": {
+        "title": "CLIPビジョンエンコード",
+        "inputs": {
+            "clip_vision": "CLIPビジョン",
+            "image": "画像"
+        },
+        "outputs": {
+            "CLIP_VISION_OUTPUT": "CLIPビジョン出力"
+    }
+    },
+    "unCLIPConditioning": {
+        "title": "unCLIP条件",
+        "inputs": {
+            "conditioning": "条件",
+            "clip_vision_output": "CLIPビジョン出力"
+        },
+        "widgets": {
+            "strength": "強度",
+            "noise_augmentation": "ノイズ増強"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ControlNetApply": {
+        "title": "ControlNet適用",
+        "inputs": {
+            "conditioning": "条件",
+            "control_net": "ControlNet",
+            "image": "画像"
+        },
+        "widgets": {
+            "strength": "強度"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ControlNetApplyAdvanced": {
+        "title": "ControlNet適用（高さ）",
+        "inputs": {
+            "positive": "正面",
+            "negative": "负面",
+            "control_net": "ControlNet",
+            "image": "画像"
+        },
+        "widgets": {
+            "strength": "強度",
+            "start_percent": "開始パーセント",
+            "end_percent": "終了パーセント"
+        },
+        "outputs": {
+            "positive": "正面",
+            "negative": "负面"
+        }
+    },
+
+
+
+
+    "VAEEncodeForInpaint": {
+        "title": "VAE内部エンコーダー",
+        "inputs": {
+            "pixels": "ピクセル",
+            "vae": "VAE",
+            "mask": "マスク"
+        },
+        "widgets": {
+            "grow_mask_by": "マスクを拡大"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "SetLatentNoiseMask": {
+        "title": "Latentノイズマスク設定",
+        "inputs": {
+            "samples": "Latent",
+            "mask": "マスク"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    
+    
+    "LatentFromBatch": {
+        "title": "バッチからLatent取得",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "batch_index": "バッチインデックス",
+            "length": "長さ"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "RepeatLatentBatch": {
+        "title": "バッチの繰り返し",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "回数": "回数"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "RebatchLatents": {
+        "title": "Latentの再バッチ処理",
+        "inputs": {
+            "latents": "Latent"
+        },
+        "widgets": {
+            "batch_size": "バッチサイズ"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    
+    
+    "LatentRotate": {
+        "title": "Latent回転",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "rotation": "回転",
+                "none": "なし",
+                "90 degrees": "90度",
+                "180 degrees": "180度",
+                "270 degrees": "270度"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentFlip": {
+        "title": "Latent反転",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "flip_method": "反転方法",
+                "x-axis: vertically": "X軸:垂直",
+                "y-axis: horizontally": "Y軸:横型"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentCrop": {
+        "title": "Latentクロップ",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "x": "X",
+            "y": "Y"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    
+    
+    "VAEDecode": {
+        "title": "VAEデコード",
+        "inputs": {
+            "samples": "Latent",
+            "vae": "VAE"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "VAEEncode": {
+        "title": "VAEエンコード",
+        "inputs": {
+            "pixels": "ピクセル",
+            "vae": "VAE"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "EmptyLatentImage": {
+        "title": "空Latent",
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "batch_size": "バッチサイズ"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentUpscale": {
+        "title": "Latentアップスケール",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "upscale_method": "アップスケール方法",
+                "nearest-exact": "最近傍-正確",
+                "bilinear": "バイリニア補間",
+                "area": "エリア",
+                "bislerp": "バイスフィアリニア",
+                "bicubic": "バイキュービック補間",
+            "width": "幅",
+            "height": "高さ",
+            "crop": "クロップ",
+                "enabled": "有効",
+                "disabled": "無効"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentUpscaleBy": {
+        "title": "Latent比率アップスケール",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "upscale_method": "アップスケール方法",
+                "nearest-exact": "最近傍-正確",
+                "bilinear": "バイリニア補間",
+                "area": "エリア",
+                "bislerp": "バイスフィアリニア",
+                "bicubic": "バイキュービック補間",
+            "scale_by": "比率"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentComposite": {
+        "title": "Latentコンポジット",
+        "inputs": {
+            "samples_to": "目標Latent",
+            "samples_from": "ソースLatent"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "feather": "フェザー"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentCompositeMasked": {
+        "title": "マスク付きLatentコンポジット",
+        "inputs": {
+            "destination": "目標Latent",
+            "source": "ソースLatent",
+            "mask": "マスク"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "resize_source": "ソースLatentをリサイズ"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    
+
+
+
+    "ImageScale": {
+        "title": "画像のスケーリング",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "upscale_method": "スケーリング方法",
+                "nearest-exact": "最近傍-正確",
+                "bilinear": "バイリニア補間",
+                "area": "領域",
+                "bicubic": "バイキュービック補間",
+            "width": "幅",
+            "height": "高さ",
+            "crop": "クロップ",
+                "enabled": "有効",
+                "disabled": "無効"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageScaleBy": {
+        "title": "係数で画像をスケーリング",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "upscale_method": "スケーリング方法",
+                "nearest-exact": "最近傍-正確",
+                "bilinear": "バイリニア補間",
+                "area": "領域",
+                "bicubic": "バイキュービック補間",
+            "scale_by": "係数"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageUpscaleWithModel": {
+        "title": "モデルを使用して画像をアップスケール",
+        "inputs": {
+            "upscale_model": "アップスケールモデル",
+            "image": "画像"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageScaleToTotalPixels": {
+        "title": "ピクセル数に合わせて画像をスケーリング",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "upscale_method": "スケーリング方法",
+                "nearest-exact": "最近傍-正確",
+                "bilinear": "バイリニア補間",
+                "area": "領域",
+                "bicubic": "バイキュービック補間",
+            "megapixels": "メガピクセル数"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    
+
+    "ImageBlend": {
+        "title": "画像混合",
+        "inputs": {
+            "image1": "画像1",
+            "image2": "画像2"
+        },
+        "widgets": {
+            "blend_factor": "混合係数",
+            "blend_mode": "混合モード",
+                "normal": "通常",
+                "multiply": "乗算",
+                "screen": "スクリーン",
+                "overlay": "オーバーレイ",
+                "soft_light": "ソフトライト"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageBlur": {
+        "title": "画像ぼかし",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "blur_radius": "ぼかし半径",
+            "sigma": "シグマ"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageQuantize": {
+        "title": "画像量化",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "colors": "色数",
+            "dither": "ディザ",
+                "none": "なし",
+                "floyd-steinberg": "フロイド・スタインバーグ"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageSharpen": {
+        "title": "画像シャープ化",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "sharpen_radius": "シャープ化半径",
+            "sigma": "シグマ",
+            "alpha": "アルファ"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+
+
+    "Canny": {
+        "title": "Canny",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "low_threshold": "低い閾値",
+            "high_threshold": "高い閾値"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+
+
+    "SaveImage": {
+        "title": "画像保存",
+        "inputs": {
+            "images": "画像"
+        },
+        "widgets": {
+            "filename_prefix": "ファイル名のプレフィックス"
+        }
+    },
+    "PreviewImage": {
+        "title": "画像プレビュー",
+        "inputs": {
+            "images": "画像"
+        }
+    },
+    "LoadImage": {
+        "title": "画像読み込み",
+        "widgets": {
+            "image": "画像",
+            "choose file to upload": "ファイルを選択してアップロード"
+        },
+        "outputs": {
+            "IMAGE": "画像",
+            "MASK": "マスク"
+        }
+    },
+    "ImageInvert": {
+        "title": "画像反転",
+        "inputs": {
+            "image": "画像"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageBatch": {
+        "title": "画像バッチ結合",
+        "inputs": {
+            "image1": "画像1",
+            "image2": "画像2"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImagePadForOutpaint": {
+        "title": "外部用画像パッド",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "left": "左",
+            "top": "上",
+            "right": "右",
+            "bottom": "下",
+            "feathering": "フェザリング"
+        },
+        "outputs": {
+            "IMAGE": "画像",
+            "MASK": "マスク"
+        }
+    },
+    "EmptyImage": {
+        "title": "空の画像",
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "batch_size": "バッチサイズ",
+            "color": "色"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageCompositeMasked": {
+        "title": "マスク合成画像",
+        "inputs": {
+            "destination": "目標画像",
+            "source": "ソース画像",
+            "mask": "マスク"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "resize_source": "ソース画像のリサイズ"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+
+
+
+
+    "LoadImageMask": {
+        "title": "マスク画像読み込み",
+        "widgets": {
+            "image": "画像",
+            "channel": "チャンネル",
+            "choose file to upload": "ファイルを選択してアップロード"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "MaskToImage": {
+        "title": "マスクから画像",
+        "inputs": {
+            "mask": "マスク"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "ImageToMask": {
+        "title": "画像からマスク",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "channel": "チャンネル"
+        },
+        "outputs": {
+            "MASK": "マスク",
+                "red": "赤",
+                "green": "緑",
+                "blue": "青"
+        }
+    },
+    "ImageColorToMask": {
+        "title": "画像色からマスク",
+        "inputs": {
+            "image": "画像"
+        },
+        "widgets": {
+            "color": "色"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "SolidMask": {
+        "title": "塗りつぶしマスク",
+        "widgets": {
+            "value": "明度",
+            "width": "幅",
+            "height": "高さ"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "InvertMask": {
+        "title": "マスク反転",
+        "inputs": {
+            "mask": "マスク"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "CropMask": {
+        "title": "マスク切り取り",
+        "inputs": {
+            "mask": "マスク"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "width": "幅",
+            "height": "高さ"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "MaskComposite": {
+        "title": "マスク合成",
+        "inputs": {
+            "destination": "対象マスク",
+            "source": "ソースマスク"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "operation": "操作",
+                "multiply": "乗算",
+                "add": "加算",
+                "subtract": "減算",
+                "and": "AND",
+                "or": "OR",
+                "xor": "XOR"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "FeatherMask": {
+        "title": "マスクフェザリング",
+        "inputs": {
+            "mask": "マスク"
+        },
+        "widgets": {
+            "left": "左",
+            "top": "上",
+            "right": "右",
+            "bottom": "下"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    "GrowMask": {
+        "title": "マスク拡大",
+        "inputs": {
+            "mask": "マスク"
+        },
+        "widgets": {
+            "expand": "拡大",
+            "tapered_corners": "テーパードコーナー"
+        },
+        "outputs": {
+            "MASK": "マスク"
+        }
+    },
+    
+
+
+
+    "VAEDecodeTiled": {
+        "title": "VAE分割デコード",
+        "inputs": {
+            "samples": "Latent",
+            "vae": "VAE"
+        },
+        "outputs": {
+            "IMAGE": "画像"
+        }
+    },
+    "VAEEncodeTiled": {
+        "title": "VAE分割エンコード",
+        "inputs": {
+            "pixels": "画像",
+            "vae": "VAE"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "TomePatchModel": {
+        "title": "Tomeパッチモデル",
+        "inputs": {
+            "model": "モデル"
+        },
+        "widgets": {
+            "ratio": "比率"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "SaveLatent": {
+        "title": "Latentを保存",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "widgets": {
+            "samples": "Latent"
+        }
+    },
+    "LoadLatent": {
+        "title": "Latentを読み込み",
+        "widgets": {
+            "filename_prefix": "ファイル名のプレフィックス"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "LatentBlend": {
+        "title": "Latent混合",
+        "inputs": {
+            "samples1": "Latent1",
+            "samples2": "Latent2"
+        },
+        "widgets": {
+            "blend_factor": "係数"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+
+
+
+
+    "DiffusersLoader": {
+        "title": "拡散器ローダー",
+        "widgets": {
+            "model_path": "モデルのパス"
+        },
+        "outputs": {
+            "MODEL": "モデル",
+            "CLIP": "CLIP",
+            "VAE": "VAE"
+        }
+    },
+    "CLIPLoader": {
+        "title": "CLIPローダー",
+        "widgets": {
+            "clip_name": "CLIPの名"
+        },
+        "outputs": {
+            "CLIP": "CLIP"
+        }
+    },
+    "CheckpointLoader": {
+        "title": "Checkpointローダー",
+        "widgets": {
+            "config_name": "設定名",
+            "ckpt_name": "Checkpointの名"
+        },
+        "outputs": {
+            "MODEL": "モデル",
+            "CLIP": "CLIP",
+            "VAE": "VAE"
+        }
+    },
+    "UNETLoader": {
+        "title": "UNETローダー",
+        "widgets": {
+            "unet_name": "UNETの名"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "DualCLIPLoader": {
+        "title": "デュアルCLIPローダー",
+        "widgets": {
+            "clip_name1": "CLIP1",
+            "clip_name2": "CLIP2"
+        },
+        "outputs": {
+            "CLIP": "CLIP"
+        }
+    },
+
+
+    "ConditioningZeroOut": {
+        "title": "条件をゼロ化",
+        "inputs": {
+            "conditioning": "条件"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "ConditioningSetTimestepRange": {
+        "title": "条件のタイムステップ範囲を設定",
+        "inputs": {
+            "conditioning": "条件"
+        },
+        "widgets": {
+            "start": "開始",
+            "end": "終了"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "CLIPTextEncodeSDXL": {
+        "title": "CLIPテキストエンコードSDXL",
+        "inputs": {
+            "clip": "CLIP"
+        },
+        "widgets": {
+            "width": "幅",
+            "height": "高さ",
+            "crop_w": "クロップ幅",
+            "crop_h": "クロップ高さ",
+            "target_width": "ターゲット幅",
+            "target_height": "ターゲット高さ",
+            "text_g": "Gテキスト",
+            "text_l": "Lテキスト"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+    "CLIPTextEncodeSDXLRefiner": {
+        "title": "CLIPテキストエンコードSDXLリファイナー",
+        "inputs": {
+            "clip": "CLIP"
+        },
+        "widgets": {
+            "ascore": "美学スコア",
+            "width": "幅",
+            "height": "高さ",
+            "text": "テキスト"
+        },
+        "outputs": {
+            "CONDITIONING": "条件"
+        }
+    },
+
+
+    "ModelMergeSimple": {
+        "title": "モデルのマージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "widgets": {
+            "ratio": "比率"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "ModelMergeBlocks": {
+        "title": "モデルのブロックマージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "CheckpointSave": {
+        "title": "モデルの保存",
+        "inputs": {
+            "model": "モデル",
+            "clip": "CLIP",
+            "vae": "VAE"
+        },
+        "widgets": {
+            "filename_prefix": "ファイル名のプレフィックス"
+        }
+    },
+    "CLIPMergeSimple": {
+        "title": "CLIPのマージ",
+        "inputs": {
+            "clip1": "CLIP1",
+            "clip2": "CLIP2"
+        },
+        "widgets": {
+            "ratio": "比率"
+        },
+        "outputs": {
+        }
+    },
+    "ModelMergeBlockNumber": {
+        "title": "ブロック番号モデルのマージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "ModelMergeSDXL": {
+        "title": "SDXLモデルのマージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "ModelMergeSDXLTransformers": {
+        "title": "SDXLモデルTransformersのマージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    },
+    "ModelMergeSDXLDetailedTransformers": {
+        "title": "SDXLモデルTransformersの詳細マージ",
+        "inputs": {
+            "model1": "モデル1",
+            "model2": "モデル2"
+        },
+        "outputs": {
+            "MODEL": "モデル"
+        }
+    }
+}

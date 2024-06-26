@@ -209,6 +209,8 @@ path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
 path_outputs = get_path_output()
 path_models_root = get_dir_or_set_default('path_models_root', '../models/')
+path_unet = get_dir_or_set_default('path_unet', '../models/unet')
+path_rembg = get_dir_or_set_default('path_rembg', '../models/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
 
 
@@ -678,11 +680,13 @@ comfyui:
      embeddings: {embeddings}
      loras: {loras}
      upscale_models: {upscale_models}
+     unet: {unet}
+     rembg: {rembg}
      layer_model: {layer_model}
      '''
 
 paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, layer_model=path_layer_model)
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 
