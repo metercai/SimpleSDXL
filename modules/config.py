@@ -298,7 +298,7 @@ default_loras = get_config_item_or_set_default(
 default_loras = [(y[0], y[1], y[2]) if len(y) == 3 else (True, y[0], y[1]) for y in default_loras]
 default_max_lora_number = get_config_item_or_set_default(
     key='default_max_lora_number',
-    default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else 5,
+    default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else ads.default['max_lora_number'],
     validator=lambda x: isinstance(x, int) and x >= 1
 )
 
@@ -343,13 +343,13 @@ default_refiner_switch = get_config_item_or_set_default(
 )
 default_loras_min_weight = get_config_item_or_set_default(
     key='default_loras_min_weight',
-    default_value=-2,
+    default_value=ads.default['loras_min_weight'],
     validator=lambda x: isinstance(x, numbers.Number) and -10 <= x <= 10,
     expected_type=numbers.Number
 )
 default_loras_max_weight = get_config_item_or_set_default(
     key='default_loras_max_weight',
-    default_value=2,
+    default_value=ads.default['loras_max_weight'],
     validator=lambda x: isinstance(x, numbers.Number) and -10 <= x <= 10,
     expected_type=numbers.Number
 )
@@ -415,25 +415,25 @@ default_performance = get_config_item_or_set_default(
 )
 default_advanced_checkbox = get_config_item_or_set_default(
     key='default_advanced_checkbox',
-    default_value=True,
+    default_value=ads.default['advanced_checkbox'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
 default_max_image_number = get_config_item_or_set_default(
     key='default_max_image_number',
-    default_value=32,
+    default_value=ads.default['max_image_number'],
     validator=lambda x: isinstance(x, int) and x >= 1,
     expected_type=int
 )
 default_output_format = get_config_item_or_set_default(
     key='default_output_format',
-    default_value='png',
+    default_value=ads.default['output_format'],
     validator=lambda x: x in OutputFormat.list(),
     expected_type=str
 )
 default_image_number = get_config_item_or_set_default(
     key='default_image_number',
-    default_value=2,
+    default_value=ads.default['image_number'],
     validator=lambda x: isinstance(x, int) and 1 <= x <= default_max_image_number,
     expected_type=int
 )
