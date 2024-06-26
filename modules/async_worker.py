@@ -999,7 +999,7 @@ def worker():
                     except ValueError as e:
                         print(f"comfy_task: input_image is None: {e}")
                         empty_path = [np.zeros((width, height), dtype=np.uint8)]
-                        yield_result(async_task, empty_path, do_not_show_finished_images=True)
+                        yield_result(async_task, empty_path, black_out_nsfw, do_not_show_finished_images=True)
                         imgs = empty_path
 
                 elif is_hydit_task:

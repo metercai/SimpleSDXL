@@ -45,11 +45,11 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.12"
-    REINSTALL_BASE = True
+    ver_required = "0.3.13"
+    REINSTALL_BASE = False
     base_file = {
-        "Windows": "enhanced/libs/simpleai_base-0.3.12-cp310-none-win_amd64.whl",
-        "Linux": "enhanced/libs/simpleai_base-0.3.12-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
+        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
         }
     #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
@@ -60,11 +60,11 @@ def check_base_environment():
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
-    if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib"):
-            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
-            print(f'受Windows限制，SimpleSDXL新版本需要下载新安装包，更新系统环境后再运行。下载地址：https://huggingface.co/metercai/simpleai/resolve/main/SimpleSDXL_install.exe')
+    if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
+            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
+            print(f'受组件安装限制，SimpleSDXL2新版本需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址：https://hf-mirror.com/metercai/SimpleSDXL2/')
             print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
-            print(f'如果不更新，可点击：run_SimpleSDXL_commit.bat 将运行旧的某个指定版本。')
+            print(f'如果不升级，可点击：run_SimpleSDXL_commit.bat 继续运行旧版本。')
             sys.exit(0)
 
     from simpleai_base import simpleai_base
