@@ -931,9 +931,9 @@
         1152,
         896,
         "nearest",
-        false,
+        true,
         "always",
-        0
+        8
       ]
     },
     {

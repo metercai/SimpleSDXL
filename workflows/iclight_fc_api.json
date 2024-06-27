@@ -136,9 +136,9 @@
       "width": 1152,
       "height": 896,
       "interpolation": "nearest",
-      "keep_proportion": false,
+      "keep_proportion": true,
       "condition": "always",
-      "multiple_of": 0,
+      "multiple_of": 8,
       "image": [
         "9",
         0
