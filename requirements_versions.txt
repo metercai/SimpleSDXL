@@ -35,13 +35,14 @@ pyyaml==6.0
 sacremoses==0.1.1
 safetensors==0.4.3
 scipy==1.13.1
+segment_anything==1.0
 sentencepiece==0.1.99
 spandrel
 tqdm==4.65.0
 timm==0.9.5
 translators==5.8.9
 websocket-client
-./enhanced/libs/rembg-2.0.54-py3-none-any.whl
+./enhanced/libs/rembg-2.0.57-py3-none-any.whl
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
 
  

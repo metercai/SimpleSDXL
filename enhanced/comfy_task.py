@@ -100,6 +100,7 @@ def get_comfy_task(method, default_params, input_images, options={}):
                 "width": width,
                 "height": height,
                 })
+            comfy_params.delete_params(['denoise'])
             return ComfyTask('layerdiffuse_cond', comfy_params, images)
 
 def fixed_width_height(width, height, factor): 
