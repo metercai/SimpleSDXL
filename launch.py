@@ -1,6 +1,7 @@
 import os
 import ssl
 import sys
+import json
 import importlib
 import packaging.version
 from pathlib import Path
@@ -21,64 +22,103 @@ if "GRADIO_SERVER_PORT" not in os.environ:
 ssl._create_default_https_context = ssl._create_unverified_context
 
 import platform
-import fooocus_version
-import enhanced.version as version
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, repo_dir
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
 
 REINSTALL_ALL = False
-TRY_INSTALL_XFORMERS = False
+TRY_INSTALL_XFORMERS = True
 
+target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-def prepare_environment():
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
-    torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
-    torch_command += ' -i https://pypi.tuna.tsinghua.edu.cn/simple '
-    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
-    if is_win32_standalone_build:
-        torch_command += f' -t {target_path_win}'
+def check_base_environment():
+#    sys.path.append(os.path.join(root, "comfy"))
+    sys.path.append(os.path.join(root, "hydit"))
 
-    comfy_repo = os.environ.get(
-        "COMFY_REPO", "https://gitee.com/metercai/ComfyUI.git"
-    )
-    comfy_commit_hash = os.environ.get(
-        "COMFY_COMMIT_HASH", "30abc324c2f73e6b648093ccd4741dece20be1e5"
-    )
+    import fooocus_version
+    import comfy.comfy_version as comfy_version
+    import enhanced.version as version
 
     print(f"Python {sys.version}")
     print(f"Fooocus version: {fooocus_version.version}")
+    print(f"Comfy version: {comfy_version.version}")
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
-    comfyui_name = "ComfyUI-SAI"
-    git_clone(comfy_repo, repo_dir(comfyui_name), "Comfy Backend", comfy_commit_hash)
-    sys.path.append(str(repo_dir(comfyui_name)))
-
     base_pkg = "simpleai_base"
-    ver_required = "0.3.9"
+    ver_required = "0.3.15"
+    REINSTALL_BASE = False
+    base_file = {
+        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
+        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
+        }
+    #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+        run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
-        if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+        if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+            run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
+
+    if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
+            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
+            print(f'受组件安装限制，SimpleSDXL2新版本需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址：https://hf-mirror.com/metercai/SimpleSDXL2/')
+            print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
+            print(f'如果不升级，可点击：run_SimpleSDXL_commit.bat 继续运行旧版本。')
+            sys.exit(0)
 
     from simpleai_base import simpleai_base
     print("Checking ...")
     token = simpleai_base.init_local(f'SimpleSDXL_User')
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    sysinfo.update(dict(did=token.get_did()))
+    return token, sysinfo
+
+#Intel Arc
+#conda install pkg-config libuv
+#python -m pip install torch==2.1.0.post2 torchvision==0.16.0.post2 torchaudio==2.1.0.post2 intel-extension-for-pytorch==2.1.30 --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/
+
+def prepare_environment():
+    global sysinfo
+
+    torch_ver = '2.2.2'
+    torchvisio_ver = '0.17.2'
+    if sysinfo['gpu_brand'] == 'NVIDIA':
+        torch_index_url = "https://download.pytorch.org/whl/cu121"
+    elif sysinfo['gpu_brand'] == 'AMD':
+        if platform.system() == "Windows":
+            #pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
+            #pip install torch-directml
+            torch_index_url = "https://download.pytorch.org/whl/"
+        else:
+            torch_index_url = "https://download.pytorch.org/whl/rocm6.0"
+            torch_ver = '2.3.1'
+            torchvisio_ver = '0.18.1'
+    elif sysinfo['gpu_brand'] == 'INTEL':
+            torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
+    else:
+        torch_index_url = "https://download.pytorch.org/whl/"
+    torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
+    torch_command = os.environ.get('TORCH_COMMAND',
+                                   f"pip install torch=={torch_ver} torchvision=={torchvisio_ver} --extra-index-url {torch_index_url}")
+    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    torch_command += target_path_install
+    torch_command += f' -i {index_url} '
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
+    if sysinfo['gpu_brand'] == 'AMD' and platform.system() == "Windows" and not is_installed("torch-directml"):
+        run_pip(f"install -U -I --no-deps torch-directml", "torch-directml")
+
     if TRY_INSTALL_XFORMERS:
-        if REINSTALL_ALL or not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.23')
+        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
+        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-manylinux2014_x86_64.whl'
+        if not is_installed("xformers"):
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.26')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26", live=True)
                 else:
                     print("Installation of xformers is not supported in this version of Python.")
                     print(
@@ -86,19 +126,32 @@ def prepare_environment():
                     if not is_installed("xformers"):
                         exit(0)
             elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
+                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
+        else:
+            version_installed = importlib.metadata.version('xformers')
+            if not version_installed.startswith('0.0.26'):
+                print(f'Upgrade xformers from {version_installed} to 0.0.26')
+                run(f'"{python}" -m pip uninstall -y xformers')
+                if platform.system() == "Windows":
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26")
+                elif platform.system() == "Linux":
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
+                else:
+                    run_pip(f"install -U -I --no-deps xformers==0.0.26", "xformers 0.0.26")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
-       
+        if len(met_diff.keys())>0:
+            for p in met_diff.keys():
+                print(f'Uninstall {p}.{met_diff[p]} ...')
+                run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
         if is_win32_standalone_build:
-            import modules.launch_util as launch_util
-            if len(launch_util.met_diff.keys())>0:
-                for p in launch_util.met_diff.keys():
-                    print(f'Uninstall {p}.{launch_util.met_diff[p]} ...')
-                    run(f'"{python}" -m pip uninstall -y {p}=={launch_util.met_diff[p]}')
             run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
+
+    patch_requirements = "requirements_patch.txt"
+    if (REINSTALL_ALL or not requirements_met(patch_requirements)) and not is_win32_standalone_build:
+        run_pip(f"install -r \"{patch_requirements}\"", "requirements patching")
 
     return
 
@@ -119,6 +172,9 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+token, sysinfo = check_base_environment()
+print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
+
 prepare_environment()
 build_launcher()
 args = ini_args()
@@ -127,27 +183,21 @@ if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-#import enhanced.token_did as token_did
-#token_did.init_local_did(f'SimpleSDXL_User')
-
-import enhanced.location as location 
-location.init_location()
-
-if '--location' in sys.argv:
-        location.location = args.location
-
-if location.location !='CN':
-    if '--language' not in sys.argv:
-        args.language='default'
-
-import socket
-if '--listen' not in sys.argv:
-    if is_ipynb():
-        args.listen = '127.0.0.1'
+if args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192:
+    env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
+    if env_var is None:
+        env_var = "backend:cudaMallocAsync"
     else:
-        args.listen = socket.gethostbyname(socket.gethostname())
-if '--port' not in sys.argv:
-    args.port = 8186
+        env_var += ",backend:cudaMallocAsync"
+
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
+
+
+import warnings
+import logging
+logging.basicConfig(level=logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
+
 if args.hf_mirror is not None : 
     os.environ['HF_MIRROR'] = str(args.hf_mirror)
     print("Set hf_mirror to:", args.hf_mirror)
@@ -211,4 +261,33 @@ config.default_base_model_name, config.checkpoint_downloads = download_models(
     config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
     config.embeddings_downloads, config.lora_downloads)
 
+
+def reset_env_args():
+    global token, sysinfo
+
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    sysinfo.update(dict(did=token.get_did()))
+    #print(f'sysinfo/基础环境信息:{sysinfo}')
+
+    if '--location' in sys.argv:
+        sysinfo["location"] = args.location
+
+    if sysinfo["location"] !='CN':
+        if '--language' not in sys.argv:
+            args.language='default'
+
+    if '--listen' not in sys.argv:
+        if is_ipynb():
+            args.listen = '127.0.0.1'
+        else:
+            args.listen = sysinfo["local_ip"]
+    if '--port' not in sys.argv:
+        args.port = sysinfo["local_port"]
+
+    from enhanced.simpleai import reset_simpleai_args
+    reset_simpleai_args(token, sysinfo)
+
+reset_env_args()
+
 from webui import *
+

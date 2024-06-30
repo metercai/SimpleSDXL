@@ -1,0 +1,376 @@
+{
+  "2": {
+    "inputs": {
+      "ckpt_name": "realisticVisionV60B1_v51VAE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "soft light, cinematic, masterpiece, best quality, photograph",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "bad quality, bad picture",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "samples": [
+        "19",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "9": {
+    "inputs": {
+      "image": "2024-05-13_00-42-31_2592 (4).png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "input_image"
+    }
+  },
+  "19": {
+    "inputs": {
+      "seed": 100361857014338,
+      "steps": 25,
+      "cfg": 2.05,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.9,
+      "model": [
+        "37",
+        0
+      ],
+      "positive": [
+        "44",
+        0
+      ],
+      "negative": [
+        "44",
+        1
+      ],
+      "latent_image": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "20": {
+    "inputs": {
+      "pixels": [
+        "51",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "36": {
+    "inputs": {
+      "images": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "37": {
+    "inputs": {
+      "model_path": "iclight_sd15_fc_unet_ldm.safetensors",
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "LoadAndApplyICLightUnet",
+    "_meta": {
+      "title": "ic_light_apply"
+    }
+  },
+  "39": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "interpolation": "nearest",
+      "keep_proportion": true,
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "resize_input_image"
+    }
+  },
+  "44": {
+    "inputs": {
+      "multiplier": 0.18215,
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ],
+      "foreground": [
+        "45",
+        0
+      ],
+      "opt_background": [
+        "58",
+        0
+      ]
+    },
+    "class_type": "ICLightConditioning",
+    "_meta": {
+      "title": "IC-Light Conditioning"
+    }
+  },
+  "45": {
+    "inputs": {
+      "pixels": [
+        "39",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "46": {
+    "inputs": {
+      "points_store": "[{\"x\":503.60461174579814,\"y\":498.20884804852176},{\"x\":381.3006346075329,\"y\":129.49832873463382},{\"x\":5.395763697276409,\"y\":14.38870319273709}]",
+      "coordinates": "[{\"x\":503.6046142578125,\"y\":498.2088623046875},{\"x\":5.395763874053955,\"y\":14.388703346252441}]",
+      "mask_width": [
+        "57",
+        1
+      ],
+      "mask_height": [
+        "57",
+        2
+      ],
+      "points_to_sample": 2,
+      "sampling_method": "path",
+      "interpolation": "cardinal",
+      "tension": 0.5,
+      "repeat_output": 1,
+      "float_output_type": "list",
+      "min_value": 0,
+      "max_value": 1,
+      "New spline": null
+    },
+    "class_type": "SplineEditor",
+    "_meta": {
+      "title": "light_editor"
+    }
+  },
+  "47": {
+    "inputs": {
+      "coordinates": [
+        "46",
+        1
+      ],
+      "frame_width": [
+        "57",
+        1
+      ],
+      "frame_height": [
+        "57",
+        2
+      ],
+      "start_color": "orange",
+      "end_color": "black",
+      "multiplier": 1
+    },
+    "class_type": "CreateGradientFromCoords",
+    "_meta": {
+      "title": "light_source_color"
+    }
+  },
+  "48": {
+    "inputs": {
+      "images": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "50": {
+    "inputs": {
+      "light_position": "Top Light",
+      "multiplier": 1,
+      "start_color": "#FFFFFF",
+      "end_color": "#000000",
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "LightSource",
+    "_meta": {
+      "title": "light_source_definition"
+    }
+  },
+  "51": {
+    "inputs": {
+      "boolean": true,
+      "image_a": [
+        "47",
+        0
+      ],
+      "image_b": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "easy imageSwitch",
+    "_meta": {
+      "title": "light_source_text_or"
+    }
+  },
+  "53": {
+    "inputs": {
+      "images": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "54": {
+    "inputs": {
+      "rem_mode": "RMBG-1.4",
+      "image_output": "Preview",
+      "save_prefix": "ComfyUI",
+      "images": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "easy imageRemBg",
+    "_meta": {
+      "title": "Image Remove Bg"
+    }
+  },
+  "55": {
+    "inputs": {
+      "images": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "56": {
+    "inputs": {
+      "image": "00007-447766443-0.5.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "input_image2"
+    }
+  },
+  "57": {
+    "inputs": {
+      "width": [
+        "39",
+        1
+      ],
+      "height": [
+        "39",
+        2
+      ],
+      "interpolation": "nearest",
+      "keep_proportion": false,
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "resize_input_image2"
+    }
+  },
+  "58": {
+    "inputs": {
+      "pixels": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  }
+}

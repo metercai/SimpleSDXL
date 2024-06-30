@@ -23,9 +23,9 @@ def load_file_from_muid(
     cached_file = os.path.abspath(os.path.join(model_dir, filename))
     if not os.path.exists(cached_file):
         import requests
-        import enhanced.models_hub_host as hub
-        import enhanced.token_did as token_did
-        from enhanced.location import location
+        from enhanced.simpleai import models_hub_host as hub, token as token_did, sysinfo
+        location = sysinfo["location"]
+
         try:
             if muid in accelerate_muid:
                 print(f'Get info from {hub.models_hub_host_2} and downloading: "{filename}" at location: {location}.')
@@ -66,7 +66,9 @@ def load_file_from_url(
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
-        from enhanced.location import location
+        from enhanced.simpleai import sysinfo
+        location = sysinfo["location"]
+
         if location=='CN':
             if url in urlmapping.keys():
                 return load_file_from_muid(file_name, urlmapping[url], model_dir, progress)

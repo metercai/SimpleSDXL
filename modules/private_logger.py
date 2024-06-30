@@ -35,7 +35,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
 
     image = Image.fromarray(img)
 
-    if output_format == OutputFormat.PNG.value:
+    if output_format == OutputFormat.PNG.value or (image.mode == 'RGBA' and output_format == OutputFormat.JPEG.value):
         if metadata_scheme == 'simple':
             pnginfo = PngInfo()
             pnginfo.add_text("Comment", parsed_parameters)
@@ -45,8 +45,10 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
             pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
         else:
             pnginfo = None
+        if output_format == OutputFormat.JPEG.value:
+            local_temp_filename = local_temp_filename[:-4] + "png"
         image.save(local_temp_filename, pnginfo=pnginfo)
-    elif output_format == OutputFormat.JPEG.value:
+    elif output_format == OutputFormat.JPEG.value and image.mode != 'RGBA':
         image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
     elif output_format == OutputFormat.WEBP.value:
         image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())

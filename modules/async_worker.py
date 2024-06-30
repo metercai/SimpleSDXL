@@ -57,6 +57,8 @@ def worker():
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
+    import enhanced.hydit_task as hydit_task
+    from enhanced.simpleai import comfyd, args_comfyd
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -168,6 +170,10 @@ def worker():
         inpaint_input_image = args.pop()
         inpaint_additional_prompt = args.pop()
         inpaint_mask_image_upload = args.pop()
+        layer_method = args.pop()
+        layer_input_image = args.pop()
+        iclight_enable = args.pop()
+        iclight_source_radio = args.pop()
         disable_preview = args.pop()
         disable_intermediate_results = args.pop()
         disable_seed_increment = args.pop()
@@ -212,13 +218,23 @@ def worker():
         metadata_scheme = MetadataScheme(
             args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
 
-        if ehps.translation_timing != 'No translate':
+        is_SD3_task = False #ehps.backend_selection == flags.backend_engines[2]
+        is_SD3T_task = False #ehps.backend_selection == flags.backend_engines[2]
+        is_hydit_task =  ehps.backend_selection == flags.backend_engines[1]
+        is_comfy_task = 'layer' in current_tab and input_image_checkbox
+        is_SD3m_task = ehps.backend_selection == flags.backend_engines[2]
+
+        if is_hydit_task:
+            aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
+        if is_SD3m_task:
+            aspect_ratios_selection = ehps.sd3_aspect_ratios_selection
+        if not is_hydit_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
             negative_prompt = translator.convert(negative_prompt, ehps.translation_methods)
-        
+
         import enhanced.sd3_handle as sd3_handle
-        if ehps.backend_selection == 'SD3 Api' or ehps.backend_selection == 'SD3Turbo Api':
-            if ehps.backend_selection == 'SD3 Api':
+        if is_SD3_task or is_SD3T_task:
+            if is_SD3_task:
                 model = 'sd3'
             else:
                 model = 'sd3-turbo'
@@ -232,11 +248,13 @@ def worker():
                  ('Negative Prompt', 'negative_prompt', negative_prompt),
                  ('Base Model', 'base_model', model),
                  ('Resolution', 'resolution', str((width, height))),
-                 ('Seed', 'seed', image_seed)]
+                 ('Seed', 'seed', image_seed),
+                 ('Generate Engine', 'generate_engine', 'StableDiffusion3')]
             sd3_image_path = log(img, d, output_format=output_format)
             yield_result(async_task, sd3_image_path, do_not_show_finished_images=True)    
             async_task.processing = False
             return
+
 
         cn_tasks = {x: [] for x in flags.ip_list}
         for _ in range(flags.controlnet_image_count):
@@ -488,17 +506,18 @@ def worker():
             extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
             extra_negative_prompts = negative_prompts[1:] if len(negative_prompts) > 1 else []
 
-            progressbar(async_task, 2, 'Loading models ...')
+            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+                progressbar(async_task, 2, 'Loading models ...')
 
-            lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames, performance_selection)
-            loras, prompt = parse_lora_references_from_prompt(prompt, loras, modules.config.default_max_lora_number, lora_filenames=lora_filenames)
-            loras += performance_loras
-
-            pipeline.refresh_everything(refiner_model_name=refiner_model_name, base_model_name=base_model_name,
+                lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames, performance_selection)
+                loras, prompt = parse_lora_references_from_prompt(prompt, loras, modules.config.default_max_lora_number, lora_filenames=lora_filenames)
+                loras += performance_loras
+                print(f'refiner_model_name:{refiner_model_name}, base_model_name={base_model_name},  base_model_additional_loras:{ base_model_additional_loras}, use_synthetic_refiner:{use_synthetic_refiner}, vae_name:{vae_name}')
+                pipeline.refresh_everything(refiner_model_name=refiner_model_name, base_model_name=base_model_name,
                                         loras=loras, base_model_additional_loras=base_model_additional_loras,
                                         use_synthetic_refiner=use_synthetic_refiner, vae_name=vae_name)
 
-            pipeline.set_clip_skip(clip_skip)
+                pipeline.set_clip_skip(clip_skip)
 
             progressbar(async_task, 3, 'Processing prompts ...')
             tasks = []
@@ -540,6 +559,7 @@ def worker():
                 positive_basic_workloads = remove_empty_str(positive_basic_workloads, default=task_prompt)
                 negative_basic_workloads = remove_empty_str(negative_basic_workloads, default=task_negative_prompt)
 
+                #print(f'task_prompt:{task_prompt},\npositive:{positive_basic_workloads}')
                 tasks.append(dict(
                     task_seed=task_seed,
                     task_prompt=task_prompt,
@@ -564,16 +584,17 @@ def worker():
                     t['expansion'] = expansion
                     t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
 
-            for i, t in enumerate(tasks):
-                progressbar(async_task, 5, f'Encoding positive #{i + 1} ...')
-                t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
+            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+                for i, t in enumerate(tasks):
+                    progressbar(async_task, 5, f'Encoding positive #{i + 1} ...')
+                    t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
 
-            for i, t in enumerate(tasks):
-                if abs(float(cfg_scale) - 1.0) < 1e-4:
-                    t['uc'] = pipeline.clone_cond(t['c'])
-                else:
-                    progressbar(async_task, 6, f'Encoding negative #{i + 1} ...')
-                    t['uc'] = pipeline.clip_encode(texts=t['negative'], pool_top_k=t['negative_top_k'])
+                for i, t in enumerate(tasks):
+                    if abs(float(cfg_scale) - 1.0) < 1e-4:
+                        t['uc'] = pipeline.clone_cond(t['c'])
+                    else:
+                        progressbar(async_task, 6, f'Encoding negative #{i + 1} ...')
+                        t['uc'] = pipeline.clip_encode(texts=t['negative'], pool_top_k=t['negative_top_k'])
 
         if len(goals) > 0:
             progressbar(async_task, 7, 'Image processing ...')
@@ -885,57 +906,152 @@ def worker():
 
             print(f'Using {scheduler_name} scheduler.')
 
-        async_task.yields.append(['preview', (flags.preparation_step_count, 'Moving model to GPU ...', None)])
+        if is_comfy_task:
+            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process Comfy Task ...', None)])
+        elif is_hydit_task:
+            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process HyDiT Task ...', None)])
+        elif is_SD3m_task:
+            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process SD3m Task ...', None)])
+        else:
+            async_task.yields.append(['preview', (flags.preparation_step_count, 'Moving model to GPU ...', None)])
 
         def callback(step, x0, x, total_steps, y):
             done_steps = current_task_id * steps + step
             async_task.yields.append(['preview', (
                 int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
                 f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{image_number} ...', y)])
+        
+        def callback_comfytask(step, total_steps, y):
+            done_steps = current_task_id * steps + step
+            async_task.yields.append(['preview', (
+                int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
+                f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{image_number} ...', y)])
+        
+        def callback_hydittask(pipe, step, time_steps, callback_kwargs):
+            from enhanced.latent_preview import get_previewer
+            from ldm_patched.modules.latent_formats import SDXL as SDXL_format
+
+            latents = callback_kwargs["latents"]
+            preview_format = "JPEG"
+            latent_format = SDXL_format()
+            previewer = get_previewer(latent_format)
+            y=previewer.decode_latent_to_preview_image(preview_format, latents)
+            done_steps = current_task_id * steps + step
+            async_task.yields.append(['preview', (
+                int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(done_steps) / float(all_steps)),
+                f'Sampling step {step + 1}/{steps}, image {current_task_id + 1}/{image_number} ...', y)])
+            return callback_kwargs
+
+        task_type = ''
+        if is_hydit_task or is_comfy_task or is_SD3m_task:
+            ldm_patched.modules.model_management.unload_all_models()
+            ldm_patched.modules.model_management.soft_empty_cache(True)
+            if is_comfy_task:
+                task_type = 'Comfy'
+            if is_hydit_task:
+                hydit_task.init_load_model()
+                task_type = 'HyDiT'
+            if is_SD3m_task:
+                task_type = 'SD3m'
 
         for current_task_id, task in enumerate(tasks):
             current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(current_task_id * steps) / float(all_steps))
-            progressbar(async_task, current_progress, f'Preparing task {current_task_id + 1}/{image_number} ...')
+            progressbar(async_task, current_progress, f'Preparing {task_type} task {current_task_id + 1}/{image_number} ...')
             execution_start_time = time.perf_counter()
 
             try:
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
-                positive_cond, negative_cond = task['c'], task['uc']
 
-                if 'cn' in goals:
-                    for cn_flag, cn_path in [
-                        (flags.cn_canny, controlnet_canny_path),
-                        (flags.cn_cpds, controlnet_cpds_path)
-                    ]:
-                        for cn_img, cn_stop, cn_weight in cn_tasks[cn_flag]:
-                            positive_cond, negative_cond = core.apply_controlnet(
-                                positive_cond, negative_cond,
-                                pipeline.loaded_ControlNets[cn_path], cn_img, cn_weight, 0, cn_stop)
+                if is_comfy_task or is_SD3m_task:
+                    from enhanced.simpleai import comfyclient_pipeline as comfypipeline
+                    from enhanced.comfy_task import get_comfy_task
+                    
+                    default_params = dict(
+                        prompt=task["positive"][0],
+                        negative_prompt=task["negative"][0],
+                        width=width,
+                        height=height,
+                        base_model=base_model_name,
+                        sampler=final_sampler_name,
+                        scheduler=final_scheduler_name,
+                        cfg_scale=cfg_scale,
+                        steps=steps,
+                        denoise=denoising_strength,
+                        seed=task['task_seed'],
+                        )
+                    if layer_input_image is None:
+                        input_images = None
+                    else:
+                        input_images = [HWC3(layer_input_image)]
+                    if is_SD3m_task:
+                        comfy_method = 'SD3m'
+                        options = dict()
+                    else:
+                        comfy_method = layer_method
+                        options = dict(
+                            iclight_enable=iclight_enable,
+                            iclight_source_radio=iclight_source_radio
+                            )
+                    try:
+                        comfy_task = get_comfy_task(comfy_method, default_params, input_images, options)
+                        imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback_comfytask)
+                    except ValueError as e:
+                        print(f"comfy_task: input_image is None: {e}")
+                        empty_path = [np.zeros((width, height), dtype=np.uint8)]
+                        yield_result(async_task, empty_path, black_out_nsfw, do_not_show_finished_images=True)
+                        imgs = empty_path
 
-                imgs = pipeline.process_diffusion(
-                    positive_cond=positive_cond,
-                    negative_cond=negative_cond,
-                    steps=steps,
-                    switch=switch,
-                    width=width,
-                    height=height,
-                    image_seed=task['task_seed'],
-                    callback=callback,
-                    sampler_name=final_sampler_name,
-                    scheduler_name=final_scheduler_name,
-                    latent=initial_latent,
-                    denoise=denoising_strength,
-                    tiled=tiled,
-                    cfg_scale=cfg_scale,
-                    refiner_swap_method=refiner_swap_method,
-                    disable_preview=disable_preview
-                )
+                elif is_hydit_task:
+                    imgs = hydit_task.inferencer(
+                        prompt=task["positive"][0],
+                        negative_prompt=task["negative"][0],
+                        seed=task['task_seed'],
+                        cfg_scale=cfg_scale,
+                        infer_steps=steps,
+                        width=width, 
+                        height=height,
+                        sampler=final_sampler_name,
+                        callback=callback_hydittask
+                    )
+                    scheduler_name, sampler_name = hydit_task.get_scheduler_name(final_sampler_name)
 
-                del task['c'], task['uc'], positive_cond, negative_cond  # Save memory
+                else:
+                    positive_cond, negative_cond = task['c'], task['uc']
 
-                if inpaint_worker.current_task is not None:
-                    imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
+                    if 'cn' in goals:
+                        for cn_flag, cn_path in [
+                            (flags.cn_canny, controlnet_canny_path),
+                            (flags.cn_cpds, controlnet_cpds_path)
+                        ]:
+                            for cn_img, cn_stop, cn_weight in cn_tasks[cn_flag]:
+                                positive_cond, negative_cond = core.apply_controlnet(
+                                    positive_cond, negative_cond,
+                                    pipeline.loaded_ControlNets[cn_path], cn_img, cn_weight, 0, cn_stop)
+                
+                    imgs = pipeline.process_diffusion(
+                        positive_cond=positive_cond,
+                        negative_cond=negative_cond,
+                        steps=steps,
+                        switch=switch,
+                        width=width,
+                        height=height,
+                        image_seed=task['task_seed'],
+                        callback=callback,
+                        sampler_name=final_sampler_name,
+                        scheduler_name=final_scheduler_name,
+                        latent=initial_latent,
+                        denoise=denoising_strength,
+                        tiled=tiled,
+                        cfg_scale=cfg_scale,
+                        refiner_swap_method=refiner_swap_method,
+                        disable_preview=disable_preview
+                    )
+
+                    del task['c'], task['uc'], positive_cond, negative_cond  # Save memory
+
+                    if inpaint_worker.current_task is not None:
+                        imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
 
                 img_paths = []
                 current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float((current_task_id + 1) * steps) / float(all_steps))
@@ -943,6 +1059,8 @@ def worker():
                     progressbar(async_task, current_progress, 'Checking for NSFW content ...')
                     imgs = default_censor(imgs)
 
+                if ldm_patched.modules.model_management.is_nvidia():
+                    print(f'[Fooocus] Max_memory_allocated: {torch.cuda.max_memory_allocated()/ 1024 / 1024 / 1024:.2f}GB')
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
                 for x in imgs:
                     d = [('Prompt', 'prompt', task['log_positive_prompt']),
@@ -961,7 +1079,13 @@ def worker():
                           ('ADM Guidance', 'adm_guidance', str((
                               modules.patch.patch_settings[pid].positive_adm_scale,
                               modules.patch.patch_settings[pid].negative_adm_scale,
-                              modules.patch.patch_settings[pid].adm_scaler_end))),
+                              modules.patch.patch_settings[pid].adm_scaler_end)))]
+                    if is_comfy_task or is_hydit_task or is_SD3m_task:
+                        refiner_model_name = ''
+                        refiner_switch = 1.0
+                        if is_hydit_task:
+                            base_model_name = 'hydit_v1.1_fp16.safetensors'
+                    d += [
                           ('Base Model', 'base_model', base_model_name),
                           ('Refiner Model', 'refiner_model', refiner_model_name),
                           ('Refiner Switch', 'refiner_switch', refiner_switch)]
@@ -975,19 +1099,22 @@ def worker():
                         d.append(
                             ('CFG Mimicking from TSNR', 'adaptive_cfg', modules.patch.patch_settings[pid].adaptive_cfg))
 
-                    if clip_skip > 1:
+                    if clip_skip > 1 and not is_comfy_task and not is_hydit_task:
                         d.append(('CLIP Skip', 'clip_skip', clip_skip))
                     d.append(('Sampler', 'sampler', sampler_name))
                     d.append(('Scheduler', 'scheduler', scheduler_name))
-                    d.append(('VAE', 'vae', vae_name))
+                    if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+                        d.append(('VAE', 'vae', vae_name))
                     d.append(('Seed', 'seed', str(task['task_seed'])))
 
                     if freeu_enabled:
                         d.append(('FreeU', 'freeu', str((freeu_b1, freeu_b2, freeu_s1, freeu_s2))))
 
                     for li, (n, w) in enumerate(loras):
-                        if n != 'None':
+                        if n != 'None' and not is_hydit_task and not is_comfy_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
+                    if is_hydit_task or is_comfy_task or is_SD3m_task:
+                        loras = []
 
                     metadata_parser = None
                     if save_metadata_to_images:
@@ -998,6 +1125,12 @@ def worker():
                         metadata_parser.set_data(task['log_positive_prompt'], task['positive'],
                                                  task['log_negative_prompt'], task['negative'],
                                                  steps, base_model_name, refiner_model_name, loras, vae_name, '')
+                    if is_hydit_task:
+                        d.append(('Backend Engine', 'backend_engine', 'Hunyuan-DiT'))
+                    elif is_SD3m_task:
+                        d.append(('Backend Engine', 'backend_engine', 'SD3-medium'))
+                    else:
+                        d.append(('Backend Engine', 'backend_engine', 'SDXL-Fooocus'))
                     d.append(('Metadata Scheme', 'metadata_scheme', metadata_scheme.value if save_metadata_to_images else save_metadata_to_images))
                     import enhanced.version as version
                     d.append(('Version', 'version', f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'))

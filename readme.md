@@ -28,7 +28,8 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
-- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL的原始初衷。
+- **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL
+的原始初衷。
 - **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力。SimpleSDXL以**预置包和嵌参图片**为基础，面向场景提升Fooocus的**开放性和可定制性**，发挥出SDXL的强大能力。
 
 ## SmipleSDXL2 全新架构 / New Architecture

@@ -30,8 +30,7 @@ def generate_mask_from_image(image, mask_model, extras):
         image = image['image']
 
     if mask_model == 'sam':
-        if enhanced_parameters.translation_timing != 'No translate':
-            extras['sam_prompt_text'] = translator.convert(extras['sam_prompt_text'], enhanced_parameters.translation_methods)
+        extras['sam_prompt_text'] = translator.convert(extras['sam_prompt_text'], enhanced_parameters.translation_methods)
  
         boxes = run_grounded_sam(Image.fromarray(image), extras['sam_prompt_text'], box_threshold=extras['box_threshold'], text_threshold=extras['text_threshold'])
         extras['sam_prompt'] = []

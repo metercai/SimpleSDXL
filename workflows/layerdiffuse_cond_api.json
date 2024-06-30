@@ -1,0 +1,257 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 991458235975350,
+      "steps": 30,
+      "cfg": 4,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "28",
+        0
+      ],
+      "positive": [
+        "28",
+        1
+      ],
+      "negative": [
+        "28",
+        2
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "juggernaut-X-RunDiffusion-NSFW.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": [
+        "33",
+        1
+      ],
+      "height": [
+        "33",
+        2
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "Park benches, grass, trees, street lights, high quality",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "text, watermark",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "40",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "20": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "28": {
+    "inputs": {
+      "config": "SDXL, Foreground",
+      "weight": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "cond": [
+        "6",
+        0
+      ],
+      "uncond": [
+        "7",
+        0
+      ],
+      "latent": [
+        "29",
+        0
+      ]
+    },
+    "class_type": "LayeredDiffusionCondApply",
+    "_meta": {
+      "title": "layer_diffuse_cond_apply"
+    }
+  },
+  "29": {
+    "inputs": {
+      "pixels": [
+        "33",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "30": {
+    "inputs": {
+      "image": "2024-03-07_17-57-20_1318.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "input_image"
+    }
+  },
+  "33": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "nearest",
+      "keep_proportion": true,
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "resize_input_image"
+    }
+  },
+  "36": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "37": {
+    "inputs": {
+      "rem_mode": "RMBG-1.4",
+      "image_output": "Preview",
+      "save_prefix": "ComfyUI",
+      "images": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "easy imageRemBg",
+    "_meta": {
+      "title": "Image Remove Bg"
+    }
+  },
+  "38": {
+    "inputs": {
+      "scale": 0.5,
+      "invert": false,
+      "image": [
+        "37",
+        0
+      ],
+      "mask": [
+        "37",
+        1
+      ]
+    },
+    "class_type": "BackgroundScaler",
+    "_meta": {
+      "title": "Background Scaler"
+    }
+  },
+  "40": {
+    "inputs": {
+      "seed": 201673959389453,
+      "steps": 30,
+      "cfg": 4,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 0.2,
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  }
+}

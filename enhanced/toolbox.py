@@ -10,14 +10,14 @@ import modules.sdxl_styles as sdxl_styles
 import enhanced.all_parameters as ads
 import enhanced.topbar as topbar
 import enhanced.gallery as gallery
-import enhanced.token_did as token_did
 import enhanced.version as version
+import modules.flags as flags
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from enhanced.models_info import models_info, models_info_muid, refresh_models_info_from_path, sync_model_info
+from enhanced.simpleai import models_info, models_info_muid, refresh_models_info, sync_model_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-
+from enhanced.simpleai import sysinfo
 
 css = '''
 .toolbox {
@@ -70,6 +70,21 @@ css = '''
     left: 50%;
     transform: translateX(-50%);
     width: 300px !important;
+    z-index: 21;
+    text-align: left;
+    opacity: 1;
+    border-radius: 8px;
+    padding: 0px;
+    border: groove;
+}
+
+.identity_note {
+    height: auto;
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px !important;
     z-index: 21;
     text-align: left;
     opacity: 1;
@@ -137,9 +152,10 @@ def make_infobox_markdown(info):
 
 
 def toggle_toolbox(state, state_params):
-    state_params.update({"infobox_state": 0})
-    state_params.update({"note_box_state": ['',0,0]})
-    return [gr.update(visible=state)] + [gr.update(visible=False)] * 5 + [state_params]
+    if "gallery_state" in state_params and state_params["gallery_state"] == 'finished_index':
+        return [gr.update(visible=state)]
+    else:
+        return [gr.update(visible=False)] 
 
 
 def toggle_prompt_info(state_params):
@@ -327,10 +343,39 @@ def reset_image_params(state_params):
 
     metadata.update({"loras": loras})
     metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
+    
+    get_meta_value = lambda x1,y: y if x1 not in metadata else metadata[x1]
+    backend_engine = get_meta_value('Backend Engine', 'SDXL-Fooocus')
+    if backend_engine=='Hunyuan-DiT':
+        backend_engine = flags.backend_engines[1]
+    elif backend_engine=='SD3-medium':
+        backend_engine = flags.backend_engines[2]
+    else:
+        backend_engine = flags.backend_engines[0]
+    engine_preset = state_params[f'{backend_engine}_preset_value']
+    engine_preset[1] = get_meta_value('Performance', engine_preset[1])
+    engine_preset[2] = [f[1:-1] for f in get_meta_value('Styles', str(engine_preset[2]))[1:-1].split(', ')]
+    if engine_preset[2] == ['']:
+        engine_preset[2] = []
+    engine_preset[3] = float(get_meta_value('Guidance Scale', engine_preset[3]))
+    engine_preset[4] = int(get_meta_value('Steps', engine_preset[4]))
+    engine_preset[5] = get_meta_value('Sampler', engine_preset[5])
+    engine_preset[6] = get_meta_value('Scheduler', engine_preset[6])
+    engine_preset[7] = get_meta_value('Base Model', engine_preset[7])
+    state_params[f'{backend_engine}_preset_value'] = engine_preset
+    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
+    aspect_ratio = get_meta_value('Resolution', '(0, 0)')
+    if aspect_ratio!='(0, 0)':
+        width, height = eval(aspect_ratio)
+        engine_aspect_ratio = config.add_ratio(f'{width}*{height}')
+        state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+    refiner_model = get_meta_value("Refiner Model", 'None')
+    metadata.update({'Refiner Model': refiner_model})
+
     results = topbar.reset_params(metadata)
     state_params.update({"note_box_state": ['',0,0]})
     print(f'[ToolBox] Reset_params: update {len(metainfo.keys())} params from current image log file.')
-    return results + [gr.update(visible=False)] * 2 + [state_params]
+    return results + [gr.update(visible=False)] * 2 + [state_params, backend_engine]
 
 
 def apply_enabled_loras(loras):
@@ -343,6 +388,7 @@ def apply_enabled_loras(loras):
 
 def save_preset(*args):    
     args = list(args)
+    backend_selection = args.pop()
     state_params = args.pop()
     name = args.pop()
     seed_random = args.pop()
@@ -372,6 +418,12 @@ def save_preset(*args):
 
     if name is not None and name != '':
         preset = {}
+        if backend_selection != flags.backend_engines[0]:
+            preset["default_backend"] = backend_selection
+            aspect_ratios_selection = state_params[f'{backend_selection}_current_aspect_ratios']
+            if backend_selection == flags.backend_engines[1]:
+                base_model = "hydit_v1.1_fp16.safetensors"
+
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model
         preset["default_refiner_switch"] = refiner_switch
@@ -403,7 +455,9 @@ def save_preset(*args):
             preset["default_image_seed"] = image_seed
 
         def get_muid_link(k):
-            muid = models_info[k]['muid']
+            muid = ''
+            if k in models_info.keys():
+                muid = models_info[k]['muid']
             return '' if muid is None else f'MUID:{muid}'
 
         preset["checkpoint_downloads"] = {base_model: get_muid_link("checkpoints/"+base_model)}
@@ -448,7 +502,7 @@ def save_preset(*args):
 
 
 def embed_params(state_params):
-    refresh_models_info_from_path()
+    refresh_models_info()
     sync_model_info([])
     [choice, selected] = state_params["prompt_info"]
     info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
@@ -501,7 +555,7 @@ def get_embed_metadata(info, extra=None):
             m_dict.update({key: sdxl_styles.styles[key]})
     if len(m_dict.keys())>0:
         metadata.update({'styles_definition': m_dict})
-    metadata.update({'created_by': token_did.DID})
+    metadata.update({'created_by': sysinfo['did']})
     metadata.update({'created_timestamp': time.time()})
     metadata.update({'software': f'{version.branch}_{version.get_simplesdxl_ver()}'})
     metadata.update({'version': 'v1.0'})
@@ -521,7 +575,7 @@ def extract_reset_image_params(img_path):
         print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image. \nmetadata:{metadata}')
         return [gr.update()] * 31
     print(f'[ToolBox] Extraction successful and ready to reset: {metadata}') 
-    refresh_models_info_from_path()
+    refresh_models_info()
     sync_model_info([])
     metadata["Comment"].update({"task_from": f'embed_image:{img_path}'})
     results = topbar.reset_params(topbar.check_prepare_for_reset(metadata["Comment"]))   
@@ -533,4 +587,20 @@ function() {
 refresh_style_localization()
 }
 '''
+
+def sync_model_info_click(*args):
+
+    downurls = list(args)
+    #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
+    keylist = sync_model_info(downurls)
+    results = []
+    nums = 0
+    for k in keylist:
+        muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
+        durl = None if models_info[k]['url'] is None else models_info[k]['url']
+        nums += 1 if models_info[k]['muid'] is None else 0
+        results += [gr.update(info=f'MUID={muid}', value=durl)]
+    if nums:
+        print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
+    return results
 
