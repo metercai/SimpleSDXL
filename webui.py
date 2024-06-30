@@ -205,6 +205,7 @@ with shared.gradio_root:
                             currentTask.last_stop = 'stop'
                             if (currentTask.processing):
                                 model_management.interrupt_current_processing()
+                                comfyd.interrupt()
                             return currentTask
 
                         def skip_clicked(currentTask):
@@ -212,6 +213,7 @@ with shared.gradio_root:
                             currentTask.last_stop = 'skip'
                             if (currentTask.processing):
                                 model_management.interrupt_current_processing()
+                                comfyd.interrupt()
                             return currentTask
 
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
@@ -799,6 +801,8 @@ with shared.gradio_root:
                 else:
                     if not comfyd_active:
                         comfyd.stop()
+                    else:
+                        comfyd.free()
                     result = [gr.update(choices=flags.Performance.list()), gr.update()]
                     result += [gr.update(interactive=True)] * 18
                 return result
@@ -882,8 +886,10 @@ with shared.gradio_root:
                 comfyd.start(args_comfyd)
             elif x==flags.backend_engines[1]:
                 results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
+                comfyd.free()
             else:
                 results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
+                comfyd.free()
             return results
 
         def toggle_layer_visible(x):

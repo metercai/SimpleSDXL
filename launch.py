@@ -45,7 +45,7 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.14"
+    ver_required = "0.3.15"
     REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
@@ -81,6 +81,8 @@ def check_base_environment():
 def prepare_environment():
     global sysinfo
 
+    torch_ver = '2.2.2'
+    torchvisio_ver = '0.17.2'
     if sysinfo['gpu_brand'] == 'NVIDIA':
         torch_index_url = "https://download.pytorch.org/whl/cu121"
     elif sysinfo['gpu_brand'] == 'AMD':
@@ -89,20 +91,25 @@ def prepare_environment():
             #pip install torch-directml
             torch_index_url = "https://download.pytorch.org/whl/"
         else:
-            torch_index_url = "https://download.pytorch.org/whl/rocm5.7/"
+            torch_index_url = "https://download.pytorch.org/whl/rocm6.0"
+            torch_ver = '2.3.1'
+            torchvisio_ver = '0.18.1'
     elif sysinfo['gpu_brand'] == 'INTEL':
             torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
     else:
         torch_index_url = "https://download.pytorch.org/whl/"
     torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
     torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.2.2 torchvision==0.17.2 --extra-index-url {torch_index_url}")
+                                   f"pip install torch=={torch_ver} torchvision=={torchvisio_ver} --extra-index-url {torch_index_url}")
     requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
     torch_command += target_path_install
     torch_command += f' -i {index_url} '
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
+
+    if sysinfo['gpu_brand'] == 'AMD' and platform.system() == "Windows" and not is_installed("torch-directml"):
+        run_pip(f"install -U -I --no-deps torch-directml", "torch-directml")
 
     if TRY_INSTALL_XFORMERS:
         xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
