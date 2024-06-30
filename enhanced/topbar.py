@@ -36,6 +36,12 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
+def get_welcome_image(is_mobile=False):
+    path_welcome = os.path.abspath(f'./enhanced/attached/')
+    file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
+    welcomes = [p for p in util.get_files_from_folder(path_welcome, ['.jpg'], file_suffix, None) if not p.startswith('.')]
+    file_welcome = random.choice(welcomes)
+    return file_welcome
 
 def get_preset_name_list():
     path_preset = os.path.abspath(f'./presets/')
@@ -264,7 +270,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
     results = refresh_nav_bars(state_params)
-    results += [gr.update(value="enhanced/attached/welcome_m.jpg")] if state_params["__is_mobile"] else [gr.update()]
+    results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_mask_upload_checkbox)]
