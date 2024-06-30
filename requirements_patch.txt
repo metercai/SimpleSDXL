@@ -2,5 +2,4 @@ facexlib
 insightface
 nvidia-pyindex==1.0.9
 flash-attn==2.5.8
-#git+https://github.com/huggingface/diffusers
 #apex

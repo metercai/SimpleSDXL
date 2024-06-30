@@ -13,6 +13,7 @@
 - 点击启动 run_SimpleSDXL_dev.bat。
 
 Linux用户在启动命令后加 `--dev` 参数启动测试版。
+
 ## 🔔 更新 / Update
 - [2024.05.28] <b>合并主线的2.4.3版本</b>
 - [2024.04.23] 升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。
