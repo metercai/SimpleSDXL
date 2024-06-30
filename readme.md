@@ -1,5 +1,5 @@
 ## SimpleSDXL2 - 扩展后端，超越Fooocus，支持6G显存国产混元与SD3出图。
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/1805fb54-a207-4cf4-92f7-d08482a62055"></div>
+<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/92b6c7d5-fc3e-4407-b03e-5c87d149d503"></div>
 
 ## 🔔 最新更新 / Update
 - [2024.06.30] <b>扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。</b>
@@ -32,6 +32,7 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 - **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力。SimpleSDXL以**预置包和嵌参图片**为基础，面向场景提升Fooocus的**开放性和可定制性**，发挥出SDXL的强大能力。
 
 ## SmipleSDXL2 全新架构 / New Architecture
+<img width="600" align=center src="https://github.com/metercai/SimpleSDXL/assets/5652458/364df3ce-3420-4cec-b26e-f315c76b4c1e">
 
 ## 对比Fooocus的增强特色 / Enhanced features of Fooocus
 在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
