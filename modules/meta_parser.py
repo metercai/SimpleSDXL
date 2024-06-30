@@ -1,3 +1,4 @@
+import os
 import json
 import re
 from abc import ABC, abstractmethod
@@ -12,6 +13,8 @@ import modules.sdxl_styles
 from modules.flags import MetadataScheme, Performance, Steps
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
+from enhanced.simpleai import models_info, models_info_file
+
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
@@ -67,6 +70,8 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
 
     for i in range(modules.config.default_max_lora_number):
         get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results, performance_filename)
+
+    get_str('backend_engine', 'backend_engine', loaded_parameter_dict, results)
 
     return results
 
@@ -236,9 +241,13 @@ def get_loras_simple(loras: dict, results: list):
 
 def get_sha256(filepath):
     global hash_cache
+    if not os.path.isfile(filepath):
+        return ''
     if filepath not in hash_cache:
-        hash_cache[filepath] = sha256(filepath)
-
+        if filepath in models_info_file:
+            hash_cache[filepath] = models_info[models_info_file[filepath]]['muid']
+        else:
+            hash_cache[filepath] = sha256(filepath)
     return hash_cache[filepath]
 
 
@@ -627,18 +636,15 @@ class SIMPLEMetadataParser(MetadataParser):
 
     def to_json(self, metadata: dict) -> dict:
 
-        model_filenames = modules.config.model_filenames.copy()
-        lora_filenames = modules.config.lora_filenames.copy()
-        if modules.config.sdxl_lcm_lora in lora_filenames:
-            lora_filenames.remove(modules.config.sdxl_lcm_lora)
-
         for key, value in metadata.items():
             if value in ['', 'None']:
                 continue
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
-                metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
+                metadata[key] = self.replace_value_with_filename(key, value, modules.config.model_filenames)
             elif key.startswith('LoRA '):
-                metadata[key] = self.replace_value_with_filename(key, value, lora_filenames)
+                metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
+            elif key in ['vae', 'VAE']:
+                metadata[key] = self.replace_value_with_filename(key, value, modules.config.vae_filenames)
             else:
                 continue
 
@@ -665,6 +671,7 @@ class SIMPLEMetadataParser(MetadataParser):
             res['Refiner Model'] = self.refiner_model_name
             res['Refiner Model Hash'] = self.refiner_model_hash
 
+        res['VAE'] = self.vae_name
         res['LoRAs'] = self.loras
         res['styles_definition'] = self.styles_definition
 

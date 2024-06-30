@@ -1,0 +1,518 @@
+{
+  "2": {
+    "inputs": {
+      "ckpt_name": "realisticVisionV60B1_v51VAE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "soft light, cinematic, masterpiece, best quality, photograph",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "bad quality, bad picture",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "samples": [
+        "19",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "9": {
+    "inputs": {
+      "image": "2024-03-07_14-49-19_6033.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "input_image"
+    }
+  },
+  "19": {
+    "inputs": {
+      "seed": 100361857014338,
+      "steps": 30,
+      "cfg": 2.05,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.9,
+      "model": [
+        "37",
+        0
+      ],
+      "positive": [
+        "44",
+        0
+      ],
+      "negative": [
+        "44",
+        1
+      ],
+      "latent_image": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "20": {
+    "inputs": {
+      "pixels": [
+        "51",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "36": {
+    "inputs": {
+      "images": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "37": {
+    "inputs": {
+      "model_path": "iclight_sd15_fc_unet_ldm.safetensors",
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "LoadAndApplyICLightUnet",
+    "_meta": {
+      "title": "ic_light_apply"
+    }
+  },
+  "39": {
+    "inputs": {
+      "width": 1152,
+      "height": 896,
+      "interpolation": "nearest",
+      "keep_proportion": true,
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "resize_input_image"
+    }
+  },
+  "44": {
+    "inputs": {
+      "multiplier": 0.18215,
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ],
+      "foreground": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "ICLightConditioning",
+    "_meta": {
+      "title": "ic_light_conditioning"
+    }
+  },
+  "45": {
+    "inputs": {
+      "pixels": [
+        "54",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "46": {
+    "inputs": {
+      "points_store": "[{\"x\":0,\"y\":512},{\"x\":366.43744764661454,\"y\":417.19934515610225},{\"x\":483.8243356373049,\"y\":71.38391837271712},{\"x\":296.6398385710689,\"y\":28.553567349086848},{\"x\":160.21723901432063,\"y\":42.83035102363027},{\"x\":55.5208254010022,\"y\":33.31249524060132}]",
+      "coordinates": "[{\"x\":0,\"y\":512},{\"x\":481.2992248535156,\"y\":221.98526000976562},{\"x\":55.52082443237305,\"y\":33.312496185302734}]",
+      "mask_width": [
+        "39",
+        1
+      ],
+      "mask_height": [
+        "39",
+        2
+      ],
+      "points_to_sample": 3,
+      "sampling_method": "path",
+      "interpolation": "cardinal",
+      "tension": 0.5,
+      "repeat_output": 1,
+      "float_output_type": "list",
+      "min_value": 0,
+      "max_value": 1,
+      "New spline": null
+    },
+    "class_type": "SplineEditor",
+    "_meta": {
+      "title": "ic_light_editor"
+    }
+  },
+  "47": {
+    "inputs": {
+      "coordinates": [
+        "46",
+        1
+      ],
+      "frame_width": [
+        "39",
+        1
+      ],
+      "frame_height": [
+        "39",
+        2
+      ],
+      "start_color": "orange",
+      "end_color": "black",
+      "multiplier": 1
+    },
+    "class_type": "CreateGradientFromCoords",
+    "_meta": {
+      "title": "ic_light_source_color"
+    }
+  },
+  "48": {
+    "inputs": {
+      "images": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "50": {
+    "inputs": {
+      "light_position": "Left Light",
+      "multiplier": 1,
+      "start_color": "#FFFFFF",
+      "end_color": "#000000",
+      "width": [
+        "39",
+        1
+      ],
+      "height": [
+        "39",
+        2
+      ],
+      "batch_size": 1
+    },
+    "class_type": "LightSource",
+    "_meta": {
+      "title": "ic_light_source_text"
+    }
+  },
+  "51": {
+    "inputs": {
+      "boolean": false,
+      "image_a": [
+        "50",
+        0
+      ],
+      "image_b": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "easy imageSwitch",
+    "_meta": {
+      "title": "ic_light_source_text_switch"
+    }
+  },
+  "53": {
+    "inputs": {
+      "images": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "54": {
+    "inputs": {
+      "rem_mode": "RMBG-1.4",
+      "image_output": "Preview",
+      "save_prefix": "ComfyUI",
+      "images": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "easy imageRemBg",
+    "_meta": {
+      "title": "Image Remove Bg"
+    }
+  },
+  "57": {
+    "inputs": {
+      "mode": "soft_light",
+      "blur_sigma": 3,
+      "blend_factor": 0.2,
+      "target": [
+        "7",
+        0
+      ],
+      "source": [
+        "39",
+        0
+      ],
+      "mask": [
+        "58",
+        0
+      ]
+    },
+    "class_type": "DetailTransfer",
+    "_meta": {
+      "title": "ic_light_detail_transfer"
+    }
+  },
+  "58": {
+    "inputs": {
+      "amount": 3,
+      "mask": [
+        "54",
+        1
+      ]
+    },
+    "class_type": "MaskBlur+",
+    "_meta": {
+      "title": "🔧 Mask Blur"
+    }
+  },
+  "62": {
+    "inputs": {
+      "shape": "circle",
+      "frames": 1,
+      "location_x": [
+        "76",
+        0
+      ],
+      "location_y": [
+        "77",
+        0
+      ],
+      "grow": [
+        "79",
+        0
+      ],
+      "frame_width": [
+        "39",
+        1
+      ],
+      "frame_height": [
+        "39",
+        2
+      ],
+      "shape_width": [
+        "76",
+        0
+      ],
+      "shape_height": [
+        "77",
+        0
+      ]
+    },
+    "class_type": "CreateShapeMask",
+    "_meta": {
+      "title": "ic_light_source_shape"
+    }
+  },
+  "63": {
+    "inputs": {
+      "expand": 0,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": [
+        "79",
+        1
+      ],
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "62",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "ic_light_source_shape_blur"
+    }
+  },
+  "64": {
+    "inputs": {
+      "mask": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "65": {
+    "inputs": {
+      "boolean": false,
+      "image_a": [
+        "64",
+        0
+      ],
+      "image_b": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "easy imageSwitch",
+    "_meta": {
+      "title": "ic_light_source_shape_switch"
+    }
+  },
+  "66": {
+    "inputs": {
+      "images": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "76": {
+    "inputs": {
+      "value": "a/2+b",
+      "a": [
+        "39",
+        1
+      ],
+      "b": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "77": {
+    "inputs": {
+      "value": "a/2+b",
+      "a": [
+        "39",
+        2
+      ],
+      "b": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "78": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "79": {
+    "inputs": {
+      "value": "a/4+b",
+      "a": [
+        "76",
+        0
+      ],
+      "b": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  }
+}

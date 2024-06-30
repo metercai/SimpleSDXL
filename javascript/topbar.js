@@ -127,7 +127,8 @@ function initPresetPreviewOverlay() {
         label.addEventListener("mouseout", onMouseLeave);
         const originalText = label.getAttribute("data-original-text");
         let name = originalText || label.textContent;
-	if (name!=" ") {
+	name = name.trim();
+	if (name!=" " && name!='') {
 	    let download = false;
 	    if (name.endsWith('\u2B07')) {
     	   	name = name.slice(0, -1);
@@ -176,7 +177,7 @@ function initPresetPreviewOverlay() {
 }
 
 async function fetchPresetDataFor(name) {
-    let time_ver = "t="+Date.now()+"."+Math.floor(Math.random() * 10000)
+    let time_ver = "t="+Date.now()+"."+Math.floor(Math.random() * 10000);
     const response = await fetch(`${webpath}/presets/${name}.json?${time_ver}`);
     const data = await response.json();
     let pos = data.default_model.lastIndexOf('.');

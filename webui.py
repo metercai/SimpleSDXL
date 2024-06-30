@@ -18,7 +18,7 @@ import copy
 import launch
 
 from PIL import Image
-from modules.sdxl_styles import legal_style_names
+from modules.sdxl_styles import legal_style_names, fooocus_expansion
 from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
@@ -30,9 +30,11 @@ import enhanced.toolbox  as toolbox
 import enhanced.translator  as translator
 import enhanced.enhanced_parameters as enhanced_parameters
 import enhanced.version as version
-import enhanced.location as location
 import enhanced.wildcards as wildcards
-from enhanced.models_info import models_info, sync_model_info_click 
+import enhanced.simpleai as simpleai
+import enhanced.comfy_task as comfy_task
+import enhanced.hydit_task as hydit_task
+from enhanced.simpleai import models_info, comfyd, args_comfyd, sysinfo  
 
 def get_task(*args):
     args = list(args)
@@ -130,7 +132,7 @@ with shared.gradio_root:
                     bar8_button = gr.Button(value='', size='sm', visible=True, min_width=70, elem_id='bar8', elem_classes='bar_button')
                 with gr.Row():
                     progress_window = grh.Image(label='Preview', show_label=True, visible=True, height=768, elem_id='preview_generating',
-                                            elem_classes=['main_view'], value="enhanced/attached/welcome.jpg")
+                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png")
                     progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
@@ -146,12 +148,21 @@ with shared.gradio_root:
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                     params_note_embed_button = gr.Button(value='Enter', visible=False)
-                with gr.Group(visible=False, elem_classes='toolbox_note') as preset_down_note:
-                    preset_down_note_info = gr.Markdown(elem_classes='note_info', value=topbar.preset_down_note_info)
-                    preset_down_confirm_button = gr.Button(value='Continue', visible=True)
-                    preset_down_cancel_button = gr.Button(value='Cancel', visible=True)
-                    preset_down_confirm_button.click(fn=lambda x: x.update({"load_preset":1}), inputs=state_topbar, outputs=state_topbar)
-                    preset_down_cancel_button.click(fn=lambda x: x.update({"load_preset":0}), inputs=state_topbar, outputs=state_topbar)
+                with gr.Group(visible=False, elem_classes='identity_note') as identity_dialog:
+                    identity_note_info = gr.Markdown(elem_classes='note_info', value=simpleai.identity_note)
+                    with gr.Tab(label='New Identity') as new_id_tab:
+                        identity_nick_input = gr.Textbox(show_label=False, placeholder="Type nickname here.", min_width=70, elem_classes='identity_input')
+                        identity_tele_input = gr.Textbox(show_label=False, placeholder="Type telephone here.", min_width=70, elem_classes='identity_input')
+                        identity_getvcode_button = gr.Button(value='Get Verification Code', visible=True)
+                        identity_vcode_input = gr.Textbox(show_label=False, placeholder="Type vcode here.", min_width=70, elem_classes='identity_input')
+                        identity_bind_button = gr.Button(value='Bind identity', min_width=150, visible=True)
+                    with gr.Tab(label='Confirm Identity') as confirm_id_tab:
+                        identity_phrase_input = gr.Textbox(show_label=False, type='password', placeholder="Type id phrases here.", min_width=150, elem_classes='identity_input')
+                        identity_confirm_button = gr.Button(value='Confirm identity', visible=True)
+                    identity_getvcode_button.click(simpleai.get_vcode, inputs=[identity_nick_input, identity_tele_input, state_topbar], outputs=state_topbar)
+                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input, identity_vcode_input, state_topbar], outputs=state_topbar)
+                    identity_confirm_button.click(simpleai.confirm_identity, inputs=[identity_phrase_input, state_topbar], outputs=state_topbar)
+
                 with gr.Accordion("Finished Images Index:", open=False, visible=False) as index_radio:
                     gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
@@ -194,6 +205,7 @@ with shared.gradio_root:
                             currentTask.last_stop = 'stop'
                             if (currentTask.processing):
                                 model_management.interrupt_current_processing()
+                                comfyd.interrupt()
                             return currentTask
 
                         def skip_clicked(currentTask):
@@ -201,6 +213,7 @@ with shared.gradio_root:
                             currentTask.last_stop = 'skip'
                             if (currentTask.processing):
                                 model_management.interrupt_current_processing()
+                                comfyd.interrupt()
                             return currentTask
 
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
@@ -219,7 +232,6 @@ with shared.gradio_root:
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced+', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
-                image_tools_checkbox = gr.Checkbox(label='ParamsTools', value=False, container=False, elem_classes='min_check')
             
             with gr.Group(visible=False, elem_classes='toolbox') as image_toolbox:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
@@ -227,7 +239,6 @@ with shared.gradio_root:
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
                 prompt_embed_button = gr.Button(value='EmbedMeta', size='sm', visible=not modules.config.default_save_metadata_to_images)
                 prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
-                image_tools_checkbox.change(toolbox.toggle_toolbox, inputs=[image_tools_checkbox, state_topbar], outputs=[image_toolbox, prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], queue=False, show_progress=False)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
             
             with gr.Row(visible=False) as image_input_panel:
@@ -341,6 +352,24 @@ with shared.gradio_root:
                                                       outputs=[inpaint_mask_cloth_category, inpaint_mask_sam_prompt_text, inpaint_mask_advanced_options],
                                                       queue=False, show_progress=False)
 
+                    with gr.TabItem(label='Layer_iclight') as layer_tab:
+                        with gr.Row():
+                            layer_method = gr.Radio(label='Layer case', choices=comfy_task.method_names, value=comfy_task.method_names[0])
+                        with gr.Row():
+                            with gr.Column():
+                                layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
+                            with gr.Column():
+                                with gr.Group():
+                                    iclight_enable = gr.Checkbox(label='Enable IC-Light', value=True)
+                                    iclight_source_radio = gr.Radio(show_label=False, choices=comfy_task.iclight_source_names, value=comfy_task.iclight_source_names[0], elem_classes='iclight_source', elem_id='iclight_source')
+                                gr.HTML('* The module derived from <a href="https://github.com/lllyasviel/IC-Light" target="_blank">IC-Light</a> <a href="https://github.com/layerdiffusion/LayerDiffuse" target="_blank">LayerDiffuse</a>')
+                        with gr.Row():
+                            example_quick_subjects = gr.Dataset(samples=comfy_task.quick_subjects, label='Subject Quick List', samples_per_page=1000, components=[prompt])
+                        with gr.Row():
+                            example_quick_prompts = gr.Dataset(samples=comfy_task.quick_prompts, label='Lighting Quick List', samples_per_page=1000, components=[prompt])
+                    example_quick_prompts.click(lambda x, y: ', '.join(y.split(', ')[:2] + [x[0]]), inputs=[example_quick_prompts, prompt], outputs=prompt, show_progress=False, queue=False)
+                    example_quick_subjects.click(lambda x: x[0], inputs=example_quick_subjects, outputs=prompt, show_progress=False, queue=False)
+
                     with gr.TabItem(label='Describe') as desc_tab:
                         with gr.Row():
                             with gr.Column():
@@ -391,11 +420,6 @@ with shared.gradio_root:
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
             current_tab = gr.Textbox(value='uov', visible=False)
-            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            metadata_tab.select(lambda: 'metadata', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Setting'):
@@ -405,17 +429,25 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 interactive=True)
-                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engine_list, value=modules.config.default_backend, info='Api engine needs to configure the api key before use')
+                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engines, value=modules.config.default_backend)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
-                image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
-                with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
-                    aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                    sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios_sd3')
-                    aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                    shared.gradio_root.load(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                output_format = gr.Radio(label='Output Format',
+                with gr.Group():
+                    image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
+                    with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
+                        aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                        sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                        hydit_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=hydit_task.available_aspect_ratios, visible=False, value=hydit_task.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                        def set_current_aspect_ratios(x,y,z):
+                            y[f'{x}_current_aspect_ratios']=z
+                            return y
+
+                        aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, aspect_ratios_selection])
+                        hydit_aspect_ratios_selection.change(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, hydit_aspect_ratios_selection])
+                        sd3_aspect_ratios_selection.change(lambda x: None, inputs=sd3_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, sd3_aspect_ratios_selection])
+                        shared.gradio_root.load(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                    output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
 
@@ -522,7 +554,7 @@ with shared.gradio_root:
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 with gr.Row():
-                    sync_model_info = gr.Checkbox(label='Sync model info', info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
+                    sync_model_info = gr.Checkbox(label='Sync model info', interactive=False, info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
                     with gr.Column(visible=False) as info_sync_texts:
                         models_infos = []
                         keylist = sorted(models_info.keys())
@@ -550,7 +582,7 @@ with shared.gradio_root:
                 info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', visible=False, variant='secondary', elem_classes='refresh_button')
                 info_progress = gr.Markdown('Note: If MUID is not obtained after synchronizing, it means that it is a new model file. You need to add an available download URL before.', visible=False)
                 sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
-                info_sync_button.click(sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
+                info_sync_button.click(toolbox.sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
 
             with gr.Tab(label='Advanced'):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=1.0, maximum=30.0, step=0.01,
@@ -734,13 +766,16 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):
+                with gr.Row(visible=False):
+                    binding_id_button = gr.Button(value='Binding Identity', visible=False)
                 with gr.Row():
-                    language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=location.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
+                    language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
-                    backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
-                    translation_timing = gr.Radio(label='Timing of translation', choices=modules.flags.translation_timing, value=modules.config.default_translation_timing, info='The selection of timing for prompt translation.')
+                    comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=args_manager.args.enable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
+                    image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
+                    backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
                 
@@ -752,12 +787,37 @@ with shared.gradio_root:
                     #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                     super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
-                    gr.Markdown(value=f'VERSION: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}')
+                    gr.Markdown(value=f'OS: {sysinfo["os_name"]}, {sysinfo["cpu_arch"]}, {sysinfo["cuda_version"]}, Torch{sysinfo["torch_version"]}, XF{sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {sysinfo["pyhash"]}, UIHash: {sysinfo["uihash"]}')
 
-            translation_timing.change(lambda x: gr.update(interactive=not (x=='No translate')), inputs=translation_timing, outputs=translation_methods, queue=False, show_progress=False)
+            iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selection], queue=False, show_progress=False)
+            pre4comfy = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
+            def toggle_image_tab(tab, styles, comfyd_active):
+                result = []
+                if 'layer' in tab:
+                    comfyd.start(args_comfyd)
+                    result = [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion])]
+                    result += [gr.update(value=False, interactive=False)]
+                    result += [gr.update(interactive=False)] * 17
+                else:
+                    if not comfyd_active:
+                        comfyd.stop()
+                    else:
+                        comfyd.free()
+                    result = [gr.update(choices=flags.Performance.list()), gr.update()]
+                    result += [gr.update(interactive=True)] * 18
+                return result
+            
+            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections, comfyd_active_checkbox], outputs=pre4comfy, show_progress=False, queue=False)
+            inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections, comfyd_active_checkbox], outputs=pre4comfy, show_progress=False, queue=False)
+            ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections, comfyd_active_checkbox], outputs=pre4comfy, show_progress=False, queue=False)
+            desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections, comfyd_active_checkbox], outputs=pre4comfy, show_progress=False, queue=False)
+            layer_tab.select(lambda: 'layer', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections, comfyd_active_checkbox], outputs=pre4comfy, show_progress=False, queue=False)
+            
+            image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
+            comfyd_active_checkbox.change(lambda x: comfyd.start(args_comfyd) if x else comfyd.stop(), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_timing, translation_methods, backend_selection, sd3_aspect_ratios_selection]
+            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, comfyd_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -772,10 +832,12 @@ with shared.gradio_root:
                                                                inpaint_mask_text_threshold
                                                            ], outputs=inpaint_mask_image, show_progress=True, queue=True)
 
-            gallery_index.select(gallery_util.select_index, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_window, progress_gallery, prompt_info_box, params_note_box, image_tools_checkbox, state_topbar], show_progress=False)
+            gallery_index.select(gallery_util.select_index, inputs=[gallery_index, image_tools_checkbox, state_topbar], outputs=[gallery, image_toolbox, progress_window, progress_gallery, prompt_info_box, params_note_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             progress_gallery.select(gallery_util.select_gallery_progress, inputs=state_topbar, outputs=[prompt_info_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
 
+            #with gr.Row():
+            #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
 
         load_data_outputs = [advanced_checkbox, image_number, prompt, negative_prompt, style_selections,
@@ -817,14 +879,54 @@ with shared.gradio_root:
                                          scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
                                      ], queue=False, show_progress=False)
         
-        def toggle_engine(x):
-            if x=='SD3 Api' or x=='SD3Turbo Api':
-                results = [gr.update(value=False, interactive=False), gr.update(visible=False), gr.update(value=1, interactive=False), gr.update(visible=False), gr.update(visible=True), gr.update(choices=['png', 'jpeg'], value='png')]
+
+        def toggle_layer_interactive(x):
+            if x==flags.backend_engines[2]:
+                results = [gr.update(), gr.update(choices=flags.sampler_list), gr.update(interactive=False)] + [gr.update(interactive=True)] * 18
+                comfyd.start(args_comfyd)
+            elif x==flags.backend_engines[1]:
+                results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
+                comfyd.free()
             else:
-                results = [gr.update(interactive=True), gr.update(visible=True), gr.update(value=modules.config.default_image_number, interactive=True), gr.update(visible=True), gr.update(visible=False), gr.update(choices=flags.OutputFormat.list(), value=modules.config.default_output_format)]
+                results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
+                comfyd.free()
             return results
 
-        backend_selection.change(toggle_engine, inputs=backend_selection, outputs = [input_image_checkbox, performance_selection, image_number, aspect_ratios_selection, sd3_aspect_ratios_selection, output_format], queue=False, show_progress=False)
+        def toggle_layer_visible(x):
+            if x==flags.backend_engines[2]:
+                results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)]
+            elif x==flags.backend_engines[1]:
+                results = [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)]
+            else:
+                results = [gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)]
+            return results
+
+        def toggle_preset_value(x, state_params):
+            results = []
+            for v in state_params[f'{x}_preset_value']:
+                if v is None or v=='':
+                    results += [gr.update()]
+                else:
+                    results += [v]
+            return results + [state_params[f'{x}_current_aspect_ratios']+f',{x}']
+        
+        def reset_aspect_ratios(c_aspect_ratios):
+            engine = c_aspect_ratios.split(',')[1]
+            aspect_ratios = c_aspect_ratios.split(',')[0]
+            if engine==flags.backend_engines[2]:
+                results = [gr.update(), gr.update(), aspect_ratios]
+            elif engine==flags.backend_engines[1]:
+                results = [gr.update(), aspect_ratios, gr.update()]
+            else:
+                results = [aspect_ratios, gr.update(), gr.update()]
+            return results
+
+        current_aspect_ratios = gr.Textbox(value='', visible=False)    
+        current_aspect_ratios.change(reset_aspect_ratios, inputs=current_aspect_ratios, outputs=[aspect_ratios_selection, hydit_aspect_ratios_selection, sd3_aspect_ratios_selection], queue=False, show_progress=False)
+        backend_selection.change(toggle_layer_interactive, inputs=backend_selection, outputs=[performance_selection, sampler_name, input_image_checkbox, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False) \
+                .then(toggle_layer_visible, inputs=backend_selection, outputs=[performance_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection], queue=False, show_progress=False) \
+                .then(toggle_preset_value, inputs=[backend_selection, state_topbar], outputs=[input_image_checkbox, performance_selection, style_selections, guidance_scale, overwrite_step, sampler_name, scheduler_name, base_model, current_aspect_ratios], queue=False, show_progress=False) \
+                .then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
 
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         
@@ -876,6 +978,7 @@ with shared.gradio_root:
         ctrls += [input_image_checkbox, current_tab]
         ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
+        ctrls += [layer_method, layer_input_image, iclight_enable, iclight_source_radio]
         ctrls += [disable_preview, disable_intermediate_results, disable_seed_increment, black_out_nsfw]
         ctrls += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg, clip_skip]
         ctrls += [sampler_name, scheduler_name, vae_name]
@@ -926,7 +1029,7 @@ with shared.gradio_root:
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=False)
 
-        def trigger_metadata_import(filepath, state_is_generating):
+        def trigger_metadata_import(filepath, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(filepath)
             if parameters is None:
                 print('Could not find metadata in the image!')
@@ -934,18 +1037,48 @@ with shared.gradio_root:
             else:
                 metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                 parsed_parameters = metadata_parser.to_json(parameters)
+            
+            get_meta_value = lambda x1,x2,y: (y if x1 not in parsed_parameters else parsed_parameters[x1]) if x2 not in parsed_parameters else parsed_parameters[x2]
+
+            backend_engine = get_meta_value("Backend Engine", 'backend_engine', 'SDXL-Fooocus')
+            if backend_engine=='Hunyuan-DiT':
+                backend_engine = flags.backend_engines[1]
+            elif backend_engine=='SD3-medium':
+                backend_engine = flags.backend_engines[2]
+            else:
+                backend_engine = flags.backend_engines[0]
+            parsed_parameters.update({'backend_engine': backend_engine})
+            engine_preset = state_params[f'{backend_engine}_preset_value']
+            engine_preset[1] = get_meta_value('performance', 'Performance', engine_preset[1])
+            engine_preset[2] = [f[1:-1] for f in get_meta_value('styles', 'Styles', str(engine_preset[2]))[1:-1].split(', ')]
+            if engine_preset[2] == ['']:
+                engine_preset[2] = []
+            engine_preset[3] = float(get_meta_value('guidance_scale', 'Guidance Scale', engine_preset[3]))
+            engine_preset[4] = int(get_meta_value('steps', 'Steps', engine_preset[4]))
+            engine_preset[5] = get_meta_value('sampler', 'Sampler', engine_preset[5])
+            engine_preset[6] = get_meta_value('scheduler', 'Scheduler', engine_preset[6])
+            engine_preset[7] = get_meta_value('base_model', 'Base Model', engine_preset[7])
+            state_params[f'{backend_engine}_preset_value'] = engine_preset
+            engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
+            aspect_ratio = get_meta_value('resolution', 'Resolution', '(0, 0)')
+            if aspect_ratio!='(0, 0)':
+                width, height = eval(aspect_ratio)
+                engine_aspect_ratio = modules.config.add_ratio(f'{width}*{height}')
+                state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
+            refiner_model = get_meta_value("Refiner Model", 'refiner_model', 'None')
+            parsed_parameters.update({'refiner_model': refiner_model})
 
             return modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating)
 
-        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=True) \
+        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=load_data_outputs+[backend_selection], queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         reset_params = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
         reset_params_in = ctrls[2:] + [seed_random]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
         nav_bars = [bar_title, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button]
-        protections = [prompt, random_button, translator_button, super_prompter, background_theme] + nav_bars[1:]
-        generate_button.click(topbar.process_before_generation, inputs=state_topbar, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_tools_checkbox] + protections, show_progress=False) \
+        protections = [prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars[1:]
+        generate_button.click(topbar.process_before_generation, inputs=state_topbar, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections, show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
@@ -997,75 +1130,70 @@ with shared.gradio_root:
     params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
     
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box, state_topbar], show_progress=False)
-    params_note_regen_button.click(toolbox.reset_image_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box, state_topbar], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_image_params, inputs=state_topbar, outputs=reset_params + [params_note_regen_button, params_note_box, state_topbar, backend_selection], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box, state_topbar], show_progress=False)
-    params_note_preset_button.click(toolbox.save_preset, inputs= reset_params_in + [params_note_input_name, state_topbar], outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar] + nav_bars, show_progress=False) \
+    params_note_preset_button.click(toolbox.save_preset, inputs= reset_params_in + [params_note_input_name, state_topbar, backend_selection], outputs=[params_note_input_name, params_note_preset_button, params_note_box, state_topbar] + nav_bars, show_progress=False) \
         .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, queue=False, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js)
 
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
-    reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_timing, translation_methods]
-    reset_preset_all = [backend_selection] + reset_params + reset_preset_fun + nav_bars + [output_format] + [state_topbar]
+    reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
+    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [output_format, state_topbar, backend_selection]
     
-    preset_down_confirm_button.click(topbar.down_absent_model, inputs=state_topbar, outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
-               .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
-               .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
-               .then(fn=lambda: None, _js='refresh_grid_delayed')
-    preset_down_cancel_button.click(fn=lambda: gr.update(visible=False), outputs=preset_down_note, show_progress=False)
+    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 
-    bar0_button.click(topbar.check_absent_model, inputs=[bar0_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar0_button.click(topbar.check_absent_model, inputs=[bar0_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar1_button.click(topbar.check_absent_model, inputs=[bar1_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar1_button.click(topbar.check_absent_model, inputs=[bar1_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar2_button.click(topbar.check_absent_model, inputs=[bar2_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar2_button.click(topbar.check_absent_model, inputs=[bar2_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar3_button.click(topbar.check_absent_model, inputs=[bar3_button, state_topbar], outputs=[preset_down_note, state_topbar], show_progress=False) \
-               .then(topbar.reset_params_for_preset, inputs=state_topbar, outputs=reset_preset_all, show_progress=False) \
+    bar3_button.click(topbar.check_absent_model, inputs=[bar3_button, state_topbar], outputs=[state_topbar], show_progress=False) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar4_button.click(topbar.check_absent_model, inputs=[bar4_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar4_button.click(topbar.check_absent_model, inputs=[bar4_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar5_button.click(topbar.check_absent_model, inputs=[bar5_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar5_button.click(topbar.check_absent_model, inputs=[bar5_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar6_button.click(topbar.check_absent_model, inputs=[bar6_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar6_button.click(topbar.check_absent_model, inputs=[bar6_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar7_button.click(topbar.check_absent_model, inputs=[bar7_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar7_button.click(topbar.check_absent_model, inputs=[bar7_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
-    bar8_button.click(topbar.check_absent_model, inputs=[bar8_button, state_topbar], outputs=[preset_down_note, state_topbar]) \
-               .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+    bar8_button.click(topbar.check_absent_model, inputs=[bar8_button, state_topbar], outputs=[state_topbar]) \
+               .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, image_tools_checkbox, inpaint_mask_upload_checkbox, preset_instruction], show_progress=False) \
-                      .then(topbar.reset_params_for_preset, inputs=[state_topbar], outputs=reset_preset_all, show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_mask_upload_checkbox, preset_instruction], show_progress=False) \
+                      .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]).then(fn=lambda: None, _js='refresh_grid_delayed')
@@ -1090,6 +1218,21 @@ import logging
 import httpx
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)
+
+import logging
+import httpx
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.WARNING)
+hydit_logger = logging.getLogger("hydit")
+hydit_logger.setLevel(logging.WARNING)
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+launch.reset_env_args()
+
+if args_manager.args.enable_comfyd:
+    comfyd.start(args_comfyd)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

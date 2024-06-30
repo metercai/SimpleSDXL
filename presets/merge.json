@@ -39,7 +39,7 @@
     "default_aspect_ratio": "1152*896",
     "default_overwrite_step": 24,
     "checkpoint_downloads": {
-        "albedobaseXL_v21.safetensors": "https://huggingface.co/metercai/SimpleSDXL/resolve/main/checkpoints/albedobaseXL_v21.safetensors"
+        "albedobaseXL_v21.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/albedobaseXL_v21.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {},

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-base-ubuntu22.04
+FROM simpleai/cuda:12.4.1-base-ubuntu22.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV CMDARGS --listen
 
@@ -7,6 +7,7 @@ RUN apt-get update -y && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
+COPY enhanced/libs/* /enhanced/libs/
 COPY requirements_docker.txt requirements_versions.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements_docker.txt -r /tmp/requirements_versions.txt && \
 	rm -f /tmp/requirements_docker.txt /tmp/requirements_versions.txt

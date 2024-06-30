@@ -6,6 +6,9 @@
 -element- god;male
 -element- goddess;female
 -musicgenre-mancer;both
+-pokemontype- type;both
+-humanoid- queen;female
+-humanoid- king;male
 Abbot;both
 Abjurer;both
 Acrobat;both
@@ -68,13 +71,13 @@ Boss;both
 Bookbinder;both
 Botanist;both
 Bounty hunter;both
-Brewer;both
+Brawler;both
 Brewer;both
 Bride;female
 Brigadier General;both
 Businessperson;both
 Butcher;both
-Butcher;both
+Bully;both
 Calligrapher;both
 Canon;both
 Captain;both
@@ -89,6 +92,7 @@ CEO;both
 Chancellor;both
 Chaos mage;both
 Chaplain;both
+Chairperson;both
 Chauffeur;both
 Cheerleader;female
 Chef;both
@@ -136,8 +140,10 @@ Death knight;both
 Death knight;both
 Deep-Sea Diver;both
 Defender;both
-Demon hunter;both
+Demonist;both
 Demon Hunter;both
+Demon Queen;female
+Demon King;male
 Designer;both
 Detective;both
 Diplomat;both
@@ -242,6 +248,7 @@ Historian;both
 Hillbilly;both
 Hooded figure;both
 Humanitarian;both
+Humorist;both
 hunk;male
 Hunter;both
 Ice Cream Vendor;both
@@ -470,6 +477,7 @@ Steeplejack;both
 Stormtrooper;both
 Student;both
 Sultan;both
+Skank;female
 Summoner;both
 Sumo Wrestler;both
 Super model;female
@@ -479,6 +487,7 @@ Surgeon;both
 Surveyor;both
 Swashbuckler;both
 Sword bearer;both
+Sysadmin;both
 Tailor;both
 Tanner;both
 Tax collector;both
@@ -505,6 +514,7 @@ Traveler;both
 Tribal Chief;both
 Trickster;both
 Troubadour;both
+Twink;male
 Vagabond;both
 Valedictorian;both
 Valet;both

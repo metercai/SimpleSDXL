@@ -5,6 +5,7 @@ import numbers
 
 import args_manager
 import tempfile
+import shared
 import modules.flags
 import modules.sdxl_styles
 import enhanced.all_parameters as ads
@@ -40,7 +41,10 @@ try:
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as json_file:
             config_dict.update(json.load(json_file))
-            always_save_keys = list(config_dict.keys())
+        always_save_keys = list(config_dict.keys())
+        for key in always_save_keys:
+            if key.startswith('default_') and key[8:] in ads.default:
+                ads.default[key[8:]] = config_dict[key]
         print(f'Load config data from {config_path}.')
 except Exception as e:
     print(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
@@ -204,6 +208,10 @@ path_llms = get_dir_or_set_default('path_llms','../models/llms/')
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
 path_outputs = get_path_output()
+path_models_root = get_dir_or_set_default('path_models_root', '../models/')
+path_unet = get_dir_or_set_default('path_unet', '../models/unet')
+path_rembg = get_dir_or_set_default('path_rembg', '../models/rembg')
+path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
 
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
@@ -290,7 +298,7 @@ default_loras = get_config_item_or_set_default(
 default_loras = [(y[0], y[1], y[2]) if len(y) == 3 else (True, y[0], y[1]) for y in default_loras]
 default_max_lora_number = get_config_item_or_set_default(
     key='default_max_lora_number',
-    default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else 5,
+    default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else ads.default['max_lora_number'],
     validator=lambda x: isinstance(x, int) and x >= 1
 )
 
@@ -335,13 +343,13 @@ default_refiner_switch = get_config_item_or_set_default(
 )
 default_loras_min_weight = get_config_item_or_set_default(
     key='default_loras_min_weight',
-    default_value=-2,
+    default_value=ads.default['loras_min_weight'],
     validator=lambda x: isinstance(x, numbers.Number) and -10 <= x <= 10,
     expected_type=numbers.Number
 )
 default_loras_max_weight = get_config_item_or_set_default(
     key='default_loras_max_weight',
-    default_value=2,
+    default_value=ads.default['loras_max_weight'],
     validator=lambda x: isinstance(x, numbers.Number) and -10 <= x <= 10,
     expected_type=numbers.Number
 )
@@ -407,25 +415,25 @@ default_performance = get_config_item_or_set_default(
 )
 default_advanced_checkbox = get_config_item_or_set_default(
     key='default_advanced_checkbox',
-    default_value=True,
+    default_value=ads.default['advanced_checkbox'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
 default_max_image_number = get_config_item_or_set_default(
     key='default_max_image_number',
-    default_value=32,
+    default_value=ads.default['max_image_number'],
     validator=lambda x: isinstance(x, int) and x >= 1,
     expected_type=int
 )
 default_output_format = get_config_item_or_set_default(
     key='default_output_format',
-    default_value='png',
+    default_value=ads.default['output_format'],
     validator=lambda x: x in OutputFormat.list(),
     expected_type=str
 )
 default_image_number = get_config_item_or_set_default(
     key='default_image_number',
-    default_value=2,
+    default_value=ads.default['image_number'],
     validator=lambda x: isinstance(x, int) and 1 <= x <= default_max_image_number,
     expected_type=int
 )
@@ -512,13 +520,13 @@ default_black_out_nsfw = get_config_item_or_set_default(
 )
 default_save_metadata_to_images = get_config_item_or_set_default(
     key='default_save_metadata_to_images',
-    default_value=False,
+    default_value=ads.default['save_metadata_to_images'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
 default_metadata_scheme = get_config_item_or_set_default(
     key='default_metadata_scheme',
-    default_value=MetadataScheme.SIMPLE.value,
+    default_value=ads.default['metadata_scheme'],
     validator=lambda x: x in [y[1] for y in modules.flags.metadata_scheme if y[1] == x],
     expected_type=str
 )
@@ -551,26 +559,26 @@ default_inpaint_mask_sam_model = get_config_item_or_set_default(
 
 default_translation_methods = get_config_item_or_set_default(
     key='default_translation_methods',
-    default_value='Big Model',
+    default_value=ads.default['translation_methods'],
     validator=lambda x: x in modules.flags.translation_methods
-)
-
-default_translation_timing = get_config_item_or_set_default(
-    key='default_translation_timing',
-    default_value='Translate then generate',
-    validator=lambda x: x in modules.flags.translation_timing
 )
 
 default_backfill_prompt = get_config_item_or_set_default(
     key='default_backfill_prompt',
-    default_value=False,
+    default_value=ads.default['backfill_prompt'],
     validator=lambda x: isinstance(x, bool)
 )
 
 default_backend = get_config_item_or_set_default(
     key='default_backend',
-    default_value='SDXL',
-    validator=lambda x: x in modules.flags.backend_engine_list
+    default_value=ads.default['backend'],
+    validator=lambda x: x in modules.flags.backend_engines
+)
+
+default_comfyd_active_checkbox = get_config_item_or_set_default(
+    key='default_comfyd_active_checkbox',
+    default_value=ads.default['comfyd_active_checkbox'],
+    validator=lambda x: isinstance(x, bool)
 )
 
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
@@ -621,28 +629,31 @@ def add_ratio(x):
     a, b = x.replace('*', ' ').split(' ')[:2]
     a, b = int(a), int(b)
     g = math.gcd(a, b)
-    c, d = 1, 1
-    if g<8:
-        if (a, b) == (768, 1366):
-            c, d = 9, 16
-        elif (a, b) == (915, 1144):
-            c, d = 4, 5
-        elif (a, b) == (1182, 886):
-            c, d = 4, 3
-        elif (a, b) == (1366, 768):
-            c, d = 16, 9
-        elif (a, b) == (1564, 670):
-            c, d = 21, 9
-    else:
-        c, d = a // g, b // g
+    c, d = a // g, b // g
+    if (a, b) == (576, 1344):
+        c, d = 9, 21
+    elif (a, b) == (1344, 576):
+        c, d = 21, 9
+    elif (a, b) == (768, 1280):
+        c, d = 9, 15
+    elif (a, b) == (1280, 768):
+        c, d = 15, 9
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
 default_aspect_ratio = add_ratio(default_aspect_ratio)
 available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
-sd3_default_aspect_ratio = '16:9'
-sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+#sd3_default_aspect_ratio = '16:9'
+#sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
+sd3_default_aspect_ratio = add_ratio('1024*1024')
+sd3_available_aspect_ratios = [
+        '576*1344', '768*1152', '896*1152', '768*1280', '960*1280',  
+        '1024*1024', '1024*1280', '1280*1280', '1280*1024',
+        '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'
+    ]
+sd3_available_aspect_ratios = [add_ratio(x) for x in sd3_available_aspect_ratios]
+
 
 # Only write config in the first launch.
 if not os.path.exists(config_path):
@@ -659,6 +670,26 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
                     + 'Remember to split the paths with "\\\\" rather than "\\", '
                       'and there is no "," before the last "}". \n\n\n')
     json.dump({k: config_dict[k] for k in visited_keys}, json_file, indent=4)
+
+config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
+config_comfy_formatted_text = '''
+comfyui:
+     checkpoints: {checkpoints} 
+     clip_vision: {clip_vision}
+     controlnet: {controlnet}
+     embeddings: {embeddings}
+     loras: {loras}
+     upscale_models: {upscale_models}
+     unet: {unet}
+     rembg: {rembg}
+     layer_model: {layer_model}
+     '''
+
+paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
+with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
+    comfy_file.write(config_comfy_text)
+
 
 model_filenames = []
 lora_filenames = []
@@ -836,5 +867,18 @@ def downloading_superprompter_model():
     )
     return os.path.join(path_superprompter, 'model.safetensors')
 
+def downloading_sd3_medium_model():
+    load_file_from_url(
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors',
+        model_dir=paths_checkpoints[0],
+        file_name='sd3_medium_incl_clips.safetensors'
+    )
+    return os.path.join(paths_checkpoints[0], 'sd3_medium_incl_clips.safetensors')
 
 update_files()
+from enhanced.simpleai import simpleai_config, refresh_models_info 
+simpleai_config.paths_checkpoints = paths_checkpoints
+simpleai_config.paths_loras = paths_loras
+simpleai_config.path_embeddings = path_embeddings
+
+refresh_models_info()

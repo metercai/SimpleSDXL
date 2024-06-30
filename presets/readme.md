@@ -63,7 +63,6 @@
   default_freeu                                     # 默认FreeU参数: [b1, b2, s1, s2]
   default_seed                                      # 默认种子
   default_backfill_prompt                           # 默认浏览图片回填提示词
-  default_translation_timing                        # 默认翻译器介入时点
   default_translation_methods                       # 默认翻译器模型
   checkpoint_downloads                              # 模型下载
   lora_downloads                                    # LoRA下载
