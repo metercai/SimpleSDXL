@@ -86,5 +86,5 @@ src/
 test/
 *.did
 client.toml
-/models/t2i
+/models/hydit
 /comfy
