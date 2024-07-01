@@ -1,6 +1,5 @@
 import os
 import sys
-from modules.launch_util import is_installed, run_pip
 
 if len(sys.argv) < 2:
     print("Usage: python launch_with_commit.py <commit_hash>")
@@ -11,6 +10,7 @@ root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
 os.chdir(root)
 
+from modules.launch_util import is_installed, run_pip
 
 try:
     if not is_installed("simpleai_base"):
