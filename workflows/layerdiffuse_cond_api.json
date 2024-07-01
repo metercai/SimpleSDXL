@@ -1,7 +1,7 @@
 {
   "3": {
     "inputs": {
-      "seed": 991458235975350,
+      "seed": 795135597808708,
       "steps": 30,
       "cfg": 4,
       "sampler_name": "dpmpp_2m_sde_gpu",
@@ -100,7 +100,7 @@
   "20": {
     "inputs": {
       "images": [
-        "14",
+        "42",
         0
       ]
     },
@@ -138,7 +138,7 @@
   "29": {
     "inputs": {
       "pixels": [
-        "33",
+        "38",
         0
       ],
       "vae": [
@@ -153,7 +153,7 @@
   },
   "30": {
     "inputs": {
-      "image": "2024-03-07_17-57-20_1318.jpg",
+      "image": "welcome2.jpg",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -170,7 +170,7 @@
       "condition": "always",
       "multiple_of": 8,
       "image": [
-        "38",
+        "30",
         0
       ]
     },
@@ -182,7 +182,7 @@
   "36": {
     "inputs": {
       "images": [
-        "14",
+        "42",
         0
       ]
     },
@@ -197,7 +197,7 @@
       "image_output": "Preview",
       "save_prefix": "ComfyUI",
       "images": [
-        "30",
+        "33",
         0
       ]
     },
@@ -226,12 +226,12 @@
   },
   "40": {
     "inputs": {
-      "seed": 201673959389453,
-      "steps": 30,
+      "seed": 800548109459035,
+      "steps": 20,
       "cfg": 4,
       "sampler_name": "dpmpp_2m_sde_gpu",
       "scheduler": "karras",
-      "denoise": 0.2,
+      "denoise": 0.3,
       "model": [
         "4",
         0
@@ -252,6 +252,42 @@
     "class_type": "KSampler",
     "_meta": {
       "title": "main_sampler"
+    }
+  },
+  "41": {
+    "inputs": {
+      "amount": 6,
+      "mask": [
+        "37",
+        1
+      ]
+    },
+    "class_type": "MaskBlur+",
+    "_meta": {
+      "title": "🔧 Mask Blur"
+    }
+  },
+  "42": {
+    "inputs": {
+      "mode": "add",
+      "blur_sigma": 6,
+      "blend_factor": 1,
+      "target": [
+        "14",
+        0
+      ],
+      "source": [
+        "30",
+        0
+      ],
+      "mask": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "DetailTransfer",
+    "_meta": {
+      "title": "Detail Transfer"
     }
   }
 }
