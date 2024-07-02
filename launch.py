@@ -172,11 +172,11 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
 prepare_environment()
-build_launcher()
 args = ini_args()
 
 if args.gpu_device_id is not None:
