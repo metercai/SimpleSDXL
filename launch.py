@@ -57,25 +57,34 @@ def prepare_environment():
     sys.path.append(str(repo_dir(comfyui_name)))
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.9"
+    ver_required = "0.3.15"
+    REINSTALL_BASE = False
+    base_file = {
+        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
+        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
+        }
+    #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+        run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
-        if packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+        if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_pkg}=={ver_required} -i https://pypi.org/simple', f'Install {base_pkg} {ver_required}')
+            run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
+
 
     from simpleai_base import simpleai_base
     print("Checking ...")
     token = simpleai_base.init_local(f'SimpleSDXL_User')
+    sysinfo = json.loads(token.get_sysinfo().to_json())
+    print(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, SWAP: {sysinfo["ram_swap"]}MB, DiskFree: {sysinfo["disk_free"]}MB')
 
     if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
         run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
 
     if TRY_INSTALL_XFORMERS:
         if REINSTALL_ALL or not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.23')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.26')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
                     run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
@@ -119,8 +128,8 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
-prepare_environment()
 build_launcher()
+prepare_environment()
 args = ini_args()
 
 if args.gpu_device_id is not None:
