@@ -72,6 +72,8 @@ def check_base_environment():
     token = simpleai_base.init_local(f'SimpleSDXL_User')
     sysinfo = json.loads(token.get_sysinfo().to_json())
     sysinfo.update(dict(did=token.get_did()))
+    print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, SWAP: {sysinfo["ram_swap"]}MB, DiskFree: {sysinfo["disk_free"]}MB')
+
     return token, sysinfo
 
 #Intel Arc
