@@ -22,7 +22,7 @@ def build_launcher():
     for (name, cmd) in branchs.items():
         win32_cmd_preset = win32_cmd.replace('{cmds}', f'{cmd}')
         bat_path = os.path.join(win32_root, f'run_{name}.bat')
-        if not os.path.exists(bat_path) or bat_path=='run_SimpleSDXL_commit.bat':
+        if not os.path.exists(bat_path) or name=='SimpleSDXL_commit':
             with open(bat_path, "w", encoding="utf-8") as f:
                 f.write(win32_cmd_preset)
     return
