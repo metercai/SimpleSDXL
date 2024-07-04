@@ -943,6 +943,8 @@ def worker():
                     progressbar(async_task, current_progress, 'Checking for NSFW content ...')
                     imgs = default_censor(imgs)
 
+                if ldm_patched.modules.model_management.is_nvidia():
+                    print(f'[Fooocus] Max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated: {torch.cuda.memory_allocated()/1024/1024:.3f}MB, cached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
                 for x in imgs:
                     d = [('Prompt', 'prompt', task['log_positive_prompt']),
