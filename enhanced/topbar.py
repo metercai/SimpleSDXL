@@ -421,11 +421,17 @@ def reset_context(state_params):
         "Sampler": f'{ads.default["sampler_name"]}' if 'default_sampler' not in keys else config_preset["default_sampler"],
         "Scheduler": f'{ads.default["scheduler_name"]}' if 'default_scheduler' not in keys else config_preset["default_scheduler"]
         })
-    if "default_aspect_ratio" in keys and config.add_ratio(config_preset["default_aspect_ratio"]) in config.available_aspect_ratios:
-        aspect_ratio = config_preset["default_aspect_ratio"].split('*')
-        info_preset.update({'Resolution': f'({aspect_ratio[0]}, {aspect_ratio[1]})'})
-    else:
-        info_preset.update({"Resolution": '(1152, 896)'})
+
+    get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
+    backend_engine = get_preset_value('default_backend', 'SDXL')
+    aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
+    if backend_engine == modules.flags.backend_engines[2] and aspect_ratio not in config.sd3_available_aspect_ratios:
+        aspect_ratio = config.sd3_default_aspect_ratio
+    elif backend_engine == modules.flags.backend_engines[1] and aspect_ratio not in hydit_task.available_aspect_ratios:
+        aspect_ratio = hydit_task.default_aspect_ratio
+    aspect_ratio = aspect_ratio.split('*')
+    info_preset.update({'Resolution': f'({aspect_ratio[0]}, {aspect_ratio[1]})'})
+    
     adm_scaler_positive = ads.default["adm_scaler_positive"] if "default_adm_scaler_positive" not in keys else config_preset["default_adm_scaler_positive"]
     adm_scaler_negative = ads.default["adm_scaler_negative"] if "default_adm_scaler_negative" not in keys else config_preset["default_adm_scaler_negative"]
     adm_scaler_end = ads.default["adm_scaler_end"] if "default_adm_scaler_end" not in keys else config_preset["default_adm_scaler_end"]
@@ -511,8 +517,6 @@ def reset_context(state_params):
     results += update_in_keys("output_format")
     results += [state_params]
    
-    get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
-    backend_engine = get_preset_value('default_backend', 'SDXL')
     engine_preset = state_params[f'{backend_engine}_preset_value']
     engine_preset[1] = get_preset_value('default_performance', engine_preset[1])
     engine_preset[2] = get_preset_value('default_styles', engine_preset[2])
@@ -526,7 +530,6 @@ def reset_context(state_params):
     engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])
     state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
     results += [backend_engine]
-
     system_message = 'system message was displayed!'
     return results
 
