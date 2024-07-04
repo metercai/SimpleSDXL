@@ -185,7 +185,7 @@ if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-if args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192:
+if not args.disable_async_cuda_allocation and (args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192):
     env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
     if env_var is None:
         env_var = "backend:cudaMallocAsync"
