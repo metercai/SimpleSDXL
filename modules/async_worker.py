@@ -1060,8 +1060,16 @@ def worker():
                     imgs = default_censor(imgs)
 
                 if ldm_patched.modules.model_management.is_nvidia():
-                    print(f'[Fooocus] Max_memory_allocated: {torch.cuda.max_memory_allocated()/ 1024 / 1024 / 1024:.2f}GB')
+                    print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
+                
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
+                if is_comfy_task or is_hydit_task or is_SD3m_task:
+                    refiner_model_name = ''
+                    refiner_switch = 1.0
+                    if is_hydit_task:
+                        base_model_name = 'hydit_v1.1_fp16.safetensors'
+                    loras = []
+
                 for x in imgs:
                     d = [('Prompt', 'prompt', task['log_positive_prompt']),
                          ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
@@ -1079,13 +1087,7 @@ def worker():
                           ('ADM Guidance', 'adm_guidance', str((
                               modules.patch.patch_settings[pid].positive_adm_scale,
                               modules.patch.patch_settings[pid].negative_adm_scale,
-                              modules.patch.patch_settings[pid].adm_scaler_end)))]
-                    if is_comfy_task or is_hydit_task or is_SD3m_task:
-                        refiner_model_name = ''
-                        refiner_switch = 1.0
-                        if is_hydit_task:
-                            base_model_name = 'hydit_v1.1_fp16.safetensors'
-                    d += [
+                              modules.patch.patch_settings[pid].adm_scaler_end))),
                           ('Base Model', 'base_model', base_model_name),
                           ('Refiner Model', 'refiner_model', refiner_model_name),
                           ('Refiner Switch', 'refiner_switch', refiner_switch)]
@@ -1113,13 +1115,10 @@ def worker():
                     for li, (n, w) in enumerate(loras):
                         if n != 'None' and not is_hydit_task and not is_comfy_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
-                    if is_hydit_task or is_comfy_task or is_SD3m_task:
-                        loras = []
 
                     metadata_parser = None
                     if save_metadata_to_images:
                         styles_name = task['styles'] if not use_expansion else [fooocus_expansion] + task['styles']
-                        #styles_name = [f[1:-1] for f in str(raw_style_selections)[1:-1].split(', ')]
                         styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k and k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
                         metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                         metadata_parser.set_data(task['log_positive_prompt'], task['positive'],

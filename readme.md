@@ -25,6 +25,9 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
   - 不更新启动：run_SimpleSDXL_without_update.bat
   - 启动开发测试版：run_SimpleSDXL_dev.bat
 
+### 如果机器显卡配置较低，可选择不升级，运行旧版
+- SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.exe.7z (28G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z)
+- 解压前仍然需要去掉`.7z`的尾缀
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
@@ -93,13 +96,6 @@ Enhanced parameter management for instant viewing and embedding of images, and c
 - [x] **查看参数** 从出图日志文件中提取当前图片的生成参数并用浮层完整展示。图集切换过程中，浮层内容跟随切换。
 - [x] **提参重生** 用当前图片的生成参数覆盖默认预置包的参数，提示词回填，可以修改参数或提示词后重新出图。
 - [x] **嵌参图片** 在系统未设置统一嵌参的情况，可以制作当前图片的参数打包嵌入，并保存到专属的嵌参图片目录。嵌参图片可通过图片描述工具提取参数形成新的出图环境配置。
-
-### 启动包和升级包
-- [x] **启动流程优化** 对接国内模型下载源，根据接入位置区分语言和下载源。国内IP默认中文，国内源；国外IP默认英文，国外源。提供启动参数可自定义覆盖默认值，满足科学魔法的适配需求。
-- [x] **安装包瘦身** 用最小必备组件进行打包，生成一键安装包，从Fooocus主线的1.8G瘦身到81M。支持Fooocus配置文件的设置，可以共享模型和图片输出目录。
-- [x] **整合完全包** 整合所有必要资源文件打包形成的完全包，一次下载，运行后就可直接出图。
-- [x] **日志消息** 每次启动自动检测Fooocus主线和SimpleSDXL的更新日志，将更新消息显示到顶部消息浮层。
-- [x] **版本标识** 以发布日期和版本哈希值作为SimpleSDXL的版本标识，方便定位排错。
 
 ### 算力云化及其他
 - [x] **云化适配** 增加访问根路径启动参数，`--webroot`。当在云端服务器部署，并配置前置转发后，需要配置根路径参数，避免URL路径的混乱。
