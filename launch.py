@@ -62,9 +62,9 @@ def check_base_environment():
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
             print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
-            print(f'受组件安装限制，SimpleSDXL2新版本需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址：https://hf-mirror.com/metercai/SimpleSDXL2/')
+            print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元和SD3支持,增加Comfy后端)需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址见：https://hf-mirror.com/metercai/SimpleSDXL2/')
             print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
-            print(f'如果不升级，可点击：run_SimpleSDXL_commit.bat 继续运行旧版本。')
+            print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
             sys.exit(0)
 
     from simpleai_base import simpleai_base
@@ -72,6 +72,8 @@ def check_base_environment():
     token = simpleai_base.init_local(f'SimpleSDXL_User')
     sysinfo = json.loads(token.get_sysinfo().to_json())
     sysinfo.update(dict(did=token.get_did()))
+    print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB')
+
     return token, sysinfo
 
 #Intel Arc
@@ -172,24 +174,23 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
 prepare_environment()
-build_launcher()
 args = ini_args()
 
 if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-if args.async_cuda_allocation or sysinfo["gpu_memory"] <= 8192:
+if not args.disable_async_cuda_allocation and args.async_cuda_allocation:
     env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
     if env_var is None:
         env_var = "backend:cudaMallocAsync"
     else:
         env_var += ",backend:cudaMallocAsync"
-
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
 
 

@@ -1,9 +1,8 @@
 import os
-import launch
 
 gradio_root = None
 
-root = launch.root
+root = os.path.dirname(os.path.abspath(__file__))
 
 torch_device = ''
 

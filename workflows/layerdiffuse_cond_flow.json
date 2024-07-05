@@ -1,268 +1,12 @@
 {
-  "last_node_id": 40,
-  "last_link_id": 26,
+  "last_node_id": 42,
+  "last_link_id": 33,
   "nodes": [
-    {
-      "id": 5,
-      "type": "EmptyLatentImage",
-      "pos": [
-        1845,
-        306
-      ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "width",
-          "type": "INT",
-          "link": 5,
-          "widget": {
-            "name": "width"
-          },
-          "label": "width"
-        },
-        {
-          "name": "height",
-          "type": "INT",
-          "link": 6,
-          "widget": {
-            "name": "height"
-          },
-          "label": "height"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "LATENT",
-          "type": "LATENT",
-          "links": [
-            4
-          ],
-          "shape": 3,
-          "label": "LATENT"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "EmptyLatentImage"
-      },
-      "widgets_values": [
-        512,
-        512,
-        1
-      ]
-    },
-    {
-      "id": 14,
-      "type": "VAEDecode",
-      "pos": [
-        3505,
-        130
-      ],
-      "size": {
-        "0": 210,
-        "1": 46
-      },
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "samples",
-          "type": "LATENT",
-          "link": 9,
-          "label": "samples"
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 10,
-          "label": "vae"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            11,
-            19
-          ],
-          "shape": 3,
-          "label": "IMAGE"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEDecode"
-      }
-    },
-    {
-      "id": 29,
-      "type": "VAEEncode",
-      "pos": [
-        1845,
-        130
-      ],
-      "size": {
-        "0": 210,
-        "1": 46
-      },
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "pixels",
-          "type": "IMAGE",
-          "link": 16,
-          "label": "pixels"
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 17,
-          "label": "vae"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "LATENT",
-          "type": "LATENT",
-          "links": [
-            15
-          ],
-          "shape": 3,
-          "label": "LATENT"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEEncode"
-      }
-    },
-    {
-      "id": 37,
-      "type": "easy imageRemBg",
-      "pos": [
-        515,
-        790
-      ],
-      "size": [
-        315,
-        314
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 20,
-          "label": "images"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "links": [
-            21
-          ],
-          "shape": 3,
-          "label": "image"
-        },
-        {
-          "name": "mask",
-          "type": "MASK",
-          "links": [
-            22
-          ],
-          "shape": 3,
-          "label": "mask"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "easy imageRemBg"
-      },
-      "widgets_values": [
-        "RMBG-1.4",
-        "Preview",
-        "ComfyUI"
-      ]
-    },
-    {
-      "id": 33,
-      "type": "ImageResize+",
-      "pos": [
-        1430,
-        130
-      ],
-      "size": {
-        "0": 315,
-        "1": 218
-      },
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 18,
-          "label": "image"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            16
-          ],
-          "shape": 3,
-          "label": "IMAGE"
-        },
-        {
-          "name": "width",
-          "type": "INT",
-          "links": [
-            5
-          ],
-          "shape": 3,
-          "label": "width"
-        },
-        {
-          "name": "height",
-          "type": "INT",
-          "links": [
-            6
-          ],
-          "shape": 3,
-          "label": "height"
-        }
-      ],
-      "title": "resize_input_image",
-      "properties": {
-        "Node name for S&R": "ImageResize+"
-      },
-      "widgets_values": [
-        1024,
-        1024,
-        "nearest",
-        true,
-        "always",
-        8
-      ]
-    },
     {
       "id": 3,
       "type": "KSampler",
       "pos": [
-        2675,
+        2570,
         130
       ],
       "size": [
@@ -270,7 +14,7 @@
         474
       ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -314,7 +58,7 @@
         "Node name for S&R": "KSampler"
       },
       "widgets_values": [
-        991458235975350,
+        795135597808708,
         "randomize",
         30,
         4,
@@ -324,43 +68,37 @@
       ]
     },
     {
-      "id": 40,
-      "type": "KSampler",
+      "id": 5,
+      "type": "EmptyLatentImage",
       "pos": [
-        3090,
-        130
+        1015,
+        386
       ],
-      "size": [
-        315,
-        474
-      ],
+      "size": {
+        "0": 315,
+        "1": 106
+      },
       "flags": {},
-      "order": 11,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
-          "name": "model",
-          "type": "MODEL",
-          "link": 23,
-          "label": "model"
+          "name": "width",
+          "type": "INT",
+          "link": 5,
+          "widget": {
+            "name": "width"
+          },
+          "label": "width"
         },
         {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "link": 24,
-          "label": "positive"
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "link": 25,
-          "label": "negative"
-        },
-        {
-          "name": "latent_image",
-          "type": "LATENT",
-          "link": 26,
-          "label": "latent_image"
+          "name": "height",
+          "type": "INT",
+          "link": 6,
+          "widget": {
+            "name": "height"
+          },
+          "label": "height"
         }
       ],
       "outputs": [
@@ -368,24 +106,19 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            9
+            4
           ],
           "shape": 3,
           "label": "LATENT"
         }
       ],
-      "title": "main_sampler",
       "properties": {
-        "Node name for S&R": "KSampler"
+        "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
-        201673959389453,
-        "randomize",
-        30,
-        4,
-        "dpmpp_2m_sde_gpu",
-        "karras",
-        0.2
+        512,
+        512,
+        1
       ]
     },
     {
@@ -473,206 +206,10 @@
       ]
     },
     {
-      "id": 30,
-      "type": "LoadImage",
-      "pos": [
-        100,
-        358
-      ],
-      "size": [
-        315,
-        314
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            20
-          ],
-          "shape": 3,
-          "label": "IMAGE"
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null,
-          "shape": 3,
-          "label": "MASK"
-        }
-      ],
-      "title": "input_image",
-      "properties": {
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "2024-03-07_17-57-20_1318.jpg",
-        "image"
-      ]
-    },
-    {
-      "id": 4,
-      "type": "CheckpointLoaderSimple",
-      "pos": [
-        100,
-        130
-      ],
-      "size": {
-        "0": 315,
-        "1": 98
-      },
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            12,
-            23
-          ],
-          "shape": 3,
-          "label": "MODEL"
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            7,
-            8
-          ],
-          "shape": 3,
-          "label": "CLIP"
-        },
-        {
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            10,
-            17
-          ],
-          "shape": 3,
-          "label": "VAE"
-        }
-      ],
-      "title": "base_model",
-      "properties": {
-        "Node name for S&R": "CheckpointLoaderSimple"
-      },
-      "widgets_values": [
-        "juggernaut-X-RunDiffusion-NSFW.safetensors"
-      ]
-    },
-    {
-      "id": 38,
-      "type": "BackgroundScaler",
-      "pos": [
-        1015,
-        130
-      ],
-      "size": {
-        "0": 315,
-        "1": 102
-      },
-      "flags": {},
-      "order": 5,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 21,
-          "label": "image"
-        },
-        {
-          "name": "mask",
-          "type": "MASK",
-          "link": 22,
-          "label": "mask"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            18
-          ],
-          "shape": 3,
-          "label": "IMAGE"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "BackgroundScaler"
-      },
-      "widgets_values": [
-        0.5,
-        false
-      ]
-    },
-    {
-      "id": 36,
-      "type": "SaveImageWebsocket",
-      "pos": [
-        3549,
-        352
-      ],
-      "size": [
-        210,
-        246
-      ],
-      "flags": {},
-      "order": 14,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 19,
-          "label": "images"
-        }
-      ],
-      "title": "result_image",
-      "properties": {
-        "Node name for S&R": "SaveImageWebsocket"
-      }
-    },
-    {
-      "id": 20,
-      "type": "PreviewImage",
-      "pos": [
-        3815,
-        130
-      ],
-      "size": [
-        210,
-        246
-      ],
-      "flags": {},
-      "order": 13,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 11,
-          "label": "images"
-        }
-      ],
-      "title": "result_image",
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      }
-    },
-    {
       "id": 28,
       "type": "LayeredDiffusionCondApply",
       "pos": [
-        2260,
+        2155,
         130
       ],
       "size": {
@@ -680,7 +217,7 @@
         "1": 142
       },
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -745,6 +282,567 @@
         "SDXL, Foreground",
         1
       ]
+    },
+    {
+      "id": 29,
+      "type": "VAEEncode",
+      "pos": [
+        1845,
+        130
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 16,
+          "label": "pixels"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 17,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            15
+          ],
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      }
+    },
+    {
+      "id": 33,
+      "type": "ImageResize+",
+      "pos": [
+        515,
+        790
+      ],
+      "size": {
+        "0": 315,
+        "1": 218
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 18,
+          "label": "image"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            20
+          ],
+          "shape": 3,
+          "label": "IMAGE"
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            5
+          ],
+          "shape": 3,
+          "label": "width"
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            6
+          ],
+          "shape": 3,
+          "label": "height"
+        }
+      ],
+      "title": "resize_input_image",
+      "properties": {
+        "Node name for S&R": "ImageResize+"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        "nearest",
+        true,
+        "always",
+        8
+      ]
+    },
+    {
+      "id": 37,
+      "type": "easy imageRemBg",
+      "pos": [
+        1015,
+        130
+      ],
+      "size": {
+        "0": 315,
+        "1": 314
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 20,
+          "label": "images"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            21
+          ],
+          "shape": 3,
+          "label": "image"
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [
+            22,
+            27
+          ],
+          "shape": 3,
+          "label": "mask"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "easy imageRemBg"
+      },
+      "widgets_values": [
+        "RMBG-1.4",
+        "Preview",
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 38,
+      "type": "BackgroundScaler",
+      "pos": [
+        1430,
+        130
+      ],
+      "size": {
+        "0": 315,
+        "1": 102
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 21,
+          "label": "image"
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 22,
+          "label": "mask"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            16
+          ],
+          "shape": 3,
+          "label": "IMAGE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BackgroundScaler"
+      },
+      "widgets_values": [
+        0.5,
+        false
+      ]
+    },
+    {
+      "id": 40,
+      "type": "KSampler",
+      "pos": [
+        2985,
+        130
+      ],
+      "size": [
+        315,
+        474
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 23,
+          "label": "model"
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 24,
+          "label": "positive"
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 25,
+          "label": "negative"
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 26,
+          "label": "latent_image"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            9
+          ],
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "title": "main_sampler",
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        800548109459035,
+        "randomize",
+        20,
+        4,
+        "dpmpp_2m_sde_gpu",
+        "karras",
+        0.3
+      ]
+    },
+    {
+      "id": 41,
+      "type": "MaskBlur+",
+      "pos": [
+        1430,
+        362
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 27,
+          "label": "mask"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            30
+          ],
+          "shape": 3,
+          "label": "MASK"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskBlur+"
+      },
+      "widgets_values": [
+        6
+      ]
+    },
+    {
+      "id": 30,
+      "type": "LoadImage",
+      "pos": [
+        100,
+        358
+      ],
+      "size": {
+        "0": 315,
+        "1": 314
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            18,
+            29
+          ],
+          "shape": 3,
+          "label": "IMAGE"
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3,
+          "label": "MASK"
+        }
+      ],
+      "title": "input_image",
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "welcome2.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        100,
+        130
+      ],
+      "size": {
+        "0": 315,
+        "1": 98
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            12,
+            23
+          ],
+          "shape": 3,
+          "label": "MODEL"
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            7,
+            8
+          ],
+          "shape": 3,
+          "label": "CLIP"
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            10,
+            17
+          ],
+          "shape": 3,
+          "label": "VAE"
+        }
+      ],
+      "title": "base_model",
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "juggernaut-X-RunDiffusion-NSFW.safetensors"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "VAEDecode",
+      "pos": [
+        3400,
+        130
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 9,
+          "label": "samples"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 10,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            32
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 42,
+      "type": "DetailTransfer",
+      "pos": [
+        3504,
+        429
+      ],
+      "size": {
+        "0": 315,
+        "1": 146
+      },
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "target",
+          "type": "IMAGE",
+          "link": 32,
+          "label": "target"
+        },
+        {
+          "name": "source",
+          "type": "IMAGE",
+          "link": 29,
+          "label": "source"
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 30,
+          "label": "mask"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            19,
+            33
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DetailTransfer"
+      },
+      "widgets_values": [
+        "add",
+        6,
+        1
+      ]
+    },
+    {
+      "id": 20,
+      "type": "PreviewImage",
+      "pos": [
+        3710,
+        130
+      ],
+      "size": [
+        210,
+        246
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 33,
+          "label": "images"
+        }
+      ],
+      "title": "result_image",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 36,
+      "type": "SaveImageWebsocket",
+      "pos": [
+        4125,
+        130
+      ],
+      "size": [
+        475.2260556623214,
+        599.5152306650724
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19,
+          "label": "images"
+        }
+      ],
+      "title": "result_image",
+      "properties": {
+        "Node name for S&R": "SaveImageWebsocket"
+      }
     }
   ],
   "links": [
@@ -829,14 +927,6 @@
       "VAE"
     ],
     [
-      11,
-      14,
-      0,
-      20,
-      0,
-      "IMAGE"
-    ],
-    [
       12,
       4,
       0,
@@ -870,7 +960,7 @@
     ],
     [
       16,
-      33,
+      38,
       0,
       29,
       0,
@@ -886,7 +976,7 @@
     ],
     [
       18,
-      38,
+      30,
       0,
       33,
       0,
@@ -894,7 +984,7 @@
     ],
     [
       19,
-      14,
+      42,
       0,
       36,
       0,
@@ -902,7 +992,7 @@
     ],
     [
       20,
-      30,
+      33,
       0,
       37,
       0,
@@ -955,16 +1045,56 @@
       40,
       3,
       "LATENT"
+    ],
+    [
+      27,
+      37,
+      1,
+      41,
+      0,
+      "MASK"
+    ],
+    [
+      29,
+      30,
+      0,
+      42,
+      1,
+      "IMAGE"
+    ],
+    [
+      30,
+      41,
+      0,
+      42,
+      2,
+      "MASK"
+    ],
+    [
+      32,
+      14,
+      0,
+      42,
+      0,
+      "IMAGE"
+    ],
+    [
+      33,
+      42,
+      0,
+      20,
+      0,
+      "IMAGE"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.9090909090909091,
+      "scale": 0.8264462809917354,
       "offset": [
-        -2088.6053277303267,
-        214.7993428445166
+        -2989.2481259748215,
+        115.33418339742764
       ]
     }
   },
