@@ -2,14 +2,14 @@ import gradio as gr
 import custom.OneButtonPrompt.shared
 from custom.OneButtonPrompt.shared import add_ctrl
 
-from random_prompt.build_dynamic_prompt import build_dynamic_prompt
+from random_prompt.build_dynamic_prompt import build_dynamic_prompt, OBPresets
 
 from random_prompt.csv_reader import load_config_csv
 
 from .modules.settings import default_settings
 from random_prompt.one_button_presets import OneButtonPresets
 
-OBPresets = OneButtonPresets()
+#OBPresets = OneButtonPresets()
 settings = default_settings
 custom_obp_values = OBPresets.get_obp_preset(settings["OBP_preset"])
 

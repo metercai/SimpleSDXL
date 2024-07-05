@@ -25,9 +25,8 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
   - 不更新启动：run_SimpleSDXL_without_update.bat
   - 启动开发测试版：run_SimpleSDXL_dev.bat
 
-### 如果机器显卡配置较低，可选择不升级，运行旧版
-- SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.exe.7z (28G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z)
-- 解压前仍然需要去掉`.7z`的尾缀
+### 如果对旧版情有独钟，可选择不升级，运行旧版
+- SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.zip (30G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.zip)
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
