@@ -875,6 +875,14 @@ def downloading_sd3_medium_model():
     )
     return os.path.join(paths_checkpoints[0], 'sd3_medium_incl_clips.safetensors')
 
+def downloading_base_sd15_model():
+    load_file_from_url(
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/realisticVisionV60B1_v51VAE.safetensors',
+        model_dir=paths_checkpoints[0],
+        file_name='realisticVisionV60B1_v51VAE.safetensors'
+    )
+    return os.path.join(paths_checkpoints[0], 'realisticVisionV60B1_v51VAE.safetensors')
+
 update_files()
 from enhanced.simpleai import simpleai_config, refresh_models_info 
 simpleai_config.paths_checkpoints = paths_checkpoints
