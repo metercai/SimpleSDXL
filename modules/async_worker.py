@@ -967,7 +967,8 @@ def worker():
             try:
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
-
+                
+                if is_comfy_task or is_SD3m_task:
                     default_params = dict(
                         prompt=task["positive"][0],
                         negative_prompt=task["negative"][0],
