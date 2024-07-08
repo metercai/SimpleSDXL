@@ -146,7 +146,10 @@ def get_images_prompt(choice, selected, max_per_page, display_index=False):
     page_choice = page
     page_index = selected
     parse_html_log(choice)
-    nums = len(images_list[choice])
+    if choice not in images_list.keys():
+        nums = len(refresh_images_catalog(choice))
+    else:
+        nums = len(images_list[choice])
     if page > 0:
         page = abs(page-math.ceil(nums/max_per_page))+1
         if page*max_per_page < nums:
