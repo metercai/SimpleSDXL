@@ -350,6 +350,8 @@ def reset_image_params(state_params):
         backend_engine = flags.backend_engines[1]
     elif backend_engine=='SD3-medium':
         backend_engine = flags.backend_engines[2]
+    elif backend_engine=='Kwai-Kolors':
+        backend_engine = flags.backend_engines[3] 
     else:
         backend_engine = flags.backend_engines[0]
     engine_preset = state_params[f'{backend_engine}_preset_value']

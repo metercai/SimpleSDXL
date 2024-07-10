@@ -48,6 +48,7 @@ def worker():
     import extras.face_crop
     import fooocus_version
     import args_manager
+    import enhanced.sd3_handle as sd3_handle
 
     from extras.censor import default_censor
     from modules.sdxl_styles import apply_style, get_random_style, fooocus_expansion, apply_arrays, random_style_name
@@ -59,9 +60,9 @@ def worker():
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
-    from enhanced.simpleai import comfyd, args_comfyd, comfyclient_pipeline as comfypipeline
+    from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
     from enhanced.comfy_task import get_comfy_task
-    
+
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
 
@@ -225,16 +226,40 @@ def worker():
         is_hydit_task =  ehps.backend_selection == flags.backend_engines[1]
         is_comfy_task = 'layer' in current_tab and input_image_checkbox
         is_SD3m_task = ehps.backend_selection == flags.backend_engines[2]
-
+        is_Kolors_task = ehps.backend_selection == flags.backend_engines[3]
+        sdxl_backend = flags.backend_engines[0]
+        hydit_backend = flags.backend_engines[1]
+        comfy_backend = 'Comfy'
+        task_backend = sdxl_backend
+        task_type_name = task_backend
+       
         if is_hydit_task:
             aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
+            task_backend = hydit_backend
+            task_type_name = task_backend
+            hydit_task.init_load_model()
+
         if is_SD3m_task:
             aspect_ratios_selection = ehps.sd3_aspect_ratios_selection
-        if not is_hydit_task:
+            task_backend = comfy_backend
+            task_type_name = flags.backend_engines[2]
+            comfyd.start()
+
+        if is_Kolors_task:
+            aspect_ratios_selection = ehps.kolors_aspect_ratios_selection
+            task_backend = comfy_backend
+            task_type_name = flags.backend_engines[3]
+            comfyd.start()
+
+        if is_comfy_task:
+            task_backend = comfy_backend
+            task_type_name = task_backend
+            comfyd.start()
+
+        if not is_hydit_task and not is_Kolors_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
             negative_prompt = translator.convert(negative_prompt, ehps.translation_methods)
 
-        import enhanced.sd3_handle as sd3_handle
         if is_SD3_task or is_SD3T_task:
             if is_SD3_task:
                 model = 'sd3'
@@ -508,7 +533,7 @@ def worker():
             extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
             extra_negative_prompts = negative_prompts[1:] if len(negative_prompts) > 1 else []
 
-            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+            if task_backend == sdxl_backend:
                 progressbar(async_task, 2, 'Loading models ...')
 
                 lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames, performance_selection)
@@ -586,7 +611,7 @@ def worker():
                     t['expansion'] = expansion
                     t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
 
-            if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+            if task_backend == sdxl_backend:
                 for i, t in enumerate(tasks):
                     progressbar(async_task, 5, f'Encoding positive #{i + 1} ...')
                     t['c'] = pipeline.clip_encode(texts=t['positive'], pool_top_k=t['positive_top_k'])
@@ -908,14 +933,10 @@ def worker():
 
             print(f'Using {scheduler_name} scheduler.')
 
-        if is_comfy_task:
-            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process Comfy Task ...', None)])
-        elif is_hydit_task:
-            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process HyDiT Task ...', None)])
-        elif is_SD3m_task:
-            async_task.yields.append(['preview', (flags.preparation_step_count, 'Process SD3m Task ...', None)])
-        else:
+        if task_backend == sdxl_backend:
             async_task.yields.append(['preview', (flags.preparation_step_count, 'Moving model to GPU ...', None)])
+        else:
+            async_task.yields.append(['preview', (flags.preparation_step_count, f'Process {task_type_name} Task ...', None)])
 
         def callback(step, x0, x, total_steps, y):
             done_steps = current_task_id * steps + step
@@ -944,31 +965,23 @@ def worker():
                 f'Sampling step {step + 1}/{steps}, image {current_task_id + 1}/{image_number} ...', y)])
             return callback_kwargs
 
-        task_type = ''
-        if is_hydit_task or is_comfy_task or is_SD3m_task:
+        if task_backend != sdxl_backend:
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
-            if is_comfy_task:
-                task_type = 'Comfy'
-            if is_hydit_task:
-                hydit_task.init_load_model()
-                task_type = 'HyDiT'
-            if is_SD3m_task:
-                task_type = 'SD3m'
 
         if ldm_patched.modules.model_management.is_nvidia():
             print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
 
         for current_task_id, task in enumerate(tasks):
             current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(current_task_id * steps) / float(all_steps))
-            progressbar(async_task, current_progress, f'Preparing {task_type} task {current_task_id + 1}/{image_number} ...')
+            progressbar(async_task, current_progress, f'Preparing {task_type_name} task {current_task_id + 1}/{image_number} ...')
             execution_start_time = time.perf_counter()
 
             try:
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
                 
-                if is_comfy_task or is_SD3m_task:
+                if task_backend == comfy_backend:
                     default_params = dict(
                         prompt=task["positive"][0],
                         negative_prompt=task["negative"][0],
@@ -989,6 +1002,9 @@ def worker():
                     if is_SD3m_task:
                         comfy_method = 'SD3m'
                         options = dict()
+                    elif is_Kolors_task:
+                        comfy_method = 'Kolors'
+                        options = dict()
                     else:
                         comfy_method = layer_method
                         options = dict(
@@ -1004,7 +1020,7 @@ def worker():
                         yield_result(async_task, empty_path, black_out_nsfw, do_not_show_finished_images=True)
                         imgs = empty_path
 
-                elif is_hydit_task:
+                elif task_backend == hydit_backend:
                     imgs = hydit_task.inferencer(
                         prompt=task["positive"][0],
                         negative_prompt=task["negative"][0],
@@ -1065,11 +1081,13 @@ def worker():
                     print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
                 
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
-                if is_comfy_task or is_hydit_task or is_SD3m_task:
+                if task_backend != sdxl_backend:
                     refiner_model_name = ''
                     refiner_switch = 1.0
                     if is_hydit_task:
                         base_model_name = 'hydit_v1.1_fp16.safetensors'
+                    elif is_Kolors_task:
+                        base_model_name = 'diffusers_kolors_fp16.safetensors'
                     loras = []
 
                 for x in imgs:
@@ -1103,11 +1121,11 @@ def worker():
                         d.append(
                             ('CFG Mimicking from TSNR', 'adaptive_cfg', modules.patch.patch_settings[pid].adaptive_cfg))
 
-                    if clip_skip > 1 and not is_comfy_task and not is_hydit_task:
+                    if clip_skip > 1 and task_backend == sdxl_backend:
                         d.append(('CLIP Skip', 'clip_skip', clip_skip))
                     d.append(('Sampler', 'sampler', sampler_name))
                     d.append(('Scheduler', 'scheduler', scheduler_name))
-                    if not is_comfy_task and not is_hydit_task and not is_SD3m_task:
+                    if task_backend == sdxl_backend:
                         d.append(('VAE', 'vae', vae_name))
                     d.append(('Seed', 'seed', str(task['task_seed'])))
 
@@ -1115,7 +1133,7 @@ def worker():
                         d.append(('FreeU', 'freeu', str((freeu_b1, freeu_b2, freeu_s1, freeu_s2))))
 
                     for li, (n, w) in enumerate(loras):
-                        if n != 'None' and not is_hydit_task and not is_comfy_task:
+                        if n != 'None' and not is_hydit_task and not is_comfy_task and not is_Kolors_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
                     metadata_parser = None
@@ -1130,6 +1148,8 @@ def worker():
                         d.append(('Backend Engine', 'backend_engine', 'Hunyuan-DiT'))
                     elif is_SD3m_task:
                         d.append(('Backend Engine', 'backend_engine', 'SD3-medium'))
+                    elif is_Kolors_task:
+                        d.append(('Backend Engine', 'backend_engine', 'Kwai-Kolors'))
                     else:
                         d.append(('Backend Engine', 'backend_engine', 'SDXL-Fooocus'))
                     d.append(('Metadata Scheme', 'metadata_scheme', metadata_scheme.value if save_metadata_to_images else save_metadata_to_images))
@@ -1150,6 +1170,8 @@ def worker():
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
         async_task.processing = False
+        if task_backend == comfy_backend:
+            comfyd.stop()
         return
 
     while True:
