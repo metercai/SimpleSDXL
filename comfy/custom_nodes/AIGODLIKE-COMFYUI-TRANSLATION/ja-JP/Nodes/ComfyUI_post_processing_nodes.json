@@ -1,0 +1,361 @@
+{
+    "ArithmeticBlend": {
+        "title": "簡易混合",
+        "inputs": {
+            "image1": "图像1",
+            "image2": "图像2"
+        },
+        "widgets": {
+            "blend_mode": "混合模式",
+                "add": "相加",
+                "subtract": "相减",
+                "difference": "差値"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Blend": {
+        "title": "混合",
+        "inputs": {
+            "image1": "图像1",
+            "image2": "图像2"
+        },
+        "widgets": {
+            "blend_factor": "係数",
+            "blend_mode": "混合模式",
+                "normal": "正常",
+                "multiply": "正片叠底",
+                "screen": "スクリーン",
+                "overlay": "オーバーレイ",
+                "soft_light": "ソフトライト"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Dissolve": {
+        "title": "溶解",
+        "inputs": {
+            "image1": "图像1",
+            "image2": "图像2"
+        },
+        "widgets": {
+            "dissolve_factor": "係数"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "DodgeAndBurn": {
+        "title": "ダッジ・バーン",
+        "inputs": {
+            "image1": "图像1",
+            "image2": "图像2"
+        },
+        "widgets": {
+            "intensity": "強度",
+            "mode": "模式",
+                "dodge": "ダッジ",
+                "burn": "バーン",
+                "dodge_and_burn": "ダッジ后バーン",
+                "burn_and_dodge": "バーン后ダッジ",
+                "color_dodge": "色ダッジ",
+                "color_burn": "色バーン",
+                "linear_dodge": "線性ダッジ",
+                "linear_burn": "線性バーン"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+
+
+
+    "AsciiArt": {
+        "title": "Asciiアート",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "char_size": "文字間隔",
+            "font_size": "文字サイズ"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ChromaticAberration": {
+        "title": "色収差",
+        "inputs": {
+            "image1": "图像1",
+            "image2": "图像2"
+        },
+        "widgets": {
+            "red_shift": "赤方偏移",
+            "red_direction": "赤方偏移方向",
+            "green_shift": "緑方偏移",
+            "green_direction": "緑方偏移方向",
+            "blue_shift": "青方偏移",
+            "blue_direction": "青方偏移方向",
+                "horizontal": "横型",
+                "vertical": "縦型"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "FilmGrain": {
+        "title": "フィルム粒",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "intensity": "強度",
+            "scale": "缩放",
+            "temperature": "温度",
+            "vignette": "ヴィネット"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Glow": {
+        "title": "グロー",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "intensity": "強度",
+            "blur_radius": "ぼかしレアル"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "PencilSketch": {
+        "title": "鉛画",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "blur_radius": "ぼかしレアル",
+            "sharpen_alpha": "透明閾値"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Pixelize": {
+        "title": "ピクセル化",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "pixel_size": "ピクセル尺寸"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "SineWave": {
+        "title": "正弦波",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "amplitude": "強度",
+            "frequency": "频率",
+            "direction": "方向"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Vignette": {
+        "title": "ヴィネット",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "Vignette": "強度"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+
+    
+
+
+    "Blur": {
+        "title": "ぼかし",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "blur_radius": "ぼかしレアル",
+            "sigma": "Sigma"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "KuwaharaBlur": {
+        "title": "Kuwaharaぼかし",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "blur_radius": "ぼかしレアル",
+            "method": "方法",
+                "mean": "平均",
+                "gaussian": "高斯"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Sharpen": {
+        "title": "锐化",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "sharpen_radius": "锐化レアル",
+            "alpha": "透明"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+
+
+
+
+    "CannyEdgeMask": {
+        "title": "Canny边缘マスク",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "lower_threshold": "低閾値",
+            "upper_threshold": "高閾値"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "HSVThresholdMask": {
+        "title": "HSV閾値マスク",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "low_threshold": "低閾値",
+            "high_threshold": "高閾値",
+            "hsv_channel": "HSV通道",
+                "hue": "色调",
+                "saturation": "饱和度",
+                "value": "明度"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+
+
+
+
+    "ColorCorrect": {
+        "title": "色調補正",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "temperature": "温度",
+            "hue": "色调",
+            "brightness": "明度",
+            "contrast": "对比度",
+            "saturation": "饱和度",
+            "gamma": "伽马"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ColorTint": {
+        "title": "色合い",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "strength": "強度",
+            "mode": "模式",
+                "sepia": "褐色",
+                "red": "赤",
+                "green": "緑",
+                "blue": "青",
+                "cyan": "青色",
+                "magenta": "品红",
+                "yellow": "黄色",
+                "purple": "紫色",
+                "orange": "橙色",
+                "warm": "暖色",
+                "coll": "冷色",
+                "lime": "橙绿",
+                "navy": "深蓝",
+                "vintage": "复古",
+                "rose": "淡红",
+                "teal": "深青",
+                "maroon": "红褐",
+                "peach": "桃色",
+                "lavender": "淡紫",
+                "olive": "黄绿"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Parabolize": {
+        "title": "色カーブ",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "coeoff": "係数",
+            "vertex_x": "X",
+            "vertex_y": "Y"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Quantize": {
+        "title": "クォンタイズ",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "colors": "色数",
+            "dither": "ディザ",
+                "none": "无",
+                "floyd-steinberg": "フロイト"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Solarize": {
+        "title": "色反転",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "threshold": "閾値"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    }
+}

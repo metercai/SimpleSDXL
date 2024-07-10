@@ -1,0 +1,1853 @@
+{
+    "ConditioningMultiCombine": {
+        "title": "条件合并(多重)",
+        "inputs": {
+            "conditioning_1": "条件_1",
+            "conditioning_2": "条件_2",
+            "conditioning_3": "条件_3",
+            "conditioning_4": "条件_4",
+            "conditioning_5": "条件_5",
+            "conditioning_6": "条件_6",
+            "conditioning_7": "条件_7",
+            "conditioning_8": "条件_8",
+            "conditioning_9": "条件_9",
+            "conditioning_10": "条件_10",
+            "conditioning_11": "条件_11",
+            "conditioning_12": "条件_12",
+            "conditioning_13": "条件_13",
+            "conditioning_14": "条件_14",
+            "conditioning_15": "条件_15",
+            "conditioning_16": "条件_16",
+            "conditioning_17": "条件_17",
+            "conditioning_18": "条件_18",
+            "conditioning_19": "条件_19",
+            "conditioning_20": "条件_20"
+        },
+        "widgets": {
+            "inputcount": "输入数量",
+            "Start mic capture": "开始捕捉麦克风",
+            "Stop mic capture": "停止捕捉麦克风"
+        },
+        "outputs": {
+            "combined": "条件",
+            "inputcount": "输入数量"
+        }
+    },
+    "ConditioningSetMaskAndCombine": {
+        "title": "条件设置遮罩(合并2)",
+        "inputs": {
+            "positive_1": "正面条件_1",
+            "negative_1": "负面条件_1",
+            "positive_2": "正面条件_2",
+            "negative_2": "负面条件_2",
+            "mask_1": "遮罩_1",
+            "mask_2": "遮罩_2"
+        },
+        "widgets": {
+            "mask_1_strength": "遮罩_1_强度",
+            "mask_2_strength": "遮罩_2_强度",
+            "set_cond_area": "设置条件区域",
+                "default": "默认",
+                "mask bounds": "遮罩边界"
+        },
+        "outputs": {
+            "combined_positive": "正面条件",
+            "combined_negative": "负面条件"
+        }
+    },
+    "ConditioningSetMaskAndCombine3": {
+        "title": "条件设置遮罩(合并3)",
+        "inputs": {
+            "positive_1": "正面条件_1",
+            "negative_1": "负面条件_1",
+            "positive_2": "正面条件_2",
+            "negative_2": "负面条件_2",
+            "positive_3": "正面条件_3",
+            "negative_3": "负面条件_3",
+            "mask_1": "遮罩_1",
+            "mask_2": "遮罩_2",
+            "mask_3": "遮罩_3"
+        },
+        "widgets": {
+            "mask_1_strength": "遮罩_1_强度",
+            "mask_2_strength": "遮罩_2_强度",
+            "mask_3_strength": "遮罩_3_强度",
+            "set_cond_area": "设置条件区域",
+                "default": "默认",
+                "mask bounds": "遮罩边界"
+        },
+        "outputs": {
+            "combined_positive": "正面条件",
+            "combined_negative": "负面条件"
+        }
+    },
+    "ConditioningSetMaskAndCombine4": {
+        "title": "条件设置遮罩(合并4)",
+        "inputs": {
+            "positive_1": "正面条件_1",
+            "negative_1": "负面条件_1",
+            "positive_2": "正面条件_2",
+            "negative_2": "负面条件_2",
+            "positive_3": "正面条件_3",
+            "negative_3": "负面条件_3",
+            "positive_4": "正面条件_4",
+            "negative_4": "负面条件_4",
+            "mask_1": "遮罩_1",
+            "mask_2": "遮罩_2",
+            "mask_3": "遮罩_3",
+            "mask_4": "遮罩_4"
+        },
+        "widgets": {
+            "mask_1_strength": "遮罩_1_强度",
+            "mask_2_strength": "遮罩_2_强度",
+            "mask_3_strength": "遮罩_3_强度",
+            "mask_4_strength": "遮罩_4_强度",
+            "set_cond_area": "设置条件区域",
+                "default": "默认",
+                "mask bounds": "遮罩边界"
+        },
+        "outputs": {
+            "combined_positive": "正面条件",
+            "combined_negative": "负面条件"
+        }
+    },
+    "ConditioningSetMaskAndCombine5": {
+        "title": "条件设置遮罩(合并5)",
+        "inputs": {
+            "positive_1": "正面条件_1",
+            "negative_1": "负面条件_1",
+            "positive_2": "正面条件_2",
+            "negative_2": "负面条件_2",
+            "positive_3": "正面条件_3",
+            "negative_3": "负面条件_3",
+            "positive_4": "正面条件_4",
+            "negative_4": "负面条件_4",
+            "positive_5": "正面条件_5",
+            "negative_5": "负面条件_5",
+            "mask_1": "遮罩_1",
+            "mask_2": "遮罩_2",
+            "mask_3": "遮罩_3",
+            "mask_4": "遮罩_4",
+            "mask_5": "遮罩_5"
+        },
+        "widgets": {
+            "mask_1_strength": "遮罩_1_强度",
+            "mask_2_strength": "遮罩_2_强度",
+            "mask_3_strength": "遮罩_3_强度",
+            "mask_4_strength": "遮罩_4_强度",
+            "mask_5_strength": "遮罩_5_强度",
+            "set_cond_area": "设置条件区域",
+                "default": "默认",
+                "mask bounds": "遮罩边界"
+        },
+        "outputs": {
+            "combined_positive": "正面条件",
+            "combined_negative": "负面条件"
+        }
+    },
+
+
+
+    "CreateGradientMask": {
+        "title": "渐变遮罩",
+        "widgets": {
+            "invert": "反转",
+            "frames": "帧数",
+            "width": "宽度",
+            "height": "高度"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "CreateTextMask": {
+        "title": "文本遮罩",
+        "widgets": {
+            "invert": "反转",
+            "frames": "帧数",
+            "text_x": "位置_X",
+            "text_y": "位置_Y",
+            "font_size": "字体大小",
+            "font_color": "字体颜色",
+            "text": "文本",
+            "font_path": "字体路径",
+            "width": "宽度",
+            "height": "高度",
+            "start_rotation": "起始旋转",
+            "end_rotation": "最终旋转"
+        },
+        "outputs": {
+            "IMAGE": "图像",
+            "MASK": "遮罩"
+        }
+    },
+    "CreateAudioMask": {
+        "title": "音频遮罩",
+        "widgets": {
+            "invert": "反转",
+            "frames": "帧数",
+            "scale": "缩放",
+            "audio_path": "音频路径",
+            "width": "宽度",
+            "height": "高度"
+        }
+    },
+    "CreateFadeMask": {
+        "title": "渐隐遮罩",
+        "widgets": {
+            "invert": "反转",
+            "frames": "帧数",
+            "width": "宽度",
+            "height": "高度",
+            "interpolation": "插值方式",
+            "start_level": "起始色值",
+            "midpoint_level": "中点色值",
+            "end_level": "最终色值",
+            "midpoint_frame": "中点帧编号"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "CreateFadeMaskAdvanced": {
+        "title": "渐隐遮罩(高级)",
+        "widgets": {
+            "points_string": "色值点",
+            "invert": "反转",
+            "frames": "帧数",
+            "width": "宽度",
+            "height": "高度",
+            "interpolation": "插值方式"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "CreateFluidMask": {
+        "title": "流体遮罩",
+        "widgets": {
+            "invert": "反转",
+            "frames": "帧数",
+            "width": "宽度",
+            "height": "高度",
+            "inflow_count": "流入数量",
+            "inflow_radius": "流入半径",
+            "inflow_padding": "流入填充",
+            "inflow_duration": "流入时间"
+        },
+        "outputs": {
+            "IMAGE": "图像",
+            "MASK": "遮罩"
+        }
+    },
+    "CreateShapeMask": {
+        "title": "形状遮罩",
+        "widgets": {
+            "shape": "形状",
+                "circle": "圆形",
+                "square": "正方形",
+                "triangle": "三角形",
+            "frames": "帧数",
+            "location_x": "位置_X",
+            "location_y": "位置_Y",
+            "size": "大小",
+            "grow": "生长",
+            "frame_width": "宽度",
+            "frame_height": "高度"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        }
+    },
+    "CreateVoronoiMask": {
+        "title": "沃洛诺伊遮罩",
+        "widgets": {
+            "frames": "帧数",
+            "num_points": "点数",
+            "line_width": "线宽",
+            "speed": "速度",
+            "frame_width": "宽度",
+            "frame_height": "高度"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        }
+    },
+    "CreateMagicMask": {
+        "title": "迷幻遮罩",
+        "widgets": {
+            "frames": "帧数",
+            "depth": "深度",
+            "distortion": "畸变",
+            "seed": "随机种",
+            "control_after_generate": "运行后操作",
+                "fixed": "固定",
+                "increment": "增加",
+                "decrement": "减少",
+                "randomize": "随机",
+            "transitions": "过渡",
+            "frame_height": "高度",
+            "frame_width": "宽度"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        }
+    },
+    "CreateShapeMaskOnPath": {
+        "title": "创建形状遮罩",
+        "inputs": {
+            "coordinates": "坐标",
+            "size_multiplier": "尺寸乘数"
+        },
+        "widgets": {
+            "shape": "形状",
+            "frame_height": "高度",
+            "frame_width": "宽度",
+            "shape_height": "形状高度",
+            "shape_width": "形状宽度",
+            "shape_color": "形状颜色",
+            "bg_color": "背景颜色",
+            "blur_radius": "模糊半径",
+            "intensity": "强度"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        },
+        "description": "\n生成指定形状的遮罩或遮罩批次，位置参数为中心位置。"
+    },
+    "CreateTextOnPath": {
+        "title": "创建文本",
+        "inputs": {
+            "coordinates": "坐标",
+            "size_multiplier": "尺寸乘数"
+        },
+        "widgets": {
+            "text": "文本",
+            "frame_height": "高度",
+            "frame_width": "宽度",
+            "font": "字体",
+            "font_size": "字体大小",
+            "alignment": "对齐到",
+            "text_color": "文本颜色"
+        },
+        "outputs": {
+            "image": "图像",
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        }
+    },
+    
+
+
+    "GrowMaskWithBlur": {
+        "title": "遮罩模糊生长",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "expand": "扩展",
+            "incremental_expandrate": "扩展增量",
+            "tapered_corners": "倒角",
+            "flip_input": "反转输入",
+            "use_cuda": "使用CUDA",
+            "blur_radius": "模糊半径",
+            "sigma": "Sigma",
+            "lerp_alpha": "线性透明",
+            "decay_factor": "腐蚀系数"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "mask_inverted": "反转遮罩"
+        }
+    },
+    "MaskBatchMulti": {
+        "title": "遮罩组合批次（多重）",
+        "inputs": {
+            "mask_1": "遮罩_1",
+            "mask_2": "遮罩_2",
+            "mask_3": "遮罩_3",
+            "mask_4": "遮罩_4",
+            "mask_5": "遮罩_5",
+            "mask_6": "遮罩_6",
+            "mask_7": "遮罩_7",
+            "mask_8": "遮罩_8",
+            "mask_9": "遮罩_9",
+            "mask_10": "遮罩_10"
+        },
+        "widgets": {
+            "inputcount": "输入数量",
+            "Update inputs": "更新输入"
+        },
+        "outputs": {
+            "masks": "遮罩"
+        },
+        "description": "\n合并多个遮罩为遮罩批次。可以通过“输入数量”设置输入接口数量，点击更新刷新接口。"
+    },
+    "ColorToMask": {
+        "title": "图像颜色到遮罩",
+        "inputs": {
+            "images": "图像"
+        },
+        "widgets": {
+            "invert": "反转",
+            "red": "红色",
+            "green": "绿色",
+            "blue": "蓝色",
+            "threshold": "阈值"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "ColorMatch": {
+        "title": "图像调色",
+        "inputs": {
+            "image_ref": "参考图像",
+            "image_target": "目标图像"
+        },
+        "widgets": {
+            "method": "方法"
+        },
+        "outputs": {
+            "image": "图像"
+        }
+    },
+    "BatchCropFromMask": {
+        "title": "遮罩裁剪",
+        "inputs": {
+            "original_images": "图像",
+            "masks": "遮罩"
+        },
+        "widgets": {
+            "crop_size_nult": "裁剪系数",
+            "bbox_smooth_alpha": "BBox平滑透明"
+        },
+        "outputs": {
+            "original_images": "原图像",
+            "cropped_images": "裁剪图像",
+            "bboxes": "BBox",
+            "width": "宽度",
+            "height": "高度"
+        }
+    },
+    "BatchCropFromMaskAdvanced": {
+        "title": "遮罩裁剪(高级)",
+        "inputs": {
+            "original_images": "图像",
+            "masks": "遮罩"
+        },
+        "widgets": {
+            "crop_size_nult": "裁剪系数",
+            "bbox_smooth_alpha": "BBox平滑透明"
+        },
+        "outputs": {
+            "original_images": "原图像",
+            "cropped_images": "裁剪图像",
+            "cropped_masks": "裁剪遮罩",
+            "combined_crop_image": "合并裁剪图像",
+            "combined_crop_masks": "合并裁剪遮罩",
+            "bboxes": "BBox",
+            "combined_bounding_box": "合并BBox",
+            "bbox_width": "BBox宽度",
+            "bbox_height": "BBox高度"
+        }
+    },
+    "FilterZeroMasksAndCorrespondingImages": {
+        "title": "过滤零遮罩和图像",
+        "inputs": {
+            "masks": "遮罩",
+            "original_images": "图像"
+        },
+        "outputs": {
+            "non_zero_masks_out": "非零遮罩",
+            "non_zero_mask_images_out": "非零图像",
+            "zero_mask_images_out": "零图像",
+            "zero_mask_images_out_indexes": "非零遮罩图像索引"
+        }
+    },
+    "BatchUncrop": {
+        "title": "Uncrop",
+        "inputs": {
+            "original_images": "原图像",
+            "cropped_images": "裁剪图像",
+            "bboxes": "BBox"
+        },
+        "widgets": {
+            "border_blending": "边框融合",
+            "crop_rescale": "重缩放",
+            "border_bottom": "下",
+            "border_top": "上",
+            "border_left": "左",
+            "border_right": "右"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "BatchUncropAdvanced": {
+        "title": "Uncrop(高级)",
+        "inputs": {
+            "original_images": "原图像",
+            "cropped_images": "裁剪图像",
+            "cropped_masks": "裁剪遮罩",
+            "combined_crop_mask": "合并裁剪遮罩",
+            "bboxes": "BBox",
+            "combined_bounding_box": "合并BBox"
+        },
+        "widgets": {
+            "border_blending": "边框融合",
+            "crop_rescale": "重缩放",
+            "use_combined_mask": "使用合并遮罩",
+            "use_square_mask": "使用正方形遮罩"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "BatchCLIPSeg": {
+        "title": "CLIP语义分割",
+        "inputs": {
+            "images": "图像"
+        },
+        "widgets": {
+            "text": "文本",
+            "threshold": "阈值",
+            "binary_mask": "二值遮罩",
+            "combine_mask": "合并遮罩",
+            "use_cuda": "使用CUDA"
+        },
+        "outputs": {
+            "Mask": "遮罩"
+        }
+    },
+    "RoundMask": {
+        "title": "舍入遮罩",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "ResizeMask": {
+        "title": "缩放遮罩",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "keep_proportions": "固定宽高比"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "width": "宽度",
+            "height": "高度"
+        }
+    },
+    "OffsetMask": {
+        "title": "偏移遮罩",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "angle": "角度",
+            "duplication_factor": "重复次数",
+            "roll": "使用滚动",
+            "incremental": "使用增量",
+            "padding_mode": "填充模式",
+                "empty": "空",
+                "border": "边界",
+                "reflection": "反射"
+        },
+        "outputs": {
+            "mask": "遮罩"
+        }
+    },
+    "BboxToInt": {
+        "title": "BBox到整数",
+        "inputs": {
+            "bboxes": "BBox"
+        },
+        "widgets": {
+            "index": "索引"
+        },
+        "outputs": {
+            "x_min": "X最小值",
+            "y_min": "Y最大值",
+            "width": "宽度",
+            "height": "高度",
+            "center_x": "X中心",
+            "center_y": "Y中心"
+        }
+    },
+    "SplitBboxes": {
+        "title": "分离BBox",
+        "inputs": {
+            "bboxes": "BBox"
+        },
+        "widgets": {
+            "index": "索引"
+        },
+        "outputs": {
+            "bboxes_a": "BBox_A",
+            "bboxes_b": "BBox_B"
+        }
+    },
+    "OffsetMaskByNormalizedAmplitude": {
+        "title": "按规格化幅度偏移遮罩",
+        "inputs": {
+            "normalized_amp": "规格化幅度",
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "rotate": "旋转",
+            "angle_multiplier": "角度倍数"
+        },
+        "outputs": {
+            "mask": "遮罩"
+        }
+    },
+    "RemapMaskRange": {
+        "title": "重映射遮罩范围",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "min": "最小值",
+            "max": "最大值"
+        },
+        "outputs": {
+            "mask": "遮罩"
+        }
+    },
+    "BboxVisualize": {
+        "title": "BBox预览",
+        "inputs": {
+            "images": "图像",
+            "bboxes": "BBox"
+        },
+        "widgets": {
+            "line_width": "线宽"
+        },
+        "outputs": {
+            "images": "图像"
+        }
+    },
+
+
+
+    "ImageGrabPIL": {
+        "title": "PIL画面捕捉",
+        "widgets": {
+            "x": "X",
+            "y": "Y",
+            "width": "宽度",
+            "height": "高度",
+            "num_frames": "帧数",
+            "delay": "延迟"
+        },
+        "outputs": {
+            "image": "图像"
+        }
+    },
+    "PlotCoordinates": {
+        "title": "坐标图",
+        "inputs": {
+            "coordinates": "坐标",
+            "size_multiplier": "尺寸乘数"
+        },
+        "widgets": {
+            "text": "文本",
+            "width": "宽度",
+            "height": "高度",
+            "bbox_width": "BBox宽度",
+            "bbox_height": "BBox高度"
+        },
+        "outputs": {
+            "images": "图像",
+            "width": "宽度",
+            "height": "高度",
+            "bbox_height": "BBox高度",
+            "bbox_width": "BBox宽度"
+        },
+        "description": "\n使用 Matplotlib 制作坐标图表序列。"
+    },
+    "InterpolateCoords": {
+        "title": "坐标插值",
+        "inputs": {
+            "coordinates": "坐标",
+            "interpolation_curve": "插值曲线"
+        },
+        "outputs": {
+            "coordinates": "坐标"
+        },
+        "description": "\n依据曲线插入坐标"
+    },
+    "SoundReactive": {
+        "title": "音频反馈",
+        "widgets": {
+            "sound_level": "音量",
+            "start_range_hz": "起始hz范围",
+            "end_range_hz": "最终hz范围",
+            "multiplier": "倍数",
+            "smoothing_factor": "平滑系数",
+            "normalize": "规格化",
+            "Start mic capture": "开始捕捉麦克风",
+            "Stop mic capture": "停止捕捉麦克风"
+        },
+        "outputs": {
+            "sound_level": "音量图",
+            "sound_level_int": "音量整数"
+        }
+    },
+
+
+
+    "NormalizeLatent": {
+        "title": "规格化Latent",
+        "inputs": {
+            "latent": "Latent"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "FlipSigmasAdjusted": {
+        "title": "反转Sigmas",
+        "inputs": {
+            "sigmas": "Sigmas"
+        },
+        "outputs": {
+            "SIGMAS": "Sigmas"
+        }
+    },
+    "InjectNoiseToLatent": {
+        "title": "插入噪波到Latent",
+        "inputs": {
+            "latents": "Latent",
+            "noise": "噪波Latent",
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "strength": "强度",
+            "normalize": "规格化",
+            "average": "平均"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "GenerateNoise": {
+        "title": "生成噪波",
+        "inputs": {
+            "model": "模型",
+            "sigmas": "Sigmas"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "batch_size": "批次大小",
+            "seed": "随机种",
+            "control_after_generate": "运行后操作",
+                "fixed": "固定",
+                "increment": "增加",
+                "decrement": "减少",
+                "randomize": "随机",
+            "multiplier": "倍数",
+            "constant_batch_noise": "批次噪波不变",
+            "normalize": "规格化"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "CustomSigmas": {
+        "title": "自定义Sigmas",
+        "widgets": {
+            "sigmas_string": "Sigmas字符串",
+            "interpolate_to_steps": "步数"
+        },
+        "outputs": {
+            "SIGMAS": "Sigmas"
+        }
+    },
+
+
+
+    "ReferenceOnlySimple3": {
+        "title": "简易仅参考3",
+        "inputs": {
+            "model": "模型",
+            "reference": "参考Latent1",
+            "reference2": "参考Latent2",
+            "input": "Latent"
+        },
+        "widgets": {
+            "batch_size": "批次大小"
+        },
+        "outputs": {
+            "MODEL": "模型",
+            "LATENT": "Latent"
+        }
+    },
+
+
+    "CondPassThrough": {
+        "title": "条件传递",
+        "inpus": {
+            "positive": "正面条件",
+            "negative": "负面条件"
+        },
+        "outputs": {
+            "positive": "正面条件",
+            "negative": "负面条件"
+        }
+    },
+
+
+
+    "SetNode": {
+        "title": "设置节点",
+        "inputs": {
+            "*": "输入"
+        },
+        "widgets": {
+            "Constant": "常量"
+        },
+        "outputs": {
+            "*": "输出"
+        }
+    },
+    "GetNode": {
+        "title": "获取节点",
+        "inputs": {
+            "*": "输入"
+        },
+        "widgets": {
+            "Constant": "常量"
+        },
+        "outputs": {
+            "*": "输出"
+        }
+    },
+    "INTConstant": {
+        "title": "整数常量",
+        "widgets": {
+            "value": "值"
+        },
+        "outputs": {
+            "value": "值"
+        }
+    },
+    "FloatConstant": {
+        "title": "浮点常量",
+        "widgets": {
+            "value": "值"
+        },
+        "outputs": {
+            "value": "值"
+        }
+    },
+    "StringConstant": {
+        "title": "字符串常量",
+        "widgets": {
+            "value": "值"
+        },
+        "outputs": {
+            "value": "值"
+        }
+    },
+    "StringConstantMultiline": {
+        "title": "字符串常量(文本框)",
+        "widgets": {
+            "string": "字符串",
+            "strip_newlines": "带换行符"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "JoinStrings": {
+        "title": "合并字符串",
+        "inputs": {
+            "string1": "字符串1",
+            "string2": "字符串2"
+        },
+        "widgets": {
+            "delimiter": "分隔符"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "VRAM_Debug": {
+        "title": "VRAM_Debug",
+        "inputs": {
+            "model": "模型",
+            "clip_vision": "CLIP视觉"
+        },
+        "widgets": {
+            "empty_cuda_cache": "空CUDA缓存"
+        },
+        "outputs": {
+            "model": "模型",
+            "freemem_before": "前剩余内存",
+            "freemem_after": "后剩余内存"
+        }
+    },
+    "SomethingToString": {
+        "title": "任意到字符串",
+        "inputs": {
+            "input": "输入"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "CrossFadeImages": {
+        "title": "交叉渐隐图像",
+        "inputs": {
+            "images_1": "图像_1",
+            "images_2": "图像_2"
+        },
+        "widgets": {
+            "interpolation": "插值方式",
+            "transition_start_index": "开始过渡序号",
+            "transitioning_frames": "过渡帧数",
+            "start_level": "起始色值",
+            "end_level": "最终色值"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "JoinStringMulti": {
+        "title": "合并字符串（多重）",
+        "inputs": {
+            "string_1": "字符串_1",
+            "string_2": "字符串_2",
+            "string_3": "字符串_3",
+            "string_4": "字符串_4",
+            "string_5": "字符串_5",
+            "string_6": "字符串_6",
+            "string_7": "字符串_7",
+            "string_8": "字符串_8",
+            "string_9": "字符串_9",
+            "string_10": "字符串_10"
+        },
+        "widgets": {
+            "inputcount": "输入数量",
+            "delimiter": "分隔符",
+            "return_list": "输出为列表",
+            "Update inputs": "更新输入"
+        },
+        "outputs": {
+            "string": "字符串"
+        },
+        "description": "\n合并多个字符串为字符串批次或字符串列表。可以通过“输入数量”设置输入接口数量，点击更新刷新接口。"
+    },
+    "EmptyLatentImagePresets": {
+        "title": "空Latent预设",
+        "widgets": {
+            "dimensions": "宽高",
+            "invert": "反转",
+            "batch_size": "批次大小"
+        },
+        "outputs": {
+            "Latent": "Latent",
+            "Width": "宽度",
+            "Height": "高度"
+        }
+    },
+    "GetImageRangeFromBatch": {
+        "title": "获取图像范围",
+        "inputs": {
+            "images": "图像"
+        },
+        "widgets": {
+            "start_index": "起始编号",
+            "num_frames": "帧数"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageAddMulti": {
+        "title": "图像混合（多重）",
+        "inputs": {
+            "image_1": "图像_1",
+            "image_2": "图像_2",
+            "image_3": "图像_3",
+            "image_4": "图像_4",
+            "image_5": "图像_5",
+            "image_6": "图像_6",
+            "image_7": "图像_7",
+            "image_8": "图像_8",
+            "image_9": "图像_9",
+            "image_10": "图像_10"
+        },
+        "widgets": {
+            "inputcount": "输入数量",
+            "blending": "混合方式",
+            "Update inputs": "更新输入"
+        },
+        "outputs": {
+            "images": "图像"
+        },
+        "description": "\n混合多个图像。可以通过“输入数量”设置输入接口数量，点击更新刷新接口。"
+    },
+    "ImageBatchMulti": {
+        "title": "图像组合批次（多重）",
+        "inputs": {
+            "image_1": "图像_1",
+            "image_2": "图像_2",
+            "image_3": "图像_3",
+            "image_4": "图像_4",
+            "image_5": "图像_5",
+            "image_6": "图像_6",
+            "image_7": "图像_7",
+            "image_8": "图像_8",
+            "image_9": "图像_9",
+            "image_10": "图像_10"
+        },
+        "widgets": {
+            "inputcount": "输入数量",
+            "blending": "混合方式",
+            "Update inputs": "更新输入"
+        },
+        "outputs": {
+            "images": "图像"
+        },
+        "description": "\n合并多个图像为图像批次。可以通过“输入数量”设置输入接口数量，点击更新刷新接口。"
+    },
+    "ReverseImageBatch": {
+        "title": "反转图像批次",
+        "inputs": {
+            "images": "图像"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageGridComposite2x2": {
+        "title": "图像栅格合并2x2",
+        "inputs": {
+            "image1": "图像_1",
+            "image2": "图像_2",
+            "image3": "图像_3",
+            "image4": "图像_4"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageGridComposite3x3": {
+        "title": "图像栅格合并3x3",
+        "inputs": {
+            "image1": "图像_1",
+            "image2": "图像_2",
+            "image3": "图像_3",
+            "image4": "图像_4",
+            "image5": "图像_5",
+            "image6": "图像_6",
+            "image7": "图像_7",
+            "image8": "图像_8",
+            "image9": "图像_9"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageConcanate": {
+        "title": "图像联结",
+        "inputs": {
+            "image1": "图像_1",
+            "image2": "图像_2"
+        },
+        "widgets": {
+            "direction": "方向"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageBatchTestPattern": {
+        "title": "图像批次图案",
+        "widgets": {
+            "batch_size": "批次大小",
+            "start_from": "起始值",
+            "width": "宽度",
+            "height": "高度"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ReplaceImagesInBatch": {
+        "title": "替换图像批次",
+        "inputs": {
+            "original_images": "原图像",
+            "replacement_images": "替换图像"
+        },
+        "widgets": {
+            "start_index": "起始编号"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "InsertImageBatchByIndexes": {
+        "title": "按索引插入图像批次",
+        "inputs": {
+            "images": "图像",
+            "images_to_insert": "插入图像",
+            "insert_indexes": "插入索引"
+        },
+        "outputs": {
+            "images_after_insert": "图像"
+        }
+    },
+    "CreateShapeImageOnPath": {
+        "title": "创建形状图像",
+        "inputs": {
+            "coordinates": "坐标",
+            "size_multiplier": "尺寸乘数"
+        },
+        "widgets": {
+            "shape": "形状",
+            "frame_height": "高度",
+            "frame_width": "宽度",
+            "shape_height": "形状高度",
+            "shape_width": "形状宽度",
+            "shape_color": "形状颜色",
+            "bg_color": "背景颜色",
+            "blur_radius": "模糊半径",
+            "intensity": "强度"
+        },
+        "outputs": {
+            "image": "图像",
+            "mask": "遮罩"
+        },
+        "description": "\n生成指定形状的图像或图像批次，位置参数为中心位置。"
+    },
+    "CreateGradientFromCoords": {
+        "title": "从坐标创建渐变图像",
+        "inputs": {
+            "coordinates": "坐标"
+        },
+        "widgets": {
+            "frame_height": "高度",
+            "frame_width": "宽度",
+            "start_color": "起始色",
+            "end_color": "结束色",
+            "multiplier": "倍数"
+        },
+        "outputs": {
+            "image": "图像"
+        },
+        "description": "\n在坐标位置创建渐变图像。"
+    },
+    "GradientToFloat": {
+        "title": "渐变到浮点",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "steps": "步数"
+        },
+        "outputs": {
+            "float_x": "浮点_X",
+            "float_y": "浮点_Y"
+        },
+        "description": "\n计算图像浮点列表"
+    },
+    "WidgetToString": {
+        "title": "组件到字符串",
+        "widgets": {
+            "id": "节点ID",
+            "widget_name": "组件名称",
+            "return_all": "返回全部"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "DummyLatentOut": {
+        "title": "虚拟Latent输出",
+        "inputs": {
+            "latent": "Latent"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "AddLabel": {
+        "title": "添加标签",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "text_x": "位置_X",
+            "text_y": "位置_Y",
+            "height": "高度",
+            "font_size": "字体大小",
+            "font_color": "字体颜色",
+            "label_color": "背景颜色",
+            "font": "字体",
+            "text": "文本",
+            "direction": "方向"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "SuperPrompt": {
+        "title": "超级提示词",
+        "inputs": {
+            "prompt": "提示词"
+        },
+        "widgets": {
+            "instruction_prompt": "提示词提示词",
+            "max_new_tokens": "输出最大Token数"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "Superprompt": {
+        "title": "超级提示词",
+        "inputs": {
+            "prompt": "提示词"
+        },
+        "widgets": {
+            "instruction_prompt": "提示词提示词",
+            "max_new_tokens": "最大输出Token数"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "StableZero123_BatchSchedule": {
+        "title": "SZ123_批次调度",
+        "inputs": {
+            "clip_vision": "CLIP视觉",
+            "init_image": "图像",
+            "vae": "VAE"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "batch_size": "批次大小",
+            "interpolation": "插值方式",
+                "linear": "线性",
+                "ease_in": "渐进",
+                "ease_out": "渐出",
+                "ease_in_out": "渐近渐出",
+            "azimuth_points_string": "方位角",
+            "elevation_points_string": "俯仰角"
+        },
+        "outputs": {
+            "positive": "正面条件",
+            "negative": "负面条件",
+            "latent": "Latent"
+        }
+    },
+    "SV3D_BatchSchedule": {
+        "title": "SV3D_批次调度",
+        "inputs": {
+            "clip_vision": "CLIP视觉",
+            "init_image": "图像",
+            "vae": "VAE"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "batch_size": "批次大小",
+            "interpolation": "插值方式",
+            "azimuth_points_string": "方位角",
+            "elevation_points_string": "俯仰角"
+        },
+        "outputs": {
+            "positive": "正面条件",
+            "negative": "负面条件",
+            "latent": "Latent"
+        }
+    },
+    "GLIGENTextBoxApplyBatch": {
+        "title": "GLIGEN文本框应用(批次)",
+        "inputs": {
+            "conditioning_to": "条件",
+            "clip": "CLIP",
+            "gligen_textbox_model": "GLIGEN模型",
+            "latents": "Latent"
+        },
+        "widgets": {
+            "text": "文本",
+            "width": "宽度",
+            "height": "高度",
+            "coordinates": "坐标",
+            "interpolation": "插值方式"
+        },
+        "outputs": {
+            "CONDITIONING": "条件",
+            "IMAGE": "图像"
+        }
+    },
+    "LoadResAdapterNormalization": {
+        "title": "加载规格化ResAdapter",
+        "inputs": {
+            "model": "模型"
+        },
+        "widgets": {
+            "resadapter_path": "ResAdapter路径"
+        },
+        "outputs": {
+            "MODEL": "模型"
+        }
+    },
+    "GLIGENTextBoxApplyBatchCoords": {
+        "title": "GLIGEN文本框应用(批次坐标)",
+        "inputs": {
+            "conditioning_to": "条件",
+            "latents": "Latent",
+            "clip": "CLIP",
+            "gligen_textbox_model": "GLIGEN模型",
+            "coordinates": "坐标",
+            "size_multiplier": "尺寸乘数"
+        },
+        "widgets": {
+            "text": "文本",
+            "width": "宽度",
+            "height": "高度"
+        },
+        "outputs": {
+            "conditioning": "条件",
+            "coord_preview": "坐标预览"
+        },
+        "description": "\n这个节点允许在批次中调度 GLIGEN 文本框的位置，和 AnimateDiff-Evolved 一起使用。建议和 曲线编辑器 节点一起使用。\n\n GLIGEN模型可以在 管理器 的 “安装模型” 中下载。或直接在：https://huggingface.co/comfyanonymous/GLIGEN_pruned_safetensors/tree/main 下载。 \n \n 输入： \n- **Latent** 输入用于计算批次大小 \n- **CLIP** 是文本编码器，与其他CLIP输入相同 \n- **GLIGEN模型** 连接到 GLIGEN加载器 节点 \n- **坐标** 接收坐标点json字符串，和 曲线编辑器 节点兼容。 \n- **文本** 文本框位置的提示词 \n- **宽度** 和 **高度** 设置 GLIGEN文本框 的尺寸 \n \n输出：\n- **条件** 连接到 CLIP文本编码 和 采样器 中间 \n- **坐标预览** 用于预览坐标和BBox \n\n"
+    },
+    "LoadICLightUnet": {
+        "title": "加载ICLightUnet",
+        "inputs": {
+            "model": "模型"
+        },
+        "widgets": {
+            "model_path": "模型路径"
+        },
+        "outputs": {
+            "MODEL": "模型"
+        },
+        "description": "\n加载ICLightUnet：加载一个 ICLightUnet 模型。（实验性）开发中 \n 另一种不好用但可以用的方法是在 https://huggingface.co/Kijai/iclight-comfy/blob/main/iclight_fc_converted.safetensors 下载模型，然后和 InstructPixToPix条件 节点一起使用。"
+    },
+    "StabilityAPI_SD3": {
+        "title": "StabilityAPI SD3",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "prompt": "提示词",
+            "n_prompt": "负面提示词",
+            "seed": "随机种",
+            "control_before_generate": "运行前操作",
+            "model": "模型",
+            "aspect_ratio": "宽高比",
+            "output_format": "输出格式",
+            "api_key": "API Key",
+            "img2img_strength": "图生图强度",
+            "disable_metadata": "禁用元数据"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "GetImagesFromBatchIndexed": {
+        "title": "从批次获取图像",
+        "inputs": {
+            "images": "图像"
+        },
+        "widgets": {
+            "indexes": "序号"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "InsertImagesToBatchIndexed": {
+        "title": "插入图像到索引批次",
+        "inputs": {
+            "original_images": "原图像",
+            "images_to_insert": "插入图像"
+        },
+        "widgets": {
+            "indexes": "索引"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "LoadAndResizeImage": {
+        "title": "加载并缩放图像",
+        "widgets": {
+            "image": "图像",
+            "resize": "缩放",
+            "width": "宽度",
+            "height": "高度",
+            "repeat": "复制",
+            "keep_proportions": "固定宽高比",
+            "divisible_by": "因数",
+            "mask_channel": "遮罩通道",
+            "upload": "上传"
+        },
+        "outputs": {
+            "image": "图像",
+            "mask": "遮罩",
+            "width": "宽度",
+            "height": "高度"
+        }
+    },
+    "SplitImageChannels": {
+        "title": "分离图像通道",
+        "inputs": {
+            "image": "图像"
+        },
+        "outputs": {
+            "red": "红色",
+            "green": "绿色",
+            "blue": "蓝色",
+            "mask": "遮罩"
+        },
+        "description": "\n分离图像为单通道图像，alpha通道分离为遮罩。"
+    },
+    "MergeImageChannels": {
+        "title": "合并图像通道",
+        "inputs": {
+            "red": "红色",
+            "green": "绿色",
+            "blue": "蓝色",
+            "mask": "遮罩"
+        },
+        "outputs": {
+            "image": "图像"
+        },
+        "description": "\n合并通道为图像"
+    },
+    "PreviewAnimation": {
+        "title": "预览动画",
+        "inputs": {
+            "images": "图像",
+            "masks": "遮罩"
+        },
+        "widgets": {
+            "fps": "帧率"
+        }
+    },
+    "ImageBatchRepeatInterleaving": {
+        "title": "复制图像批次",
+        "inputs": {
+            "images": "图像"
+        },
+        "widgets": {
+            "repeats": "次数"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImageTransformByNormalizedAmplitude": {
+        "title": "按规格化幅度变换图像",
+        "inputs": {
+            "normalized_amp": "规格化幅度",
+            "image": "图像"
+        },
+        "widgets": {
+            "zoom_scale": "缩放",
+            "cumulative": "累加"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "GetLatentsFromBatchIndexed": {
+        "title": "按索引获取Latent",
+        "inputs": {
+            "latents": "Latent"
+        },
+        "widgets": {
+            "indexes": "索引"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "ImageUpscaleWithModelBatched": {
+        "title": "图像批次通过模型放大",
+        "inputs": {
+            "upscale_model": "放大模型",
+            "images": "图像"
+        },
+        "widgets": {
+            "per_batch": "每批次"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "RemapImageRange": {
+        "title": "重映射图像范围",
+        "inputs": {
+            "image": "图像"
+        },
+        "widgets": {
+            "min": "最小值",
+            "max": "最大值",
+            "clamp": "钳制"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+
+
+    "NormalizedAmplitudeToMask": {
+        "title": "规格化振幅到遮罩",
+        "inputs": {
+            "normalized_amp": "规格化幅度"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "frame_offset": "帧偏移",
+            "location_x": "位置_X",
+            "location_y": "位置_Y",
+            "size": "大小",
+            "shape": "形状",
+            "color": "颜色"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "NormalizedAmplitudeToFloatList": {
+        "title": "规格化振幅到浮点列表",
+        "inputs": {
+            "normalized_amp": "规格化幅度"
+        },
+        "outputs": {
+            "FLOAT": "浮点"
+        },
+        "description": "\n连接“音频调度”的桥接节点：https://github.com/a1lazydog/ComfyUI-AudioScheduler \n，从规格化振幅建立一个浮点列表。"
+    },
+    "ScaleBatchPromptSchedule": {
+        "title": "缩放提示词批次调度",
+        "inputs": {
+            "input_str": "字符串",
+            "old_frame_count": "旧帧数",
+            "new_frame_count": "新帧数"
+        },
+        "outputs": {
+            "STRING": "字符串"
+        }
+    },
+    "EffnetEncode": {
+        "title": "Effnet编码",
+        "inputs": {
+            "image": "图像"
+        },
+        "outputs": {
+            "LATENT": "Latent"
+        }
+    },
+    "ImageNormalize_Neg1_To_1": {
+        "title": "图像规格化-1到1",
+        "inputs": {
+            "images": "图像"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "ImagePass": {
+        "title": "图像桥接",
+        "inputs": {
+            "image": "图像"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        },
+        "description": "\n传递图像到下一个节点"
+    },
+    "ImageResizeKJ": {
+        "title": "图像缩放（KJ）",
+        "inputs": {
+            "image": "图像",
+            "get_image_size": "参考图像大小",
+            "width_input": "宽度",
+            "height_input": "高度"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度",
+            "upscale_method": "缩放方法",
+            "keep_proportions": "固定宽高比",
+            "divisible_by": "因数"
+        },
+        "outputs": {
+            "IMAGE": "图像",
+            "width": "宽度",
+            "height": "高度"
+        },
+        "description": "\n按指定宽高缩放图像。尺寸可由输入指定，最终输出优先级按以下规则排列：\n- 参考图像尺寸 \n- 宽度-输入 和 高度-输入 \n- 宽度 和 高度 \n \n固定宽高比会按最高尺寸固定宽高比。"
+    },
+    "CameraPoseVisualizer": {
+        "title": "相机姿态预览",
+        "widgets": {
+            "pose_file_path": "姿态文件路径",
+            "sample_stride": "采样步长",
+            "frames": "帧数",
+            "use_viewer": "使用预览器"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    },
+    "Sleep": {
+        "title": "待机",
+        "inputs": {
+            "input": "输入"
+        },
+        "widgets": {
+            "minutes": "分钟",
+            "seconds": "秒数"
+        },
+        "outputs": {
+            "*": "*"
+        }
+    },
+    "Intrinsic_lora_sampling": {
+        "title": "IntrinsicLoRA采样",
+        "inputs": {
+            "model": "模型",
+            "clip": "CLIP",
+            "vae": "VAE",
+            "image": "图像",
+            "optional_latent": "Latent(可选)"
+        },
+        "widgets": {
+            "lora_name": "LoRA名称",
+            "task": "任务",
+            "text": "文本",
+            "per_batch": "每批次"
+        },
+        "outputs": {
+            "LATENT": "Latent",
+            "IMAGE": "图像"
+        }
+    },
+    "ImageAndMaskPreview": {
+        "title": "图像与遮罩预览",
+        "inputs": {
+            "image": "图像",
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "mask_opacity": "遮罩不透明",
+            "mask_color": "遮罩颜色",
+            "pass_through": "穿透"
+        },
+        "outputs": {
+            "composite": "图像"
+        },
+        "description": "\n预览图像或遮罩，同时输入图像和遮罩时会合并遮罩到图像上。\n当 穿透 开启时将禁用合成，用于通过合并为视频节点的预览。"
+    },
+    "MaskOrImageToWeight": {
+        "title": "遮罩或图像到权重",
+        "inputs": {
+            "images": "图像",
+            "masks": "遮罩"
+        },
+        "widgets": {
+            "output_type": "输出类型"
+        },
+        "outputs": {
+            "FLOAT": "浮点"
+        },
+        "description": "\n获取遮罩或图像批次的平均值，并按 输出类型 输出结果。"
+    },
+    "MaskOrImageToWeigh": {
+        "title": "遮罩或图像到权重",
+        "inputs": {
+            "images": "图像",
+            "masks": "遮罩"
+        },
+        "widgets": {
+            "output_type": "输出类型"
+        },
+        "outputs": {
+            "FLOAT": "浮点"
+        }
+    },
+    "WeightScheduleConvert": {
+        "title": "权重调度转换",
+        "inputs": {
+            "input_values": "输入值"
+        },
+        "widgets": {
+            "output_type": "输出类型"
+        },
+        "outputs": {
+            "FLOAT": "浮点"
+        }
+    },
+    "FloatToMask": {
+        "title": "浮点到遮罩",
+        "inputs": {
+            "input_values": "输入值"
+        },
+        "widgets": {
+            "width": "宽度",
+            "height": "高度"
+        },
+        "outputs": {
+            "MASK": "遮罩"
+        }
+    },
+    "ImagePadForOutpaintMasked": {
+        "title": "外补画板（遮罩）",
+        "inputs": {
+            "image": "图像",
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "left": "左",
+            "top": "上",
+            "right": "右",
+            "bottom": "下",
+            "feathering": "羽化"
+        },
+        "outputs": {
+            "IMAGE": "图像",
+            "MASK": "遮罩"
+        }
+    },
+    "ImagePadForOutpaintTargetSize": {
+        "title": "外补画板（尺寸）",
+        "inputs": {
+            "image": "图像",
+            "mask": "遮罩"
+        },
+        "widgets": {
+            "target_width": "目标宽度",
+            "target_height": "目标高度",
+            "feathering": "羽化",
+            "upscale_method": "缩放方法"
+        },
+        "outputs": {
+            "IMAGE": "图像",
+            "MASK": "遮罩"
+        }
+    },
+    "DownloadAndLoadCLIPSeg": {
+        "title": "加载CLIPSeg",
+        "widgets": {
+            "model": "模型"
+        },
+        "outputs": {
+            "clipseg_model": "CLIPSeg模型"
+        },
+        "description": "\n使用 huggingface_hub 下载 CLIPSeg 模型到 Comfy/models/clip_seg"
+    },
+    "GetMaskSizeAndCount": {
+        "title": "获取遮罩尺寸数量",
+        "inputs": {
+            "mask": "遮罩"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "width": "宽度",
+            "height": "高度",
+            "count": "数量"
+        },
+        "description": "\n输出遮罩的宽度、高度、批次大小"
+    },
+    "GetImageSizeAndCount": {
+        "title": "获取图像尺寸数量",
+        "inputs": {
+            "image": "图像"
+        },
+        "outputs": {
+            "image": "图像",
+            "width": "宽度",
+            "height": "高度",
+            "count": "数量"
+        },
+        "description": "\n输出图像的宽度、高度、批次大小"
+    },
+    "ModelPassThrough": {
+        "title": "模型桥接",
+        "inputs": {
+            "model": "模型"
+        },
+        "outputs": {
+            "model": "模型"
+        },
+        "description": "\n将模型传递到下一个节点"
+    },
+    "FloatToSigmas": {
+        "title": "浮点到Sigmas",
+        "inputs": {
+            "float_list": "浮点列表"
+        },
+        "outputs": {
+            "SIGMAS": "Sigmas"
+        },
+        "description": "\n从浮点列表创建sigmas tensor"
+    },
+    "WeightScheduleExtend": {
+        "title": "权重调度扩展",
+        "inputs": {
+            "input_values_1": "输入值_1",
+            "input_values_2": "输入值_2"
+        },
+        "widgets": {
+            "output_type": "输出类型"
+        },
+        "outputs": {
+            "FLOAT": "浮点"
+        },
+        "description": "\n扩展不同的值列表/系列，并根据需要进行转换"
+    },
+    "SplineEditor": {
+        "title": "曲线编辑器",
+        "widgets": {
+            "points_store": "点位置",
+            "mask_width": "遮罩宽度",
+            "mask_height": "遮罩高度",
+            "points_to_sample": "采样精度",
+            "sampling_method": "采样方法",
+            "interpolation": "插值方式",
+            "tension": "tension",
+            "repeat_output": "重复输出",
+            "float_output_type": "浮点输出类型",
+            "min_value": "最小值",
+            "max_value": "最大值",
+            "New spline": "新曲线"
+        },
+        "outputs": {
+            "mask": "遮罩",
+            "coord_str": "坐标",
+            "float": "浮点",
+            "count": "数量",
+            "normalized_str": "规格化字符串"
+        },
+        "description": "\n# 开发中 \n不要在工作流中经常使用这个节点，可能会遇到大量bug并且不稳定！！ \n \n##用于创建各类值调度的图形化编辑器 \n\n**Shift+左键单击** 添加新控制点，**Ctrl+左键单击** 创建中间控制点，**右键单击** 移除控制点。\n不能删除端点。\n\n 右键背景会调出菜单：一些视觉设置，不影响输出效果：\n - 控制柄可见性 \n - 显示采样点 \n\n**采样精度** 设置采样点数量，从样条线本身返回采样点，和实际控制点无关，由插值类型决定。\n采样方法：\n - 时间：沿时间轴采样，用于调度 \n - 路径：沿曲线路径采样，用于坐标 \n\n 输出：\n - 遮罩批次 \n 适用于任何接收遮罩的节点 \n - 浮点列表 \n 适用于 IPAdapter权重组 \n - pandas series \n 适用于 适用于接收 Fizz批次调度 节点 的节点 \n - torch tensor \n 适用于不明节点"
+    }
+}
