@@ -169,6 +169,14 @@ class ModelSamplingContinuousEDM(torch.nn.Module):
         return math.exp((math.log(self.sigma_max) - log_sigma_min) * percent + log_sigma_min)
 
 
+class ModelSamplingContinuousV(ModelSamplingContinuousEDM):
+    def timestep(self, sigma):
+        return sigma.atan() / math.pi * 2
+
+    def sigma(self, timestep):
+        return (timestep * math.pi / 2).tan()
+
+
 def time_snr_shift(alpha, t):
     if alpha == 1.0:
         return t
@@ -182,11 +190,12 @@ class ModelSamplingDiscreteFlow(torch.nn.Module):
         else:
             sampling_settings = {}
 
-        self.set_parameters(shift=sampling_settings.get("shift", 1.0))
+        self.set_parameters(shift=sampling_settings.get("shift", 1.0), multiplier=sampling_settings.get("multiplier", 1000))
 
-    def set_parameters(self, shift=1.0, timesteps=1000):
+    def set_parameters(self, shift=1.0, timesteps=1000, multiplier=1000):
         self.shift = shift
-        ts = self.sigma(torch.arange(1, timesteps + 1, 1))
+        self.multiplier = multiplier
+        ts = self.sigma((torch.arange(1, timesteps + 1, 1) / timesteps) * multiplier)
         self.register_buffer('sigmas', ts)
 
     @property
@@ -198,10 +207,10 @@ class ModelSamplingDiscreteFlow(torch.nn.Module):
         return self.sigmas[-1]
 
     def timestep(self, sigma):
-        return sigma * 1000
+        return sigma * self.multiplier
 
     def sigma(self, timestep):
-        return time_snr_shift(self.shift, timestep / 1000)
+        return time_snr_shift(self.shift, timestep / self.multiplier)
 
     def percent_to_sigma(self, percent):
         if percent <= 0.0:
