@@ -1,4 +1,0 @@
-facexlib
-insightface
-onnxruntime
-onnxruntime-gpu
