@@ -200,8 +200,8 @@ path_embeddings = get_dir_or_set_default('path_embeddings', '../models/embedding
 path_vae_approx = get_dir_or_set_default('path_vae_approx', '../models/vae_approx/')
 path_vae = get_dir_or_set_default('path_vae', '../models/vae/')
 path_upscale_models = get_dir_or_set_default('path_upscale_models', '../models/upscale_models/')
-path_inpaint = get_dir_or_set_default('path_inpaint', '../models/inpaint/')
-path_controlnet = get_dir_or_set_default('path_controlnet', '../models/controlnet/')
+paths_inpaint = get_dir_or_set_default('path_inpaint', ['../models/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', ['../models/controlnet/'], True)
 path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
 path_llms = get_dir_or_set_default('path_llms','../models/llms/')
@@ -212,7 +212,7 @@ path_models_root = get_dir_or_set_default('path_models_root', '../models/')
 path_unet = get_dir_or_set_default('path_unet', '../models/unet')
 path_rembg = get_dir_or_set_default('path_rembg', '../models/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
-
+paths_diffusers = get_dir_or_set_default('path_diffusers', ['../models/diffusers/'], True)
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -676,7 +676,8 @@ config_comfy_formatted_text = '''
 comfyui:
      checkpoints: {checkpoints} 
      clip_vision: {clip_vision}
-     controlnet: {controlnet}
+     controlnet: {controlnets}
+     diffusers: {diffusers}
      embeddings: {embeddings}
      loras: {loras}
      upscale_models: {upscale_models}
@@ -686,7 +687,7 @@ comfyui:
      '''
 
 paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet), diffusers=paths2str(paths_diffusers), embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 
@@ -725,35 +726,35 @@ def downloading_inpaint_models(v):
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/fooocus_inpaint_head.pth',
-        model_dir=path_inpaint,
+        model_dir=paths_inpaint[0],
         file_name='fooocus_inpaint_head.pth'
     )
-    head_file = os.path.join(path_inpaint, 'fooocus_inpaint_head.pth')
+    head_file = os.path.join(paths_inpaint[0], 'fooocus_inpaint_head.pth')
     patch_file = None
 
     if v == 'v1':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint.fooocus.patch')
 
     if v == 'v2.5':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v25.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint_v25.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint_v25.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint_v25.fooocus.patch')
 
     if v == 'v2.6':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v26.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint_v26.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint_v26.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint_v26.fooocus.patch')
 
     return head_file, patch_file
 
@@ -788,19 +789,19 @@ def downloading_sdxl_hyper_sd_lora():
 def downloading_controlnet_canny():
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='control-lora-canny-rank128.safetensors'
     )
-    return os.path.join(path_controlnet, 'control-lora-canny-rank128.safetensors')
+    return os.path.join(paths_controlnet[0], 'control-lora-canny-rank128.safetensors')
 
 
 def downloading_controlnet_cpds():
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_xl_cpds_128.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='fooocus_xl_cpds_128.safetensors'
     )
-    return os.path.join(path_controlnet, 'fooocus_xl_cpds_128.safetensors')
+    return os.path.join(paths_controlnet[0], 'fooocus_xl_cpds_128.safetensors')
 
 
 def downloading_ip_adapters(v):
@@ -817,26 +818,26 @@ def downloading_ip_adapters(v):
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_ip_negative.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='fooocus_ip_negative.safetensors'
     )
-    results += [os.path.join(path_controlnet, 'fooocus_ip_negative.safetensors')]
+    results += [os.path.join(paths_controlnet[0], 'fooocus_ip_negative.safetensors')]
 
     if v == 'ip':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin',
-            model_dir=path_controlnet,
+            model_dir=paths_controlnet[0],
             file_name='ip-adapter-plus_sdxl_vit-h.bin'
         )
-        results += [os.path.join(path_controlnet, 'ip-adapter-plus_sdxl_vit-h.bin')]
+        results += [os.path.join(paths_controlnet[0], 'ip-adapter-plus_sdxl_vit-h.bin')]
 
     if v == 'face':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus-face_sdxl_vit-h.bin',
-            model_dir=path_controlnet,
+            model_dir=paths_controlnet[0],
             file_name='ip-adapter-plus-face_sdxl_vit-h.bin'
         )
-        results += [os.path.join(path_controlnet, 'ip-adapter-plus-face_sdxl_vit-h.bin')]
+        results += [os.path.join(paths_controlnet[0], 'ip-adapter-plus-face_sdxl_vit-h.bin')]
 
     return results
 
@@ -888,5 +889,8 @@ from enhanced.simpleai import simpleai_config, refresh_models_info
 simpleai_config.paths_checkpoints = paths_checkpoints
 simpleai_config.paths_loras = paths_loras
 simpleai_config.path_embeddings = path_embeddings
+simpleai_config.paths_diffusers = paths_diffusers
+simpleai_config.paths_controlnet = paths_controlnet
+simpleai_config.paths_inpaint = paths_inpaint
 
 refresh_models_info()

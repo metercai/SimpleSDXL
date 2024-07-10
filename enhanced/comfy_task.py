@@ -1,5 +1,7 @@
 import modules.config
-from enhanced.simpleai import ComfyTaskParams, models_info
+import zipfile
+from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo
+from modules.model_loader import load_file_from_url
 
 method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
 #method_names = ['Blending given FG', 'Blending given BG', 'Blending given FG & BG', 'Generate foreground with Conv Injection']
@@ -77,6 +79,15 @@ def get_comfy_task(method, default_params, input_images, options={}):
         comfy_params = ComfyTaskParams(default_params)
         comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
         return ComfyTask(task_name[method], comfy_params)
+    elif method == 'Kolors':
+        comfy_params = ComfyTaskParams(default_params)
+        comfy_params.update_params({
+            "llm_precision": 'quant4' if sysinfo["gpu_memory"]<8192 else 'quant8' if sysinfo["gpu_memory"]<12288 else 'quant8' #'fp16'
+            })
+        #print(f'models_info:{models_info}')
+        if 'DIFFUSERS/Kolors' not in models_info:
+            pass #downloading_kolors_model(modules.config.paths_diffusers[0])
+        return ComfyTask('kolors_text2image', comfy_params)
     else:
         comfy_params = ComfyTaskParams(default_params)
         if input_images is None:
@@ -112,3 +123,25 @@ def fixed_width_height(width, height, factor):
     height = height if height % factor == 0 else int((height // factor + 1) * factor)
     return width, height
 
+kolors_schedulers = [ 
+                        "EulerDiscreteScheduler",
+                        "EulerAncestralDiscreteScheduler",
+                        "DPMSolverMultistepScheduler",
+                        "DPMSolverMultistepScheduler_SDE_karras",
+                        "UniPCMultistepScheduler",
+                        "DEISMultistepScheduler",
+                    ]
+default_kolors_scheduler = kolors_schedulers[0]
+
+def downloading_kolors_model(path_root):
+    load_file_from_url(
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16.zip',
+        model_dir=path_root,
+        file_name='models_kolors_fp16.zip'
+    )
+    downfile = os.path.join(path_root, 'models_kolors_fp16.zip')
+    with zipfile.open(downfile, 'r') as tarf:
+        zipf.extractall(path_root)
+    os.remove(downfile)
+
+    pass

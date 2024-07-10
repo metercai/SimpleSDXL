@@ -46,7 +46,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.15"
-    REINSTALL_BASE = False
+    REINSTALL_BASE = True
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -220,7 +220,7 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
     from modules.model_loader import load_file_from_url
     from modules import config
 
-    os.environ["U2NET_HOME"] = config.path_inpaint
+    os.environ["U2NET_HOME"] = config.paths_inpaint[0]
     os.environ["HUF_MIRROR"] = 'hf-mirror.com'
 
     for file_name, url in vae_approx_filenames:
