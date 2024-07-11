@@ -204,7 +204,7 @@ paths_inpaint = get_dir_or_set_default('path_inpaint', ['../models/inpaint/'], T
 paths_controlnet = get_dir_or_set_default('path_controlnet', ['../models/controlnet/'], True)
 path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
-path_llms = get_dir_or_set_default('path_llms','../models/llms/')
+paths_llms = get_dir_or_set_default('path_llms', ['../models/llms/'], True)
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
 path_outputs = get_path_output()
@@ -860,7 +860,7 @@ def downloading_safety_checker_model():
 
 
 def downloading_superprompter_model():
-    path_superprompter = os.path.join(path_llms, "superprompt-v1")
+    path_superprompter = os.path.join(paths_llms[0], "superprompt-v1")
     load_file_from_url(
         url='https://huggingface.co/roborovski/superprompt-v1/resolve/main/model.safetensors',
         model_dir=path_superprompter,
@@ -892,5 +892,8 @@ simpleai_config.path_embeddings = path_embeddings
 simpleai_config.paths_diffusers = paths_diffusers
 simpleai_config.paths_controlnet = paths_controlnet
 simpleai_config.paths_inpaint = paths_inpaint
+simpleai_config.paths_llms = paths_llms
+simpleai_config.path_unet = path_unet
+simpleai_config.path_vae = path_vae
 
 refresh_models_info()

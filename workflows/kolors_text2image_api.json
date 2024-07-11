@@ -1,5 +1,62 @@
 {
-  "3": {
+  "6": {
+    "inputs": {
+      "seed": 429331073071241,
+      "steps": 25,
+      "cfg": 7,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "59",
+        0
+      ],
+      "positive": [
+        "67",
+        0
+      ],
+      "negative": [
+        "62",
+        0
+      ],
+      "latent_image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "9": {
+    "inputs": {
+      "width": 968,
+      "height": 1280,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "aspect_ratios_size"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": [
+        "6",
+        0
+      ],
+      "vae": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "11": {
     "inputs": {
       "images": [
         "10",
@@ -11,89 +68,68 @@
       "title": "Preview Image"
     }
   },
-  "6": {
+  "59": {
     "inputs": {
-      "model": "Kwai-Kolors/Kolors",
-      "precision": "fp16"
+      "unet_name": "kolors_unet_fp16.safetensors"
     },
-    "class_type": "DownloadAndLoadKolorsModel",
+    "class_type": "MZ_KolorsUNETLoader",
     "_meta": {
-      "title": "kolors_model"
+      "title": "kolors_unet_loader"
     }
   },
-  "10": {
+  "62": {
     "inputs": {
-      "samples": [
-        "14",
+      "text": "",
+      "chatglm3_model": [
+        "66",
         0
       ],
-      "vae": [
-        "11",
-        0
+      "hid_proj": [
+        "59",
+        1
       ]
     },
-    "class_type": "VAEDecode",
+    "class_type": "MZ_ChatGLM3",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "negative_prompt"
     }
   },
-  "11": {
+  "66": {
     "inputs": {
-      "vae_name": "sdxl.vae.safetensors"
+      "chatglm3_checkpoint": "chatglm3-8bit.safetensors"
+    },
+    "class_type": "MZ_ChatGLM3Loader",
+    "_meta": {
+      "title": "llms_model"
+    }
+  },
+  "67": {
+    "inputs": {
+      "text": "真实的照片,在中国,一个可爱的女孩,红色外套,城市夜景",
+      "chatglm3_model": [
+        "66",
+        0
+      ],
+      "hid_proj": [
+        "59",
+        1
+      ]
+    },
+    "class_type": "MZ_ChatGLM3",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "70": {
+    "inputs": {
+      "vae_name": "sdxl_fp16.vae.safetensors"
     },
     "class_type": "VAELoader",
     "_meta": {
       "title": "Load VAE"
     }
   },
-  "12": {
-    "inputs": {
-      "prompt": "cinematic photograph of an astronaut riding a horse in space ",
-      "negative_prompt": "",
-      "num_images_per_prompt": 1,
-      "chatglm3_model": [
-        "13",
-        0
-      ]
-    },
-    "class_type": "KolorsTextEncode",
-    "_meta": {
-      "title": "prompt_negative_prompt"
-    }
-  },
-  "13": {
-    "inputs": {
-      "precision": "quant4"
-    },
-    "class_type": "DownloadAndLoadChatGLM3",
-    "_meta": {
-      "title": "llm_model"
-    }
-  },
-  "14": {
-    "inputs": {
-      "width": 1024,
-      "height": 1024,
-      "seed": 1000102404233412,
-      "steps": 25,
-      "cfg": 5,
-      "scheduler": "EulerDiscreteScheduler",
-      "denoise_strength": 1,
-      "kolors_model": [
-        "6",
-        0
-      ],
-      "kolors_embeds": [
-        "12",
-        0
-      ]
-    },
-    "class_type": "KolorsSampler",
-    "_meta": {
-      "title": "main_sampler"
-    }
-  },
-  "16": {
+  "75": {
     "inputs": {
       "images": [
         "10",

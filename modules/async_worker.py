@@ -61,7 +61,7 @@ def worker():
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser, MetadataScheme
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
-    from enhanced.comfy_task import get_comfy_task
+    from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -980,7 +980,15 @@ def worker():
             try:
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
-                
+                if task_backend != sdxl_backend:
+                    refiner_model_name = ''
+                    refiner_switch = 1.0
+                    if is_hydit_task:
+                        base_model_name = 'hydit_v1.1_fp16.safetensors'
+                    elif is_Kolors_task:
+                        base_model_name = default_kolors_base_model_name
+                    loras = []
+
                 if task_backend == comfy_backend:
                     default_params = dict(
                         prompt=task["positive"][0],
@@ -1081,14 +1089,6 @@ def worker():
                     print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
                 
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{image_number} to system ...')
-                if task_backend != sdxl_backend:
-                    refiner_model_name = ''
-                    refiner_switch = 1.0
-                    if is_hydit_task:
-                        base_model_name = 'hydit_v1.1_fp16.safetensors'
-                    elif is_Kolors_task:
-                        base_model_name = 'diffusers_kolors_fp16.safetensors'
-                    loras = []
 
                 for x in imgs:
                     d = [('Prompt', 'prompt', task['log_positive_prompt']),

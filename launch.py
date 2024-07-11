@@ -45,8 +45,8 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.15"
-    REINSTALL_BASE = True
+    ver_required = "0.3.16"
+    REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -113,6 +113,10 @@ def prepare_environment():
     if sysinfo['gpu_brand'] == 'AMD' and platform.system() == "Windows" and not is_installed("torch-directml"):
         run_pip(f"install -U -I --no-deps torch-directml", "torch-directml")
 
+    if not is_installed("torchaudio"):
+        torch_command = f'pip install torchaudio=={torch_ver} -i {index_url}'
+        run(f'"{python}" -m {torch_command}', "Installing torchaudio", "Couldn't install torchaudio", live=True)
+
     if TRY_INSTALL_XFORMERS:
         xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
         xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-manylinux2014_x86_64.whl'
@@ -174,6 +178,8 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
+os.environ['HF_MIRROR'] = 'hf-mirror.com'
+
 build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
@@ -198,10 +204,6 @@ import warnings
 import logging
 logging.basicConfig(level=logging.ERROR)
 warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
-
-if args.hf_mirror is not None : 
-    os.environ['HF_MIRROR'] = str(args.hf_mirror)
-    print("Set hf_mirror to:", args.hf_mirror)
 
 from modules import config
 
@@ -274,6 +276,7 @@ def reset_env_args():
         sysinfo["location"] = args.location
 
     if sysinfo["location"] !='CN':
+        os.environ['HF_MIRROR'] = 'hf-mirror.com'
         if '--language' not in sys.argv:
             args.language='default'
 
@@ -289,6 +292,10 @@ def reset_env_args():
     reset_simpleai_args(token, sysinfo)
 
 reset_env_args()
+
+if args.hf_mirror is not None :
+    os.environ['HF_MIRROR'] = str(args.hf_mirror)
+    print("Set hf_mirror to:", args.hf_mirror)
 
 from webui import *
 

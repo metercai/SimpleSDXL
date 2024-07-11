@@ -885,7 +885,7 @@ with shared.gradio_root:
             elif x==flags.backend_engines[1]:
                 results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
             elif x==flags.backend_engines[3]:
-                results = [gr.update()] + [gr.update(interactive=False)] * 2 + [gr.update(choices=comfy_task.kolors_schedulers)] + [gr.update(interactive=False)] * 17
+                results = [gr.update()] + [gr.update(interactive=True, choices=flags.sampler_list)] + [gr.update(interactive=False)] + [gr.update(interactive=True)] + [gr.update(interactive=False)] * 17
             else:
                 results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
             return results
@@ -1236,7 +1236,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 launch.reset_env_args()
 
 if args_manager.args.enable_comfyd:
-    comfyd.start()
+    comfyd.active(True)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,
