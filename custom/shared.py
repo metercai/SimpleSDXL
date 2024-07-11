@@ -12,7 +12,7 @@ paths_inpaint = config.paths_inpaint
 paths_controlnet = config.paths_controlnet
 path_clip_vision = config.path_clip_vision
 path_fooocus_expansion = config.path_fooocus_expansion
-path_llms = config.path_llms
+paths_llms = config.paths_llms
 path_outputs = config.path_outputs
 
 path_root = root

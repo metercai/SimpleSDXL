@@ -8,7 +8,7 @@ import shutil
 
 tokenizer = None
 model = None
-modelDir = os.path.join(config.path_llms, "superprompt-v1" )
+modelDir = os.path.join(config.paths_llms[0], "superprompt-v1" )
 
 
 def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperature=0.5, top_p=1, top_k = 1 , seed=-1):

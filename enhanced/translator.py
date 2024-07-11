@@ -7,7 +7,7 @@ import translators as ts
 import enhanced.enhanced_parameters as ehps
 
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
-from modules.config import path_llms
+from modules.config import paths_llms
 from modules.model_loader import load_file_from_url
 from download import download
 from functools import lru_cache
@@ -20,13 +20,13 @@ B_alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 translator_org = ['baidu', 'alibaba', 'sogou', 'caiyun']
 translator_default = translator_org[random.randint(0,2)]
-translator_path = os.path.join(path_llms, 'nllb-200-distilled-600M')
-translator_slim_path = os.path.join(path_llms, 'Helsinki-NLP/opus-mt-zh-en')
+translator_path = os.path.join(paths_llms[0], 'nllb-200-distilled-600M')
+translator_slim_path = os.path.join(paths_llms[0], 'Helsinki-NLP/opus-mt-zh-en')
 is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
 
-translator_path_old = os.path.join(path_llms, '../translator')
-if os.path.exists(translator_path_old) and not os.path.exists(path_llms):
-    os.rename(translator_path_old, path_llms)
+translator_path_old = os.path.join(paths_llms[0], '../translator')
+if os.path.exists(translator_path_old) and not os.path.exists(paths_llms[0]):
+    os.rename(translator_path_old, paths_llms[0])
 
 
 g_tokenizer = ''

@@ -45,8 +45,8 @@ class MZ_ChatGLM3Loader:
     @classmethod
     def INPUT_TYPES(s):
         from .mz_kolors_utils import Utils
-        llm_dir = os.path.join(Utils.get_models_path(), "LLM")
-        print("llm_dir:", llm_dir)
+        llm_dir = os.path.join(Utils.get_models_path(), "llms")
+        # print("llm_dir:", llm_dir)
         llm_models = Utils.listdir_models(llm_dir)
 
         return {"required": {

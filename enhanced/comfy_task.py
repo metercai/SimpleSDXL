@@ -1,5 +1,6 @@
 import modules.config
 import zipfile
+import shutil
 from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo
 from modules.model_loader import load_file_from_url
 
@@ -82,11 +83,11 @@ def get_comfy_task(method, default_params, input_images, options={}):
     elif method == 'Kolors':
         comfy_params = ComfyTaskParams(default_params)
         comfy_params.update_params({
-            "llm_precision": 'quant4' if sysinfo["gpu_memory"]<8192 else 'quant8' if sysinfo["gpu_memory"]<12288 else 'quant8' #'fp16'
+            "llms_model": 'chatglm3-4bit.safetensors' if sysinfo["gpu_memory"]<8192 else 'chatglm3-8bit.safetensors' # if sysinfo["gpu_memory"]<12288 else 'chatglm3-fp16.safetensors' #'fp16'
             })
         #print(f'models_info:{models_info}')
-        if 'DIFFUSERS/Kolors' not in models_info:
-            pass #downloading_kolors_model(modules.config.paths_diffusers[0])
+        if 'unet/kolors_unet_fp16.safetensors' not in models_info:
+            downloading_kolors_model(modules.config.path_models_root)
         return ComfyTask('kolors_text2image', comfy_params)
     else:
         comfy_params = ComfyTaskParams(default_params)
@@ -123,25 +124,22 @@ def fixed_width_height(width, height, factor):
     height = height if height % factor == 0 else int((height // factor + 1) * factor)
     return width, height
 
-kolors_schedulers = [ 
-                        "EulerDiscreteScheduler",
-                        "EulerAncestralDiscreteScheduler",
-                        "DPMSolverMultistepScheduler",
-                        "DPMSolverMultistepScheduler_SDE_karras",
-                        "UniPCMultistepScheduler",
-                        "DEISMultistepScheduler",
-                    ]
-default_kolors_scheduler = kolors_schedulers[0]
+default_kolors_base_model_name = 'kolors_unet_fp16.safetensors'
 
 def downloading_kolors_model(path_root):
     load_file_from_url(
-        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16.zip',
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_chatglm3_q4q8.zip',
         model_dir=path_root,
-        file_name='models_kolors_fp16.zip'
+        file_name='models_kolors_fp16_chatglm3_q4q8.zip'
     )
-    downfile = os.path.join(path_root, 'models_kolors_fp16.zip')
-    with zipfile.open(downfile, 'r') as tarf:
-        zipf.extractall(path_root)
-    os.remove(downfile)
 
+    downfile = os.path.join(path_root, 'models_kolors_fp16_chatglm3_q4q8.zip')
+    with zipfile.open(downfile, 'r') as zipf:
+        zipf.extractall(path_root)
+        shutil.move(os.path.join(path_root, 'models/unet/kolors_unet_fp16.safetensors'), modules_config.path_unet)
+        shutil.move(os.path.join(path_root, 'models/vae/sdxl_fp16.vae.safetensors'), modules_config.path_vae)
+        shutil.move(os.path.join(path_root, 'modles/llms/chatglm3-4bit.safetensors'), modules_config.paths_llms[0])
+        shutil.move(os.path.join(path_root, 'modles/llms/chatglm3-8bit.safetensors'), modules_config.paths_llms[0])
+        shutil.rmtree(os.path.join(path_root, 'models'))
+    os.remove(downfile)
     pass

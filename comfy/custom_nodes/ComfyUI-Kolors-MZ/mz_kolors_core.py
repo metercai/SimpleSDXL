@@ -1,10 +1,13 @@
 
 
+
 import gc
 import json
 import os
 import random
 import re
+
+import torch
 import folder_paths
 import comfy.model_management as mm
 
@@ -67,16 +70,24 @@ def KolorsTextEncode(chatglm3_model, prompt):
     return prompt_embeds, text_proj
 
 
+import importlib
+
+
 def MZ_ChatGLM3Loader_call(args):
     from .mz_kolors_utils import Utils
-    llm_dir = os.path.join(Utils.get_models_path(), "LLM")
+    llm_dir = os.path.join(Utils.get_models_path(), "llms")
     chatglm3_checkpoint = args.get("chatglm3_checkpoint")
 
     chatglm3_checkpoint_path = os.path.join(llm_dir, chatglm3_checkpoint)
 
+    if not os.path.exists(chatglm3_checkpoint_path):
+        raise RuntimeError(
+            f"ERROR: Could not find chatglm3 checkpoint: {chatglm3_checkpoint_path}")
+
     from .chatglm3.configuration_chatglm import ChatGLMConfig
     from .chatglm3.modeling_chatglm import ChatGLMModel
     from .chatglm3.tokenization_chatglm import ChatGLMTokenizer
+
     from .mz_kolors_utils import Utils
 
     offload_device = mm.unet_offload_device()
@@ -97,33 +108,22 @@ def MZ_ChatGLM3Loader_call(args):
     except:
         pass
 
-    text_encoder_resp = Utils.cache_get("chatglm3_text_encoder")
-
-    if text_encoder_resp is None or text_encoder_resp['chatglm3_checkpoint'] != chatglm3_checkpoint:
-        if text_encoder_resp is not None and text_encoder_resp['chatglm3_checkpoint'] != chatglm3_checkpoint:
-            del text_encoder_resp
-            gc.collect()
-
-        with (init_empty_weights() if is_accelerate_available else nullcontext()):
-            text_encoder = ChatGLMModel(text_encoder_config)
+    with (init_empty_weights() if is_accelerate_available else nullcontext()):
+        with torch.no_grad():
+            # 打印版本号
+            print("torch version:", torch.__version__)
+            text_encoder = ChatGLMModel(text_encoder_config).eval()
             if '4bit' in chatglm3_checkpoint:
                 text_encoder.quantize(4)
             elif '8bit' in chatglm3_checkpoint:
                 text_encoder.quantize(8)
-
-        text_encoder_sd = load_torch_file(chatglm3_checkpoint_path)
-        if is_accelerate_available:
-            for key in text_encoder_sd:
-                set_module_tensor_to_device(
-                    text_encoder, key, device=offload_device, value=text_encoder_sd[key])
-        else:
-            text_encoder.load_state_dict()
-        Utils.cache_set("chatglm3_text_encoder", {
-            "text_encoder": text_encoder,
-            "chatglm3_checkpoint": chatglm3_checkpoint
-        })
+    text_encoder_sd = load_torch_file(chatglm3_checkpoint_path)
+    if is_accelerate_available:
+        for key in text_encoder_sd:
+            set_module_tensor_to_device(
+                text_encoder, key, device=offload_device, value=text_encoder_sd[key])
     else:
-        text_encoder = text_encoder_resp['text_encoder']
+        text_encoder.load_state_dict()
 
     tokenizer_path = os.path.join(
         os.path.dirname(__file__), 'configs', "tokenizer")
@@ -236,3 +236,4 @@ def MZ_FakeCond_call(kwargs):
         cond,
         {"pooled_output": pool},
     ]],)
+
