@@ -1,5 +1,0 @@
-
-annotator_ckpts_path: /home/ubuntu/llmlab/drawing/SimpleSDXL/models/controlnet
-custom_temp_path:
-USE_SYMLINKS: False
-EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]

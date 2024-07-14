@@ -1,0 +1,63 @@
+{
+    "default_engine": {
+	"backend": "Comfy",
+	"workflow": "kolors_text2image2",
+	"disvisible": ["backend_selection", "performance_selection"],
+	"disinteractive": ["input_image_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
+	"available_list": {
+		"available_aspect_ratios_selection": [
+			"576*1344", "768*1152", "896*1152", "768*1280", "960*1280",  
+        		"1024*1024", "1024*1280", "1280*1280", "1280*1024",
+        		"1280*960", "1280*768", "1152*896", "1152*768", "1344*576" ],
+		"available_scheduler_name": ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"],
+		"available_sampler_name": [
+			"euler", "euler_ancestral", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
+                  	"lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_sde", "dpmpp_sde_gpu",
+                  	"dpmpp_2m", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm",
+		        "ddim", "uni_pc", "uni_pc_bh2" ]  
+		},
+	"llms_model": "quant8"
+	},
+    "default_model": "None",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "Hyper-SDXL-8steps-lora.safetensors",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 1.5,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "sgm_uniform",
+    "default_performance": "Speed",
+    "default_prompt": "\u5218\u4ea6\u975e\uff0c\u7e41\u534e\u5927\u8857\uff0c\u8eab\u7a7f\u6c49\u670d\uff0c\u624b\u4e3e\u724c\u5b50\uff0c\u4e0a\u9762 \u5199\u7740 \u201c\u771f\u725b\uff01\u201d",
+    "default_prompt_negative": "",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_overwrite_step": 8,
+    "checkpoint_downloads": {
+        "juggernaut-X-RunDiffusion-NSFW.safetensors": "MUID:039986f26f01"
+    },
+    "embeddings_downloads": {},
+    "lora_downloads": {
+        "sd_xl_offset_example-lora_1.0.safetensors": "MUID:8e3e833226b3"
+    }
+}
