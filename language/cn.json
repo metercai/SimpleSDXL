@@ -241,6 +241,7 @@
   "SDXL": "SDXL",
   "HyDiT": "混元",
   "Kolors": "可图",
+  "Kolors+": "可图+",
   "SD3 Api": "SD3接口",
   "SD3T Api": "SD3TApi",
   "Api engine needs to configure the api key before use": "使用接口引擎需要事先配置接口密钥。密钥从stability.ai官网申请。",
