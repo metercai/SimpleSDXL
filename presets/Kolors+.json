@@ -48,7 +48,7 @@
     "default_sampler": "euler_ancestral",
     "default_scheduler": "sgm_uniform",
     "default_performance": "Speed",
-    "default_prompt": "\u5218\u4ea6\u975e\uff0c\u7e41\u534e\u5927\u8857\uff0c\u8eab\u7a7f\u6c49\u670d\uff0c\u624b\u4e3e\u724c\u5b50\uff0c\u4e0a\u9762 \u5199\u7740 \u201c\u771f\u725b\uff01\u201d",
+    "default_prompt": "",
     "default_prompt_negative": "",
     "default_styles": [],
     "default_aspect_ratio": "1024*1024",
