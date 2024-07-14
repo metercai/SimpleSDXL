@@ -2,7 +2,7 @@ from typing import Tuple, List
 
 import ldm_patched.modules.model_management as model_management
 from ldm_patched.modules.model_patcher import ModelPatcher
-from modules.config import path_inpaint
+from modules.config import paths_inpaint
 from modules.model_loader import load_file_from_url
 
 import numpy as np
@@ -30,7 +30,7 @@ class GroundingDinoModel(Model):
             filename = load_file_from_url(
                 url="https://huggingface.co/metercai/rembg/resolve/main/inpaint/groundingdino_swint_ogc.pth",
                 file_name='groundingdino_swint_ogc.pth',
-                model_dir=path_inpaint)
+                model_dir=paths_inpaint)
             model = load_model(model_config_path=self.config_file, model_checkpoint_path=filename)
 
             self.load_device = model_management.text_encoder_device()

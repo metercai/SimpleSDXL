@@ -216,6 +216,7 @@ def worker():
         inpaint_mask_upload_checkbox = args.pop()
         invert_mask_checkbox = args.pop()
         inpaint_erode_or_dilate = args.pop()
+        params_backend = args.pop()
 
         save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
         metadata_scheme = MetadataScheme(
@@ -227,6 +228,10 @@ def worker():
         is_comfy_task = 'layer' in current_tab and input_image_checkbox
         is_SD3m_task = ehps.backend_selection == flags.backend_engines[2]
         is_Kolors_task = ehps.backend_selection == flags.backend_engines[3]
+        is_KolorsPlus_task = False if 'backend' not in params_backend else params_backend['backend'] == 'Comfy' and params_backend['workflow'] == 'kolors_text2image2'
+        print(f'params_backend:{params_backend}')
+        print(f'is_KolorsPlus_task:{is_KolorsPlus_task}')
+
         sdxl_backend = flags.backend_engines[0]
         hydit_backend = flags.backend_engines[1]
         comfy_backend = 'Comfy'
@@ -250,13 +255,18 @@ def worker():
             task_backend = comfy_backend
             task_type_name = flags.backend_engines[3]
             comfyd.start()
+        
+        if is_KolorsPlus_task:
+            task_backend = comfy_backend
+            task_type_name = flags.backend_engines[3] + '+'
+            comfyd.start()
 
         if is_comfy_task:
             task_backend = comfy_backend
             task_type_name = task_backend
             comfyd.start()
 
-        if not is_hydit_task and not is_Kolors_task:
+        if not is_hydit_task and not is_Kolors_task and not is_KolorsPlus_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
             negative_prompt = translator.convert(negative_prompt, ehps.translation_methods)
 
@@ -968,6 +978,16 @@ def worker():
         if task_backend != sdxl_backend:
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
+            refiner_model_name = ''
+            refiner_switch = 1.0
+            if is_hydit_task:
+                base_model_name = 'hydit_v1.1_fp16.safetensors'
+            elif is_Kolors_task:
+                base_model_name = default_kolors_base_model_name
+            elif is_KolorsPlus_task:
+                params_backend.update({"merge_model": base_model_name})
+                params_backend.update({"lora_speedup": loras[0][0]})
+                base_model_name = default_kolors_base_model_name
 
         if ldm_patched.modules.model_management.is_nvidia():
             print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
@@ -980,14 +1000,6 @@ def worker():
             try:
                 if async_task.last_stop is not False:
                     ldm_patched.modules.model_management.interrupt_current_processing()
-                if task_backend != sdxl_backend:
-                    refiner_model_name = ''
-                    refiner_switch = 1.0
-                    if is_hydit_task:
-                        base_model_name = 'hydit_v1.1_fp16.safetensors'
-                    elif is_Kolors_task:
-                        base_model_name = default_kolors_base_model_name
-                    loras = []
 
                 if task_backend == comfy_backend:
                     default_params = dict(
@@ -1003,6 +1015,7 @@ def worker():
                         denoise=denoising_strength,
                         seed=task['task_seed'],
                         )
+                    default_params.update(params_backend)
                     if layer_input_image is None:
                         input_images = None
                     else:
@@ -1012,6 +1025,9 @@ def worker():
                         options = dict()
                     elif is_Kolors_task:
                         comfy_method = 'Kolors'
+                        options = dict()
+                    elif is_KolorsPlus_task:
+                        comfy_method = 'KolorsPlus'
                         options = dict()
                     else:
                         comfy_method = layer_method
@@ -1133,7 +1149,7 @@ def worker():
                         d.append(('FreeU', 'freeu', str((freeu_b1, freeu_b2, freeu_s1, freeu_s2))))
 
                     for li, (n, w) in enumerate(loras):
-                        if n != 'None' and not is_hydit_task and not is_comfy_task and not is_Kolors_task:
+                        if n != 'None' and not is_hydit_task and not is_comfy_task and not is_Kolors_task and is_KolorsPlus_task:
                             d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
                     metadata_parser = None
@@ -1148,7 +1164,7 @@ def worker():
                         d.append(('Backend Engine', 'backend_engine', 'Hunyuan-DiT'))
                     elif is_SD3m_task:
                         d.append(('Backend Engine', 'backend_engine', 'SD3-medium'))
-                    elif is_Kolors_task:
+                    elif is_Kolors_task or is_KolorsPlus_task:
                         d.append(('Backend Engine', 'backend_engine', 'Kwai-Kolors'))
                     else:
                         d.append(('Backend Engine', 'backend_engine', 'SDXL-Fooocus'))

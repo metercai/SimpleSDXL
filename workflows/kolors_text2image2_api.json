@@ -1,22 +1,22 @@
 {
   "6": {
     "inputs": {
-      "seed": 429331073071241,
-      "steps": 25,
-      "cfg": 7,
-      "sampler_name": "dpmpp_2m_sde_gpu",
-      "scheduler": "karras",
+      "seed": 608980608082327,
+      "steps": 8,
+      "cfg": 1.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
-        "59",
+        "128",
         0
       ],
       "positive": [
-        "67",
+        "131",
         0
       ],
       "negative": [
-        "62",
+        "132",
         0
       ],
       "latent_image": [
@@ -68,58 +68,6 @@
       "title": "Preview Image"
     }
   },
-  "59": {
-    "inputs": {
-      "unet_name": "kolors_unet_fp16.safetensors"
-    },
-    "class_type": "MZ_KolorsUNETLoader",
-    "_meta": {
-      "title": "kolors_unet_loader"
-    }
-  },
-  "62": {
-    "inputs": {
-      "text": "",
-      "chatglm3_model": [
-        "66",
-        0
-      ],
-      "hid_proj": [
-        "59",
-        1
-      ]
-    },
-    "class_type": "MZ_ChatGLM3",
-    "_meta": {
-      "title": "negative_prompt"
-    }
-  },
-  "66": {
-    "inputs": {
-      "chatglm3_checkpoint": "chatglm3-8bit.safetensors"
-    },
-    "class_type": "MZ_ChatGLM3Loader",
-    "_meta": {
-      "title": "llms_model"
-    }
-  },
-  "67": {
-    "inputs": {
-      "text": "真实的照片,在中国,一个可爱的女孩,红色外套,城市夜景",
-      "chatglm3_model": [
-        "66",
-        0
-      ],
-      "hid_proj": [
-        "59",
-        1
-      ]
-    },
-    "class_type": "MZ_ChatGLM3",
-    "_meta": {
-      "title": "prompt"
-    }
-  },
   "70": {
     "inputs": {
       "vae_name": "sdxl_fp16.vae.safetensors"
@@ -129,7 +77,56 @@
       "title": "Load VAE"
     }
   },
-  "75": {
+  "128": {
+    "inputs": {
+      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
+      "strength_model": 1,
+      "model": [
+        "130",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_speedup"
+    }
+  },
+  "130": {
+    "inputs": {
+      "unet_name": "kolors_unet_fp16.safetensors"
+    },
+    "class_type": "MZ_KolorsUNETLoaderV2",
+    "_meta": {
+      "title": "MinusZone - KolorsUNETLoaderV2"
+    }
+  },
+  "131": {
+    "inputs": {
+      "text": "刘亦非，繁华大街，身穿汉服，手举牌子，上面 写着 “真牛！”",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "132": {
+    "inputs": {
+      "text": "",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "134": {
     "inputs": {
       "images": [
         "10",
@@ -139,6 +136,15 @@
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "result_image"
+    }
+  },
+  "136": {
+    "inputs": {
+      "precision": "quant8"
+    },
+    "class_type": "DownloadAndLoadChatGLM3",
+    "_meta": {
+      "title": "llms_model"
     }
   }
 }

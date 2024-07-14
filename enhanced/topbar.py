@@ -266,7 +266,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({f'{modules.flags.backend_engines[0]}_preset_value': ['', config.default_performance, config.default_styles, config.default_cfg_scale, config.default_overwrite_step, config.default_sampler, config.default_scheduler, config.default_base_model_name]})
     state_params.update({f'{modules.flags.backend_engines[1]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 6, config.default_overwrite_step, hydit_task.default_sampler, '', '']})
     state_params.update({f'{modules.flags.backend_engines[2]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 4.5, 28, 'dpmpp_2m', 'sgm_uniform', comfy_task.get_default_base_SD3m_name()]})
-    state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 7, 25, 'dpmpp_2m_sde_gpu', 'karras', '']})
+    state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 5, 25, '', comfy_task.default_kolors_scheduler, '']})
     state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
@@ -370,7 +370,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params] + [gr.update()]
+        return [gr.update()] * 59 + [state_params] + [gr.update()] * 3
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -428,11 +428,12 @@ def reset_context(state_params):
     backend_engine = get_preset_value('default_backend', 'SDXL')
     aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
     if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.sd3_available_aspect_ratios:
-        aspect_ratio = config.sd3_default_aspect_ratio
+        width, height = config.sd3_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
     elif backend_engine == modules.flags.backend_engines[1] and aspect_ratio not in hydit_task.available_aspect_ratios:
-        aspect_ratio = hydit_task.default_aspect_ratio
-    aspect_ratio = aspect_ratio.split('*')
-    info_preset.update({'Resolution': f'({aspect_ratio[0]}, {aspect_ratio[1]})'})
+        width, height = hydit_task.default_aspect_ratio.replace('×', ' ').split(' ')[:2]
+    else:
+        width, height = aspect_ratio.split('*')
+    info_preset.update({'Resolution': f'({width}, {height})'})
     
     adm_scaler_positive = ads.default["adm_scaler_positive"] if "default_adm_scaler_positive" not in keys else config_preset["default_adm_scaler_positive"]
     adm_scaler_negative = ads.default["adm_scaler_negative"] if "default_adm_scaler_negative" not in keys else config_preset["default_adm_scaler_negative"]
@@ -498,6 +499,22 @@ def reset_context(state_params):
 #"example_inpaint_prompts":[]
     info_preset.update({"task_from": f'preset:{preset}'})
     
+    disvisible = []
+    disinteractive = []
+    if 'default_engine' in config_preset:
+        if "disvisible" in config_preset['default_engine']:
+            disvisible = config_preset['default_engine']['disvisible']
+        if "disinteractive" in config_preset['default_engine']:
+            disinteractive = config_preset['default_engine']['disinteractive']
+        if 'available_list' in config_preset['default_engine']:
+            if "available_aspect_ratios_selection" in config_preset['default_engine']['available_list']:
+                info_preset.update({"available_aspect_ratios_selection": config_preset['default_engine']['available_list']['available_aspect_ratios_selection']})
+            if "available_scheduler_name" in config_preset['default_engine']['available_list']:
+                info_preset.update({"available_scheduler_name": config_preset['default_engine']['available_list']['available_scheduler_name']})
+            if "available_sampler_name" in config_preset['default_engine']['available_list']:
+                info_preset.update({"available_sampler_name": config_preset['default_engine']['available_list']['available_sampler_name']})
+    info_preset.update({"disvisible": disvisible})
+    info_preset.update({"disinteractive": disinteractive})
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
     # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
     update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
@@ -505,10 +522,7 @@ def reset_context(state_params):
     results = reset_params(check_prepare_for_reset(info_preset))
     results += [gr.update(visible=True if preset_url else False)]
 
-    if "default_image_number" in keys or "default_max_image_number" in keys:
-        results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
-    else:
-        results += [gr.update()]
+    results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     
     results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
@@ -531,7 +545,33 @@ def reset_context(state_params):
     engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
     engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])
     state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
-    results += [backend_engine]
+    if 'default_engine' in config_preset:
+        if 'backend' in config_preset['default_engine'] and config_preset['default_engine']['backend']=='Coomfy':
+            if config_preset['default_engine']['backend']['workflow']=='kolors_text2image2':
+                backend_engine = modules.flags.backend_engines[0]
+    
+    if 'backend_selection' in disvisible:
+        results += [gr.update(value=backend_engine, visible=False)]
+    else:
+        results += [gr.update(value=backend_engine, visible=True)]
+
+    if 'input_image_checkbox' in disinteractive:
+        results += [gr.update(interactive=False, value=False)]
+    else:
+        results += [gr.update()]
+    
+    params_backend = {}
+    if 'default_engine' in config_preset:
+        if 'backend' in config_preset['default_engine']:
+            params_backend.update({'backend': config_preset['default_engine']['backend']})
+        if 'workflow' in config_preset['default_engine']:
+            params_backend.update({'workflow': config_preset['default_engine']['workflow']})
+        if 'llms_model' in config_preset['default_engine']:
+            params_backend.update({'llms_model': config_preset['default_engine']['llms_model']})
+        if 'model_merge_ratio' in config_preset['default_engine']:
+            params_backend.update({'model_merge_ratio': config_preset['default_engine']['model_merge_ratio']})
+    results += [params_backend]
+
     system_message = 'system message was displayed!'
     return results
 
@@ -670,6 +710,8 @@ def reset_params(metadata):
 # overwrite_width, overwrite_height, refiner_swap_method
 
     update_not_null = lambda x: gr.update(value=x) if x else gr.update()
+    is_interactive = lambda x: x not in metadata['disinteractive']
+    is_visible = lambda x: x not in metadata['disvisible']
     results = []
     results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
@@ -680,12 +722,26 @@ def reset_params(metadata):
         results += [gr.update(value=copy.deepcopy(styles), choices=copy.deepcopy(style_sorter.all_styles))]
     else:
         results += [gr.update(value=copy.deepcopy(styles))]
-    results += [gr.update(value=metadata['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(metadata['Sharpness'])), \
-            gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model']), gr.update(value=metadata['Refiner Model']), \
-            gr.update(value=float(metadata['Refiner Switch'])), gr.update(value=metadata['Sampler']), gr.update(value=metadata['Scheduler']), \
-            gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
+    results += [gr.update(value=metadata['Performance'], visible=is_visible('performance_selection'), interactive=is_interactive('performance_selection'))]
+    if 'available_aspect_ratios_selection' in metadata:
+        available_aspect_ratios = metadata['available_aspect_ratios_selection']
+        available_aspect_ratios = [config.add_ratio(x) for x in available_aspect_ratios]
+        results += [gr.update(value=config.add_ratio(aspect_ratios), choices=available_aspect_ratios)]
+    else:
+        results += [gr.update(value=config.add_ratio(aspect_ratios))]
+    results += [gr.update(value=float(metadata['Sharpness'])), gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model'], interactive=is_interactive('base_model')), gr.update(value=metadata['Refiner Model'], interactive=is_interactive('refiner_model')), gr.update(value=float(metadata['Refiner Switch']))]
+    if 'available_sampler_name' in metadata:
+        results += [gr.update(value=metadata['Sampler'], choices=metadata['available_sampler_name'])]
+    else:
+        results += [gr.update(value=metadata['Sampler'], visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
+    if 'available_scheduler_name' in metadata:
+        results += [gr.update(value=metadata['Scheduler'], choices=metadata['available_scheduler_name'])]
+    else:
+        results += [gr.update(value=metadata['Scheduler'], visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
+
+    results += [gr.update(value=adaptive_cfg), gr.update(value=overwrite_step, interactive=is_interactive('overwrite_step')), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
     for i, (n, v) in enumerate(metadata['loras']):
-        results += [gr.update(value=True), gr.update(value=n), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight)]
+        results += [gr.update(value=True, interactive=is_interactive('loras')), gr.update(value=n, interactive=is_interactive('loras')), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight, interactive=is_interactive('loras'))]
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
     if "Seed" in metadata.keys():
         results += [gr.update(value=False), gr.update(value=metadata['Seed'])]

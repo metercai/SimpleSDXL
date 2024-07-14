@@ -175,7 +175,8 @@ def init_all_params_index(lora_number, disable_metadata):
         'inpaint_mask_upload_checkbox': 62+a, 
         'invert_mask_checkbox': 63+a, 
         'inpaint_erode_or_dilate': 64+a,
-        'save_metadata_to_images': 65+a,
-        'metadata_scheme': 66+a,
-        'ip_ctrls': 65+b,
+        'params_backend': 65+a,
+        'save_metadata_to_images': 66+a,
+        'metadata_scheme': 67+a,
+        'ip_ctrls': 66+b,
     }
