@@ -180,7 +180,7 @@ def is_ipynb():
 
 os.environ['HF_MIRROR'] = 'hf-mirror.com'
 
-build_launcher()
+#build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
