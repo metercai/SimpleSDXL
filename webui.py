@@ -115,6 +115,7 @@ shared.gradio_root = gr.Blocks(
 
 with shared.gradio_root:
     state_topbar = gr.State({})
+    params_backend = gr.State({})
     currentTask = gr.State(worker.AsyncTask(args=[]))
     with gr.Row():
         with gr.Column(scale=2):
@@ -885,7 +886,7 @@ with shared.gradio_root:
             elif x==flags.backend_engines[1]:
                 results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
             elif x==flags.backend_engines[3]:
-                results = [gr.update()] + [gr.update(interactive=True, choices=flags.sampler_list)] + [gr.update(interactive=False)] + [gr.update(interactive=True)] + [gr.update(interactive=False)] * 17
+                results = [gr.update()] + [gr.update(interactive=False)] + [gr.update(interactive=False)] + [gr.update(interactive=True, choices=comfy_task.kolors_scheduler_list)] + [gr.update(interactive=False)] * 17
             else:
                 results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
             return results
@@ -990,6 +991,7 @@ with shared.gradio_root:
         ctrls += [refiner_swap_method, controlnet_softness]
         ctrls += freeu_ctrls
         ctrls += inpaint_ctrls
+        ctrls += [params_backend]
 
         if not args_manager.args.disable_metadata:
             ctrls += [save_metadata_to_images, metadata_scheme]
@@ -1145,7 +1147,7 @@ with shared.gradio_root:
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
     reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
-    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [output_format, state_topbar, backend_selection]
+    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [output_format, state_topbar, backend_selection, input_image_checkbox, params_backend]
     
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 

@@ -686,10 +686,22 @@ comfyui:
      layer_model: {layer_model}
      '''
 
-paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet), diffusers=paths2str(paths_diffusers), embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
+paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
+
+
+config_controlnet_aux_path = os.path.join(shared.root, 'comfy/custom_nodes/comfyui_controlnet_aux/config.yaml')
+config_controlnet_aux_formatted_text = '''
+annotator_ckpts_path: {controlnets}
+custom_temp_path:
+USE_SYMLINKS: False
+EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+'''
+config_controlnet_aux_text = config_controlnet_aux_formatted_text.format(controlnets=paths_controlnet[0])
+with open(config_controlnet_aux_path, "w", encoding="utf-8") as controlnet_file:
+    controlnet_file.write(config_controlnet_aux_text)
 
 
 model_filenames = []

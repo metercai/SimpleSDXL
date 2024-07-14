@@ -11,23 +11,7 @@ class Kolors(comfy.supported_models.SDXL):
         "context_dim": 2048,
         "adm_in_channels": 5632,
         "use_temporal_attention": False,
-    }
-    
-    def process_clip_state_dict(self, state_dict):
-        raise NotImplementedError("Kolors does not support clip state dict processing")
-        return state_dict
-
-    
-    def process_clip_state_dict_for_saving(self, state_dict):
-        raise NotImplementedError("Kolors does not support clip state dict processing")
-        return state_dict
-    
-    
-    def clip_target(self):
-        raise NotImplementedError("Kolors does not support clip target")
-        # return supported_models_base.ClipTarget(sdxl_clip.SDXLTokenizer, sdxl_clip.SDXLClipModel)
-
-
+    } 
 
 if Kolors not in comfy.supported_models.models:
     comfy.supported_models.models += [Kolors]

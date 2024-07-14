@@ -1,7 +1,8 @@
-import modules.config
+import os
 import zipfile
 import shutil
-from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo
+import modules.config
+from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo, refresh_models_info
 from modules.model_loader import load_file_from_url
 
 method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
@@ -83,12 +84,19 @@ def get_comfy_task(method, default_params, input_images, options={}):
     elif method == 'Kolors':
         comfy_params = ComfyTaskParams(default_params)
         comfy_params.update_params({
-            "llms_model": 'chatglm3-4bit.safetensors' if sysinfo["gpu_memory"]<8192 else 'chatglm3-8bit.safetensors' # if sysinfo["gpu_memory"]<12288 else 'chatglm3-fp16.safetensors' #'fp16'
+            "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
             })
-        #print(f'models_info:{models_info}')
-        if 'unet/kolors_unet_fp16.safetensors' not in models_info:
-            downloading_kolors_model(modules.config.path_models_root)
-        return ComfyTask('kolors_text2image', comfy_params)
+        check_download_kolors_model(modules.config.path_models_root)
+        comfy_params.delete_params(['sampler'])
+        return ComfyTask('kolors_text2image1', comfy_params)
+    elif method == 'KolorsPlus':
+        workflow_name = default_params['workflow']
+        del default_params['workflow']
+        del default_params['backend']
+        comfy_params = ComfyTaskParams(default_params)
+        comfy_params.delete_params(['merge_model'])
+        check_download_kolors_model(modules.config.path_models_root)
+        return ComfyTask(workflow_name, comfy_params)
     else:
         comfy_params = ComfyTaskParams(default_params)
         if input_images is None:
@@ -126,20 +134,50 @@ def fixed_width_height(width, height, factor):
 
 default_kolors_base_model_name = 'kolors_unet_fp16.safetensors'
 
-def downloading_kolors_model(path_root):
-    load_file_from_url(
-        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_chatglm3_q4q8.zip',
-        model_dir=path_root,
-        file_name='models_kolors_fp16_chatglm3_q4q8.zip'
-    )
+kolors_scheduler_list = [ "EulerDiscreteScheduler",
+                          "EulerAncestralDiscreteScheduler",
+                          "DPMSolverMultistepScheduler",
+                          "DPMSolverMultistepScheduler_SDE_karras",
+                          "UniPCMultistepScheduler",
+                          "DEISMultistepScheduler" ]
+default_kolors_scheduler = kolors_scheduler_list[0]
 
-    downfile = os.path.join(path_root, 'models_kolors_fp16_chatglm3_q4q8.zip')
-    with zipfile.open(downfile, 'r') as zipf:
-        zipf.extractall(path_root)
-        shutil.move(os.path.join(path_root, 'models/unet/kolors_unet_fp16.safetensors'), modules_config.path_unet)
-        shutil.move(os.path.join(path_root, 'models/vae/sdxl_fp16.vae.safetensors'), modules_config.path_vae)
-        shutil.move(os.path.join(path_root, 'modles/llms/chatglm3-4bit.safetensors'), modules_config.paths_llms[0])
-        shutil.move(os.path.join(path_root, 'modles/llms/chatglm3-8bit.safetensors'), modules_config.paths_llms[0])
-        shutil.rmtree(os.path.join(path_root, 'models'))
-    os.remove(downfile)
-    pass
+def check_download_kolors_model(path_root):
+    #print(f'models_info:{models_info.keys()}')
+    check_modle_file = [
+            "diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin",
+            "unet/kolors_unet_fp16.safetensors",
+            "vae/sdxl_fp16.vae.safetensors",
+            ]
+    path_temp = os.path.join(path_root, 'temp')
+    if not os.path.exists(path_temp):
+        os.makedirs(path_temp)
+    if check_modle_file[0] not in models_info:
+        load_file_from_url(
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_simpleai_diffusers_fp16.zip',
+            model_dir=path_temp,
+            file_name='models_kolors_simpleai_diffusers_fp16.zip'
+        )
+        downfile = os.path.join(path_temp, 'models_kolors_simpleai_diffusers_fp16.zip')
+        with zipfile.ZipFile(downfile, 'r') as zipf:
+            print(f'extractall: {downfile}')
+            zipf.extractall(path_temp)
+        shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), modules.config.paths_diffusers[0])
+        shutil.rmtree(os.path.join(path_temp, 'models'))
+        os.remove(downfile)
+    
+    if check_modle_file[1] not in models_info:
+        path_org = os.path.join(modules.config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
+        path_dst = os.path.join(modules.config.path_unet, 'kolors_unet_fp16.safetensors')
+        print(f'model file copy: {path_org} to {path_dst}')
+        shutil.copy(path_org, path_dst)
+
+    if check_modle_file[2] not in models_info:
+        path_org = os.path.join(modules.config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
+        path_dst = os.path.join(modules.config.path_vae, 'sdxl_fp16.vae.safetensors')
+        print(f'model file copy: {path_org} to {path_dst}')
+        shutil.copy(path_org, path_dst)
+   
+    refresh_models_info()    
+    return
+
