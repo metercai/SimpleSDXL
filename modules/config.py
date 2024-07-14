@@ -692,16 +692,16 @@ with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 
 
-config_controlnet_aux_path = os.path.join(shared.root, 'comfy/custom_nodes/comfyui_controlnet_aux/config.yaml')
-config_controlnet_aux_formatted_text = '''
-annotator_ckpts_path: {controlnets}
-custom_temp_path:
-USE_SYMLINKS: False
-EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
-'''
-config_controlnet_aux_text = config_controlnet_aux_formatted_text.format(controlnets=paths_controlnet[0])
-with open(config_controlnet_aux_path, "w", encoding="utf-8") as controlnet_file:
-    controlnet_file.write(config_controlnet_aux_text)
+#config_controlnet_aux_path = os.path.join(shared.root, 'comfy/custom_nodes/comfyui_controlnet_aux/config.yaml')
+#config_controlnet_aux_formatted_text = '''
+#annotator_ckpts_path: {controlnets}
+#custom_temp_path:
+#USE_SYMLINKS: False
+#EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+#'''
+#config_controlnet_aux_text = config_controlnet_aux_formatted_text.format(controlnets=paths_controlnet[0])
+#with open(config_controlnet_aux_path, "w", encoding="utf-8") as controlnet_file:
+#    controlnet_file.write(config_controlnet_aux_text)
 
 
 model_filenames = []
