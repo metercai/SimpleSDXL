@@ -1,14 +1,12 @@
 {
     "default_engine": {
 	"backend": "Comfy",
-	"workflow": "kolors_text2image2",
+	"task_name": "kolors_text2image2",
+	"task_display_name": "Kolors",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
 	"available_list": {
-		"available_aspect_ratios_selection": [
-			"576*1344", "768*1152", "896*1152", "768*1280", "960*1280",  
-        		"1024*1024", "1024*1280", "1280*1280", "1280*1024",
-        		"1280*960", "1280*768", "1152*896", "1152*768", "1344*576" ],
+		"available_aspect_ratios_selection": "Common",
 		"available_scheduler_name": ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"],
 		"available_sampler_name": [
 			"euler", "euler_ancestral", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
@@ -48,10 +46,8 @@
     "default_sampler": "euler_ancestral",
     "default_scheduler": "sgm_uniform",
     "default_performance": "Speed",
-    "default_prompt": "",
-    "default_prompt_negative": "",
     "default_styles": [],
-    "default_aspect_ratio": "1024*1024",
+    "default_aspect_ratio": "1280*960",
     "default_overwrite_step": 8,
     "checkpoint_downloads": {
         "juggernaut-X-RunDiffusion-NSFW.safetensors": "MUID:039986f26f01"

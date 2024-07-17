@@ -67,7 +67,7 @@
     },
     "class_type": "DownloadAndLoadChatGLM3",
     "_meta": {
-      "title": "llm_model"
+      "title": "llms_model"
     }
   },
   "14": {

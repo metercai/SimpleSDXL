@@ -137,7 +137,7 @@ def get_system_message():
 
 
 def preset_instruction():
-    head = "<div style='max-width:100%; max-height:128px; overflow:hidden'>"
+    head = "<div style='max-width:100%; max-height:98px; overflow:hidden'>"
     foot = "</div>"
     body = '预置包简介:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     body += f'<iframe id="instruction" src="{get_preset_inc_url()}" frameborder="0" scrolling="no" width="100%"></iframe>'
@@ -269,8 +269,8 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 5, 25, '', comfy_task.default_kolors_scheduler, '']})
     state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.common_default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.common_default_aspect_ratio})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -370,7 +370,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params] + [gr.update()] * 3
+        return [gr.update()] * 59 + [state_params] + [gr.update()] * 2
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -427,8 +427,8 @@ def reset_context(state_params):
     get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
     backend_engine = get_preset_value('default_backend', 'SDXL')
     aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
-    if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.sd3_available_aspect_ratios:
-        width, height = config.sd3_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
+    if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.common_available_aspect_ratios:
+        width, height = config.common_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
     elif backend_engine == modules.flags.backend_engines[1] and aspect_ratio not in hydit_task.available_aspect_ratios:
         width, height = hydit_task.default_aspect_ratio.replace('×', ' ').split(' ')[:2]
     else:
@@ -549,29 +549,26 @@ def reset_context(state_params):
         if 'backend' in config_preset['default_engine'] and config_preset['default_engine']['backend']=='Coomfy':
             if config_preset['default_engine']['backend']['workflow']=='kolors_text2image2':
                 backend_engine = modules.flags.backend_engines[0]
-    
-    if 'backend_selection' in disvisible:
-        results += [gr.update(value=backend_engine, visible=False)]
-    else:
-        results += [gr.update(value=backend_engine, visible=True)]
 
     if 'input_image_checkbox' in disinteractive:
         results += [gr.update(interactive=False, value=False)]
     else:
-        results += [gr.update()]
+        results += [gr.update(interactive=True)]
     
     params_backend = {}
     if 'default_engine' in config_preset:
         if 'backend' in config_preset['default_engine']:
             params_backend.update({'backend': config_preset['default_engine']['backend']})
-        if 'workflow' in config_preset['default_engine']:
-            params_backend.update({'workflow': config_preset['default_engine']['workflow']})
+        if 'task_name' in config_preset['default_engine']:
+            params_backend.update({'task_name': config_preset['default_engine']['task_name']})
+        if 'task_display_name' in config_preset['default_engine']:
+            params_backend.update({'task_display_name': config_preset['default_engine']['task_display_name']})
         if 'llms_model' in config_preset['default_engine']:
             params_backend.update({'llms_model': config_preset['default_engine']['llms_model']})
         if 'model_merge_ratio' in config_preset['default_engine']:
             params_backend.update({'model_merge_ratio': config_preset['default_engine']['model_merge_ratio']})
     results += [params_backend]
-
+    
     system_message = 'system message was displayed!'
     return results
 
@@ -723,21 +720,22 @@ def reset_params(metadata):
     else:
         results += [gr.update(value=copy.deepcopy(styles))]
     results += [gr.update(value=metadata['Performance'], visible=is_visible('performance_selection'), interactive=is_interactive('performance_selection'))]
+    available_aspect_ratios_template = 'SDXL'
     if 'available_aspect_ratios_selection' in metadata:
-        available_aspect_ratios = metadata['available_aspect_ratios_selection']
-        available_aspect_ratios = [config.add_ratio(x) for x in available_aspect_ratios]
-        results += [gr.update(value=config.add_ratio(aspect_ratios), choices=available_aspect_ratios)]
-    else:
-        results += [gr.update(value=config.add_ratio(aspect_ratios))]
+        available_aspect_ratios_template = metadata['available_aspect_ratios_selection']
+    aspect_ratios_reset = config.add_ratio(aspect_ratios) + f',{available_aspect_ratios_template}'
+    results += [aspect_ratios_reset]
+    #results += [gr.Radio.update(value=config.add_ratio(aspect_ratios)]
+
     results += [gr.update(value=float(metadata['Sharpness'])), gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model'], interactive=is_interactive('base_model')), gr.update(value=metadata['Refiner Model'], interactive=is_interactive('refiner_model')), gr.update(value=float(metadata['Refiner Switch']))]
     if 'available_sampler_name' in metadata:
-        results += [gr.update(value=metadata['Sampler'], choices=metadata['available_sampler_name'])]
+        results += [gr.update(value=metadata['Sampler'], choices=metadata['available_sampler_name'], visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
     else:
-        results += [gr.update(value=metadata['Sampler'], visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
+        results += [gr.update(value=metadata['Sampler'], choices=modules.flags.sampler_list, visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
     if 'available_scheduler_name' in metadata:
-        results += [gr.update(value=metadata['Scheduler'], choices=metadata['available_scheduler_name'])]
+        results += [gr.update(value=metadata['Scheduler'], choices=metadata['available_scheduler_name'], visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
     else:
-        results += [gr.update(value=metadata['Scheduler'], visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
+        results += [gr.update(value=metadata['Scheduler'], choices=modules.flags.scheduler_list, visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
 
     results += [gr.update(value=adaptive_cfg), gr.update(value=overwrite_step, interactive=is_interactive('overwrite_step')), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
     for i, (n, v) in enumerate(metadata['loras']):

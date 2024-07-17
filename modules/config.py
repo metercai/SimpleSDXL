@@ -644,15 +644,13 @@ def add_ratio(x):
 default_aspect_ratio = add_ratio(default_aspect_ratio)
 available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
-#sd3_default_aspect_ratio = '16:9'
-#sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
-sd3_default_aspect_ratio = add_ratio('1024*1024')
-sd3_available_aspect_ratios = [
+common_default_aspect_ratio = add_ratio('1024*1024')
+common_available_aspect_ratios = [
         '576*1344', '768*1152', '896*1152', '768*1280', '960*1280',  
         '1024*1024', '1024*1280', '1280*1280', '1280*1024',
         '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'
     ]
-sd3_available_aspect_ratios = [add_ratio(x) for x in sd3_available_aspect_ratios]
+common_available_aspect_ratios = [add_ratio(x) for x in common_available_aspect_ratios]
 
 
 # Only write config in the first launch.

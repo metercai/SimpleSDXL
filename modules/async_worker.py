@@ -224,47 +224,34 @@ def worker():
 
         is_SD3_task = False #ehps.backend_selection == flags.backend_engines[2]
         is_SD3T_task = False #ehps.backend_selection == flags.backend_engines[2]
-        is_hydit_task =  ehps.backend_selection == flags.backend_engines[1]
         is_comfy_task = 'layer' in current_tab and input_image_checkbox
-        is_SD3m_task = ehps.backend_selection == flags.backend_engines[2]
-        is_Kolors_task = ehps.backend_selection == flags.backend_engines[3]
-        is_KolorsPlus_task = False if 'backend' not in params_backend else params_backend['backend'] == 'Comfy' and params_backend['workflow'] == 'kolors_text2image2'
-        print(f'params_backend:{params_backend}')
-        print(f'is_KolorsPlus_task:{is_KolorsPlus_task}')
+        #print(f'params_backend:{params_backend}')
+        #print(f'is_KolorsPlus_task:{is_KolorsPlus_task}')
 
-        sdxl_backend = flags.backend_engines[0]
-        hydit_backend = flags.backend_engines[1]
+        sdxl_backend = 'SDXL'
+        hydit_backend = 'Diffusers'
         comfy_backend = 'Comfy'
-        task_backend = sdxl_backend
-        task_type_name = task_backend
-       
-        if is_hydit_task:
-            aspect_ratios_selection = ehps.hydit_aspect_ratios_selection
-            task_backend = hydit_backend
-            task_type_name = task_backend
-            hydit_task.init_load_model()
-
-        if is_SD3m_task:
-            aspect_ratios_selection = ehps.sd3_aspect_ratios_selection
-            task_backend = comfy_backend
-            task_type_name = flags.backend_engines[2]
-            comfyd.start()
-
-        if is_Kolors_task:
-            aspect_ratios_selection = ehps.kolors_aspect_ratios_selection
-            task_backend = comfy_backend
-            task_type_name = flags.backend_engines[3]
-            comfyd.start()
-        
-        if is_KolorsPlus_task:
-            task_backend = comfy_backend
-            task_type_name = flags.backend_engines[3] + '+'
-            comfyd.start()
-
+        task_backend = sdxl_backend if 'backend' not in params_backend else params_backend['backend']
+        task_name = 'sdxl' if task_backend == sdxl_backend else params_backend['task_name']
+        is_hydit_task = True if task_name == 'hydit_base' else False
+        is_SD3m_task = True if task_name == 'sd3_base' else False
+        is_Kolors_task = True if task_name == 'kolors_text2image1' else False
+        is_KolorsPlus_task = True if task_name == 'kolors_text2image2' else False
+        task_display_name = 'SDXL' if task_backend == sdxl_backend else params_backend['task_display_name'] 
+     
+        is_comfy_task = 'layer' in current_tab and input_image_checkbox
         if is_comfy_task:
             task_backend = comfy_backend
-            task_type_name = task_backend
+            task_name = 'layer'
+            task_display_name = 'Comfy'
+
+        if task_backend == comfy_backend:
             comfyd.start()
+        elif task_backend == hydit_backend:
+            comfyd.stop()
+            hydit_task.init_load_model()
+        else:
+            comfyd.stop()
 
         if not is_hydit_task and not is_Kolors_task and not is_KolorsPlus_task:
             prompt = translator.convert(prompt, ehps.translation_methods)
@@ -275,7 +262,7 @@ def worker():
                 model = 'sd3'
             else:
                 model = 'sd3-turbo'
-            out_path_filename = sd3_handle.sd3_generate_api(prompt=prompt, model=model, aspect_ratio=ehps.sd3_aspect_ratios_selection, negative_prompt=negative_prompt, seed=int(image_seed), output_format=output_format)
+            out_path_filename = sd3_handle.sd3_generate_api(prompt=prompt, model=model, aspect_ratio=aspect_ratios_selection, negative_prompt=negative_prompt, seed=int(image_seed), output_format=output_format)
 
             from PIL import Image
             with Image.open(out_path_filename) as image:
@@ -946,7 +933,7 @@ def worker():
         if task_backend == sdxl_backend:
             async_task.yields.append(['preview', (flags.preparation_step_count, 'Moving model to GPU ...', None)])
         else:
-            async_task.yields.append(['preview', (flags.preparation_step_count, f'Process {task_type_name} Task ...', None)])
+            async_task.yields.append(['preview', (flags.preparation_step_count, f'Process {task_display_name} Task ...', None)])
 
         def callback(step, x0, x, total_steps, y):
             done_steps = current_task_id * steps + step
@@ -985,7 +972,6 @@ def worker():
             elif is_Kolors_task:
                 base_model_name = default_kolors_base_model_name
             elif is_KolorsPlus_task:
-                params_backend.update({"merge_model": base_model_name})
                 params_backend.update({"lora_speedup": loras[0][0]})
                 base_model_name = default_kolors_base_model_name
 
@@ -994,7 +980,7 @@ def worker():
 
         for current_task_id, task in enumerate(tasks):
             current_progress = int(flags.preparation_step_count + (100 - flags.preparation_step_count) * float(current_task_id * steps) / float(all_steps))
-            progressbar(async_task, current_progress, f'Preparing {task_type_name} task {current_task_id + 1}/{image_number} ...')
+            progressbar(async_task, current_progress, f'Preparing {task_display_name} task {current_task_id + 1}/{image_number} ...')
             execution_start_time = time.perf_counter()
 
             try:
@@ -1187,7 +1173,7 @@ def worker():
             print(f'Generating and saving time: {execution_time:.2f} seconds')
         async_task.processing = False
         if task_backend == comfy_backend:
-            comfyd.stop()
+            comfyd.finished()
         return
 
     while True:

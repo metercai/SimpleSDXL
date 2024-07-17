@@ -30,7 +30,7 @@ class GroundingDinoModel(Model):
             filename = load_file_from_url(
                 url="https://huggingface.co/metercai/rembg/resolve/main/inpaint/groundingdino_swint_ogc.pth",
                 file_name='groundingdino_swint_ogc.pth',
-                model_dir=paths_inpaint)
+                model_dir=paths_inpaint[0])
             model = load_model(model_config_path=self.config_file, model_checkpoint_path=filename)
 
             self.load_device = model_management.text_encoder_device()

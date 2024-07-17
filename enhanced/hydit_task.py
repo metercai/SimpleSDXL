@@ -11,7 +11,7 @@ from pathlib import Path
 from hydit.constants import SAMPLER_FACTORY
 from hydit.config import get_args
 from hydit.inference import End2End
-from modules.config import path_models_root, add_ratio
+from modules.config import path_models_root, paths_diffusers, add_ratio
 from modules.model_loader import load_file_from_url
 from modules.launch_util import is_installed
 from diffusers import HunyuanDiTPipeline, DDPMScheduler, DDIMScheduler, DPMSolverMultistepScheduler
@@ -26,12 +26,10 @@ available_aspect_ratios = [add_ratio(x) for x in available_aspect_ratios]
 
 SAMPLERS = list(SAMPLER_FACTORY.keys())
 default_sampler = SAMPLERS[0]
-#infer_mode = "fa" if is_installed("flash-attn") else "torch"
-#new_args = ["--use_fp16", "--lang", "zh", "--load-key", "distill", "--infer-mode", infer_mode]
-#hydit_args = get_args(new_args)
-#gen = None
 
-hydit_models_root = Path(os.path.join(path_models_root, "hydit"))
+path_hydit = path_models_root  # paths_diffusers[0]
+path_hydit_name = 'hydit' # 'HyDiT'
+hydit_models_root = Path(os.path.join(path_hydit, path_hydit_name))
 hydit_text_encoder = None
 hydit_pipe = None
 
@@ -43,7 +41,7 @@ def init_load_model():
     files = ["text_encoder_2/model.safetensors", "text_encoder/model.safetensors", "transformer/diffusion_pytorch_model.safetensors", "vae/diffusion_pytorch_model.safetensors"]
     if not hydit_models_root.exists() or not check_files_exist(hydit_models_root, files):
         hydit_models_root.mkdir(parents=True, exist_ok=True)
-        downloading_hydit_model(path_models_root)
+        downloading_hydit_model(path_hydit)
     
     if 'hydit_text_encoder' not in globals():
         globals()['hydit_text_encoder'] = None
@@ -53,7 +51,6 @@ def init_load_model():
                 hydit_models_root,
                 subfolder="text_encoder_2",
                 load_in_8bit=True,
-                #llm_int8_enable_fp32_cpu_offload=True,
                 device_map="auto",
             )
         else:
