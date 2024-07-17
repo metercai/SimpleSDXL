@@ -1029,6 +1029,8 @@ def worker():
                         empty_path = [np.zeros((width, height), dtype=np.uint8)]
                         yield_result(async_task, empty_path, black_out_nsfw, do_not_show_finished_images=True)
                         imgs = empty_path
+                    scheduler_name = final_scheduler_name
+                    sampler_name = final_sampler_name
 
                 elif task_backend == hydit_backend:
                     imgs = hydit_task.inferencer(
