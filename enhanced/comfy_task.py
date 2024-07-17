@@ -73,28 +73,41 @@ def get_comfy_task(method, default_params, input_images, options={}):
     global method_name, task_name
 
     if method == 'SD3m':
+        workflow_name = default_params['task_name']
+        del default_params['task_name']
+        del default_params['task_display_name']
+        del default_params['backend']
         comfy_params = ComfyTaskParams(default_params)
         if f'checkpoints/{default_params["base_model"]}' not in models_info:
             modules.config.downloading_sd3_medium_model()
-        return ComfyTask('sd3_base', comfy_params)
+        return ComfyTask(workflow_name, comfy_params)
     elif method == method_names[1]:
         comfy_params = ComfyTaskParams(default_params)
         comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
         return ComfyTask(task_name[method], comfy_params)
     elif method == 'Kolors':
-        comfy_params = ComfyTaskParams(default_params)
-        comfy_params.update_params({
-            "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
-            })
-        check_download_kolors_model(modules.config.path_models_root)
-        comfy_params.delete_params(['sampler'])
-        return ComfyTask('kolors_text2image1', comfy_params)
-    elif method == 'KolorsPlus':
-        workflow_name = default_params['workflow']
-        del default_params['workflow']
+        workflow_name = default_params['task_name']
+        del default_params['task_name']
+        del default_params['task_display_name']
         del default_params['backend']
         comfy_params = ComfyTaskParams(default_params)
-        comfy_params.delete_params(['merge_model'])
+        if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
+            comfy_params.update_params({
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
+                })
+        check_download_kolors_model(modules.config.path_models_root)
+        comfy_params.delete_params(['sampler'])
+        return ComfyTask(workflow_name, comfy_params)
+    elif method == 'KolorsPlus':
+        workflow_name = default_params['task_name']
+        del default_params['task_name']
+        del default_params['task_display_name']
+        del default_params['backend']
+        comfy_params = ComfyTaskParams(default_params)
+        if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
+            comfy_params.update_params({
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
+                })
         check_download_kolors_model(modules.config.path_models_root)
         return ComfyTask(workflow_name, comfy_params)
     else:
@@ -142,6 +155,9 @@ kolors_scheduler_list = [ "EulerDiscreteScheduler",
                           "DEISMultistepScheduler" ]
 default_kolors_scheduler = kolors_scheduler_list[0]
 
+def check_task_model():
+    pass
+
 def check_download_kolors_model(path_root):
     #print(f'models_info:{models_info.keys()}')
     check_modle_file = [
@@ -152,6 +168,9 @@ def check_download_kolors_model(path_root):
     path_temp = os.path.join(path_root, 'temp')
     if not os.path.exists(path_temp):
         os.makedirs(path_temp)
+    for f in models_info:
+        if '00007-of-00007.bin' in f:
+            print(f'model in diffusers: {f}')
     #if check_modle_file[0] not in models_info:
     #    load_file_from_url(
     #        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_simpleai_diffusers_fp16.zip',

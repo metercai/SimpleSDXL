@@ -154,7 +154,7 @@
           "label": "chatglm3_model"
         }
       ],
-      "title": "llm_model",
+      "title": "llms_model",
       "properties": {
         "Node name for S&R": "DownloadAndLoadChatGLM3"
       },

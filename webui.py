@@ -430,26 +430,22 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 interactive=True)
-                backend_selection = gr.Radio(label='Generate Engine', choices=flags.backend_engines, value=modules.config.default_backend)
+                backend_selection = gr.Radio(label='Generate Engine', visible=False, choices=flags.backend_engines, value=modules.config.default_backend)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
                 with gr.Group():
                     image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
                     with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
-                        aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                        sd3_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                        aspect_ratios_selection = gr.Textbox(value='', visible=False) 
+                        sdxl_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios_labels, value=modules.config.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
                         hydit_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=hydit_task.available_aspect_ratios, visible=False, value=hydit_task.default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                        kolors_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.sd3_available_aspect_ratios, visible=False, value=modules.config.sd3_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
-                        def set_current_aspect_ratios(x,y,z):
-                            y[f'{x}_current_aspect_ratios']=z
-                            return y
-
-                        aspect_ratios_selection.change(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, aspect_ratios_selection])
-                        hydit_aspect_ratios_selection.change(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, hydit_aspect_ratios_selection])
-                        sd3_aspect_ratios_selection.change(lambda x: None, inputs=sd3_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, sd3_aspect_ratios_selection])
-                        kolors_aspect_ratios_selection.change(lambda x: None, inputs=kolors_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}').then(set_current_aspect_ratios, inputs=[backend_selection, state_topbar, kolors_aspect_ratios_selection])
-                        shared.gradio_root.load(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        common_aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.common_available_aspect_ratios, visible=False, value=modules.config.common_default_aspect_ratio, info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios')
+                        
+                        sdxl_aspect_ratios_selection.change(lambda x: x, inputs=sdxl_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=sdxl_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        hydit_aspect_ratios_selection.change(lambda x: x, inputs=hydit_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        common_aspect_ratios_selection.change(lambda x: x, inputs=common_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=common_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        shared.gradio_root.load(lambda x: None, inputs=sdxl_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                     output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
@@ -792,7 +788,7 @@ with shared.gradio_root:
                 with gr.Row():
                     gr.Markdown(value=f'OS: {sysinfo["os_name"]}, {sysinfo["cpu_arch"]}, {sysinfo["cuda_version"]}, Torch{sysinfo["torch_version"]}, XF{sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {sysinfo["pyhash"]}, UIHash: {sysinfo["uihash"]}')
 
-            iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selection], queue=False, show_progress=False)
+            iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, sdxl_aspect_ratios_selection], queue=False, show_progress=False)
             pre4comfy = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
             def toggle_image_tab(tab, styles):
                 result = []
@@ -816,7 +812,7 @@ with shared.gradio_root:
             comfyd_active_checkbox.change(lambda x: comfyd.active(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_methods, backend_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, kolors_aspect_ratios_selection, comfyd_active_checkbox]
+            ehps = [backfill_prompt, translation_methods, backend_selection, comfyd_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
            
@@ -911,25 +907,24 @@ with shared.gradio_root:
                     results += [v]
             return results + [state_params[f'{x}_current_aspect_ratios']+f',{x}']
         
-        def reset_aspect_ratios(c_aspect_ratios):
-            engine = c_aspect_ratios.split(',')[1]
-            aspect_ratios = c_aspect_ratios.split(',')[0]
-            if engine==flags.backend_engines[2]:
-                results = [gr.update(), gr.update(), aspect_ratios, gr.update()]
-            elif engine==flags.backend_engines[1]:
-                results = [gr.update(), aspect_ratios, gr.update(), gr.update()]
-            elif engine==flags.backend_engines[3]:
-                results = [gr.update(), gr.update(), gr.update(), aspect_ratios]
+        def reset_aspect_ratios(aspect_ratios):
+            if len(aspect_ratios.split(','))>1:
+                template = aspect_ratios.split(',')[1]
+                aspect_ratios = aspect_ratios.split(',')[0]
+                if template=='HyDiT':
+                    results = [gr.update(visible=False), gr.update(value=aspect_ratios, visible=True), gr.update(visible=False)]
+                elif template=='Common':
+                    results = [gr.update(visible=False), gr.update(visible=False), gr.update(value=aspect_ratios, visible=True)]
+                else:
+                    results = [gr.update(value=aspect_ratios, visible=True), gr.update(visible=False), gr.update(visible=False)]
             else:
-                results = [aspect_ratios, gr.update(), gr.update(), gr.update()]
+                results = [gr.update()] * 3
             return results
 
-        current_aspect_ratios = gr.Textbox(value='', visible=False)    
-        current_aspect_ratios.change(reset_aspect_ratios, inputs=current_aspect_ratios, outputs=[aspect_ratios_selection, hydit_aspect_ratios_selection, sd3_aspect_ratios_selection, kolors_aspect_ratios_selection], queue=False, show_progress=False)
+
+        aspect_ratios_selection.change(reset_aspect_ratios, inputs=aspect_ratios_selection, outputs=[sdxl_aspect_ratios_selection, hydit_aspect_ratios_selection, common_aspect_ratios_selection], queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+
         backend_selection.change(toggle_layer_interactive, inputs=backend_selection, outputs=[performance_selection, sampler_name, input_image_checkbox, scheduler_name, base_model, refiner_model] + lora_ctrls, queue=False, show_progress=False) \
-                .then(toggle_layer_visible, inputs=backend_selection, outputs=[performance_selection, aspect_ratios_selection, sd3_aspect_ratios_selection, hydit_aspect_ratios_selection, kolors_aspect_ratios_selection], queue=False, show_progress=False) \
-                .then(toggle_preset_value, inputs=[backend_selection, state_topbar], outputs=[input_image_checkbox, performance_selection, style_selections, guidance_scale, overwrite_step, sampler_name, scheduler_name, base_model, current_aspect_ratios], queue=False, show_progress=False) \
-                .then(lambda x: None, inputs=current_aspect_ratios, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
 
         output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
         
@@ -1146,8 +1141,8 @@ with shared.gradio_root:
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
-    reset_preset_fun = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
-    reset_preset_all = reset_params + reset_preset_fun + nav_bars + [output_format, state_topbar, backend_selection, input_image_checkbox, params_backend]
+    reset_preset_func = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
+    reset_preset_all = reset_params + reset_preset_func + nav_bars + [output_format, state_topbar, input_image_checkbox, params_backend]
     
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 

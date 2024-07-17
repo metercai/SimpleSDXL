@@ -74,6 +74,10 @@ def check_base_environment():
     sysinfo.update(dict(did=token.get_did()))
     print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB')
 
+    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
+        print(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
+        print(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量大于40G。')
+        sys.exit(0)
     return token, sysinfo
 
 #Intel Arc

@@ -4,6 +4,7 @@ import random
 import re
 import gc
 import json
+import psutil
 import comfy.model_management as mm
 from comfy.utils import ProgressBar, load_torch_file
 
@@ -74,11 +75,13 @@ class DownloadAndLoadKolorsModel:
                             local_dir_use_symlinks=False)
         pbar.update(1)
 
+        ram_rss_start = psutil.Process().memory_info().rss
         scheduler = EulerDiscreteScheduler.from_pretrained(model_path, subfolder= 'scheduler')
         
-        print("Load UNET...")
+        print(f'Load UNET...')
         unet = UNet2DConditionModel.from_pretrained(model_path, subfolder= 'unet', variant="fp16", revision=None, low_cpu_mem_usage=True).to(dtype).eval()      
-
+        ram_rss_end = psutil.Process().memory_info().rss
+        print(f'Kolors-unet: RAM allocated = {(ram_rss_end-ram_rss_start)/(1024*1024*1024):.3f}GB')
         pipeline = StableDiffusionXLPipeline(
                 unet=unet,
                 scheduler=scheduler,
@@ -107,6 +110,7 @@ class LoadChatGLM3:
     def loadmodel(self, chatglm3_checkpoint):
         device=mm.get_torch_device()
         offload_device=mm.unet_offload_device()
+        print(f'chatglm3: device={device}, offload_device={offload_device}')
 
         pbar = ProgressBar(2)
         chatglm3_path = folder_paths.get_full_path("llms", chatglm3_checkpoint)
@@ -176,17 +180,21 @@ class DownloadAndLoadChatGLM3:
                             local_dir_use_symlinks=False)
         pbar.update(1)
 
-        print("Load TEXT_ENCODER...")
-
+        ram_rss_start = psutil.Process().memory_info().rss
+        device = mm.get_torch_device()
+        offload_device = mm.unet_offload_device()
+        print(f"Load TEXT_ENCODER..., {precision}, {offload_device}")
         text_encoder = ChatGLMModel.from_pretrained(
             text_encoder_path,
             torch_dtype=torch.float16
-            )
+            ).to(offload_device)
         if precision == 'quant8':
             text_encoder.quantize(8)
         elif precision == 'quant4':
             text_encoder.quantize(4)
-       
+        #device_text = next(text_encoder.parameters()).device
+        #print(f'chatglm3: device={device_text}, torch_device={device}, offload_device={offload_device}')
+
         tokenizer = ChatGLMTokenizer.from_pretrained(text_encoder_path)
         pbar.update(1)
     
@@ -194,7 +202,8 @@ class DownloadAndLoadChatGLM3:
             'text_encoder': text_encoder, 
             'tokenizer': tokenizer
             }
-
+        ram_rss_end = psutil.Process().memory_info().rss
+        print(f'chatglm3: RAM allocated = {(ram_rss_end-ram_rss_start)/(1024*1024*1024):.3f}GB')
         return (chatglm3_model,)
         
 class KolorsTextEncode:
