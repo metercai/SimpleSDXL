@@ -225,8 +225,6 @@ def worker():
         is_SD3_task = False #ehps.backend_selection == flags.backend_engines[2]
         is_SD3T_task = False #ehps.backend_selection == flags.backend_engines[2]
         is_comfy_task = 'layer' in current_tab and input_image_checkbox
-        #print(f'params_backend:{params_backend}')
-        #print(f'is_KolorsPlus_task:{is_KolorsPlus_task}')
 
         sdxl_backend = 'SDXL'
         hydit_backend = 'Diffusers'
