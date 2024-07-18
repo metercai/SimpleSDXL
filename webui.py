@@ -445,7 +445,7 @@ with shared.gradio_root:
                         sdxl_aspect_ratios_selection.change(lambda x: x, inputs=sdxl_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=sdxl_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                         hydit_aspect_ratios_selection.change(lambda x: x, inputs=hydit_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=hydit_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                         common_aspect_ratios_selection.change(lambda x: x, inputs=common_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=common_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                        shared.gradio_root.load(lambda x: None, inputs=sdxl_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        shared.gradio_root.load(lambda x: x, inputs=sdxl_aspect_ratios_selection, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=sdxl_aspect_ratios_selection, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
                     output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
