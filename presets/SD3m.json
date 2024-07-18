@@ -1,8 +1,7 @@
 {
     "default_engine": {
-	"backend": "Comfy",
-	"task_name": "sd3_base",
-	"task_display_name": "SD3m",
+	"backend": "SD3m",
+	"task_method": "sd3_base",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "performance_selection", "loras", "refiner_model"],
 	"available_list": {

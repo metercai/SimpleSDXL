@@ -5,8 +5,12 @@ import modules.config
 from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo, refresh_models_info
 from modules.model_loader import load_file_from_url
 
-method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
-#method_names = ['Blending given FG', 'Blending given BG', 'Blending given FG & BG', 'Generate foreground with Conv Injection']
+default_method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
+default_method_list = {
+    default_method_names[0]: 'iclight_fc',
+    default_method_names[1]: 'layerdiffuse_fg',
+}
+
 iclight_source_names = ['Top -  Left', 'Top - Light', 'Top - Right', 'Left  Light', 'CenterLight', 'Right Light', 'Bottom Left', 'BottomLight', 'BottomRight']
 iclight_source_text = {
     iclight_source_names[0]: "Top Left Light",
@@ -69,27 +73,47 @@ class ComfyTask:
         self.images = images
 
 
-def get_comfy_task(method, default_params, input_images, options={}):
-    global method_name, task_name
+def get_comfy_task(task_name, task_method, default_params, input_images, options={}):
+    global defaul_method_names, default_method_list
 
-    if method == 'SD3m':
-        workflow_name = default_params['task_name']
-        del default_params['task_name']
-        del default_params['task_display_name']
-        del default_params['backend']
+    if task_name == 'default':
+        if task_method == default_method_names[1]:
+            comfy_params = ComfyTaskParams(default_params)
+            comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
+            return ComfyTask(task_name[method], comfy_params)
+        else:
+            comfy_params = ComfyTaskParams(default_params)
+            if input_images is None:
+                raise ValueError("input_images cannot be None for this method")
+            images = {"input_image": input_images[0]}
+            if 'iclight_enable' in options and options["iclight_enable"]:
+                if f'checkpoints/{default_base_SD15_name}' not in models_info:
+                    modules.config.downloading_base_sd15_model()
+                comfy_params.update_params({"base_model": default_base_SD15_name})
+                if options["iclight_source_radio"] == 'CenterLight':
+                    comfy_params.update_params({"light_source_text_switch": False})
+                else:
+                    comfy_params.update_params({
+                        "light_source_text_switch": True,
+                        "light_source_text": iclight_source_text[options["iclight_source_radio"]]
+                        })
+                return ComfyTask(task_name[method], comfy_params, images)
+            else:
+                width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
+                comfy_params.update_params({
+                    "layer_diffuse_cond": "SDXL, Foreground",
+                    "width": width,
+                    "height": height,
+                    })
+                comfy_params.delete_params(['denoise'])
+                return ComfyTask('layerdiffuse_cond', comfy_params, images)
+
+    elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
         if f'checkpoints/{default_params["base_model"]}' not in models_info:
             modules.config.downloading_sd3_medium_model()
-        return ComfyTask(workflow_name, comfy_params)
-    elif method == method_names[1]:
-        comfy_params = ComfyTaskParams(default_params)
-        comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
-        return ComfyTask(task_name[method], comfy_params)
-    elif method == 'Kolors':
-        workflow_name = default_params['task_name']
-        del default_params['task_name']
-        del default_params['task_display_name']
-        del default_params['backend']
+        return ComfyTask(task_method, comfy_params)
+    elif task_name == 'Kolors':
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
@@ -97,46 +121,17 @@ def get_comfy_task(method, default_params, input_images, options={}):
                 })
         check_download_kolors_model(modules.config.path_models_root)
         comfy_params.delete_params(['sampler'])
-        return ComfyTask(workflow_name, comfy_params)
-    elif method == 'KolorsPlus':
-        workflow_name = default_params['task_name']
-        del default_params['task_name']
-        del default_params['task_display_name']
-        del default_params['backend']
+        return ComfyTask(task_method, comfy_params)
+    elif task_name == 'KolorsPlus':
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
                 })
         check_download_kolors_model(modules.config.path_models_root)
-        return ComfyTask(workflow_name, comfy_params)
-    else:
-        comfy_params = ComfyTaskParams(default_params)
-        if input_images is None:
-            raise ValueError("input_images cannot be None for this method")
-        images = {"input_image": input_images[0]}
-        if 'iclight_enable' in options and options["iclight_enable"]:
-            if f'checkpoints/{default_base_SD15_name}' not in models_info:
-                modules.config.downloading_base_sd15_model()
-            comfy_params.update_params({"base_model": default_base_SD15_name})
-            if options["iclight_source_radio"] == 'CenterLight':
-                comfy_params.update_params({"light_source_text_switch": False})
-            else:
-                comfy_params.update_params({
-                    "light_source_text_switch": True,
-                    "light_source_text": iclight_source_text[options["iclight_source_radio"]]
-                    })
-            #comfy_params.update_params({"base_model": "realisticVisionV60B1_v51VAE.safetensors"})
-            return ComfyTask(task_name[method], comfy_params, images)
-        else:
-            width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
-            comfy_params.update_params({
-                "layer_diffuse_cond": "SDXL, Foreground",
-                "width": width,
-                "height": height,
-                })
-            comfy_params.delete_params(['denoise'])
-            return ComfyTask('layerdiffuse_cond', comfy_params, images)
+        return ComfyTask(task_method, comfy_params)
+
+
 
 def fixed_width_height(width, height, factor): 
     fixed_width = int(((height // factor + 1) * factor * width)/height)

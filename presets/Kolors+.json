@@ -1,8 +1,7 @@
 {
     "default_engine": {
-	"backend": "Comfy",
-	"task_name": "kolors_text2image2",
-	"task_display_name": "Kolors",
+	"backend": "Kolors",
+	"task_method": "kolors_text2image2",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
 	"available_list": {

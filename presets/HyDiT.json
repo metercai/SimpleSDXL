@@ -1,8 +1,7 @@
 {
     "default_engine": {
-	"backend": "Diffusers",
-	"task_name": "hydit_base",
-	"task_display_name": "HyDiT",
+	"backend": "HyDiT",
+	"task_method": "hydit_base",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
 	"available_list": {
