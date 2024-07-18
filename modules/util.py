@@ -206,13 +206,11 @@ def get_files_from_folder(folder_path, extensions=None, name_filter=None, variat
 
 
 def sha256(filename, use_addnet_hash=False, length=HASH_SHA256_LENGTH):
-    print(f"Calculating sha256 for {filename}: ", end='')
     if use_addnet_hash:
         with open(filename, "rb") as file:
             sha256_value = addnet_hash_safetensors(file)
     else:
         sha256_value = calculate_sha256(filename)
-    print(f"{sha256_value}")
 
     return sha256_value[:length] if length is not None else sha256_value
 
@@ -413,13 +411,6 @@ def get_file_from_folder_list(name, folders):
     return os.path.abspath(os.path.realpath(os.path.join(folders[0], name)))
 
 
-def makedirs_with_log(path):
-    try:
-        os.makedirs(path, exist_ok=True)
-    except OSError as error:
-        print(f'Directory {path} could not be created, reason: {error}')
-
-
 def get_enabled_loras(loras: list, remove_none=True) -> list:
     return [(lora[1], lora[2]) for lora in loras if lora[0] and (lora[1] != 'None' if remove_none else True)]
 
@@ -427,6 +418,9 @@ def get_enabled_loras(loras: list, remove_none=True) -> list:
 def parse_lora_references_from_prompt(prompt: str, loras: List[Tuple[AnyStr, float]], loras_limit: int = 5,
                                       skip_file_check=False, prompt_cleanup=True, deduplicate_loras=True,
                                       lora_filenames=None) -> tuple[List[Tuple[AnyStr, float]], str]:
+    # prevent unintended side effects when returning without detection
+    loras = loras.copy()
+
     if lora_filenames is None:
         lora_filenames = []
 
