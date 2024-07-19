@@ -9,12 +9,23 @@ from modules.util import sha256, HASH_SHA256_LENGTH, get_file_from_folder_list
 hash_cache_filename = 'hash_cache.txt'
 hash_cache = {}
 
+def sha256_filename(filepath):
+    import hashlib
+    import os
+    filename = os.path.basename(filepath)
+    print(f'sha256_filename: {filename}')
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(filename.encode('utf-8'))
+    return sha256_hash.hexdigest()
 
 def sha256_from_cache(filepath):
     global hash_cache
     if filepath not in hash_cache:
-        print(f"[Cache] Calculating sha256 for {filepath}")
-        hash_value = sha256(filepath)
+        if 'kolors_' in filepath or 'hydit_' in filepath:
+            hash_value = sha256_filename(filepath)            
+        else:
+            print(f"[Cache] Calculating sha256 for {filepath}")
+            hash_value = sha256(filepath)
         print(f"[Cache] sha256 for {filepath}: {hash_value}")
         hash_cache[filepath] = hash_value
         save_cache_to_file(filepath, hash_value)

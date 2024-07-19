@@ -518,6 +518,13 @@ default_overwrite_upscale = get_config_item_or_set_default(
     default_value=-1,
     validator=lambda x: isinstance(x, numbers.Number)
 )
+
+default_inpaint_advanced_masking_checkbox = get_config_item_or_set_default(
+    key='default_inpaint_advanced_masking_checkbox',
+    default_value=ads.default['inpaint_advanced_masking_checkbox'],
+    validator=lambda x: isinstance(x, bool)
+)
+
 example_inpaint_prompts = get_config_item_or_set_default(
     key='example_inpaint_prompts',
     default_value=[
@@ -773,10 +780,11 @@ comfyui:
      unet: {unet}
      rembg: {rembg}
      layer_model: {layer_model}
+     vae: {vae}
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model)
+config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 

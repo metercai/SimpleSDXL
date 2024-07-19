@@ -173,35 +173,34 @@ class AsyncTask:
             'SD3m'   : 'SD3-medium',
             'HyDiT'  : 'Hunyuan-DiT',
             }
-        self.comfy_classes = ['Comfy', 'Comfy', 'SD3m']
+        self.comfy_classes = ['Comfy', 'Kolors', 'SD3m']
 
         self.task_class = self.params_backend.pop('backend', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
-        if 'layer' in current_tab and input_image_checkbox:
+        if 'layer' in self.current_tab and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
-        
-        self.params_backend.update({"lora_speedup": loras[0][0]})
+       
+        print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
+        if len(self.loras) > 0 and self.task_name == 'Kolors+':
+            self.params_backend.update({"lora_speedup": self.loras[0][0]})
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
             }
-        self.params_backend.update({"ui_options": ui_options})
-
-        if self.task_class in self.comfy_classes:
-            comfyd.start()
-        elif self.task_class == 'HyDiT':
-            comfyd.stop()
-            hydit_task.init_load_model()
-        else:
-            comfyd.stop()
+        if self.task_name == 'default':
+            self.params_backend.update({"ui_options": ui_options})
+        self.backfill_prompt = self.params_backend.pop('backfill_prompt')
+        self.translation_methods = self.params_backend.pop('translation_methods')
+        self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
 
         if self.task_class != 'Kolors' and self.task_class != 'HyDiT':
-            self.prompt = translator.convert(self.prompt, self.params_backend['translation_methods'])
-            self.negative_prompt = translator.convert(self.negative_prompt, self.params_backend['translation_methods'])
+            self.prompt = translator.convert(self.prompt, self.translation_methods)
+            self.negative_prompt = translator.convert(self.negative_prompt, self.translation_methods)
+        
 
 async_tasks = []
 
@@ -354,8 +353,9 @@ def worker():
             else:
                 input_images = [HWC3(async_task.layer_input_image)]
             try:
+                options = async_task.params_backend.pop('ui_options', {})
                 comfy_task = get_comfy_task(async_task.task_name, async_task.task_method, 
-                        default_params, input_images, async_task.params_backend['ui_options'])
+                        default_params, input_images, options)
                 imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback)
             except ValueError as e:
                 print(f"comfy_task: input_image is None: {e}")
@@ -364,7 +364,7 @@ def worker():
                 current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
                 yield_result(async_task, empty_path, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
-                return imgs, img_paths, current_progress
+                return imgs, [], current_progress
 
         elif async_task.task_class == 'HyDiT':
             imgs = hydit_task.inferencer(
@@ -477,7 +477,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and sync_task.task_class in ['Fooocus', 'Kolors']:
+                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors']:
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None
@@ -489,6 +489,8 @@ def worker():
                                          task['log_negative_prompt'], task['negative'],
                                          async_task.steps, async_task.base_model_name, async_task.refiner_model_name,
                                          loras, async_task.vae_name, '')
+            
+            d.append(('Backend Engine', 'backend_engine', async_task.task_class_full))
             d.append(('Metadata Scheme', 'metadata_scheme',
                       async_task.metadata_scheme.value if async_task.save_metadata_to_images else async_task.save_metadata_to_images))
             d.append(('Version', 'version', f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'))
@@ -753,16 +755,16 @@ def worker():
         extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
         extra_negative_prompts = negative_prompts[1:] if len(negative_prompts) > 1 else []
         
-        if async_task.task_class = 'Fooocus':
+        lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames,
+                                                              async_task.performance_selection)
+        loras, prompt = parse_lora_references_from_prompt(prompt, async_task.loras,
+                                                          modules.config.default_max_lora_number,
+                                                          lora_filenames=lora_filenames)
+        loras += async_task.performance_loras
+        if async_task.task_class == 'Fooocus':
             if advance_progress:
                 current_progress += 1
             progressbar(async_task, current_progress, 'Loading models ...')
-            lora_filenames = modules.util.remove_performance_lora(modules.config.lora_filenames,
-                                                              async_task.performance_selection)
-            loras, prompt = parse_lora_references_from_prompt(prompt, async_task.loras,
-                                                          modules.config.default_max_lora_number,
-                                                          lora_filenames=lora_filenames)
-            loras += async_task.performance_loras
             pipeline.refresh_everything(refiner_model_name=async_task.refiner_model_name,
                                     base_model_name=async_task.base_model_name,
                                     loras=loras, base_model_additional_loras=base_model_additional_loras,
@@ -772,7 +774,7 @@ def worker():
             current_progress += 1
         progressbar(async_task, current_progress, 'Processing prompts ...')
         tasks = []
-        task_rng = random.Random(seed % (constants.MAX_SEED + 1))
+        task_rng = random.Random(async_task.seed % (constants.MAX_SEED + 1))
         prompt, wildcards_arrays, arrays_mult, seed_fixed = wildcards.compile_arrays(prompt, task_rng)
         for i in range(image_number if arrays_mult==0 else arrays_mult):
             if arrays_mult==0 or not seed_fixed or not disable_seed_increment:
@@ -835,7 +837,7 @@ def worker():
                 print(f'[Prompt Expansion] {expansion}')
                 t['expansion'] = expansion
                 t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
-        if async_task.task_class = 'Fooocus':
+        if async_task.task_class == 'Fooocus':
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):
@@ -1170,6 +1172,14 @@ def worker():
         preparation_start_time = time.perf_counter()
         async_task.processing = True
 
+        if async_task.task_class in async_task.comfy_classes:
+            comfyd.start()
+        elif async_task.task_class == 'HyDiT':
+            comfyd.stop()
+            hydit_task.init_load_model()
+        else:
+            comfyd.stop()
+
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
         async_task.uov_method = async_task.uov_method.casefold()
@@ -1357,7 +1367,7 @@ def worker():
         if async_task.task_class == 'Fooocus':
             async_task.yields.append(['preview', (current_progress, 'Moving model to GPU ...', None)])
         else:
-            async_task.yields.append(['preview', (flags.preparation_step_count, f'Process {async_task.task_class} Task ...', None)])
+            async_task.yields.append(['preview', (current_progress, f'Process {async_task.task_class} Task ...', None)])
 
         processing_start_time = time.perf_counter()
 
@@ -1373,8 +1383,8 @@ def worker():
                 f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         def callback_comfytask(step, total_steps, y):
-            if step == 0:
-                async_task.callback_steps = 0
+            if step == 1:
+                async_task.callback_steps = 1
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
             async_task.yields.append(['preview', (
                 int(current_progress + async_task.callback_steps),
@@ -1397,13 +1407,16 @@ def worker():
                 f'Sampling step {step + 1}/{steps}, image {current_task_id + 1}/{total_count} ...', y)])
             return callback_kwargs
 
+        callback_function = callback
         if async_task.task_class != 'Fooocus':
             ldm_patched.modules.model_management.unload_all_models()
             ldm_patched.modules.model_management.soft_empty_cache(True)
             async_task.refiner_model_name = ''
             async_task.refiner_switch = 1.0
+            callback_function = callback_comfytask
             if async_task.task_class == 'HyDiT':
                 async_task.base_model_name = 'hydit_v1.1_fp16.safetensors'
+                callback_function = callback_hydittask
             elif async_task.task_class == 'Kolors':
                 async_task.base_model_name = default_kolors_base_model_name
 
@@ -1418,7 +1431,7 @@ def worker():
             execution_start_time = time.perf_counter()
 
             try:
-                imgs, img_paths, current_progress = process_task(all_steps, async_task, callback, controlnet_canny_path,
+                imgs, img_paths, current_progress = process_task(all_steps, async_task, callback_function, controlnet_canny_path,
                                                                  controlnet_cpds_path, current_task_id,
                                                                  denoising_strength, final_scheduler_name, goals,
                                                                  initial_latent, async_task.steps, switch, task['c'],

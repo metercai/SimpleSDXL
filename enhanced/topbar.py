@@ -275,7 +275,7 @@ def init_nav_bars(state_params, request: gr.Request):
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_mask_upload_checkbox)]
+    results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_advanced_masking_checkbox)]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
@@ -313,17 +313,24 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox):
     if "__nav_name_list" not in state_params.keys():
         state_params.update({"__nav_name_list": get_preset_name_list()})
     superprompter.remove_superprompt()
     remove_tokenizer()
+    backend_params.update({
+        'backfill_prompt': backfill_prompt,
+        'translation_methods': translation_methods,
+        'comfyd_active_checkbox': comfyd_active_checkbox,
+        'preset': state_params["__preset"],
+        })
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)
     results += [gr.update()] * (9-preset_nums)
+    results += [backend_params]
     state_params["gallery_state"]='preview'
     return results
 
@@ -370,7 +377,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params] + [gr.update()] * 2
+        return [gr.update()] * 59 + [state_params] + [gr.update()] * 3
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -524,7 +531,7 @@ def reset_context(state_params):
 
     results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     
-    results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
+    results += update_in_keys("inpaint_advanced_masking_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
     
     state_params.update({"__message": system_message})
@@ -554,15 +561,18 @@ def reset_context(state_params):
         results += [gr.update(interactive=False, value=False)]
     else:
         results += [gr.update(interactive=True)]
+
+    if 'enhance_checkbox' in disinteractive:
+        results += [gr.update(interactive=False, value=False)]
+    else:
+        results += [gr.update(interactive=True)]
     
     params_backend = {}
     if 'default_engine' in config_preset:
         if 'backend' in config_preset['default_engine']:
             params_backend.update({'backend': config_preset['default_engine']['backend']})
-        if 'task_name' in config_preset['default_engine']:
-            params_backend.update({'task_name': config_preset['default_engine']['task_name']})
-        if 'task_display_name' in config_preset['default_engine']:
-            params_backend.update({'task_display_name': config_preset['default_engine']['task_display_name']})
+        if 'task_method' in config_preset['default_engine']:
+            params_backend.update({'task_method': config_preset['default_engine']['task_method']})
         if 'llms_model' in config_preset['default_engine']:
             params_backend.update({'llms_model': config_preset['default_engine']['llms_model']})
         if 'model_merge_ratio' in config_preset['default_engine']:
