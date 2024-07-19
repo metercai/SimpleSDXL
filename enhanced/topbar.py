@@ -377,7 +377,7 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params] + [gr.update()] * 3
+        return [gr.update()] * 61 + [state_params] + [gr.update()] * 3
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -495,7 +495,11 @@ def reset_context(state_params):
     if "default_loras_max_weight" in keys:
         ads_params.update({"loras_max_weight": f'{config_preset["default_loras_max_weight"]}'})
     if "default_freeu" in keys:
-        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})    
+        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})
+    if "default_vae" in keys:
+        ads_params.update({"vae": f'{config_preset["default_vae"]}'})
+    if "default_clip_skip" in keys:
+        ads_params.update({"clip_skip": f'{config_preset["default_clip_skip"]}'})
     if len(ads_params.keys())>0:
         info_preset.update({"Advanced_parameters": ads_params})
     
@@ -707,6 +711,8 @@ def reset_params(metadata):
     loras_min_weight = int(get_ads_value_or_default('loras_min_weight'))
     loras_max_weight = int(get_ads_value_or_default('loras_max_weight'))
     freeu_b1, freeu_b2, freeu_s1, freeu_s2 = [float(f.strip()) for f in get_ads_value_or_default('freeu')[1:-1].split(',')]
+    clip_skip = int(get_ads_value_or_default('clip_skip'))
+    vae = get_ads_value_or_default('vae')
 
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
     if styles == ['']:
@@ -755,6 +761,9 @@ def reset_params(metadata):
         results += [gr.update(value=False), gr.update(value=metadata['Seed'])]
     else:
         results += [gr.update(value=True), gr.update()]
+
+    results += [gr.update(value=clip_skip), gr.update(value=vae)]
+
     if get_ads_value_exist('freeu'):
         results += [gr.update(value=True)]
     else:
