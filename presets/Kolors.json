@@ -1,4 +1,4 @@
-{
+{ 
     "default_engine": {
 	"backend": "Kolors",
 	"task_method": "kolors_text2image1",

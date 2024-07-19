@@ -1,4 +1,4 @@
-{
+{ 
     "default_model": "animaPencilXL_v310.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
