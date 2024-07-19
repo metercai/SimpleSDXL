@@ -46,7 +46,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.16"
-    REINSTALL_BASE = True
+    REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -211,8 +211,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nod
 
 from modules import config
 from modules.hash_cache import init_cache
-os.environ["U2NET_HOME"] = config.path_inpaint
-
+os.environ["U2NET_HOME"] = config.paths_inpaint[0]
 os.environ['GRADIO_TEMP_DIR'] = config.temp_path
 
 if config.temp_path_cleanup_on_launch:
@@ -227,9 +226,6 @@ if config.temp_path_cleanup_on_launch:
 def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
     from modules.model_loader import load_file_from_url
     from modules import config
-
-    os.environ["U2NET_HOME"] = config.paths_inpaint[0]
-    os.environ["HUF_MIRROR"] = 'hf-mirror.com'
 
     for file_name, url in vae_approx_filenames:
         load_file_from_url(url=url, model_dir=config.path_vae_approx, file_name=file_name)

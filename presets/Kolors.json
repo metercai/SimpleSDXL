@@ -3,7 +3,7 @@
 	"backend": "Kolors",
 	"task_method": "kolors_text2image1",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["input_image_checkbox", "performance_selection", "base_model", "loras", "sampler_name", "refiner_model"],
+	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "sampler_name", "refiner_model"],
 	"available_list": {
 		"available_aspect_ratios_selection": "Common",
 		"available_scheduler_name": [ 

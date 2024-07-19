@@ -60,11 +60,6 @@ quick_subjects = [
 quick_subjects = [[x] for x in quick_subjects]
 
 
-task_name = {
-    method_names[0]: 'iclight_fc',
-    method_names[1]: 'layerdiffuse_fg',
-}
-
 class ComfyTask:
 
     def __init__(self, name, params, images=None):
@@ -122,7 +117,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         check_download_kolors_model(modules.config.path_models_root)
         comfy_params.delete_params(['sampler'])
         return ComfyTask(task_method, comfy_params)
-    elif task_name == 'KolorsPlus':
+    elif task_name == 'Kolors+':
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({

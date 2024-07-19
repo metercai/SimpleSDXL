@@ -334,12 +334,11 @@ with shared.gradio_root:
                     with gr.TabItem(label='Inpaint or Outpaint') as inpaint_tab:
                         with gr.Row():
                             mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint', value=False)
-                            inpaint_mask_upload_checkbox = gr.Checkbox(label='Enable Mask Upload', value=True)
-                            invert_mask_checkbox = gr.Checkbox(label='Invert Mask', value=False)
+                            inpaint_advanced_masking_checkbox = gr.Checkbox(label='Enable Advanced Masking Features', value=True)
+                            invert_mask_checkbox = gr.Checkbox(label='Invert Mask When Generating', value=False)
                         with gr.Row():
                             with gr.Column():
                                 inpaint_input_image = grh.Image(label='Image', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas', show_label=False)
-                                inpaint_advanced_masking_checkbox = gr.Checkbox(label='Enable Advanced Masking Features', value=False)
                                 inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.config.default_inpaint_method, label='Method')
                                 inpaint_additional_prompt = gr.Textbox(placeholder="Describe what you want to inpaint.", elem_id='inpaint_additional_prompt', label='Inpaint Additional Prompt', visible=False)
                                 outpaint_selections = gr.CheckboxGroup(choices=['Left', 'Right', 'Top', 'Bottom'], value=[], label='Outpaint Direction')
@@ -414,7 +413,7 @@ with shared.gradio_root:
                     
                     with gr.TabItem(label='Layer_iclight') as layer_tab:
                         with gr.Row():
-                            layer_method = gr.Radio(label='Layer case', choices=comfy_task.method_names, value=comfy_task.method_names[0])
+                            layer_method = gr.Radio(label='Layer case', choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0])
                         with gr.Row():
                             with gr.Column():
                                 layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
@@ -480,10 +479,10 @@ with shared.gradio_root:
 
             with gr.Row(visible=modules.config.default_enhance_checkbox) as enhance_input_panel:
                 with gr.Tabs():
-                    with gr.TabItem(label='Upscale or Variation'):
+                    with gr.TabItem(label='Upscale  or  Variation'):
                         with gr.Row():
                             with gr.Column():
-                                enhance_uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list,
+                                enhance_uov_method = gr.Radio(label='Upscale or Variation :', choices=flags.uov_list,
                                                               value=modules.config.default_enhance_uov_method)
                                 enhance_uov_processing_order = gr.Radio(label='Order of Processing',
                                                                         info='Use before to enhance small details and after to enhance large areas.',
@@ -1041,25 +1040,18 @@ with shared.gradio_root:
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
             desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
             layer_tab.select(lambda: 'layer', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            
+            metadata_tab.select(lambda: 'metadata', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
+            enhance_tab.select(lambda: 'enhance', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
+            enhance_checkbox.change(lambda x: gr.update(visible=x), inputs=enhance_checkbox,
+                                        outputs=enhance_input_panel, queue=False, show_progress=False, _js=switch_js)
+
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
             comfyd_active_checkbox.change(lambda x: comfyd.active(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: enhanced.superprompter.answer(input_text=translator.convert(f'{y}{x}', z), seed=image_seed), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            ehps = [backfill_prompt, translation_methods, backend_selection, comfyd_active_checkbox]
+            ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox]
             language_ui.select(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
-           
-            generate_mask_button.click(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
-                                 .then(fn=generate_mask,inputs=[
-                                                               inpaint_input_image, inpaint_mask_model,
-                                                               inpaint_mask_cloth_category,
-                                                               inpaint_mask_sam_prompt_text,
-                                                               inpaint_mask_sam_model,
-                                                               inpaint_mask_sam_quant,
-                                                               inpaint_mask_box_threshold,
-                                                               inpaint_mask_text_threshold
-                                                           ], outputs=inpaint_mask_image, show_progress=True, queue=True)
 
             gallery_index.select(gallery_util.select_index, inputs=[gallery_index, image_tools_checkbox, state_topbar], outputs=[gallery, image_toolbox, progress_window, progress_gallery, prompt_info_box, params_note_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, state_topbar], show_progress=False)
@@ -1324,10 +1316,10 @@ with shared.gradio_root:
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
         nav_bars = [bar_title, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button]
         protections = [prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars[1:]
-        generate_button.click(topbar.process_before_generation, inputs=state_topbar, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections, show_progress=False) \
+        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [params_backend], show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
-            .then(enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
+            .then(fn=enhanced_parameters.set_all_enhanced_parameters, inputs=ehps) \
             .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections, show_progress=False) \
             .then(fn=update_history_link, outputs=history_link) \
@@ -1357,6 +1349,19 @@ with shared.gradio_root:
         
         desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
                        outputs=[prompt], show_progress=True, queue=True)
+        
+        if args_manager.args.enable_auto_describe_image:
+            def trigger_auto_describe(mode, img, prompt):
+                # keep prompt if not empty
+                if prompt == '':
+                    return trigger_describe(mode, img)
+                return gr.update(), gr.update()
+
+            uov_input_image.upload(trigger_auto_describe, inputs=[desc_method, uov_input_image, prompt],
+                                   outputs=[prompt, style_selections], show_progress=True, queue=True)
+
+            enhance_input_image.upload(lambda: gr.update(value=True), outputs=enhance_checkbox, queue=False, show_progress=False) \
+                .then(trigger_auto_describe, inputs=[desc_method, enhance_input_image, prompt], outputs=[prompt, style_selections], show_progress=True, queue=True)
 
     prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
     params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
@@ -1372,8 +1377,8 @@ with shared.gradio_root:
     prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
-    reset_preset_func = [preset_instruction, image_number, inpaint_mask_upload_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
-    reset_preset_all = reset_params + reset_preset_func + nav_bars + [output_format, state_topbar, input_image_checkbox, params_backend]
+    reset_preset_func = [preset_instruction, image_number, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods]
+    reset_preset_all = reset_params + reset_preset_func + nav_bars + [output_format, state_topbar, input_image_checkbox, enhance_checkbox, params_backend]
     
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 
@@ -1424,25 +1429,12 @@ with shared.gradio_root:
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_mask_upload_checkbox, preset_instruction], show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_advanced_masking_checkbox, preset_instruction], show_progress=False) \
                       .then(topbar.reset_params_for_preset, inputs=[prompt,negative_prompt,state_topbar], outputs=reset_preset_all, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]).then(fn=lambda: None, _js='refresh_grid_delayed')
 
-
-        if args_manager.args.enable_auto_describe_image:
-            def trigger_auto_describe(mode, img, prompt):
-                # keep prompt if not empty
-                if prompt == '':
-                    return trigger_describe(mode, img)
-                return gr.update(), gr.update()
-
-            uov_input_image.upload(trigger_auto_describe, inputs=[desc_method, uov_input_image, prompt],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True)
-
-            enhance_input_image.upload(lambda: gr.update(value=True), outputs=enhance_checkbox, queue=False, show_progress=False) \
-                .then(trigger_auto_describe, inputs=[desc_method, enhance_input_image, prompt], outputs=[prompt, style_selections], show_progress=True, queue=True)
 
 def dump_default_english_config():
     from modules.localization import dump_english_config

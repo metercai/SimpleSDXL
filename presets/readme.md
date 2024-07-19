@@ -59,7 +59,7 @@
   default_inpaint_engine                            # 默认重绘引擎版本
   default_mixing_image_prompt_and_vary_upscale      # 默认图像提示与增强变化混合
   default_mixing_image_prompt_and_inpaint           # 默认图像提示与重绘混合
-  default_inpaint_mask_upload_checkbox              # 默认开启重绘蒙板
+  default_inpaint_advanced_masking_checkbox         # 默认开启重绘蒙板
   default_freeu                                     # 默认FreeU参数: [b1, b2, s1, s2]
   default_seed                                      # 默认种子
   default_backfill_prompt                           # 默认浏览图片回填提示词
