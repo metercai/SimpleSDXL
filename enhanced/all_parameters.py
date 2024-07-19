@@ -95,7 +95,9 @@ default = {
     'backfill_prompt': False,
     'translation_methods': 'Third APIs',
     'backend': 'SDXL',
-    'comfyd_active_checkbox': False
+    'comfyd_active_checkbox': False,
+    'clip_skip': 2,
+    'vae': 'Default (model)'
     }
 
 
