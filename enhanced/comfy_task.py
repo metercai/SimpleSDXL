@@ -149,7 +149,6 @@ def check_task_model():
     pass
 
 def check_download_kolors_model(path_root):
-    #print(f'models_info:{models_info.keys()}')
     check_modle_file = [
             "diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin",
             "unet/kolors_unet_fp16.safetensors",
@@ -158,22 +157,23 @@ def check_download_kolors_model(path_root):
     path_temp = os.path.join(path_root, 'temp')
     if not os.path.exists(path_temp):
         os.makedirs(path_temp)
+    exists_kolors_model_path = False
     for f in models_info:
-        if '00007-of-00007.bin' in f:
-            print(f'model in diffusers: {f}')
-    #if check_modle_file[0] not in models_info:
-    #    load_file_from_url(
-    #        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_simpleai_diffusers_fp16.zip',
-    #        model_dir=path_temp,
-    #        file_name='models_kolors_simpleai_diffusers_fp16.zip'
-    #    )
-    #    downfile = os.path.join(path_temp, 'models_kolors_simpleai_diffusers_fp16.zip')
-    #    with zipfile.ZipFile(downfile, 'r') as zipf:
-    #        print(f'extractall: {downfile}')
-    #        zipf.extractall(path_temp)
-    #    shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), modules.config.paths_diffusers[0])
-    #    shutil.rmtree(os.path.join(path_temp, 'models'))
-    #    os.remove(downfile)
+        if '00007-of-00007.bin' in f and f.startswith('diffusers/Kolors'):
+            exists_kolors_model_path = True
+    if not exists_kolors_model_path:
+        load_file_from_url(
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_simpleai_diffusers_fp16.zip',
+            model_dir=path_temp,
+            file_name='models_kolors_simpleai_diffusers_fp16.zip'
+        )
+        downfile = os.path.join(path_temp, 'models_kolors_simpleai_diffusers_fp16.zip')
+        with zipfile.ZipFile(downfile, 'r') as zipf:
+            print(f'extractall: {downfile}')
+            zipf.extractall(path_temp)
+        shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), modules.config.paths_diffusers[0])
+        shutil.rmtree(os.path.join(path_temp, 'models'))
+        os.remove(downfile)
     
     if check_modle_file[1] not in models_info:
         path_org = os.path.join(modules.config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
