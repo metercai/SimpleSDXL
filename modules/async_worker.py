@@ -105,7 +105,7 @@ class AsyncTask:
         self.invert_mask_checkbox = args.pop()
         self.inpaint_erode_or_dilate = args.pop()
 
-        self.params_backend = args.pop()
+        self.params_backend = args.pop().copy()
 
         self.save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
         self.metadata_scheme = MetadataScheme(
@@ -1455,8 +1455,6 @@ def worker():
 
             if async_task.task_class == 'Fooocus':
                 del task['c'], task['uc']  # Save memory
-            else:
-                print(f'task["c"]: {task["c"]}')
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
             if ldm_patched.modules.model_management.is_nvidia():
