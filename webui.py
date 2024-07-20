@@ -504,7 +504,7 @@ with shared.gradio_root:
                     enhance_inpaint_engine_ctrls = []
                     enhance_inpaint_update_ctrls = []
                     for index in range(modules.config.default_enhance_tabs):
-                        with gr.TabItem(label=f'#{index + 1}') as enhance_tab_item:
+                        with gr.TabItem(label=f'Region/区域#{index + 1}') as enhance_tab_item:
                             enhance_enabled = gr.Checkbox(label='Enable', value=False, elem_classes='min_check',
                                                           container=False)
 
