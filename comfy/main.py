@@ -183,6 +183,10 @@ def load_extra_path_config(yaml_path):
         conf = config[c]
         if conf is None:
             continue
+        models_root = None
+        if 'models_root' in conf:
+            models_root = conf.pop("models_root")
+            folder_paths.reset_folder_names_and_paths(models_root)
         base_path = None
         if "base_path" in conf:
             base_path = conf.pop("base_path")
@@ -219,7 +223,7 @@ if __name__ == "__main__":
     extra_model_paths_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "extra_model_paths.yaml")
     if os.path.isfile(extra_model_paths_config_path):
         load_extra_path_config(extra_model_paths_config_path)
-
+    
     if args.extra_model_paths_config:
         for config_path in itertools.chain(*args.extra_model_paths_config):
             load_extra_path_config(config_path)
