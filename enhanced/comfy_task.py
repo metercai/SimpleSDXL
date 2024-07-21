@@ -82,7 +82,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 raise ValueError("input_images cannot be None for this method")
             images = {"input_image": input_images[0]}
             if 'iclight_enable' in options and options["iclight_enable"]:
-                if f'checkpoints/{default_base_SD15_name}' not in models_info:
+                #if f'checkpoints/{default_base_SD15_name}' not in models_info:
+                if modelsinfo.exists_model(catalog="checkpoints", model_path=default_base_SD15_name):
                     modules.config.downloading_base_sd15_model()
                 comfy_params.update_params({"base_model": default_base_SD15_name})
                 if options["iclight_source_radio"] == 'CenterLight':
@@ -105,7 +106,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
 
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
-        if f'checkpoints/{default_params["base_model"]}' not in models_info:
+        if modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
+        #if f'checkpoints/{default_params["base_model"]}' not in models_info:
             modules.config.downloading_sd3_medium_model()
         return ComfyTask(task_method, comfy_params)
     elif task_name == 'Kolors':

@@ -169,7 +169,7 @@ class DownloadAndLoadChatGLM3:
         model_name = model.rsplit('/', 1)[-1]
         model_path = os.path.join(folder_paths.models_dir, "diffusers", model_name)
         text_encoder_path = os.path.join(model_path, "text_encoder")
-      
+        
         if not os.path.exists(text_encoder_path):
             print(f"Downloading ChatGLM3 to: {text_encoder_path}")
             from huggingface_hub import snapshot_download
