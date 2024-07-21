@@ -4,19 +4,20 @@ import json
 import gradio as gr
 from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
-from simpleai_base.models_info import modelsinfo, get_models_info, refresh_models_info_from_path, models_info_path, sync_model_info
+from simpleai_base.models_info import get_models_info, get_modelsinfo, refresh_models_info_from_path, models_info_path, sync_model_info
 
 simpleai_config = config
 token = None
 sysinfo = {"location": "CN"}
 #comfyd.echo_off = False
 args_comfyd = [[]]
-
+modelsinfo = None #get_modelsinfo()
 models_info, models_info_muid, models_info_file = get_models_info()
 
 def refresh_models_info():
-    global models_info, models_info_muid, models_info_file
-    refresh_models_info_from_path()
+    global modelsinfo, models_info, models_info_muid, models_info_file
+    #refresh_models_info_from_path()
+    modelsinfo = get_modelsinfo()
     models_info, models_info_muid, models_info_file = get_models_info()
 
 def reset_simpleai_args(launch_token, launch_sysinfo):

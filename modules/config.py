@@ -24,7 +24,7 @@ def get_config_path(key, default_value):
         return os.path.abspath(default_value)
 
 wildcards_max_bfs_depth = 64
-config_path = get_config_path('config_path', "./config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
+config_path = get_config_path('config_path', "config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
 config_example_path = get_config_path('config_example_path', "config_modification_tutorial.txt")
 config_dict = {}
 always_save_keys = []
@@ -196,27 +196,27 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     config_dict[key] = dp
     return dp
 
+path_models_root = get_dir_or_set_default('path_models_root', '../models/')
 
-paths_checkpoints = get_dir_or_set_default('path_checkpoints', ['../models/checkpoints/'], True)
-paths_loras = get_dir_or_set_default('path_loras', ['../models/loras/'], True)
-path_embeddings = get_dir_or_set_default('path_embeddings', '../models/embeddings/')
-path_vae_approx = get_dir_or_set_default('path_vae_approx', '../models/vae_approx/')
-path_vae = get_dir_or_set_default('path_vae', '../models/vae/')
-path_upscale_models = get_dir_or_set_default('path_upscale_models', '../models/upscale_models/')
-paths_inpaint = get_dir_or_set_default('path_inpaint', ['../models/inpaint/'], True)
-paths_controlnet = get_dir_or_set_default('path_controlnet', ['../models/controlnet/'], True)
-path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
-path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
-paths_llms = get_dir_or_set_default('path_llms', ['../models/llms/'], True)
+paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/'], True)
+paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/'], True)
+path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
+path_vae_approx = get_dir_or_set_default('path_vae_approx', f'{path_models_root}/vae_approx/')
+path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
+path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
+paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/'], True)
+path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
+path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
+paths_llms = get_dir_or_set_default('path_llms', [f'{path_models_root}/llms/'], True)
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
-path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
+path_safety_checker = get_dir_or_set_default('path_safety_checker', f'{path_models_root}/safety_checker/')
 path_sam = paths_inpaint[0]
 path_outputs = get_path_output()
-path_models_root = get_dir_or_set_default('path_models_root', '../models/')
-path_unet = get_dir_or_set_default('path_unet', '../models/unet')
-path_rembg = get_dir_or_set_default('path_rembg', '../models/rembg')
-path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
-paths_diffusers = get_dir_or_set_default('path_diffusers', ['../models/diffusers/'], True)
+path_unet = get_dir_or_set_default('path_unet', f'{path_models_root}/unet')
+path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
+path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
+paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -770,6 +770,7 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
 config_comfy_formatted_text = '''
 comfyui:
+     base_path: {base_root}
      checkpoints: {checkpoints} 
      clip_vision: {clip_vision}
      controlnet: {controlnets}
@@ -784,7 +785,7 @@ comfyui:
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
+config_comfy_text = config_comfy_formatted_text.format(base_root=path_models_root, checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 

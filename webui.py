@@ -1341,14 +1341,14 @@ with shared.gradio_root:
         def trigger_describe(mode, img):
             if mode == flags.desc_type_photo:
                 from extras.interrogate import default_interrogator as default_interrogator_photo
-                return default_interrogator_photo(img)
+                return default_interrogator_photo(img), ["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"]
             if mode == flags.desc_type_anime:
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
-                return default_interrogator_anime(img)
-            return mode
+                return default_interrogator_anime(img), ["Fooocus V2", "Fooocus Masterpiece"]
+            return mode, ["Fooocus V2"]
         
         desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
-                       outputs=[prompt], show_progress=True, queue=True)
+                       outputs=[prompt, style_selections], show_progress=True, queue=True)
         
         if args_manager.args.enable_auto_describe_image:
             def trigger_auto_describe(mode, img, prompt):
