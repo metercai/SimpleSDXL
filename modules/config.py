@@ -770,7 +770,7 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
 config_comfy_formatted_text = '''
 comfyui:
-     base_path: {base_root}
+     models_root: {models_root}
      checkpoints: {checkpoints} 
      clip_vision: {clip_vision}
      controlnet: {controlnets}
@@ -785,7 +785,7 @@ comfyui:
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
-config_comfy_text = config_comfy_formatted_text.format(base_root=path_models_root, checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
+config_comfy_text = config_comfy_formatted_text.format(models_root=path_models_root, checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 

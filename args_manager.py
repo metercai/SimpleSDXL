@@ -45,8 +45,8 @@ args_parser.parser.add_argument("--main", action='store_true',
                                 help="launch the Fooocus branch", default=False)
 args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default=None)
 
-args_parser.parser.add_argument("--enable-comfyd", action='store_true',
-                                help="auto start comfyd server at launch", default=True)
+args_parser.parser.add_argument("--disable-comfyd", action='store_true',
+                                help="disable auto start comfyd server at launch", default=False)
 
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,
