@@ -16,7 +16,7 @@ def sha256_filename(filepath):
     print(f'sha256_filename: {filename}')
     sha256_hash = hashlib.sha256()
     sha256_hash.update(filename.encode('utf-8'))
-    return sha256_hash.hexdigest()
+    return sha256_hash.hexdigest()[:10]
 
 def sha256_from_cache(filepath):
     global hash_cache
