@@ -1,3 +1,4 @@
+import math
 from enum import IntEnum, Enum
 
 disabled = 'Disabled'
@@ -96,16 +97,106 @@ desc_type_anime = 'Art/Anime'
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
-sdxl_aspect_ratios = [
-    '704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
+aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common']
+default_aspect_ratio = ['1152*896', '1024*1024', '1280*1024']
+available_aspect_ratios = [
+    ['704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
     '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960',
     '1088*960', '1088*896', '1152*896', '1152*832', '1216*832', '1280*768',
     '1344*768', '1344*704', '1408*704', '1472*704', '1536*640', '1600*640',
-    '1664*576', '1728*576'
+    '1664*576', '1728*576'],
+
+    ['768*1280', '960*1280', '1024*1024',
+    '1280*768', '1280*960', '1280*1280',],
+    
+    ['576*1344', '768*1152', '896*1152', '768*1280', '960*1280',
+    '1024*1024', '1024*1280', '1280*1280', '1280*1024',
+    '1280*960', '1280*768', '1152*896', '1152*768', '1344*576']
 ]
+
+def add_ratio(x):
+    a, b = x.replace('*', ' ').split(' ')[:2]
+    a, b = int(a), int(b)
+    g = math.gcd(a, b)
+    c, d = a // g, b // g
+    if (a, b) == (576, 1344):
+        c, d = 9, 21
+    elif (a, b) == (1344, 576):
+        c, d = 21, 9
+    elif (a, b) == (768, 1280):
+        c, d = 9, 15
+    elif (a, b) == (1280, 768):
+        c, d = 15, 9
+    return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
+
+default_aspect_ratios = {
+        aspect_ratios_templates[0]: add_ratio(default_aspect_ratio[0]),
+        aspect_ratios_templates[1]: add_ratio(default_aspect_ratio[1]),
+        aspect_ratios_templates[2]: add_ratio(default_aspect_ratio[2]),
+        }
+available_aspect_ratios_list = {
+        aspect_ratios_templates[0]: [add_ratio(x) for x in available_aspect_ratios[0]],
+        aspect_ratios_templates[1]: [add_ratio(x) for x in available_aspect_ratios[1]],
+        aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
+        }
+
 backend_engines = ['SDXL', 'HyDiT', 'SD3m', 'Kolors']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
+
+task_class_mapping = {
+            'Fooocus': 'SDXL-Fooocus',
+            'Comfy'  : 'SDXL-Comfy',
+            'Kolors' : 'Kwai-Kolors',
+            'SD3m'   : 'SD3-medium',
+            'HyDiT'  : 'Hunyuan-DiT',
+            }
+def get_taskclass_by_fullname(fullname):
+    for taskclass, fname in task_class_mapping.items():
+        if fname == fullname:
+            return taskclass
+    return None
+
+comfy_classes = ['Comfy', 'Kolors', 'SD3m']
+
+default_class_params = {
+    'Fooocus': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': sampler_list,
+        'available_scheduler_name': scheduler_list,
+        'backend_params': {},
+        },
+    'Comfy': {
+        },
+    'Kolors': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'backend_params': {
+            "task_method": "kolors_text2image1",
+            "llms_model": "quant8",
+            },
+        },
+    'SD3m': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'backend_params': {
+            "task_method": "sd3_base",
+            },
+        },
+    'HyDiT': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
+        'available_aspect_ratios_selection': 'HyDiT',
+        'available_sampler_name': ["ddpm", "ddim", "dpmms"],
+        'backend_params': {
+            "task_method": "hydit_base",
+            },
+        }
+    }
 
 
 class MetadataScheme(Enum):

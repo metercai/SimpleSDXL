@@ -11,6 +11,7 @@ import re
 import args_manager
 import random
 import modules.constants as constants
+import modules.meta_parser as meta_parser
 import enhanced.all_parameters as ads
 import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
@@ -269,8 +270,8 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 5, 25, '', comfy_task.default_kolors_scheduler, '']})
     state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.common_default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.common_default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.default_aspect_ratio})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -371,13 +372,15 @@ def down_absent_model(state_params):
     state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
     return gr.update(visible=False), state_params
 
-def reset_params_for_preset(prompt, negative_prompt, state_params):
+
+def reset_layout_params(prompt, negative_prompt, state_params, is_generating, inpaint_mode):
     global system_message, preset_down_note_info
 
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 61 + [state_params] + [gr.update()] * 3
+        return [gr.update()] * 42 + [state_params] + [gr.update()] * 55
+        #return [gr.update()] * 61 + [state_params] + [gr.update()] * 3
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -385,36 +388,38 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__preset": preset})
     state_params.update({"__prompt": prompt})
     state_params.update({"__negative_prompt": negative_prompt})
-    results = reset_context(state_params)
+
+    config_preset = config.try_get_preset_content(preset)
+    preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    #print(f'preset_prepared:{preset_prepared}')
+    
+    preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
+    state_params.update({"__preset_url":preset_url})
+
+    results = refresh_nav_bars(state_params)
+    results += meta_parser.switch_layout_template(preset_prepared, state_params, preset_url)
+    results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
+
     return results
 
 
-def reset_context(state_params):
+def reset_context(state_params, is_generating, inpaint_mode):
     global system_message, nav_id_list, nav_preset_html
 
     preset = state_params.get("__preset")
     
     # load preset config
-    config_preset = {}
-    if isinstance(preset, str):
-        preset_path = os.path.abspath(f'./presets/{preset}.json')
-        try:
-            if os.path.exists(preset_path):
-                with open(preset_path, "r", encoding="utf-8") as json_file:
-                    config_preset = json.load(json_file)
-            else:
-                raise FileNotFoundError
-        except Exception as e:
-            print(f'Load preset [{preset_path}] failed')
-            print(e)
-    if 'reference' in config_preset.keys():
-        preset_url = config_preset["reference"]
-    else:
-        if 'reference' in config.config_dict.keys():
-            config.config_dict.pop("reference")
-        preset_url = get_preset_inc_url(preset)
+    import modules.meta_parser as meta_parser
+    config_preset = config.try_get_preset_content(preset)
+    preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    print(f'preset_prepared:{preset_prepared}')
+    preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
-
+    
+    results = refresh_nav_bars(state_params)
+    results += meta_parser.switch_layout_template(preset_preparedi, state_params)
+    results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
+    
     info_preset = {}
     keys = config_preset.keys()
     info_preset.update({
@@ -517,13 +522,12 @@ def reset_context(state_params):
             disvisible = config_preset['default_engine']['disvisible']
         if "disinteractive" in config_preset['default_engine']:
             disinteractive = config_preset['default_engine']['disinteractive']
-        if 'available_list' in config_preset['default_engine']:
-            if "available_aspect_ratios_selection" in config_preset['default_engine']['available_list']:
-                info_preset.update({"available_aspect_ratios_selection": config_preset['default_engine']['available_list']['available_aspect_ratios_selection']})
-            if "available_scheduler_name" in config_preset['default_engine']['available_list']:
-                info_preset.update({"available_scheduler_name": config_preset['default_engine']['available_list']['available_scheduler_name']})
-            if "available_sampler_name" in config_preset['default_engine']['available_list']:
-                info_preset.update({"available_sampler_name": config_preset['default_engine']['available_list']['available_sampler_name']})
+        if "available_aspect_ratios_selection" in config_preset['default_engine']:
+            info_preset.update({"available_aspect_ratios_selection": config_preset['default_engine']['available_aspect_ratios_selection']})
+        if "available_scheduler_name" in config_preset['default_engine']:
+            info_preset.update({"available_scheduler_name": config_preset['default_engine']['available_scheduler_name']})
+        if "available_sampler_name" in config_preset['default_engine']:
+            info_preset.update({"available_sampler_name": config_preset['default_engine']['available_sampler_name']})
     info_preset.update({"disvisible": disvisible})
     info_preset.update({"disinteractive": disinteractive})
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
@@ -544,22 +548,6 @@ def reset_context(state_params):
     results += update_in_keys("output_format")
     results += [state_params]
    
-    engine_preset = state_params[f'{backend_engine}_preset_value']
-    engine_preset[1] = get_preset_value('default_performance', engine_preset[1])
-    engine_preset[2] = get_preset_value('default_styles', engine_preset[2])
-    engine_preset[3] = float(get_preset_value('default_cfg_scale', engine_preset[3]))
-    engine_preset[4] = int(get_preset_value('default_overwrite_step', engine_preset[4]))
-    engine_preset[5] = get_preset_value('default_sampler', engine_preset[5])
-    engine_preset[6] = get_preset_value('default_scheduler', engine_preset[6])
-    engine_preset[7] = get_preset_value('default_model', engine_preset[7])
-    state_params[f'{backend_engine}_preset_value'] = engine_preset
-    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
-    engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])
-    state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
-    if 'default_engine' in config_preset:
-        if 'backend' in config_preset['default_engine'] and config_preset['default_engine']['backend']=='Coomfy':
-            if config_preset['default_engine']['backend']['workflow']=='kolors_text2image2':
-                backend_engine = modules.flags.backend_engines[0]
 
     if 'input_image_checkbox' in disinteractive:
         results += [gr.update(interactive=False, value=False)]
@@ -573,14 +561,10 @@ def reset_context(state_params):
     
     params_backend = {}
     if 'default_engine' in config_preset:
-        if 'backend' in config_preset['default_engine']:
-            params_backend.update({'backend': config_preset['default_engine']['backend']})
-        if 'task_method' in config_preset['default_engine']:
-            params_backend.update({'task_method': config_preset['default_engine']['task_method']})
-        if 'llms_model' in config_preset['default_engine']:
-            params_backend.update({'llms_model': config_preset['default_engine']['llms_model']})
-        if 'model_merge_ratio' in config_preset['default_engine']:
-            params_backend.update({'model_merge_ratio': config_preset['default_engine']['model_merge_ratio']})
+        if 'backend_engine' in config_preset['default_engine']:
+            params_backend.update({'backend_engine': config_preset['default_engine']['backend_engine']})
+        if 'backend_params' in config_preset['default_engine']:
+            params_backend.update(config_preset['default_engine']['backend_params'])
     results += [params_backend]
     
     system_message = 'system message was displayed!'

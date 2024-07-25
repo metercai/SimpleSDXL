@@ -9,7 +9,7 @@ patch_all()
 
 class AsyncTask:
     def __init__(self, args):
-        from modules.flags import Performance, MetadataScheme, ip_list, controlnet_image_count
+        from modules.flags import Performance, MetadataScheme, ip_list, controlnet_image_count, task_class_mapping
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
         import args_manager
@@ -166,16 +166,8 @@ class AsyncTask:
                     enhance_mask_invert
                 ])
 
-        task_class_mapping = {
-            'Fooocus': 'SDXL-Fooocus',
-            'Comfy'  : 'SDXL-Comfy',
-            'Kolors' : 'Kwai-Kolors',
-            'SD3m'   : 'SD3-medium',
-            'HyDiT'  : 'Hunyuan-DiT',
-            }
-        self.comfy_classes = ['Comfy', 'Kolors', 'SD3m']
 
-        self.task_class = self.params_backend.pop('backend', 'Fooocus')
+        self.task_class = self.params_backend.pop('backend_engine', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
         if 'layer' in self.current_tab and self.input_image_checkbox:
@@ -333,7 +325,7 @@ def worker():
         if async_task.last_stop is not False:
             ldm_patched.modules.model_management.interrupt_current_processing()
         
-        if async_task.task_class in async_task.comfy_classes:
+        if async_task.task_class in flags.comfy_classes:
             default_params = dict(
                 prompt=task["positive"][0],
                 negative_prompt=task["negative"][0],
@@ -1060,7 +1052,7 @@ def worker():
         async_task.processing = False
         processing_time = time.perf_counter() - processing_start_time
         print(f'Processing time (total): {processing_time:.2f} seconds')
-        if async_task.task_class in async_task.comfy_classes:
+        if async_task.task_class in flags.comfy_classes:
             comfyd.finished()
 
     def process_enhance(all_steps, async_task, callback, controlnet_canny_path, controlnet_cpds_path,
@@ -1172,7 +1164,7 @@ def worker():
         preparation_start_time = time.perf_counter()
         async_task.processing = True
 
-        if async_task.task_class in async_task.comfy_classes:
+        if async_task.task_class in flags.comfy_classes:
             comfyd.start()
         elif async_task.task_class == 'HyDiT':
             comfyd.stop()

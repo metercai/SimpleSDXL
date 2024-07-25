@@ -12,6 +12,7 @@ import enhanced.topbar as topbar
 import enhanced.gallery as gallery
 import enhanced.version as version
 import modules.flags as flags
+import modules.meta_parser as meta_parser
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -327,57 +328,22 @@ def delete_image(state_params):
     return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
-def reset_image_params(state_params):
+def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-
-    loras = []
-    for i in range(config.default_max_lora_number):
-        if f'LoRA {i + 1}' in metainfo:
-            n, w = metainfo[f'LoRA {i + 1}'].split(' : ')
-            loras.append([n, float(w)])
-        else:
-            loras.append(['None', 1.0])
-
-    metadata.update({"loras": loras})
-    metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
-    
-    get_meta_value = lambda x1,y: y if x1 not in metadata else metadata[x1]
-    backend_engine = get_meta_value('Backend Engine', 'SDXL-Fooocus')
-    if backend_engine=='Hunyuan-DiT':
-        backend_engine = flags.backend_engines[1]
-    elif backend_engine=='SD3-medium':
-        backend_engine = flags.backend_engines[2]
-    elif backend_engine=='Kwai-Kolors':
-        backend_engine = flags.backend_engines[3] 
-    else:
-        backend_engine = flags.backend_engines[0]
-    engine_preset = state_params[f'{backend_engine}_preset_value']
-    engine_preset[1] = get_meta_value('Performance', engine_preset[1])
-    engine_preset[2] = [f[1:-1] for f in get_meta_value('Styles', str(engine_preset[2]))[1:-1].split(', ')]
-    if engine_preset[2] == ['']:
-        engine_preset[2] = []
-    engine_preset[3] = float(get_meta_value('Guidance Scale', engine_preset[3]))
-    engine_preset[4] = int(get_meta_value('Steps', engine_preset[4]))
-    engine_preset[5] = get_meta_value('Sampler', engine_preset[5])
-    engine_preset[6] = get_meta_value('Scheduler', engine_preset[6])
-    engine_preset[7] = get_meta_value('Base Model', engine_preset[7])
-    state_params[f'{backend_engine}_preset_value'] = engine_preset
-    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
-    aspect_ratio = get_meta_value('Resolution', '(0, 0)')
-    if aspect_ratio!='(0, 0)':
-        width, height = eval(aspect_ratio)
-        engine_aspect_ratio = config.add_ratio(f'{width}*{height}')
-        state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
-    refiner_model = get_meta_value("Refiner Model", 'None')
-    metadata.update({'Refiner Model': refiner_model})
-
-    results = topbar.reset_params(metadata)
     state_params.update({"note_box_state": ['',0,0]})
-    print(f'[ToolBox] Reset_params: update {len(metainfo.keys())} params from current image log file.')
-    return results + [gr.update(visible=False)] * 2 + [state_params, backend_engine]
+
+    metadata_scheme = meta_parser.MetadataScheme('simple')
+    metadata_parser = meta_parser.get_metadata_parser(metadata_scheme)
+    parsed_parameters = metadata_parser.to_json(metadata)
+
+    results = meta_parser.switch_layout_template(parsed_parameters, state_params)
+    results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
+
+    print(f'[ToolBox] Reset_params: -->{parsed_parameters["Backend Engine"]} params from current image log file.')
+    return results + [gr.update(visible=False)] * 2
 
 
 def apply_enabled_loras(loras):
@@ -390,7 +356,7 @@ def apply_enabled_loras(loras):
 
 def save_preset(*args):    
     args = list(args)
-    backend_selection = args.pop()
+    backend_params = args.pop()
     state_params = args.pop()
     name = args.pop()
     seed_random = args.pop()
@@ -420,11 +386,12 @@ def save_preset(*args):
 
     if name is not None and name != '':
         preset = {}
-        if backend_selection != flags.backend_engines[0]:
-            preset["default_backend"] = backend_selection
-            aspect_ratios_selection = state_params[f'{backend_selection}_current_aspect_ratios']
-            if backend_selection == flags.backend_engines[1]:
+        if 'task_class' in backend_params and backend_params['task_class']!='Fooocus':
+            preset["default_engine"] = backend_params
+            if backend_params['task_class'] == 'HyDiT':
                 base_model = "hydit_v1.1_fp16.safetensors"
+            elif backend_params['task_class'] == 'Kolors':
+                base_model = "kolors_unet_fp16.safetensors"
 
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model

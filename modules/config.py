@@ -321,6 +321,12 @@ temp_path_cleanup_on_launch = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
+default_engine = get_config_item_or_set_default(
+    key='default_engine',
+    default_value={},
+    validator=lambda x: isinstance(x, str),
+    expected_type=dict
+)
 default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',
     default_value='model.safetensors',
@@ -467,7 +473,7 @@ vae_downloads = get_config_item_or_set_default(
 )
 available_aspect_ratios = get_config_item_or_set_default(
     key='available_aspect_ratios',
-    default_value=modules.flags.sdxl_aspect_ratios,
+    default_value=modules.flags.available_aspect_ratios[0],
     validator=lambda x: isinstance(x, list) and all('*' in v for v in x) and len(x) > 1,
     expected_type=list
 )
@@ -663,22 +669,35 @@ default_backfill_prompt = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool)
 )
 
-default_backend = get_config_item_or_set_default(
-    key='default_backend',
-    default_value=ads.default['backend'],
-    validator=lambda x: x in modules.flags.backend_engines
-)
-
 default_comfyd_active_checkbox = get_config_item_or_set_default(
     key='default_comfyd_active_checkbox',
     default_value=ads.default['comfyd_active_checkbox'],
     validator=lambda x: isinstance(x, bool)
 )
 
+default_mixing_image_prompt_and_vary_upscale = get_config_item_or_set_default(
+    key='default_mixing_image_prompt_and_vary_upscale',
+    default_value=ads.default['mixing_image_prompt_and_vary_upscale'],
+    validator=lambda x: isinstance(x, bool)
+)
+
+default_mixing_image_prompt_and_inpaint = get_config_item_or_set_default(
+    key='default_mixing_image_prompt_and_inpaint',
+    default_value=ads.default['mixing_image_prompt_and_inpaint'],
+    validator=lambda x: isinstance(x, bool)
+)
+
+default_freeu = ads.default['freeu']
+default_adm_guidance = [ads.default['adm_scaler_positive'], ads.default['adm_scaler_negative'], ads.default['adm_scaler_end']]
+styles_definition = {}
+instruction = ''
+reference = ''
+
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
 # mapping config to meta parameter
 possible_preset_keys = {
+    "default_engine": "engine",
     "default_model": "base_model",
     "default_refiner": "refiner_model",
     "default_refiner_switch": "refiner_switch",
@@ -711,7 +730,29 @@ possible_preset_keys = {
     "default_vae": "vae",
     # "default_inpaint_method": "inpaint_method", # disabled so inpaint mode doesn't refresh after every preset change
     "default_inpaint_engine_version": "inpaint_engine_version",
+
+    "default_freeu": "freeu",
+    "default_adm_guidance": "adm_guidance",
+    "default_output_format": "output_format",
+    "default_inpaint_advanced_masking_checkbox": "inpaint_advanced_masking_checkbox",
+    "default_mixing_image_prompt_and_vary_upscale": "mixing_image_prompt_and_vary_upscale",
+    "default_mixing_image_prompt_and_inpaint": "mixing_image_prompt_and_inpaint",
+    "default_backfill_prompt": "backfill_prompt",
+    "default_translation_methods": "translation_methods",
+    "styles_definition": "styles_definition",
+    "instruction": "instruction",
+    "reference": "reference",
 }
+
+allow_missing_preset_key = [
+    "default_prompt",
+    "default_prompt_negative",
+    "default_output_format",
+    "input_image_checkbox",
+    "styles_definition",
+    "instruction",
+    "reference",
+    ]
 
 REWRITE_PRESET = False
 
@@ -739,16 +780,9 @@ def add_ratio(x):
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
-default_aspect_ratio = add_ratio(default_aspect_ratio)
-available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
-common_default_aspect_ratio = add_ratio('1024*1024')
-common_available_aspect_ratios = [
-        '576*1344', '768*1152', '896*1152', '768*1280', '960*1280',  
-        '1024*1024', '1024*1280', '1280*1280', '1280*1024',
-        '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'
-    ]
-common_available_aspect_ratios = [add_ratio(x) for x in common_available_aspect_ratios]
+default_aspect_ratio = modules.flags.default_aspect_ratios['SDXL']
+available_aspect_ratios_labels = modules.flags.available_aspect_ratios_list['SDXL']
 
 
 # Only write config in the first launch.
