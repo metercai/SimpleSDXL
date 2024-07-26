@@ -175,7 +175,9 @@ class AsyncTask:
             self.task_name = 'default'
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
-       
+      
+        if self.task_class in ['Kolors+', 'Kolors', 'HyDiT', 'SD3m'] and self.task_name not in ['Kolors+', 'Kolors', 'HyDiT', 'SD3m']:
+            self.task_name = self.task_class
         print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
         if len(self.loras) > 0 and self.task_name == 'Kolors+':
             self.params_backend.update({"lora_speedup": self.loras[0][0]})
@@ -1053,7 +1055,10 @@ def worker():
         processing_time = time.perf_counter() - processing_start_time
         print(f'Processing time (total): {processing_time:.2f} seconds')
         if async_task.task_class in flags.comfy_classes:
-            comfyd.finished()
+            if async_task.comfyd_active_checkbox:
+                comfyd.finished()
+            else:
+                comfyd.stop()
 
     def process_enhance(all_steps, async_task, callback, controlnet_canny_path, controlnet_cpds_path,
                         current_progress, current_task_id, denoising_strength, inpaint_disable_initial_latent,

@@ -75,7 +75,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         if task_method == default_method_names[1]:
             comfy_params = ComfyTaskParams(default_params)
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
-            return ComfyTask(task_name[method], comfy_params)
+            return ComfyTask(default_method_list[task_method], comfy_params)
         else:
             comfy_params = ComfyTaskParams(default_params)
             if input_images is None:
@@ -93,7 +93,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                         "light_source_text_switch": True,
                         "light_source_text": iclight_source_text[options["iclight_source_radio"]]
                         })
-                return ComfyTask(task_name[method], comfy_params, images)
+                return ComfyTask(default_method_list[task_method], comfy_params, images)
             else:
                 width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
                 comfy_params.update_params({

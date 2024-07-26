@@ -332,7 +332,7 @@ def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
-    metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
+    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
     state_params.update({"note_box_state": ['',0,0]})
 
     metadata_scheme = meta_parser.MetadataScheme('simple')
@@ -356,42 +356,60 @@ def apply_enabled_loras(loras):
 
 def save_preset(*args):    
     args = list(args)
-    backend_params = args.pop()
-    state_params = args.pop()
+    
+    args.reverse()
     name = args.pop()
+    backend_params = dict(args.pop())
+    output_format = args.pop()
+    inpaint_advanced_masking_checkbox = args.pop()
+    mixing_image_prompt_and_vary_upscale = args.pop()
+    mixing_image_prompt_and_inpaint = args.pop()
+    backfill_prompt = args.pop()
+    translation_methods = args.pop()
+    input_image_checkbox = args.pop()
+    state_params = dict(args.pop())
+
+    advanced_checkbox = args.pop()
+    image_number = int(args.pop())
+    prompt = args.pop()
+    negative_prompt = args.pop()
+    style_selections = args.pop()
+    performance_selection = args.pop()
+    overwrite_step = int(args.pop())
+    overwrite_switch = args.pop()
+    aspect_ratios_selection = args.pop()
+    overwrite_width = args.pop()
+    overwrite_height = args.pop()
+    guidance_scale = args.pop()
+    sharpness = args.pop()
+    adm_scaler_positive = args.pop()
+    adm_scaler_negative = args.pop()
+    adm_scaler_end = args.pop()
+    refiner_swap_method = args.pop()
+    adaptive_cfg = args.pop()
+    clip_skip = args.pop()
+    base_model = args.pop()
+    refiner_model = args.pop()
+    refiner_switch = args.pop()
+    sampler_name = args.pop()
+    scheduler_name = args.pop()
+    vae_name = args.pop()
     seed_random = args.pop()
-    params = ads.get_dict_args(args)
-    prompt = params['prompt']
-    negative_prompt = params['negative_prompt']
-    style_selections = params['style_selections']
-    performance_selection = params['performance_selection']
-    aspect_ratios_selection = params['aspect_ratios_selection']
-    sharpness = params['sharpness']
-    guidance_scale = params['guidance_scale']
-    base_model = params['base_model']
-    refiner_model = params['refiner_model']
-    refiner_switch = params['refiner_switch']
-    sampler_name = params['sampler_name']
-    scheduler_name = params['scheduler_name']
-    adaptive_cfg = params['adaptive_cfg']
-    overwrite_step = params['overwrite_step']
-    overwrite_switch = params['overwrite_switch']
-    inpaint_engine = params['inpaint_engine']
-    loras = params['loras']
-    adm_scaler_positive = params['adm_scaler_positive']
-    adm_scaler_negative = params['adm_scaler_negative']
-    adm_scaler_end = params['adm_scaler_end']
-    image_seed = params['image_seed']
+    image_seed = args.pop()
+    inpaint_engine = args.pop()
+    inpaint_engine_state = args.pop()
+    inpaint_mode = args.pop()
+    enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
+    generate_button = args.pop()
+    load_parameter_button = args.pop()
+    freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
+    loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
+    
 
-
-    if name is not None and name != '':
+    if name:
         preset = {}
-        if 'task_class' in backend_params and backend_params['task_class']!='Fooocus':
+        if 'backend_engine' in backend_params and backend_params['backend_engine']!='Fooocus':
             preset["default_engine"] = backend_params
-            if backend_params['task_class'] == 'HyDiT':
-                base_model = "hydit_v1.1_fp16.safetensors"
-            elif backend_params['task_class'] == 'Kolors':
-                base_model = "kolors_unet_fp16.safetensors"
 
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model
@@ -406,12 +424,11 @@ def save_preset(*args):
         preset["default_prompt_negative"] = negative_prompt
         preset["default_styles"] = style_selections
         preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
-        if ads.default["adm_scaler_positive"] != adm_scaler_positive:
-            preset["default_adm_scaler_positive"] = adm_scaler_positive
-        if ads.default["adm_scaler_negative"] != adm_scaler_negative:
-            preset["default_adm_scaler_negative"] = adm_scaler_negative
-        if ads.default["adm_scaler_end"] != adm_scaler_end:
-            preset["default_adm_scaler_end"] = adm_scaler_end
+        if ads.default["adm_scaler_positive"] != adm_scaler_positive or ads.default["adm_scaler_negative"] != adm_scaler_negative \
+                or ads.default["adm_scaler_end"] != adm_scaler_end:
+            preset["default_adm_guidance"] = f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'
+        if ads.default["freeu"]!=freeu_ctrls[1:]:
+            preset["default_freeu"]=freeu_ctrls[1:]
         if ads.default["adaptive_cfg"] != adaptive_cfg:
             preset["default_cfg_tsnr"] = adaptive_cfg
         if ads.default["overwrite_step"] != overwrite_step:
@@ -420,6 +437,14 @@ def save_preset(*args):
             preset["default_overwrite_switch"] = overwrite_switch
         if ads.default["inpaint_engine"] != inpaint_engine:
             preset["default_inpaint_engine"] = inpaint_engine
+        if ads.default["clip_skip"] != clip_skip:
+            preset["default_clip_skip"] = clip_skip
+        if ads.default["vae"] != vae_name:
+            preset["default_vae"] = vae_name
+        if ads.default["overwrite_width"] != overwrite_width:
+            preset["default_overwrite_width"] = overwrite_width
+        if ads.default["overwrite_height"] != overwrite_height:
+            preset["default_overwrite_height"] = overwrite_height
         if not seed_random:
             preset["default_image_seed"] = image_seed
 
@@ -445,10 +470,10 @@ def save_preset(*args):
             if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
                 preset["embeddings_downloads"].update({k[11:]: get_muid_link(k)})
 
-        preset["lora_downloads"] = {}
-        for m,w in loras:
-            if m != 'None':
-                preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
+        #preset["lora_downloads"] = {}
+        #for m,w in loras:
+        #    if m != 'None':
+        #        preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
 
         m_dict = {}
         for key in style_selections:

@@ -1,6 +1,7 @@
 import math
 from enum import IntEnum, Enum
 
+
 disabled = 'Disabled'
 enabled = 'Enabled'
 subtle_variation = 'Vary (Subtle)'
@@ -97,6 +98,13 @@ desc_type_anime = 'Art/Anime'
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
+COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ancestral_cfg_pp", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
+                  "lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_sde", "dpmpp_sde_gpu",
+                  "dpmpp_2m", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm",
+                  "ipndm", "ipndm_v", "deis"]   
+comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"]
+comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
+
 aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common']
 default_aspect_ratio = ['1152*896', '1024*1024', '1280*1024']
 available_aspect_ratios = [
@@ -140,7 +148,7 @@ available_aspect_ratios_list = {
         aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
         }
 
-backend_engines = ['SDXL', 'HyDiT', 'SD3m', 'Kolors']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
@@ -148,6 +156,7 @@ task_class_mapping = {
             'Fooocus': 'SDXL-Fooocus',
             'Comfy'  : 'SDXL-Comfy',
             'Kolors' : 'Kwai-Kolors',
+            'Kolors+' : 'Kwai-Kolors+',
             'SD3m'   : 'SD3-medium',
             'HyDiT'  : 'Hunyuan-DiT',
             }
@@ -157,7 +166,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'SD3m']
+comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m']
 
 default_class_params = {
     'Fooocus': {
@@ -174,8 +183,21 @@ default_class_params = {
         'disvisible': ["backend_selection", "performance_selection"],
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
         'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
             "task_method": "kolors_text2image1",
+            "llms_model": "quant8",
+            },
+        },
+    'Kolors+': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "kolors_text2image2",
             "llms_model": "quant8",
             },
         },
@@ -183,6 +205,8 @@ default_class_params = {
         'disvisible': ["backend_selection", "performance_selection"],
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
         'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
             "task_method": "sd3_base",
             },

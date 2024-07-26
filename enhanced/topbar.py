@@ -19,7 +19,7 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.hydit_task as hydit_task
 import enhanced.comfy_task as comfy_task
-from enhanced.simpleai import models_info, models_info_muid, refresh_models_info
+from enhanced.simpleai import comfyd, models_info, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
 
@@ -373,7 +373,7 @@ def down_absent_model(state_params):
     return gr.update(visible=False), state_params
 
 
-def reset_layout_params(prompt, negative_prompt, state_params, is_generating, inpaint_mode):
+def reset_layout_params(prompt, negative_prompt, state_params, is_generating, inpaint_mode, comfyd_active_checkbox):
     global system_message, preset_down_note_info
 
     state_params.update({"__message": system_message})
@@ -392,6 +392,10 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     config_preset = config.try_get_preset_content(preset)
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
     #print(f'preset_prepared:{preset_prepared}')
+    
+    engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
+    if comfyd_active_checkbox:
+        comfyd.stop()
     
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})

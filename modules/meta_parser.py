@@ -48,7 +48,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
     results.append(get_layout_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_visible_inter('base_model', visible, inter))
-    results.append(get_layout_visible_inter('refiner_model,', visible, inter))
+    results.append(get_layout_visible_inter('refiner_model', visible, inter))
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
     results.append(gr.update(visible=True if preset_url else False))
     for i in range(modules.config.default_max_lora_number):
@@ -405,8 +405,9 @@ class MetadataParser(ABC):
         self.steps = steps
         self.base_model_name = Path(base_model_name).stem
 
-        base_model_path = get_file_from_folder_list(base_model_name, modules.config.paths_checkpoints)
-        self.base_model_hash = sha256_from_cache(base_model_path)
+        if base_model_name not in ['', 'None']:
+            base_model_path = get_file_from_folder_list(base_model_name, modules.config.paths_checkpoints)
+            self.base_model_hash = sha256_from_cache(base_model_path)
 
         if refiner_model_name not in ['', 'None']:
             self.refiner_model_name = Path(refiner_model_name).stem
@@ -751,9 +752,9 @@ class SIMPLEMetadataParser(MetadataParser):
                 name, weight = value.split(' : ')
                 if name == path.stem:
                     return f'{filename} : {weight}'
-            elif value == path.stem:
+            elif Path(value).stem == path.stem:
                 return filename
-        return None
+        return 'None'
 
 
 def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
