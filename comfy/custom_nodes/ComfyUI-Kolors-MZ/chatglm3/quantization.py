@@ -15,6 +15,26 @@ logger = logging.get_logger(__name__)
 try:
     from cpm_kernels.kernels.base import LazyKernelCModule, KernelFunction, round_up
 
+    import cpm_kernels.library.base
+
+    original_windows_find_lib = cpm_kernels.library.base.windows_find_lib
+    
+    def windows_find_lib(name):
+        result = original_windows_find_lib(name)
+        if result is not None:
+            return result
+        import torch
+        import os
+        torch_dir = os.path.dirname(torch.__file__)
+        torch_lib_dir = os.path.join(torch_dir, "lib")
+
+        for name in os.listdir(torch_lib_dir):
+            if name.startswith(name) and name.lower().endswith(".dll"):
+                return os.path.join(torch_lib_dir, name)
+            
+        return None
+    cpm_kernels.library.base.windows_find_lib = windows_find_lib
+
     class Kernel:
         def __init__(self, code: bytes, function_names: List[str]):
             self.code = code
@@ -137,8 +157,11 @@ class QuantizedLinear(torch.nn.Module):
             self.weight = torch.round(weight / self.weight_scale[:, None]).to(torch.int8)
             if weight_bit_width == 4:
                 self.weight = compress_int4_weight(self.weight)
-
-        self.weight = Parameter(self.weight.to(device), requires_grad=False)
+ 
+        try:
+            self.weight = Parameter(self.weight.to(device), requires_grad=False)
+        except:
+            self.weight.to(device, dtype=self.weight.dtype)
         self.weight_scale = Parameter(self.weight_scale.to(device), requires_grad=False)
         self.bias = Parameter(bias.to(device), requires_grad=False) if bias is not None else None
 
