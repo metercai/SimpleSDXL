@@ -179,7 +179,7 @@ class AsyncTask:
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
       
-        if self.task_class in ['Kolors+', 'Kolors', 'HyDiT', 'SD3m'] and self.task_name not in ['Kolors+', 'Kolors', 'HyDiT', 'SD3m']:
+        if self.task_class in ['Kolors+', 'Kolors', 'HyDiT', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Kolors', 'HyDiT', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
         print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
         if len(self.loras) > 0 and self.task_name == 'Kolors+':
@@ -194,7 +194,7 @@ class AsyncTask:
         self.translation_methods = self.params_backend.pop('translation_methods')
         self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
 
-        if self.task_class != 'Kolors' and self.task_class != 'HyDiT':
+        if self.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
             self.prompt = translator.convert(self.prompt, self.translation_methods)
             self.negative_prompt = translator.convert(self.negative_prompt, self.translation_methods)
         
@@ -473,7 +473,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors']:
+                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+']:
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None

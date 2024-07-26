@@ -1072,6 +1072,14 @@ def downloading_base_sd15_model():
     )
     return os.path.join(paths_checkpoints[0], 'realisticVisionV60B1_v51VAE.safetensors')
 
+def downloading_hydit_model():
+    load_file_from_url(
+        url='https://huggingface.co/comfyanonymous/hunyuan_dit_comfyui/resolve/main/hunyuan_dit_1.2.safetensors',
+        model_dir=paths_checkpoints[0],
+        file_name='hunyuan_dit_1.2.safetensors'
+    )
+    return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
+
 update_files()
 from enhanced.simpleai import simpleai_config, refresh_models_info 
 simpleai_config.paths_checkpoints = paths_checkpoints
