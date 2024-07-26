@@ -127,6 +127,11 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 })
         check_download_kolors_model(modules.config.path_models_root)
         return ComfyTask(task_method, comfy_params)
+    elif task_name == 'HyDiT+':
+        comfy_params = ComfyTaskParams(default_params)
+        if modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
+            modules.config.downloading_hydit_model()
+        return ComfyTask(task_method, comfy_params)
 
 
 

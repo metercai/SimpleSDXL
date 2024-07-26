@@ -148,7 +148,7 @@ available_aspect_ratios_list = {
         aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
         }
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
@@ -159,6 +159,7 @@ task_class_mapping = {
             'Kolors+' : 'Kwai-Kolors+',
             'SD3m'   : 'SD3-medium',
             'HyDiT'  : 'Hunyuan-DiT',
+            'HyDiT+'  : 'Hunyuan-DiT+',
             }
 def get_taskclass_by_fullname(fullname):
     for taskclass, fname in task_class_mapping.items():
@@ -166,7 +167,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m']
+comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT+']
 
 default_class_params = {
     'Fooocus': {
@@ -216,6 +217,16 @@ default_class_params = {
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
         'available_aspect_ratios_selection': 'HyDiT',
         'available_sampler_name': ["ddpm", "ddim", "dpmms"],
+        'backend_params': {
+            "task_method": "hydit_base",
+            },
+        },
+    'HyDiT+': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
+        'available_aspect_ratios_selection': 'HyDiT',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
             "task_method": "hydit_base",
             },
