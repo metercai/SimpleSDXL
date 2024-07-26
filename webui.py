@@ -445,6 +445,12 @@ with shared.gradio_root:
                     example_quick_prompts.click(lambda x, y: ', '.join(y.split(', ')[:2] + [x[0]]), inputs=[example_quick_prompts, prompt], outputs=prompt, show_progress=False, queue=False)
                     example_quick_subjects.click(lambda x: x[0], inputs=example_quick_subjects, outputs=prompt, show_progress=False, queue=False)
 
+                    with gr.TabItem(label='Enhance') as enhance_tab:
+                        with gr.Row():
+                            with gr.Column():
+                                enhance_input_image = grh.Image(label='Use with Enhance, skips image generation', source='upload', type='numpy')
+                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/3281" target="_blank">\U0001F4D4 Documentation</a>')
+
                     with gr.TabItem(label='Describe') as desc_tab:
                         with gr.Row():
                             with gr.Column():
@@ -464,12 +470,6 @@ with shared.gradio_root:
 
                                 desc_input_image.upload(trigger_show_image_properties, inputs=desc_input_image,
                                                         outputs=desc_image_size, show_progress=False, queue=False)
-
-                    with gr.TabItem(label='Enhance') as enhance_tab:
-                        with gr.Row():
-                            with gr.Column():
-                                enhance_input_image = grh.Image(label='Use with Enhance, skips image generation', source='upload', type='numpy')
-                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/3281" target="_blank">\U0001F4D4 Documentation</a>')
 
                     with gr.TabItem(label='Metadata') as metadata_tab:
                         with gr.Column():
