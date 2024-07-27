@@ -665,7 +665,7 @@ with shared.gradio_root:
                     preset_selection = gr.Radio(label='Preset',
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
-                                                interactive=True)
+                                                visible=False, interactive=True)
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)

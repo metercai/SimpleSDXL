@@ -280,18 +280,18 @@ def init_nav_bars(state_params, request: gr.Request):
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
-    results += [gr.update(visible=True if preset_url else False)]
+    results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
     
     return results
 
 def get_preset_inc_url(preset_name='blank'):
-    if preset_name!='blank':
-        preset_name = f'{preset_name}.inc'
+    preset_name = f'{preset_name}.inc'
     preset_inc_path = os.path.abspath(f'./presets/html/{preset_name}.html')
+    blank_inc_path = os.path.abspath(f'./presets/html/blank.inc.html')
     if os.path.exists(preset_inc_path):
         return f'{args_manager.args.webroot}/file={preset_inc_path}'
     else:
-        return '' 
+        return f'{args_manager.args.webroot}/file={blank_inc_path}'
 
 def refresh_nav_bars(state_params):
     state_params.update({"__nav_name_list": get_preset_name_list()})
