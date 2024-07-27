@@ -752,7 +752,7 @@ class SIMPLEMetadataParser(MetadataParser):
                 name, weight = value.split(' : ')
                 if name == path.stem:
                     return f'{filename} : {weight}'
-            elif Path(value).stem == path.stem:
+            elif Path(value).stem == path.stem or value == path.stem:
                 return filename
         return 'None'
 
