@@ -14,6 +14,7 @@ from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
 from enhanced.simpleai import models_info, models_info_file
+import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
@@ -76,7 +77,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
     if isinstance(raw_metadata, str):
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
-
+    
     results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
@@ -166,7 +167,8 @@ def get_image_number(key: str, fallback: str | None, source_dict: dict, results:
         assert h is not None
         h = int(h)
         h = min(h, modules.config.default_max_image_number)
-        results.append(h)
+        m = int(source_dict.get('max_image_number', ads.default["max_image_number"]))
+        results.append(gr.update(value=h, maximum=m))
     except:
         results.append(1)
 
@@ -300,11 +302,12 @@ def get_lora(key: str, fallback: str | None, source_dict: dict, results: list, p
 
         if name == performance_filename:
             raise Exception
-
+        w_min = float(source_dict.get('loras_min_weight', ads.default['loras_min_weight']))
+        w_max = float(source_dict.get('loras_max_weight', ads.default['loras_max_weight']))
         weight = float(weight)
         results.append(enabled)
         results.append(name)
-        results.append(weight)
+        results.append(gr.update(value=weight, minimum=w_min, maximum=w_max))
     except:
         results.append(True)
         results.append('None')
