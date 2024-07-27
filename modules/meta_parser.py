@@ -50,7 +50,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
-    results.append(gr.update(visible=True if preset_url else False))
+    results.append(gr.update(visible=True if 'blank.inc.html' not in preset_url else False))
     for i in range(modules.config.default_max_lora_number):
         results += [get_layout_visible_inter('loras', visible, inter)] * 3
 
