@@ -106,7 +106,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
 
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
-        if modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
+        if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
         #if f'checkpoints/{default_params["base_model"]}' not in models_info:
             modules.config.downloading_sd3_medium_model()
         return ComfyTask(task_method, comfy_params)
@@ -114,7 +114,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
-                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' if sysinfo["gpu_memory"]<12200 else 'fp16'
                 })
         check_download_kolors_model(modules.config.path_models_root)
         comfy_params.delete_params(['sampler'])
@@ -127,9 +127,9 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 })
         check_download_kolors_model(modules.config.path_models_root)
         return ComfyTask(task_method, comfy_params)
-    elif task_name == 'HyDiT+':
+    elif task_name in ['HyDiT+', 'HyDiT']:
         comfy_params = ComfyTaskParams(default_params)
-        if modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
+        if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             modules.config.downloading_hydit_model()
         return ComfyTask(task_method, comfy_params)
 

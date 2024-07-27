@@ -1138,37 +1138,6 @@ with shared.gradio_root:
                                          scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
                                      ], queue=False, show_progress=False)
 
-        def toggle_layer_interactive(x):
-            if x==flags.backend_engines[2]:
-                results = [gr.update(), gr.update(choices=flags.sampler_list), gr.update(interactive=False)] + [gr.update(interactive=True)] * 18
-                comfyd.start()
-            elif x==flags.backend_engines[1]:
-                results = [gr.update(choices=flags.Performance.list()[:2]), gr.update(choices=hydit_task.SAMPLERS)] + [gr.update(interactive=False)] * 19
-            elif x==flags.backend_engines[3]:
-                results = [gr.update()] + [gr.update(interactive=False)] + [gr.update(interactive=False)] + [gr.update(interactive=True, choices=comfy_task.kolors_scheduler_list)] + [gr.update(interactive=False)] * 17
-            else:
-                results = [gr.update(choices=flags.Performance.list()), gr.update(choices=flags.sampler_list)] + [gr.update(interactive=True)] * 19
-            return results
-
-        def toggle_layer_visible(x):
-            if x==flags.backend_engines[2]:
-                results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)]
-            elif x==flags.backend_engines[1]:
-                results = [gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)]
-            elif x==flags.backend_engines[3]:
-                results = [gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)]
-            else:
-                results = [gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)]
-            return results
-
-        def toggle_preset_value(x, state_params):
-            results = []
-            for v in state_params[f'{x}_preset_value']:
-                if v is None or v=='':
-                    results += [gr.update()]
-                else:
-                    results += [v]
-            return results + [state_params[f'{x}_current_aspect_ratios']+f',{x}']
         
         def reset_aspect_ratios(aspect_ratios):
             if len(aspect_ratios.split(','))>1:
@@ -1293,7 +1262,7 @@ with shared.gradio_root:
             else:
                 metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
                 parsed_parameters = metadata_parser.to_json(parameters)
-            
+           
             results = modules.meta_parser.switch_layout_template(parsed_parameters, state_params)
             results += modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating, inpaint_mode)
             engine = parsed_parameters.get("Backend Engine", parsed_parameters.get("backend_engine", "SDXL-Fooocus"))
@@ -1386,12 +1355,27 @@ with shared.gradio_root:
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(fn=lambda: None, _js='refresh_grid_delayed')
 
+    enhance_mask_dino_prompt_text_ctrls = []
+    for index in range(modules.config.default_enhance_tabs):
+        enhance_mask_dino_prompt_text_ctrls += [enhance_ctrls[1 + index * 16]]
+
+    def preset_for_enhance_image():
+        dino_prompt_list = [''] * modules.config.default_enhance_tabs
+        inpaint_mode_list = [flags.inpaint_option_default] * modules.config.default_enhance_tabs
+        if modules.config.default_enhance_tabs >= 2:
+            dino_prompt_list[0] = 'face'
+            dino_prompt_list[1] = 'hand'
+            inpaint_mode_list[0] = inpaint_mode_list[1] = flags.inpaint_option_detail
+        return dino_prompt_list + inpaint_mode_list
+
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
                       .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_advanced_masking_checkbox, preset_instruction], show_progress=False) \
                       .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
-                      .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]).then(fn=lambda: None, _js='refresh_grid_delayed')
+                      .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]) \
+                      .then(preset_for_enhance_image, outputs=enhance_mask_dino_prompt_text_ctrls + enhance_inpaint_mode_ctrls, show_progress=False) \
+                      .then(fn=lambda: None, _js='refresh_grid_delayed')
 
 
 def dump_default_english_config():
