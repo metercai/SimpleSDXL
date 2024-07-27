@@ -6,7 +6,7 @@
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "kolors_text2image2",
-		"llms_model": "quant8"
+		"llms_model": "auto"
 		}
 	},
     "default_model": "None",
