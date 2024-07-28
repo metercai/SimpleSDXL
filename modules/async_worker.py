@@ -9,7 +9,7 @@ patch_all()
 
 class AsyncTask:
     def __init__(self, args):
-        from modules.flags import Performance, MetadataScheme, ip_list, controlnet_image_count, disabled
+        from modules.flags import Performance, MetadataScheme, ip_list, disabled
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
         import args_manager
@@ -101,7 +101,7 @@ class AsyncTask:
             args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
 
         self.cn_tasks = {x: [] for x in ip_list}
-        for _ in range(controlnet_image_count):
+        for _ in range(modules.config.default_controlnet_image_count):
             cn_img = args.pop()
             cn_stop = args.pop()
             cn_weight = args.pop()
@@ -689,13 +689,20 @@ def worker():
 
             task_styles = async_task.style_selections.copy()
             if use_style:
+                placeholder_replaced = False
+
                 for j, s in enumerate(task_styles):
                     if s == random_style_name:
                         s = get_random_style(task_rng)
                         task_styles[j] = s
-                    p, n = apply_style(s, positive=task_prompt)
+                    p, n, style_has_placeholder = apply_style(s, positive=task_prompt)
+                    if style_has_placeholder:
+                        placeholder_replaced = True
                     positive_basic_workloads = positive_basic_workloads + p
                     negative_basic_workloads = negative_basic_workloads + n
+
+                if not placeholder_replaced:
+                    positive_basic_workloads = [task_prompt] + positive_basic_workloads
             else:
                 positive_basic_workloads.append(task_prompt)
 
