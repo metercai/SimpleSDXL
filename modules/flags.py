@@ -69,6 +69,9 @@ default_vae = 'Default (model)'
 
 refiner_swap_method = 'joint'
 
+default_input_image_tab = 'uov_tab'
+input_image_tab_ids = ['uov_tab', 'ip_tab', 'inpaint_tab', 'describe_tab', 'enhance_tab', 'metadata_tab']
+
 cn_ip = "ImagePrompt"
 cn_ip_face = "FaceSwap"
 cn_canny = "PyraCanny"
@@ -93,8 +96,8 @@ inpaint_option_detail = 'Improve Detail (face, hand, eyes, etc.)'
 inpaint_option_modify = 'Modify Content (add objects, change background, etc.)'
 inpaint_options = [inpaint_option_default, inpaint_option_detail, inpaint_option_modify]
 
-desc_type_photo = 'Photograph'
-desc_type_anime = 'Art/Anime'
+describe_type_photo = 'Photograph'
+describe_type_anime = 'Art/Anime'
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
@@ -245,8 +248,6 @@ metadata_scheme = [
     (f'{MetadataScheme.FOOOCUS.value}', MetadataScheme.FOOOCUS.value),
     (f'{MetadataScheme.A1111.value}', MetadataScheme.A1111.value),
 ]
-
-controlnet_image_count = 4
 
 
 class OutputFormat(Enum):
