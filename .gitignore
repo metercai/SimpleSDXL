@@ -67,4 +67,5 @@ test/
 *.did
 client.toml
 /repos
-/models/t2i
+/models
+/comfy
