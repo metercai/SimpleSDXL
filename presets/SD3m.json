@@ -43,10 +43,8 @@
     "default_aspect_ratio": "1152*896",
     "default_overwrite_step": 28,
     "checkpoint_downloads": {
-        "juggernaut-X-RunDiffusion-NSFW.safetensors": "MUID:039986f26f01"
+        "sd3_medium_incl_clips.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {
-        "sd_xl_offset_example-lora_1.0.safetensors": "MUID:8e3e833226b3"
-    }
+    "lora_downloads": {}
 }
