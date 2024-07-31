@@ -15,6 +15,7 @@ models_dir = os.path.join(os.path.dirname(base_path), "models")
 def reset_folder_names_and_paths(models_root):
     global models_dir, folder_names_and_paths
     models_dir = models_root
+    folder_names_and_paths = {}
     folder_names_and_paths["checkpoints"] = ([os.path.join(models_dir, "checkpoints")], supported_pt_extensions)
     folder_names_and_paths["configs"] = ([os.path.join(models_dir, "configs")], [".yaml"])
 

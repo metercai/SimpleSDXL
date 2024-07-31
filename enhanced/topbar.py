@@ -60,13 +60,11 @@ def get_preset_name_list():
     return name_list
 
 def is_models_file_absent(preset_name):
-    refresh_models_info()
+    #refresh_models_info()
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
             config_preset = json.load(json_file)
-        if config_preset["default_model"] and config_preset["default_model"] == 'hydit_v1.1_fp16.safetensors':
-            return False
         if config_preset["default_model"] and config_preset["default_model"] != 'None':
             if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
                 return True
@@ -354,7 +352,6 @@ def process_after_generation(state_params):
         gallery_util.refresh_images_catalog(output_index, True)
         gallery_util.parse_html_log(output_index, True)
     
-    refresh_models_info() 
     return results
 
 

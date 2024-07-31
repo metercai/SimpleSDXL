@@ -145,12 +145,25 @@ def get_path_output() -> str:
     Checking output path argument and overriding default path.
     """
     global config_dict
-    path_output = get_dir_or_set_default('path_outputs', '../outputs/', make_directory=True)
+    path_output = 'outputs'
     if args_manager.args.output_path:
-        print(f'Overriding config value path_outputs with {args_manager.args.output_path}')
-        config_dict['path_outputs'] = path_output = args_manager.args.output_path
+        path_output = args_manager.args.output_path
+    path_output_abs = os.path.abspath(path_output)
+    config_dict['path_outputs'] = path_output_abs
+    path_output = get_dir_or_set_default('path_outputs', f'../{path_output}')
+    print(f'The path_output: {path_output}')
     return path_output
 
+def get_path_models_root() -> str:
+    global config_dict
+    models_root = 'models'
+    if args_manager.args.models_root:
+        models_root = args_manager.args.models_root
+    path_models_root = os.path.abspath(models_root)
+    config_dict['path_models_root'] = path_models_root
+    path_models_root = get_dir_or_set_default('path_models_root', f'../{models_root}')
+    print(f'The path_models_root: {path_models_root}')
+    return path_models_root
 
 def get_dir_or_set_default(key, default_value, as_array=False, make_directory=False):
     global config_dict, visited_keys, always_save_keys
@@ -196,8 +209,7 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     config_dict[key] = dp
     return dp
 
-path_models_root = get_dir_or_set_default('path_models_root', '../models/')
-
+path_models_root = get_path_models_root()
 paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/'], True)
 paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/'], True)
 path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
@@ -217,6 +229,18 @@ path_unet = get_dir_or_set_default('path_unet', f'{path_models_root}/unet')
 path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
 paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
+
+from enhanced.simpleai import simpleai_config
+simpleai_config.path_models_root = path_models_root
+simpleai_config.paths_checkpoints = paths_checkpoints
+simpleai_config.paths_loras = paths_loras
+simpleai_config.path_embeddings = path_embeddings
+simpleai_config.paths_diffusers = paths_diffusers
+simpleai_config.paths_controlnet = paths_controlnet
+simpleai_config.paths_inpaint = paths_inpaint
+simpleai_config.paths_llms = paths_llms
+simpleai_config.path_unet = path_unet
+simpleai_config.path_vae = path_vae
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -443,7 +467,7 @@ default_advanced_checkbox = get_config_item_or_set_default(
 )
 default_developer_debug_mode_checkbox = get_config_item_or_set_default(
     key='default_developer_debug_mode_checkbox',
-    default_value=False,
+    default_value=ads.default['developer_debug_mode_checkbox'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
@@ -568,7 +592,7 @@ for image_count in range(default_controlnet_image_count):
 
 default_inpaint_advanced_masking_checkbox = get_config_item_or_set_default(
     key='default_inpaint_advanced_masking_checkbox',
-    default_value=False,
+    default_value=ads.default['inpaint_advanced_masking_checkbox'],
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
@@ -606,12 +630,6 @@ default_overwrite_upscale = get_config_item_or_set_default(
     key='default_overwrite_upscale',
     default_value=-1,
     validator=lambda x: isinstance(x, numbers.Number)
-)
-
-default_inpaint_advanced_masking_checkbox = get_config_item_or_set_default(
-    key='default_inpaint_advanced_masking_checkbox',
-    default_value=ads.default['inpaint_advanced_masking_checkbox'],
-    validator=lambda x: isinstance(x, bool)
 )
 
 example_inpaint_prompts = get_config_item_or_set_default(
@@ -1165,15 +1183,5 @@ def downloading_hydit_model():
     return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
 
 update_files()
-from enhanced.simpleai import simpleai_config, refresh_models_info 
-simpleai_config.paths_checkpoints = paths_checkpoints
-simpleai_config.paths_loras = paths_loras
-simpleai_config.path_embeddings = path_embeddings
-simpleai_config.paths_diffusers = paths_diffusers
-simpleai_config.paths_controlnet = paths_controlnet
-simpleai_config.paths_inpaint = paths_inpaint
-simpleai_config.paths_llms = paths_llms
-simpleai_config.path_unet = path_unet
-simpleai_config.path_vae = path_vae
-
+from enhanced.simpleai import refresh_models_info 
 refresh_models_info()
