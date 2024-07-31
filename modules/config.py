@@ -148,8 +148,8 @@ def get_path_output() -> str:
     path_output = 'outputs'
     if args_manager.args.output_path:
         path_output = args_manager.args.output_path
-    path_output_abs = os.path.abspath(path_output)
-    config_dict['path_outputs'] = path_output_abs
+        path_output_abs = os.path.abspath(path_output)
+        config_dict['path_outputs'] = path_output_abs
     path_output = get_dir_or_set_default('path_outputs', f'../{path_output}')
     print(f'The path_output: {path_output}')
     return path_output
@@ -159,8 +159,8 @@ def get_path_models_root() -> str:
     models_root = 'models'
     if args_manager.args.models_root:
         models_root = args_manager.args.models_root
-    path_models_root = os.path.abspath(models_root)
-    config_dict['path_models_root'] = path_models_root
+        path_models_root = os.path.abspath(models_root)
+        config_dict['path_models_root'] = path_models_root
     path_models_root = get_dir_or_set_default('path_models_root', f'../{models_root}')
     print(f'The path_models_root: {path_models_root}')
     return path_models_root
