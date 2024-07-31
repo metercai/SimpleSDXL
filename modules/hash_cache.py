@@ -5,6 +5,7 @@ from multiprocessing import cpu_count
 
 import args_manager
 from modules.util import sha256, HASH_SHA256_LENGTH, get_file_from_folder_list
+from enhanced.simpleai import modelsinfo, models_info, models_info_file
 
 hash_cache_filename = 'hash_cache.txt'
 hash_cache = {}
@@ -21,8 +22,10 @@ def sha256_filename(filepath):
 def sha256_from_cache(filepath):
     global hash_cache
     if filepath not in hash_cache:
-        if 'kolors_' in filepath or 'hydit_' in filepath:
+        if 'kolors_' in filepath:
             hash_value = sha256_filename(filepath)            
+        elif filepath in models_info_file:
+            hash_value = models_info[models_info_file[filepath]]['muid']
         else:
             print(f"[Cache] Calculating sha256 for {filepath}")
             hash_value = sha256(filepath)

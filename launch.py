@@ -45,8 +45,8 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.16"
-    REINSTALL_BASE = True
+    ver_required = "0.3.17"
+    REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -212,6 +212,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nod
 from modules import config
 from modules.hash_cache import init_cache
 os.environ["U2NET_HOME"] = config.paths_inpaint[0]
+os.environ["BERT_HOME"] = config.paths_llms[0]
 os.environ['GRADIO_TEMP_DIR'] = config.temp_path
 
 if config.temp_path_cleanup_on_launch:

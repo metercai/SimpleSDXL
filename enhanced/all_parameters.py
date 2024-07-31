@@ -97,7 +97,8 @@ default = {
     'backend': 'SDXL',
     'comfyd_active_checkbox': False,
     'clip_skip': 2,
-    'vae': 'Default (model)'
+    'vae': 'Default (model)',
+    'developer_debug_mode_checkbox': True
     }
 
 

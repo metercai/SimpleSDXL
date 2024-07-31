@@ -155,6 +155,29 @@ def inpaint_mode_change(mode, inpaint_engine_version):
         False, inpaint_engine_version, 1.0, 0.618
     ]
 
+def enhance_inpaint_mode_change(mode, inpaint_engine_version):
+    assert mode in modules.flags.inpaint_options
+
+    # inpaint_disable_initial_latent, inpaint_engine,
+    # inpaint_strength, inpaint_respective_field
+
+    if mode == modules.flags.inpaint_option_detail:
+        return [
+            False, 'None', 0.5, 0.0
+        ]
+
+    if inpaint_engine_version == 'empty':
+        inpaint_engine_version = modules.config.default_inpaint_engine_version
+
+    if mode == modules.flags.inpaint_option_modify:
+        return [
+            True, inpaint_engine_version, 1.0, 0.0
+        ]
+
+    return [
+        False, inpaint_engine_version, 1.0, 0.618
+    ]
+
 
 reload_javascript()
 
@@ -443,7 +466,7 @@ with shared.gradio_root:
                     example_quick_prompts.click(lambda x, y: ', '.join(y.split(', ')[:2] + [x[0]]), inputs=[example_quick_prompts, prompt], outputs=prompt, show_progress=False, queue=False)
                     example_quick_subjects.click(lambda x: x[0], inputs=example_quick_subjects, outputs=prompt, show_progress=False, queue=False)
 
-                    with gr.TabItem(label='Enhance', id='enhance_tab') as enhance_tab:
+                    with gr.TabItem(label='Enhance+', id='enhance_tab') as enhance_tab:
                         with gr.Row():
                             with gr.Column():
                                 enhance_input_image = grh.Image(label='Use with Enhance, skips image generation', source='upload', type='numpy')
@@ -459,12 +482,12 @@ with shared.gradio_root:
                                     choices=[flags.describe_type_photo, flags.describe_type_anime],
                                     value=flags.describe_type_photo)
                                 describe_btn = gr.Button(value='Describe this Image into Prompt')
-                                describe_image_size = gr.Textbox(label='Image Size and Recommended Size', elem_id='describe_image_size', visible=False)
+                                describe_image_size = gr.Textbox(label='Original Size / Recommended Size', elem_id='describe_image_size', visible=False)
                                 gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/1363" target="_blank">\U0001F4D4 Documentation</a>')
 
                                 def trigger_show_image_properties(image):
-                                    value = modules.util.get_image_size_info(image, modules.flags.sdxl_aspect_ratios)
-                                    return gr.update(value=value, visible=True)
+                                    image_size = modules.util.get_image_size_info(image, modules.flags.available_aspect_ratios[0])
+                                    return gr.update(value=image_size, visible=True)
 
                                 describe_input_image.upload(trigger_show_image_properties, inputs=describe_input_image,
                                                             outputs=describe_image_size, show_progress=False, queue=False)
@@ -491,7 +514,7 @@ with shared.gradio_root:
                         metadata_input_image.upload(trigger_metadata_preview, inputs=metadata_input_image,
                                                     outputs=metadata_json, queue=False, show_progress=True)
 
-            with gr.Row(visible=modules.config.default_enhance_checkbox) as enhance_input_panel:
+            with gr.Accordion("Enhance Setting", visible=modules.config.default_enhance_checkbox) as enhance_input_panel:
                 with gr.Tabs():
                     with gr.Tab(label='Upscale or Variation'):
                         with gr.Row():
@@ -518,7 +541,7 @@ with shared.gradio_root:
                     enhance_inpaint_engine_ctrls = []
                     enhance_inpaint_update_ctrls = []
                     for index in range(modules.config.default_enhance_tabs):
-                        with gr.Tab(label=f'Region/区域#{index + 1}') as enhance_tab_item:
+                        with gr.Tab(label=f'Region#{index + 1}') as enhance_tab_item:
                             enhance_enabled = gr.Checkbox(label='Enable', value=False, elem_classes='min_check',
                                                           container=False)
 
@@ -633,8 +656,7 @@ with shared.gradio_root:
                             enhance_inpaint_strength, enhance_inpaint_respective_field
                         ]]
 
-                        enhance_inpaint_mode.change(inpaint_mode_change, inputs=[enhance_inpaint_mode, inpaint_engine_state], outputs=[
-                            inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts,
+                        enhance_inpaint_mode.change(enhance_inpaint_mode_change, inputs=[enhance_inpaint_mode, inpaint_engine_state], outputs=[
                             enhance_inpaint_disable_initial_latent, enhance_inpaint_engine,
                             enhance_inpaint_strength, enhance_inpaint_respective_field
                         ], show_progress=False, queue=False)
@@ -1055,13 +1077,28 @@ with shared.gradio_root:
             describe_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
             layer_tab.select(lambda: 'layer', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
             metadata_tab.select(lambda: 'metadata', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            enhance_tab.select(lambda: 'enhance', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
+            enhance_tab.select(lambda: 'enhance', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False).then(lambda: True, outputs=enhance_checkbox, show_progress=False, queue=False)
             
             input_image_checkbox.change(lambda x: [gr.update(visible=x), gr.update(choices=flags.Performance.list()), gr.update()] + 
                     [gr.update(interactive=True)]*18, inputs=input_image_checkbox,
                                         outputs=[image_input_panel] + pre4comfy, queue=False, show_progress=False, _js=switch_js)
-            enhance_checkbox.change(lambda x: gr.update(visible=x), inputs=enhance_checkbox,
-                                        outputs=enhance_input_panel, queue=False, show_progress=False, _js=switch_js)
+            
+            enhance_mask_dino_prompt_text_ctrls = []
+            for index in range(modules.config.default_enhance_tabs):
+                enhance_mask_dino_prompt_text_ctrls += [enhance_ctrls[1 + index * 16]]
+
+            def preset_for_enhance_image():
+                dino_prompt_list = [''] * modules.config.default_enhance_tabs
+                inpaint_mode_list = [flags.inpaint_option_default] * modules.config.default_enhance_tabs
+                if modules.config.default_enhance_tabs >= 2:
+                    dino_prompt_list[0] = 'face'
+                    dino_prompt_list[1] = 'hand'
+                    inpaint_mode_list[0] = inpaint_mode_list[1] = flags.inpaint_option_detail
+                return dino_prompt_list + inpaint_mode_list
+
+            enhance_checkbox.change(lambda x: gr.update(visible=x), inputs=enhance_checkbox, 
+                    outputs=enhance_input_panel, queue=False, show_progress=False, _js=switch_js) \
+                        .then(preset_for_enhance_image, outputs=enhance_mask_dino_prompt_text_ctrls + enhance_inpaint_mode_ctrls, show_progress=False)
 
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
             comfyd_active_checkbox.change(lambda x: comfyd.active(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
@@ -1110,19 +1147,20 @@ with shared.gradio_root:
                 return modules.meta_parser.load_parameter_button_click(json.dumps(preset_prepared), is_generating, inpaint_mode)
 
 
-            def inpaint_engine_state_change(inpaint_engine_version, *args):
-                if inpaint_engine_version == 'empty':
-                    inpaint_engine_version = modules.config.default_inpaint_engine_version
+        def inpaint_engine_state_change(inpaint_engine_version, *args):
+            if inpaint_engine_version == 'empty':
+                inpaint_engine_version = modules.config.default_inpaint_engine_version
 
-                result = []
-                for inpaint_mode in args:
-                    if inpaint_mode != modules.flags.inpaint_option_detail:
-                        result.append(gr.update(value=inpaint_engine_version))
-                    else:
-                        result.append(gr.update())
+            result = []
+            for inpaint_mode in args:
+                if inpaint_mode != modules.flags.inpaint_option_detail:
+                    result.append(gr.update(value=inpaint_engine_version))
+                else:
+                    result.append(gr.update())
 
-                return result
+            return result
 
+        if not args_manager.args.disable_preset_selection:
             preset_selection.change(preset_selection_change, inputs=[preset_selection, state_is_generating, inpaint_mode], outputs=load_data_outputs, queue=False, show_progress=True) \
                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
                 .then(lambda: None, _js='()=>{refresh_style_localization();}') \
@@ -1353,20 +1391,13 @@ with shared.gradio_root:
                .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
-               .then(fn=lambda: None, _js='refresh_grid_delayed')
+               .then(lambda: None, _js='()=>{refresh_style_localization();}') \
+               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
 
     enhance_mask_dino_prompt_text_ctrls = []
     for index in range(modules.config.default_enhance_tabs):
         enhance_mask_dino_prompt_text_ctrls += [enhance_ctrls[1 + index * 16]]
 
-    def preset_for_enhance_image():
-        dino_prompt_list = [''] * modules.config.default_enhance_tabs
-        inpaint_mode_list = [flags.inpaint_option_default] * modules.config.default_enhance_tabs
-        if modules.config.default_enhance_tabs >= 2:
-            dino_prompt_list[0] = 'face'
-            dino_prompt_list[1] = 'hand'
-            inpaint_mode_list[0] = inpaint_mode_list[1] = flags.inpaint_option_detail
-        return dino_prompt_list + inpaint_mode_list
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
                       .then(topbar.init_nav_bars, inputs=state_topbar, outputs=nav_bars + [progress_window, language_ui, background_theme, gallery_index, index_radio, inpaint_advanced_masking_checkbox, preset_instruction], show_progress=False) \
@@ -1374,7 +1405,6 @@ with shared.gradio_root:
                       .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \
                       .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                       .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]) \
-                      .then(preset_for_enhance_image, outputs=enhance_mask_dino_prompt_text_ctrls + enhance_inpaint_mode_ctrls, show_progress=False) \
                       .then(fn=lambda: None, _js='refresh_grid_delayed')
 
 
