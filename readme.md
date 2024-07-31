@@ -1,4 +1,4 @@
-## SimpleSDXL2 - 最强中文创意生图平台，6G显存可用国产混元、可图和SD3m！
+## SimpleSDXL2 - 最强中文创意生图平台，6G显存用混元、可图和SD3m！
 <div align=center><img src="https://github.com/user-attachments/assets/75786e42-60ec-4e02-b802-51bd82cff634"></div>
     
 ## 🔔 最新更新 / Update
@@ -12,17 +12,17 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 
 ## Windows安装使用
 ### 下载：(新用户至少要下载程序包和基本模型包)
-- 运行环境和应用程序, [程序包: SimpleSDXL2_win.exe.7z0731 (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0731)
-- 缺省出图模型和所有辅助模型，包含SD3基础版, [基本模型包: models_base_0731.zip (49G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip)
-- 预置导航上的其他出图模型，包括写实/动漫(V500)/小马v6/Playground-v2.5/混元1.2/可图, [扩展模型包: models_ckpt_0731.zip (47G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip)
+- 程序包: 运行环境和应用程序, [SimpleSDXL2_win.exe.7z0731 (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0731)
+- 基本模型包: 缺省出图模型和所有辅助模型，包含SD3基础版, [models_base_0731.zip (49G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip)
+- 扩展模型包: 预置导航上的其他出图模型，包括写实/动漫(V500)/小马v6/Playground-v2.5/混元1.2/可图, [models_ckpt_0731.zip (47G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip)
 ### 安装：
-- 新建空目录，示范名称为: SimpleAI，注意完整路径名上不能包含中文和空格。将程序包复制到新目录内，<b>去掉`.7z0731`的文件名尾缀</b>，然后点击运行SimpleSDXL2_win.exe，自解压到当前目录。新版本严禁与旧版本混装。
-- 复制基本模型包models_base_0731.zip和扩展模型包models_ckpt_0731.zip到SimpleAI目录下，分别双击文件解压到本目录，同名覆盖在同一目录，缺省模型目录名称为: SimpleModels。
-- 在SimpleAI目录下新建出图目录，示范名称为: outputs ，此目录保存所有出图的图片。
+- 新建空目录名称为: SimpleAI，注意完整路径名上不能包含中文和空格。将程序包复制到新目录内，<b>去掉`.7z0731`的文件名尾缀</b>，双击运行，自解压到当前目录。新版本严禁与旧版本混装。
+- 复制基本模型包models_base_0731.zip和扩展模型包models_ckpt_0731.zip到SimpleAI目录下，分别双击文件解压到本目录，同名覆盖在同一目录下：SimpleModels，即模型根目录。
+- 在SimpleAI目录下新建出图目录，名称为: outputs ，此目录将保存所有出图的图片。
 ### 运行
 - 进入SimpleSDXL2_win目录，双击启动脚本 run_SimpleSDXL.bat，完成第一次运行。
 - 第一次运行后，在SimpleSDXL目录下会生成 config.txt文件，可以自行修改和添加模型路径。
-- 如果模型根目录和出图目录不是预设的示范路径和名称，需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
+- 模型根目录和出图目录可以自定义，但需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
 <img width="600" align=center src="https://github.com/user-attachments/assets/4c039129-b59f-47ef-825b-863c5ea24705">
 
 
@@ -113,18 +113,19 @@ Enhanced parameter management for instant viewing and embedding of images, and c
     mkdir SimpleAI;cd SimpleAI
     git clone https://github.com/metercai/SimpleSDXL.git
     #国内用户可换用gitee源: https://gitee.com/metercai/SimpleSDXL.git
-    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base.zip
-    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt.zip
-    cd SimpleSDXL
-    unzip -d -o ../models_base.zip 
-    unzip -d -o ../models_ckpt.zip
+    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip
+    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip
+    unzip -d -o models_base_0731.zip 
+    unzip -d -o models_ckpt_0731.zip
+    mkdir outputs
     conda env create -f environment.yaml
     conda activate simpleai
     pip install packaging pygit2==1.12.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ### 启动服务
 
-    python entry_with_update.py
+    cd SimpleSDXL
+    python entry_with_update.py --models-root ../SimpleModels --output-path ../outputs
     # 云端部署可以配置： ip, port, webroot 等参数
     # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --preset realistic
     # Enter English UI : --language en
