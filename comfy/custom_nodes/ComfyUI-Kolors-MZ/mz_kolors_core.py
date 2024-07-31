@@ -5,11 +5,16 @@ import json
 import os
 import random
 import re
+import subprocess
+import sys
+from types import MethodType
+
+import torch
 import folder_paths
 import comfy.model_management as mm
 
 
-def KolorsTextEncode(chatglm3_model, prompt):
+def chatglm3_text_encode(chatglm3_model, prompt):
     device = mm.get_torch_device()
     offload_device = mm.unet_offload_device()
     mm.unload_all_models()
@@ -21,14 +26,6 @@ def KolorsTextEncode(chatglm3_model, prompt):
         return random.choice(options)
 
     prompt = re.sub(r'\{([^{}]*)\}', choose_random_option, prompt)
-
-    if "|" in prompt:
-        prompt = prompt.split("|")
-
-    if prompt is not None and isinstance(prompt, str):
-        batch_size = 1
-    elif prompt is not None and isinstance(prompt, list):
-        batch_size = len(prompt)
 
     # Define tokenizers and text encoders
     tokenizer = chatglm3_model['tokenizer']
@@ -68,16 +65,20 @@ def KolorsTextEncode(chatglm3_model, prompt):
 
 
 def MZ_ChatGLM3Loader_call(args):
-    from .mz_kolors_utils import Utils
-    llm_dir = os.path.join(Utils.get_models_path(), "LLM")
+    # from .mz_kolors_utils import Utils
+    # llm_dir = os.path.join(Utils.get_models_path(), "LLM")
     chatglm3_checkpoint = args.get("chatglm3_checkpoint")
 
-    chatglm3_checkpoint_path = os.path.join(llm_dir, chatglm3_checkpoint)
+    chatglm3_checkpoint_path = folder_paths.get_full_path(
+        'LLM', chatglm3_checkpoint)
+
+    if not os.path.exists(chatglm3_checkpoint_path):
+        raise RuntimeError(
+            f"ERROR: Could not find chatglm3 checkpoint: {chatglm3_checkpoint_path}")
 
     from .chatglm3.configuration_chatglm import ChatGLMConfig
     from .chatglm3.modeling_chatglm import ChatGLMModel
     from .chatglm3.tokenization_chatglm import ChatGLMTokenizer
-    from .mz_kolors_utils import Utils
 
     offload_device = mm.unet_offload_device()
 
@@ -90,6 +91,7 @@ def MZ_ChatGLM3Loader_call(args):
 
     from comfy.utils import load_torch_file
     from contextlib import nullcontext
+    is_accelerate_available = False
     try:
         from accelerate import init_empty_weights
         from accelerate.utils import set_module_tensor_to_device
@@ -97,33 +99,30 @@ def MZ_ChatGLM3Loader_call(args):
     except:
         pass
 
-    text_encoder_resp = Utils.cache_get("chatglm3_text_encoder")
-
-    if text_encoder_resp is None or text_encoder_resp['chatglm3_checkpoint'] != chatglm3_checkpoint:
-        if text_encoder_resp is not None and text_encoder_resp['chatglm3_checkpoint'] != chatglm3_checkpoint:
-            del text_encoder_resp
-            gc.collect()
-
-        with (init_empty_weights() if is_accelerate_available else nullcontext()):
-            text_encoder = ChatGLMModel(text_encoder_config)
+    with (init_empty_weights() if is_accelerate_available else nullcontext()):
+        with torch.no_grad():
+            # 打印版本号
+            print("torch version:", torch.__version__)
+            text_encoder = ChatGLMModel(text_encoder_config).eval()
             if '4bit' in chatglm3_checkpoint:
+                try:
+                    import cpm_kernels
+                except ImportError:
+                    print("Installing cpm_kernels...")
+                    subprocess.run(
+                        [sys.executable, "-m", "pip", "install", "cpm_kernels"], check=True)
+                    pass
                 text_encoder.quantize(4)
             elif '8bit' in chatglm3_checkpoint:
                 text_encoder.quantize(8)
-
-        text_encoder_sd = load_torch_file(chatglm3_checkpoint_path)
-        if is_accelerate_available:
-            for key in text_encoder_sd:
-                set_module_tensor_to_device(
-                    text_encoder, key, device=offload_device, value=text_encoder_sd[key])
-        else:
-            text_encoder.load_state_dict()
-        Utils.cache_set("chatglm3_text_encoder", {
-            "text_encoder": text_encoder,
-            "chatglm3_checkpoint": chatglm3_checkpoint
-        })
+    text_encoder_sd = load_torch_file(chatglm3_checkpoint_path)
+    if is_accelerate_available:
+        for key in text_encoder_sd:
+            set_module_tensor_to_device(
+                text_encoder, key, device=offload_device, value=text_encoder_sd[key])
     else:
-        text_encoder = text_encoder_resp['text_encoder']
+        print("WARNING: Accelerate not available, use load_state_dict load model")
+        text_encoder.load_state_dict(text_encoder_sd)
 
     tokenizer_path = os.path.join(
         os.path.dirname(__file__), 'configs', "tokenizer")
@@ -132,107 +131,162 @@ def MZ_ChatGLM3Loader_call(args):
     return ({"text_encoder": text_encoder, "tokenizer": tokenizer},)
 
 
-def MZ_ChatGLM3TextEncode_call(args):
-
+def MZ_ChatGLM3TextEncodeV2_call(args):
     text = args.get("text")
     chatglm3_model = args.get("chatglm3_model")
-
-    prompt_embeds, pooled_output = KolorsTextEncode(
+    prompt_embeds, pooled_output = chatglm3_text_encode(
         chatglm3_model,
         text,
     )
-
-    from torch import nn
-    hid_proj: nn.Linear = args.get("hid_proj")
-
-    prompt_embeds = hid_proj(prompt_embeds)
-
+    extra_kwargs = {
+        "pooled_output": pooled_output,
+    }
+    extra_cond_keys = [
+        "width",
+        "height",
+        "crop_w",
+        "crop_h",
+        "target_width",
+        "target_height"
+    ]
+    for key, value in args.items():
+        if key in extra_cond_keys:
+            extra_kwargs[key] = value
     return ([[
         prompt_embeds,
-        {"pooled_output": pooled_output},
+        # {"pooled_output": pooled_output},
+        extra_kwargs
     ]], )
 
 
-def load_unet_state_dict(sd):  # load unet in diffusers or regular format
-    from comfy import model_management, model_detection
-    import comfy.utils
+def MZ_ChatGLM3Embeds2Conditioning_call(args):
+    kolors_embeds = args.get("kolors_embeds")
 
-    # Allow loading unets from checkpoint files
-    checkpoint = False
-    diffusion_model_prefix = model_detection.unet_prefix_from_state_dict(sd)
-    temp_sd = comfy.utils.state_dict_prefix_replace(
-        sd, {diffusion_model_prefix: ""}, filter_keys=True)
-    if len(temp_sd) > 0:
-        sd = temp_sd
-        checkpoint = True
+    # kolors_embeds = {
+    #     'prompt_embeds': prompt_embeds,
+    #     'negative_prompt_embeds': negative_prompt_embeds,
+    #     'pooled_prompt_embeds': text_proj,
+    #     'negative_pooled_prompt_embeds': negative_text_proj
+    # }
 
-    parameters = comfy.utils.calculate_parameters(sd)
-    unet_dtype = model_management.unet_dtype(model_params=parameters)
-    load_device = model_management.get_torch_device()
+    positive = [[
+        kolors_embeds['prompt_embeds'],
+        {
+            "pooled_output": kolors_embeds['pooled_prompt_embeds'],
+            "width": args.get("width"),
+            "height": args.get("height"),
+            "crop_w": args.get("crop_w"),
+            "crop_h": args.get("crop_h"),
+            "target_width": args.get("target_width"),
+            "target_height": args.get("target_height")
+        }
+    ]]
 
-    from torch import nn
-    hid_proj: nn.Linear = None
-    if True:
-        model_config = model_detection.model_config_from_diffusers_unet(sd)
-        if model_config is None:
-            return None
+    negative = [[
+        kolors_embeds['negative_prompt_embeds'],
+        {
+            "pooled_output": kolors_embeds['negative_pooled_prompt_embeds'],
+        }
+    ]]
 
-        diffusers_keys = comfy.utils.unet_to_diffusers(
-            model_config.unet_config)
-
-        new_sd = {}
-        for k in diffusers_keys:
-            if k in sd:
-                new_sd[diffusers_keys[k]] = sd.pop(k)
-            else:
-                print("{} {}".format(diffusers_keys[k], k))
-
-        encoder_hid_proj_weight = sd.pop("encoder_hid_proj.weight")
-        encoder_hid_proj_bias = sd.pop("encoder_hid_proj.bias")
-        hid_proj = nn.Linear(
-            encoder_hid_proj_weight.shape[1], encoder_hid_proj_weight.shape[0])
-        hid_proj.weight.data = encoder_hid_proj_weight
-        hid_proj.bias.data = encoder_hid_proj_bias
-        hid_proj = hid_proj.to(load_device)
-
-    offload_device = model_management.unet_offload_device()
-    unet_dtype = model_management.unet_dtype(
-        model_params=parameters, supported_dtypes=model_config.supported_inference_dtypes)
-    manual_cast_dtype = model_management.unet_manual_cast(
-        unet_dtype, load_device, model_config.supported_inference_dtypes)
-    model_config.set_inference_dtype(unet_dtype, manual_cast_dtype)
-    model = model_config.get_model(new_sd, "")
-    model = model.to(offload_device)
-    model.load_model_weights(new_sd, "")
-    left_over = sd.keys()
-    if len(left_over) > 0:
-        print("left over keys in unet: {}".format(left_over))
-    return comfy.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=offload_device), hid_proj
+    return (positive, negative)
 
 
-def MZ_KolorsUNETLoader_call(kwargs):
+def MZ_KolorsUNETLoaderV2_call(kwargs):
 
-    from . import hook_comfyui
-    with hook_comfyui.apply_kolors():
+    from . import hook_comfyui_kolors_v2
+    import comfy.sd
+
+    with hook_comfyui_kolors_v2.apply_kolors():
         unet_name = kwargs.get("unet_name")
         unet_path = folder_paths.get_full_path("unet", unet_name)
         import comfy.utils
         sd = comfy.utils.load_torch_file(unet_path)
-        model, hid_proj = load_unet_state_dict(sd)
+        model = comfy.sd.load_unet_state_dict(sd)
         if model is None:
             raise RuntimeError(
                 "ERROR: Could not detect model type of: {}".format(unet_path))
-        return (model, hid_proj)
+
+        return (model, )
 
 
-def MZ_FakeCond_call(kwargs):
-    import torch
-    # cond: torch.Size([1, 77, ])
-    cond = torch.zeros(2, 256, 4096)
-    # torch.Size([1, 1280])
-    pool = torch.zeros(2, 4096)
+from comfy.cldm.cldm import ControlNet
+from comfy.controlnet import ControlLora
 
-    return ([[
-        cond,
-        {"pooled_output": pool},
-    ]],)
+
+def MZ_KolorsControlNetPatch_call(kwargs):
+    from . import hook_comfyui_kolors_v2
+    model = kwargs.get("model")
+    control_net = kwargs.get("control_net")
+    import comfy.controlnet
+    if isinstance(control_net, ControlLora):
+        del_keys = []
+        for k in control_net.control_weights:
+            if k.startswith("label_emb.0.0."):
+                del_keys.append(k)
+
+        for k in del_keys:
+            control_net.control_weights.pop(k)
+
+        super_pre_run = ControlLora.pre_run
+        super_copy = ControlLora.copy
+
+        super_forward = ControlNet.forward
+
+        def KolorsControlNet_forward(self, x, hint, timesteps, context, **kwargs):
+            with torch.cuda.amp.autocast(enabled=True):
+                context = model.model.diffusion_model.encoder_hid_proj(context)
+                return super_forward(self, x, hint, timesteps, context, **kwargs)
+
+        def KolorsControlLora_pre_run(self, *args, **kwargs):
+            result = super_pre_run(self, *args, **kwargs)
+
+            if hasattr(self, "control_model"):
+                self.control_model.forward = MethodType(
+                    KolorsControlNet_forward, self.control_model)
+            return result
+
+        control_net.pre_run = MethodType(
+            KolorsControlLora_pre_run, control_net)
+
+        def KolorsControlLora_copy(self, *args, **kwargs):
+            c = super_copy(self, *args, **kwargs)
+            c.pre_run = MethodType(
+                KolorsControlLora_pre_run, c)
+            return c
+
+        control_net.copy = MethodType(
+            KolorsControlLora_copy, control_net)
+
+    elif isinstance(control_net, comfy.controlnet.ControlNet):
+        model_label_emb = model.model.diffusion_model.label_emb
+
+        control_net.control_model.label_emb = model_label_emb
+
+        control_net.control_model_wrapped.model.label_emb = model_label_emb
+
+        super_forward = ControlNet.forward
+
+        def KolorsControlNet_forward(self, x, hint, timesteps, context, **kwargs):
+            with torch.cuda.amp.autocast(enabled=True):
+                context = model.model.diffusion_model.encoder_hid_proj(context)
+                return super_forward(self, x, hint, timesteps, context, **kwargs)
+
+        control_net.control_model.forward = MethodType(
+            KolorsControlNet_forward, control_net.control_model)
+
+    else:
+        raise NotImplementedError(
+            f"Type {control_net} not supported for KolorsControlNetPatch")
+
+    return (control_net,)
+
+
+def MZ_KolorsCLIPVisionLoader_call(kwargs):
+    import comfy.clip_vision
+    from . import hook_comfyui_kolors_v2
+    clip_name = kwargs.get("clip_name")
+    clip_path = folder_paths.get_full_path("clip_vision", clip_name)
+    with hook_comfyui_kolors_v2.apply_kolors():
+        clip_vision = comfy.clip_vision.load(clip_path)
+        return (clip_vision,)

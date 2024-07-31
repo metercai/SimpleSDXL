@@ -58,22 +58,14 @@ def load_file_from_url(
 
     Returns the path to the downloaded file.
     """
-    domain = os.environ.get("HF_MIRROR", "https://huggingface.co").rstrip('/')
-    url = str.replace(url, "https://huggingface.co", domain, 1)
+    domain = os.environ.get("HF_MIRROR", "huggingface.co").rstrip('/')
+    url = str.replace(url, "huggingface.co", domain, 1)
     os.makedirs(model_dir, exist_ok=True)
     if not file_name:
         parts = urlparse(url)
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
-        from enhanced.simpleai import sysinfo
-        location = sysinfo["location"]
-
-        if location=='CN':
-            if url in urlmapping.keys():
-                return load_file_from_muid(file_name, urlmapping[url], model_dir, progress)
-            elif url.find("huggingface.co")>=0:
-                url = url.replace('huggingface.co', 'hf-mirror.com')
         print(f'Downloading: "{url}" to {cached_file}\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)

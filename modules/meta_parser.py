@@ -10,25 +10,74 @@ from PIL import Image
 import fooocus_version
 import modules.config
 import modules.sdxl_styles
-from modules.flags import MetadataScheme, Performance, Steps
+from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
 from enhanced.simpleai import models_info, models_info_file
-
+import enhanced.all_parameters as ads
+from modules.hash_cache import sha256_from_cache
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
 re_imagesize = re.compile(r"^(\d+)x(\d+)$")
 
-hash_cache = {}
+get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
+get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
 
 
-def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
+def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
+    presetdata_dict = presetdata
+    if isinstance(presetdata, str):
+        presetdata_dict = json.loads(presetdata)
+    assert isinstance(presetdata_dict, dict)
+    enginedata_dict = presetdata_dict.get('engine', {})
+    #print(f'enginedata:{enginedata_dict}')
+    template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', task_class_mapping['Fooocus'])))
+    template_engine = enginedata_dict.get('backend_engine', template_engine)
+    default_params = default_class_params[template_engine]
+    visible = enginedata_dict.get('disvisible', default_params.get('disvisible', default_class_params['Fooocus']['disvisible']))
+    inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
+    sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
+    scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
+    
+    params_backend  = enginedata_dict.get('backend_params', default_params.get('backend_params', default_class_params['Fooocus']['backend_params']))
+    params_backend.update({'backend_engine': template_engine})
+    results = [params_backend]
+    results.append(get_layout_visible_inter('performance_selection', visible, inter))
+    results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
+    results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
+    results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
+    results.append(get_layout_visible_inter('enhance_checkbox', visible, inter))
+    results.append(get_layout_visible_inter('base_model', visible, inter))
+    results.append(get_layout_visible_inter('refiner_model', visible, inter))
+    results.append(get_layout_visible_inter('overwrite_step', visible, inter))
+    results.append(gr.update(visible=True if 'blank.inc.html' not in preset_url else False))
+    for i in range(modules.config.default_max_lora_number):
+        results += [get_layout_visible_inter('loras', visible, inter)] * 3
+
+
+    #[output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox, state_topbar]
+    # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
+    update_value_if_existed = lambda x: gr.update() if x not in presetdata_dict else presetdata_dict[x]
+    results.append(update_value_if_existed("output_format"))
+    results.append(update_value_if_existed("inpaint_advanced_masking_checkbox"))
+    results.append(update_value_if_existed("mixing_image_prompt_and_vary_upscale"))
+    results.append(update_value_if_existed("mixing_image_prompt_and_inpaint"))
+    results.append(update_value_if_existed("backfill_prompt"))
+    results.append(update_value_if_existed("translation_methods"))
+    results.append(False if template_engine!='Fooocus' else update_value_if_existed("input_image_checkbox"))
+    results.append(state_params)
+
+    return results
+
+
+
+def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, inpaint_mode: str):
     loaded_parameter_dict = raw_metadata
     if isinstance(raw_metadata, str):
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
-
+    
     results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
@@ -52,6 +101,8 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
     get_str('scheduler', 'Scheduler', loaded_parameter_dict, results)
     get_str('vae', 'VAE', loaded_parameter_dict, results)
     get_seed('seed', 'Seed', loaded_parameter_dict, results)
+    get_inpaint_engine_version('inpaint_engine_version', 'Inpaint Engine Version', loaded_parameter_dict, results, inpaint_mode)
+    get_inpaint_method('inpaint_method', 'Inpaint Mode', loaded_parameter_dict, results)
 
     if is_generating:
         results.append(gr.update())
@@ -71,7 +122,6 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool):
     for i in range(modules.config.default_max_lora_number):
         get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results, performance_filename)
 
-    get_str('backend_engine', 'backend_engine', loaded_parameter_dict, results)
 
     return results
 
@@ -85,7 +135,6 @@ def get_str(key: str, fallback: str | None, source_dict: dict, results: list, de
     except:
         results.append(gr.update())
         return None
-
 
 def get_list(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
     try:
@@ -118,7 +167,8 @@ def get_image_number(key: str, fallback: str | None, source_dict: dict, results:
         assert h is not None
         h = int(h)
         h = min(h, modules.config.default_max_image_number)
-        results.append(h)
+        m = int(source_dict.get('max_image_number', ads.default["max_image_number"]))
+        results.append(gr.update(value=h, maximum=m))
     except:
         results.append(1)
 
@@ -144,15 +194,23 @@ def get_resolution(key: str, fallback: str | None, source_dict: dict, results: l
         h = source_dict.get(key, source_dict.get(fallback, default))
         width, height = eval(h)
         formatted = modules.config.add_ratio(f'{width}*{height}')
-        if formatted in modules.config.available_aspect_ratios_labels:
-            results.append(formatted)
+        engine = get_taskclass_by_fullname(source_dict.get('Backend Engine', source_dict.get('backend_engine', task_class_mapping['Fooocus']))) 
+        if 'engine' in source_dict:
+            engine = source_dict['engine'].get('backend_engine', engine)
+            template = source_dict['engine'].get('available_aspect_ratios_selection', default_class_params[engine].get('available_aspect_ratios_selection', default_class_params['Fooocus']['available_aspect_ratios_selection']))
+        else:
+            template = default_class_params[engine].get('available_aspect_ratios_selection', default_class_params['Fooocus']['available_aspect_ratios_selection'])
+        if formatted in modules.flags.available_aspect_ratios_list[template]:
+            h = f'{formatted},{template}'
+            results.append(h)
             results.append(-1)
             results.append(-1)
         else:
             results.append(gr.update())
             results.append(int(width))
             results.append(int(height))
-    except:
+    except e:
+        print(f'in except:{e}')
         results.append(gr.update())
         results.append(gr.update())
         results.append(gr.update())
@@ -168,6 +226,36 @@ def get_seed(key: str, fallback: str | None, source_dict: dict, results: list, d
     except:
         results.append(gr.update())
         results.append(gr.update())
+
+
+def get_inpaint_engine_version(key: str, fallback: str | None, source_dict: dict, results: list, inpaint_mode: str, default=None) -> str | None:
+    try:
+        h = source_dict.get(key, source_dict.get(fallback, default))
+        assert isinstance(h, str) and h in modules.flags.inpaint_engine_versions
+        if inpaint_mode != modules.flags.inpaint_option_detail:
+            results.append(h)
+        else:
+            results.append(gr.update())
+        results.append(h)
+        return h
+    except:
+        results.append(gr.update())
+        results.append('empty')
+        return None
+
+
+def get_inpaint_method(key: str, fallback: str | None, source_dict: dict, results: list, default=None) -> str | None:
+    try:
+        h = source_dict.get(key, source_dict.get(fallback, default))
+        assert isinstance(h, str) and h in modules.flags.inpaint_options
+        results.append(h)
+        for i in range(modules.config.default_enhance_tabs):
+            results.append(h)
+        return h
+    except:
+        results.append(gr.update())
+        for i in range(modules.config.default_enhance_tabs):
+            results.append(gr.update())
 
 
 def get_adm_guidance(key: str, fallback: str | None, source_dict: dict, results: list, default=None):
@@ -214,11 +302,12 @@ def get_lora(key: str, fallback: str | None, source_dict: dict, results: list, p
 
         if name == performance_filename:
             raise Exception
-
+        w_min = float(source_dict.get('loras_min_weight', ads.default['loras_min_weight']))
+        w_max = float(source_dict.get('loras_max_weight', ads.default['loras_max_weight']))
         weight = float(weight)
         results.append(enabled)
         results.append(name)
-        results.append(weight)
+        results.append(gr.update(value=weight, minimum=w_min, maximum=w_max))
     except:
         results.append(True)
         results.append('None')
@@ -272,9 +361,10 @@ def parse_meta_from_preset(preset_content):
                 width, height = default_aspect_ratio.split('×')
                 height = height[:height.index(" ")]
             preset_prepared[meta_key] = (width, height)
+        elif settings_key not in items and settings_key in modules.config.allow_missing_preset_key:
+            continue
         else:
-            preset_prepared[meta_key] = items[settings_key] if settings_key in items and items[
-                settings_key] is not None else getattr(modules.config, settings_key)
+            preset_prepared[meta_key] = items[settings_key] if settings_key in items and items[settings_key] is not None else getattr(modules.config, settings_key)
 
         if settings_key == "default_styles" or settings_key == "default_aspect_ratio":
             preset_prepared[meta_key] = str(preset_prepared[meta_key])
@@ -318,19 +408,20 @@ class MetadataParser(ABC):
         self.steps = steps
         self.base_model_name = Path(base_model_name).stem
 
-        base_model_path = get_file_from_folder_list(base_model_name, modules.config.paths_checkpoints)
-        self.base_model_hash = get_sha256(base_model_path)
+        if base_model_name not in ['', 'None']:
+            base_model_path = get_file_from_folder_list(base_model_name, modules.config.paths_checkpoints)
+            self.base_model_hash = sha256_from_cache(base_model_path)
 
         if refiner_model_name not in ['', 'None']:
             self.refiner_model_name = Path(refiner_model_name).stem
             refiner_model_path = get_file_from_folder_list(refiner_model_name, modules.config.paths_checkpoints)
-            self.refiner_model_hash = get_sha256(refiner_model_path)
+            self.refiner_model_hash = sha256_from_cache(refiner_model_path)
 
         self.loras = []
         for (lora_name, lora_weight) in loras:
             if lora_name != 'None':
                 lora_path = get_file_from_folder_list(lora_name, modules.config.paths_loras)
-                lora_hash = get_sha256(lora_path)
+                lora_hash = sha256_from_cache(lora_path)
                 self.loras.append((Path(lora_name).stem, lora_weight, lora_hash))
         self.vae_name = Path(vae_name).stem
         if styles_definition != 'None':
@@ -368,7 +459,8 @@ class A1111MetadataParser(MetadataParser):
         'lora_hashes': 'Lora hashes',
         'lora_weights': 'Lora weights',
         'created_by': 'User',
-        'version': 'Version'
+        'version': 'Version',
+        'backend_engine': 'Backend Engine'
     }
 
     def to_json(self, metadata: str) -> dict:
@@ -606,33 +698,6 @@ class SIMPLEMetadataParser(MetadataParser):
     def get_scheme(self) -> MetadataScheme:
         return MetadataScheme.SIMPLE
 
-    simple_to_fooocus = {
-        'Full Prompt': 'full_prompt',
-        'Full Negative Prompt': 'full_negative_prompt',
-        'Prompt': 'prompt',
-        'Negative Prompt': 'negative_prompt',
-        'Fooocus V2 Expansion': 'prompt_expansion',
-        'Styles': 'styles',
-        'Performance': 'performance',
-        'Steps': 'steps',
-        'Resolution': 'resolution',
-        'Guidance Scale': 'guidance_scale',
-        'Sharpness': 'sharpness',
-        'ADM Guidance adm_guidance': 'adm_guidance',
-        'Base Model': 'base_model',
-        'Refiner Model': 'refiner_model',
-        'Refiner Switch': 'refiner_switch',
-        'Overwrite Switch': 'overwrite_switch',
-        'Refiner Swap Method': 'refiner_swap_method',
-        'CFG Mimicking from TSNR': 'adaptive_cfg',
-        'Sampler': 'sampler',
-        'Scheduler': 'scheduler',
-        'Seed': 'seed',
-        'FreeU': 'freeu',
-        'User': 'created_by',
-        'Version': 'version',
-        'LoRAs': 'loras',
-    }
 
     def to_json(self, metadata: dict) -> dict:
 
@@ -682,15 +747,17 @@ class SIMPLEMetadataParser(MetadataParser):
 
     @staticmethod
     def replace_value_with_filename(key, value, filenames):
+        if key in ['vae', 'VAE'] and value=='Default (model)':
+            return value
         for filename in filenames:
             path = Path(filename)
             if key.startswith('LoRA '):
                 name, weight = value.split(' : ')
                 if name == path.stem:
                     return f'{filename} : {weight}'
-            elif value == path.stem:
+            elif Path(value).stem == path.stem or value == path.stem:
                 return filename
-        return None
+        return 'None'
 
 
 def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
@@ -705,9 +772,8 @@ def get_metadata_parser(metadata_scheme: MetadataScheme) -> MetadataParser:
             raise NotImplementedError
 
 
-def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
-    with Image.open(filepath) as image:
-        items = (image.info or {}).copy()
+def read_info_from_image(file) -> tuple[str | None, MetadataScheme | None]:
+    items = (file.info or {}).copy()
 
     parameters = items.pop('parameters', None)
     metadata_scheme = items.pop('fooocus_scheme', None)
@@ -720,7 +786,7 @@ def read_info_from_image(filepath) -> tuple[str | None, MetadataScheme | None]:
         parameters = json.loads(parameters)
         parameters = params_lora_fixed(parameters)
     elif exif is not None:
-        exif = image.getexif()
+        exif = file.getexif()
         # 0x9286 = UserComment
         parameters = exif.get(0x9286, None)
         # 0x927C = MakerNote

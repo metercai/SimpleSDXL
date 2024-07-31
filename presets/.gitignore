@@ -1,7 +1,11 @@
 *.json
 !anime.json
 !default.json
-!lcm.json
 !playground_v2.5.json
+!pony_v6.json
 !realistic.json
 !sai.json
+!Kolors+.json
+!Kolors.json
+!SD3m.json
+!HyDiT.json

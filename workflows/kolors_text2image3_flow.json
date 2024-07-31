@@ -1,0 +1,638 @@
+{
+  "last_node_id": 137,
+  "last_link_id": 190,
+  "nodes": [
+    {
+      "id": 130,
+      "type": "MZ_KolorsUNETLoaderV2",
+      "pos": [
+        892,
+        -115
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            183
+          ],
+          "shape": 3,
+          "label": "model",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MZ_KolorsUNETLoaderV2"
+      },
+      "widgets_values": [
+        "kolors_unet_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 70,
+      "type": "VAELoader",
+      "pos": [
+        890,
+        406
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            92
+          ],
+          "shape": 3,
+          "label": "VAE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "sdxl_fp16.vae.safetensors"
+      ]
+    },
+    {
+      "id": 126,
+      "type": "ModelMergeSimple",
+      "pos": [
+        1350,
+        -105
+      ],
+      "size": {
+        "0": 315,
+        "1": 78
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model1",
+          "type": "MODEL",
+          "link": 183,
+          "label": "model1"
+        },
+        {
+          "name": "model2",
+          "type": "MODEL",
+          "link": 175,
+          "label": "model2"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            179
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "model_merge_ratio",
+      "properties": {
+        "Node name for S&R": "ModelMergeSimple"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 131,
+      "type": "MZ_ChatGLM3_V2",
+      "pos": [
+        1350,
+        50
+      ],
+      "size": {
+        "0": 395.505126953125,
+        "1": 158.75376892089844
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 189,
+          "label": "chatglm3_model",
+          "slot_index": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            184
+          ],
+          "shape": 3,
+          "label": "CONDITIONING",
+          "slot_index": 0
+        }
+      ],
+      "title": "prompt",
+      "properties": {
+        "Node name for S&R": "MZ_ChatGLM3_V2"
+      },
+      "widgets_values": [
+        "刘亦非，繁华大街，身穿汉服，手举牌子，上面 写着 “真牛！”"
+      ]
+    },
+    {
+      "id": 128,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1741,
+        -99
+      ],
+      "size": {
+        "0": 315,
+        "1": 82
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 179,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            180
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "lora_speedup",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [
+        1831,
+        73
+      ],
+      "size": {
+        "0": 250,
+        "1": 46
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 9,
+          "label": "samples"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 92,
+          "label": "vae",
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            11,
+            188
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 9,
+      "type": "EmptyLatentImage",
+      "pos": [
+        1339,
+        484
+      ],
+      "size": {
+        "0": 385,
+        "1": 170
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ],
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "title": "aspect_ratios_size",
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        968,
+        1280,
+        1
+      ]
+    },
+    {
+      "id": 132,
+      "type": "MZ_ChatGLM3_V2",
+      "pos": [
+        1338,
+        274
+      ],
+      "size": {
+        "0": 395.0398254394531,
+        "1": 144.48951721191406
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 190,
+          "label": "chatglm3_model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            185
+          ],
+          "shape": 3,
+          "label": "CONDITIONING",
+          "slot_index": 0
+        }
+      ],
+      "title": "negative_prompt",
+      "properties": {
+        "Node name for S&R": "MZ_ChatGLM3_V2"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 6,
+      "type": "KSampler",
+      "pos": [
+        1775,
+        221
+      ],
+      "size": {
+        "0": 315,
+        "1": 475
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 180,
+          "label": "model",
+          "slot_index": 0
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 184,
+          "label": "positive",
+          "slot_index": 1
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 185,
+          "label": "negative",
+          "slot_index": 2
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8,
+          "label": "latent_image",
+          "slot_index": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            9
+          ],
+          "shape": 3,
+          "label": "LATENT",
+          "slot_index": 0
+        }
+      ],
+      "title": "main_sampler",
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        164051197915510,
+        "randomize",
+        8,
+        1.5,
+        "euler_ancestral",
+        "sgm_uniform",
+        1
+      ]
+    },
+    {
+      "id": 11,
+      "type": "PreviewImage",
+      "pos": [
+        2353,
+        -77
+      ],
+      "size": {
+        "0": 670.8212890625,
+        "1": 717.841064453125
+      },
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 11,
+          "label": "images"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 134,
+      "type": "SaveImageWebsocket",
+      "pos": [
+        2110,
+        229
+      ],
+      "size": [
+        210,
+        246
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 188,
+          "label": "images"
+        }
+      ],
+      "title": "result_image",
+      "properties": {
+        "Node name for S&R": "SaveImageWebsocket"
+      }
+    },
+    {
+      "id": 136,
+      "type": "DownloadAndLoadChatGLM3",
+      "pos": [
+        891,
+        204
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "links": [
+            189,
+            190
+          ],
+          "shape": 3,
+          "label": "chatglm3_model",
+          "slot_index": 0
+        }
+      ],
+      "title": "llms_model",
+      "properties": {
+        "Node name for S&R": "DownloadAndLoadChatGLM3"
+      },
+      "widgets_values": [
+        "quant8"
+      ]
+    },
+    {
+      "id": 105,
+      "type": "UNETLoader",
+      "pos": [
+        891,
+        32
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            175
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "merge_model",
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "juggernautXL_v8Rundiffusion.safetensors"
+      ]
+    }
+  ],
+  "links": [
+    [
+      8,
+      9,
+      0,
+      6,
+      3,
+      "LATENT"
+    ],
+    [
+      9,
+      6,
+      0,
+      10,
+      0,
+      "LATENT"
+    ],
+    [
+      11,
+      10,
+      0,
+      11,
+      0,
+      "IMAGE"
+    ],
+    [
+      92,
+      70,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      175,
+      105,
+      0,
+      126,
+      1,
+      "MODEL"
+    ],
+    [
+      179,
+      126,
+      0,
+      128,
+      0,
+      "MODEL"
+    ],
+    [
+      180,
+      128,
+      0,
+      6,
+      0,
+      "MODEL"
+    ],
+    [
+      183,
+      130,
+      0,
+      126,
+      0,
+      "MODEL"
+    ],
+    [
+      184,
+      131,
+      0,
+      6,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      185,
+      132,
+      0,
+      6,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      188,
+      10,
+      0,
+      134,
+      0,
+      "IMAGE"
+    ],
+    [
+      189,
+      136,
+      0,
+      131,
+      0,
+      "CHATGLM3MODEL"
+    ],
+    [
+      190,
+      136,
+      0,
+      132,
+      0,
+      "CHATGLM3MODEL"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9229599817706413,
+      "offset": [
+        -811.1596465054535,
+        269.87924603579
+      ]
+    }
+  },
+  "version": 0.4
+}

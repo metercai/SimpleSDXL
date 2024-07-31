@@ -1,0 +1,404 @@
+{
+  "last_node_id": 16,
+  "last_link_id": 19,
+  "nodes": [
+    {
+      "id": 11,
+      "type": "VAELoader",
+      "pos": [
+        1323,
+        240
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            12
+          ],
+          "shape": 3,
+          "label": "VAE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "sdxl_fp16.vae.safetensors"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [
+        200,
+        636
+      ],
+      "size": {
+        "0": 273.5273742675781,
+        "1": 149.5546417236328
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "Text encoding takes the most VRAM, quantization can reduce that a lot.\n\nApproximate values I have observed:\nfp16 - 12 GB\nquant8 - 8-9 GB\nquant4 - 4-5 GB\n\nquant4 reduces the quality quite a bit, 8 seems fine"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": [
+        1366,
+        468
+      ],
+      "size": [
+        268.739540100097,
+        301.608847878196
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13,
+          "label": "images"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [
+        1368,
+        369
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 18,
+          "label": "samples"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 12,
+          "slot_index": 1,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13,
+            19
+          ],
+          "shape": 3,
+          "slot_index": 0,
+          "label": "IMAGE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 13,
+      "type": "DownloadAndLoadChatGLM3",
+      "pos": [
+        206,
+        522
+      ],
+      "size": {
+        "0": 274.5334167480469,
+        "1": 58
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "links": [
+            14
+          ],
+          "shape": 3,
+          "label": "chatglm3_model"
+        }
+      ],
+      "title": "llms_model",
+      "properties": {
+        "Node name for S&R": "DownloadAndLoadChatGLM3"
+      },
+      "widgets_values": [
+        "quant4"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "DownloadAndLoadKolorsModel",
+      "pos": [
+        201,
+        368
+      ],
+      "size": {
+        "0": 315,
+        "1": 82
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "kolors_model",
+          "type": "KOLORSMODEL",
+          "links": [
+            16
+          ],
+          "shape": 3,
+          "slot_index": 0,
+          "label": "kolors_model"
+        }
+      ],
+      "title": "kolors_model",
+      "properties": {
+        "Node name for S&R": "DownloadAndLoadKolorsModel"
+      },
+      "widgets_values": [
+        "Kwai-Kolors/Kolors",
+        "fp16"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "KolorsTextEncode",
+      "pos": [
+        519,
+        529
+      ],
+      "size": {
+        "0": 457.28936767578125,
+        "1": 225.28656005859375
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 14,
+          "slot_index": 0,
+          "label": "chatglm3_model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "kolors_embeds",
+          "type": "KOLORS_EMBEDS",
+          "links": [
+            17
+          ],
+          "shape": 3,
+          "slot_index": 0,
+          "label": "kolors_embeds"
+        }
+      ],
+      "title": "prompt_negative_prompt",
+      "properties": {
+        "Node name for S&R": "KolorsTextEncode"
+      },
+      "widgets_values": [
+        "cinematic photograph of an astronaut riding a horse in space ",
+        "",
+        1
+      ]
+    },
+    {
+      "id": 14,
+      "type": "KolorsSampler",
+      "pos": [
+        1011,
+        371
+      ],
+      "size": {
+        "0": 315,
+        "1": 266
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "kolors_model",
+          "type": "KOLORSMODEL",
+          "link": 16,
+          "label": "kolors_model"
+        },
+        {
+          "name": "kolors_embeds",
+          "type": "KOLORS_EMBEDS",
+          "link": 17,
+          "label": "kolors_embeds"
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": null,
+          "label": "latent"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            18
+          ],
+          "shape": 3,
+          "slot_index": 0,
+          "label": "latent"
+        }
+      ],
+      "title": "main_sampler",
+      "properties": {
+        "Node name for S&R": "KolorsSampler"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1000102404233412,
+        "fixed",
+        25,
+        5,
+        "EulerDiscreteScheduler",
+        1
+      ]
+    },
+    {
+      "id": 16,
+      "type": "SaveImageWebsocket",
+      "pos": [
+        1734,
+        463
+      ],
+      "size": {
+        "0": 210,
+        "1": 26
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19,
+          "label": "images"
+        }
+      ],
+      "title": "output_image",
+      "properties": {
+        "Node name for S&R": "SaveImageWebsocket"
+      }
+    }
+  ],
+  "links": [
+    [
+      12,
+      11,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      13,
+      10,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      13,
+      0,
+      12,
+      0,
+      "CHATGLM3MODEL"
+    ],
+    [
+      16,
+      6,
+      0,
+      14,
+      0,
+      "KOLORSMODEL"
+    ],
+    [
+      17,
+      12,
+      0,
+      14,
+      1,
+      "KOLORS_EMBEDS"
+    ],
+    [
+      18,
+      14,
+      0,
+      10,
+      0,
+      "LATENT"
+    ],
+    [
+      19,
+      10,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.1,
+      "offset": {
+        "0": -362.7260457819157,
+        "1": -150.47177401455986
+      }
+    }
+  },
+  "version": 0.4
+}

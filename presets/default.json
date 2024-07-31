@@ -37,6 +37,7 @@
         "Fooocus Sharp"
     ],
     "default_aspect_ratio": "1152*896",
+    "default_overwrite_step": -1,
     "checkpoint_downloads": {
         "juggernaut-X-RunDiffusion-NSFW.safetensors": "https://huggingface.co/RunDiffusion/Juggernaut-X-v10/resolve/main/Juggernaut-X-RunDiffusion-NSFW.safetensors"
     },

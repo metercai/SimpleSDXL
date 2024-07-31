@@ -1,0 +1,5 @@
+diffusers>=0.28.2
+transformers>=4.26.1
+sentencepiece
+accelerate
+cpm-kernels

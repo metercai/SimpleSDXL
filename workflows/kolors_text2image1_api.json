@@ -1,0 +1,108 @@
+{
+  "3": {
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "model": "Kwai-Kolors/Kolors",
+      "precision": "fp16"
+    },
+    "class_type": "DownloadAndLoadKolorsModel",
+    "_meta": {
+      "title": "kolors_model"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": [
+        "14",
+        0
+      ],
+      "vae": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "11": {
+    "inputs": {
+      "vae_name": "sdxl_fp16.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "12": {
+    "inputs": {
+      "prompt": "cinematic photograph of an astronaut riding a horse in space ",
+      "negative_prompt": "",
+      "num_images_per_prompt": 1,
+      "chatglm3_model": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "KolorsTextEncode",
+    "_meta": {
+      "title": "prompt_negative_prompt"
+    }
+  },
+  "13": {
+    "inputs": {
+      "precision": "quant4"
+    },
+    "class_type": "DownloadAndLoadChatGLM3",
+    "_meta": {
+      "title": "llms_model"
+    }
+  },
+  "14": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "seed": 1000102404233412,
+      "steps": 25,
+      "cfg": 5,
+      "scheduler": "EulerDiscreteScheduler",
+      "denoise_strength": 1,
+      "kolors_model": [
+        "6",
+        0
+      ],
+      "kolors_embeds": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "KolorsSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "output_image"
+    }
+  }
+}

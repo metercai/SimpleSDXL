@@ -11,6 +11,7 @@ import re
 import args_manager
 import random
 import modules.constants as constants
+import modules.meta_parser as meta_parser
 import enhanced.all_parameters as ads
 import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
@@ -18,7 +19,7 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.hydit_task as hydit_task
 import enhanced.comfy_task as comfy_task
-from enhanced.simpleai import models_info, models_info_muid, refresh_models_info
+from enhanced.simpleai import comfyd, models_info, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
 
@@ -59,13 +60,11 @@ def get_preset_name_list():
     return name_list
 
 def is_models_file_absent(preset_name):
-    refresh_models_info()
+    #refresh_models_info()
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
             config_preset = json.load(json_file)
-        if config_preset["default_model"] and config_preset["default_model"] == 'hydit_v1.1_fp16.safetensors':
-            return False
         if config_preset["default_model"] and config_preset["default_model"] != 'None':
             if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
                 return True
@@ -137,7 +136,7 @@ def get_system_message():
 
 
 def preset_instruction():
-    head = "<div style='max-width:100%; max-height:128px; overflow:hidden'>"
+    head = "<div style='max-width:100%; max-height:98px; overflow:hidden'>"
     foot = "</div>"
     body = '预置包简介:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     body += f'<iframe id="instruction" src="{get_preset_inc_url()}" frameborder="0" scrolling="no" width="100%"></iframe>'
@@ -266,29 +265,31 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({f'{modules.flags.backend_engines[0]}_preset_value': ['', config.default_performance, config.default_styles, config.default_cfg_scale, config.default_overwrite_step, config.default_sampler, config.default_scheduler, config.default_base_model_name]})
     state_params.update({f'{modules.flags.backend_engines[1]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 6, config.default_overwrite_step, hydit_task.default_sampler, '', '']})
     state_params.update({f'{modules.flags.backend_engines[2]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 4.5, 28, 'dpmpp_2m', 'sgm_uniform', comfy_task.get_default_base_SD3m_name()]})
+    state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 5, 25, '', comfy_task.default_kolors_scheduler, '']})
     state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
     state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.sd3_default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.default_aspect_ratio})
+    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.default_aspect_ratio})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_mask_upload_checkbox)]
+    results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_advanced_masking_checkbox)]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
-    results += [gr.update(visible=True if preset_url else False)]
+    results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
     
     return results
 
 def get_preset_inc_url(preset_name='blank'):
-    if preset_name!='blank':
-        preset_name = f'{preset_name}.inc'
+    preset_name = f'{preset_name}.inc'
     preset_inc_path = os.path.abspath(f'./presets/html/{preset_name}.html')
+    blank_inc_path = os.path.abspath(f'./presets/html/blank.inc.html')
     if os.path.exists(preset_inc_path):
         return f'{args_manager.args.webroot}/file={preset_inc_path}'
     else:
-        return '' 
+        return f'{args_manager.args.webroot}/file={blank_inc_path}'
 
 def refresh_nav_bars(state_params):
     state_params.update({"__nav_name_list": get_preset_name_list()})
@@ -311,17 +312,24 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox):
     if "__nav_name_list" not in state_params.keys():
         state_params.update({"__nav_name_list": get_preset_name_list()})
     superprompter.remove_superprompt()
     remove_tokenizer()
+    backend_params.update({
+        'backfill_prompt': backfill_prompt,
+        'translation_methods': translation_methods,
+        'comfyd_active_checkbox': comfyd_active_checkbox,
+        'preset': state_params["__preset"],
+        })
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)
     results += [gr.update()] * (9-preset_nums)
+    results += [backend_params]
     state_params["gallery_state"]='preview'
     return results
 
@@ -344,7 +352,6 @@ def process_after_generation(state_params):
         gallery_util.refresh_images_catalog(output_index, True)
         gallery_util.parse_html_log(output_index, True)
     
-    refresh_models_info() 
     return results
 
 
@@ -362,13 +369,15 @@ def down_absent_model(state_params):
     state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
     return gr.update(visible=False), state_params
 
-def reset_params_for_preset(prompt, negative_prompt, state_params):
+
+def reset_layout_params(prompt, negative_prompt, state_params, is_generating, inpaint_mode, comfyd_active_checkbox):
     global system_message, preset_down_note_info
 
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * 59 + [state_params] + [gr.update()]
+        return [gr.update()] * 42 + [state_params] + [gr.update()] * 55
+        #return [gr.update()] * 61 + [state_params] + [gr.update()] * 3
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -376,36 +385,42 @@ def reset_params_for_preset(prompt, negative_prompt, state_params):
     state_params.update({"__preset": preset})
     state_params.update({"__prompt": prompt})
     state_params.update({"__negative_prompt": negative_prompt})
-    results = reset_context(state_params)
+
+    config_preset = config.try_get_preset_content(preset)
+    preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    #print(f'preset_prepared:{preset_prepared}')
+    
+    engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
+    if comfyd_active_checkbox:
+        comfyd.stop()
+    
+    preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
+    state_params.update({"__preset_url":preset_url})
+
+    results = refresh_nav_bars(state_params)
+    results += meta_parser.switch_layout_template(preset_prepared, state_params, preset_url)
+    results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
+
     return results
 
 
-def reset_context(state_params):
+def reset_context(state_params, is_generating, inpaint_mode):
     global system_message, nav_id_list, nav_preset_html
 
     preset = state_params.get("__preset")
     
     # load preset config
-    config_preset = {}
-    if isinstance(preset, str):
-        preset_path = os.path.abspath(f'./presets/{preset}.json')
-        try:
-            if os.path.exists(preset_path):
-                with open(preset_path, "r", encoding="utf-8") as json_file:
-                    config_preset = json.load(json_file)
-            else:
-                raise FileNotFoundError
-        except Exception as e:
-            print(f'Load preset [{preset_path}] failed')
-            print(e)
-    if 'reference' in config_preset.keys():
-        preset_url = config_preset["reference"]
-    else:
-        if 'reference' in config.config_dict.keys():
-            config.config_dict.pop("reference")
-        preset_url = get_preset_inc_url(preset)
+    import modules.meta_parser as meta_parser
+    config_preset = config.try_get_preset_content(preset)
+    preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    print(f'preset_prepared:{preset_prepared}')
+    preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
-
+    
+    results = refresh_nav_bars(state_params)
+    results += meta_parser.switch_layout_template(preset_preparedi, state_params)
+    results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
+    
     info_preset = {}
     keys = config_preset.keys()
     info_preset.update({
@@ -425,9 +440,9 @@ def reset_context(state_params):
     get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
     backend_engine = get_preset_value('default_backend', 'SDXL')
     aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
-    if backend_engine == modules.flags.backend_engines[2] and config.add_ratio(aspect_ratio) not in config.sd3_available_aspect_ratios:
-        width, height = config.sd3_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
-    elif backend_engine == modules.flags.backend_engines[1] and config.add_ratio(aspect_ratio) not in hydit_task.available_aspect_ratios:
+    if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.common_available_aspect_ratios:
+        width, height = config.common_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
+    elif backend_engine == modules.flags.backend_engines[1] and aspect_ratio not in hydit_task.available_aspect_ratios:
         width, height = hydit_task.default_aspect_ratio.replace('×', ' ').split(' ')[:2]
     else:
         width, height = aspect_ratio.split('*')
@@ -486,7 +501,11 @@ def reset_context(state_params):
     if "default_loras_max_weight" in keys:
         ads_params.update({"loras_max_weight": f'{config_preset["default_loras_max_weight"]}'})
     if "default_freeu" in keys:
-        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})    
+        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})
+    if "default_vae" in keys:
+        ads_params.update({"vae": f'{config_preset["default_vae"]}'})
+    if "default_clip_skip" in keys:
+        ads_params.update({"clip_skip": f'{config_preset["default_clip_skip"]}'})
     if len(ads_params.keys())>0:
         info_preset.update({"Advanced_parameters": ads_params})
     
@@ -497,6 +516,21 @@ def reset_context(state_params):
 #"example_inpaint_prompts":[]
     info_preset.update({"task_from": f'preset:{preset}'})
     
+    disvisible = []
+    disinteractive = []
+    if 'default_engine' in config_preset:
+        if "disvisible" in config_preset['default_engine']:
+            disvisible = config_preset['default_engine']['disvisible']
+        if "disinteractive" in config_preset['default_engine']:
+            disinteractive = config_preset['default_engine']['disinteractive']
+        if "available_aspect_ratios_selection" in config_preset['default_engine']:
+            info_preset.update({"available_aspect_ratios_selection": config_preset['default_engine']['available_aspect_ratios_selection']})
+        if "available_scheduler_name" in config_preset['default_engine']:
+            info_preset.update({"available_scheduler_name": config_preset['default_engine']['available_scheduler_name']})
+        if "available_sampler_name" in config_preset['default_engine']:
+            info_preset.update({"available_sampler_name": config_preset['default_engine']['available_sampler_name']})
+    info_preset.update({"disvisible": disvisible})
+    info_preset.update({"disinteractive": disinteractive})
     get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
     # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
     update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
@@ -504,12 +538,9 @@ def reset_context(state_params):
     results = reset_params(check_prepare_for_reset(info_preset))
     results += [gr.update(visible=True if preset_url else False)]
 
-    if "default_image_number" in keys or "default_max_image_number" in keys:
-        results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
-    else:
-        results += [gr.update()]
+    results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
     
-    results += update_in_keys("inpaint_mask_upload_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
+    results += update_in_keys("inpaint_advanced_masking_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
     results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
     
     state_params.update({"__message": system_message})
@@ -518,19 +549,25 @@ def reset_context(state_params):
     results += update_in_keys("output_format")
     results += [state_params]
    
-    engine_preset = state_params[f'{backend_engine}_preset_value']
-    engine_preset[1] = get_preset_value('default_performance', engine_preset[1])
-    engine_preset[2] = get_preset_value('default_styles', engine_preset[2])
-    engine_preset[3] = float(get_preset_value('default_cfg_scale', engine_preset[3]))
-    engine_preset[4] = int(get_preset_value('default_overwrite_step', engine_preset[4]))
-    engine_preset[5] = get_preset_value('default_sampler', engine_preset[5])
-    engine_preset[6] = get_preset_value('default_scheduler', engine_preset[6])
-    engine_preset[7] = get_preset_value('default_model', engine_preset[7])
-    state_params[f'{backend_engine}_preset_value'] = engine_preset
-    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
-    engine_aspect_ratio = engine_aspect_ratio if 'default_aspect_ratio' not in keys else config.add_ratio(config_preset["default_aspect_ratio"])
-    state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
-    results += [backend_engine]
+
+    if 'input_image_checkbox' in disinteractive:
+        results += [gr.update(interactive=False, value=False)]
+    else:
+        results += [gr.update(interactive=True)]
+
+    if 'enhance_checkbox' in disinteractive:
+        results += [gr.update(interactive=False, value=False)]
+    else:
+        results += [gr.update(interactive=True)]
+    
+    params_backend = {}
+    if 'default_engine' in config_preset:
+        if 'backend_engine' in config_preset['default_engine']:
+            params_backend.update({'backend_engine': config_preset['default_engine']['backend_engine']})
+        if 'backend_params' in config_preset['default_engine']:
+            params_backend.update(config_preset['default_engine']['backend_params'])
+    results += [params_backend]
+    
     system_message = 'system message was displayed!'
     return results
 
@@ -659,6 +696,8 @@ def reset_params(metadata):
     loras_min_weight = int(get_ads_value_or_default('loras_min_weight'))
     loras_max_weight = int(get_ads_value_or_default('loras_max_weight'))
     freeu_b1, freeu_b2, freeu_s1, freeu_s2 = [float(f.strip()) for f in get_ads_value_or_default('freeu')[1:-1].split(',')]
+    clip_skip = int(get_ads_value_or_default('clip_skip'))
+    vae = get_ads_value_or_default('vae')
 
     styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
     if styles == ['']:
@@ -669,6 +708,8 @@ def reset_params(metadata):
 # overwrite_width, overwrite_height, refiner_swap_method
 
     update_not_null = lambda x: gr.update(value=x) if x else gr.update()
+    is_interactive = lambda x: x not in metadata['disinteractive']
+    is_visible = lambda x: x not in metadata['disvisible']
     results = []
     results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
     if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
@@ -679,17 +720,35 @@ def reset_params(metadata):
         results += [gr.update(value=copy.deepcopy(styles), choices=copy.deepcopy(style_sorter.all_styles))]
     else:
         results += [gr.update(value=copy.deepcopy(styles))]
-    results += [gr.update(value=metadata['Performance']),  gr.update(value=config.add_ratio(aspect_ratios)), gr.update(value=float(metadata['Sharpness'])), \
-            gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model']), gr.update(value=metadata['Refiner Model']), \
-            gr.update(value=float(metadata['Refiner Switch'])), gr.update(value=metadata['Sampler']), gr.update(value=metadata['Scheduler']), \
-            gr.update(value=adaptive_cfg), gr.update(value=overwrite_step), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
+    results += [gr.update(value=metadata['Performance'], visible=is_visible('performance_selection'), interactive=is_interactive('performance_selection'))]
+    available_aspect_ratios_template = 'SDXL'
+    if 'available_aspect_ratios_selection' in metadata:
+        available_aspect_ratios_template = metadata['available_aspect_ratios_selection']
+    aspect_ratios_reset = config.add_ratio(aspect_ratios) + f',{available_aspect_ratios_template}'
+    results += [aspect_ratios_reset]
+    #results += [gr.Radio.update(value=config.add_ratio(aspect_ratios)]
+
+    results += [gr.update(value=float(metadata['Sharpness'])), gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model'], interactive=is_interactive('base_model')), gr.update(value=metadata['Refiner Model'], interactive=is_interactive('refiner_model')), gr.update(value=float(metadata['Refiner Switch']))]
+    if 'available_sampler_name' in metadata:
+        results += [gr.update(value=metadata['Sampler'], choices=metadata['available_sampler_name'], visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
+    else:
+        results += [gr.update(value=metadata['Sampler'], choices=modules.flags.sampler_list, visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
+    if 'available_scheduler_name' in metadata:
+        results += [gr.update(value=metadata['Scheduler'], choices=metadata['available_scheduler_name'], visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
+    else:
+        results += [gr.update(value=metadata['Scheduler'], choices=modules.flags.scheduler_list, visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
+
+    results += [gr.update(value=adaptive_cfg), gr.update(value=overwrite_step, interactive=is_interactive('overwrite_step')), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
     for i, (n, v) in enumerate(metadata['loras']):
-        results += [gr.update(value=True), gr.update(value=n), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight)]
+        results += [gr.update(value=True, interactive=is_interactive('loras')), gr.update(value=n, interactive=is_interactive('loras')), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight, interactive=is_interactive('loras'))]
     results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
     if "Seed" in metadata.keys():
         results += [gr.update(value=False), gr.update(value=metadata['Seed'])]
     else:
         results += [gr.update(value=True), gr.update()]
+
+    results += [gr.update(value=clip_skip), gr.update(value=vae)]
+
     if get_ads_value_exist('freeu'):
         results += [gr.update(value=True)]
     else:
