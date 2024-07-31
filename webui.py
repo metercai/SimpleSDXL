@@ -695,7 +695,7 @@ with shared.gradio_root:
                         aspect_ratios_selection = gr.Textbox(value='', visible=False) 
                         aspect_ratios_selections = []
                         for template in flags.aspect_ratios_templates:
-                            aspect_ratios_selections.append(gr.Radio(label='Aspect Ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
+                            aspect_ratios_selections.append(gr.Radio(label='Aspect Ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
                         
                         for aspect_ratios_select in aspect_ratios_selections:
                             aspect_ratios_select.change(lambda x: x, inputs=aspect_ratios_select, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
@@ -1062,7 +1062,7 @@ with shared.gradio_root:
             def toggle_image_tab(tab, styles):
                 result = []
                 if 'layer' in tab:
-                    comfyd.start()
+                    #comfyd.start()
                     result = [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion])]
                     result += [gr.update(value=False, interactive=False)]
                     result += [gr.update(interactive=False)] * 17

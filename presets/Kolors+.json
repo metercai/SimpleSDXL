@@ -42,11 +42,9 @@
     "default_styles": [],
     "default_aspect_ratio": "1280*960",
     "default_overwrite_step": 8,
-    "checkpoint_downloads": {
-        "juggernaut-X-RunDiffusion-NSFW.safetensors": "MUID:039986f26f01"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {
-        "sd_xl_offset_example-lora_1.0.safetensors": "MUID:8e3e833226b3"
+        "Hyper-SDXL-8steps-lora.safetensors": "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SDXL-8steps-lora.safetensors"
     }
 }

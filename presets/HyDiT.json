@@ -41,10 +41,8 @@
     "default_styles": [],
     "default_aspect_ratio": "1024*1024",
     "checkpoint_downloads": {
-        "juggernaut-X-RunDiffusion-NSFW.safetensors": "MUID:039986f26f01"
+        "hunyuan_dit_1.2.safetensors": "https://huggingface.co/comfyanonymous/hunyuan_dit_comfyui/resolve/main/hunyuan_dit_1.2.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {
-        "sd_xl_offset_example-lora_1.0.safetensors": "MUID:8e3e833226b3"
-    }
+    "lora_downloads": {}
 }
