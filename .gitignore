@@ -94,3 +94,4 @@ comfy/output/
 comfy/temp/
 comfy/extra_model_paths.yaml
 comfy/user/default/*.json
+hash_cache.txt
