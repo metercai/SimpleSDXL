@@ -1,6 +1,6 @@
-## SimpleSDXL2 - 扩展后端，超越Fooocus，6G显存使用国产混元/可图和SD3出图。
-<div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/92b6c7d5-fc3e-4407-b03e-5c87d149d503"></div>
-
+## SimpleSDXL2 - 最强中文创意生图平台，6G显存可用国产混元、可图和SD3m！
+<div align=center><img src="https://github.com/user-attachments/assets/75786e42-60ec-4e02-b802-51bd82cff634"></div>
+    
 ## 🔔 最新更新 / Update
 - [2024.07.31] <b>优化了新架构，更稳定，更快速。新增对快手可图模型的支持，使SimpleSDXL2除SDXL外，以6G显卡显存同时支持: 小马v6/Playground-v2.5/SD3m/混元/可图等多种模型出图，适用更多场景。同步主线v2.5.2，并对修图界面进行优化和适配，使之更容易被中文用户理解和使用。</b>
 - [2024.06.30] 扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。
@@ -23,18 +23,21 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 - 进入SimpleSDXL2_win目录，双击启动脚本 run_SimpleSDXL.bat，完成第一次运行。
 - 第一次运行后，在SimpleSDXL目录下会生成 config.txt文件，可以自行修改和添加模型路径。
 - 如果模型根目录和出图目录不是预设的示范路径和名称，需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
+<img width="600" align=center src="https://github.com/user-attachments/assets/4c039129-b59f-47ef-825b-863c5ea24705">
+
 
 ### 如果对旧版情有独钟，可选择不升级，运行旧版
 - SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.zip (30G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.zip)
 
 ## 什么是SimpleSDXL？/ What's SimpleSDXL?
+
 - **化繁为简** AI的本质应该是化繁为简，让操作更简洁，让想法更易达成。SimpleSDXL保持Fooocus的易用性，以SDXL模型生态为核心，朝着开源可控，简洁易用，功能完善的方向更进一步。
 - **中文适配** 中文环境与英语环境有很多差异。不仅仅在语言文字上，包括思维习惯、操作方式和网络环境都有很多不同。让中文用户使用更简单，用的更爽，也是SimpleSDXL
 的原始初衷。
 - **场景定制** 文生图和图生图有非常多的使用场景，需要更好的配置定制能力。SimpleSDXL以**预置包和嵌参图片**为基础，面向场景提升Fooocus的**开放性和可定制性**，发挥出SDXL的强大能力。
 
 ## SmipleSDXL2 全新架构 / New Architecture
-<img width="600" align=center src="https://github.com/metercai/SimpleSDXL/assets/5652458/364df3ce-3420-4cec-b26e-f315c76b4c1e">
+<img width="500" align=center src="https://github.com/metercai/SimpleSDXL/assets/5652458/364df3ce-3420-4cec-b26e-f315c76b4c1e">
 
 ## 对比Fooocus的增强特色 / Enhanced features of Fooocus
 在Fooocus基础上增强功能，可无缝升级，同步迭代，并行使用。而且经过了手机适配，PC和手机也可同步操作。<br> 
