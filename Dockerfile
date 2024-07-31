@@ -10,7 +10,7 @@ RUN apt-get update -y && \
 COPY enhanced/libs/* /enhanced/libs/
 COPY requirements_docker.txt requirements_versions.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements_docker.txt -r /tmp/requirements_versions.txt && \
-	rm -f /tmp/requirements_docker.txt /tmp/requirements_versions.txt
+	rm -r f /tmp/requirements_docker.txt /tmp/requirements_versions.txt /enhanced/libs
 RUN pip install --no-cache-dir xformers==0.0.23 --no-dependencies
 RUN curl -fsL -o /usr/local/lib/python3.10/dist-packages/gradio/frpc_linux_amd64_v0.2 https://cdn-media.huggingface.co/frpc-gradio-0.2/frpc_linux_amd64 && \
 	chmod +x /usr/local/lib/python3.10/dist-packages/gradio/frpc_linux_amd64_v0.2

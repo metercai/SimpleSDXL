@@ -1,0 +1,6 @@
+timm>=0.6.13
+sentencepiece>=0.1.97
+transformers>=4.34.1
+accelerate>=0.23.0
+einops>=0.6.0
+protobuf>=3.20.3

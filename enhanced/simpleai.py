@@ -4,19 +4,20 @@ import json
 import gradio as gr
 from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
-from simpleai_base.models_info import get_models_info, refresh_models_info_from_path, models_info_path, sync_model_info
+from simpleai_base.models_info import get_models_info, get_modelsinfo, refresh_models_info_from_path, models_info_path, sync_model_info
 
 simpleai_config = config
 token = None
 sysinfo = {"location": "CN"}
 #comfyd.echo_off = False
 args_comfyd = [[]]
-
+modelsinfo = None #get_modelsinfo()
 models_info, models_info_muid, models_info_file = get_models_info()
 
 def refresh_models_info():
-    global models_info, models_info_muid, models_info_file
-    refresh_models_info_from_path()
+    global modelsinfo, models_info, models_info_muid, models_info_file
+    #refresh_models_info_from_path()
+    modelsinfo = get_modelsinfo()
     models_info, models_info_muid, models_info_file = get_models_info()
 
 def reset_simpleai_args(launch_token, launch_sysinfo):
@@ -29,6 +30,7 @@ def reset_simpleai_args(launch_token, launch_sysinfo):
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']]
+    comfyd.comfyd_args = args_comfyd
 
 identity_note = '将手机号与身份私钥绑定，获得固定的可信数字身份标识，就可以存储、找回和分享非公开资源，也可以具备云端登录和算力共享的能力，详情可见。'
 

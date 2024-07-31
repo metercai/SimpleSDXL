@@ -927,63 +927,9 @@ class Utils:
                 m for m in source_model_zoo_json if tags_filter in m["tags"]]
 
         return source_model_zoo_json
+        
 
 
 modelscope_models_map = {
-    "llama3": {
-        "Meta-Llama-3-8B-Instruct.Q4_K_M.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=Meta-Llama-3-8B-Instruct-GGUF%2FMeta-Llama-3-8B-Instruct.Q4_K_M.gguf",
-            "output": "modelscope_models/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf",
-            "SHA256": "647a2b64cbcdbe670432d0502ebb2592b36dd364d51a9ef7a1387b7a4365781f",
-        },
-    },
-    "llava": {
-        "ggml_bakllava-1/ggml-model-q5_k.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=ggml_bakllava-1%2Fggml-model-q5_k.gguf",
-            "output": "modelscope_models/ggml_bakllava-1/ggml-model-q5_k.gguf",
-            "SHA256": "c93de1376be9b6977cc94d252a3d165d6059e07b528de0fa762534d9599b27d6",
-        },
-        "ggml_llava-v1.5-7b/ggml-model-q4_k.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=ggml_llava-v1.5-7b%2Fggml-model-q4_k.gguf",
-            "output": "modelscope_models/ggml_llava-v1.5-7b/ggml-model-q4_k.gguf",
-            "SHA256": "7ac9c2f7b8d76cc7f3118cdf0953ebab7a7a9b12bad5dbe237219d2ab61765ea",
-        },
-        "ggml_bakllava-1/mmproj-model-f16.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=ggml_bakllava-1%2Fmmproj-model-f16.gguf",
-            "output": "modelscope_models/ggml_bakllava-1/mmproj-model-f16.gguf",
-            "SHA256": "2e467eba710002839e0966d5e329942bb836eabd4e787bc713b07eff1d8ea13b"
-        },
-        "ggml_llava-v1.5-7b/mmproj-model-f16.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=ggml_llava-v1.5-7b%2Fmmproj-model-f16.gguf",
-            "output": "modelscope_models/ggml_llava-v1.5-7b/mmproj-model-f16.gguf",
-            "SHA256": "b7c8ff0f58fca47d28ba92c4443adf8653f3349282cb8d9e6911f22d9b3814fe"
-        },
-        "llava-v1.6-vicuna-13b-gguf/llava-v1.6-vicuna-13b.Q5_K_M.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=llava-v1.6-vicuna-13b-gguf%2Fllava-v1.6-vicuna-13b.Q5_K_M.gguf",
-            "output": "modelscope_models/llava-v1.6-vicuna-13b-gguf/llava-v1.6-vicuna-13b.Q5_K_M.gguf",
-            "SHA256": "fac8ecd642ac1c2dd8ef8fb6d6daac349293051b468f5fdc21921b94dfb2916a",
-        },
-        "llava-v1.6-vicuna-13b-gguf/mmproj-model-f16.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=llava-v1.6-vicuna-13b-gguf%2Fmmproj-model-f16.gguf",
-            "output": "modelscope_models/llava-v1.6-vicuna-13b-gguf/mmproj-model-f16.gguf",
-            "SHA256": "9860fbc162d6df40d12f32211aed11ab4826e16e473e6fff595496b9943872e2"
-        },
-        "llava-1.6-mistral-7b-gguf/llava-v1.6-mistral-7b.Q5_K_M.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=llava-1.6-mistral-7b-gguf%2Fllava-v1.6-mistral-7b.Q5_K_M.gguf",
-            "output": "modelscope_models/llava-1.6-mistral-7b-gguf/llava-v1.6-mistral-7b.Q5_K_M.gguf",
-            "SHA256": "b1d37fc65ecb80aa8f1ce185bf4d7605bc3c5cc5bcc77a160c3a1b0377631112",
-        },
-        "llava-1.6-mistral-7b-gguf/mmproj-model-f16.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=llava-1.6-mistral-7b-gguf%2Fmmproj-model-f16.gguf",
-            "output": "modelscope_models/llava-1.6-mistral-7b-gguf/mmproj-model-f16.gguf",
-            "SHA256": "00205ee8a0d7a381900cd031e43105f86aa0d8c07bf329851e85c71a26632d16",
-        },
-    },
-    "phi3": {
-        "Phi-3-mini-4k-instruct-q4.gguf": {
-            "url": "https://www.modelscope.cn/api/v1/models/wailovet/MinusZoneAIModels/repo?Revision=master&FilePath=Phi-3-mini-4k-instruct-gguf%2FPhi-3-mini-4k-instruct-q4.gguf",
-            "output": "modelscope_models/Phi-3-mini-4k-instruct-gguf/Phi-3-mini-4k-instruct-q4.gguf",
-            "SHA256": "1cd9a9df07350196623f93bf4829cf228959e07ad32f787b8fdd7f5956f5b9de"
-        }
-    },
+   
 }

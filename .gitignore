@@ -10,6 +10,7 @@ __pycache__
 *.partial
 *.onnx
 sorted_styles.json
+hash_cache.txt
 /input
 /cache
 /language/default.json
@@ -95,3 +96,4 @@ comfy/temp/
 comfy/extra_model_paths.yaml
 comfy/user/default/*.json
 hash_cache.txt
+comfy/custom_nodes/comfyui_controlnet_aux/config.yaml

@@ -19,7 +19,7 @@ args_parser.parser.add_argument("--disable-offload-from-vram", action="store_tru
 
 args_parser.parser.add_argument("--theme", type=str, help="Launches the UI with light or dark theme", default='dark')
 args_parser.parser.add_argument("--disable-image-log", action='store_true',
-                                help="Prevent writing images and logs to hard drive.")
+                                help="Prevent writing images and logs to the outputs folder.")
 
 args_parser.parser.add_argument("--disable-analytics", action='store_true',
                                 help="Disables analytics for Gradio.")
@@ -30,20 +30,25 @@ args_parser.parser.add_argument("--disable-metadata", action='store_true',
 args_parser.parser.add_argument("--disable-preset-download", action='store_true',
                                 help="Disables downloading models for presets", default=False)
 
-args_parser.parser.add_argument("--enable-describe-uov-image", action='store_true',
-                                help="Disables automatic description of uov images when prompt is empty", default=False)
+args_parser.parser.add_argument("--disable-enhance-output-sorting", action='store_true',
+                                help="Disables enhance output sorting for final image gallery.")
+
+args_parser.parser.add_argument("--enable-auto-describe-image", action='store_true',
+                                help="Enables automatic description of uov and enhance image when prompt is empty", default=True)
 
 args_parser.parser.add_argument("--always-download-new-model", action='store_true',
-                                help="Always download newer models ", default=False)
+                                help="Always download newer models", default=False)
+
+args_parser.parser.add_argument("--rebuild-hash-cache", help="Generates missing model and LoRA hashes.",
+                                type=int, nargs="?", metavar="CPU_NUM_THREADS", const=-1)
 
 args_parser.parser.add_argument("--dev", action='store_true',
                                 help="launch the dev branch", default=False)
-args_parser.parser.add_argument("--main", action='store_true',
-                                help="launch the Fooocus branch", default=False)
+args_parser.parser.add_argument("--models-root", type=str, help="Set the path root of models", default=None)
 args_parser.parser.add_argument("--config", type=str, help="Set the path of config.txt", default=None)
 
-args_parser.parser.add_argument("--enable-comfyd", action='store_true',
-                                help="auto start comfyd server at launch", default=False)
+args_parser.parser.add_argument("--disable-comfyd", action='store_true',
+                                help="disable auto start comfyd server at launch", default=False)
 
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,

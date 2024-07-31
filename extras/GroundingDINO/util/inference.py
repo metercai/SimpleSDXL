@@ -2,7 +2,7 @@ from typing import Tuple, List
 
 import ldm_patched.modules.model_management as model_management
 from ldm_patched.modules.model_patcher import ModelPatcher
-from modules.config import path_inpaint
+from modules.config import paths_inpaint
 from modules.model_loader import load_file_from_url
 
 import numpy as np
@@ -19,18 +19,20 @@ class GroundingDinoModel(Model):
         self.load_device = torch.device('cpu')
         self.offload_device = torch.device('cpu')
 
+    @torch.no_grad()
+    @torch.inference_mode()
     def predict_with_caption(
             self,
             image: np.ndarray,
             caption: str,
             box_threshold: float = 0.35,
             text_threshold: float = 0.25
-    ) -> Tuple[sv.Detections, List[str]]:
+    ) -> Tuple[sv.Detections, torch.Tensor, torch.Tensor, List[str]]:
         if self.model is None:
             filename = load_file_from_url(
-                url="https://huggingface.co/metercai/rembg/resolve/main/inpaint/groundingdino_swint_ogc.pth",
+                url="https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth",
                 file_name='groundingdino_swint_ogc.pth',
-                model_dir=path_inpaint)
+                model_dir=paths_inpaint[0])
             model = load_model(model_config_path=self.config_file, model_checkpoint_path=filename)
 
             self.load_device = model_management.text_encoder_device()
@@ -56,7 +58,7 @@ class GroundingDinoModel(Model):
             source_w=source_w,
             boxes=boxes,
             logits=logits)
-        return detections, phrases
+        return detections, boxes, logits, phrases
 
 
 def predict(

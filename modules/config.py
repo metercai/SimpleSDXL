@@ -24,7 +24,7 @@ def get_config_path(key, default_value):
         return os.path.abspath(default_value)
 
 wildcards_max_bfs_depth = 64
-config_path = get_config_path('config_path', "./config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
+config_path = get_config_path('config_path', "config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
 config_example_path = get_config_path('config_example_path', "config_modification_tutorial.txt")
 config_dict = {}
 always_save_keys = []
@@ -114,8 +114,11 @@ def get_presets():
         print('No presets found.')
         return presets
 
-    return presets + [f[:f.index('.json')] for f in os.listdir(preset_folder) if f.endswith('.json')]
+    return presets + [f[:f.index(".json")] for f in os.listdir(preset_folder) if f.endswith('.json')]
 
+def update_presets():
+    global available_presets
+    available_presets = get_presets()
 
 def try_get_preset_content(preset):
     if isinstance(preset, str):
@@ -142,12 +145,25 @@ def get_path_output() -> str:
     Checking output path argument and overriding default path.
     """
     global config_dict
-    path_output = get_dir_or_set_default('path_outputs', '../outputs/', make_directory=True)
+    path_output = 'outputs'
     if args_manager.args.output_path:
-        print(f'Overriding config value path_outputs with {args_manager.args.output_path}')
-        config_dict['path_outputs'] = path_output = args_manager.args.output_path
+        path_output = args_manager.args.output_path
+        path_output_abs = os.path.abspath(path_output)
+        config_dict['path_outputs'] = path_output_abs
+    path_output = get_dir_or_set_default('path_outputs', f'../{path_output}')
+    print(f'The path_output: {path_output}')
     return path_output
 
+def get_path_models_root() -> str:
+    global config_dict
+    models_root = 'models'
+    if args_manager.args.models_root:
+        models_root = args_manager.args.models_root
+        path_models_root = os.path.abspath(models_root)
+        config_dict['path_models_root'] = path_models_root
+    path_models_root = get_dir_or_set_default('path_models_root', f'../{models_root}')
+    print(f'The path_models_root: {path_models_root}')
+    return path_models_root
 
 def get_dir_or_set_default(key, default_value, as_array=False, make_directory=False):
     global config_dict, visited_keys, always_save_keys
@@ -193,26 +209,38 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     config_dict[key] = dp
     return dp
 
-
-paths_checkpoints = get_dir_or_set_default('path_checkpoints', ['../models/checkpoints/'], True)
-paths_loras = get_dir_or_set_default('path_loras', ['../models/loras/'], True)
-path_embeddings = get_dir_or_set_default('path_embeddings', '../models/embeddings/')
-path_vae_approx = get_dir_or_set_default('path_vae_approx', '../models/vae_approx/')
-path_vae = get_dir_or_set_default('path_vae', '../models/vae/')
-path_upscale_models = get_dir_or_set_default('path_upscale_models', '../models/upscale_models/')
-path_inpaint = get_dir_or_set_default('path_inpaint', '../models/inpaint/')
-path_controlnet = get_dir_or_set_default('path_controlnet', '../models/controlnet/')
-path_clip_vision = get_dir_or_set_default('path_clip_vision', '../models/clip_vision/')
-path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', '../models/prompt_expansion/fooocus_expansion')
-path_llms = get_dir_or_set_default('path_llms','../models/llms/')
+path_models_root = get_path_models_root()
+paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/'], True)
+paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/'], True)
+path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
+path_vae_approx = get_dir_or_set_default('path_vae_approx', f'{path_models_root}/vae_approx/')
+path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
+path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
+paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/'], True)
+path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
+path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
+paths_llms = get_dir_or_set_default('path_llms', [f'{path_models_root}/llms/'], True)
 path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
-path_safety_checker = get_dir_or_set_default('path_safety_checker', '../models/safety_checker/')
+path_safety_checker = get_dir_or_set_default('path_safety_checker', f'{path_models_root}/safety_checker/')
+path_sam = paths_inpaint[0]
 path_outputs = get_path_output()
-path_models_root = get_dir_or_set_default('path_models_root', '../models/')
-path_unet = get_dir_or_set_default('path_unet', '../models/unet')
-path_rembg = get_dir_or_set_default('path_rembg', '../models/rembg')
-path_layer_model = get_dir_or_set_default('path_layer_model', '../models/layer_model')
+path_unet = get_dir_or_set_default('path_unet', f'{path_models_root}/unet')
+path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
+path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
+paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
 
+from enhanced.simpleai import simpleai_config
+simpleai_config.path_models_root = path_models_root
+simpleai_config.paths_checkpoints = paths_checkpoints
+simpleai_config.paths_loras = paths_loras
+simpleai_config.path_embeddings = path_embeddings
+simpleai_config.paths_diffusers = paths_diffusers
+simpleai_config.paths_controlnet = paths_controlnet
+simpleai_config.paths_inpaint = paths_inpaint
+simpleai_config.paths_llms = paths_llms
+simpleai_config.path_unet = path_unet
+simpleai_config.path_vae = path_vae
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -317,6 +345,12 @@ temp_path_cleanup_on_launch = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
+default_engine = get_config_item_or_set_default(
+    key='default_engine',
+    default_value={},
+    validator=lambda x: isinstance(x, str),
+    expected_type=dict
+)
 default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',
     default_value='model.safetensors',
@@ -410,12 +444,36 @@ default_prompt = get_config_item_or_set_default(
 default_performance = get_config_item_or_set_default(
     key='default_performance',
     default_value=Performance.SPEED.value,
-    validator=lambda x: x in Performance.list(),
+    validator=lambda x: x in Performance.values(),
     expected_type=str
+)
+default_image_prompt_checkbox = get_config_item_or_set_default(
+    key='default_image_prompt_checkbox',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+default_enhance_checkbox = get_config_item_or_set_default(
+    key='default_enhance_checkbox',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
 )
 default_advanced_checkbox = get_config_item_or_set_default(
     key='default_advanced_checkbox',
     default_value=ads.default['advanced_checkbox'],
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+default_developer_debug_mode_checkbox = get_config_item_or_set_default(
+    key='default_developer_debug_mode_checkbox',
+    default_value=ads.default['developer_debug_mode_checkbox'],
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+default_image_prompt_advanced_checkbox = get_config_item_or_set_default(
+    key='default_image_prompt_advanced_checkbox',
+    default_value=False,
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
@@ -455,9 +513,15 @@ embeddings_downloads = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in x.items()),
     expected_type=dict
 )
+vae_downloads = get_config_item_or_set_default(
+    key='vae_downloads',
+    default_value={},
+    validator=lambda x: isinstance(x, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in x.items()),
+    expected_type=dict
+)
 available_aspect_ratios = get_config_item_or_set_default(
     key='available_aspect_ratios',
-    default_value=modules.flags.sdxl_aspect_ratios,
+    default_value=modules.flags.available_aspect_ratios[0],
     validator=lambda x: isinstance(x, list) and all('*' in v for v in x) and len(x) > 1,
     expected_type=list
 )
@@ -471,6 +535,71 @@ default_inpaint_engine_version = get_config_item_or_set_default(
     key='default_inpaint_engine_version',
     default_value=ads.default['inpaint_engine'],
     validator=lambda x: x in modules.flags.inpaint_engine_versions,
+    expected_type=str
+)
+default_selected_image_input_tab_id = get_config_item_or_set_default(
+    key='default_selected_image_input_tab_id',
+    default_value=modules.flags.default_input_image_tab,
+    validator=lambda x: x in modules.flags.input_image_tab_ids,
+    expected_type=str
+)
+default_uov_method = get_config_item_or_set_default(
+    key='default_uov_method',
+    default_value=modules.flags.disabled,
+    validator=lambda x: x in modules.flags.uov_list,
+    expected_type=str
+)
+default_controlnet_image_count = get_config_item_or_set_default(
+    key='default_controlnet_image_count',
+    default_value=4,
+    validator=lambda x: isinstance(x, int) and x > 0,
+    expected_type=int
+)
+default_ip_images = {}
+default_ip_stop_ats = {}
+default_ip_weights = {}
+default_ip_types = {}
+
+for image_count in range(default_controlnet_image_count):
+    image_count += 1
+    default_ip_images[image_count] = get_config_item_or_set_default(
+        key=f'default_ip_image_{image_count}',
+        default_value=None,
+        validator=lambda x: x is None or isinstance(x, str) and os.path.exists(x),
+        expected_type=str
+    )
+    default_ip_types[image_count] = get_config_item_or_set_default(
+        key=f'default_ip_type_{image_count}',
+        default_value=modules.flags.default_ip,
+        validator=lambda x: x in modules.flags.ip_list,
+        expected_type=str
+    )
+
+    default_end, default_weight = modules.flags.default_parameters[default_ip_types[image_count]]
+
+    default_ip_stop_ats[image_count] = get_config_item_or_set_default(
+        key=f'default_ip_stop_at_{image_count}',
+        default_value=default_end,
+        validator=lambda x: isinstance(x, float) and 0 <= x <= 1,
+        expected_type=float
+    )
+    default_ip_weights[image_count] = get_config_item_or_set_default(
+        key=f'default_ip_weight_{image_count}',
+        default_value=default_weight,
+        validator=lambda x: isinstance(x, float) and 0 <= x <= 2,
+        expected_type=float
+    )
+
+default_inpaint_advanced_masking_checkbox = get_config_item_or_set_default(
+    key='default_inpaint_advanced_masking_checkbox',
+    default_value=ads.default['inpaint_advanced_masking_checkbox'],
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+default_inpaint_method = get_config_item_or_set_default(
+    key='default_inpaint_method',
+    default_value=modules.flags.inpaint_option_default,
+    validator=lambda x: x in modules.flags.inpaint_options,
     expected_type=str
 )
 default_cfg_tsnr = get_config_item_or_set_default(
@@ -497,11 +626,10 @@ default_overwrite_switch = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, int),
     expected_type=int
 )
-
-default_inpaint_mask_upload_checkbox = get_config_item_or_set_default(
-    key='default_inpaint_mask_upload_checkbox',
-    default_value=ads.default['inpaint_mask_upload_checkbox'],
-    validator=lambda x: isinstance(x, bool)
+default_overwrite_upscale = get_config_item_or_set_default(
+    key='default_overwrite_upscale',
+    default_value=-1,
+    validator=lambda x: isinstance(x, numbers.Number)
 )
 
 example_inpaint_prompts = get_config_item_or_set_default(
@@ -512,8 +640,52 @@ example_inpaint_prompts = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, list) and all(isinstance(v, str) for v in x),
     expected_type=list
 )
+example_enhance_detection_prompts = get_config_item_or_set_default(
+    key='example_enhance_detection_prompts',
+    default_value=[
+        'face', 'eye', 'mouth', 'hair', 'hand', 'body'
+    ],
+    validator=lambda x: isinstance(x, list) and all(isinstance(v, str) for v in x),
+    expected_type=list
+)
+default_enhance_tabs = get_config_item_or_set_default(
+    key='default_enhance_tabs',
+    default_value=3,
+    validator=lambda x: isinstance(x, int) and 1 <= x <= 5,
+    expected_type=int
+)
+default_enhance_uov_method = get_config_item_or_set_default(
+    key='default_enhance_uov_method',
+    default_value=modules.flags.disabled,
+    validator=lambda x: x in modules.flags.uov_list,
+    expected_type=int
+)
+default_enhance_uov_processing_order = get_config_item_or_set_default(
+    key='default_enhance_uov_processing_order',
+    default_value=modules.flags.enhancement_uov_before,
+    validator=lambda x: x in modules.flags.enhancement_uov_processing_order,
+    expected_type=int
+)
+default_enhance_uov_prompt_type = get_config_item_or_set_default(
+    key='default_enhance_uov_prompt_type',
+    default_value=modules.flags.enhancement_uov_prompt_type_original,
+    validator=lambda x: x in modules.flags.enhancement_uov_prompt_types,
+    expected_type=int
+)
+default_sam_max_detections = get_config_item_or_set_default(
+    key='default_sam_max_detections',
+    default_value=0,
+    validator=lambda x: isinstance(x, int) and 0 <= x <= 10,
+    expected_type=int
+)
 default_black_out_nsfw = get_config_item_or_set_default(
     key='default_black_out_nsfw',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+default_save_only_final_enhanced_image = get_config_item_or_set_default(
+    key='default_save_only_final_enhanced_image',
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
@@ -538,6 +710,42 @@ metadata_created_by = get_config_item_or_set_default(
 )
 
 example_inpaint_prompts = [[x] for x in example_inpaint_prompts]
+example_enhance_detection_prompts = [[x] for x in example_enhance_detection_prompts]
+
+default_invert_mask_checkbox = get_config_item_or_set_default(
+    key='default_invert_mask_checkbox',
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    expected_type=bool
+)
+
+default_inpaint_mask_model = get_config_item_or_set_default(
+    key='default_inpaint_mask_model',
+    default_value='isnet-general-use',
+    validator=lambda x: x in modules.flags.inpaint_mask_models,
+    expected_type=str
+)
+
+default_enhance_inpaint_mask_model = get_config_item_or_set_default(
+    key='default_enhance_inpaint_mask_model',
+    default_value='sam',
+    validator=lambda x: x in modules.flags.inpaint_mask_models,
+    expected_type=str
+)
+
+default_inpaint_mask_cloth_category = get_config_item_or_set_default(
+    key='default_inpaint_mask_cloth_category',
+    default_value='full',
+    validator=lambda x: x in modules.flags.inpaint_mask_cloth_category,
+    expected_type=str
+)
+
+default_inpaint_mask_sam_model = get_config_item_or_set_default(
+    key='default_inpaint_mask_sam_model',
+    default_value='vit_b',
+    validator=lambda x: x in [y[1] for y in modules.flags.inpaint_mask_sam_model if y[1] == x],
+    expected_type=str
+)
 
 default_inpaint_mask_model = get_config_item_or_set_default(
     key='default_inpaint_mask_model',
@@ -569,28 +777,41 @@ default_backfill_prompt = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool)
 )
 
-default_backend = get_config_item_or_set_default(
-    key='default_backend',
-    default_value=ads.default['backend'],
-    validator=lambda x: x in modules.flags.backend_engines
-)
-
 default_comfyd_active_checkbox = get_config_item_or_set_default(
     key='default_comfyd_active_checkbox',
     default_value=ads.default['comfyd_active_checkbox'],
     validator=lambda x: isinstance(x, bool)
 )
 
+default_mixing_image_prompt_and_vary_upscale = get_config_item_or_set_default(
+    key='default_mixing_image_prompt_and_vary_upscale',
+    default_value=ads.default['mixing_image_prompt_and_vary_upscale'],
+    validator=lambda x: isinstance(x, bool)
+)
+
+default_mixing_image_prompt_and_inpaint = get_config_item_or_set_default(
+    key='default_mixing_image_prompt_and_inpaint',
+    default_value=ads.default['mixing_image_prompt_and_inpaint'],
+    validator=lambda x: isinstance(x, bool)
+)
+
+default_freeu = ads.default['freeu']
+default_adm_guidance = [ads.default['adm_scaler_positive'], ads.default['adm_scaler_negative'], ads.default['adm_scaler_end']]
+styles_definition = {}
+instruction = ''
+reference = ''
+
 config_dict["default_loras"] = default_loras = default_loras[:default_max_lora_number] + [[True, 'None', 1.0] for _ in range(default_max_lora_number - len(default_loras))]
 
-# mapping config to meta parameter 
+# mapping config to meta parameter
 possible_preset_keys = {
+    "default_engine": "engine",
     "default_model": "base_model",
     "default_refiner": "refiner_model",
     "default_refiner_switch": "refiner_switch",
     "previous_default_models": "previous_default_models",
-    "default_loras_min_weight": "default_loras_min_weight",
-    "default_loras_max_weight": "default_loras_max_weight",
+    "default_loras_min_weight": "loras_min_weight",
+    "default_loras_max_weight": "loras_max_weight",
     "default_loras": "<processed>",
     "default_cfg_scale": "guidance_scale",
     "default_sample_sharpness": "sharpness",
@@ -599,21 +820,48 @@ possible_preset_keys = {
     "default_sampler": "sampler",
     "default_scheduler": "scheduler",
     "default_overwrite_step": "steps",
+    "default_overwrite_switch": "overwrite_switch",
     "default_performance": "performance",
     "default_image_number": "image_number",
     "default_prompt": "prompt",
     "default_prompt_negative": "negative_prompt",
     "default_styles": "styles",
     "default_aspect_ratio": "resolution",
-    "default_cfg_tsnr": "cfg_tsnr",
-    "default_overwrite_step": "overwrite_step",
-    "default_overwrite_switch": "overwrite_switch",
-    "default_save_metadata_to_images": "default_save_metadata_to_images",
+    "default_save_metadata_to_images": "save_metadata_to_images",
     "checkpoint_downloads": "checkpoint_downloads",
     "embeddings_downloads": "embeddings_downloads",
     "lora_downloads": "lora_downloads",
-    "default_vae": "vae"
+    "vae_downloads": "vae_downloads",
+    "default_vae": "vae",
+    # "default_inpaint_method": "inpaint_method", # disabled so inpaint mode doesn't refresh after every preset change
+    "default_inpaint_engine_version": "inpaint_engine_version",
+
+    "default_max_image_number": "max_image_number",
+    "default_freeu": "freeu",
+    "default_adm_guidance": "adm_guidance",
+    "default_output_format": "output_format",
+    #"default_controlnet_softness": "controlnet_softness",
+    #"default_overwrite_vary_strength": "overwrite_vary_strength",
+    #"default_overwrite_upscale_strength": "overwrite_upscale_strength",
+    "default_inpaint_advanced_masking_checkbox": "inpaint_advanced_masking_checkbox",
+    "default_mixing_image_prompt_and_vary_upscale": "mixing_image_prompt_and_vary_upscale",
+    "default_mixing_image_prompt_and_inpaint": "mixing_image_prompt_and_inpaint",
+    "default_backfill_prompt": "backfill_prompt",
+    "default_translation_methods": "translation_methods",
+    "styles_definition": "styles_definition",
+    "instruction": "instruction",
+    "reference": "reference",
 }
+
+allow_missing_preset_key = [
+    "default_prompt",
+    "default_prompt_negative",
+    "default_output_format",
+    "input_image_checkbox",
+    "styles_definition",
+    "instruction",
+    "reference",
+    ]
 
 REWRITE_PRESET = False
 
@@ -641,18 +889,9 @@ def add_ratio(x):
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 
-default_aspect_ratio = add_ratio(default_aspect_ratio)
-available_aspect_ratios_labels = [add_ratio(x) for x in available_aspect_ratios]
 
-#sd3_default_aspect_ratio = '16:9'
-#sd3_available_aspect_ratios = ['21:9', '16:9', '3:2', '5:4', '1:1', '2:3', '4:5', '9:16', '9:21']
-sd3_default_aspect_ratio = add_ratio('1024*1024')
-sd3_available_aspect_ratios = [
-        '576*1344', '768*1152', '896*1152', '768*1280', '960*1280',  
-        '1024*1024', '1024*1280', '1280*1280', '1280*1024',
-        '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'
-    ]
-sd3_available_aspect_ratios = [add_ratio(x) for x in sd3_available_aspect_ratios]
+default_aspect_ratio = modules.flags.default_aspect_ratios['SDXL']
+available_aspect_ratios_labels = modules.flags.available_aspect_ratios_list['SDXL']
 
 
 # Only write config in the first launch.
@@ -674,21 +913,36 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
 config_comfy_formatted_text = '''
 comfyui:
+     models_root: {models_root}
      checkpoints: {checkpoints} 
      clip_vision: {clip_vision}
-     controlnet: {controlnet}
+     controlnet: {controlnets}
+     diffusers: {diffusers}
      embeddings: {embeddings}
      loras: {loras}
      upscale_models: {upscale_models}
      unet: {unet}
      rembg: {rembg}
      layer_model: {layer_model}
+     vae: {vae}
      '''
 
-paths2str = lambda p: '\n'.join(p[:-1]) + ('' if not p else p[-1])
-config_comfy_text = config_comfy_formatted_text.format(checkpoints=paths2str(paths_checkpoints), clip_vision=path_clip_vision, controlnet=path_controlnet, embeddings=path_embeddings, loras=paths2str(paths_loras), upscale_models=path_upscale_models, unet=path_unet, rembg=path_rembg, layer_model=path_layer_model)
+paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
+config_comfy_text = config_comfy_formatted_text.format(models_root=path_models_root, checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
+
+
+#config_controlnet_aux_path = os.path.join(shared.root, 'comfy/custom_nodes/comfyui_controlnet_aux/config.yaml')
+#config_controlnet_aux_formatted_text = '''
+#annotator_ckpts_path: {controlnets}
+#custom_temp_path:
+#USE_SYMLINKS: False
+#EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
+#'''
+#config_controlnet_aux_text = config_controlnet_aux_formatted_text.format(controlnets=paths_controlnet[0])
+#with open(config_controlnet_aux_path, "w", encoding="utf-8") as controlnet_file:
+#    controlnet_file.write(config_controlnet_aux_text)
 
 
 model_filenames = []
@@ -725,35 +979,35 @@ def downloading_inpaint_models(v):
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/fooocus_inpaint_head.pth',
-        model_dir=path_inpaint,
+        model_dir=paths_inpaint[0],
         file_name='fooocus_inpaint_head.pth'
     )
-    head_file = os.path.join(path_inpaint, 'fooocus_inpaint_head.pth')
+    head_file = os.path.join(paths_inpaint[0], 'fooocus_inpaint_head.pth')
     patch_file = None
 
     if v == 'v1':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint.fooocus.patch')
 
     if v == 'v2.5':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v25.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint_v25.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint_v25.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint_v25.fooocus.patch')
 
     if v == 'v2.6':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v26.fooocus.patch',
-            model_dir=path_inpaint,
+            model_dir=paths_inpaint[0],
             file_name='inpaint_v26.fooocus.patch'
         )
-        patch_file = os.path.join(path_inpaint, 'inpaint_v26.fooocus.patch')
+        patch_file = os.path.join(paths_inpaint[0], 'inpaint_v26.fooocus.patch')
 
     return head_file, patch_file
 
@@ -788,19 +1042,19 @@ def downloading_sdxl_hyper_sd_lora():
 def downloading_controlnet_canny():
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='control-lora-canny-rank128.safetensors'
     )
-    return os.path.join(path_controlnet, 'control-lora-canny-rank128.safetensors')
+    return os.path.join(paths_controlnet[0], 'control-lora-canny-rank128.safetensors')
 
 
 def downloading_controlnet_cpds():
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_xl_cpds_128.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='fooocus_xl_cpds_128.safetensors'
     )
-    return os.path.join(path_controlnet, 'fooocus_xl_cpds_128.safetensors')
+    return os.path.join(paths_controlnet[0], 'fooocus_xl_cpds_128.safetensors')
 
 
 def downloading_ip_adapters(v):
@@ -817,26 +1071,26 @@ def downloading_ip_adapters(v):
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_ip_negative.safetensors',
-        model_dir=path_controlnet,
+        model_dir=paths_controlnet[0],
         file_name='fooocus_ip_negative.safetensors'
     )
-    results += [os.path.join(path_controlnet, 'fooocus_ip_negative.safetensors')]
+    results += [os.path.join(paths_controlnet[0], 'fooocus_ip_negative.safetensors')]
 
     if v == 'ip':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin',
-            model_dir=path_controlnet,
+            model_dir=paths_controlnet[0],
             file_name='ip-adapter-plus_sdxl_vit-h.bin'
         )
-        results += [os.path.join(path_controlnet, 'ip-adapter-plus_sdxl_vit-h.bin')]
+        results += [os.path.join(paths_controlnet[0], 'ip-adapter-plus_sdxl_vit-h.bin')]
 
     if v == 'face':
         load_file_from_url(
             url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus-face_sdxl_vit-h.bin',
-            model_dir=path_controlnet,
+            model_dir=paths_controlnet[0],
             file_name='ip-adapter-plus-face_sdxl_vit-h.bin'
         )
-        results += [os.path.join(path_controlnet, 'ip-adapter-plus-face_sdxl_vit-h.bin')]
+        results += [os.path.join(paths_controlnet[0], 'ip-adapter-plus-face_sdxl_vit-h.bin')]
 
     return results
 
@@ -857,9 +1111,46 @@ def downloading_safety_checker_model():
     )
     return os.path.join(path_safety_checker, 'stable-diffusion-safety-checker.bin')
 
+def download_sam_model(sam_model: str) -> str:
+    match sam_model:
+        case 'vit_b':
+            return downloading_sam_vit_b()
+        case 'vit_l':
+            return downloading_sam_vit_l()
+        case 'vit_h':
+            return downloading_sam_vit_h()
+        case _:
+            raise ValueError(f"sam model {sam_model} does not exist.")
+
+
+def downloading_sam_vit_b():
+    load_file_from_url(
+        url='https://huggingface.co/mashb1t/misc/resolve/main/sam_vit_b_01ec64.pth',
+        model_dir=path_sam,
+        file_name='sam_vit_b_01ec64.pth'
+    )
+    return os.path.join(path_sam, 'sam_vit_b_01ec64.pth')
+
+
+def downloading_sam_vit_l():
+    load_file_from_url(
+        url='https://huggingface.co/mashb1t/misc/resolve/main/sam_vit_l_0b3195.pth',
+        model_dir=path_sam,
+        file_name='sam_vit_l_0b3195.pth'
+    )
+    return os.path.join(path_sam, 'sam_vit_l_0b3195.pth')
+
+
+def downloading_sam_vit_h():
+    load_file_from_url(
+        url='https://huggingface.co/mashb1t/misc/resolve/main/sam_vit_h_4b8939.pth',
+        model_dir=path_sam,
+        file_name='sam_vit_h_4b8939.pth'
+    )
+    return os.path.join(path_sam, 'sam_vit_h_4b8939.pth')
 
 def downloading_superprompter_model():
-    path_superprompter = os.path.join(path_llms, "superprompt-v1")
+    path_superprompter = os.path.join(paths_llms[0], "superprompt-v1")
     load_file_from_url(
         url='https://huggingface.co/roborovski/superprompt-v1/resolve/main/model.safetensors',
         model_dir=path_superprompter,
@@ -883,10 +1174,14 @@ def downloading_base_sd15_model():
     )
     return os.path.join(paths_checkpoints[0], 'realisticVisionV60B1_v51VAE.safetensors')
 
-update_files()
-from enhanced.simpleai import simpleai_config, refresh_models_info 
-simpleai_config.paths_checkpoints = paths_checkpoints
-simpleai_config.paths_loras = paths_loras
-simpleai_config.path_embeddings = path_embeddings
+def downloading_hydit_model():
+    load_file_from_url(
+        url='https://huggingface.co/comfyanonymous/hunyuan_dit_comfyui/resolve/main/hunyuan_dit_1.2.safetensors',
+        model_dir=paths_checkpoints[0],
+        file_name='hunyuan_dit_1.2.safetensors'
+    )
+    return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
 
+update_files()
+from enhanced.simpleai import refresh_models_info 
 refresh_models_info()

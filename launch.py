@@ -45,7 +45,7 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.15"
+    ver_required = "0.3.17"
     REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
@@ -61,11 +61,14 @@ def check_base_environment():
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
-            print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
-            print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元和SD3支持,增加Comfy后端)需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址见：https://hf-mirror.com/metercai/SimpleSDXL2/')
-            print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
-            print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
-            sys.exit(0)
+        print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
+        print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元和SD3支持,增加Comfy后端)需要下载新的程序包和基本模型包，在新目录下解压合并目录后再运行。下载地址见：https://hf-mirror.com/metercai/SimpleSDXL2/')
+        print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
+        print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
+        sys.exit(0)
+    if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and not is_installed("cpm_kernels"):
+        print(f'程序运行环境缺乏必要组件, SimpleSDXL2的程序环境包已升级,请到 https://hf-mirror.com/metercai/SimpleSDXL2/ 下载安装最新程序环境包.')
+        print(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
 
     from simpleai_base import simpleai_base
     print("Checking ...")
@@ -74,6 +77,10 @@ def check_base_environment():
     sysinfo.update(dict(did=token.get_did()))
     print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB')
 
+    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
+        print(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
+        print(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量大于40G。')
+        sys.exit(0)
     return token, sysinfo
 
 #Intel Arc
@@ -112,6 +119,10 @@ def prepare_environment():
 
     if sysinfo['gpu_brand'] == 'AMD' and platform.system() == "Windows" and not is_installed("torch-directml"):
         run_pip(f"install -U -I --no-deps torch-directml", "torch-directml")
+
+    if not is_installed("torchaudio"):
+        torch_command = f'pip install torchaudio=={torch_ver} -i {index_url}'
+        run(f'"{python}" -m {torch_command}', "Installing torchaudio", "Couldn't install torchaudio", live=True)
 
     if TRY_INSTALL_XFORMERS:
         xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
@@ -174,7 +185,9 @@ def ini_args():
 def is_ipynb():
     return True if 'ipykernel' in sys.modules and hasattr(sys, '_jupyter_kernel') else False
 
-build_launcher()
+os.environ['HF_MIRROR'] = 'hf-mirror.com'
+
+#build_launcher()
 token, sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地身份ID: {token.get_did()}')
 
@@ -199,12 +212,10 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
 
-if args.hf_mirror is not None : 
-    os.environ['HF_MIRROR'] = str(args.hf_mirror)
-    print("Set hf_mirror to:", args.hf_mirror)
-
 from modules import config
-
+from modules.hash_cache import init_cache
+os.environ["U2NET_HOME"] = config.paths_inpaint[0]
+os.environ["BERT_HOME"] = config.paths_llms[0]
 os.environ['GRADIO_TEMP_DIR'] = config.temp_path
 
 if config.temp_path_cleanup_on_launch:
@@ -216,12 +227,9 @@ if config.temp_path_cleanup_on_launch:
         print(f"[Cleanup] Failed to delete content of temp dir.")
 
 
-def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads):
+def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
     from modules.model_loader import load_file_from_url
     from modules import config
-
-    os.environ["U2NET_HOME"] = config.path_inpaint
-    os.environ["HUF_MIRROR"] = 'hf-mirror.com'
 
     for file_name, url in vae_approx_filenames:
         load_file_from_url(url=url, model_dir=config.path_vae_approx, file_name=file_name)
@@ -254,13 +262,18 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
         load_file_from_url(url=url, model_dir=config.path_embeddings, file_name=file_name)
     for file_name, url in lora_downloads.items():
         load_file_from_url(url=url, model_dir=config.paths_loras[0], file_name=file_name)
+    for file_name, url in vae_downloads.items():
+        load_file_from_url(url=url, model_dir=config.path_vae, file_name=file_name)
 
     return default_model, checkpoint_downloads
 
 
 config.default_base_model_name, config.checkpoint_downloads = download_models(
     config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
-    config.embeddings_downloads, config.lora_downloads)
+    config.embeddings_downloads, config.lora_downloads, config.vae_downloads)
+
+config.update_files()
+init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenames, config.paths_loras)
 
 
 def reset_env_args():
@@ -274,6 +287,7 @@ def reset_env_args():
         sysinfo["location"] = args.location
 
     if sysinfo["location"] !='CN':
+        os.environ['HF_MIRROR'] = 'hf-mirror.com'
         if '--language' not in sys.argv:
             args.language='default'
 
@@ -289,6 +303,10 @@ def reset_env_args():
     reset_simpleai_args(token, sysinfo)
 
 reset_env_args()
+
+if args.hf_mirror is not None :
+    os.environ['HF_MIRROR'] = str(args.hf_mirror)
+    print("Set hf_mirror to:", args.hf_mirror)
 
 from webui import *
 

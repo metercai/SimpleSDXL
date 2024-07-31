@@ -1,4 +1,6 @@
+import math
 from enum import IntEnum, Enum
+
 
 disabled = 'Disabled'
 enabled = 'Enabled'
@@ -8,9 +10,15 @@ upscale_15 = 'Upscale (1.5x)'
 upscale_2 = 'Upscale (2x)'
 upscale_fast = 'Upscale (Fast 2x)'
 
-uov_list = [
-    disabled, subtle_variation, strong_variation, upscale_15, upscale_2, upscale_fast
-]
+uov_list = [disabled, subtle_variation, strong_variation, upscale_15, upscale_2, upscale_fast]
+
+enhancement_uov_before = "Before First Enhancement"
+enhancement_uov_after = "After Last Enhancement"
+enhancement_uov_processing_order = [enhancement_uov_before, enhancement_uov_after]
+
+enhancement_uov_prompt_type_original = 'Original Prompts'
+enhancement_uov_prompt_type_last_filled = 'Last Filled Enhancement Prompts'
+enhancement_uov_prompt_types = [enhancement_uov_prompt_type_original, enhancement_uov_prompt_type_last_filled]
 
 CIVITAI_NO_KARRAS = ["euler", "euler_ancestral", "heun", "dpm_fast", "dpm_adaptive", "ddim", "uni_pc"]
 
@@ -35,7 +43,8 @@ KSAMPLER = {
     "dpmpp_3m_sde_gpu": "",
     "ddpm": "",
     "lcm": "LCM",
-    "tcd": "TCD"
+    "tcd": "TCD",
+    "restart": "Restart"
 }
 
 SAMPLER_EXTRA = {
@@ -60,6 +69,9 @@ default_vae = 'Default (model)'
 
 refiner_swap_method = 'joint'
 
+default_input_image_tab = 'uov_tab'
+input_image_tab_ids = ['uov_tab', 'ip_tab', 'inpaint_tab', 'describe_tab', 'enhance_tab', 'metadata_tab']
+
 cn_ip = "ImagePrompt"
 cn_ip_face = "FaceSwap"
 cn_canny = "PyraCanny"
@@ -74,13 +86,9 @@ default_parameters = {
 
 output_formats = ['png', 'jpeg', 'webp']
 
-inpaint_mask_models = [
-    'u2net', 'u2netp', 'u2net_human_seg', 'u2net_cloth_seg', 'silueta', 'isnet-general-use', 'isnet-anime', 'sam'
-]
-
+inpaint_mask_models = ['u2net', 'u2netp', 'u2net_human_seg', 'u2net_cloth_seg', 'silueta', 'isnet-general-use', 'isnet-anime', 'sam']
 inpaint_mask_cloth_category = ['full', 'upper', 'lower']
-
-inpaint_mask_sam_model = ['sam_vit_b_01ec64', 'sam_vit_h_4b8939', 'sam_vit_l_0b3195']
+inpaint_mask_sam_model = ['vit_b', 'vit_l', 'vit_h']
 
 inpaint_engine_versions = ['None', 'v2.5', 'v2.6']
 inpaint_option_default = 'Inpaint or Outpaint (default)'
@@ -88,21 +96,145 @@ inpaint_option_detail = 'Improve Detail (face, hand, eyes, etc.)'
 inpaint_option_modify = 'Modify Content (add objects, change background, etc.)'
 inpaint_options = [inpaint_option_default, inpaint_option_detail, inpaint_option_modify]
 
-desc_type_photo = 'Photograph'
-desc_type_anime = 'Art/Anime'
+describe_type_photo = 'Photograph'
+describe_type_anime = 'Art/Anime'
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
-sdxl_aspect_ratios = [
-    '704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
+COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ancestral_cfg_pp", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
+                  "lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_sde", "dpmpp_sde_gpu",
+                  "dpmpp_2m", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm",
+                  "ipndm", "ipndm_v", "deis"]   
+comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"]
+comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
+
+aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common']
+default_aspect_ratio = ['1152*896', '1024*1024', '1280*1024']
+available_aspect_ratios = [
+    ['704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
     '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960',
     '1088*960', '1088*896', '1152*896', '1152*832', '1216*832', '1280*768',
     '1344*768', '1344*704', '1408*704', '1472*704', '1536*640', '1600*640',
-    '1664*576', '1728*576'
+    '1664*576', '1728*576'],
+
+    ['768*1280', '960*1280', '1024*1024',
+    '1280*768', '1280*960', '1280*1280',],
+    
+    ['576*1344', '768*1152', '896*1152', '768*1280', '960*1280',
+    '1024*1024', '1024*1280', '1280*1280', '1280*1024',
+    '1280*960', '1280*768', '1152*896', '1152*768', '1344*576']
 ]
-backend_engines = ['SDXL', 'HyDiT', 'SD3m']
+
+def add_ratio(x):
+    a, b = x.replace('*', ' ').split(' ')[:2]
+    a, b = int(a), int(b)
+    g = math.gcd(a, b)
+    c, d = a // g, b // g
+    if (a, b) == (576, 1344):
+        c, d = 9, 21
+    elif (a, b) == (1344, 576):
+        c, d = 21, 9
+    elif (a, b) == (768, 1280):
+        c, d = 9, 15
+    elif (a, b) == (1280, 768):
+        c, d = 15, 9
+    return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
+
+default_aspect_ratios = {
+        aspect_ratios_templates[0]: add_ratio(default_aspect_ratio[0]),
+        aspect_ratios_templates[1]: add_ratio(default_aspect_ratio[1]),
+        aspect_ratios_templates[2]: add_ratio(default_aspect_ratio[2]),
+        }
+available_aspect_ratios_list = {
+        aspect_ratios_templates[0]: [add_ratio(x) for x in available_aspect_ratios[0]],
+        aspect_ratios_templates[1]: [add_ratio(x) for x in available_aspect_ratios[1]],
+        aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
+        }
+
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
+
+task_class_mapping = {
+            'Fooocus': 'SDXL-Fooocus',
+            'Comfy'  : 'SDXL-Comfy',
+            'Kolors' : 'Kwai-Kolors',
+            'Kolors+' : 'Kwai-Kolors+',
+            'SD3m'   : 'SD3-medium',
+            'HyDiT'  : 'Hunyuan-DiT',
+            'HyDiT+'  : 'Hunyuan-DiT+',
+            }
+def get_taskclass_by_fullname(fullname):
+    for taskclass, fname in task_class_mapping.items():
+        if fname == fullname:
+            return taskclass
+    return None
+
+comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT+']
+
+default_class_params = {
+    'Fooocus': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': sampler_list,
+        'available_scheduler_name': scheduler_list,
+        'backend_params': {},
+        },
+    'Comfy': {
+        },
+    'Kolors': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "kolors_text2image1",
+            "llms_model": "quant8",
+            },
+        },
+    'Kolors+': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "kolors_text2image2",
+            "llms_model": "quant8",
+            },
+        },
+    'SD3m': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "sd3_base",
+            },
+        },
+    'HyDiT': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
+        'available_aspect_ratios_selection': 'HyDiT',
+        'available_sampler_name': ["ddpm", "ddim", "dpmms"],
+        'backend_params': {
+            "task_method": "hydit_base",
+            },
+        },
+    'HyDiT+': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
+        'available_aspect_ratios_selection': 'HyDiT',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "hydit_base",
+            },
+        }
+    }
 
 
 class MetadataScheme(Enum):
@@ -116,9 +248,6 @@ metadata_scheme = [
     (f'{MetadataScheme.FOOOCUS.value}', MetadataScheme.FOOOCUS.value),
     (f'{MetadataScheme.A1111.value}', MetadataScheme.A1111.value),
 ]
-
-controlnet_image_count = 4
-preparation_step_count = 13
 
 
 class OutputFormat(Enum):

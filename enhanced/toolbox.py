@@ -12,6 +12,7 @@ import enhanced.topbar as topbar
 import enhanced.gallery as gallery
 import enhanced.version as version
 import modules.flags as flags
+import modules.meta_parser as meta_parser
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -327,55 +328,22 @@ def delete_image(state_params):
     return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
-def reset_image_params(state_params):
+def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
-    metadata['Refiner Model'] = None if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-
-    loras = []
-    for i in range(config.default_max_lora_number):
-        if f'LoRA {i + 1}' in metainfo:
-            n, w = metainfo[f'LoRA {i + 1}'].split(' : ')
-            loras.append([n, float(w)])
-        else:
-            loras.append(['None', 1.0])
-
-    metadata.update({"loras": loras})
-    metadata.update({"task_from": f'regeneration:{metadata["Filename"]}'})
-    
-    get_meta_value = lambda x1,y: y if x1 not in metadata else metadata[x1]
-    backend_engine = get_meta_value('Backend Engine', 'SDXL-Fooocus')
-    if backend_engine=='Hunyuan-DiT':
-        backend_engine = flags.backend_engines[1]
-    elif backend_engine=='SD3-medium':
-        backend_engine = flags.backend_engines[2]
-    else:
-        backend_engine = flags.backend_engines[0]
-    engine_preset = state_params[f'{backend_engine}_preset_value']
-    engine_preset[1] = get_meta_value('Performance', engine_preset[1])
-    engine_preset[2] = [f[1:-1] for f in get_meta_value('Styles', str(engine_preset[2]))[1:-1].split(', ')]
-    if engine_preset[2] == ['']:
-        engine_preset[2] = []
-    engine_preset[3] = float(get_meta_value('Guidance Scale', engine_preset[3]))
-    engine_preset[4] = int(get_meta_value('Steps', engine_preset[4]))
-    engine_preset[5] = get_meta_value('Sampler', engine_preset[5])
-    engine_preset[6] = get_meta_value('Scheduler', engine_preset[6])
-    engine_preset[7] = get_meta_value('Base Model', engine_preset[7])
-    state_params[f'{backend_engine}_preset_value'] = engine_preset
-    engine_aspect_ratio = state_params[f'{backend_engine}_current_aspect_ratios']
-    aspect_ratio = get_meta_value('Resolution', '(0, 0)')
-    if aspect_ratio!='(0, 0)':
-        width, height = eval(aspect_ratio)
-        engine_aspect_ratio = config.add_ratio(f'{width}*{height}')
-        state_params[f'{backend_engine}_current_aspect_ratios'] = engine_aspect_ratio
-    refiner_model = get_meta_value("Refiner Model", 'None')
-    metadata.update({'Refiner Model': refiner_model})
-
-    results = topbar.reset_params(metadata)
+    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
     state_params.update({"note_box_state": ['',0,0]})
-    print(f'[ToolBox] Reset_params: update {len(metainfo.keys())} params from current image log file.')
-    return results + [gr.update(visible=False)] * 2 + [state_params, backend_engine]
+
+    metadata_scheme = meta_parser.MetadataScheme('simple')
+    metadata_parser = meta_parser.get_metadata_parser(metadata_scheme)
+    parsed_parameters = metadata_parser.to_json(metadata)
+
+    results = meta_parser.switch_layout_template(parsed_parameters, state_params)
+    results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
+
+    print(f'[ToolBox] Reset_params: -->{parsed_parameters["Backend Engine"]} params from current image log file.')
+    return results + [gr.update(visible=False)] * 2
 
 
 def apply_enabled_loras(loras):
@@ -388,41 +356,60 @@ def apply_enabled_loras(loras):
 
 def save_preset(*args):    
     args = list(args)
-    backend_selection = args.pop()
-    state_params = args.pop()
+    
+    args.reverse()
     name = args.pop()
+    backend_params = dict(args.pop())
+    output_format = args.pop()
+    inpaint_advanced_masking_checkbox = args.pop()
+    mixing_image_prompt_and_vary_upscale = args.pop()
+    mixing_image_prompt_and_inpaint = args.pop()
+    backfill_prompt = args.pop()
+    translation_methods = args.pop()
+    input_image_checkbox = args.pop()
+    state_params = dict(args.pop())
+
+    advanced_checkbox = args.pop()
+    image_number = int(args.pop())
+    prompt = args.pop()
+    negative_prompt = args.pop()
+    style_selections = args.pop()
+    performance_selection = args.pop()
+    overwrite_step = int(args.pop())
+    overwrite_switch = args.pop()
+    aspect_ratios_selection = args.pop()
+    overwrite_width = args.pop()
+    overwrite_height = args.pop()
+    guidance_scale = args.pop()
+    sharpness = args.pop()
+    adm_scaler_positive = args.pop()
+    adm_scaler_negative = args.pop()
+    adm_scaler_end = args.pop()
+    refiner_swap_method = args.pop()
+    adaptive_cfg = args.pop()
+    clip_skip = args.pop()
+    base_model = args.pop()
+    refiner_model = args.pop()
+    refiner_switch = args.pop()
+    sampler_name = args.pop()
+    scheduler_name = args.pop()
+    vae_name = args.pop()
     seed_random = args.pop()
-    params = ads.get_dict_args(args)
-    prompt = params['prompt']
-    negative_prompt = params['negative_prompt']
-    style_selections = params['style_selections']
-    performance_selection = params['performance_selection']
-    aspect_ratios_selection = params['aspect_ratios_selection']
-    sharpness = params['sharpness']
-    guidance_scale = params['guidance_scale']
-    base_model = params['base_model']
-    refiner_model = params['refiner_model']
-    refiner_switch = params['refiner_switch']
-    sampler_name = params['sampler_name']
-    scheduler_name = params['scheduler_name']
-    adaptive_cfg = params['adaptive_cfg']
-    overwrite_step = params['overwrite_step']
-    overwrite_switch = params['overwrite_switch']
-    inpaint_engine = params['inpaint_engine']
-    loras = params['loras']
-    adm_scaler_positive = params['adm_scaler_positive']
-    adm_scaler_negative = params['adm_scaler_negative']
-    adm_scaler_end = params['adm_scaler_end']
-    image_seed = params['image_seed']
+    image_seed = args.pop()
+    inpaint_engine = args.pop()
+    inpaint_engine_state = args.pop()
+    inpaint_mode = args.pop()
+    enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
+    generate_button = args.pop()
+    load_parameter_button = args.pop()
+    freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
+    loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
+    
 
-
-    if name is not None and name != '':
+    if name:
         preset = {}
-        if backend_selection != flags.backend_engines[0]:
-            preset["default_backend"] = backend_selection
-            aspect_ratios_selection = state_params[f'{backend_selection}_current_aspect_ratios']
-            if backend_selection == flags.backend_engines[1]:
-                base_model = "hydit_v1.1_fp16.safetensors"
+        if 'backend_engine' in backend_params and backend_params['backend_engine']!='Fooocus':
+            preset["default_engine"] = backend_params
 
         preset["default_model"] = base_model
         preset["default_refiner"] = refiner_model
@@ -437,12 +424,11 @@ def save_preset(*args):
         preset["default_prompt_negative"] = negative_prompt
         preset["default_styles"] = style_selections
         preset["default_aspect_ratio"] = aspect_ratios_selection.split(' ')[0].replace(u'\u00d7','*')
-        if ads.default["adm_scaler_positive"] != adm_scaler_positive:
-            preset["default_adm_scaler_positive"] = adm_scaler_positive
-        if ads.default["adm_scaler_negative"] != adm_scaler_negative:
-            preset["default_adm_scaler_negative"] = adm_scaler_negative
-        if ads.default["adm_scaler_end"] != adm_scaler_end:
-            preset["default_adm_scaler_end"] = adm_scaler_end
+        if ads.default["adm_scaler_positive"] != adm_scaler_positive or ads.default["adm_scaler_negative"] != adm_scaler_negative \
+                or ads.default["adm_scaler_end"] != adm_scaler_end:
+            preset["default_adm_guidance"] = f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'
+        if ads.default["freeu"]!=freeu_ctrls[1:]:
+            preset["default_freeu"]=freeu_ctrls[1:]
         if ads.default["adaptive_cfg"] != adaptive_cfg:
             preset["default_cfg_tsnr"] = adaptive_cfg
         if ads.default["overwrite_step"] != overwrite_step:
@@ -451,6 +437,14 @@ def save_preset(*args):
             preset["default_overwrite_switch"] = overwrite_switch
         if ads.default["inpaint_engine"] != inpaint_engine:
             preset["default_inpaint_engine"] = inpaint_engine
+        if ads.default["clip_skip"] != clip_skip:
+            preset["default_clip_skip"] = clip_skip
+        if ads.default["vae"] != vae_name:
+            preset["default_vae"] = vae_name
+        if ads.default["overwrite_width"] != overwrite_width:
+            preset["default_overwrite_width"] = overwrite_width
+        if ads.default["overwrite_height"] != overwrite_height:
+            preset["default_overwrite_height"] = overwrite_height
         if not seed_random:
             preset["default_image_seed"] = image_seed
 
@@ -476,10 +470,10 @@ def save_preset(*args):
             if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
                 preset["embeddings_downloads"].update({k[11:]: get_muid_link(k)})
 
-        preset["lora_downloads"] = {}
-        for m,w in loras:
-            if m != 'None':
-                preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
+        #preset["lora_downloads"] = {}
+        #for m,w in loras:
+        #    if m != 'None':
+        #        preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
 
         m_dict = {}
         for key in style_selections:

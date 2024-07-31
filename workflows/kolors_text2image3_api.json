@@ -1,0 +1,176 @@
+{
+  "6": {
+    "inputs": {
+      "seed": 164051197915510,
+      "steps": 8,
+      "cfg": 1.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "128",
+        0
+      ],
+      "positive": [
+        "131",
+        0
+      ],
+      "negative": [
+        "132",
+        0
+      ],
+      "latent_image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "9": {
+    "inputs": {
+      "width": 968,
+      "height": 1280,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "aspect_ratios_size"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": [
+        "6",
+        0
+      ],
+      "vae": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "11": {
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "70": {
+    "inputs": {
+      "vae_name": "sdxl_fp16.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "105": {
+    "inputs": {
+      "unet_name": "juggernautXL_v8Rundiffusion.safetensors"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "merge_model"
+    }
+  },
+  "126": {
+    "inputs": {
+      "ratio": 1,
+      "model1": [
+        "130",
+        0
+      ],
+      "model2": [
+        "105",
+        0
+      ]
+    },
+    "class_type": "ModelMergeSimple",
+    "_meta": {
+      "title": "model_merge_ratio"
+    }
+  },
+  "128": {
+    "inputs": {
+      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
+      "strength_model": 1,
+      "model": [
+        "126",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_speedup"
+    }
+  },
+  "130": {
+    "inputs": {
+      "unet_name": "kolors_unet_fp16.safetensors"
+    },
+    "class_type": "MZ_KolorsUNETLoaderV2",
+    "_meta": {
+      "title": "MinusZone - KolorsUNETLoaderV2"
+    }
+  },
+  "131": {
+    "inputs": {
+      "text": "刘亦非，繁华大街，身穿汉服，手举牌子，上面 写着 “真牛！”",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "132": {
+    "inputs": {
+      "text": "",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "134": {
+    "inputs": {
+      "images": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "136": {
+    "inputs": {
+      "precision": "quant8"
+    },
+    "class_type": "DownloadAndLoadChatGLM3",
+    "_meta": {
+      "title": "llms_model"
+    }
+  }
+}

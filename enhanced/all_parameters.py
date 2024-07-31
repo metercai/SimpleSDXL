@@ -79,7 +79,7 @@ default = {
     'inpaint_engine': 'v2.6',
     'inpaint_strength': 1,
     'inpaint_respective_field': 0.618,
-    'inpaint_mask_upload_checkbox': True,
+    'inpaint_advanced_masking_checkbox': True,
     'invert_mask_checkbox': False,
     'inpaint_erode_or_dilate': 0,
     'loras_min_weight': -2,
@@ -95,7 +95,10 @@ default = {
     'backfill_prompt': False,
     'translation_methods': 'Third APIs',
     'backend': 'SDXL',
-    'comfyd_active_checkbox': False
+    'comfyd_active_checkbox': False,
+    'clip_skip': 2,
+    'vae': 'Default (model)',
+    'developer_debug_mode_checkbox': True
     }
 
 
@@ -172,10 +175,11 @@ def init_all_params_index(lora_number, disable_metadata):
         'inpaint_engine': 59+a, 
         'inpaint_strength': 60+a, 
         'inpaint_respective_field': 61+a, 
-        'inpaint_mask_upload_checkbox': 62+a, 
+        'inpaint_advanced_masking_checkbox': 62+a, 
         'invert_mask_checkbox': 63+a, 
         'inpaint_erode_or_dilate': 64+a,
-        'save_metadata_to_images': 65+a,
-        'metadata_scheme': 66+a,
-        'ip_ctrls': 65+b,
+        'params_backend': 65+a,
+        'save_metadata_to_images': 66+a,
+        'metadata_scheme': 67+a,
+        'ip_ctrls': 66+b,
     }
