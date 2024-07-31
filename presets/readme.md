@@ -50,9 +50,7 @@
   default_scheduler                                 # 默认调度器
   default_cfg_scale                                 # 默认引导系数CFG
   default_sample_sharpness                          # 默认采样锐度
-  default_adm_scaler_positive                       # 默认正向ADM引导系数
-  default_adm_scaler_negative                       # 默认反向ADM引导系数
-  default_adm_scaler_end                            # 默认ADM引导结束点
+  default_adm_guidance                              # 默认ADM引导系数: [adm_scaler_positive, adm_scaler_positive, adm_scaler_end]
   default_cfg_tsnr                                  # 默认TSNR模拟CFG
   default_overwrite_step                            # 默认重写采样步数STEP
   default_overwrite_switch                          # 默认重写精炼器切入步数

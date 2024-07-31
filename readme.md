@@ -1,29 +1,28 @@
-## SimpleSDXL2 - 扩展后端，超越Fooocus，支持6G显存国产混元与SD3出图。
+## SimpleSDXL2 - 扩展后端，超越Fooocus，6G显存使用国产混元/可图和SD3出图。
 <div align=center><img src="https://github.com/metercai/SimpleSDXL/assets/5652458/92b6c7d5-fc3e-4407-b03e-5c87d149d503"></div>
 
 ## 🔔 最新更新 / Update
-- [2024.06.30] <b>扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。</b>
+- [2024.07.31] <b>优化了新架构，更稳定，更快速。新增对快手可图模型的支持，使SimpleSDXL2除SDXL外，以6G显卡显存同时支持: 小马v6/Playground-v2.5/SD3m/混元/可图等多种模型出图，适用更多场景。同步主线v2.5.2，并对修图界面进行优化和适配，使之更容易被中文用户理解和使用。</b>
+- [2024.06.30] 扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。
 - [2024.05.28] 同步主线升级到v2.4.3，新增nsfw过滤等功能。
-- [2024.04.23] 升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。</b>
+- [2024.04.23] 升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。
 
 <b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
 Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
 
 ## Windows安装使用
 ### 下载：(新用户至少要下载程序包和基本模型包)
-- 运行环境和应用程序, [程序包: SimpleSDXL2_win.exe.7z (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z)
-- 缺省出图模型和所有辅助模型，包括混元v1.1版和SD3基础版, [基本模型包: models_base.zip (49G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base.zip)
-- 预置导航上的其他出图模型和SD3的t5fp8版, [扩展模型包: models_ckpt.zip (46G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt.zip)
+- 运行环境和应用程序, [程序包: SimpleSDXL2_win.exe.7z0731 (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0731)
+- 缺省出图模型和所有辅助模型，包含SD3基础版, [基本模型包: models_base_0731.zip (49G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip)
+- 预置导航上的其他出图模型，包括写实/动漫(V500)/小马v6/Playground-v2.5/混元1.2/可图, [扩展模型包: models_ckpt_0731.zip (47G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip)
 ### 安装：
-- 新建空目录，路径名上不能包含中文和空格。将程序包复制到新目录，<b>去掉`.7z`的文件名尾缀</b>，然后点击运行SimpleSDXL2_win.exe，自解压到当前目录。新版本严禁与旧版本混装。
-- 解压基本模型包models_base.zip， 与上一步解压出来的models目录同名覆盖。如有Fooocus、SD或其他模型库共享，可自行配置config.txt。
-- 如需解除预置导航上其他预置包下载箭头，可解压扩展模型包models_ckpt.zip，同样覆盖同名目录models。
+- 新建空目录，示范名称为: SimpleAI，注意完整路径名上不能包含中文和空格。将程序包复制到新目录内，<b>去掉`.7z0731`的文件名尾缀</b>，然后点击运行SimpleSDXL2_win.exe，自解压到当前目录。新版本严禁与旧版本混装。
+- 复制基本模型包models_base_0731.zip和扩展模型包models_ckpt_0731.zip到SimpleAI目录下，分别双击文件解压到本目录，同名覆盖在同一目录，缺省模型目录名称为: SimpleModels。
+- 在SimpleAI目录下新建出图目录，示范名称为: outputs ，此目录保存所有出图的图片。
 ### 运行
-- 点击启动 run_SimpleSDXL.bat，完成第一次运行。
-- 后续可用三种方式启动运行：
-  - 带更新启动：run_SimpleSDXL.bat
-  - 不更新启动：run_SimpleSDXL_without_update.bat
-  - 启动开发测试版：run_SimpleSDXL_dev.bat
+- 进入SimpleSDXL2_win目录，双击启动脚本 run_SimpleSDXL.bat，完成第一次运行。
+- 第一次运行后，在SimpleSDXL目录下会生成 config.txt文件，可以自行修改和添加模型路径。
+- 如果模型根目录和出图目录不是预设的示范路径和名称，需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
 
 ### 如果对旧版情有独钟，可选择不升级，运行旧版
 - SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.zip (30G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.zip)
