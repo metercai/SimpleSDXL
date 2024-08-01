@@ -320,7 +320,7 @@ class LoadedModel:
         return self.model is other.model
 
 def minimum_inference_memory():
-    return (1024 * 1024 * 1024)
+    return (1024 * 1024 * 1024) * 1.2
 
 def unload_model_clones(model, unload_weights_only=True, force_unload=True):
     to_unload = []
@@ -448,7 +448,7 @@ def load_models_gpu(models, memory_required=0, force_patch_weights=False):
         if lowvram_available and (vram_set_state == VRAMState.LOW_VRAM or vram_set_state == VRAMState.NORMAL_VRAM):
             model_size = loaded_model.model_memory_required(torch_dev)
             current_free_mem = get_free_memory(torch_dev)
-            lowvram_model_memory = int(max(64 * (1024 * 1024), (current_free_mem - 1024 * (1024 * 1024)) / 1.3 ))
+            lowvram_model_memory = int(max(64 * (1024 * 1024), (current_free_mem - extra_mem)))
             if model_size <= (current_free_mem - inference_memory): #only switch to lowvram if really necessary
                 lowvram_model_memory = 0
 
@@ -651,17 +651,28 @@ def supports_cast(device, dtype): #TODO
         return True
     if dtype == torch.float16:
         return True
-    if is_device_mps(device):
-        return False
     if directml_enabled: #TODO: test this
         return False
     if dtype == torch.bfloat16:
         return True
+    if is_device_mps(device):
+        return False
     if dtype == torch.float8_e4m3fn:
         return True
     if dtype == torch.float8_e5m2:
         return True
     return False
+
+def pick_weight_dtype(dtype, fallback_dtype, device=None):
+    if dtype is None:
+        dtype = fallback_dtype
+    elif dtype_size(dtype) > dtype_size(fallback_dtype):
+        dtype = fallback_dtype
+
+    if not supports_cast(device, dtype):
+        dtype = fallback_dtype
+
+    return dtype
 
 def device_supports_non_blocking(device):
     if is_device_mps(device):
@@ -878,9 +889,9 @@ def should_use_bf16(device=None, model_params=0, prioritize_performance=True, ma
         if is_device_cpu(device): #TODO ? bf16 works on CPU but is extremely slow
             return False
 
-    if device is not None: #TODO not sure about mps bf16 support
+    if device is not None:
         if is_device_mps(device):
-            return False
+            return True
 
     if FORCE_FP32:
         return False
