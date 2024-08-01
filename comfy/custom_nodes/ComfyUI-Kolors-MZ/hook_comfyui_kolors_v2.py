@@ -12,7 +12,7 @@ from comfy.model_base import sdxl_pooled, CLIPEmbeddingNoiseAugmentation, Timest
 
 
 from comfy.ldm.modules.diffusionmodules.openaimodel import UNetModel
-
+from comfy.cldm.cldm import ControlNet
 
 # try:
 #     import comfy.samplers as samplers
@@ -165,7 +165,38 @@ def kolors_unet_config_from_diffusers_unet(state_dict, dtype=None):
               'use_linear_in_transformer': True, 'context_dim': 2048, 'num_head_channels': 64, 'transformer_depth_output': [0, 0, 0, 2, 2, 2, 10, 10, 10],
               'use_temporal_attention': False, 'use_temporal_resblock': False}
 
-    supported_models = [Kolors]
+    Kolors_inpaint = {'use_checkpoint': False, 'image_size': 32, 'out_channels': 4, 'use_spatial_transformer': True, 'legacy': False,
+                      'num_classes': 'sequential', 'adm_in_channels': 5632, 'dtype': dtype, 'in_channels': 9, 'model_channels': 320,
+                      'num_res_blocks': [2, 2, 2], 'transformer_depth': [0, 0, 2, 2, 10, 10], 'channel_mult': [1, 2, 4], 'transformer_depth_middle': 10,
+                      'use_linear_in_transformer': True, 'context_dim': 2048, 'num_head_channels': 64, 'transformer_depth_output': [0, 0, 0, 2, 2, 2, 10, 10, 10],
+                      'use_temporal_attention': False, 'use_temporal_resblock': False}
+
+    Kolors_ip2p = {'use_checkpoint': False, 'image_size': 32, 'out_channels': 4, 'use_spatial_transformer': True, 'legacy': False,
+                   'num_classes': 'sequential', 'adm_in_channels': 5632, 'dtype': dtype, 'in_channels': 8, 'model_channels': 320,
+                   'num_res_blocks': [2, 2, 2], 'transformer_depth': [0, 0, 2, 2, 10, 10], 'channel_mult': [1, 2, 4], 'transformer_depth_middle': 10,
+                   'use_linear_in_transformer': True, 'context_dim': 2048, 'num_head_channels': 64, 'transformer_depth_output': [0, 0, 0, 2, 2, 2, 10, 10, 10],
+                   'use_temporal_attention': False, 'use_temporal_resblock': False}
+
+    SDXL = {'use_checkpoint': False, 'image_size': 32, 'out_channels': 4, 'use_spatial_transformer': True, 'legacy': False,
+            'num_classes': 'sequential', 'adm_in_channels': 2816, 'dtype': dtype, 'in_channels': 4, 'model_channels': 320,
+            'num_res_blocks': [2, 2, 2], 'transformer_depth': [0, 0, 2, 2, 10, 10], 'channel_mult': [1, 2, 4], 'transformer_depth_middle': 10,
+            'use_linear_in_transformer': True, 'context_dim': 2048, 'num_head_channels': 64, 'transformer_depth_output': [0, 0, 0, 2, 2, 2, 10, 10, 10],
+            'use_temporal_attention': False, 'use_temporal_resblock': False}
+
+    SDXL_mid_cnet = {'use_checkpoint': False, 'image_size': 32, 'out_channels': 4, 'use_spatial_transformer': True, 'legacy': False,
+                     'num_classes': 'sequential', 'adm_in_channels': 2816, 'dtype': dtype, 'in_channels': 4, 'model_channels': 320,
+                     'num_res_blocks': [2, 2, 2], 'transformer_depth': [0, 0, 0, 0, 1, 1], 'channel_mult': [1, 2, 4], 'transformer_depth_middle': 1,
+                     'use_linear_in_transformer': True, 'context_dim': 2048, 'num_head_channels': 64, 'transformer_depth_output': [0, 0, 0, 0, 0, 0, 1, 1, 1],
+                     'use_temporal_attention': False, 'use_temporal_resblock': False}
+
+    SDXL_small_cnet = {'use_checkpoint': False, 'image_size': 32, 'out_channels': 4, 'use_spatial_transformer': True, 'legacy': False,
+                       'num_classes': 'sequential', 'adm_in_channels': 2816, 'dtype': dtype, 'in_channels': 4, 'model_channels': 320,
+                       'num_res_blocks': [2, 2, 2], 'transformer_depth': [0, 0, 0, 0, 0, 0], 'channel_mult': [1, 2, 4], 'transformer_depth_middle': 0,
+                       'use_linear_in_transformer': True, 'num_head_channels': 64, 'context_dim': 1, 'transformer_depth_output': [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       'use_temporal_attention': False, 'use_temporal_resblock': False}
+
+    supported_models = [Kolors, Kolors_inpaint,
+                        Kolors_ip2p, SDXL, SDXL_mid_cnet, SDXL_small_cnet]
 
     for unet_config in supported_models:
         matches = True
@@ -220,9 +251,32 @@ def load_clipvision_336_from_sd(sd, prefix="", convert_keys=False):
     return clip
 
 
+class KolorsControlNet(ControlNet):
+    def __init__(self, *args, **kwargs):
+        adm_in_channels = kwargs["adm_in_channels"]
+        if adm_in_channels == 2816:
+            # 异常: 该加载器不支持SDXL类型, 请使用ControlNet加载器+KolorsControlNetPatch节点
+            raise Exception(
+                "This loader does not support SDXL type, please use ControlNet loader + KolorsControlNetPatch node")
+
+        super().__init__(*args, **kwargs)
+        self.encoder_hid_proj = nn.Linear(
+            4096, 2048, bias=True)
+
+    def forward(self, *args, **kwargs):
+        with torch.cuda.amp.autocast(enabled=True):
+            if "context" in kwargs:
+                kwargs["context"] = self.encoder_hid_proj(
+                    kwargs["context"])
+
+            result = super().forward(*args, **kwargs)
+            return result
+
+
 class apply_kolors:
     def __enter__(self):
         import comfy.ldm.modules.diffusionmodules.openaimodel
+        import comfy.cldm.cldm
         import comfy.utils
         import comfy.clip_vision
 
@@ -244,8 +298,12 @@ class apply_kolors:
         self.original_supported_models = comfy.supported_models.models
         comfy.supported_models.models = [KolorsSupported]
 
+        self.original_controlnet = comfy.cldm.cldm.ControlNet
+        comfy.cldm.cldm.ControlNet = KolorsControlNet
+
     def __exit__(self, type, value, traceback):
         import comfy.ldm.modules.diffusionmodules.openaimodel
+        import comfy.cldm.cldm
         import comfy.utils
         comfy.utils.UNET_MAP_BASIC = self.original_UNET_MAP_BASIC
 
@@ -256,3 +314,5 @@ class apply_kolors:
 
         import comfy.clip_vision
         comfy.clip_vision.load_clipvision_from_sd = self.original_load_clipvision_from_sd
+
+        comfy.cldm.cldm.ControlNet = self.original_controlnet

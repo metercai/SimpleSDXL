@@ -90,6 +90,7 @@ def translate2en_apis(text):
 def init_or_load_translator_model(method='Slim Model'):
     global g_tokenizer, g_model, g_model_type
 
+    print(f'init_or_load_translator_model: {method}')
     if method != g_model_type or g_tokenizer is None or g_model is None:
         if method == "Big Model":
             if not os.path.exists(translator_path):
@@ -169,7 +170,7 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
                 return 'Slim Model', tokenizer.batch_decode(sequences, skip_special_tokens=True)[0]
             elif method=="Big Model":
                 inputs = tokenizer(text_zh, return_tensors="pt")
-                translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=60)
+                translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.convert_tokens_to_ids("eng_Latn"), max_length=60)
                 return 'Big Model', tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
             else:
                 return translator_default, translate2en_apis(text_zh)

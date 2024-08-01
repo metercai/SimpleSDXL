@@ -3,7 +3,7 @@ import folder_paths
 from pathlib import Path
 
 BASE_RESOLUTIONS = [
-    ("自定义", "自定义"),
+    ("width", "height"),
     (512, 512),
     (512, 768),
     (576, 1024),
@@ -15,6 +15,7 @@ BASE_RESOLUTIONS = [
     (768, 1536),
     (816, 1920),
     (832, 1152),
+    (832, 1216),
     (896, 1152),
     (896, 1088),
     (1024, 1024),
@@ -23,6 +24,7 @@ BASE_RESOLUTIONS = [
     (1080, 1920),
     (1440, 2560),
     (1088, 896),
+    (1216, 832),
     (1152, 832),
     (1152, 896),
     (1280, 768),
@@ -76,9 +78,13 @@ BRUSHNET_MODELS = {
         }
     }
 }
-POWERPAINT_CLIP = {
-    "base_fp16":{
-        "model_url":"https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/text_encoder/model.fp16.safetensors"
+POWERPAINT_MODELS = {
+    "base_fp16": {
+        "model_url": "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/text_encoder/model.fp16.safetensors"
+    },
+    "v2.1": {
+        "model_url": "https://huggingface.co/JunhaoZhuang/PowerPaint-v2-1/resolve/main/PowerPaint_Brushnet/diffusion_pytorch_model.safetensors",
+        "clip_url": "https://huggingface.co/JunhaoZhuang/PowerPaint-v2-1/resolve/main/PowerPaint_Brushnet/pytorch_model.bin",
     }
 }
 
@@ -222,6 +228,14 @@ IPADAPTER_MODELS = {
             "model_url": "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
         }
     },
+    "PLUS (kolors genernal)":{
+        "sd15":{
+            "model_url":""
+        },
+        "sdxl":{
+            "model_url":"https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/ip_adapter_plus_general.bin"
+        }
+    },
     "PLUS FACE (portraits)": {
         "sd15": {
             "model_url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter-plus-face_sd15.safetensors"
@@ -276,6 +290,14 @@ IPADAPTER_MODELS = {
             "model_url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-portrait_sdxl.bin",
         }
     },
+    "FACEID PORTRAIT UNNORM - SDXL only (strong)": {
+        "sd15": {
+            "model_url":""
+        },
+        "sdxl": {
+            "model_url": "https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-portrait_sdxl_unnorm.bin",
+        }
+    },
     "COMPOSITION": {
         "sd15": {
             "model_url": "https://huggingface.co/ostris/ip-composition-adapter/resolve/main/ip_plus_composition_sd15.safetensors"
@@ -283,6 +305,14 @@ IPADAPTER_MODELS = {
         "sdxl": {
             "model_url": "https://huggingface.co/ostris/ip-composition-adapter/resolve/main/ip_plus_composition_sdxl.safetensors"
         }
+    }
+}
+IPADAPTER_CLIPVISION_MODELS = {
+    "clip-vit-large-patch14-336":{
+        "model_url": "https://huggingface.co/openai/clip-vit-large-patch14-336/resolve/main/pytorch_model.bin"
+    },
+    "clip-vit-h-14-laion2B-s32B-b79K":{
+        "model_url": "https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K/resolve/main/open_clip_pytorch_model.safetensors"
     }
 }
 

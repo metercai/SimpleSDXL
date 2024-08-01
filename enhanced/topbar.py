@@ -19,9 +19,9 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.hydit_task as hydit_task
 import enhanced.comfy_task as comfy_task
+import launch
 from enhanced.simpleai import comfyd, models_info, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-
 
 css = '''
 '''
@@ -393,7 +393,18 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     if comfyd_active_checkbox:
         comfyd.stop()
-    
+   
+    default_model = preset_prepared.get('base_model')
+    previous_default_models = preset_prepared.get('previous_default_models', [])
+    checkpoint_downloads = preset_prepared.get('checkpoint_downloads', {})
+    embeddings_downloads = preset_prepared.get('embeddings_downloads', {})
+    lora_downloads = preset_prepared.get('lora_downloads', {})
+    vae_downloads = preset_prepared.get('vae_downloads', {})
+
+    preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
+                    default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
+                    vae_downloads)
+
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
 
