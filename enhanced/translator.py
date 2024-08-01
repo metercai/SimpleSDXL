@@ -169,7 +169,7 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
                 return 'Slim Model', tokenizer.batch_decode(sequences, skip_special_tokens=True)[0]
             elif method=="Big Model":
                 inputs = tokenizer(text_zh, return_tensors="pt")
-                translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=60)
+                translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.convert_tokens_to_ids("eng_Latn"), max_length=60)
                 return 'Big Model', tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
             else:
                 return translator_default, translate2en_apis(text_zh)
