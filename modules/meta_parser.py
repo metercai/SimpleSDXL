@@ -22,6 +22,7 @@ re_param = re.compile(re_param_code)
 re_imagesize = re.compile(r"^(\d+)x(\d+)$")
 
 get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
+get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
 
 
@@ -47,7 +48,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
     results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
-    results.append(get_layout_visible_inter('enhance_checkbox', visible, inter))
+    results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_visible_inter('base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
