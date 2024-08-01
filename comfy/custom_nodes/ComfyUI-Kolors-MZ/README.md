@@ -1,6 +1,10 @@
 ![image](./examples/workflow_ipa.png)
 
 ## Recent changes 
+* [2024-07-27] 新增MZ_KolorsControlNetLoader节点,用于加载可图ControlNet官方模型
+* [2024-07-26] 新增MZ_ApplySDXLSamplingSettings节点,用于V2版本重新回到SDXL的scheduler配置.
+  ![image](https://github.com/user-attachments/assets/8c3be6bf-4744-478f-8660-4842a4558a1f)
+
 * [2024-07-25] 修正sampling_settings,参数来自 [scheduler_config.json](https://huggingface.co/Kwai-Kolors/Kolors/blob/main/scheduler/scheduler_config.json),仅V2生效
 * [2024-07-21] 感谢来自yiwangsimple对Mac修复和测试的分支  https://github.com/yiwangsimple/ComfyUI-Kolors-MZ
 * [2024-07-21] 新增MZ_ChatGLM3TextEncodeAdvanceV2节点
@@ -16,6 +20,7 @@
 使用ComfyUI原生采样
 
 工作流在examples/workflow.png中获取
+
  
 ### UNET模型下载
 unet模型放置在 models/unet/ 文件夹下
@@ -39,7 +44,17 @@ chatglm3放置在 models/LLM/ 文件夹下
 https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/ip_adapter_plus_general.bin 下载至 models/ipadapter/
 
 https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/image_encoder/pytorch_model.bin 下载至 models/clip_vision/
- 
+
+### 官方ControlNet模型下载地址
+模型主页(Depth): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Depth
+
+模型主页(Canny): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Canny
+
+### Kolors-Inpainting模型下载地址
+模型主页: https://huggingface.co/Kwai-Kolors/Kolors-Inpainting
+
+https://huggingface.co/Kwai-Kolors/Kolors-Inpainting/resolve/main/unet/diffusion_pytorch_model.safetensors 下载至 models/unet/
+
 
 ## Implementation of Kolors on ComfyUI
 
@@ -76,15 +91,33 @@ https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/ip_adapte
 
 https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/image_encoder/pytorch_model.bin Download to models/clip_vision/
 
+### Official ControlNet model download link
+Model homepage(Depth): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Depth
+
+Model homepage(Canny): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Canny
+
+### Kolors-Inpainting model download link
+Model homepage: https://huggingface.co/Kwai-Kolors/Kolors-Inpainting
+
+https://huggingface.co/Kwai-Kolors/Kolors-Inpainting/resolve/main/unet/diffusion_pytorch_model.safetensors Download to models/unet/
+
+## 使用ComfyUI-KwaiKolorsWrapper在相同种子下测试结果 (Testing results with the same seed using ComfyUI-KwaiKolorsWrapper)
+测试工作流来自examples/workflow_same_seed_test.png 
+
+The test workflow comes from examples/workflow_same_seed_test.png
+
+![image](./examples/workflow_same_seed_test.png)
 
 ## FAQ
+加载模型时出现的错误
++ 目前kolors有两个版本, 一种是unet类型采用unet加载器, 一种是放checkpoints文件夹用KolorsCheckpointLoaderSimple加载器, 如果你的模型来自huggingface的unet文件夹, 优先尝试使用unet加载器 (Currently, there are two versions of kolors, one is unet type using unet loader, and the other is placed in the checkpoints folder using KolorsCheckpointLoaderSimple loader. If your model comes from the huggingface unet folder, try to use the unet loader first)
++ 如果你无法确定模型类型, 那就都试一下 (If you are not sure about the model type, try both)
 
 Mac用户无法使用(Mac users cannot use)
 + Mac用户可移步至[ComfyUI-Kolors-MZ](https://github.com/yiwangsimple/ComfyUI-Kolors-MZ)  (Mac users can go to [ComfyUI-Kolors-MZ](https://github.com/yiwangsimple/ComfyUI-Kolors-MZ) )
 
 和IPAdapter有关的错误(Errors related to IPAdapter)
 + 确保ComfyUI本体和ComfyUI_IPAdapter_plus已经更新到最新版本(Make sure ComfyUI ontology and ComfyUI_IPAdapter_plus are updated to the latest version)
-
 
 name 'round_up' is not defined
 + 参考:https://github.com/THUDM/ChatGLM2-6B/issues/272#issuecomment-1632164243 , 使用 pip install cpm_kernels 或者 pip install -U cpm_kernels 更新 cpm_kernels

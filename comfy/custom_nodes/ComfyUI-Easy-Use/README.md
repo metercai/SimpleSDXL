@@ -6,7 +6,7 @@
 
 # ComfyUI Easy Use
 
-[![Bilibili Badge](https://img.shields.io/badge/1.0版本-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white&link=https://www.bilibili.com/video/BV1Wi4y1h76G)](https://www.bilibili.com/video/BV1Wi4y1h76G)
+[![Bilibili Badge](https://img.shields.io/badge/1.1版本-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white&link=https://www.bilibili.com/video/BV1w6421F7Uv)](https://www.bilibili.com/video/BV1w6421F7Uv)
 [![Bilibili Badge](https://img.shields.io/badge/基本介绍-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white&link=https://www.bilibili.com/video/BV1vQ4y1G7z7)](https://www.bilibili.com/video/BV1vQ4y1G7z7/)
 </div>
 
@@ -14,7 +14,7 @@
 
 [![ComfyUI-Yolain-Workflows](https://github.com/yolain/ComfyUI-Easy-Use/assets/73304135/9a3f54bc-a677-4bf1-a196-8845dd57c942)](https://github.com/yolain/ComfyUI-Yolain-Workflows)
 
-## 特色介绍
+## 👨🏻‍🎨 特色介绍
 
 - 沿用了 [tinyterraNodes](https://github.com/TinyTerra/ComfyUI_tinyterraNodes) 的思路，大大减少了折腾工作流的时间成本。
 - UI界面美化，首次安装的用户，如需使用UI主题，请在 Settings -> Color Palette 中自行切换主题并**刷新页面**即可
@@ -36,11 +36,59 @@
 - 支持 强制清理comfyUI模型显存占用
 - 支持Stable Diffusion 3 多账号API节点
 - 支持IC-Light的应用 [示例参考](https://github.com/yolain/ComfyUI-Yolain-Workflows?tab=readme-ov-file#2-5-ic-light) | [代码整合来源](https://github.com/huchenlei/ComfyUI-IC-Light) | [技术参考](https://github.com/lllyasviel/IC-Light)
+- 中文提示词自动识别，使用[opus-mt-zh-en模型](https://huggingface.co/Helsinki-NLP/opus-mt-zh-en)
+- 支持 sd3 模型
+- 支持 kolors 模型
 
-## 更新日志
+## 👨🏻‍🔧 安装
+
+1. 将存储库克隆到 **custom_nodes** 目录并安装依赖
+```shell
+#1. git下载
+git clone https://github.com/yolain/ComfyUI-Easy-Use
+#2. 安装依赖
+双击install.bat安装依赖
+```
+
+## ☕️ 计划
+
+- [ ] 更新便于维护的新前端代码
+  - [x] 使用sass维护css样式
+  - [ ] 对原有扩展进行优化
+  - [ ] 增加新的组件（如节点时间统计等） 
+  - [ ] 增加浅色主题
+- [ ] 在[ComfyUI-Yolain-Workflows](https://github.com/yolain/ComfyUI-Yolain-Workflows)中上传更多的工作流（如kolors,sd3等），并更新english版本的readme  
+- [ ] 更详细功能介绍的 gitbook   
+
+## 📜 更新日志
+
+**v1.2.1**
+
+- `easy imageRemBg` 增加 **inspyrenet** 选项
+- 增加 `easy controlnetLoader++`
+- `easy ipadapterApply` 和 `easy ipadapterApplyADV` 增加 **PLUS (kolors genernal)** 预置项 (支持kolors IPA，可能会改名）
+- 去除 `easy positive` `easy negative` 等prompt节点的自动将中文翻译功能，自动翻译仅在 `easy a1111Loader` 等不支持中文TE的加载器中生效
+- 增加 `easy kolorsLoader` - 可灵加载器，参考了 [MinusZoneAI](https://github.com/MinusZoneAI/ComfyUI-Kolors-MZ) 和 [kijai](https://github.com/kijai/ComfyUI-KwaiKolorsWrapper) 的代码。
+
+**v1.2.0**
+
+- 增加 `easy pulIDApply` 和 `easy pulIDApplyADV`
+- 增加 `easy hunyuanDiTLoader` 和 `easy pixArtLoader`
+- 当新菜单的位置在上或者下时增加上 crystools 的显示，推荐开两个就好（如果后续crystools有更新UI适配我可能会删除掉）
+- 增加 **easy sliderControl** - 滑块控制节点，当前可用于控制ipadapterMS的参数 (双击滑块可重置为默认值)
+- 增加 **layer_weights** 属性在 `easy ipadapterApplyADV` 节点
+
+**v1.1.9**
+
+- 增加 新的调度器 **gitsScheduler**
+- 增加 `easy imageBatchToImageList` 和 `easy imageListToImageBatch` (修复Impact版的一点小问题)
+- 递归模型子目录嵌套
+- 支持 sd3 模型 
+- 增加 `easy applyInpaint` - 局部重绘全模式节点 (相比与之前的kSamplerInpating节点逻辑会更合理些)
 
 **v1.1.8**
 
+- 增加中文提示词自动翻译，使用[opus-mt-zh-en模型](https://huggingface.co/Helsinki-NLP/opus-mt-zh-en), 默认已对wildcard、lora正则处理, 其他需要保留的中文，可使用`@你的提示词@`包裹 (若依赖安装完成后报错, 请重启)，测算大约会占0.3GB显存
 - 增加 `easy controlnetStack` - controlnet堆
 - 增加 `easy applyBrushNet` - [示例参考](https://github.com/yolain/ComfyUI-Yolain-Workflows/blob/main/workflows/2_advanced/2-4inpainting/2-4brushnet_1.1.8.json)
 - 增加 `easy applyPowerPaint` - [示例参考](https://github.com/yolain/ComfyUI-Yolain-Workflows/blob/main/workflows/2_advanced/2-4inpainting/2-4powerpaint_outpaint_1.1.8.json)
@@ -124,7 +172,9 @@
 - 去除强制**control_before_generate**设定
 - 增加 `easy imageRemBg` - 默认为BriaAI的RMBG-1.4模型, 移除背景效果更加，速度更快
 
-**v1.1.0**
+
+<details>
+<summary><b>v1.1.0</b></summary>
 
 - 增加 `easy imageSplitList` - 拆分每 N 张图像
 - 增加 `easy preSamplingDiffusionADDTL` - 可配置前景、背景、blended的additional_prompt等   
@@ -137,6 +187,7 @@
 - 修复 `easy wildcards` 读取lora未填写完整路径时未自动检索导致加载lora失败的问题
 - 修复 `easy instantIDApply` mask 未传入正确值
 - 修复 在 非a1111提示词风格下 BREAK 不生效的问题
+</details>
 
 <details>
 <summary><b>v1.0.9</b></summary>
@@ -349,6 +400,7 @@
 | easy imageChooser              | [cg-image-picker](https://github.com/chrisgoringe/cg-image-picker) | Preview Chooser         | 
 | easy styleAlignedBatchAlign    | [style_aligned_comfy](https://github.com/chrisgoringe/cg-image-picker) | styleAlignedBatchAlign  | 
 | easy icLightApply              | [ComfyUI-IC-Light](https://github.com/huchenlei/ComfyUI-IC-Light) | ICLightApply等           |
+| easy kolorsLoader              | [ComfyUI-Kolors-MZ](https://github.com/MinusZoneAI/ComfyUI-Kolors-MZ) | kolorsLoader            |
 
 ## Credits
 
@@ -372,8 +424,18 @@
 
 [ComfyUI_InstantID](https://github.com/cubiq/ComfyUI_InstantID) - 人脸迁移
 
+[ComfyUI_PuLID](https://github.com/cubiq/PuLID_ComfyUI) - 人脸迁移
+
 [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts) - pyssss 小蛇🐍脚本
 
 [cg-image-picker](https://github.com/chrisgoringe/cg-image-picker) - 图片选择器
 
 [ComfyUI-BrushNet](https://github.com/nullquant/ComfyUI-BrushNet) - BrushNet 内补节点
+
+[ComfyUI_ExtraModels](https://github.com/city96/ComfyUI_ExtraModels) - DiT架构相关节点（Pixart、混元DiT等）
+
+##  🌟Stargazers
+
+My gratitude extends to the generous souls who bestow a star. Your support is much appreciated!
+
+[![Stargazers repo roster for @yolain/ComfyUI-Easy-Use](https://reporoster.com/stars/yolain/ComfyUI-Easy-Use)](https://github.com/yolain/ComfyUI-Easy-Use/stargazers)

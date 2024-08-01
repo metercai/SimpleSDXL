@@ -142,6 +142,52 @@ NODE_DISPLAY_NAME_MAPPINGS[
     "MZ_ChatGLM3_Advance_V2"] = f"{AUTHOR_NAME} - ChatGLM3TextEncodeAdvanceV2"
 
 
+class MZ_KolorsCheckpointLoaderSimple():
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {"ckpt_name": (folder_paths.get_filename_list("checkpoints"), ),
+                             }}
+    RETURN_TYPES = ("MODEL", "VAE")
+    FUNCTION = "load_checkpoint"
+
+    CATEGORY = CATEGORY_NAME
+
+    def load_checkpoint(self, **kwargs):
+        from . import mz_kolors_core
+        importlib.reload(mz_kolors_core)
+        return mz_kolors_core.MZ_KolorsCheckpointLoaderSimple_call(kwargs)
+
+
+NODE_CLASS_MAPPINGS["MZ_KolorsCheckpointLoaderSimple"] = MZ_KolorsCheckpointLoaderSimple
+NODE_DISPLAY_NAME_MAPPINGS[
+    "MZ_KolorsCheckpointLoaderSimple"] = f"{AUTHOR_NAME} - KolorsCheckpointLoaderSimple"
+
+
+class MZ_KolorsControlNetLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "control_net_name": (folder_paths.get_filename_list("controlnet"), ),
+            # "seed": ("INT", {"default": 0, "min": 0, "max": 1000000}),
+        }}
+
+    RETURN_TYPES = ("CONTROL_NET",)
+    RETURN_NAMES = ("ControlNet",)
+    FUNCTION = "load_controlnet"
+
+    CATEGORY = CATEGORY_NAME
+
+    def load_controlnet(self, **kwargs):
+        from . import mz_kolors_core
+        importlib.reload(mz_kolors_core)
+        return mz_kolors_core.MZ_KolorsControlNetLoader_call(kwargs)
+
+
+NODE_CLASS_MAPPINGS["MZ_KolorsControlNetLoader"] = MZ_KolorsControlNetLoader
+NODE_DISPLAY_NAME_MAPPINGS[
+    "MZ_KolorsControlNetLoader"] = f"{AUTHOR_NAME} - KolorsControlNetLoader"
+
+
 class MZ_KolorsUNETLoaderV2():
     @classmethod
     def INPUT_TYPES(s):
@@ -212,6 +258,56 @@ class MZ_KolorsCLIPVisionLoader:
 
 NODE_CLASS_MAPPINGS["MZ_KolorsCLIPVisionLoader"] = MZ_KolorsCLIPVisionLoader
 NODE_DISPLAY_NAME_MAPPINGS["MZ_KolorsCLIPVisionLoader"] = f"{AUTHOR_NAME} - KolorsCLIPVisionLoader - Legacy"
+
+
+class MZ_ApplySDXLSamplingSettings():
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL", ),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL", )
+
+    FUNCTION = "apply_sampling_settings"
+    CATEGORY = CATEGORY_NAME
+
+    def apply_sampling_settings(self, **kwargs):
+        from . import mz_kolors_core
+        importlib.reload(mz_kolors_core)
+        return mz_kolors_core.MZ_ApplySDXLSamplingSettings_call(kwargs)
+
+
+NODE_CLASS_MAPPINGS["MZ_ApplySDXLSamplingSettings"] = MZ_ApplySDXLSamplingSettings
+NODE_DISPLAY_NAME_MAPPINGS[
+    "MZ_ApplySDXLSamplingSettings"] = f"{AUTHOR_NAME} - ApplySDXLSamplingSettings"
+
+
+class MZ_ApplyCUDAGenerator():
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL", ),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL", )
+
+    FUNCTION = "apply_cuda_generator"
+    CATEGORY = CATEGORY_NAME
+
+    def apply_cuda_generator(self, **kwargs):
+        from . import mz_kolors_core
+        importlib.reload(mz_kolors_core)
+        return mz_kolors_core.MZ_ApplyCUDAGenerator_call(kwargs)
+
+
+NODE_CLASS_MAPPINGS["MZ_ApplyCUDAGenerator"] = MZ_ApplyCUDAGenerator
+NODE_DISPLAY_NAME_MAPPINGS[
+    "MZ_ApplyCUDAGenerator"] = f"{AUTHOR_NAME} - ApplyCUDAGenerator"
 
 
 from .ComfyUI_IPAdapter_plus.IPAdapterPlus import IPAdapterAdvanced, IPAdapterModelLoader

@@ -1,7 +1,8 @@
 from typing import Iterator, List, Tuple, Dict, Any, Union, Optional
 from _decimal import Context, getcontext
 from decimal import Decimal
-from .libs.utils import AlwaysEqualProxy, cleanGPUUsedForce
+from .libs.utils import AlwaysEqualProxy, ByPassTypeTuple, cleanGPUUsedForce
+from .libs.cache import remove_cache
 import numpy as np
 import json
 
@@ -74,7 +75,7 @@ class Int:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {"value": ("INT", {"default": 0})},
+            "required": {"value": ("INT", {"default": 0, "min": -999999, "max": 999999,})},
         }
 
     RETURN_TYPES = ("INT",)
@@ -143,7 +144,7 @@ class Float:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {"value": ("FLOAT", {"default": 0, "step": 0.01})},
+            "required": {"value": ("FLOAT", {"default": 0, "step": 0.01, "min": -999999, "max": 999999,})},
         }
 
     RETURN_TYPES = ("FLOAT",)
@@ -423,19 +424,18 @@ class ConvertAnything:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "anything": (AlwaysEqualProxy("*"),),
+            "*": (AlwaysEqualProxy("*"),),
             "output_type": (["string", "int", "float", "boolean"], {"default": "string"}),
         }}
 
-    RETURN_TYPES = (AlwaysEqualProxy("*"),),
-    RETURN_NAMES = ('*',)
+    RETURN_TYPES = ByPassTypeTuple((AlwaysEqualProxy("*"),))
     OUTPUT_NODE = True
     FUNCTION = "convert"
     CATEGORY = "EasyUse/Logic"
 
     def convert(self, *args, **kwargs):
         print(kwargs)
-        anything = kwargs['anything']
+        anything = kwargs['*']
         output_type = kwargs['output_type']
         params = None
         if output_type == 'string':
@@ -477,7 +477,11 @@ class showAnything:
                     values.append(str(val))
                     pass
 
-        if unique_id and extra_pnginfo and "workflow" in extra_pnginfo[0]:
+        if not extra_pnginfo:
+            print("Error: extra_pnginfo is empty")
+        elif (not isinstance(extra_pnginfo[0], dict) or "workflow" not in extra_pnginfo[0]):
+            print("Error: extra_pnginfo[0] is not a dict or missing 'workflow' key")
+        else:
             workflow = extra_pnginfo[0]["workflow"]
             node = next((x for x in workflow["nodes"] if str(x["id"]) == unique_id[0]), None)
             if node:
@@ -531,9 +535,9 @@ class cleanGPUUsed:
 
     def empty_cache(self, anything, unique_id=None, extra_pnginfo=None):
         cleanGPUUsedForce()
+        remove_cache('*')
         return ()
 
-from .libs.cache import remove_cache
 class clearCacheKey:
     @classmethod
     def INPUT_TYPES(s):

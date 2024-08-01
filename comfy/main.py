@@ -52,10 +52,10 @@ def execute_prestartup_script():
                 import_message = ""
             else:
                 import_message = " (PRESTARTUP FAILED)"
-            #print("{:6.1f} seconds{}:".format(n[0], import_message), n[1])
+            print("{:6.1f} seconds{}:".format(n[0], import_message), n[1])
         #print()
 
-execute_prestartup_script()
+#execute_prestartup_script()
 
 # Main code
 import asyncio
@@ -234,6 +234,7 @@ if __name__ == "__main__":
         for config_path in itertools.chain(*args.extra_model_paths_config):
             load_extra_path_config(config_path)
 
+    execute_prestartup_script()
     nodes.init_extra_nodes(init_custom_nodes=not args.disable_all_custom_nodes)
 
     cuda_malloc_warning()

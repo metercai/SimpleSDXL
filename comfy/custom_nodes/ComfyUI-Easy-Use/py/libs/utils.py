@@ -5,6 +5,19 @@ class AlwaysEqualProxy(str):
     def __ne__(self, _):
         return False
 
+class TautologyStr(str):
+    def __ne__(self, other):
+        return False
+
+class ByPassTypeTuple(tuple):
+    def __getitem__(self, index):
+        if index>0:
+            index=0
+        item = super().__getitem__(index)
+        if isinstance(item, str):
+            return TautologyStr(item)
+        return item
+
 comfy_ui_revision = None
 def get_comfyui_revision():
     try:
@@ -92,6 +105,8 @@ def get_sd_version(model):
     model_config: comfy.supported_models.supported_models_base.BASE = base.model_config
     if isinstance(model_config, comfy.supported_models.SDXL):
         return 'sdxl'
+    elif isinstance(model_config, comfy.supported_models.SDXLRefiner):
+        return 'sdxl_refiner'
     elif isinstance(
             model_config, (comfy.supported_models.SD15, comfy.supported_models.SD20)
     ):
@@ -100,6 +115,10 @@ def get_sd_version(model):
             model_config, (comfy.supported_models.SVD_img2vid)
     ):
         return 'svd'
+    elif isinstance(model_config, comfy.supported_models.SD3):
+        return 'sd3'
+    elif isinstance(model_config, comfy.supported_models.HunyuanDiT):
+        return 'hydit'
     else:
         return 'unknown'
 

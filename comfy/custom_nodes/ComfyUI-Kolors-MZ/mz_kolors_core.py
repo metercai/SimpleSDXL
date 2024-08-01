@@ -210,14 +210,54 @@ def MZ_KolorsUNETLoaderV2_call(kwargs):
         return (model, )
 
 
+def MZ_KolorsCheckpointLoaderSimple_call(kwargs):
+    checkpoint_name = kwargs.get("ckpt_name")
+
+    ckpt_path = folder_paths.get_full_path("checkpoints", checkpoint_name)
+
+    from . import hook_comfyui_kolors_v2
+    import comfy.sd
+
+    with hook_comfyui_kolors_v2.apply_kolors():
+        out = comfy.sd.load_checkpoint_guess_config(
+            ckpt_path, output_vae=True, output_clip=False, embedding_directory=folder_paths.get_folder_paths("embeddings"))
+
+        unet, _, vae = out[:3]
+        return (unet, vae)
+
+
 from comfy.cldm.cldm import ControlNet
 from comfy.controlnet import ControlLora
 
 
-def MZ_KolorsControlNetPatch_call(kwargs):
+def MZ_KolorsControlNetLoader_call(kwargs):
+    control_net_name = kwargs.get("control_net_name")
+    controlnet_path = folder_paths.get_full_path(
+        "controlnet", control_net_name)
+
+    from torch import nn
     from . import hook_comfyui_kolors_v2
+    import comfy.controlnet
+
+    with hook_comfyui_kolors_v2.apply_kolors():
+        control_net = comfy.controlnet.load_controlnet(controlnet_path)
+        return (control_net, )
+
+
+def MZ_KolorsControlNetPatch_call(kwargs):
+    import copy
+    from . import hook_comfyui_kolors_v2
+    import comfy.model_management
+    import comfy.model_patcher
+
     model = kwargs.get("model")
     control_net = kwargs.get("control_net")
+
+    if hasattr(control_net, "control_model") and hasattr(control_net.control_model, "encoder_hid_proj"):
+        return (control_net,)
+
+    control_net = copy.deepcopy(control_net)
+
     import comfy.controlnet
     if isinstance(control_net, ControlLora):
         del_keys = []
@@ -229,25 +269,32 @@ def MZ_KolorsControlNetPatch_call(kwargs):
             control_net.control_weights.pop(k)
 
         super_pre_run = ControlLora.pre_run
-        super_copy = ControlLora.copy
-
         super_forward = ControlNet.forward
 
         def KolorsControlNet_forward(self, x, hint, timesteps, context, **kwargs):
             with torch.cuda.amp.autocast(enabled=True):
-                context = model.model.diffusion_model.encoder_hid_proj(context)
+                context = self.encoder_hid_proj(context)
                 return super_forward(self, x, hint, timesteps, context, **kwargs)
 
         def KolorsControlLora_pre_run(self, *args, **kwargs):
             result = super_pre_run(self, *args, **kwargs)
 
             if hasattr(self, "control_model"):
+                if hasattr(self.control_model, "encoder_hid_proj"):
+                    return result
+
+                setattr(self.control_model, "encoder_hid_proj",
+                        model.model.diffusion_model.encoder_hid_proj)
+
                 self.control_model.forward = MethodType(
                     KolorsControlNet_forward, self.control_model)
+
             return result
 
         control_net.pre_run = MethodType(
             KolorsControlLora_pre_run, control_net)
+
+        super_copy = ControlLora.copy
 
         def KolorsControlLora_copy(self, *args, **kwargs):
             c = super_copy(self, *args, **kwargs)
@@ -258,18 +305,23 @@ def MZ_KolorsControlNetPatch_call(kwargs):
         control_net.copy = MethodType(
             KolorsControlLora_copy, control_net)
 
+        control_net = copy.deepcopy(control_net)
+
     elif isinstance(control_net, comfy.controlnet.ControlNet):
         model_label_emb = model.model.diffusion_model.label_emb
 
         control_net.control_model.label_emb = model_label_emb
+        setattr(control_net.control_model, "encoder_hid_proj",
+                model.model.diffusion_model.encoder_hid_proj)
 
-        control_net.control_model_wrapped.model.label_emb = model_label_emb
+        control_net.control_model_wrapped = comfy.model_patcher.ModelPatcher(
+            control_net.control_model, load_device=control_net.load_device, offload_device=comfy.model_management.unet_offload_device())
 
         super_forward = ControlNet.forward
 
         def KolorsControlNet_forward(self, x, hint, timesteps, context, **kwargs):
             with torch.cuda.amp.autocast(enabled=True):
-                context = model.model.diffusion_model.encoder_hid_proj(context)
+                context = self.encoder_hid_proj(context)
                 return super_forward(self, x, hint, timesteps, context, **kwargs)
 
         control_net.control_model.forward = MethodType(
@@ -290,3 +342,53 @@ def MZ_KolorsCLIPVisionLoader_call(kwargs):
     with hook_comfyui_kolors_v2.apply_kolors():
         clip_vision = comfy.clip_vision.load(clip_path)
         return (clip_vision,)
+
+
+def MZ_ApplySDXLSamplingSettings_call(kwargs):
+    model = kwargs.get("model").clone()
+
+    import comfy.model_sampling
+    sampling_base = comfy.model_sampling.ModelSamplingDiscrete
+    sampling_type = comfy.model_sampling.EPS
+
+    class SDXLSampling(sampling_base, sampling_type):
+        pass
+
+    model.model.model_config.sampling_settings["beta_schedule"] = "linear"
+    model.model.model_config.sampling_settings["linear_start"] = 0.00085
+    model.model.model_config.sampling_settings["linear_end"] = 0.012
+    model.model.model_config.sampling_settings["timesteps"] = 1000
+
+    model_sampling = SDXLSampling(model.model.model_config)
+
+    model.add_object_patch("model_sampling", model_sampling)
+
+    return (model,)
+
+
+def MZ_ApplyCUDAGenerator_call(kwargs):
+    model = kwargs.get("model")
+
+    def prepare_noise(latent_image, seed, noise_inds=None):
+        """
+        creates random noise given a latent image and a seed.
+        optional arg skip can be used to skip and discard x number of noise generations for a given seed
+        """
+        generator = torch.Generator(device="cuda").manual_seed(seed)
+        if noise_inds is None:
+            return torch.randn(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, generator=generator, device="cuda")
+
+        unique_inds, inverse = np.unique(noise_inds, return_inverse=True)
+        noises = []
+        for i in range(unique_inds[-1] + 1):
+            noise = torch.randn([1] + list(latent_image.size())[1:], dtype=latent_image.dtype,
+                                layout=latent_image.layout, generator=generator, device="cuda")
+            if i in unique_inds:
+                noises.append(noise)
+        noises = [noises[i] for i in inverse]
+        noises = torch.cat(noises, axis=0)
+        return noises
+
+    import comfy.sample
+    comfy.sample.prepare_noise = prepare_noise
+    return (model,)

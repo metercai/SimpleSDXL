@@ -7,8 +7,7 @@ import { $t } from '../common/i18n.js';
 import { findWidgetByName, toggleWidget, updateNodeHeight} from "../common/utils.js";
 
 const seedNodes = ["easy seed", "easy latentNoisy", "easy wildcards", "easy preSampling", "easy preSamplingAdvanced", "easy preSamplingNoiseIn", "easy preSamplingSdTurbo", "easy preSamplingCascade", "easy preSamplingDynamicCFG", "easy preSamplingLayerDiffusion", "easy fullkSampler", "easy fullCascadeKSampler"]
-const loaderNodes = ["easy fullLoader", "easy a1111Loader", "easy comfyLoader"]
-
+const loaderNodes = ["easy fullLoader", "easy a1111Loader", "easy comfyLoader", "easy hunyuanDiTLoader", "easy pixArtLoader"]
 
 function widgetLogic(node, widget) {
 	if (widget.name === 'lora_name') {
@@ -77,14 +76,30 @@ function widgetLogic(node, widget) {
 		}
 	}
 	if (widget.name === 'add_noise') {
+		let control_before_widget = findWidgetByName(node, 'control_before_generate')
+		let control_after_widget = findWidgetByName(node, 'control_after_generate')
 		if (widget.value === "disable") {
 			toggleWidget(node, findWidgetByName(node, 'seed'))
-			toggleWidget(node, findWidgetByName(node, 'control_before_generate'))
-			toggleWidget(node, findWidgetByName(node, 'control_after_generate'))
+			if(control_before_widget){
+				control_before_widget.last_value = control_before_widget.value
+				control_before_widget.value = 'fixed'
+				toggleWidget(node, control_before_widget)
+			}
+			if(control_after_widget){
+				control_after_widget.last_value = control_after_widget.value
+				control_after_widget.value = 'fixed'
+				toggleWidget(node, control_after_widget)
+			}
 		} else {
 			toggleWidget(node, findWidgetByName(node, 'seed'), true)
-			toggleWidget(node, findWidgetByName(node, 'control_before_generate'), true)
-			toggleWidget(node, findWidgetByName(node, 'control_after_generate'), true)
+			if(control_before_widget){
+				if(control_before_widget?.last_value) control_before_widget.value = control_before_widget.last_value
+				toggleWidget(node, control_before_widget, true)
+			}
+			if(control_after_widget) {
+				if(control_after_widget?.last_value) control_after_widget.value = control_after_widget.last_value
+				toggleWidget(node, findWidgetByName(node, control_after_widget, true))
+			}
 		}
 		updateNodeHeight(node)
 	}
@@ -177,7 +192,19 @@ function widgetLogic(node, widget) {
 	}
 
 	if (widget.name === 'resolution') {
-		if (widget.value === "自定义 x 自定义") {
+		if(widget.value === "自定义 x 自定义"){
+			widget.value = 'width x height (custom)'
+		}
+		if (widget.value === "自定义 x 自定义" || widget.value === 'width x height (custom)') {
+			toggleWidget(node, findWidgetByName(node, 'empty_latent_width'), true)
+			toggleWidget(node, findWidgetByName(node, 'empty_latent_height'), true)
+		} else {
+			toggleWidget(node, findWidgetByName(node, 'empty_latent_width'), false)
+			toggleWidget(node, findWidgetByName(node, 'empty_latent_height'), false)
+		}
+	}
+	if (widget.name === 'ratio') {
+		if (widget.value === "custom") {
 			toggleWidget(node, findWidgetByName(node, 'empty_latent_width'), true)
 			toggleWidget(node, findWidgetByName(node, 'empty_latent_height'), true)
 		} else {
@@ -252,7 +279,8 @@ function widgetLogic(node, widget) {
             'FACEID',
             'FACEID PLUS - SD1.5 only',
             'FACEID PLUS V2',
-			'FACEID PORTRAIT (style transfer)'
+			'FACEID PORTRAIT (style transfer)',
+			'FACEID PORTRAIT UNNORM - SDXL only (strong)'
         ]
 		if(normol_presets.includes(widget.value)){
 			toggleWidget(node, findWidgetByName(node, 'lora_strength'))
@@ -273,7 +301,7 @@ function widgetLogic(node, widget) {
 			}else{
 				toggleWidget(node, findWidgetByName(node, 'weight_faceidv2'))
 			}
-			if(widget.value == 'FACEID PORTRAIT (style transfer)'){
+			if(['FACEID PORTRAIT (style transfer)','FACEID PORTRAIT UNNORM - SDXL only (strong)'].includes(widget.value)){
 				toggleWidget(node, findWidgetByName(node, 'lora_strength'), false)
 			}
 			else{
@@ -333,6 +361,7 @@ function widgetLogic(node, widget) {
 			toggleWidget(node, findWidgetByName(node, 'beta_d'))
 			toggleWidget(node, findWidgetByName(node, 'beta_min'))
 			toggleWidget(node, findWidgetByName(node, 'eps_s'))
+			toggleWidget(node, findWidgetByName(node, 'coeff'))
 			if(widget.value != 'exponentialADV'){
 				toggleWidget(node, findWidgetByName(node, 'rho'), true)
 			}else{
@@ -346,7 +375,9 @@ function widgetLogic(node, widget) {
 			toggleWidget(node, findWidgetByName(node, 'beta_d'),true)
 			toggleWidget(node, findWidgetByName(node, 'beta_min'),true)
 			toggleWidget(node, findWidgetByName(node, 'eps_s'),true)
-		}else{
+			toggleWidget(node, findWidgetByName(node, 'coeff'))
+		}
+		else{
 			toggleWidget(node, findWidgetByName(node, 'denoise'),true)
 			toggleWidget(node, findWidgetByName(node, 'sigma_max'))
 			toggleWidget(node, findWidgetByName(node, 'sigma_min'))
@@ -354,8 +385,72 @@ function widgetLogic(node, widget) {
 			toggleWidget(node, findWidgetByName(node, 'beta_min'))
 			toggleWidget(node, findWidgetByName(node, 'eps_s'))
 			toggleWidget(node, findWidgetByName(node, 'rho'))
+			if(widget.value == 'gits') 	toggleWidget(node, findWidgetByName(node, 'coeff'), true)
+			else toggleWidget(node, findWidgetByName(node, 'coeff'))
 		}
 		updateNodeHeight(node)
+	}
+
+	if(widget.name === 'inpaint_mode'){
+		switch (widget.value){
+			case 'normal':
+			case 'fooocus_inpaint':
+				toggleWidget(node, findWidgetByName(node, 'dtype'))
+				toggleWidget(node, findWidgetByName(node, 'fitting'))
+				toggleWidget(node, findWidgetByName(node, 'function'))
+				toggleWidget(node, findWidgetByName(node, 'scale'))
+				toggleWidget(node, findWidgetByName(node, 'start_at'))
+				toggleWidget(node, findWidgetByName(node, 'end_at'))
+				break
+			case 'brushnet_random':
+			case 'brushnet_segmentation':
+				toggleWidget(node, findWidgetByName(node, 'dtype'), true)
+				toggleWidget(node, findWidgetByName(node, 'fitting'))
+				toggleWidget(node, findWidgetByName(node, 'function'))
+				toggleWidget(node, findWidgetByName(node, 'scale'), true)
+				toggleWidget(node, findWidgetByName(node, 'start_at'), true)
+				toggleWidget(node, findWidgetByName(node, 'end_at'), true)
+				break
+			case 'powerpaint':
+				toggleWidget(node, findWidgetByName(node, 'dtype'), true)
+				toggleWidget(node, findWidgetByName(node, 'fitting'),true)
+				toggleWidget(node, findWidgetByName(node, 'function'),true)
+				toggleWidget(node, findWidgetByName(node, 'scale'), true)
+				toggleWidget(node, findWidgetByName(node, 'start_at'), true)
+				toggleWidget(node, findWidgetByName(node, 'end_at'), true)
+				break
+		}
+		updateNodeHeight(node)
+	}
+
+	if(widget.name == 't5_type'){
+		switch (widget.value){
+			case 'sd3':
+				toggleWidget(node, findWidgetByName(node, 'clip_name'), true)
+				toggleWidget(node, findWidgetByName(node, 'padding'), true)
+				toggleWidget(node, findWidgetByName(node, 't5_name'))
+				toggleWidget(node, findWidgetByName(node, 'device'))
+				toggleWidget(node, findWidgetByName(node, 'dtype'))
+				break
+			case 't5v11':
+				toggleWidget(node, findWidgetByName(node, 'clip_name'))
+				toggleWidget(node, findWidgetByName(node, 'padding'))
+				toggleWidget(node, findWidgetByName(node, 't5_name'),true)
+				toggleWidget(node, findWidgetByName(node, 'device'),true)
+				toggleWidget(node, findWidgetByName(node, 'dtype'),true)
+		}
+		updateNodeHeight(node)
+	}
+
+	if(widget.name == 'rem_mode'){
+		switch (widget.value){
+			case 'Inspyrenet':
+				toggleWidget(node, findWidgetByName(node, 'torchscript_jit'), true)
+				break
+			default:
+				toggleWidget(node, findWidgetByName(node, 'torchscript_jit'), false)
+				break
+		}
 	}
 }
 
@@ -607,6 +702,9 @@ app.registerExtension({
 			case "easy cascadeLoader":
 			case "easy svdLoader":
 			case "easy dynamiCrafterLoader":
+			case "easy hunyuanDiTLoader":
+			case "easy pixArtLoader":
+			case "easy kolorsLoader":
 			case "easy loraStack":
 			case "easy controlnetStack":
 			case "easy latentNoisy":
@@ -646,6 +744,7 @@ app.registerExtension({
 			case 'easy ipadapterApply':
 			case 'easy ipadapterApplyADV':
 			case 'easy ipadapterApplyEncoder':
+			case 'easy applyInpaint':
 				getSetters(node)
 				break
 			case "easy wildcards":
@@ -984,24 +1083,15 @@ app.registerExtension({
 			const onNodeCreated = nodeType.prototype.onNodeCreated;
 			nodeType.prototype.onNodeCreated = async function () {
 				onNodeCreated ? onNodeCreated.apply(this, []) : undefined;
-				// const values = ["randomize", "fixed", "increment", "decrement"]
-				// const seed_widget = this.widgets.find(w => w.name == 'seed_num')
-				// const seed_control = this.addWidget("combo", "control_before_generate", values[0], () => {
-				// }, {
-				// 	values,
-				// 	serialize: false
-				// })
-				// seed_widget.linkedWidgets = [seed_control]
 				const seed_widget = this.widgets.find(w => ['seed_num','seed'].includes(w.name))
 				const seed_control = this.widgets.find(w=> ['control_before_generate','control_after_generate'].includes(w.name))
 				if(nodeData.name == 'easy seed'){
-					this.addWidget("button", "🎲 Manual Random Seed", null, _=>{
-						if(seed_control.value != 'fixed'){
-							seed_control.value = 'fixed'
-						}
+					const randomSeedButton = this.addWidget("button", "🎲 Manual Random Seed", null, _=>{
+						if(seed_control.value != 'fixed') seed_control.value = 'fixed'
 						seed_widget.value = Math.floor(Math.random() * 1125899906842624)
 						app.queuePrompt(0, 1)
-					})
+					},{ serialize:false})
+					seed_widget.linkedWidgets = [randomSeedButton, seed_control];
 				}
 			}
 			const onAdded = nodeType.prototype.onAdded;
@@ -1096,22 +1186,15 @@ app.registerExtension({
 
 		if(nodeData.name == 'easy convertAnything'){
 			const onNodeCreated = nodeType.prototype.onNodeCreated;
-			const changeType = async function (type) {
-				const body = new FormData();
-				body.append("type", type);
-				const response = await api.fetchApi("/easyuse/convert", { method:'POST',body});
-			}
 			nodeType.prototype.onNodeCreated = async function () {
 				onNodeCreated ? onNodeCreated.apply(this, []) : undefined;
 				setTimeout(_=>{
 					const type_control = this.widgets[this.widgets.findIndex((w) => w.name === "output_type")]
 					let _this = this
-					changeType(type_control.value)
 					type_control.callback = async() => {
 						_this.outputs[0].type = (type_control.value).toUpperCase()
 						_this.outputs[0].name = type_control.value
 						_this.outputs[0].label = type_control.value
-						changeType(type_control.value)
 					}
 				},300)
 
@@ -1156,10 +1239,10 @@ const getSetWidgets = ['rescale_after_model', 'rescale',
 						'refiner_lora1_name', 'refiner_lora2_name', 'upscale_method', 
 						'image_output', 'add_noise', 'info', 'sampler_name',
 						'ckpt_B_name', 'ckpt_C_name', 'save_model', 'refiner_ckpt_name',
-						'num_loras', 'num_controlnet', 'mode', 'toggle', 'resolution', 'target_parameter',
+						'num_loras', 'num_controlnet', 'mode', 'toggle', 'resolution', 'ratio', 'target_parameter',
 	'input_count', 'replace_count', 'downscale_mode', 'range_mode','text_combine_mode', 'input_mode',
 	'lora_count','ckpt_count', 'conditioning_mode', 'preset', 'use_tiled', 'use_batch', 'num_embeds',
-	"easing_mode", "guider", "scheduler"
+	"easing_mode", "guider", "scheduler", "inpaint_mode", 't5_type', 'rem_mode'
 ]
 
 function getSetters(node) {

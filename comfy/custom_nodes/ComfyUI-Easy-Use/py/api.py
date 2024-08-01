@@ -10,6 +10,8 @@ from .config import RESOURCES_DIR, FOOOCUS_STYLES_DIR, FOOOCUS_STYLES_SAMPLES
 from .logic import ConvertAnything
 from .libs.model import easyModelManager
 from .libs.utils import getMetadata, cleanGPUUsedForce, get_local_filepath
+from .libs.cache import remove_cache
+from .libs.translate import has_chinese, zh_to_en
 
 try:
     import aiohttp
@@ -23,10 +25,20 @@ except ImportError:
 def cleanGPU(request):
     try:
         cleanGPUUsedForce()
+        remove_cache('*')
         return web.Response(status=200)
     except Exception as e:
         return web.Response(status=500)
         pass
+
+@PromptServer.instance.routes.post("/easyuse/translate")
+async def translate(request):
+    post = await request.post()
+    text = post.get("text")
+    if has_chinese(text):
+        return web.json_response({"text": zh_to_en([text])[0]})
+    else:
+        return web.json_response({"text": text})
 
 @PromptServer.instance.routes.get("/easyuse/reboot")
 def reboot(request):
@@ -87,6 +99,10 @@ async def getStylesList(request):
                         nd['name_cn'] = cn_data[key] if key in cn_data else key
                     nd["name"] = d['name']
                     nd['imgName'] = img_name
+                    if "prompt" in d:
+                        nd['prompt'] = d['prompt']
+                    if "negative_prompt" in d:
+                        nd['negative_prompt'] = d['negative_prompt']
                     ndata.append(nd)
                 return web.json_response(ndata)
     return web.Response(status=400)

@@ -2,14 +2,14 @@ import {app} from "../../../../scripts/app.js";
 import {$t} from '../common/i18n.js'
 import {CheckpointInfoDialog, LoraInfoDialog} from "../common/model.js";
 
-const loaders = ['easy fullLoader', 'easy a1111Loader', 'easy comfyLoader']
+const loaders = ['easy fullLoader', 'easy a1111Loader', 'easy comfyLoader', 'easy kolorsLoader', 'easy hunyuanDiTLoader', 'easy pixArtLoader']
 const preSampling = ['easy preSampling', 'easy preSamplingAdvanced', 'easy preSamplingDynamicCFG', 'easy preSamplingNoiseIn', 'easy preSamplingCustom', 'easy preSamplingLayerDiffusion', 'easy fullkSampler']
 const kSampler = ['easy kSampler', 'easy kSamplerTiled', 'easy kSamplerInpainting', 'easy kSamplerDownscaleUnet', 'easy kSamplerLayerDiffusion']
-const controlnet = ['easy controlnetLoader', 'easy controlnetLoaderADV', 'easy instantIDApply', 'easy instantIDApplyADV']
-const ipadapter = ['easy ipadapterApply', 'easy ipadapterApplyADV', 'easy ipadapterStyleComposition', 'easy ipadapterApplyFromParams']
+const controlnet = ['easy controlnetLoader', 'easy controlnetLoaderADV', 'easy controlnetLoader++', 'easy instantIDApply', 'easy instantIDApplyADV']
+const ipadapter = ['easy ipadapterApply', 'easy ipadapterApplyADV', 'easy ipadapterStyleComposition', 'easy ipadapterApplyFromParams', 'easy pulIDApply', 'easy pulIDApplyADV']
 const positive_prompt = ['easy positive', 'easy wildcards']
 const imageNode = ['easy loadImageBase64', 'LoadImage', 'LoadImageMask']
-const brushnet = ['easy applyBrushNet', 'easy applyPowerPaint']
+const inpaint = ['easy applyBrushNet', 'easy applyPowerPaint', 'easy applyInpaint']
 const widgetMapping = {
     "positive_prompt":{
         "text": "positive",
@@ -60,14 +60,18 @@ const widgetMapping = {
         "end_at": "end_at",
         "cache_mode": "cache_mode",
         "use_tiled": "use_tiled",
+        "insightface": "insightface",
+        "pulid_file": "pulid_file"
     },
     "load_image":{
         "image":"image",
         "base64_data":"base64_data",
         "channel": "channel"
     },
-    "brushnet":{
+    "inpaint":{
         "dtype": "dtype",
+        "fitting": "fitting",
+        "function": "function",
         "scale": "scale",
         "start_at": "start_at",
         "end_at": "end_at"
@@ -107,7 +111,7 @@ const inputMapping = {
         "attn_mask":"attn_mask",
         "optional_ipadapter":"optional_ipadapter"
     },
-    "brushnet":{
+    "inpaint":{
         "pipe": "pipe",
         "image": "image",
         "mask": "mask"
@@ -150,7 +154,7 @@ const outputMapping = {
         "masks":"masks",
         "ipadapter":"ipadapter"
     },
-    "brushnet":{
+    "inpaint":{
         "pipe": "pipe",
     }
 };
@@ -436,12 +440,14 @@ const reloadNode = function (node) {
 
     function handleLinks() {
         // re-convert inputs
-        for (let w of oldNode.widgets) {
-            if (w.type === 'converted-widget') {
-                const WidgetToConvert = newNode.widgets.find((nw) => nw.name === w.name);
-                for (let i of oldNode.inputs) {
-                    if (i.name === w.name) {
-                        convertToInput(newNode, WidgetToConvert, i.widget);
+        if(oldNode.widgets) {
+            for (let w of oldNode.widgets) {
+                if (w.type === 'converted-widget') {
+                    const WidgetToConvert = newNode.widgets.find((nw) => nw.name === w.name);
+                    for (let i of oldNode.inputs) {
+                        if (i.name === w.name) {
+                            convertToInput(newNode, WidgetToConvert, i.widget);
+                        }
                     }
                 }
             }
@@ -459,7 +465,7 @@ const reloadNode = function (node) {
 
     // fix widget values
     let values = oldNode.widgets_values;
-    if (!values) {
+    if (!values && newNode.widgets?.length>0) {
         newNode.widgets.forEach((newWidget, index) => {
             const oldWidget = oldNode.widgets[index];
             if (newWidget.name === oldWidget.name && newWidget.type === oldWidget.type) {
@@ -470,7 +476,7 @@ const reloadNode = function (node) {
         return;
     }
     let pass = false
-    const isIterateForwards = values.length <= newNode.widgets.length;
+    const isIterateForwards = values?.length <= newNode.widgets?.length;
     let vi = isIterateForwards ? 0 : values.length - 1;
     function evalWidgetValues(testValue, newWidg) {
         if (testValue === true || testValue === false) {
@@ -502,15 +508,15 @@ const reloadNode = function (node) {
             }
             vi++
             if (!isIterateForwards) {
-                vi = values.length - (newNode.widgets.length - 1 - wi);
+                vi = values.length - (newNode.widgets?.length - 1 - wi);
             }
         }
     };
-    if (isIterateForwards) {
+    if (isIterateForwards && newNode.widgets?.length>0) {
         for (let wi = 0; wi < newNode.widgets.length; wi++) {
             updateValue(wi);
         }
-    } else {
+    } else if(newNode.widgets?.length>0){
         for (let wi = newNode.widgets.length - 1; wi >= 0; wi--) {
             updateValue(wi);
         }
@@ -572,15 +578,15 @@ app.registerExtension({
         }
         // Swap IPAdapater
         if (ipadapter.includes(nodeData.name)) {
-            addMenu("↪️ Swap EasyIPAdapater", 'ipadapter', ipadapter, nodeType)
+            addMenu("↪️ Swap EasyAdapater", 'ipadapter', ipadapter, nodeType)
         }
         // Swap Image
         if (imageNode.includes(nodeData.name)) {
             addMenu("↪️ Swap LoadImage", 'load_image', imageNode, nodeType)
         }
-        // Swap Brushnet
-        if (brushnet.includes(nodeData.name)) {
-            addMenu("↪️ Swap BrushNet", 'brushnet', brushnet, nodeType)
+        // Swap inpaint
+        if (inpaint.includes(nodeData.name)) {
+            addMenu("↪️ Swap InpaintNode", 'inpaint', inpaint, nodeType)
         }
     }
 });
