@@ -45,8 +45,11 @@
     "default_aspect_ratio": "1024*1024",
     "default_overwrite_step": 4,
     "checkpoint_downloads": {
-        "sd3_medium_incl_clips.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors"
+        "flux1-schnell.sft": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.sft"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {}
+    "lora_downloads": {},
+    "vae_downloads": {
+        "ae.sft": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.sft"
+    }
 }
