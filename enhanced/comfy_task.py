@@ -1,7 +1,7 @@
 import os
 import zipfile
 import shutil
-import modules.config
+import modules.config as config
 from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo, refresh_models_info
 from modules.model_loader import load_file_from_url
 
@@ -84,7 +84,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             if 'iclight_enable' in options and options["iclight_enable"]:
                 #if f'checkpoints/{default_base_SD15_name}' not in models_info:
                 if modelsinfo.exists_model(catalog="checkpoints", model_path=default_base_SD15_name):
-                    modules.config.downloading_base_sd15_model()
+                    config.downloading_base_sd15_model()
                 comfy_params.update_params({"base_model": default_base_SD15_name})
                 if options["iclight_source_radio"] == 'CenterLight':
                     comfy_params.update_params({"light_source_text_switch": False})
@@ -108,7 +108,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
         #if f'checkpoints/{default_params["base_model"]}' not in models_info:
-            modules.config.downloading_sd3_medium_model()
+            config.downloading_sd3_medium_model()
         return ComfyTask(task_method, comfy_params)
     elif task_name == 'Kolors':
         comfy_params = ComfyTaskParams(default_params)
@@ -116,7 +116,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' if sysinfo["gpu_memory"]<12200 else 'fp16'
                 })
-        check_download_kolors_model(modules.config.path_models_root)
+        check_download_kolors_model(config.path_models_root)
         comfy_params.delete_params(['sampler'])
         return ComfyTask(task_method, comfy_params)
     elif task_name == 'Kolors+':
@@ -125,12 +125,16 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
                 })
-        check_download_kolors_model(modules.config.path_models_root)
+        check_download_kolors_model(config.path_models_root)
         return ComfyTask(task_method, comfy_params)
     elif task_name in ['HyDiT+', 'HyDiT']:
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
-            modules.config.downloading_hydit_model()
+            config.downloading_hydit_model()
+        return ComfyTask(task_method, comfy_params)
+    elif task_name == 'Flux':
+        comfy_params = ComfyTaskParams(default_params)
+        check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 
 
@@ -178,22 +182,48 @@ def check_download_kolors_model(path_root):
         with zipfile.ZipFile(downfile, 'r') as zipf:
             print(f'extractall: {downfile}')
             zipf.extractall(path_temp)
-        shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), modules.config.paths_diffusers[0])
+        shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), config.paths_diffusers[0])
         shutil.rmtree(os.path.join(path_temp, 'models'))
         os.remove(downfile)
     
     if check_modle_file[1] not in models_info:
-        path_org = os.path.join(modules.config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
-        path_dst = os.path.join(modules.config.path_unet, 'kolors_unet_fp16.safetensors')
+        path_org = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
+        path_dst = os.path.join(config.path_unet, 'kolors_unet_fp16.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')
         shutil.copy(path_org, path_dst)
 
     if check_modle_file[2] not in models_info:
-        path_org = os.path.join(modules.config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
-        path_dst = os.path.join(modules.config.path_vae, 'sdxl_fp16.vae.safetensors')
+        path_org = os.path.join(config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
+        path_dst = os.path.join(config.path_vae, 'sdxl_fp16.vae.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')
         shutil.copy(path_org, path_dst)
    
     refresh_models_info()    
     return
+
+def check_download_flux_model(base_model, clip_model):
+    if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
+        load_file_from_url(
+            url='https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.sft',
+            model_dir=config.paths_checkpoints[0],
+            file_name='flux1-schnell.sft'
+        )
+    if not modelsinfo.exists_model(catalog="clip", model_path=clip_model):
+        load_file_from_url(
+            url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/{clip_model}',
+            model_dir=config.path_clip,
+            file_name=f'{clip_model}'
+        )
+    if not modelsinfo.exists_model(catalog="clip", model_path='clip_l.safetensors'):
+        load_file_from_url(
+            url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors',
+            model_dir=config.path_clip,
+            file_name=f'clip_l.safetensors'
+        )
+    if not modelsinfo.exists_model(catalog="vae", model_path='ae.sft'):
+        load_file_from_url(
+            url='https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.sft',
+            model_dir=config.path_vae,
+            file_name='ae.sft'
+        )
 
