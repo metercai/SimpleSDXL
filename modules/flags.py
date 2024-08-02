@@ -151,7 +151,7 @@ available_aspect_ratios_list = {
         aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
         }
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+', 'Flux']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
@@ -159,10 +159,11 @@ task_class_mapping = {
             'Fooocus': 'SDXL-Fooocus',
             'Comfy'  : 'SDXL-Comfy',
             'Kolors' : 'Kwai-Kolors',
-            'Kolors+' : 'Kwai-Kolors+',
+            'Kolors+': 'Kwai-Kolors+',
             'SD3m'   : 'SD3-medium',
             'HyDiT'  : 'Hunyuan-DiT',
-            'HyDiT+'  : 'Hunyuan-DiT+',
+            'HyDiT+' : 'Hunyuan-DiT+',
+            'Flux'   : 'Flux-schnell',
             }
 def get_taskclass_by_fullname(fullname):
     for taskclass, fname in task_class_mapping.items():
@@ -170,7 +171,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT+']
+comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT+', 'Flux']
 
 default_class_params = {
     'Fooocus': {
@@ -233,7 +234,19 @@ default_class_params = {
         'backend_params': {
             "task_method": "hydit_base",
             },
-        }
+        },
+    'Flux': {
+        'disvisible': ["backend_selection", "performance_selection"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
+        'available_aspect_ratios_selection': 'Common',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "flux_base",
+            "clip_model": "t5xxl_fp8_e4m3fn.safetensors",
+            "base_model_weight": "fp8_e4m3fn",
+            },
+        },
     }
 
 

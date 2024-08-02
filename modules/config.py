@@ -218,6 +218,7 @@ path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
 path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
 paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/'], True)
 paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/'], True)
+path_clip = get_dir_or_set_default('path_clip', f'{path_models_root}/clip/')
 path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
 paths_llms = get_dir_or_set_default('path_llms', [f'{path_models_root}/llms/'], True)
@@ -953,7 +954,7 @@ wildcard_filenames = []
 
 def get_model_filenames(folder_paths, extensions=None, name_filter=None):
     if extensions is None:
-        extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch']
+        extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch', '.sft']
     files = []
 
     if not isinstance(folder_paths, list):

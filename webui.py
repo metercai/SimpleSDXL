@@ -1307,7 +1307,7 @@ with shared.gradio_root:
             print(f'[MetaData] Reset_params: -->{engine} from the image file.')
             return results
 
-        reset_preset_layout = [params_backend, performance_selection, scheduler_name, sampler_name, input_image_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, preset_instruction] + lora_ctrls
+        reset_preset_layout = [params_backend, performance_selection, scheduler_name, sampler_name, input_image_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, preset_instruction] + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox, state_topbar]
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + load_data_outputs, queue=False, show_progress=True) \
