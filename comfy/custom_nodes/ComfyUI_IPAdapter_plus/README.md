@@ -27,6 +27,20 @@ Please consider a [Github Sponsorship](https://github.com/sponsors/cubiq) or [Pa
 
 ## Important updates
 
+**2024/08/02**: Support for Kolors FaceIDv2. Please check the [example workflow](./examples/IPAdapter_FaceIDv2_Kolors.json) for best practices.
+
+**2024/07/26**: Added support for image batches and animation to the ClipVision Enhancer.
+
+**2024/07/18**: Support for Kolors.
+
+**2024/07/17**: Added experimental ClipVision Enhancer node. It was somehow inspired by the [Scaling on Scales](https://arxiv.org/pdf/2403.13043) paper but the implementation is a bit different. The new IPAdapterClipVisionEnhancer tries to catch small details by tiling the embeds (instead of the image in the pixel space), the result is a slightly higher resolution visual embedding with no cost of performance.
+
+**2024/07/11**: Added experimental Precise composition (layout) transfer. It's not as good as style. `embeds_scaling` has a huge impact. Start with strength 0.8 and boost 0.3 in SDXL and 0.6 boost 0.35 in SD1.5.
+
+**2024/06/28**: Added the `IPAdapter Precise Style Transfer` node. Increase the `style_boost` option to lower the bleeding of the composition layer. **Important:** works better in SDXL, start with a style_boost of 2; for SD1.5 try to increase the weight a little over 1.0 and set the style_boost to a value between -1 and +1, starting with 0.
+
+**2024/06/22**: Added `style transfer precise`, offers less bleeding of the embeds between the style and composition layers. It is sometimes better than the standard style transfer especially if the reference image is very different from the generated image. Works better in SDXL than SD1.5.
+
 **2024/05/21**: Improved memory allocation when `encode_batch_size`. Useful mostly for very long animations.
 
 **2024/05/02**: Add `encode_batch_size` to the Advanced batch node. This can be useful for animations with a lot of frames to reduce the VRAM usage during the image encoding. Please note that results will be slightly different based on the batch size.
@@ -39,17 +53,7 @@ Please consider a [Github Sponsorship](https://github.com/sponsors/cubiq) or [Pa
 
 **2024/04/12**: Added scheduled weights. Useful for animations.
 
-**2024/04/09**: Added experimental Style/Composition transfer for SD1.5. The results are often not as good as SDXL. Optimal weight seems to be from 0.8 to 2.0. The **Style+Composition node doesn't work for SD1.5** at the moment, you can only alter either the Style or the Composition, I need more time for testing. Old workflows will still work **but you may need to refresh the page and re-select the weight type!**
-
-**2024/04/04**: Added Style & Composition node. It's now possible to apply both Style and Composition from the same node
-
-**2024/04/01**: Added Composition only transfer weight type for SDXL
-
-**2024/03/27**: Added Style transfer weight type for SDXL
-
-**2024/03/23**: Complete code rewrite! **This is a breaking update!** Your previous workflows won't work and you'll need to recreate them. You've been warned! After the update, refresh your browser, delete the old IPAdapter nodes and create the new ones.
-
-*(I removed old updates related to the previous version of the extension)*
+*(Older updates removed for readability)*
 
 ## Example workflows
 
@@ -81,6 +85,7 @@ Remember you can also use any custom location setting an `ipadapter` entry in th
 - `/ComfyUI/models/clip_vision`
     - [CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors), download and rename
     - [CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/image_encoder/model.safetensors), download and rename
+    - [clip-vit-large-patch14-336.bin](https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/image_encoder/pytorch_model.bin), download and rename only for Kolors models
 - `/ComfyUI/models/ipadapter`, create it if not present
     - [ip-adapter_sd15.safetensors](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15.safetensors), Basic model, average strength
     - [ip-adapter_sd15_light_v11.bin](https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15_light_v11.bin), Light impact model
@@ -127,6 +132,8 @@ The community has baked some interesting IPAdapter models.
 - `/ComfyUI/models/ipadapter`
     - [ip_plus_composition_sd15.safetensors](https://huggingface.co/ostris/ip-composition-adapter/resolve/main/ip_plus_composition_sd15.safetensors), general composition ignoring style and content, more about it [here](https://huggingface.co/ostris/ip-composition-adapter)
     - [ip_plus_composition_sdxl.safetensors](https://huggingface.co/ostris/ip-composition-adapter/resolve/main/ip_plus_composition_sdxl.safetensors), SDXL version
+    - [Kolors-IP-Adapter-Plus.bin](https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-Plus/resolve/main/ip_adapter_plus_general.bin?download=true), IPAdapter Plus for Kolors model
+    - [Kolors-IP-Adapter-FaceID-Plus.bin](https://huggingface.co/Kwai-Kolors/Kolors-IP-Adapter-FaceID-Plus/resolve/main/ipa-faceid-plus.bin?download=true), IPAdapter FaceIDv2 for Kolors model. **Note:** Kolors is trained on InsightFace  **antelopev2** model, you need to [manually download it](https://huggingface.co/MonsterMMORPG/tools/tree/main) and place it inside the `models/inisghtface` directory.
 
 if you know of other models please let me know and I will add them to the unified loader.
 
@@ -154,7 +161,7 @@ It's only thanks to generous sponsors that **the whole community** can enjoy ope
 
 ### :tada: Silver sponsors
 
-[![OperArt.ai](https://f.latent.vision/imgs/openart.png?r=1)](https://openart.ai/workflows)
+[![OperArt.ai](https://f.latent.vision/imgs/openart.png?r=1)](https://openart.ai/workflows)&nbsp; &nbsp;[![OperArt.ai](https://f.latent.vision/imgs/finetuners.png)](https://www.finetuners.ai/)&nbsp; &nbsp;[![Comfy.ICU](https://f.latent.vision/imgs/comfyicu.png?r=1)](https://comfy.icu/)
 
 ### Companies supporting my projects
 

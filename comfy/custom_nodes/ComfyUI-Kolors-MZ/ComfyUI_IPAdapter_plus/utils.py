@@ -132,6 +132,10 @@ def ipadapter_model_loader(file):
         model = st_model
         del st_model
 
+    if "adapter_modules" in model.keys():
+        model["ip_adapter"] = model["adapter_modules"]
+        del model["adapter_modules"]
+
     if not "ip_adapter" in model.keys() or not model["ip_adapter"]:
         raise Exception("invalid IPAdapter model {}".format(file))
 
@@ -150,7 +154,7 @@ def insightface_loader(provider):
         raise Exception(e)
 
     path = os.path.join(folder_paths.models_dir, "insightface")
-    model = FaceAnalysis(name="buffalo_l", root=path, providers=[provider + 'ExecutionProvider',])
+    model = FaceAnalysis(name="antelopev2", root=path, providers=[provider + 'ExecutionProvider',])
     model.prepare(ctx_id=0, det_size=(640, 640))
     return model
 

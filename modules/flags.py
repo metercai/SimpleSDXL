@@ -98,6 +98,7 @@ inpaint_options = [inpaint_option_default, inpaint_option_detail, inpaint_option
 
 describe_type_photo = 'Photograph'
 describe_type_anime = 'Art/Anime'
+describe_types = [describe_type_photo, describe_type_anime]
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
