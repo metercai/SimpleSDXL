@@ -10,19 +10,6 @@
       "title": "aspect_ratios_size"
     }
   },
-  "6": {
-    "inputs": {
-      "text": "a bottle with a rainbow galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
-      "clip": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "prompt"
-    }
-  },
   "8": {
     "inputs": {
       "samples": [
@@ -128,7 +115,7 @@
         0
       ],
       "conditioning": [
-        "6",
+        "28",
         0
       ]
     },
@@ -156,6 +143,21 @@
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "result_image"
+    }
+  },
+  "28": {
+    "inputs": {
+      "clip_l": "",
+      "t5xxl": "a bottle with a rainbow galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
+      "guidance": 3.5,
+      "clip": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncodeFlux",
+    "_meta": {
+      "title": "prompt"
     }
   }
 }
