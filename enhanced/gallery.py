@@ -177,6 +177,8 @@ def parse_html_log(choice: str, passthrough = False):
         #print(f'[Gallery] Parse_html_log: hit cache {len(images_prompt[choice])} image_infos of {choice}.')
         return
     html_file = os.path.join(os.path.join(config.path_outputs, "20{}".format(choice)), 'log.html')
+    if not os.path.exists(html_file):
+        return
     html = etree.parse(html_file, etree.HTMLParser(encoding='utf-8'))
     prompt_infos = html.xpath('/html/body/div')
     images_prompt_list = {}
