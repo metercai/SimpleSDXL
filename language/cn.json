@@ -183,6 +183,7 @@
   "Content Type": "内容类型",
   "Photograph": "写实照片",
   "Art/Anime": "艺术/动漫",
+  "Apply Styles": "设置对应风格",
   "Describe this Image into Prompt": "反推图片内容填入提示词框",
   "Extract the parameters of the embedded parameter image and then reset the working environment.": "从左侧图片提取嵌参图片的参数，然后重置出图环境。",
   "Extract params from Image and Reset": "提取图片参数重置环境",
@@ -307,6 +308,7 @@
   "Maximum number of detections": "最大识别数量",
   "Set to 0 to detect all": "为0值,则识别所有的",
   "Invert Mask": "翻转蒙版",
+  "Save only final enhanced image": "增强修图只保留最后的图片",
 
   "Layer_iclight": "融图打光",
   "Layer case": "场景选择",

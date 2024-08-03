@@ -46,7 +46,7 @@ WEIGHT_TYPES = ["linear", "ease in", "ease out", 'ease in-out', 'reverse in-out'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 class IPAdapter(nn.Module):
-    def __init__(self, ipadapter_model, cross_attention_dim=1024, output_cross_attention_dim=1024, clip_embeddings_dim=1024, clip_extra_context_tokens=4, is_sdxl=False, is_plus=False, is_full=False, is_faceid=False, is_portrait_unnorm=False, is_kwai_kolors=False):
+    def __init__(self, ipadapter_model, cross_attention_dim=1024, output_cross_attention_dim=1024, clip_embeddings_dim=1024, clip_extra_context_tokens=4, is_sdxl=False, is_plus=False, is_full=False, is_faceid=False, is_portrait_unnorm=False, is_kwai_kolors=False, encoder_hid_proj=None):
         super().__init__()
 
         self.clip_embeddings_dim = clip_embeddings_dim
@@ -69,7 +69,8 @@ class IPAdapter(nn.Module):
             self.image_proj_model = self.init_proj()
 
         self.image_proj_model.load_state_dict(ipadapter_model["image_proj"])
-        self.ip_layers = To_KV(ipadapter_model["ip_adapter"])
+
+        self.ip_layers = To_KV(ipadapter_model["ip_adapter"],  encoder_hid_proj_state_dict=encoder_hid_proj)
 
     def init_proj(self):
         image_proj_model = ImageProjModel(
@@ -173,13 +174,24 @@ class IPAdapter(nn.Module):
         return embeds
 
 class To_KV(nn.Module):
-    def __init__(self, state_dict):
+    def __init__(self, state_dict, encoder_hid_proj_state_dict=None):
         super().__init__()
+
+        if encoder_hid_proj_state_dict is not None:
+            encoder_hid_proj_linear = nn.Linear(encoder_hid_proj_state_dict["weight"].shape[1], encoder_hid_proj_state_dict["weight"].shape[0], bias=True)
+            encoder_hid_proj_linear.weight.data = encoder_hid_proj_state_dict["weight"]
+            encoder_hid_proj_linear.bias.data = encoder_hid_proj_state_dict["bias"]
 
         self.to_kvs = nn.ModuleDict()
         for key, value in state_dict.items():
-            self.to_kvs[key.replace(".weight", "").replace(".", "_")] = nn.Linear(value.shape[1], value.shape[0], bias=False)
-            self.to_kvs[key.replace(".weight", "").replace(".", "_")].weight.data = value
+            if encoder_hid_proj_state_dict is None:
+                self.to_kvs[key.replace(".weight", "").replace(".", "_")] = nn.Linear(value.shape[1], value.shape[0], bias=False)
+                self.to_kvs[key.replace(".weight", "").replace(".", "_")].weight.data = value
+            else:
+                linear = nn.Linear(value.shape[1], value.shape[0], bias=False)
+                linear.weight.data = value
+                self.to_kvs[key.replace(".weight", "").replace(".", "_")] = nn.Sequential(encoder_hid_proj_linear, linear)
+                
 
 def set_model_patch_replace(model, patch_kwargs, key):
     to = model.model_options["transformer_options"].copy()
@@ -237,6 +249,14 @@ def ipadapter_execute(model,
     is_sdxl = output_cross_attention_dim == 2048
     is_kwai_kolors = is_sdxl and "layers.0.0.to_out.weight" in ipadapter["image_proj"] and ipadapter["image_proj"]["layers.0.0.to_out.weight"].shape[0] == 2048
 
+    
+    # kwai-kolors faceid
+    is_kwai_kolors_faceid = "perceiver_resampler.layers.0.0.to_out.weight" in ipadapter["image_proj"] and ipadapter["image_proj"]["perceiver_resampler.layers.0.0.to_out.weight"].shape[0] == 4096
+    if is_kwai_kolors_faceid:
+        is_faceid = True 
+        is_kwai_kolors = True
+        is_faceidv2 = True
+
     if is_faceid and not insightface:
         raise Exception("insightface model is required for FaceID models")
 
@@ -245,6 +265,10 @@ def ipadapter_execute(model,
 
     cross_attention_dim = 1280 if (is_plus and is_sdxl and not is_faceid and not is_kwai_kolors) or is_portrait_unnorm else output_cross_attention_dim
     clip_extra_context_tokens = 16 if (is_plus and not is_faceid) or is_portrait or is_portrait_unnorm else 4
+
+    if is_kwai_kolors_faceid: 
+        clip_extra_context_tokens = 6
+        cross_attention_dim = 4096
 
     if image is not None and image.shape[1] != image.shape[2]:
         print("\033[33mINFO: the IPAdapter reference image is not a square, CLIPImageProcessor will resize and crop it at the center. If the main focus of the picture is not in the middle the result might not be what you are expecting.\033[0m")
@@ -309,6 +333,9 @@ def ipadapter_execute(model,
         face_cond_embeds = []
         image = []
 
+        face_image_size = 256 if is_sdxl else 224
+        if is_kwai_kolors_faceid:
+            face_image_size = 336
         for i in range(image_iface.shape[0]):
             for size in [(size, size) for size in range(640, 256, -64)]:
                 insightface.det_model.input_size = size # TODO: hacky but seems to be working
@@ -318,7 +345,7 @@ def ipadapter_execute(model,
                         face_cond_embeds.append(torch.from_numpy(face[0].normed_embedding).unsqueeze(0))
                     else:
                         face_cond_embeds.append(torch.from_numpy(face[0].embedding).unsqueeze(0))
-                    image.append(image_to_tensor(face_align.norm_crop(image_iface[i], landmark=face[0].kps, image_size=256 if is_sdxl else 224)))
+                    image.append(image_to_tensor(face_align.norm_crop(image_iface[i], landmark=face[0].kps, image_size=face_image_size)))
 
                     if 640 not in size:
                         print(f"\033[33mINFO: InsightFace detection resolution lowered to {size}.\033[0m")
@@ -408,6 +435,11 @@ def ipadapter_execute(model,
     if attn_mask is not None:
         attn_mask = attn_mask.to(device, dtype=dtype)
 
+    encoder_hid_proj = None
+    if is_kwai_kolors_faceid:
+        if hasattr(model.model, "diffusion_model") and hasattr(model.model.diffusion_model, "encoder_hid_proj"):
+            encoder_hid_proj = model.model.diffusion_model.encoder_hid_proj.state_dict()  
+     
     ipa = IPAdapter(
         ipadapter,
         cross_attention_dim=cross_attention_dim,
@@ -420,6 +452,7 @@ def ipadapter_execute(model,
         is_faceid=is_faceid,
         is_portrait_unnorm=is_portrait_unnorm,
         is_kwai_kolors=is_kwai_kolors,
+        encoder_hid_proj=encoder_hid_proj
     ).to(device, dtype=dtype)
 
     if is_faceid and is_plus:
@@ -442,6 +475,7 @@ def ipadapter_execute(model,
 
     sigma_start = model.get_model_object("model_sampling").percent_to_sigma(start_at)
     sigma_end = model.get_model_object("model_sampling").percent_to_sigma(end_at)
+
 
     patch_kwargs = {
         "ipadapter": ipa,
@@ -1266,11 +1300,11 @@ class IPAdapterEncoder:
             mask = transforms(mask).squeeze(1)
             #mask = T.Resize((image.shape[1], image.shape[2]), interpolation=T.InterpolationMode.BICUBIC, antialias=True)(mask.unsqueeze(1)).squeeze(1)
 
-        img_cond_embeds = encode_image_masked(clip_vision, image, mask)
+        img_cond_embeds = encode_image_masked(clip_vision, image, mask, size=image_size)
 
         if is_plus:
             img_cond_embeds = img_cond_embeds.penultimate_hidden_states
-            img_uncond_embeds = encode_image_masked(clip_vision, torch.zeros([1, image_size, image_size, 3])).penultimate_hidden_states
+            img_uncond_embeds = encode_image_masked(clip_vision, torch.zeros([1, image_size, image_size, 3]), size=image_size).penultimate_hidden_states
         else:
             img_cond_embeds = img_cond_embeds.image_embeds
             img_uncond_embeds = torch.zeros_like(img_cond_embeds)
@@ -1798,92 +1832,4 @@ class IPAdapterCombineParams:
             ipadapter_params["end_at"] += params_5["end_at"]
 
         return (ipadapter_params, )
-
-"""
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Register
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-NODE_CLASS_MAPPINGS = {
-    # Main Apply Nodes
-    "IPAdapter": IPAdapterSimple,
-    "IPAdapterAdvanced": IPAdapterAdvanced,
-    "IPAdapterBatch": IPAdapterBatch,
-    "IPAdapterFaceID": IPAdapterFaceID,
-    "IPAAdapterFaceIDBatch": IPAAdapterFaceIDBatch,
-    "IPAdapterTiled": IPAdapterTiled,
-    "IPAdapterTiledBatch": IPAdapterTiledBatch,
-    "IPAdapterEmbeds": IPAdapterEmbeds,
-    "IPAdapterEmbedsBatch": IPAdapterEmbedsBatch,
-    "IPAdapterStyleComposition": IPAdapterStyleComposition,
-    "IPAdapterStyleCompositionBatch": IPAdapterStyleCompositionBatch,
-    "IPAdapterMS": IPAdapterMS,
-    "IPAdapterFromParams": IPAdapterFromParams,
-    "IPAdapterPreciseStyleTransfer": IPAdapterPreciseStyleTransfer,
-    "IPAdapterPreciseStyleTransferBatch": IPAdapterPreciseStyleTransferBatch,
-    "IPAdapterPreciseComposition": IPAdapterPreciseComposition,
-    "IPAdapterPreciseCompositionBatch": IPAdapterPreciseCompositionBatch,
-
-    # Loaders
-    "IPAdapterUnifiedLoader": IPAdapterUnifiedLoader,
-    "IPAdapterUnifiedLoaderFaceID": IPAdapterUnifiedLoaderFaceID,
-    "IPAdapterModelLoader": IPAdapterModelLoader,
-    "IPAdapterInsightFaceLoader": IPAdapterInsightFaceLoader,
-    "IPAdapterUnifiedLoaderCommunity": IPAdapterUnifiedLoaderCommunity,
-
-    # Helpers
-    "IPAdapterEncoder": IPAdapterEncoder,
-    "IPAdapterCombineEmbeds": IPAdapterCombineEmbeds,
-    "IPAdapterNoise": IPAdapterNoise,
-    "PrepImageForClipVision": PrepImageForClipVision,
-    "IPAdapterSaveEmbeds": IPAdapterSaveEmbeds,
-    "IPAdapterLoadEmbeds": IPAdapterLoadEmbeds,
-    "IPAdapterWeights": IPAdapterWeights,
-    "IPAdapterCombineWeights": IPAdapterCombineWeights,
-    "IPAdapterWeightsFromStrategy": IPAdapterWeightsFromStrategy,
-    "IPAdapterPromptScheduleFromWeightsStrategy": IPAdapterPromptScheduleFromWeightsStrategy,
-    "IPAdapterRegionalConditioning": IPAdapterRegionalConditioning,
-    "IPAdapterCombineParams": IPAdapterCombineParams,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    # Main Apply Nodes
-    "IPAdapter": "IPAdapter",
-    "IPAdapterAdvanced": "IPAdapter Advanced",
-    "IPAdapterBatch": "IPAdapter Batch (Adv.)",
-    "IPAdapterFaceID": "IPAdapter FaceID",
-    "IPAAdapterFaceIDBatch": "IPAdapter FaceID Batch",
-    "IPAdapterTiled": "IPAdapter Tiled",
-    "IPAdapterTiledBatch": "IPAdapter Tiled Batch",
-    "IPAdapterEmbeds": "IPAdapter Embeds",
-    "IPAdapterEmbedsBatch": "IPAdapter Embeds Batch",
-    "IPAdapterStyleComposition": "IPAdapter Style & Composition SDXL",
-    "IPAdapterStyleCompositionBatch": "IPAdapter Style & Composition Batch SDXL",
-    "IPAdapterMS": "IPAdapter Mad Scientist",
-    "IPAdapterFromParams": "IPAdapter from Params",
-    "IPAdapterPreciseStyleTransfer": "IPAdapter Precise Style Transfer",
-    "IPAdapterPreciseStyleTransferBatch": "IPAdapter Precise Style Transfer Batch",
-    "IPAdapterPreciseComposition": "IPAdapter Precise Composition",
-    "IPAdapterPreciseCompositionBatch": "IPAdapter Precise Composition Batch",
-
-    # Loaders
-    "IPAdapterUnifiedLoader": "IPAdapter Unified Loader",
-    "IPAdapterUnifiedLoaderFaceID": "IPAdapter Unified Loader FaceID",
-    "IPAdapterModelLoader": "IPAdapter Model Loader",
-    "IPAdapterInsightFaceLoader": "IPAdapter InsightFace Loader",
-    "IPAdapterUnifiedLoaderCommunity": "IPAdapter Unified Loader Community",
-
-    # Helpers
-    "IPAdapterEncoder": "IPAdapter Encoder",
-    "IPAdapterCombineEmbeds": "IPAdapter Combine Embeds",
-    "IPAdapterNoise": "IPAdapter Noise",
-    "PrepImageForClipVision": "Prep Image For ClipVision",
-    "IPAdapterSaveEmbeds": "IPAdapter Save Embeds",
-    "IPAdapterLoadEmbeds": "IPAdapter Load Embeds",
-    "IPAdapterWeights": "IPAdapter Weights",
-    "IPAdapterWeightsFromStrategy": "IPAdapter Weights From Strategy",
-    "IPAdapterPromptScheduleFromWeightsStrategy": "Prompt Schedule From Weights Strategy",
-    "IPAdapterCombineWeights": "IPAdapter Combine Weights",
-    "IPAdapterRegionalConditioning": "IPAdapter Regional Conditioning",
-    "IPAdapterCombineParams": "IPAdapter Combine Params",
-}
+ 
