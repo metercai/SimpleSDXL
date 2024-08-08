@@ -127,7 +127,11 @@ class PromptServer():
 
         @routes.get("/")
         async def get_root(request):
-            return web.FileResponse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "index.html"))
+            response = web.FileResponse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "index.html"))
+            response.headers['Cache-Control'] = 'no-cache'
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
 
         @routes.get("/embeddings")
         def get_embeddings(self):
