@@ -131,14 +131,14 @@ def detect_unet_config(state_dict, key_prefix):
     if '{}double_blocks.0.img_attn.norm.key_norm.scale'.format(key_prefix) in state_dict_keys: #Flux
         dit_config = {}
         dit_config["image_model"] = "flux"
-        dit_config["in_channels"] = 64
+        dit_config["in_channels"] = 16
         dit_config["vec_in_dim"] = 768
         dit_config["context_in_dim"] = 4096
         dit_config["hidden_size"] = 3072
         dit_config["mlp_ratio"] = 4.0
         dit_config["num_heads"] = 24
-        dit_config["depth"] = 19
-        dit_config["depth_single_blocks"] = 38
+        dit_config["depth"] = count_blocks(state_dict_keys, '{}double_blocks.'.format(key_prefix) + '{}.')
+        dit_config["depth_single_blocks"] = count_blocks(state_dict_keys, '{}single_blocks.'.format(key_prefix) + '{}.')
         dit_config["axes_dim"] = [16, 56, 56]
         dit_config["theta"] = 10000
         dit_config["qkv_bias"] = True

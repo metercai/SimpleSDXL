@@ -142,7 +142,7 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
         else:
             version_installed = importlib.metadata.version('xformers')
-            if not version_installed.startswith('0.0.26'):
+            if not version_installed.startswith('0.0.26') and not version_installed.startswith('0.0.27'):
                 print(f'Upgrade xformers from {version_installed} to 0.0.26')
                 run(f'"{python}" -m pip uninstall -y xformers')
                 if platform.system() == "Windows":
