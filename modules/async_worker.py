@@ -15,7 +15,6 @@ class AsyncTask:
         import args_manager
 
         from enhanced.simpleai import comfyd
-        import enhanced.hydit_task as hydit_task
         import enhanced.translator as translator
 
         self.args = args.copy()
@@ -106,6 +105,9 @@ class AsyncTask:
         self.inpaint_erode_or_dilate = args.pop()
 
         self.params_backend = args.pop().copy()
+        self.backfill_prompt = self.params_backend.pop('backfill_prompt')
+        self.translation_methods = self.params_backend.pop('translation_methods')
+        self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
 
         self.save_final_enhanced_image_only = args.pop() if not args_manager.args.disable_image_log else False
         self.save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
@@ -150,9 +152,9 @@ class AsyncTask:
             enhance_mask_invert = args.pop()
             if enhance_enabled:
                 self.enhance_ctrls.append([
-                    enhance_mask_dino_prompt_text,
-                    enhance_prompt,
-                    enhance_negative_prompt,
+                    translator.convert(enhance_mask_dino_prompt_text, self.translation_methods),
+                    translator.convert(enhance_prompt, self.translation_methods),
+                    translator.convert(enhance_negative_prompt, self.translation_methods),
                     enhance_mask_model,
                     enhance_mask_cloth_category,
                     enhance_mask_sam_model,
@@ -179,7 +181,7 @@ class AsyncTask:
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
       
-        if self.task_class in ['Kolors+', 'Kolors', 'HyDiT', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Kolors', 'HyDiT', 'HyDiT+', 'SD3m']:
+        if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
         print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
         if len(self.loras) > 0 and self.task_name == 'Kolors+':
@@ -190,9 +192,6 @@ class AsyncTask:
             }
         if self.task_name == 'default':
             self.params_backend.update({"ui_options": ui_options})
-        self.backfill_prompt = self.params_backend.pop('backfill_prompt')
-        self.translation_methods = self.params_backend.pop('translation_methods')
-        self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
 
         if self.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
             self.prompt = translator.convert(self.prompt, self.translation_methods)
@@ -231,7 +230,6 @@ def worker():
     import extras.face_crop
     import fooocus_version
     import enhanced.wildcards as wildcards
-    import enhanced.hydit_task as hydit_task
     import enhanced.version as version
 
     from extras.censor import default_censor
@@ -362,20 +360,6 @@ def worker():
                 yield_result(async_task, empty_path, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
                 return imgs, [], current_progress
-
-        elif async_task.task_class == 'HyDiT':
-            imgs = hydit_task.inferencer(
-                        prompt=task["positive"][0],
-                        negative_prompt=task["negative"][0],
-                        seed=task['task_seed'],
-                        cfg_scale=async_task.cfg_scale,
-                        infer_steps=steps,
-                        width=width, 
-                        height=height,
-                        sampler=async_task.sampler_name,
-                        callback=callback
-                    )
-            async_task.scheduler_name, async_task.sampler_name = hydit_task.get_scheduler_name(async_task.sampler_name)
 
         else:
             if 'cn' in goals:
@@ -1181,9 +1165,6 @@ def worker():
 
         if async_task.task_class in flags.comfy_classes:
             comfyd.start()
-        elif async_task.task_class == 'HyDiT':
-            comfyd.stop()
-            hydit_task.init_load_model()
         else:
             comfyd.stop()
 

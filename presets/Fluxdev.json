@@ -11,7 +11,7 @@
             "base_model_dtype": "auto"
 	    }
     	},
-    "default_model": "flux1-schnell.safetensors",
+    "default_model": "flux1-dev.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -43,13 +43,13 @@
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1024*1024",
-    "default_overwrite_step": 4,
+    "default_overwrite_step": 20,
     "checkpoint_downloads": {
-        "flux1-schnell.safetensors": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors"
+        "flux1-dev.safetensors": "https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {},
     "vae_downloads": {
-        "ae.safetensors": "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors"
-    }
+        "ae.safetensors": "https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors"
+    } 
 }

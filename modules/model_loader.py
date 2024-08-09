@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 from typing import Optional
 
 import json
+import shutil
 
 urlmapping = {}
 urlmapping_path = os.path.abspath(f'./enhanced/urlmapping.json')
@@ -65,10 +66,19 @@ def load_file_from_url(
         parts = urlparse(url)
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
+    file_name_main, file_extension = os.path.splitext(file_name)
+    if file_extension == '.safetensors':
+        cached_file2 = os.path.abspath(os.path.join(model_dir, f'{file_name_main}.sft'))
+        if os.path.exists(cached_file2):
+            shutil.move(cached_file2, cached_file)
+            from enhanced.simpleai import refresh_models_info
+            refresh_models_info()
     if not os.path.exists(cached_file):
         print(f'Downloading: "{url}" to {cached_file}\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)
+        #from enhanced.simpleai import refresh_models_info
+        #refresh_models_info()
 
     return cached_file
 

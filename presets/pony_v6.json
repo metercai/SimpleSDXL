@@ -50,5 +50,5 @@
     "lora_downloads": {},
     "vae_downloads": {
         "ponyDiffusionV6XL_vae.safetensors": "https://huggingface.co/mashb1t/fav_models/resolve/main/fav/ponyDiffusionV6XL_vae.safetensors"
-    }
+    } 
 }

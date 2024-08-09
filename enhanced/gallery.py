@@ -244,7 +244,8 @@ def parse_html_log(choice: str, passthrough = False):
                         continue
                     info_dict[key] = value
             else:
-                print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
+                if 'Upscale (Fast)' not in text:
+                    print(f'[Gallery] Parse_html_log: Parse error for {choice}, file={html_file}\ntext:{info.xpath(".//text()")}')
                 info_dict={"Filename":text[1]}
                 info_dict[text[2]] = text[3]
         #print(f'{len(text)},info_dict={info_dict}')

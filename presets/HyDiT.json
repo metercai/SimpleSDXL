@@ -44,5 +44,5 @@
         "hunyuan_dit_1.2.safetensors": "https://huggingface.co/comfyanonymous/hunyuan_dit_comfyui/resolve/main/hunyuan_dit_1.2.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {}
+    "lora_downloads": {} 
 }
