@@ -515,7 +515,7 @@ with shared.gradio_root:
                         metadata_input_image.upload(trigger_metadata_preview, inputs=metadata_input_image,
                                                     outputs=metadata_json, queue=False, show_progress=True)
 
-            with gr.Accordion("Enhance Setting", visible=modules.config.default_enhance_checkbox) as enhance_input_panel:
+            with gr.Accordion("Enhance Setting", visible=modules.config.default_enhance_checkbox, open=True) as enhance_input_panel:
                 with gr.Tabs():
                     with gr.Tab(label='Upscale or Variation'):
                         with gr.Row():
@@ -1059,11 +1059,10 @@ with shared.gradio_root:
                     gr.Markdown(value=f'OS: {sysinfo["os_name"]}, {sysinfo["cpu_arch"]}, {sysinfo["cuda_version"]}, Torch{sysinfo["torch_version"]}, XF{sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {sysinfo["pyhash"]}, UIHash: {sysinfo["uihash"]}')
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=modules.config.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
-            pre4comfy = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
+            layout_image_tab = [performance_selection, style_selections, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
             def toggle_image_tab(tab, styles):
                 result = []
                 if 'layer' in tab:
-                    #comfyd.start()
                     result = [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion])]
                     result += [gr.update(value=False, interactive=False)]
                     result += [gr.update(interactive=False)] * 17
@@ -1072,17 +1071,17 @@ with shared.gradio_root:
                     result += [gr.update(interactive=True)] * 18
                 return result
             
-            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            describe_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            layer_tab.select(lambda: 'layer', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            metadata_tab.select(lambda: 'metadata', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False)
-            enhance_tab.select(lambda: 'enhance', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=pre4comfy, show_progress=False, queue=False).then(lambda: True, outputs=enhance_checkbox, show_progress=False, queue=False)
+            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            describe_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            layer_tab.select(lambda: 'layer', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            metadata_tab.select(lambda: 'metadata', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False)
+            enhance_tab.select(lambda: 'enhance', outputs=current_tab, queue=False, _js=down_js, show_progress=False).then(toggle_image_tab,inputs=[current_tab, style_selections], outputs=layout_image_tab, show_progress=False, queue=False).then(lambda: True, outputs=enhance_checkbox, show_progress=False, queue=False)
             
-            input_image_checkbox.change(lambda x: [gr.update(visible=x), gr.update(choices=flags.Performance.list()), gr.update()] + 
-                    [gr.update(interactive=True)]*18, inputs=input_image_checkbox,
-                                        outputs=[image_input_panel] + pre4comfy, queue=False, show_progress=False, _js=switch_js)
+            input_image_checkbox.change(lambda x: [gr.update(visible=x), gr.update(choices=flags.Performance.list()), 
+                gr.update()] + [gr.update(interactive=True)]*18, inputs=input_image_checkbox,
+                outputs=[image_input_panel] + layout_image_tab, queue=False, show_progress=False, _js=switch_js)
             
             enhance_mask_dino_prompt_text_ctrls = []
             for index in range(modules.config.default_enhance_tabs):
@@ -1097,7 +1096,7 @@ with shared.gradio_root:
                     inpaint_mode_list[0] = inpaint_mode_list[1] = flags.inpaint_option_detail
                 return dino_prompt_list + inpaint_mode_list
 
-            enhance_checkbox.change(lambda x: gr.update(visible=x), inputs=enhance_checkbox, 
+            enhance_checkbox.change(lambda x: gr.update(visible=x, open=True), inputs=enhance_checkbox, 
                     outputs=enhance_input_panel, queue=False, show_progress=False, _js=switch_js) \
                         .then(preset_for_enhance_image, outputs=enhance_mask_dino_prompt_text_ctrls + enhance_inpaint_mode_ctrls, show_progress=False)
 
