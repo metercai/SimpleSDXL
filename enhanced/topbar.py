@@ -396,15 +396,13 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     lora_downloads = preset_prepared.get('lora_downloads', {})
     vae_downloads = preset_prepared.get('vae_downloads', {})
 
-<<<<<<< HEAD
     model_dtype = preset_prepared.get('engine', {}).get('backend_params', {}).get('base_model_dtype', '')
     if engine == 'SD3m' and  model_dtype == 'auto':
         base_model = comfy_task.get_default_base_SD3m_name()
         if modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
             default_model = base_model
             checkpoint_downloads = {}
-=======
->>>>>>> SimpleSDXL
+    
     preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
                     default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
                     vae_downloads)
