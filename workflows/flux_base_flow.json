@@ -106,7 +106,7 @@
         "Node name for S&R": "VAELoader"
       },
       "widgets_values": [
-        "ae.sft"
+        "ae.safetensors"
       ]
     },
     {
@@ -403,7 +403,7 @@
         "Node name for S&R": "UNETLoader"
       },
       "widgets_values": [
-        "flux1-schnell.sft",
+        "flux1-schnell.safetensors",
         "fp8_e4m3fn"
       ]
     },

@@ -46,5 +46,5 @@
     "embeddings_downloads": {},
     "lora_downloads": {
         "Hyper-SDXL-8steps-lora.safetensors": "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SDXL-8steps-lora.safetensors"
-    }
+    } 
 }

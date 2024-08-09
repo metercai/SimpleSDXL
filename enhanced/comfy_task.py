@@ -28,7 +28,9 @@ default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
 default_base_SD3m_name_list = ['sd3_medium_incl_clips.safetensors', 'sd3_medium_incl_clips_t5xxlfp8.safetensors', 'sd3_medium_incl_clips_t5xxlfp16.safetensors']
 
 def get_default_base_SD3m_name():
-    for sd3name in default_base_SD3m_name_list:
+    dtype = 0 if sysinfo["gpu_memory"]<8180 and sysinfo["ram_total"]<16300 else 1 if sysinfo["gpu_memory"]<16300 and sysinfo["ram_total"]<32700 else 2
+    for i in range(dtype, -1 ,-1):
+        sd3name = default_base_SD3m_name_list[i]
         if f'checkpoints/{sd3name}' in models_info:
             return sd3name
     return default_base_SD3m_name_list[0]
@@ -107,33 +109,42 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
-        #if f'checkpoints/{default_params["base_model"]}' not in models_info:
             config.downloading_sd3_medium_model()
+        if 'base_model_dtype' in default_params:
+            comfy_params.delete_params(['base_model_dtype'])
         return ComfyTask(task_method, comfy_params)
-    elif task_name == 'Kolors':
+    
+    elif task_name in ['Kolors+', 'Kolors']:
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
-                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' if sysinfo["gpu_memory"]<12200 else 'fp16'
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 and sysinfo["ram_total"]<16300 else 'quant8' if sysinfo["gpu_memory"]<16300 and sysinfo["ram_total"]<32700 else 'fp16'
                 })
         check_download_kolors_model(config.path_models_root)
-        comfy_params.delete_params(['sampler'])
+        if task_name == 'Kolors':
+            comfy_params.delete_params(['sampler'])
         return ComfyTask(task_method, comfy_params)
-    elif task_name == 'Kolors+':
-        comfy_params = ComfyTaskParams(default_params)
-        if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
-            comfy_params.update_params({
-                "llms_model": 'quant4' if sysinfo["gpu_memory"]<8180 else 'quant8' #'fp16'
-                })
-        check_download_kolors_model(config.path_models_root)
-        return ComfyTask(task_method, comfy_params)
+    
     elif task_name in ['HyDiT+', 'HyDiT']:
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_hydit_model()
         return ComfyTask(task_method, comfy_params)
+    
     elif task_name == 'Flux':
         comfy_params = ComfyTaskParams(default_params)
+        if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
+            comfy_params.update_params({
+                "clip_model": 't5xxl_fp8_e4m3fn.safetensors' if sysinfo["ram_total"]<32700 else 't5xxl_fp16.safetensors' #'fp16'
+                })
+        if ' base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
+            comfy_params.update_params({
+                "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<16300 else 'default' #'fp16'
+                })
+        elif default_params['base_model_dtype'] == 'fp16':
+            comfy_params.update_params({
+                "base_model_dtype": 'default' #'fp16'
+                })
         check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 
@@ -204,9 +215,9 @@ def check_download_kolors_model(path_root):
 def check_download_flux_model(base_model, clip_model):
     if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
         load_file_from_url(
-            url='https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.sft',
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
             model_dir=config.paths_checkpoints[0],
-            file_name='flux1-schnell.sft'
+            file_name=base_model
         )
     if not modelsinfo.exists_model(catalog="clip", model_path=clip_model):
         load_file_from_url(
@@ -220,10 +231,10 @@ def check_download_flux_model(base_model, clip_model):
             model_dir=config.path_clip,
             file_name=f'clip_l.safetensors'
         )
-    if not modelsinfo.exists_model(catalog="vae", model_path='ae.sft'):
+    if not modelsinfo.exists_model(catalog="vae", model_path='ae.safetensors'):
         load_file_from_url(
-            url='https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.sft',
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ae.safetensors',
             model_dir=config.path_vae,
-            file_name='ae.sft'
+            file_name='ae.safetensors'
         )
 

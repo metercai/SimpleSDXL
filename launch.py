@@ -90,8 +90,8 @@ def check_base_environment():
 def prepare_environment():
     global sysinfo
 
-    torch_ver = '2.2.2'
-    torchvisio_ver = '0.17.2'
+    torch_ver = '2.3.1'
+    torchvisio_ver = '0.18.1'
     if sysinfo['gpu_brand'] == 'NVIDIA':
         torch_index_url = "https://download.pytorch.org/whl/cu121"
     elif sysinfo['gpu_brand'] == 'AMD':

@@ -146,7 +146,7 @@ else:
             pass
         try:
             XFORMERS_VERSION = xformers.version.__version__
-            #logging.info("xformers version: {}".format(XFORMERS_VERSION))
+            logging.info("xformers version: {}".format(XFORMERS_VERSION))
             if XFORMERS_VERSION.startswith("0.0.18"):
                 logging.warning("\nWARNING: This version of xformers has a major bug where you will get black images when generating high resolution images.")
                 logging.warning("Please downgrade or upgrade xformers to a different version.\n")

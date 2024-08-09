@@ -6,7 +6,8 @@
 	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
-		"task_method": "sd3_base"
+		"task_method": "sd3_base",
+		"base_model_dtype": "auto"
 		}
     	},
     "default_model": "sd3_medium_incl_clips.safetensors",
@@ -46,5 +47,5 @@
         "sd3_medium_incl_clips.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors"
     },
     "embeddings_downloads": {},
-    "lora_downloads": {}
+    "lora_downloads": {} 
 }

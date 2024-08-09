@@ -17,11 +17,11 @@ import modules.sdxl_styles as sdxl_styles
 import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
-import enhanced.hydit_task as hydit_task
 import enhanced.comfy_task as comfy_task
 import launch
-from enhanced.simpleai import comfyd, models_info, models_info_muid, refresh_models_info
+from enhanced.simpleai import comfyd, models_info, modelsinfo, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
+from shared import BUTTON_NUM
 
 css = '''
 '''
@@ -52,7 +52,7 @@ def get_preset_name_list():
     sorted_files = [f[0] for f in sorted_file_times]
     sorted_files.pop(sorted_files.index(f'{config.preset}.json'))
     sorted_files.insert(0, f'{config.preset}.json')
-    presets = sorted_files[:9]
+    presets = sorted_files[:BUTTON_NUM]
     name_list = ''
     for i in range(len(presets)):
         name_list += f'{presets[i][:-5]},'
@@ -262,14 +262,6 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
-    state_params.update({f'{modules.flags.backend_engines[0]}_preset_value': ['', config.default_performance, config.default_styles, config.default_cfg_scale, config.default_overwrite_step, config.default_sampler, config.default_scheduler, config.default_base_model_name]})
-    state_params.update({f'{modules.flags.backend_engines[1]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 6, config.default_overwrite_step, hydit_task.default_sampler, '', '']})
-    state_params.update({f'{modules.flags.backend_engines[2]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 4.5, 28, 'dpmpp_2m', 'sgm_uniform', comfy_task.get_default_base_SD3m_name()]})
-    state_params.update({f'{modules.flags.backend_engines[3]}_preset_value': [False, modules.flags.Performance.SPEED.value, [], 5, 25, '', comfy_task.default_kolors_scheduler, '']})
-    state_params.update({f'{modules.flags.backend_engines[0]}_current_aspect_ratios': config.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[1]}_current_aspect_ratios': hydit_task.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[2]}_current_aspect_ratios': config.default_aspect_ratio})
-    state_params.update({f'{modules.flags.backend_engines[3]}_current_aspect_ratios': config.default_aspect_ratio})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -294,7 +286,7 @@ def get_preset_inc_url(preset_name='blank'):
 def refresh_nav_bars(state_params):
     state_params.update({"__nav_name_list": get_preset_name_list()})
     preset_name_list = state_params["__nav_name_list"].split(',')
-    for i in range(9-len(preset_name_list)):
+    for i in range(BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
     results = []
     if state_params["__is_mobile"]:
@@ -304,7 +296,7 @@ def refresh_nav_bars(state_params):
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
         name += '\u2B07' if is_models_file_absent(name) else ''
-        visible_flag = i<(5 if state_params["__is_mobile"] else 9)
+        visible_flag = i<(5 if state_params["__is_mobile"] else BUTTON_NUM)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
         else: 
@@ -328,7 +320,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)
-    results += [gr.update()] * (9-preset_nums)
+    results += [gr.update()] * (BUTTON_NUM-preset_nums)
     results += [backend_params]
     state_params["gallery_state"]='preview'
     return results
@@ -345,7 +337,7 @@ def process_after_generation(state_params):
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 6)
-    results += [gr.update()] * (9-preset_nums)
+    results += [gr.update()] * (BUTTON_NUM-preset_nums)
     
     if len(state_params["__output_list"]) > 0:
         output_index = state_params["__output_list"][0].split('/')[0]
@@ -400,6 +392,12 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     lora_downloads = preset_prepared.get('lora_downloads', {})
     vae_downloads = preset_prepared.get('vae_downloads', {})
 
+    model_dtype = preset_prepared.get('engine', {}).get('backend_params', {}).get('base_model_dtype', '')
+    if engine == 'SD3m' and  model_dtype == 'auto':
+        base_model = comfy_task.get_default_base_SD3m_name()
+        if modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
+            default_model = base_model
+            checkpoint_downloads = {}
     preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
                     default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
                     vae_downloads)
@@ -452,8 +450,6 @@ def reset_context(state_params, is_generating, inpaint_mode):
     aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
     if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.common_available_aspect_ratios:
         width, height = config.common_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
-    elif backend_engine == modules.flags.backend_engines[1] and aspect_ratio not in hydit_task.available_aspect_ratios:
-        width, height = hydit_task.default_aspect_ratio.replace('×', ' ').split(' ')[:2]
     else:
         width, height = aspect_ratio.split('*')
     info_preset.update({'Resolution': f'({width}, {height})'})

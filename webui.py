@@ -34,7 +34,6 @@ import enhanced.version as version
 import enhanced.wildcards as wildcards
 import enhanced.simpleai as simpleai
 import enhanced.comfy_task as comfy_task
-import enhanced.hydit_task as hydit_task
 from enhanced.simpleai import models_info, comfyd, sysinfo  
 
 def get_task(*args):
@@ -192,7 +191,7 @@ shared.gradio_root = gr.Blocks(
 
 with shared.gradio_root:
     state_topbar = gr.State({})
-    params_backend = gr.State({})
+    params_backend = gr.State({'translation_methods': modules.config.default_translation_methods})
     currentTask = gr.State(worker.AsyncTask(args=[]))
     inpaint_engine_state = gr.State('empty')
     with gr.Row():
@@ -201,8 +200,9 @@ with shared.gradio_root:
                 with gr.Row():
                     bar_title = gr.Markdown('<b>Presets:</b>', visible=False, elem_id='bar_title', elem_classes='bar_title')
                     bar_buttons = []
-                    for i in range(9):
+                    for i in range(shared.BUTTON_NUM):
                         bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=70, elem_id=f'bar{i}', elem_classes='bar_button'))
+                    #bar_dropdown = gr.Dropdown(show_label=False, choices=['self','preset1','preset2','preset3'], value='self')
                 with gr.Row():
                     progress_window = grh.Image(label='Preview', show_label=True, visible=True, height=768, elem_id='preview_generating',
                                             elem_classes=['main_view'], value="enhanced/attached/welcome.png")
@@ -414,7 +414,7 @@ with shared.gradio_root:
                                     inpaint_mask_sam_max_detections = gr.Slider(label="Maximum number of detections", info="Set to 0 to detect all", minimum=0, maximum=10, value=modules.config.default_sam_max_detections, step=1, interactive=True)
                                 generate_mask_button = gr.Button(value='Generate mask from image')
 
-                                def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug):
+                                def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug, params_extra):
                                     from extras.inpaint_mask import generate_mask_from_image
 
                                     extras = {}
@@ -423,7 +423,7 @@ with shared.gradio_root:
                                         extras['cloth_category'] = cloth_category
                                     elif mask_model == 'sam':
                                         sam_options = SAMOptions(
-                                            dino_prompt=dino_prompt_text,
+                                            dino_prompt=translator.convert(dino_prompt_text, params_extra['translation_methods']),
                                             dino_box_threshold=box_threshold,
                                             dino_text_threshold=text_threshold,
                                             dino_erode_or_dilate=dino_erode_or_dilate,
@@ -1220,7 +1220,7 @@ with shared.gradio_root:
                                    inputs=[inpaint_input_image, inpaint_mask_model, inpaint_mask_cloth_category,
                                            inpaint_mask_dino_prompt_text, inpaint_mask_sam_model,
                                            inpaint_mask_box_threshold, inpaint_mask_text_threshold,
-                                           inpaint_mask_sam_max_detections, dino_erode_or_dilate, debugging_dino],
+                                           inpaint_mask_sam_max_detections, dino_erode_or_dilate, debugging_dino, params_backend],
                                    outputs=inpaint_mask_image, show_progress=True, queue=True)
 
         ctrls = [currentTask, generate_image_grid]
@@ -1411,7 +1411,7 @@ with shared.gradio_root:
     
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=identity_dialog, show_progress=False)
 
-    for i in range(9):
+    for i in range(shared.BUTTON_NUM):
         bar_buttons[i].click(topbar.check_absent_model, inputs=[bar_buttons[i], state_topbar], outputs=[state_topbar]) \
                .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, show_progress=False) \

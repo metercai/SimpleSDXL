@@ -1,4 +1,4 @@
-{ 
+{  
     "default_engine": {
 	"backend_engine": "Kolors",
 	"disvisible": ["backend_selection", "performance_selection"],
