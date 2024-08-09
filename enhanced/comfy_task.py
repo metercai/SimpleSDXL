@@ -137,7 +137,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             comfy_params.update_params({
                 "clip_model": 't5xxl_fp8_e4m3fn.safetensors' if sysinfo["ram_total"]<32700 else 't5xxl_fp16.safetensors' #'fp16'
                 })
-        if ' base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
+        if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
             comfy_params.update_params({
                 "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<16300 else 'default' #'fp16'
                 })
