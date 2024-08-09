@@ -19,11 +19,7 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import launch
-<<<<<<< HEAD
 from enhanced.simpleai import comfyd, models_info, modelsinfo, models_info_muid, refresh_models_info
-=======
-from enhanced.simpleai import comfyd, models_info, models_info_muid, refresh_models_info
->>>>>>> SimpleSDXL
 from modules.model_loader import load_file_from_url, load_file_from_muid
 from shared import BUTTON_NUM
 
