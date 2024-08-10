@@ -397,6 +397,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         base_model = comfy_task.get_default_base_SD3m_name()
         if modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
             default_model = base_model
+            preset_prepared['base_model'] = base_model
             checkpoint_downloads = {}
     
     #preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
