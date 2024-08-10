@@ -399,9 +399,9 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
             default_model = base_model
             checkpoint_downloads = {}
     
-    preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
-                    default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
-                    vae_downloads)
+    #preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
+    #                default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
+    #                vae_downloads)
 
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
