@@ -26,6 +26,7 @@ iclight_source_text = {
 RAM32G = 32600
 RAM16G = 16300
 VRAM8G = 8180
+VRAM8G1 = 8193
 VRAM16G = 16300
 
 default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
@@ -122,7 +123,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
-                "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G and sysinfo["ram_total"]<RAM16G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 'fp16'
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 'fp16'
                 })
         check_download_kolors_model(config.path_models_root)
         if task_name == 'Kolors':
@@ -139,16 +140,19 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
             comfy_params.update_params({
-                "clip_model": 't5xxl_fp8_e4m3fn.safetensors' if sysinfo["ram_total"]<RAM32G else 't5xxl_fp16.safetensors' #'fp16'
+                "clip_model": 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G and sysinfo["ram_total"]>RAM32G else 't5xxl_fp8_e4m3fn.safetensors'
                 })
         if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
             comfy_params.update_params({
                 "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G else 'default' #'fp16'
                 })
-        elif default_params['base_model_dtype'] == 'fp16':
-            comfy_params.update_params({
-                "base_model_dtype": 'default' #'fp16'
-                })
+        else:
+            base_model_dtype = default_params['base_model_dtype']
+            if base_model_dtype == 'fp16':
+                base_model_dtype = 'default'
+            elif base_model_dtype == 'fp8':
+                base_model_dtype = 'fp8_e4m3fn'
+            comfy_params.update_params({"base_model_dtype": base_model_dtype})
         check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 
