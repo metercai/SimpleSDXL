@@ -351,6 +351,7 @@ def attention_xformers(q, k, v, heads, mask=None, attn_precision=None, skip_resh
 
     if BROKEN_XFORMERS:
         if b * heads > 65535:
+            print(f'BROKEN_XFORMERS:b={b}, heads{heads}, {b*heads}')
             disabled_xformers = True
 
     if not disabled_xformers:

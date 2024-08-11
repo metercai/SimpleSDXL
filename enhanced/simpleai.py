@@ -32,8 +32,6 @@ def reset_simpleai_args(launch_token, launch_sysinfo):
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']]
-    if is_win32_standalone_build:
-        args_comfyd += [['--disable-xformers']]
     comfyd.comfyd_args = args_comfyd
     set_scan_models_hash(True)
     return
