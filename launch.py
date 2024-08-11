@@ -65,10 +65,13 @@ def check_base_environment():
         print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
         print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
         print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
+        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
     if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and not is_installed("cpm_kernels"):
         print(f'程序运行环境缺乏必要组件, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
         print(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
+        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+        sys.exit(0)
 
     from simpleai_base import simpleai_base
     print("Checking ...")
@@ -79,7 +82,8 @@ def check_base_environment():
 
     if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
         print(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
-        print(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量大于40G。')
+        print(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量(RAM+SWAP)大于40G。')
+        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
     return token, sysinfo
 
