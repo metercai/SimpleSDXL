@@ -185,7 +185,10 @@ class AsyncTask:
             self.task_name = self.task_class
         print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
         if len(self.loras) > 0 and self.task_name == 'Kolors+':
-            self.params_backend.update({"lora_speedup": self.loras[0][0]})
+            self.params_backend.update({
+                "lora_speedup": self.loras[0][0],
+                "lora_speedup_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=1 else 0 if self.loras[0][1]<0 else 1,
+                })
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
