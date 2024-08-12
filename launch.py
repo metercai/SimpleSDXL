@@ -27,7 +27,7 @@ from build_launcher import build_launcher, is_win32_standalone_build, python_emb
 from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
 
 REINSTALL_ALL = False
-TRY_INSTALL_XFORMERS = True
+TRY_INSTALL_XFORMERS = False
 
 target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
@@ -144,17 +144,6 @@ def prepare_environment():
                         exit(0)
             elif platform.system() == "Linux":
                 run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
-        else:
-            version_installed = importlib.metadata.version('xformers')
-            if not version_installed.startswith('0.0.26') and not version_installed.startswith('0.0.27'):
-                print(f'Upgrade xformers from {version_installed} to 0.0.26')
-                run(f'"{python}" -m pip uninstall -y xformers')
-                if platform.system() == "Windows":
-                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26")
-                elif platform.system() == "Linux":
-                    run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
-                else:
-                    run_pip(f"install -U -I --no-deps xformers==0.0.26", "xformers 0.0.26")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
