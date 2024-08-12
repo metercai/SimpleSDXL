@@ -1,9 +1,9 @@
 *.json
-anime.json
+!anime.json
 !default.json
 !playground_v2.5.json
 !pony_v6.json
-realistic.json
+!realistic.json
 sai.json
 !Kolors+.json
 !Kolors.json
