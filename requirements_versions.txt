@@ -3,7 +3,7 @@ torchsde==0.2.6 #
 transformers==4.42.4 #
 
 accelerate==0.32.1 #
-bitsandbytes==0.43.1
+bitsandbytes==0.43.3
 colour-science
 cuda-python==11.7.1
 download==0.3.5

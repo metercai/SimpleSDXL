@@ -201,10 +201,10 @@ with shared.gradio_root:
                     bar_title = gr.Markdown('<b>Presets:</b>', visible=False, elem_id='bar_title', elem_classes='bar_title')
                     bar_buttons = []
                     for i in range(shared.BUTTON_NUM):
-                        bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=70, elem_id=f'bar{i}', elem_classes='bar_button'))
+                        bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=40, elem_id=f'bar{i}', elem_classes='bar_button'))
                     #bar_dropdown = gr.Dropdown(show_label=False, choices=['self','preset1','preset2','preset3'], value='self')
                 with gr.Row():
-                    progress_window = grh.Image(label='Preview', show_label=True, visible=True, height=768, elem_id='preview_generating',
+                    progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
                                             elem_classes=['main_view'], value="enhanced/attached/welcome.png")
                     progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])

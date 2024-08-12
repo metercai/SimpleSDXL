@@ -36,7 +36,7 @@ def reset_simpleai_args(launch_token, launch_sysinfo):
     set_scan_models_hash(True)
     return
 
-#set_scan_models_hash(True)
+set_scan_models_hash(True)
 
 
 identity_note = '将手机号与身份私钥绑定，获得固定的可信数字身份标识，就可以存储、找回和分享非公开资源，也可以具备云端登录和算力共享的能力，详情可见。'
