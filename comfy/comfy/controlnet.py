@@ -173,7 +173,7 @@ class ControlBase:
 
 
 class ControlNet(ControlBase):
-    def __init__(self, control_model=None, global_average_pooling=False, compression_ratio=8, latent_format=None, device=None, load_device=None, manual_cast_dtype=None, extra_conds=[], strength_type=StrengthType.CONSTANT):
+    def __init__(self, control_model=None, global_average_pooling=False, compression_ratio=8, latent_format=None, device=None, load_device=None, manual_cast_dtype=None, extra_conds=["y"], strength_type=StrengthType.CONSTANT):
         super().__init__(device)
         self.control_model = control_model
         self.load_device = load_device
@@ -322,6 +322,7 @@ class ControlLora(ControlNet):
         ControlBase.__init__(self, device)
         self.control_weights = control_weights
         self.global_average_pooling = global_average_pooling
+        self.extra_conds += ["y"]
 
     def pre_run(self, model, percent_to_timestep_function):
         super().pre_run(model, percent_to_timestep_function)
@@ -423,7 +424,7 @@ def load_controlnet_hunyuandit(controlnet_data):
 
     latent_format = comfy.latent_formats.SDXL()
     extra_conds = ['text_embedding_mask', 'encoder_hidden_states_t5', 'text_embedding_mask_t5', 'image_meta_size', 'style', 'cos_cis_img', 'sin_cis_img']
-    control = ControlNet(control_model, compression_ratio=1, latent_format=latent_format, load_device=load_device, manual_cast_dtype=manual_cast_dtype, extra_conds=extra_conds, strength_type=StrengthType.LINEAR_UP)
+    control = ControlNet(control_model, compression_ratio=1, latent_format=latent_format, load_device=load_device, manual_cast_dtype=manual_cast_dtype, extra_conds=extra_conds, strength_type=StrengthType.CONSTANT)
     return control
 
 def load_controlnet(ckpt_path, model=None):

@@ -23,10 +23,11 @@ iclight_source_text = {
     iclight_source_names[8]: "Bottom Right Light",
     }
 
-RAM32G = 32600
+RAM32G = 32500
+RAM32G1 = 32768
 RAM16G = 16300
 VRAM8G = 8180
-VRAM8G1 = 8193
+VRAM8G1 = 8192  # include 8G
 VRAM16G = 16300
 
 default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
@@ -138,22 +139,38 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
     
     elif task_name == 'Flux':
         comfy_params = ComfyTaskParams(default_params)
-        if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
-            comfy_params.update_params({
-                "clip_model": 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G and sysinfo["ram_total"]>RAM32G else 't5xxl_fp8_e4m3fn.safetensors'
-                })
-        if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
-            comfy_params.update_params({
-                "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G else 'default' #'fp16'
-                })
+        base_model = default_params['base_model']
+        if 'nf4' in base_model:
+            task_method = 'flux_base_nf4'
+            if 'clip_model' in default_params:
+                comfy_params.delete_params(['clip_model'])
+            if 'base_model_dtype' in default_params:
+                comfy_params.delete_params(['base_model_dtype'])
+            check_download_flux_model(default_params["base_model"])
+        elif 'fp8' in base_model:
+            task_method = 'flux_base_fp8'
+            if 'clip_model' in default_params:
+                comfy_params.delete_params(['clip_model'])
+            if 'base_model_dtype' in default_params:
+                comfy_params.delete_params(['base_model_dtype'])
+            check_download_flux_model(default_params["base_model"])
         else:
-            base_model_dtype = default_params['base_model_dtype']
-            if base_model_dtype == 'fp16':
-                base_model_dtype = 'default'
-            elif base_model_dtype == 'fp8':
-                base_model_dtype = 'fp8_e4m3fn'
-            comfy_params.update_params({"base_model_dtype": base_model_dtype})
-        check_download_flux_model(default_params["base_model"], default_params["clip_model"])
+            if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
+                comfy_params.update_params({
+                    "clip_model": 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 else 't5xxl_fp8_e4m3fn.safetensors'
+                })
+            if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
+                comfy_params.update_params({
+                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G else 'default' #'fp16'
+                })
+            else:
+                base_model_dtype = default_params['base_model_dtype']
+                if base_model_dtype == 'fp16':
+                    base_model_dtype = 'default'
+                elif base_model_dtype == 'fp8':
+                    base_model_dtype = 'fp8_e4m3fn'
+                comfy_params.update_params({"base_model_dtype": base_model_dtype})
+            check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 
 
@@ -220,29 +237,57 @@ def check_download_kolors_model(path_root):
     refresh_models_info()    
     return
 
-def check_download_flux_model(base_model, clip_model):
+def check_download_flux_model(base_model, clip_model=None):
     if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
-        load_file_from_url(
-            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
-            model_dir=config.paths_checkpoints[0],
-            file_name=base_model
-        )
-    if not modelsinfo.exists_model(catalog="clip", model_path=clip_model):
-        load_file_from_url(
-            url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/{clip_model}',
-            model_dir=config.path_clip,
-            file_name=f'{clip_model}'
-        )
-    if not modelsinfo.exists_model(catalog="clip", model_path='clip_l.safetensors'):
-        load_file_from_url(
-            url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors',
-            model_dir=config.path_clip,
-            file_name=f'clip_l.safetensors'
-        )
-    if not modelsinfo.exists_model(catalog="vae", model_path='ae.safetensors'):
-        load_file_from_url(
-            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ae.safetensors',
-            model_dir=config.path_vae,
-            file_name='ae.safetensors'
-        )
+        if 'nf4' in base_model:
+            if 'schnell' in base_model:
+                load_file_from_url(
+                    url='https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+            else:
+                load_file_from_url(
+                    url='https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+        elif 'fp8' in base_model:
+            if 'schnell' in base_model:
+                load_file_from_url(
+                    url='https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+            else:
+                load_file_from_url(
+                    url='https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+        else:
+            load_file_from_url(
+                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
+                model_dir=config.paths_checkpoints[0],
+                file_name=base_model
+            )
+    if clip_model:
+        if not modelsinfo.exists_model(catalog="clip", model_path=clip_model):
+            load_file_from_url(
+                url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/{clip_model}',
+                model_dir=config.path_clip,
+                file_name=f'{clip_model}'
+            )
+        if not modelsinfo.exists_model(catalog="clip", model_path='clip_l.safetensors'):
+            load_file_from_url(
+                url=f'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors',
+                model_dir=config.path_clip,
+                file_name=f'clip_l.safetensors'
+            )
+        if not modelsinfo.exists_model(catalog="vae", model_path='ae.safetensors'):
+            load_file_from_url(
+                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ae.safetensors',
+                model_dir=config.path_vae,
+                file_name='ae.safetensors'
+            )
 
