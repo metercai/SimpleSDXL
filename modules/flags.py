@@ -164,7 +164,7 @@ task_class_mapping = {
             'SD3m'   : 'SD3-medium',
             'HyDiT'  : 'Hunyuan-DiT',
             'HyDiT+' : 'Hunyuan-DiT+',
-            'Flux'   : 'Flux-schnell',
+            'Flux'   : 'Flux.1',
             }
 def get_taskclass_by_fullname(fullname):
     for taskclass, fname in task_class_mapping.items():
