@@ -124,7 +124,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
-                "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 'fp16'
+                "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G else 'fp16'
                 })
         check_download_kolors_model(config.path_models_root)
         if task_name == 'Kolors':
@@ -141,7 +141,10 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         comfy_params = ComfyTaskParams(default_params)
         base_model = default_params['base_model']
         if 'nf4' in base_model:
-            task_method = 'flux_base_nf4'
+            if sysinfo["gpu_memory"]<VRAM8G:
+                task_method = 'flux_base_nf4_2'
+            else:
+                task_method = 'flux_base_nf4'
             if 'clip_model' in default_params:
                 comfy_params.delete_params(['clip_model'])
             if 'base_model_dtype' in default_params:

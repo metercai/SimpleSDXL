@@ -89,6 +89,7 @@ class ForgeLoader4Bit(torch.nn.Module):
         return
 
     def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs):
+        global current_nf4_version
         quant_state_keys = {k[len(prefix + "weight."):] for k in state_dict.keys() if k.startswith(prefix + "weight.")}
 
         if any('bitsandbytes' in k for k in quant_state_keys):
@@ -109,15 +110,26 @@ class ForgeLoader4Bit(torch.nn.Module):
             del self.dummy
         elif hasattr(self, 'dummy'):
             if prefix + 'weight' in state_dict:
-                self.weight = ForgeParams4bit(
-                    state_dict[prefix + 'weight'].to(self.dummy),
-                    requires_grad=False,
-                    compress_statistics=False,
-                    blocksize=64,
-                    quant_type=self.quant_type,
-                    quant_storage=torch.uint8,
-                    module=self,
-                )
+                if current_nf4_version == 'v2':
+                    print(f'ForgeLoader4Bit: v2')
+                    self.weight = ForgeParams4bit(
+                        state_dict[prefix + 'weight'].to(self.dummy),
+                        requires_grad=False,
+                        compress_statistics=False,
+                        blocksize=64,
+                        quant_type=self.quant_type,
+                        quant_storage=torch.uint8,
+                        module=self,
+                    )
+                else:
+                    self.weight = ForgeParams4bit(
+                        state_dict[prefix + 'weight'].to(self.dummy),
+                        requires_grad=False,
+                        compress_statistics=True,
+                        quant_type=self.quant_type,
+                        quant_storage=torch.uint8,
+                        module=self,
+                    )
                 self.quant_state = self.weight.quant_state
 
             if prefix + 'bias' in state_dict:
@@ -131,6 +143,7 @@ current_device = None
 current_dtype = None
 current_manual_cast_enabled = False
 current_bnb_dtype = None
+current_nf4_version = 'v1'
 
 import comfy.ops
 
@@ -175,7 +188,10 @@ class CheckpointLoaderNF4:
     CATEGORY = "loaders"
 
     def load_checkpoint(self, ckpt_name):
+        global current_nf4_version
         ckpt_path = folder_paths.get_full_path("checkpoints", ckpt_name)
+        if 'bnb-nf4-v2' in ckpt_name:
+            current_nf4_version = 'v2'
         out = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, embedding_directory=folder_paths.get_folder_paths("embeddings"), model_options={"custom_operations": OPS})
         return out[:3]
 
