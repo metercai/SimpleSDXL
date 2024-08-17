@@ -266,6 +266,23 @@ def refresh_everything(refiner_model_name, base_model_name, loras,
     clear_all_caches()
     return
 
+def free_everything():
+    global model_base, model_refiner, final_unet, final_clip, final_vae, final_refiner_unet, final_refiner_vae, final_expansion, loaded_ControlNets
+    
+    model_base = core.StableDiffusionModel()
+    model_refiner = core.StableDiffusionModel()
+
+    final_expansion = None
+    final_unet = None
+    final_clip = None
+    final_vae = None
+    final_refiner_unet = None
+    final_refiner_vae = None
+
+    loaded_ControlNets = {}
+
+    ldm_patched.modules.model_management.unload_and_free_everything()
+    return
 
 refresh_everything(
     refiner_model_name=modules.config.default_refiner_model_name,

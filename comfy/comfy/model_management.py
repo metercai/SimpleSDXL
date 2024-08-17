@@ -1089,3 +1089,29 @@ def throw_exception_if_processing_interrupted():
         if interrupt_processing:
             interrupt_processing = False
             raise InterruptProcessingException()
+
+def unload_and_free_everything():
+    cleanup_models()
+    unload_all_models()
+    soft_empty_cache(True)
+    gc.collect()
+    return
+
+def print_memory_info():
+    gpu_total, torch_total = get_total_memory(torch_total_too=True)
+    free_total, free_torch = get_free_memory(torch_free_too=True)
+    gpu_total = f'{gpu_total/1024/1024/1024:.3f}GB'
+    torch_total = f'{torch_total/1024/1024/1024:.3f}GB'
+    free_total = f'{free_total/1024/1024/1024:.3f}GB'
+    free_torch = f'{free_torch/1024/1024/1024:.3f}GB'
+    if is_nvidia():
+        free_cuda, cuda_total = torch.cuda.mem_get_info()
+        max_reserved = f'{torch.cuda.max_memory_reserved()/1024/1024/1024:.3f}GB'
+        max_allocated = f'{torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB'
+        reserved = f'{torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB'
+        free_cuda = f'{free_cuda/1024/1024/1024:.3f}GB'
+        cuda_total = f'{cuda_total/1024/1024/1024:.3f}GB'
+
+        logging.info(f'GPU memory: max_reserved={max_reserved}, max_allocated={max_allocated}, reserved={reserved}, free={free_cuda}, free_torch={free_torch}, free_total={free_total}, gpu_total={gpu_total}, torch_total={torch_total}')
+        torch.cuda.reset_peak_memory_stats()
+
