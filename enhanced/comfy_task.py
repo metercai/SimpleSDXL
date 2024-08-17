@@ -140,7 +140,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
     elif task_name == 'Flux':
         comfy_params = ComfyTaskParams(default_params)
         base_model = default_params['base_model']
-        if 'nf4' in base_model:
+        if 'nf4' in base_model.lower() and 'bnb' in base_model.lower():
             if sysinfo["gpu_memory"]<VRAM8G:
                 task_method = 'flux_base_nf4_2'
             else:
@@ -150,7 +150,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             if 'base_model_dtype' in default_params:
                 comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"])
-        elif 'fp8' in base_model:
+        elif 'fp8' in base_model.lower():
             task_method = 'flux_base_fp8'
             if 'clip_model' in default_params:
                 comfy_params.delete_params(['clip_model'])

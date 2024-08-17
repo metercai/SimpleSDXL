@@ -259,6 +259,7 @@ def worker():
         print(flag)
     except Exception as e:
         print(e)
+    ldm_patched.modules.model_management.print_memory_info()
 
     def progressbar(async_task, number, text):
         print(f'[Fooocus] {text}')
@@ -1165,6 +1166,7 @@ def worker():
     def handler(async_task: AsyncTask):
         preparation_start_time = time.perf_counter()
         async_task.processing = True
+        ldm_patched.modules.model_management.print_memory_info()
 
         if async_task.task_class in flags.comfy_classes:
             comfyd.start()
@@ -1404,8 +1406,8 @@ def worker():
 
         callback_function = callback
         if async_task.task_class != 'Fooocus':
-            ldm_patched.modules.model_management.unload_all_models()
-            ldm_patched.modules.model_management.soft_empty_cache(True)
+            pipeline.free_everything()
+            #ldm_patched.modules.model_management.unload_and_free_everything()
             async_task.refiner_model_name = ''
             async_task.refiner_switch = 1.0
             callback_function = callback_comfytask
@@ -1415,8 +1417,7 @@ def worker():
             elif async_task.task_class == 'Kolors':
                 async_task.base_model_name = default_kolors_base_model_name
 
-        if ldm_patched.modules.model_management.is_nvidia():
-            print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
+        ldm_patched.modules.model_management.print_memory_info()
 
         show_intermediate_results = len(tasks) > 1 or async_task.should_enhance
         persist_image = not async_task.should_enhance or not async_task.save_final_enhanced_image_only
@@ -1453,8 +1454,7 @@ def worker():
                 del task['c'], task['uc']  # Save memory
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
-            if ldm_patched.modules.model_management.is_nvidia():
-                print(f'[Fooocus] GPU Memory, max: {torch.cuda.max_memory_allocated()/1024/1024/1024:.3f}GB, allocated:{torch.cuda.memory_allocated()/1024/1024:.3f}MB, chached: {torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB')
+            ldm_patched.modules.model_management.print_memory_info()
 
 
         if not async_task.should_enhance:
@@ -1621,7 +1621,8 @@ def worker():
                 if task.generate_image_grid:
                     build_image_wall(task)
                 task.yields.append(['finish', task.results])
-                pipeline.prepare_text_encoder(async_call=True)
+                if task.task_class not in flags.comfy_classes:
+                    pipeline.prepare_text_encoder(async_call=True)
             except:
                 traceback.print_exc()
                 task.yields.append(['finish', task.results])

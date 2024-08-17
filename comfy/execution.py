@@ -350,6 +350,7 @@ class PromptExecutor:
         self.status_messages = []
         self.add_message("execution_start", { "prompt_id": prompt_id}, broadcast=False)
 
+        comfy.model_management.print_memory_info()
         with torch.inference_mode():
             #delete cached outputs if nodes don't exist for them
             to_delete = []
@@ -413,8 +414,7 @@ class PromptExecutor:
             self.server.last_node_id = None
             if comfy.model_management.DISABLE_SMART_MEMORY:
                 comfy.model_management.unload_all_models()
-            if comfy.model_management.is_nvidia():
-                    print(f'[Comfyd] Max_memory_allocated: {torch.cuda.max_memory_allocated()/ 1024 / 1024 / 1024:.2f}GB')
+            comfy.model_management.print_memory_info()
 
 
 
