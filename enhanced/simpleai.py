@@ -6,6 +6,8 @@ from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import get_models_info, get_modelsinfo, set_scan_models_hash, refresh_models_info_from_path, models_info_path, sync_model_info
 from build_launcher import is_win32_standalone_build
+from args_manager import args
+
 
 simpleai_config = config
 token = None
@@ -31,9 +33,9 @@ def reset_simpleai_args(launch_token, launch_sysinfo):
         xformers_version=xformers_version,
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']]
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
+    args_comfyd += [["--cuda-malloc"]] if not args.disable_async_cuda_allocation and not args.async_cuda_allocation else []
     comfyd.comfyd_args = args_comfyd
-    set_scan_models_hash(True)
     return
 
 #set_scan_models_hash(True)

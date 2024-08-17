@@ -266,7 +266,7 @@ def get_torch_device_name(device):
         return "CUDA {}: {}".format(device, torch.cuda.get_device_name(device))
 
 try:
-    pass#logging.info("Device: {}".format(get_torch_device_name(get_torch_device())))
+    logging.info("Device: {}".format(get_torch_device_name(get_torch_device())))
 except:
     logging.warning("Could not pick default device.")
 
