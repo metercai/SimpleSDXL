@@ -6,6 +6,7 @@ import logging
 
 
 torch_spec = importlib.util.find_spec("torch")
+logging.info("Fix and patch for torch in windows")
 for folder in torch_spec.submodule_search_locations:
     lib_folder = os.path.join(folder, "lib")
     test_file = os.path.join(lib_folder, "fbgemm.dll")

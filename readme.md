@@ -135,6 +135,15 @@ Enhanced parameter management for instant viewing and embedding of images, and c
 ## 在线交流：qq群：938075852  新年新版本，需要增加哪些新功能，进群畅聊
 <div align=center><img width="250" src="https://github.com/metercai/SimpleSDXL/assets/5652458/28f8c604-79eb-467d-956c-b9137c784194"></div>
 
+## Star History
+<a href="https://star-history.com/#metercai/SimpleSDXL&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=metercai/SimpleSDXL&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=metercai/SimpleSDXL&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=metercai/SimpleSDXL&type=Date" />
+ </picture>
+</a>
+
 ---
 <div align=center>
 <img src="https://github.com/lllyasviel/Fooocus/assets/19834515/483fb86d-c9a2-4c20-997c-46dafc124f25">
