@@ -4,7 +4,7 @@
 	"task_method": "flux_base",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model" ],
-	"available_aspect_ratios_selection": "Common",
+	"available_aspect_ratios_selection": "Flux",
 	"backend_params": {
 	    "task_method": "flux_base",
 	    "clip_model": "auto",
@@ -42,7 +42,7 @@
     "default_scheduler": "simple",
     "default_performance": "Speed",
     "default_styles": [],
-    "default_aspect_ratio": "1024*1024",
+    "default_aspect_ratio": "1280*720",
     "default_overwrite_step": 4,
     "checkpoint_downloads": {
         "flux1-schnell.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-schnell.safetensors"
