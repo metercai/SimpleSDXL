@@ -109,8 +109,8 @@ COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ances
 comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"]
 comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
 
-aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common']
-default_aspect_ratio = ['1152*896', '1024*1024', '1280*1024']
+aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common', 'Flux']
+default_aspect_ratio = ['1152*896', '1024*1024', '1280*768', '1280*720']
 available_aspect_ratios = [
     ['704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
     '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960',
@@ -123,7 +123,11 @@ available_aspect_ratios = [
     
     ['576*1344', '768*1152', '896*1152', '768*1280', '960*1280',
     '1024*1024', '1024*1280', '1280*1280', '1280*1024',
-    '1280*960', '1280*768', '1152*896', '1152*768', '1344*576']
+    '1280*960', '1280*768', '1152*896', '1152*768', '1344*576'],
+
+    ['576*1344', '768*1152', '896*1152', '720*1280', '768*1280', '960*1280',
+    '1024*1024', '1024*1280', '1280*1280', '1280*1024',
+    '1280*960', '1280*768', '1280*720', '1152*896', '1152*768', '1344*576']
 ]
 
 def add_ratio(x):
@@ -142,15 +146,15 @@ def add_ratio(x):
     return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
 
 default_aspect_ratios = {
-        aspect_ratios_templates[0]: add_ratio(default_aspect_ratio[0]),
-        aspect_ratios_templates[1]: add_ratio(default_aspect_ratio[1]),
-        aspect_ratios_templates[2]: add_ratio(default_aspect_ratio[2]),
-        }
+    template: add_ratio(ratio)
+    for template, ratio in zip(aspect_ratios_templates, default_aspect_ratio)
+}
+
 available_aspect_ratios_list = {
-        aspect_ratios_templates[0]: [add_ratio(x) for x in available_aspect_ratios[0]],
-        aspect_ratios_templates[1]: [add_ratio(x) for x in available_aspect_ratios[1]],
-        aspect_ratios_templates[2]: [add_ratio(x) for x in available_aspect_ratios[2]],
-        }
+    template: [add_ratio(x) for x in ratios]
+    for template, ratios in zip(aspect_ratios_templates, available_aspect_ratios)
+}
+
 
 backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+', 'Flux']
 
@@ -239,13 +243,13 @@ default_class_params = {
     'Flux': {
         'disvisible': ["backend_selection", "performance_selection"],
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
-        'available_aspect_ratios_selection': 'Common',
+        'available_aspect_ratios_selection': 'Flux',
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
             "task_method": "flux_base",
-            "clip_model": "t5xxl_fp8_e4m3fn.safetensors",
-            "base_model_weight": "fp8_e4m3fn",
+            "clip_model": "auto",
+            "base_model_dtype": "auto",
             },
         },
     }

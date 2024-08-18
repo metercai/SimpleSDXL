@@ -1167,13 +1167,15 @@ with shared.gradio_root:
                 template = aspect_ratios.split(',')[1]
                 aspect_ratios = aspect_ratios.split(',')[0]
                 if template=='HyDiT':
-                    results = [gr.update(visible=False), gr.update(value=aspect_ratios, visible=True), gr.update(visible=False)]
+                    results = [gr.update(visible=False), gr.update(value=aspect_ratios, visible=True)] + [gr.update(visible=False)] * 2
                 elif template=='Common':
-                    results = [gr.update(visible=False), gr.update(visible=False), gr.update(value=aspect_ratios, visible=True)]
+                    results = [gr.update(visible=False)] * 2 + [gr.update(value=aspect_ratios, visible=True), gr.update(visible=False)]
+                elif template=='Flux':
+                    results = [gr.update(visible=False)] * 3 + [gr.update(value=aspect_ratios, visible=True)]
                 else:
-                    results = [gr.update(value=aspect_ratios, visible=True), gr.update(visible=False), gr.update(visible=False)]
+                    results = [gr.update(value=aspect_ratios, visible=True)] + [gr.update(visible=False)] * 3
             else:
-                results = [gr.update()] * 3
+                results = [gr.update()] * 4
             return results
 
 
