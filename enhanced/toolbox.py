@@ -559,28 +559,6 @@ def get_embed_metadata(info, extra=None):
     return metadata
 
 
-def extract_reset_image_params(img_path):
-    img = Image.open(img_path)
-    metadata = {}
-    if hasattr(img,'text'):
-        for k in img.text:
-            metadata.update({k: json.loads(img.text[k])})
-    if "Comment" not in metadata.keys():
-        print(f'[ToolBox] Reset_params_from_image: it\'s not the embedded parameter image. \nmetadata:{metadata}')
-        return [gr.update()] * 31
-    print(f'[ToolBox] Extraction successful and ready to reset: {metadata}') 
-    refresh_models_info()
-    sync_model_info([])
-    metadata["Comment"].update({"task_from": f'embed_image:{img_path}'})
-    results = topbar.reset_params(topbar.check_prepare_for_reset(metadata["Comment"]))   
-    print(f'[ToolBox] Reset_params_from_image: update {len(metadata["Comment"].keys())} params from input image.')
-    return results
-
-extract_reset_image_params_js = '''
-function() {
-refresh_style_localization()
-}
-'''
 
 def sync_model_info_click(*args):
 

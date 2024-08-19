@@ -15,7 +15,6 @@ class AsyncTask:
         import args_manager
 
         from enhanced.simpleai import comfyd
-        import enhanced.translator as translator
 
         self.args = args.copy()
         self.yields = []
@@ -152,9 +151,9 @@ class AsyncTask:
             enhance_mask_invert = args.pop()
             if enhance_enabled:
                 self.enhance_ctrls.append([
-                    translator.convert(enhance_mask_dino_prompt_text, self.translation_methods),
-                    translator.convert(enhance_prompt, self.translation_methods),
-                    translator.convert(enhance_negative_prompt, self.translation_methods),
+                    enhance_mask_dino_prompt_text,
+                    enhance_prompt,
+                    enhance_negative_prompt,
                     enhance_mask_model,
                     enhance_mask_cloth_category,
                     enhance_mask_sam_model,
@@ -181,9 +180,8 @@ class AsyncTask:
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
       
-        if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
+        if self.task_class in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
-        print(f'[TaskEngine] task_class:{self.task_class}, task_name:{self.task_name}, task_method:{self.task_method}')
         if len(self.loras) > 0 and self.task_name == 'Kolors+':
             self.params_backend.update({
                 "lora_speedup": self.loras[0][0],
@@ -195,10 +193,6 @@ class AsyncTask:
             }
         if self.task_name == 'default':
             self.params_backend.update({"ui_options": ui_options})
-
-        if self.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
-            self.prompt = translator.convert(self.prompt, self.translation_methods)
-            self.negative_prompt = translator.convert(self.negative_prompt, self.translation_methods)
         
 
 async_tasks = []
@@ -247,6 +241,7 @@ def worker():
     from modules.meta_parser import get_metadata_parser
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
+    import enhanced.translator as translator
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -1167,11 +1162,18 @@ def worker():
         preparation_start_time = time.perf_counter()
         async_task.processing = True
         ldm_patched.modules.model_management.print_memory_info()
-
+        print(f'[TaskEngine] Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
+        
         if async_task.task_class in flags.comfy_classes:
+            print(f'[TaskEngine] Enable Comfyd backend.')
             comfyd.start()
         else:
+            print(f'[TaskEngine] Enable Fooocus backend.')
             comfyd.stop()
+
+        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
+            async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
+            async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
 
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
@@ -1511,6 +1513,10 @@ def worker():
                 enhancement_task_start_time = time.perf_counter()
                 is_last_enhance_for_image = (current_task_id + 1) % active_enhance_tabs == 0 and not enhance_uov_after
                 persist_image = not async_task.save_final_enhanced_image_only or is_last_enhance_for_image
+
+                enhance_mask_dino_prompt_text = translator.convert(enhance_mask_dino_prompt_text, async_task.translation_methods),
+                enhance_prompt = translator.convert(enhance_prompt, async_task.translation_methods),
+                enhance_negative_prompt = translator.convert(enhance_negative_prompt, async_task.translation_methods),
 
                 extras = {}
                 if enhance_mask_model == 'sam':

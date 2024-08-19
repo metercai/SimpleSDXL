@@ -11,7 +11,7 @@
             "base_model_dtype": "auto"
 	    }
     	},
-    "default_model": "flux1-dev.safetensors",
+    "default_model": "auto",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [

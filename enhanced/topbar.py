@@ -66,6 +66,8 @@ def is_models_file_absent(preset_name):
         with open(preset_path, "r", encoding="utf-8") as json_file:
             config_preset = json.load(json_file)
         if config_preset["default_model"] and config_preset["default_model"] != 'None':
+            if 'Flux' in preset_name and config_preset["default_model"]== 'auto':
+                config_preset["default_model"] = comfy_task.get_default_base_Flux_name('+' in preset_name)
             if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
                 return True
         if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
@@ -202,7 +204,7 @@ function(system_params) {
                     nav_item.style.color = 'var(--neutral-800)';
                     nav_item.style.background= 'var(--secondary-200)';
                 } else {
-                    nav_item.style.color = 'var(--neutral-50)';
+                    nav_item.style.color = 'white';
                     nav_item.style.background= 'var(--secondary-400)';
                 }
             }
@@ -386,7 +388,6 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         comfyd.stop()
    
     default_model = preset_prepared.get('base_model')
-    previous_default_models = preset_prepared.get('previous_default_models', [])
     checkpoint_downloads = preset_prepared.get('checkpoint_downloads', {})
     embeddings_downloads = preset_prepared.get('embeddings_downloads', {})
     lora_downloads = preset_prepared.get('lora_downloads', {})
@@ -399,10 +400,17 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
             default_model = base_model
             preset_prepared['base_model'] = base_model
             checkpoint_downloads = {}
-    
-    #preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = launch.download_models(
-    #                default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
-    #                vae_downloads)
+    if engine == 'Flux' and default_model=='auto':
+        default_model = comfy_task.get_default_base_Flux_name('+' in preset)
+        preset_prepared['base_model'] = default_model
+        if modelsinfo.exists_model(catalog="checkpoints", model_path=default_model):
+            checkpoint_downloads = {}
+        else:
+            checkpoint_downloads = {default_model: comfy_task.flux_model_urls[default_model]}
+        if 'merged' in default_model:
+            preset_prepared.update({'default_overwrite_step': 6})
+
+    download_models(default_model, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads)
 
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
@@ -414,355 +422,22 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     return results
 
 
-def reset_context(state_params, is_generating, inpaint_mode):
-    global system_message, nav_id_list, nav_preset_html
+def download_models(default_model, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
+    from modules.util import get_file_from_folder_list
 
-    preset = state_params.get("__preset")
-    
-    # load preset config
-    import modules.meta_parser as meta_parser
-    config_preset = config.try_get_preset_content(preset)
-    preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
-    print(f'preset_prepared:{preset_prepared}')
-    preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
-    state_params.update({"__preset_url":preset_url})
-    
-    results = refresh_nav_bars(state_params)
-    results += meta_parser.switch_layout_template(preset_preparedi, state_params)
-    results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
-    
-    info_preset = {}
-    keys = config_preset.keys()
-    info_preset.update({
-        "Prompt": state_params.get("__prompt") if 'default_prompt' not in keys else config_preset["default_prompt"],
-        "Negative Prompt": state_params.get("__negative_prompt") if 'default_prompt_negative' not in keys else config_preset["default_prompt_negative"],
-        "Styles": "['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp']" if 'default_styles' not in keys else f'{config_preset["default_styles"]}',
-        "Performance": 'Speed' if 'default_performance' not in keys else config_preset["default_performance"],
-        "Sharpness": '2.0' if 'default_sample_sharpness' not in keys else f'{config_preset["default_sample_sharpness"]}',
-        "Guidance Scale": '4.0' if 'default_cfg_scale' not in keys else f'{config_preset["default_cfg_scale"]}',
-        "Base Model": 'juggernautXL_version6Rundiffusion.safetensors' if 'default_model' not in keys else config_preset["default_model"],
-        "Refiner Model": 'None' if 'default_refiner' not in keys else config_preset["default_refiner"],
-        "Refiner Switch": '0.5' if 'default_refiner_switch' not in keys else f'{config_preset["default_refiner_switch"]}', 
-        "Sampler": f'{ads.default["sampler_name"]}' if 'default_sampler' not in keys else config_preset["default_sampler"],
-        "Scheduler": f'{ads.default["scheduler_name"]}' if 'default_scheduler' not in keys else config_preset["default_scheduler"]
-        })
+    for file_name, url in checkpoint_downloads.items():
+        model_dir = os.path.dirname(get_file_from_folder_list(file_name, config.paths_checkpoints))
+        load_file_from_url(url=url, model_dir=model_dir, file_name=file_name)
+    for file_name, url in embeddings_downloads.items():
+        load_file_from_url(url=url, model_dir=config.path_embeddings, file_name=file_name)
+    for file_name, url in lora_downloads.items():
+        model_dir = os.path.dirname(get_file_from_folder_list(file_name, config.paths_loras))
+        load_file_from_url(url=url, model_dir=model_dir, file_name=file_name)
+    for file_name, url in vae_downloads.items():
+        load_file_from_url(url=url, model_dir=config.path_vae, file_name=file_name)
 
-    get_preset_value = lambda x1,y: y if x1 not in config_preset else config_preset[x1]
-    backend_engine = get_preset_value('default_backend', 'SDXL')
-    aspect_ratio = get_preset_value('default_aspect_ratio', '1152*896')
-    if (backend_engine == modules.flags.backend_engines[2] or backend_engine == modules.flags.backend_engines[3]) and aspect_ratio not in config.common_available_aspect_ratios:
-        width, height = config.common_default_aspect_ratio.replace('×', ' ').split(' ')[:2]
-    else:
-        width, height = aspect_ratio.split('*')
-    info_preset.update({'Resolution': f'({width}, {height})'})
-    
-    adm_scaler_positive = ads.default["adm_scaler_positive"] if "default_adm_scaler_positive" not in keys else config_preset["default_adm_scaler_positive"]
-    adm_scaler_negative = ads.default["adm_scaler_negative"] if "default_adm_scaler_negative" not in keys else config_preset["default_adm_scaler_negative"]
-    adm_scaler_end = ads.default["adm_scaler_end"] if "default_adm_scaler_end" not in keys else config_preset["default_adm_scaler_end"]
-    info_preset.update({"ADM Guidance": f'({adm_scaler_positive}, {adm_scaler_negative}, {adm_scaler_end})'})
-    if "default_loras" in keys:
-        if len(config_preset["default_loras"][0])==3:
-            loras = [(n, v) for i, (e, n, v) in enumerate(config_preset["default_loras"]) if n!='None']
-        else:
-            loras = [(n, v) for i, (n, v) in enumerate(config_preset["default_loras"]) if n!='None']
-        for i, (n, v) in enumerate(loras, 1):
-            info_preset.update({f'LoRA {i}': f'{n} : {v}'})
+    return default_model, checkpoint_downloads
 
-    if "default_seed" in keys:
-        info_preset.update({"Seed": f'{config_preset["default_seed"]}'})
-    if "checkpoint_downloads" in keys:
-        info_preset.update({"checkpoint_downloads": config_preset["checkpoint_downloads"]})
-    if "lora_downloads" in keys:
-        info_preset.update({"lora_downloads": config_preset["lora_downloads"]})
-    if "embeddings_downloads" in keys:
-        info_preset.update({"embeddings_downloads": config_preset["embeddings_downloads"]})
-    if "styles_definition" in keys:
-        info_preset.update({"styles_definition": config_preset["styles_definition"]})
-
-    ads_params = {}
-    if "default_cfg_tsnr" in keys:
-        ads_params.update({"adaptive_cfg": f'{config_preset["default_cfg_tsnr"]}'})
-    if "default_overwrite_step" in keys:
-        ads_params.update({"overwrite_step": f'{config_preset["default_overwrite_step"]}'})
-    if "default_overwrite_switch" in keys:
-        ads_params.update({"overwrite_switch": f'{config_preset["default_overwrite_switch"]}'})
-    if "default_overwrite_width" in keys:
-        ads_params.update({"overwrite_width": f'{config_preset["default_overwrite_width"]}'})
-    if "default_overwrite_height" in keys:
-        ads_params.update({"overwrite_height": f'{config_preset["default_overwrite_height"]}'})
-    if "default_overwrite_vary_strength" in keys:
-        ads_params.update({"overwrite_vary_strength": f'{config_preset["default_overwrite_vary_strength"]}'})
-    if "default_overwrite_upscale_strength" in keys:
-        ads_params.update({"overwrite_upscale_strength": f'{config_preset["default_overwrite_upscale_strength"]}'})
-    if "default_mixing_image_prompt_and_vary_upscale" in keys:
-        ads_params.update({"mixing_image_prompt_and_vary_upscale": config_preset["default_mixing_image_prompt_and_vary_upscale"]})
-    if "default_mixing_image_prompt_and_inpaint" in keys:
-        ads_params.update({"mixing_image_prompt_and_inpaint": f'{config_preset["default_mixing_image_prompt_and_inpaint"]}'})
-    if "default_refiner_swap_method" in keys:
-        ads_params.update({"refiner_swap_method": f'{config_preset["default_refiner_swap_method"]}'})
-    if "default_controlnet_softness" in keys:
-        ads_params.update({"controlnet_softness": f'{config_preset["default_controlnet_softness"]}'})
-    if "default_inpaint_engine" in keys:
-        ads_params.update({"inpaint_engine": config_preset["default_inpaint_engine"]})
-    if "default_loras_min_weight" in keys:
-        ads_params.update({"loras_min_weight": f'{config_preset["default_loras_min_weight"]}'})
-    if "default_loras_max_weight" in keys:
-        ads_params.update({"loras_max_weight": f'{config_preset["default_loras_max_weight"]}'})
-    if "default_freeu" in keys:
-        ads_params.update({"freeu": f'{config_preset["default_freeu"]}'})
-    if "default_vae" in keys:
-        ads_params.update({"vae": f'{config_preset["default_vae"]}'})
-    if "default_clip_skip" in keys:
-        ads_params.update({"clip_skip": f'{config_preset["default_clip_skip"]}'})
-    if len(ads_params.keys())>0:
-        info_preset.update({"Advanced_parameters": ads_params})
-    
-
-#other
-#"available_aspect_ratios": []
-#"default_advanced_checkbox": true,
-#"example_inpaint_prompts":[]
-    info_preset.update({"task_from": f'preset:{preset}'})
-    
-    disvisible = []
-    disinteractive = []
-    if 'default_engine' in config_preset:
-        if "disvisible" in config_preset['default_engine']:
-            disvisible = config_preset['default_engine']['disvisible']
-        if "disinteractive" in config_preset['default_engine']:
-            disinteractive = config_preset['default_engine']['disinteractive']
-        if "available_aspect_ratios_selection" in config_preset['default_engine']:
-            info_preset.update({"available_aspect_ratios_selection": config_preset['default_engine']['available_aspect_ratios_selection']})
-        if "available_scheduler_name" in config_preset['default_engine']:
-            info_preset.update({"available_scheduler_name": config_preset['default_engine']['available_scheduler_name']})
-        if "available_sampler_name" in config_preset['default_engine']:
-            info_preset.update({"available_sampler_name": config_preset['default_engine']['available_sampler_name']})
-    info_preset.update({"disvisible": disvisible})
-    info_preset.update({"disinteractive": disinteractive})
-    get_value_or_default = lambda x: ads.default[x] if f'default_{x}' not in config_preset else config_preset[f'default_{x}']
-    # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
-    update_in_keys = lambda x: [gr.update(value=config_preset[f'default_{x}'])] if f'default_{x}' in config_preset else [gr.update(value=ads.default[x])]
-
-    results = reset_params(check_prepare_for_reset(info_preset))
-    results += [gr.update(visible=True if preset_url else False)]
-
-    results += [gr.update(value=get_value_or_default('image_number'), maximum=get_value_or_default('max_image_number'))]
-    
-    results += update_in_keys("inpaint_advanced_masking_checkbox") + update_in_keys("mixing_image_prompt_and_vary_upscale") + update_in_keys("mixing_image_prompt_and_inpaint")
-    results += update_in_keys("backfill_prompt") + update_in_keys("translation_methods") 
-    
-    state_params.update({"__message": system_message})
-
-    results += refresh_nav_bars(state_params)
-    results += update_in_keys("output_format")
-    results += [state_params]
-   
-
-    if 'input_image_checkbox' in disinteractive:
-        results += [gr.update(interactive=False, value=False)]
-    else:
-        results += [gr.update(interactive=True)]
-
-    if 'enhance_checkbox' in disinteractive:
-        results += [gr.update(interactive=False, value=False)]
-    else:
-        results += [gr.update(interactive=True)]
-    
-    params_backend = {}
-    if 'default_engine' in config_preset:
-        if 'backend_engine' in config_preset['default_engine']:
-            params_backend.update({'backend_engine': config_preset['default_engine']['backend_engine']})
-        if 'backend_params' in config_preset['default_engine']:
-            params_backend.update(config_preset['default_engine']['backend_params'])
-    results += [params_backend]
-    
-    system_message = 'system message was displayed!'
-    return results
-
-
-def check_prepare_for_reset(info):
-    #print(f'[Topbar] Check_prepare_for_reset: {info}')
-    # download urls with MUID
-    down_muid = {}
-    if "checkpoint_downloads" in info.keys():
-        for k in info["checkpoint_downloads"].keys():
-            if info["checkpoint_downloads"][k].startswith('MUID:'):
-                down_muid.update({"checkpoints/"+k: info["checkpoint_downloads"][k][5:]})
-    if "lora_downloads" in info.keys():
-        for k in info["lora_downloads"].keys():
-            if info["lora_downloads"][k].startswith('MUID:'):
-                down_muid.update({"loras/"+k: info["lora_downloads"][k][5:]})
-    if "embeddings_downloads" in info.keys():
-        for k in info["embeddings_downloads"].keys():
-            if info["embeddings_downloads"][k].startswith('MUID:'):
-                down_muid.update({"embeddings/"+k: info["embeddings_downloads"][k][5:]})
-
-    # the models to be checked 
-    info['Refiner Model'] = None if info['Refiner Model']=='' else info['Refiner Model']
-    
-    loras = []
-    for i in range(config.default_max_lora_number):
-        if f'LoRA {i + 1}' in info:
-            n, w = info[f'LoRA {i + 1}'].split(' : ')
-            loras.append([n, float(w)])
-        else:
-            loras.append(['None', 1.0])
-
-    embeddings = embeddings_model_split(info["Prompt"], info["Negative Prompt"])
-    checklist = ["checkpoints/"+info["Base Model"], "checkpoints/"+info["Refiner Model"]] + ["loras/"+n for i, (n, v) in enumerate(loras)]
-    checklist += embeddings
-
-    # check if the models is in local model path
-    newlist = []
-    downlist = []
-    not_MUID = False
-    for i in range(len(checklist)):
-        f = checklist[i]
-        filename = f
-        if f and f != "checkpoints/None" and f != "loras/None":
-            if f not in models_info.keys():
-                if f in down_muid.keys() and down_muid[f] in models_info_muid.keys():
-                    filename = models_info_muid[down_muid[f]]
-                    #print(f'[Topbar] The local file {filename.split("/")[1]} is the same as in reset data {f.split("/")[1]}, replace it with the local file.')
-                else:
-                    downlist += [f]
-            else:
-                if not models_info[f]['muid']:
-                    print(f'[Topbar] The file:{f} in local is missing MUID!')
-                    not_MUID = True
-        newlist += [filename]
-
-    # download the missing model
-    if downlist:
-        print(f'[Topbar] The model is not local, ready to download.')
-        for f in downlist:
-            if f in down_muid:
-                if f.startswith("checkpoints/"):
-                    file_path = os.path.join(config.paths_checkpoints[0], f[12:])
-                elif f.startswith("loras/"):
-                    file_path = os.path.join(config.paths_loras[0], f[6:])
-                elif f.startswith("embeddings/"):
-                    file_path = os.path.join(config.path_embeddings, f[11:])
-                else:
-                    file_path = os.path.abspath(f'./models/{f}')
-                model_dir, filename = os.path.split(file_path)
-                #load_file_from_muid(filename, down_muid[f], model_dir)
-            elif "checkpoint_downloads" in info.keys() and f[12:] in info["checkpoint_downloads"]:
-                load_file_from_url(url=info["checkpoint_downloads"][f[12:]], model_dir=config.paths_checkpoints[0], file_name=f[12:])
-            elif "lora_downloads" in info.keys() and f[6:] in info["lora_downloads"]:
-                load_file_from_url(url=info["lora_downloads"][f[6:]], model_dir=config.paths_loras[0], file_name=f[6:])
-            elif "embeddings_downloads" in info.keys() and f[11:] in info["embeddings_downloads"]:
-                load_file_from_url(url=info["embeddings_downloads"][f[11:]], model_dir=config.path_embeddings, file_name=f[11:])
-            else:
-                print(f'[Topbar] The model is not local and cannot be download.')
-
-    if not_MUID:
-        #print(f'[Topbar] The reset request contains model file without MUID, need to sync model info for usability and transferability.')
-        pass
-
-    # replace to local model filename
-    new_loras = []
-    for i in range(len(newlist)):
-        if newlist[i] != checklist[i]:
-            if i==0:
-                info["Base Model"]=newlist[i][12:]
-            elif i==1:
-                info["Refiner Model"]=newlist[i][12:]
-            elif i>1 and i<len(config.default_loras)+2:
-                new_loras += [[newlist[i][6:], loras[i-2][1]]]
-            else:
-                embedding_new = newlist[i][11:].split('.')[0]
-                embedding_old = checklist[i][11:].split('.')[0]
-                info["Prompt"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
-                info["Negative Prompt"].replace("(embedding:"+embedding_new+":", "(embedding:"+embedding_old+":")
-        elif i>1 and i<len(config.default_loras)+2:
-            new_loras += [[newlist[i][6:], loras[i-2][1]]]
-    loras = new_loras
-    info.update({'loras': loras})
-
-    styles_update_flag = False
-    if "styles_definition" in info.keys():
-        for key in info["styles_definition"].keys():
-            if key not in sdxl_styles.styles.keys():
-                sdxl_styles.styles.update({key: info["styles_definition"][key]})
-                styles_update_flag = True
-                print(f'[Topbar] New styles: {key} to be loaded in reset process!')
-    info.update({'styles_update_flag': styles_update_flag})
-    return info
-
-def reset_params(metadata):
-    print(f'[Topbar] Ready to reset generation params session based by {metadata["task_from"]}.')
-    aspect_ratios = metadata['Resolution'][1:-1].replace(', ', '*')
-    adm_scaler_positive, adm_scaler_negative, adm_scaler_end = [float(f) for f in metadata['ADM Guidance'][1:-1].split(', ')]
-    
-    get_ads_value_or_default = lambda x: f'{ads.default[x]}' if 'Advanced_parameters' not in metadata.keys() or x not in metadata['Advanced_parameters'].keys() else metadata['Advanced_parameters'][x]
-    get_ads_value_exist = lambda x: 'Advanced_parameters' in metadata.keys() and x in metadata['Advanced_parameters'].keys()
-    adaptive_cfg = float(get_ads_value_or_default('adaptive_cfg'))
-    overwrite_step = int(get_ads_value_or_default('overwrite_step'))
-    overwrite_switch = int(get_ads_value_or_default('overwrite_switch'))
-    inpaint_engine = get_ads_value_or_default('inpaint_engine')
-    loras_min_weight = int(get_ads_value_or_default('loras_min_weight'))
-    loras_max_weight = int(get_ads_value_or_default('loras_max_weight'))
-    freeu_b1, freeu_b2, freeu_s1, freeu_s2 = [float(f.strip()) for f in get_ads_value_or_default('freeu')[1:-1].split(',')]
-    clip_skip = int(get_ads_value_or_default('clip_skip'))
-    vae = get_ads_value_or_default('vae')
-
-    styles = [f[1:-1] for f in metadata['Styles'][1:-1].split(', ')]
-    if styles == ['']:
-        styles = []
-
-# [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed] + freeu_ctrls
-
-# overwrite_width, overwrite_height, refiner_swap_method
-
-    update_not_null = lambda x: gr.update(value=x) if x else gr.update()
-    is_interactive = lambda x: x not in metadata['disinteractive']
-    is_visible = lambda x: x not in metadata['disvisible']
-    results = []
-    results += [gr.update(value=metadata['Prompt']), gr.update(value=metadata['Negative Prompt'])]
-    if 'styles_update_flag' in metadata.keys() and metadata['styles_update_flag']:
-        keys_list = list(sdxl_styles.styles.keys())
-        style_sorter.try_load_sorted_styles(
-                    style_names=[sdxl_styles.fooocus_expansion] + keys_list,
-                    default_selected=styles)
-        results += [gr.update(value=copy.deepcopy(styles), choices=copy.deepcopy(style_sorter.all_styles))]
-    else:
-        results += [gr.update(value=copy.deepcopy(styles))]
-    results += [gr.update(value=metadata['Performance'], visible=is_visible('performance_selection'), interactive=is_interactive('performance_selection'))]
-    available_aspect_ratios_template = 'SDXL'
-    if 'available_aspect_ratios_selection' in metadata:
-        available_aspect_ratios_template = metadata['available_aspect_ratios_selection']
-    aspect_ratios_reset = config.add_ratio(aspect_ratios) + f',{available_aspect_ratios_template}'
-    results += [aspect_ratios_reset]
-    #results += [gr.Radio.update(value=config.add_ratio(aspect_ratios)]
-
-    results += [gr.update(value=float(metadata['Sharpness'])), gr.update(value=float(metadata['Guidance Scale'])), gr.update(value=metadata['Base Model'], interactive=is_interactive('base_model')), gr.update(value=metadata['Refiner Model'], interactive=is_interactive('refiner_model')), gr.update(value=float(metadata['Refiner Switch']))]
-    if 'available_sampler_name' in metadata:
-        results += [gr.update(value=metadata['Sampler'], choices=metadata['available_sampler_name'], visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
-    else:
-        results += [gr.update(value=metadata['Sampler'], choices=modules.flags.sampler_list, visible=is_visible('sampler_name'), interactive=is_interactive('sampler_name'))]
-    if 'available_scheduler_name' in metadata:
-        results += [gr.update(value=metadata['Scheduler'], choices=metadata['available_scheduler_name'], visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
-    else:
-        results += [gr.update(value=metadata['Scheduler'], choices=modules.flags.scheduler_list, visible=is_visible('scheduler_name'), interactive=is_interactive('scheduler_name'))]
-
-    results += [gr.update(value=adaptive_cfg), gr.update(value=overwrite_step, interactive=is_interactive('overwrite_step')), gr.update(value=overwrite_switch), gr.update(value=inpaint_engine)]
-    for i, (n, v) in enumerate(metadata['loras']):
-        results += [gr.update(value=True, interactive=is_interactive('loras')), gr.update(value=n, interactive=is_interactive('loras')), gr.update(value=v, minimum=loras_min_weight, maximum=loras_max_weight, interactive=is_interactive('loras'))]
-    results += [gr.update(value=adm_scaler_positive), gr.update(value=adm_scaler_negative), gr.update(value=adm_scaler_end)]
-    if "Seed" in metadata.keys():
-        results += [gr.update(value=False), gr.update(value=metadata['Seed'])]
-    else:
-        results += [gr.update(value=True), gr.update()]
-
-    results += [gr.update(value=clip_skip), gr.update(value=vae)]
-
-    if get_ads_value_exist('freeu'):
-        results += [gr.update(value=True)]
-    else:
-        results += [gr.update(value=False)]
-    results += [gr.update(value=freeu_b1), gr.update(value=freeu_b2), gr.update(value=freeu_s1), gr.update(value=freeu_s2) ]
-    return results
 
 from transformers import CLIPTokenizer
 import shared
