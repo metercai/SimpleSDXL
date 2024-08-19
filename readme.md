@@ -1,4 +1,4 @@
-## SimpleSDXL2 - 最强中文创意生图平台，6G显存用混元、可图和SD3m！
+## SimpleSDXL2 - 最强中文创意生图，6G显存玩转混元、可图、SD3m和Flux！
 <div align=center><img src="https://github.com/user-attachments/assets/75786e42-60ec-4e02-b802-51bd82cff634"></div>
     
 ## 🔔 最新更新 / Update
