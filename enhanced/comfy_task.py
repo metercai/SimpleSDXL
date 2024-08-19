@@ -30,6 +30,12 @@ VRAM8G = 8180
 VRAM8G1 = 8192  # include 8G
 VRAM16G = 16300
 
+def is_lowlevel_device():
+    return sysinfo["gpu_memory"]<VRAM8G
+
+def is_highlevel_device():
+    return sysinfo["gpu_memory"]>VRAM16G
+
 default_base_SD15_name = 'realisticVisionV60B1_v51VAE.safetensors'
 default_base_SD3m_name_list = ['sd3_medium_incl_clips.safetensors', 'sd3_medium_incl_clips_t5xxlfp8.safetensors', 'sd3_medium_incl_clips_t5xxlfp16.safetensors']
 
@@ -41,6 +47,39 @@ def get_default_base_SD3m_name():
             return sd3name
     return default_base_SD3m_name_list[0]
 
+default_base_Flux_name_list = ['flux1-dev.safetensors', 'flux1-dev-bnb-nf4.safetensors', 'flux1-dev-bnb-nf4-v2.safetensors', 'FLUX.1-schnell-dev-merged.safetensors', 'flux1-schnell.safetensors', 'flux1-schnell-bnb-nf4.safetensors']
+flux_model_urls = {
+    "flux1-dev.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-dev.safetensors",
+    "flux1-dev-bnb-nf4-v2.safetensors": "https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/flux1-dev-bnb-nf4-v2.safetensors",
+    "flux1-schnell.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-schnell.safetensor",
+    "flux1-schnell-bnb-nf4.safetensors": "https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/flux1-schnell-bnb-nf4.safetensors"
+    }
+
+def get_default_base_Flux_name(plus=False):
+    if plus:
+        if is_lowlevel_device():
+            checklist = [default_base_Flux_name_list[5], default_base_Flux_name_list[3]]
+        else:
+            checklist = [default_base_Flux_name_list[4], default_base_Flux_name_list[5], default_base_Flux_name_list[3]]
+    else:
+        if is_highlevel_device():
+            checklist = [default_base_Flux_name_list[0], default_base_Flux_name_list[2], default_base_Flux_name_list[1]]
+        else:
+            checklist = [default_base_Flux_name_list[2], default_base_Flux_name_list[1], default_base_Flux_name_list[3]]
+    for i in range(0, len(checklist)):
+        fluxname = checklist[i]
+        if modelsinfo.exists_model(catalog="checkpoints", model_path=fluxname):
+            return fluxname
+    return checklist[0]
+        
+
+
+    level = 0 if sysinfo["gpu_memory"]<VRAM8G and sysinfo["ram_total"]<RAM16G else 1 if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 2
+    for i in range(dtype, -1 ,-1):
+        sd3name = default_base_SD3m_name_list[i]
+        if f'checkpoints/{sd3name}' in models_info:
+            return sd3name
+    return default_base_SD3m_name_list[0]
 
 quick_prompts = [
     'sunshine from window',
