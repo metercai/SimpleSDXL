@@ -73,14 +73,6 @@ def get_default_base_Flux_name(plus=False):
     return checklist[0]
         
 
-
-    level = 0 if sysinfo["gpu_memory"]<VRAM8G and sysinfo["ram_total"]<RAM16G else 1 if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 2
-    for i in range(dtype, -1 ,-1):
-        sd3name = default_base_SD3m_name_list[i]
-        if f'checkpoints/{sd3name}' in models_info:
-            return sd3name
-    return default_base_SD3m_name_list[0]
-
 quick_prompts = [
     'sunshine from window',
     'neon light, city',

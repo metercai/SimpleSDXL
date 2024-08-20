@@ -59,14 +59,14 @@ def Q2B_alphabet(text):
 def translate2en_model(model, tokenizer, text_zh):
     inputs = tokenizer(text_zh, return_tensors="pt")
     translated_tokens = model.generate(
-        **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["eng_Latn"], max_length=60
+        **inputs, forced_bos_token_id=tokenizer.convert_tokens_to_ids("eng_Latn"), max_length=60
     )
     return tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
 
 def translate2zh_model(model, tokenizer, text_en):
     inputs = tokenizer(text_en, return_tensors="pt")
     translated_tokens = model.generate(
-        **inputs, forced_bos_token_id=tokenizer.lang_code_to_id["zho_Hans"], max_length=60
+        **inputs, forced_bos_token_id=tokenizer.convert_tokens_to_ids("zho_Hans"), max_length=60
     )
     return tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0].lower()
 
