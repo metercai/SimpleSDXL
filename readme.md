@@ -2,7 +2,8 @@
 <div align=center><img src="https://github.com/user-attachments/assets/75786e42-60ec-4e02-b802-51bd82cff634"></div>
     
 ## 🔔 最新更新 / Update
-- [2024.07.31] <b>优化了新架构，更稳定，更快速。新增对快手可图模型的支持，使SimpleSDXL2除SDXL外，以6G显卡显存同时支持: 小马v6/Playground-v2.5/SD3m/混元/可图等多种模型出图，适用更多场景。同步主线v2.5.2，并对修图界面进行优化和适配，使之更容易被中文用户理解和使用。</b>
+- [2024.08.20] <b>新架构进一步优化，提升在Windows环境的兼容性，压缩Fooocus和Comfy后端切换的资源消耗。优化支持最低6G显存的Flux模型出图，提供质量优先的Fluxdev和速度优先的Flux+两个预置包，并可根据系统资源自动适配。同步升级主线v2.5.5，优化增强修图UI，更符合Fooocus交互习惯。</b>
+- [2024.07.31] 优化了新架构，更稳定，更快速。新增对快手可图模型的支持，使SimpleSDXL2除SDXL外，以6G显卡显存同时支持: 小马v6/Playground-v2.5/SD3m/混元/可图等多种模型出图，适用更多场景。同步主线v2.5.2，并对修图界面进行优化和适配，使之更容易被中文用户理解和使用。
 - [2024.06.30] 扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。
 - [2024.05.28] 同步主线升级到v2.4.3，新增nsfw过滤等功能。
 - [2024.04.23] 升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。
@@ -12,15 +13,18 @@ Note: Please don't forget to give us a star if you like this project. Thanks! �
 
 ## Windows安装使用
 ### 下载：(新用户至少要下载程序包和基本模型包)
-- 程序包: 运行环境和应用程序, [SimpleSDXL2_win.exe.7z0731 (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0731)
+- 程序包: 运行环境和应用程序, [SimpleSDXL2_win.exe.7z0820 (2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0820)
 - 基本模型包: 缺省出图模型和所有辅助模型，包含SD3基础版, [models_base_0731.zip (49G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip)
 - 扩展模型包: 预置导航上的其他出图模型，包括写实/动漫(V500)/小马v6/Playground-v2.5/混元1.2/可图, [models_ckpt_0731.zip (47G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip)
+- Flux模型: 6G和8G显存可下载: [flux1-dev-bnb-nf4-v2.safetensors](https://hf-mirror.com/lllyasviel/flux1-dev-bnb-nf4/resolve/main/flux1-dev-bnb-nf4-v2.safetensors) 和 [flux1-schnell-bnb-nf4.safetensors](https://hf-mirror.com/silveroxides/flux1-nf4-weights/resolve/main/flux1-schnell-bnb-nf4.safetensors)。高配显卡可下载Flux全量模型和增补包: [flux1-dev.safetensors](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/flux1-dev.safetensors)，[flux1-schnell.safetensors](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/flux1-schnell.safetensors)，Flux全量模型所需增补包[models_flux1_fp16_simpleai_patch.zip](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux1_fp16_simpleai_patch.zip)
 ### 安装：
-- 新建空目录名称为: SimpleAI，注意完整路径名上不能包含中文和空格。将程序包复制到新目录内，<b>去掉`.7z0731`的文件名尾缀</b>，双击运行，自解压到当前目录。新版本严禁与旧版本混装。
-- 复制基本模型包models_base_0731.zip和扩展模型包models_ckpt_0731.zip到SimpleAI目录下，分别双击文件解压到本目录，同名覆盖在同一目录下：SimpleModels，即模型根目录。
-- 在SimpleAI目录下新建出图目录，名称为: outputs ，此目录将保存所有出图的图片。
+- 新建空目录名称为: SimpleAI，注意完整路径名上不能包含中文和空格。如果已经安装过正式版的用户，此步可忽略。
+- 将程序包复制到SimpleAI目录内，<b>去掉`.7z0820`的文件名尾缀</b>，双击exe文件运行，自解压到当前目录。新版本严禁与旧版本混装。
+- 复制基本模型包models_base_0731.zip和扩展模型包models_ckpt_0731.zip到SimpleAI目录下，分别双击文件解压到本目录，同名覆盖在同一目录下：SimpleModels，即模型根目录。如果已经安装过正式版的用户，此步可忽略。
+- 将下载的flux1-dev-bnb-nf4-v2.safetensors、flux1-schnell-bnb-nf4.safetensors或flux1-dev.safetensors、flux1-schnell.safetensors模型文件放入SimpleModels下的checkpoints目录下。如果需要运行Flux全量模型，需在SimpleAI目录下解压models_flux1_fp16_simpleai_patch.zip，覆盖到SimpleModels下，主要是补齐clip和vae目录下的模型。
+- 在SimpleAI目录下新建出图目录，名称为: outputs ，此目录将保存所有出图的图片。如果已经安装过正式版的用户，此步可忽略。
 ### 运行
-- 进入SimpleSDXL2_win目录，双击启动脚本 run_SimpleSDXL.bat，完成第一次运行。
+- 进入SimpleSDXL2_win_0820目录，双击启动脚本 run_SimpleSDXL.bat，完成第一次运行。
 - 第一次运行后，在SimpleSDXL目录下会生成 config.txt文件，可以自行修改和添加模型路径。
 - 模型根目录和出图目录可以自定义，但需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
 <img width="600" align=center src="https://github.com/user-attachments/assets/4c039129-b59f-47ef-825b-863c5ea24705">
