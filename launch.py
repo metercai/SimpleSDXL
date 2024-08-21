@@ -46,7 +46,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.18"
-    REINSTALL_BASE = False
+    REINSTALL_BASE = True
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -59,6 +59,10 @@ def check_base_environment():
         if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
+    
+    extra_pkg = 'gguf'
+    if not is_installed(extra_pkg):
+        run(f'"{python}" -m pip install {extra_pkg} -i {index_url}', f'Install {extra_pkg}')
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
         print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
