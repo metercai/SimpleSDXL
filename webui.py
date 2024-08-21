@@ -1049,7 +1049,12 @@ with shared.gradio_root:
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
-                
+
+                    def sync_params_backend(v, params):
+                        params.update({'translation_methods':v})
+                        return params
+                    translation_methods.change(sync_params_backend, inputs=[translation_methods, params_backend], outputs=params_backend)
+
                 # custom plugin "OneButtonPrompt"
                 import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
                 run_event = gr.Number(visible=False, value=0)
