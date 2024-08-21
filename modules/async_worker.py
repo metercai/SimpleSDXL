@@ -1514,9 +1514,9 @@ def worker():
                 is_last_enhance_for_image = (current_task_id + 1) % active_enhance_tabs == 0 and not enhance_uov_after
                 persist_image = not async_task.save_final_enhanced_image_only or is_last_enhance_for_image
 
-                enhance_mask_dino_prompt_text = translator.convert(enhance_mask_dino_prompt_text, async_task.translation_methods),
-                enhance_prompt = translator.convert(enhance_prompt, async_task.translation_methods),
-                enhance_negative_prompt = translator.convert(enhance_negative_prompt, async_task.translation_methods),
+                enhance_mask_dino_prompt_text = translator.convert(enhance_mask_dino_prompt_text, async_task.translation_methods)
+                enhance_prompt = translator.convert(enhance_prompt, async_task.translation_methods)
+                enhance_negative_prompt = translator.convert(enhance_negative_prompt, async_task.translation_methods)
 
                 extras = {}
                 if enhance_mask_model == 'sam':
