@@ -192,7 +192,7 @@ if args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
     print("Set device to:", args.gpu_device_id)
 
-if sysinfo["gpu_memory"]<=40960:
+if sysinfo["gpu_memory"]<=4096:
     print(f'The GPU memory capacity of the system is too small to run the latest models such as Flux, SD3m, Kolors, and HyDiT properly, and the Comfyd engine will be automatically disabled.')
     print(f'系统GPU显存容量太小，无法正常运行Flux, SD3m, Kolors和HyDiT等最新模型，将自动禁用Comfyd引擎。请知晓，尽早升级硬件。')
     print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
