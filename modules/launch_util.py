@@ -175,6 +175,17 @@ def requirements_met(requirements_file):
 
     return result
 
+def is_installed_version(package, version_required):
+    try:
+        version_installed = importlib.metadata.version(package)
+    except Exception:
+        return False
+
+    #print(f'requirement:{package}, required:{version_required}, installed:{version_installed}')
+    if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
+        return False
+    return True
+
 
 def delete_folder_content(folder, prefix=None):
     result = True

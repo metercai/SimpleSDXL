@@ -24,7 +24,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import platform
 
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
+from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff, is_installed_version
 
 REINSTALL_ALL = False
 TRY_INSTALL_XFORMERS = False
@@ -60,6 +60,11 @@ def check_base_environment():
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
+    #extra_pkg = 'lark-parser'
+    #if not is_installed(extra_pkg):
+    #    pkg_command = f'pip install {extra_pkg} -i {index_url}'
+    #    run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg}', f"Couldn't install {extra_pkg}", live=True)
+
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
         print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
         print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
@@ -67,8 +72,8 @@ def check_base_environment():
         print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
         print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
-    if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and not is_installed("cpm_kernels"):
-        print(f'程序运行环境缺乏必要组件, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
+    if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and (not is_installed("cpm_kernels") or not is_installed_version("bitsandbytes", "0.43.3")):
+        print(f'运行环境中缺乏必要组件或组件版本不匹配, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
         print(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
         print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
