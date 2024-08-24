@@ -182,11 +182,17 @@ class AsyncTask:
       
         if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
-        if len(self.loras) > 0 and self.task_name == 'Kolors+':
-            self.params_backend.update({
-                "lora_speedup": self.loras[0][0],
-                "lora_speedup_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=1 else 0 if self.loras[0][1]<0 else 1,
-                })
+        if len(self.loras) > 0:
+            if self.task_name == 'Kolors+':
+                self.params_backend.update({
+                    "lora_speedup": self.loras[0][0],
+                    "lora_speedup_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=1 else 0 if self.loras[0][1]<0 else 1,
+                    })
+            elif self.task_name == 'Flux':
+                self.params_backend.update({
+                    "lora_1": self.loras[0][0],
+                    "lora_1_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=2 else 0 if self.loras[0][1]<0 else 1,
+                    })
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
@@ -456,7 +462,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+']:
+                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+', 'Flux']:
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None
