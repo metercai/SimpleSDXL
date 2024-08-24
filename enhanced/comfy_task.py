@@ -178,9 +178,9 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 task_method = 'flux_base_nf4'
             comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
             check_download_flux_model(default_params["base_model"])
-        elif 'fp8' in base_model.lower():
+        elif 'fp8' in base_model.lower() 'fp8' and base_model_key in models_info and models_info[base_model_key]["size"]/(1024*1024*1024)>15:
             task_method = 'flux_base_fp8'
-            comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
+            comfy_params.delete_params(['clip_model', 'base_model_dtype'])
             check_download_flux_model(default_params["base_model"])
         else:
             if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
@@ -189,7 +189,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 })
             if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
                 comfy_params.update_params({
-                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'lora_1' in default_params else 'default' #'fp16'
+                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'fp8' in base_model.lower() or 'lora_1' in default_params else 'default' #'fp16'
                 })
             else:
                 base_model_dtype = default_params['base_model_dtype']
