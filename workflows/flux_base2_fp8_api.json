@@ -37,7 +37,7 @@
   },
   "11": {
     "inputs": {
-      "clip_name1": "t5xxl_fp16.safetensors",
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
       "type": "flux"
     },
@@ -48,8 +48,8 @@
   },
   "12": {
     "inputs": {
-      "unet_name": "flux1-dev.safetensors",
-      "weight_dtype": "default"
+      "unet_name": "flux1-schnell.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
     },
     "class_type": "UNETLoader",
     "_meta": {
@@ -99,7 +99,7 @@
       "steps": 4,
       "denoise": 1,
       "model": [
-        "30",
+        "31",
         0
       ]
     },
@@ -111,7 +111,7 @@
   "22": {
     "inputs": {
       "model": [
-        "30",
+        "31",
         0
       ],
       "conditioning": [
@@ -126,7 +126,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 31442303716317
+      "noise_seed": 385163595326865
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -171,11 +171,25 @@
   },
   "30": {
     "inputs": {
-      "ckpt_name": "flux1-schnell-fp8.safetensors"
+      "ckpt_name": "flux1-dev-fp8.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "31": {
+    "inputs": {
+      "lora_name": "flux_lora.safetensors",
+      "strength_model": 1,
+      "model": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_1"
     }
   }
 }
