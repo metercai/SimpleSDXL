@@ -35,6 +35,7 @@ def reset_simpleai_args(launch_token, launch_sysinfo):
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
     args_comfyd += [["--cuda-malloc"]] if not args.disable_async_cuda_allocation and not args.async_cuda_allocation else []
+    args_comfyd += [["--fast"]] if 'RTX 40' in sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd
     return
 

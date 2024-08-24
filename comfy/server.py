@@ -29,6 +29,8 @@ from app.frontend_management import FrontendManager
 from app.user_manager import UserManager
 from model_filemanager import download_model, DownloadModelStatus
 from typing import Optional
+from api_server.routes.internal.internal_routes import InternalRoutes
+
 
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
@@ -72,6 +74,7 @@ class PromptServer():
         mimetypes.types_map['.js'] = 'application/javascript; charset=utf-8'
 
         self.user_manager = UserManager()
+        self.internal_routes = InternalRoutes()
         self.supports = ["custom_nodes_from_web"]
         self.prompt_queue = None
         self.loop = loop
@@ -138,6 +141,14 @@ class PromptServer():
         def get_embeddings(self):
             embeddings = folder_paths.get_filename_list("embeddings")
             return web.json_response(list(map(lambda a: os.path.splitext(a)[0], embeddings)))
+
+        @routes.get("/models/{folder}")
+        async def get_models(request):
+            folder = request.match_info.get("folder", None)
+            if not folder in folder_paths.folder_names_and_paths:
+                return web.Response(status=404)
+            files = folder_paths.get_filename_list(folder)
+            return web.json_response(files)
 
         @routes.get("/extensions")
         async def get_extensions(request):
@@ -423,6 +434,7 @@ class PromptServer():
             obj_class = nodes.NODE_CLASS_MAPPINGS[node_class]
             info = {}
             info['input'] = obj_class.INPUT_TYPES()
+            info['input_order'] = {key: list(value.keys()) for (key, value) in obj_class.INPUT_TYPES().items()}
             info['output'] = obj_class.RETURN_TYPES
             info['output_is_list'] = obj_class.OUTPUT_IS_LIST if hasattr(obj_class, 'OUTPUT_IS_LIST') else [False] * len(obj_class.RETURN_TYPES)
             info['output_name'] = obj_class.RETURN_NAMES if hasattr(obj_class, 'RETURN_NAMES') else info['output']
@@ -441,6 +453,11 @@ class PromptServer():
 
             if hasattr(obj_class, 'OUTPUT_TOOLTIPS'):
                 info['output_tooltips'] = obj_class.OUTPUT_TOOLTIPS
+
+            if getattr(obj_class, "DEPRECATED", False):
+                info['deprecated'] = True
+            if getattr(obj_class, "EXPERIMENTAL", False):
+                info['experimental'] = True
             return info
 
         @routes.get("/object_info")
@@ -596,6 +613,7 @@ class PromptServer():
 
     def add_routes(self):
         self.user_manager.add_routes(self.routes)
+        self.app.add_subapp('/internal', self.internal_routes.get_app())
 
         # Prefix every route with /api for easier matching for delegation.
         # This is very useful for frontend dev server, which need to forward
@@ -713,6 +731,9 @@ class PromptServer():
 
         site = web.TCPSite(runner, address, port, ssl_context=ssl_ctx)
         await site.start()
+
+        self.address = address
+        self.port = port
 
         if verbose:
             logging.info(f'Starting Comfyd server!\n')

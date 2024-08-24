@@ -176,17 +176,11 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 task_method = 'flux_base_nf4_2'
             else:
                 task_method = 'flux_base_nf4'
-            if 'clip_model' in default_params:
-                comfy_params.delete_params(['clip_model'])
-            if 'base_model_dtype' in default_params:
-                comfy_params.delete_params(['base_model_dtype'])
+            comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
             check_download_flux_model(default_params["base_model"])
         elif 'fp8' in base_model.lower():
             task_method = 'flux_base_fp8'
-            if 'clip_model' in default_params:
-                comfy_params.delete_params(['clip_model'])
-            if 'base_model_dtype' in default_params:
-                comfy_params.delete_params(['base_model_dtype'])
+            comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
             check_download_flux_model(default_params["base_model"])
         else:
             if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
@@ -204,6 +198,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 elif base_model_dtype == 'fp8':
                     base_model_dtype = 'fp8_e4m3fn'
                 comfy_params.update_params({"base_model_dtype": base_model_dtype})
+            if 'lora_1' in default_params:
+                task_method = 'flux_base2'
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 
