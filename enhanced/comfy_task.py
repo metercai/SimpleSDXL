@@ -189,13 +189,13 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 })
             if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
                 comfy_params.update_params({
-                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G else 'default' #'fp16'
+                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'lora_1' in default_params else 'default' #'fp16'
                 })
             else:
                 base_model_dtype = default_params['base_model_dtype']
-                if base_model_dtype == 'fp16':
+                if base_model_dtype == 'fp16' and 'lora_1' not in default_params:
                     base_model_dtype = 'default'
-                elif base_model_dtype == 'fp8':
+                else:
                     base_model_dtype = 'fp8_e4m3fn'
                 comfy_params.update_params({"base_model_dtype": base_model_dtype})
             if 'lora_1' in default_params:
