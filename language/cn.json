@@ -67,8 +67,8 @@
   "* Powered by Fooocus Inpaint Engine": "*由Fooocus重绘引擎支持",
 
   "Models": "模型",
-  "Base Model (SDXL only)": "基础模型(SDXL)",
-  "Refiner (SDXL or SD 1.5)": "精炼模型(SDXL或SD1.5)",
+  "Base Model (SDXL only)": "基础模型",
+  "Refiner (SDXL or SD 1.5)": "精炼模型",
   "None": "无",
   "LoRAs (SDXL or SD 1.5)": "LoRAs局部模型",
   "Refresh": "刷新",
