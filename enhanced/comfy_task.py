@@ -196,13 +196,18 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 })
             else:
                 base_model_dtype = default_params['base_model_dtype']
-                if base_model_dtype == 'fp16' and 'lora_1' not in default_params:
+                if base_model_dtype == 'fp16':
                     base_model_dtype = 'default'
                 else:
+                    base_model_dtype = 'fp8_e4m3fn'
+                if base_model_dtype == 'default' and 'lora_1' in default_params:
                     base_model_dtype = 'fp8_e4m3fn'
                 comfy_params.update_params({"base_model_dtype": base_model_dtype})
             if 'lora_1' in default_params:
                 task_method = 'flux_base2'
+            if '.gguf' in base_model:
+                task_method = 'flux_base_gguf'
+                comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
 

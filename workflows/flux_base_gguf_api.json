@@ -1,0 +1,204 @@
+{
+  "5": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "aspect_ratios_size"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "10": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "11": {
+    "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "clip_model"
+    }
+  },
+  "12": {
+    "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "25",
+        0
+      ],
+      "guider": [
+        "22",
+        0
+      ],
+      "sampler": [
+        "16",
+        0
+      ],
+      "sigmas": [
+        "17",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "16": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "sampler_select"
+    }
+  },
+  "17": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1,
+      "model": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "scheduler_select"
+    }
+  },
+  "22": {
+    "inputs": {
+      "model": [
+        "31",
+        0
+      ],
+      "conditioning": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "25": {
+    "inputs": {
+      "noise_seed": 750541412639431
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "noise_seed"
+    }
+  },
+  "27": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "28": {
+    "inputs": {
+      "clip_l": "",
+      "t5xxl": "a bottle with a rainbow galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
+      "guidance": 3.5,
+      "clip": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncodeFlux",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "29": {
+    "inputs": {
+      "ckpt_name": "flux1-schnell-bnb-nf4.safetensors"
+    },
+    "class_type": "CheckpointLoaderNF4",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "30": {
+    "inputs": {
+      "ckpt_name": "flux1-dev-fp8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "31": {
+    "inputs": {
+      "lora_name": "anime_lora_comfy_converted.safetensors",
+      "strength_model": 0,
+      "model": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_1"
+    }
+  },
+  "36": {
+    "inputs": {
+      "unet_name": "flux1-dev-Q8_0.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "base_model"
+    }
+  }
+}
