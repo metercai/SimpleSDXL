@@ -203,10 +203,12 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 if base_model_dtype == 'default' and 'lora_1' in default_params:
                     base_model_dtype = 'fp8_e4m3fn'
                 comfy_params.update_params({"base_model_dtype": base_model_dtype})
-            if 'lora_1' in default_params:
+            if 'lora_1' in default_params and '.gguf' not in base_model:
                 task_method = 'flux_base2'
             if '.gguf' in base_model:
                 task_method = 'flux_base_gguf'
+                if 'lora_1' in default_params:
+                    task_method = 'flux_base_gguf2'
                 comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)

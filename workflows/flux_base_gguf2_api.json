@@ -99,7 +99,7 @@
       "steps": 20,
       "denoise": 1,
       "model": [
-        "36",
+        "31",
         0
       ]
     },
@@ -111,7 +111,7 @@
   "22": {
     "inputs": {
       "model": [
-        "36",
+        "31",
         0
       ],
       "conditioning": [
@@ -126,7 +126,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 931669617070486
+      "noise_seed": 750541412639431
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -180,8 +180,12 @@
   },
   "31": {
     "inputs": {
-      "lora_name": "art_lora.safetensors",
-      "strength_model": 1
+      "lora_name": "anime_lora_comfy_converted.safetensors",
+      "strength_model": 0,
+      "model": [
+        "36",
+        0
+      ]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
