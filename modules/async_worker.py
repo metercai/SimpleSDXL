@@ -746,7 +746,7 @@ def worker():
                                                           modules.config.default_max_lora_number,
                                                           lora_filenames=lora_filenames)
         loras += async_task.performance_loras
-        if async_task.task_class == 'Fooocus':
+        if async_task.task_class in ['Fooocus', 'Comfy']:
             if advance_progress:
                 current_progress += 1
             progressbar(async_task, current_progress, 'Loading models ...')
@@ -829,7 +829,7 @@ def worker():
                 print(f'[Prompt Expansion] {expansion}')
                 t['expansion'] = expansion
                 t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
-        if async_task.task_class == 'Fooocus':
+        if async_task.task_class in ['Fooocus', 'Comfy']:
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):

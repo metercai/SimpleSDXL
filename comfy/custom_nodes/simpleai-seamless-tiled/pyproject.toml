@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-seamless-tiling"
+description = "Node for generating seamless textures, based on similar setting from A1111."
+version = "1.0.0"
+license = { file = "LICENSE" }
+
+[project.urls]
+Repository = "https://github.com/spinagon/ComfyUI-seamless-tiling"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "spinagon"
+DisplayName = "ComfyUI-seamless-tiling"
+Icon = ""
