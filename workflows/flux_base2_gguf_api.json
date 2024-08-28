@@ -1,13 +1,19 @@
 {
   "5": {
     "inputs": {
-      "width": 1024,
-      "height": 1024,
+      "width": [
+        "37",
+        0
+      ],
+      "height": [
+        "38",
+        0
+      ],
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "aspect_ratios_size"
+      "title": "aspect_ratios"
     }
   },
   "8": {
@@ -99,7 +105,7 @@
       "steps": 20,
       "denoise": 1,
       "model": [
-        "31",
+        "39",
         0
       ]
     },
@@ -111,7 +117,7 @@
   "22": {
     "inputs": {
       "model": [
-        "31",
+        "39",
         0
       ],
       "conditioning": [
@@ -126,7 +132,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 750541412639431
+      "noise_seed": 174185563030371
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -180,8 +186,8 @@
   },
   "31": {
     "inputs": {
-      "lora_name": "anime_lora_comfy_converted.safetensors",
-      "strength_model": 0,
+      "lora_name": "furry_lora.safetensors",
+      "strength_model": 1,
       "model": [
         "36",
         0
@@ -199,6 +205,46 @@
     "class_type": "UnetLoaderGGUF",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "37": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_width"
+    }
+  },
+  "38": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_height"
+    }
+  },
+  "39": {
+    "inputs": {
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": [
+        "37",
+        0
+      ],
+      "height": [
+        "38",
+        0
+      ],
+      "model": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "ModelSamplingFlux"
     }
   }
 }

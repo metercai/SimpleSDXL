@@ -1,13 +1,19 @@
 {
   "5": {
     "inputs": {
-      "width": 1024,
-      "height": 1024,
+      "width": [
+        "33",
+        0
+      ],
+      "height": [
+        "34",
+        0
+      ],
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "aspect_ratios_size"
+      "title": "aspect_ratios"
     }
   },
   "8": {
@@ -37,7 +43,7 @@
   },
   "11": {
     "inputs": {
-      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name1": "t5xxl_fp16.safetensors",
       "clip_name2": "clip_l.safetensors",
       "type": "flux"
     },
@@ -99,7 +105,7 @@
       "steps": 20,
       "denoise": 1,
       "model": [
-        "31",
+        "32",
         0
       ]
     },
@@ -111,7 +117,7 @@
   "22": {
     "inputs": {
       "model": [
-        "31",
+        "32",
         0
       ],
       "conditioning": [
@@ -126,7 +132,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 433367709956119
+      "noise_seed": 922900785278818
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -148,7 +154,7 @@
   "28": {
     "inputs": {
       "clip_l": "",
-      "t5xxl": "a bottle with a rainbow galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
+      "t5xxl": "1girl on the street,realism",
       "guidance": 3.5,
       "clip": [
         "11",
@@ -180,8 +186,8 @@
   },
   "31": {
     "inputs": {
-      "lora_name": "anime_lora_comfy_converted.safetensors",
-      "strength_model": 1,
+      "lora_name": "realism_lora_comfy_converted.safetensors",
+      "strength_model": 1.2,
       "model": [
         "12",
         0
@@ -190,6 +196,46 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_1"
+    }
+  },
+  "32": {
+    "inputs": {
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": [
+        "33",
+        0
+      ],
+      "height": [
+        "34",
+        0
+      ],
+      "model": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "ModelSamplingFlux"
+    }
+  },
+  "33": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_width"
+    }
+  },
+  "34": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_height"
     }
   }
 }

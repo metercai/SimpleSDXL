@@ -143,6 +143,11 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 comfy_params.delete_params(['denoise'])
                 return ComfyTask('layerdiffuse_cond', comfy_params, images)
 
+    elif task_name == 'Seamless':
+        comfy_params = ComfyTaskParams(default_params)
+        #check_download_base_model(default_params["base_model"])
+        return ComfyTask(task_method, comfy_params)
+
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
@@ -198,8 +203,9 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 base_model_dtype = default_params['base_model_dtype']
                 if base_model_dtype == 'fp16':
                     base_model_dtype = 'default'
-                else:
+                elif base_model_dtype != 'default':
                     base_model_dtype = 'fp8_e4m3fn'
+
                 if base_model_dtype == 'default' and 'lora_1' in default_params:
                     base_model_dtype = 'fp8_e4m3fn'
                 comfy_params.update_params({"base_model_dtype": base_model_dtype})
@@ -208,7 +214,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             if '.gguf' in base_model:
                 task_method = 'flux_base_gguf'
                 if 'lora_1' in default_params:
-                    task_method = 'flux_base_gguf2'
+                    task_method = 'flux_base2_gguf'
                 comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
@@ -275,6 +281,15 @@ def check_download_kolors_model(path_root):
         shutil.copy(path_org, path_dst)
    
     refresh_models_info()    
+    return
+
+def check_download_base_model(base_model):
+    if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
+        load_file_from_url(
+            url='https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/{base_model}',
+            model_dir=config.paths_checkpoints[0],
+            file_name=base_model
+        )
     return
 
 def check_download_flux_model(base_model, clip_model=None):
