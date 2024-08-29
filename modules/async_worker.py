@@ -746,7 +746,7 @@ def worker():
                                                           modules.config.default_max_lora_number,
                                                           lora_filenames=lora_filenames)
         loras += async_task.performance_loras
-        if async_task.task_class in ['Fooocus', 'Comfy']:
+        if async_task.task_class in ['Fooocus']:
             if advance_progress:
                 current_progress += 1
             progressbar(async_task, current_progress, 'Loading models ...')
@@ -755,6 +755,8 @@ def worker():
                                     loras=loras, base_model_additional_loras=base_model_additional_loras,
                                     use_synthetic_refiner=use_synthetic_refiner, vae_name=async_task.vae_name)
             pipeline.set_clip_skip(async_task.clip_skip)
+        else:
+            pipeline.reload_expansion()
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, 'Processing prompts ...')
@@ -829,7 +831,7 @@ def worker():
                 print(f'[Prompt Expansion] {expansion}')
                 t['expansion'] = expansion
                 t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
-        if async_task.task_class in ['Fooocus', 'Comfy']:
+        if async_task.task_class in ['Fooocus']:
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):
@@ -1177,7 +1179,7 @@ def worker():
             print(f'[TaskEngine] Enable Fooocus backend.')
             comfyd.stop()
 
-        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
+        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+'] and 'kolors' not in async_task.task_name.lower():
             async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
             async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
 
