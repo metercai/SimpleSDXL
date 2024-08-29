@@ -266,6 +266,14 @@ def refresh_everything(refiner_model_name, base_model_name, loras,
     clear_all_caches()
     return
 
+@torch.no_grad()
+@torch.inference_mode()
+def reload_expansion():
+    global final_expansion
+    if final_expansion is None:
+        final_expansion = FooocusExpansion()
+    return
+
 def free_everything():
     global model_base, model_refiner, final_unet, final_clip, final_vae, final_refiner_unet, final_refiner_vae, final_expansion, loaded_ControlNets
     

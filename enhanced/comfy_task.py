@@ -143,11 +143,6 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 comfy_params.delete_params(['denoise'])
                 return ComfyTask('layerdiffuse_cond', comfy_params, images)
 
-    elif task_name == 'Seamless':
-        comfy_params = ComfyTaskParams(default_params)
-        #check_download_base_model(default_params["base_model"])
-        return ComfyTask(task_method, comfy_params)
-
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
@@ -217,6 +212,10 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                     task_method = 'flux_base2_gguf'
                 comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
+        return ComfyTask(task_method, comfy_params)
+    else:
+        comfy_params = ComfyTaskParams(default_params)
+        #check_download_base_model(default_params["base_model"])
         return ComfyTask(task_method, comfy_params)
 
 
