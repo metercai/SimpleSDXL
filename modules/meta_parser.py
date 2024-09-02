@@ -25,6 +25,22 @@ get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactiv
 get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
 
+def get_layout_visible_inter_loras(y,z,max_number):
+    x = 'loras'
+    y1 = max_number if x in y else -1 
+    for key in y:
+        if '-' in key and x==key.split('-')[0]:
+            y1 = int(key.split('-')[1])
+            break
+    z1 = max_number if x in z else -1
+    for key in z:
+        if '-' in key and x==key.split('-')[0]:
+            z1 = int(key.split('-')[1])
+            break
+    results = []
+    for i in range(max_number):
+        results += [gr.update(visible= i+y1<max_number or y1<0, interactive= i+z1<max_number or z1<0)] * 3
+    return results
 
 def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     presetdata_dict = presetdata
@@ -54,8 +70,9 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
     results.append(get_layout_visible_inter('guidance_scale', visible, inter))
     results.append(gr.update(visible=True if 'blank.inc.html' not in preset_url else False))
-    for i in range(modules.config.default_max_lora_number):
-        results += [get_layout_visible_inter('loras', visible, inter)] * 3
+    results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
+    #for i in range(modules.config.default_max_lora_number):
+    #    results += [get_layout_visible_inter('loras', visible, inter)] * 3
 
 
     #[output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox, state_topbar]

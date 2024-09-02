@@ -42,7 +42,7 @@ def load_model_for_path(models_url, root_name):
 def load_model_for_iclight():
     models_url = dict({
         "iclight_sd15_fc_unet_ldm.safetensors": "https://huggingface.co/huchenlei/IC-Light-ldm/resolve/main/iclight_sd15_fc_unet_ldm.safetensors",
-        "iclight_sd15_fbc_unet_ldm.safetensors": "https://huggingface.co/huchenlei/IC-Light-ldm/resolve/main/iclight_sd15_fbc_unet_ldm.safetensors",
+        #"iclight_sd15_fbc_unet_ldm.safetensors": "https://huggingface.co/huchenlei/IC-Light-ldm/resolve/main/iclight_sd15_fbc_unet_ldm.safetensors",
         })
     load_model_for_path(models_url, "unet")
 

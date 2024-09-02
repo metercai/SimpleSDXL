@@ -213,7 +213,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
-    else:
+    else:  # SeamlessTiled
         comfy_params = ComfyTaskParams(default_params)
         #check_download_base_model(default_params["base_model"])
         return ComfyTask(task_method, comfy_params)

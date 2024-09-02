@@ -3,7 +3,7 @@
 	"backend_engine": "Flux",
 	"task_method": "flux_base",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "refiner_model" ],
+	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras-4", "refiner_model" ],
 	"available_aspect_ratios_selection": "Flux",
 	"backend_params": {
 	    "task_method": "flux_base",
