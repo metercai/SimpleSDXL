@@ -401,7 +401,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
             preset_prepared['base_model'] = base_model
             checkpoint_downloads = {}
     if engine == 'Flux' and default_model=='auto':
-        default_model = comfy_task.get_default_base_Flux_name('+' in preset)
+        default_model = comfy_task.get_default_base_Flux_name('FluxS' in preset)
         preset_prepared['base_model'] = default_model
         if modelsinfo.exists_model(catalog="checkpoints", model_path=default_model):
             checkpoint_downloads = {}

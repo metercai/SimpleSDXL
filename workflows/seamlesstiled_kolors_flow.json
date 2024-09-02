@@ -1,0 +1,680 @@
+{
+  "last_node_id": 145,
+  "last_link_id": 34,
+  "nodes": [
+    {
+      "id": 9,
+      "type": "EmptyLatentImage",
+      "pos": [
+        100,
+        130
+      ],
+      "size": {
+        "0": 315,
+        "1": 106
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            22
+          ],
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ]
+    },
+    {
+      "id": 70,
+      "type": "VAELoader",
+      "pos": [
+        100,
+        366
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            23
+          ],
+          "shape": 3,
+          "label": "VAE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "sdxl_fp16.vae.safetensors"
+      ]
+    },
+    {
+      "id": 131,
+      "type": "MZ_ChatGLM3_V2",
+      "pos": [
+        515,
+        554
+      ],
+      "size": {
+        "0": 400,
+        "1": 200
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 15,
+          "label": "chatglm3_model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            20
+          ],
+          "shape": 3,
+          "label": "CONDITIONING"
+        }
+      ],
+      "title": "prompt",
+      "properties": {
+        "Node name for S&R": "MZ_ChatGLM3_V2"
+      },
+      "widgets_values": [
+        "这张图片展示了一个精心设计的无缝图案,其细腻与和谐之处令人印象深刻,图案以淡雅的蓝色为基调,营造出一种宁静而深邃的氛围,仿佛让人置身于广阔的天空或深邃的海洋之中,蓝色的底色之上,巧妙地融入了纯净的白色,两者相互交织,形成了一种清新脱俗的视觉效果,在这片蓝白相间的广阔空间里,黄色的小花如同点点繁星般点缀其中,它们或聚或散,分布得恰到好处,既不过于密集显得拥挤,也不过于稀疏而失去点缀的效果,这些小黄花以其明亮的色彩,为整个图案增添了一抹生机与活力,仿佛是春天里最早绽放的花朵,宣告着生命的到来,而在小黄花的周围,绿色的叶子作为陪衬,以柔和的姿态环绕着它们,这些叶子形态各异,有的宽大厚实,有的细长如针,但它们都以一种自然流畅的方式融入图案之中,与小黄花共同构成了一幅生动的自然画卷,绿色的加入,不仅让图案的色彩更加丰富饱满,也赋予了它更多的生命力与活力,整个图案的设计非常讲究,无论是色彩的搭配还是元素的布局,都显得那么和谐统一,图案中的每一个细节都经过精心雕琢,没有任何重叠或遗漏之处,呈现出一种完美的平衡感,这种平衡感不仅让图案看起来更加美观大方,也让人在欣赏时能够感受到一种宁静与舒适,"
+      ]
+    },
+    {
+      "id": 132,
+      "type": "MZ_ChatGLM3_V2",
+      "pos": [
+        515,
+        884
+      ],
+      "size": {
+        "0": 400,
+        "1": 200
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 16,
+          "label": "chatglm3_model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            21
+          ],
+          "shape": 3,
+          "label": "CONDITIONING"
+        }
+      ],
+      "title": "negative_prompt",
+      "properties": {
+        "Node name for S&R": "MZ_ChatGLM3_V2"
+      },
+      "widgets_values": [
+        "anime,photorealistic,35mm film,deformed,glitch,low contrast,noisy,"
+      ]
+    },
+    {
+      "id": 136,
+      "type": "DownloadAndLoadChatGLM3",
+      "pos": [
+        100,
+        742
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "links": [
+            15,
+            16
+          ],
+          "shape": 3,
+          "label": "chatglm3_model"
+        }
+      ],
+      "title": "llms_model",
+      "properties": {
+        "Node name for S&R": "DownloadAndLoadChatGLM3"
+      },
+      "widgets_values": [
+        "quant8"
+      ]
+    },
+    {
+      "id": 144,
+      "type": "PreviewImage",
+      "pos": [
+        1965.3779882642807,
+        166.915507408826
+      ],
+      "size": [
+        627.1252051511651,
+        494.3503453610982
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 34,
+          "label": "images"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 134,
+      "type": "SaveImageWebsocket",
+      "pos": [
+        1296,
+        375
+      ],
+      "size": {
+        "0": 724.1514282226562,
+        "1": 751.1021118164062
+      },
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 32,
+          "label": "images"
+        }
+      ],
+      "title": "result_image",
+      "properties": {
+        "Node name for S&R": "SaveImageWebsocket"
+      }
+    },
+    {
+      "id": 141,
+      "type": "OffsetImage",
+      "pos": [
+        1399,
+        199
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 24,
+          "label": "pixels"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            32
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "title": "offset_image",
+      "properties": {
+        "Node name for S&R": "OffsetImage"
+      },
+      "widgets_values": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 145,
+      "type": "OffsetImage",
+      "pos": [
+        1682,
+        189
+      ],
+      "size": [
+        224.25087340363234,
+        82
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 33,
+          "label": "pixels"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            34
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "OffsetImage"
+      },
+      "widgets_values": [
+        50,
+        50
+      ]
+    },
+    {
+      "id": 130,
+      "type": "MZ_KolorsUNETLoaderV2",
+      "pos": [
+        111,
+        554
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            27
+          ],
+          "shape": 3,
+          "label": "model",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MZ_KolorsUNETLoaderV2"
+      },
+      "widgets_values": [
+        "kolors_unet_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 139,
+      "type": "TiledKSampler",
+      "pos": [
+        959,
+        306
+      ],
+      "size": {
+        "0": 315,
+        "1": 498
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 19,
+          "label": "model"
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 20,
+          "label": "positive"
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 21,
+          "label": "negative"
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 22,
+          "label": "latent_image"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            13
+          ],
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "title": "main_sampler",
+      "properties": {
+        "Node name for S&R": "TiledKSampler"
+      },
+      "widgets_values": [
+        206780372535210,
+        "randomize",
+        "enable",
+        30,
+        5,
+        "euler_ancestral",
+        "sgm_uniform",
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [
+        987,
+        153
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13,
+          "label": "samples"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 14,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            24,
+            33
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 138,
+      "type": "SeamlessTile",
+      "pos": [
+        525,
+        403
+      ],
+      "size": [
+        265.0090017602157,
+        82
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 27,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            19
+          ],
+          "shape": 3,
+          "label": "MODEL"
+        }
+      ],
+      "title": "seamless_tile",
+      "properties": {
+        "Node name for S&R": "SeamlessTile"
+      },
+      "widgets_values": [
+        "enable",
+        "Make a copy"
+      ]
+    },
+    {
+      "id": 140,
+      "type": "MakeCircularVAE",
+      "pos": [
+        515,
+        130
+      ],
+      "size": [
+        266.1881722656857,
+        82
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 23,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            14
+          ],
+          "shape": 3,
+          "label": "VAE"
+        }
+      ],
+      "title": "vae_tiled",
+      "properties": {
+        "Node name for S&R": "MakeCircularVAE"
+      },
+      "widgets_values": [
+        "enable",
+        "Make a copy"
+      ]
+    }
+  ],
+  "links": [
+    [
+      13,
+      139,
+      0,
+      10,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      140,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      136,
+      0,
+      131,
+      0,
+      "CHATGLM3MODEL"
+    ],
+    [
+      16,
+      136,
+      0,
+      132,
+      0,
+      "CHATGLM3MODEL"
+    ],
+    [
+      19,
+      138,
+      0,
+      139,
+      0,
+      "MODEL"
+    ],
+    [
+      20,
+      131,
+      0,
+      139,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      21,
+      132,
+      0,
+      139,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      22,
+      9,
+      0,
+      139,
+      3,
+      "LATENT"
+    ],
+    [
+      23,
+      70,
+      0,
+      140,
+      0,
+      "VAE"
+    ],
+    [
+      24,
+      10,
+      0,
+      141,
+      0,
+      "IMAGE"
+    ],
+    [
+      27,
+      130,
+      0,
+      138,
+      0,
+      "MODEL"
+    ],
+    [
+      32,
+      141,
+      0,
+      134,
+      0,
+      "IMAGE"
+    ],
+    [
+      33,
+      10,
+      0,
+      145,
+      0,
+      "IMAGE"
+    ],
+    [
+      34,
+      145,
+      0,
+      144,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8954302432552398,
+      "offset": [
+        -190.1882337041362,
+        -63.15079407703057
+      ]
+    }
+  },
+  "version": 0.4
+}
