@@ -1,27 +1,31 @@
 # (c) City96 || Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 import gguf
 import torch
-import numpy as np
 from tqdm import tqdm
 
-def dequantize_tensor(tensor, dtype=torch.float16):
-    data = torch.tensor(tensor.data)
-    qtype = tensor.tensor_type
-    oshape = tensor.tensor_shape
 
-    if qtype == gguf.GGMLQuantizationType.F32:
-        return data.to(dtype)
-    elif qtype == gguf.GGMLQuantizationType.F16:
-        return data.to(dtype)
+TORCH_COMPATIBLE_QTYPES = {None, gguf.GGMLQuantizationType.F32, gguf.GGMLQuantizationType.F16}
+
+def is_torch_compatible(tensor):
+    return tensor is None or getattr(tensor, "tensor_type", None) in TORCH_COMPATIBLE_QTYPES
+
+def is_quantized(tensor):
+    return not is_torch_compatible(tensor)
+
+def dequantize_tensor(tensor, dtype=None, dequant_dtype=None):
+    qtype = getattr(tensor, "tensor_type", None)
+    oshape = getattr(tensor, "tensor_shape", tensor.shape)
+
+    if qtype in TORCH_COMPATIBLE_QTYPES:
+        return tensor.to(dtype)
     elif qtype in dequantize_functions:
-        # dequantize in fp16 then convert instead of keeping FP32
-        out = dequantize(data, qtype, oshape, dtype=None)
-        return out.to(dtype) if out.dtype != dtype else out # why is .to() not a no-op?
+        dequant_dtype = dtype if dequant_dtype == "target" else dequant_dtype
+        return dequantize(tensor.data, qtype, oshape, dtype=dequant_dtype).to(dtype)
     else:
         # this is incredibly slow
         tqdm.write(f"Falling back to numpy dequant for qtype: {qtype}")
-        new = gguf.quants.dequantize(data.cpu().numpy(), qtype)
-        return torch.from_numpy(new).to(data.device, dtype=dtype)
+        new = gguf.quants.dequantize(tensor.cpu().numpy(), qtype)
+        return torch.from_numpy(new).to(tensor.device, dtype=dtype)
 
 def dequantize(data, qtype, oshape, dtype=None):
     """
@@ -41,13 +45,17 @@ def dequantize(data, qtype, oshape, dtype=None):
 
 def to_uint32(x):
     # no uint32 :(
-    x = x.view(torch.uint8).to(torch.int32) 
+    x = x.view(torch.uint8).to(torch.int32)
     return (x[:, 0] | x[:, 1] << 8 | x[:, 2] << 16 | x[:, 3] << 24).unsqueeze(1)
 
 def split_block_dims(blocks, *args):
     n_max = blocks.shape[1]
     dims = list(args) + [n_max - sum(args)]
     return torch.split(blocks, dims, dim=1)
+
+# Full weights #
+def dequantize_blocks_BF16(blocks, block_size, type_size, dtype=None):
+    return (blocks.view(torch.int16).to(torch.int32) << 16).view(torch.float32)
 
 # Legacy Quants #
 def dequantize_blocks_Q8_0(blocks, block_size, type_size, dtype=None):
@@ -226,6 +234,7 @@ def dequantize_blocks_Q2_K(blocks, block_size, type_size, dtype=None):
     return qs.reshape((n_blocks, -1))
 
 dequantize_functions = {
+    gguf.GGMLQuantizationType.BF16: dequantize_blocks_BF16,
     gguf.GGMLQuantizationType.Q8_0: dequantize_blocks_Q8_0,
     gguf.GGMLQuantizationType.Q5_1: dequantize_blocks_Q5_1,
     gguf.GGMLQuantizationType.Q5_0: dequantize_blocks_Q5_0,
