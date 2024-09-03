@@ -52,7 +52,7 @@
   },
   "9": {
     "inputs": {
-      "image": "2024-03-07_14-49-19_6033.png",
+      "image": "2321.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -136,7 +136,7 @@
       "width": 1152,
       "height": 896,
       "interpolation": "nearest",
-      "keep_proportion": true,
+      "method": "fill / crop",
       "condition": "always",
       "multiple_of": 8,
       "image": [
@@ -299,7 +299,7 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "result_image"
+      "title": "SaveImageWebsocket"
     }
   },
   "54": {
@@ -307,6 +307,7 @@
       "rem_mode": "RMBG-1.4",
       "image_output": "Preview",
       "save_prefix": "ComfyUI",
+      "torchscript_jit": false,
       "images": [
         "39",
         0
@@ -343,6 +344,7 @@
   "58": {
     "inputs": {
       "amount": 3,
+      "device": "auto",
       "mask": [
         "54",
         1

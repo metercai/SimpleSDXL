@@ -2,12 +2,18 @@ import numpy as np
 import time
 import torch
 import torch.nn.functional as F
+import torchvision.transforms as T
 import random
 import math
 import os
 import re
 import json
 import hashlib
+try:
+    import cv2
+except:
+    print("OpenCV not installed")
+    pass
 from PIL import ImageGrab, ImageDraw, ImageFont, Image, ImageSequence, ImageOps
 
 from nodes import MAX_RESOLUTION, SaveImage
@@ -23,7 +29,9 @@ class ImagePass:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {
+            "required": {               
+            },
+            "optional": {
                 "image": ("IMAGE",),
             },
         }
@@ -34,7 +42,7 @@ class ImagePass:
 Passes the image through without modifying it.
 """
 
-    def passthrough(self, image):
+    def passthrough(self, image=None):
         return image,
 
 class ColorMatch:
@@ -55,8 +63,10 @@ class ColorMatch:
             ], {
                "default": 'mkl'
             }),
-                
             },
+            "optional": {
+                "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}),
+            }
         }
     
     CATEGORY = "KJNodes/image"
@@ -77,7 +87,7 @@ https://github.com/hahnec/color-matcher/
 
 """
     
-    def colormatch(self, image_ref, image_target, method):
+    def colormatch(self, image_ref, image_target, method, strength=1.0):
         try:
             from color_matcher import ColorMatcher
         except:
@@ -104,6 +114,8 @@ https://github.com/hahnec/color-matcher/
             except BaseException as e:
                 print(f"Error occurred during transfer: {e}")
                 break
+            # Apply the strength multiplier
+            image_result = image_target_np + strength * (image_result - image_target_np)
             out.append(torch.from_numpy(image_result))
             
         out = torch.stack(out, dim=0).to(torch.float32)
@@ -199,7 +211,7 @@ class ImageConcanate:
             {
             "default": 'right'
              }),
-            "match_image_size": ("BOOLEAN", {"default": False}),
+            "match_image_size": ("BOOLEAN", {"default": True}),
         }}
 
     RETURN_TYPES = ("IMAGE",)
@@ -209,11 +221,11 @@ class ImageConcanate:
 Concatenates the image2 to image1 in the specified direction.
 """
 
-    def concanate(self, image1, image2, direction, match_image_size):
+    def concanate(self, image1, image2, direction, match_image_size, first_image_shape=None):
         # Check if the batch sizes are different
-        batch_size1 = image1.size(0)
-        batch_size2 = image2.size(0)
-        
+        batch_size1 = image1.shape[0]
+        batch_size2 = image2.shape[0]
+
         if batch_size1 != batch_size2:
             # Calculate the number of repetitions needed
             max_batch_size = max(batch_size1, batch_size2)
@@ -223,17 +235,139 @@ Concatenates the image2 to image1 in the specified direction.
             # Repeat the images to match the largest batch size
             image1 = image1.repeat(repeats1, 1, 1, 1)
             image2 = image2.repeat(repeats2, 1, 1, 1)
+
         if match_image_size:
-            image2 = torch.nn.functional.interpolate(image2, size=(image1.shape[2], image1.shape[3]), mode="bilinear")
+            # Use first_image_shape if provided; otherwise, default to image1's shape
+            target_shape = first_image_shape if first_image_shape is not None else image1.shape
+
+            original_height = image2.shape[1]
+            original_width = image2.shape[2]
+            original_aspect_ratio = original_width / original_height
+
+            if direction in ['left', 'right']:
+                # Match the height and adjust the width to preserve aspect ratio
+                target_height = target_shape[1]  # B, H, W, C format
+                target_width = int(target_height * original_aspect_ratio)
+            elif direction in ['up', 'down']:
+                # Match the width and adjust the height to preserve aspect ratio
+                target_width = target_shape[2]  # B, H, W, C format
+                target_height = int(target_width / original_aspect_ratio)
+            
+            # Adjust image2 to the expected format for common_upscale
+            image2_for_upscale = image2.movedim(-1, 1)  # Move C to the second position (B, C, H, W)
+            
+            # Resize image2 to match the target size while preserving aspect ratio
+            image2_resized = common_upscale(image2_for_upscale, target_width, target_height, "lanczos", "disabled")
+            
+            # Adjust image2 back to the original format (B, H, W, C) after resizing
+            image2_resized = image2_resized.movedim(1, -1)
+        else:
+            image2_resized = image2
+
+        # Concatenate based on the specified direction
         if direction == 'right':
-            row = torch.cat((image1, image2), dim=2)
+            concatenated_image = torch.cat((image1, image2_resized), dim=2)  # Concatenate along width
         elif direction == 'down':
-            row = torch.cat((image1, image2), dim=1)
+            concatenated_image = torch.cat((image1, image2_resized), dim=1)  # Concatenate along height
         elif direction == 'left':
-            row = torch.cat((image2, image1), dim=2)
+            concatenated_image = torch.cat((image2_resized, image1), dim=2)  # Concatenate along width
         elif direction == 'up':
-            row = torch.cat((image2, image1), dim=1)
-        return (row,)
+            concatenated_image = torch.cat((image2_resized, image1), dim=1)  # Concatenate along height
+        return concatenated_image,
+
+import torch  # Make sure you have PyTorch installed
+
+class ImageConcatFromBatch:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "images": ("IMAGE",),
+            "num_columns": ("INT", {"default": 3, "min": 1, "max": 255, "step": 1}),
+            "match_image_size": ("BOOLEAN", {"default": False}),
+            "max_resolution": ("INT", {"default": 4096}), 
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "concat"
+    CATEGORY = "KJNodes/image"
+    DESCRIPTION = """
+    Concatenates images from a batch into a grid with a specified number of columns.
+    """
+
+    def concat(self, images, num_columns, match_image_size, max_resolution):
+        # Assuming images is a batch of images (B, H, W, C)
+        batch_size, height, width, channels = images.shape
+        num_rows = (batch_size + num_columns - 1) // num_columns  # Calculate number of rows
+
+        print(f"Initial dimensions: batch_size={batch_size}, height={height}, width={width}, channels={channels}")
+        print(f"num_rows={num_rows}, num_columns={num_columns}")
+
+        if match_image_size:
+            target_shape = images[0].shape
+
+            resized_images = []
+            for image in images:
+                original_height = image.shape[0]
+                original_width = image.shape[1]
+                original_aspect_ratio = original_width / original_height
+
+                if original_aspect_ratio > 1:
+                    target_height = target_shape[0]
+                    target_width = int(target_height * original_aspect_ratio)
+                else:
+                    target_width = target_shape[1]
+                    target_height = int(target_width / original_aspect_ratio)
+
+                print(f"Resizing image from ({original_height}, {original_width}) to ({target_height}, {target_width})")
+
+                # Resize the image to match the target size while preserving aspect ratio
+                resized_image = common_upscale(image.movedim(-1, 0), target_width, target_height, "lanczos", "disabled")
+                resized_image = resized_image.movedim(0, -1)  # Move channels back to the last dimension
+                resized_images.append(resized_image)
+
+            # Convert the list of resized images back to a tensor
+            images = torch.stack(resized_images)
+
+            height, width = target_shape[:2]  # Update height and width
+
+        # Initialize an empty grid
+        grid_height = num_rows * height
+        grid_width = num_columns * width
+
+        print(f"Grid dimensions before scaling: grid_height={grid_height}, grid_width={grid_width}")
+
+        # Original scale factor calculation remains unchanged
+        scale_factor = min(max_resolution / grid_height, max_resolution / grid_width, 1.0)
+
+        # Apply scale factor to height and width
+        scaled_height = height * scale_factor
+        scaled_width = width * scale_factor
+
+        # Round scaled dimensions to the nearest number divisible by 8
+        height = max(1, int(round(scaled_height / 8) * 8))
+        width = max(1, int(round(scaled_width / 8) * 8))
+
+        if abs(scaled_height - height) > 4:
+            height = max(1, int(round((scaled_height + 4) / 8) * 8))
+        if abs(scaled_width - width) > 4:
+            width = max(1, int(round((scaled_width + 4) / 8) * 8))
+
+        # Recalculate grid dimensions with adjusted height and width
+        grid_height = num_rows * height
+        grid_width = num_columns * width
+        print(f"Grid dimensions after scaling: grid_height={grid_height}, grid_width={grid_width}")
+        print(f"Final image dimensions: height={height}, width={width}")
+
+        grid = torch.zeros((grid_height, grid_width, channels), dtype=images.dtype)
+
+        for idx, image in enumerate(images):
+            resized_image = torch.nn.functional.interpolate(image.unsqueeze(0).permute(0, 3, 1, 2), size=(height, width), mode="bilinear").squeeze().permute(1, 2, 0)
+            row = idx // num_columns
+            col = idx % num_columns
+            grid[row*height:(row+1)*height, col*width:(col+1)*width, :] = resized_image
+
+        return grid.unsqueeze(0),
     
 class ImageGridComposite2x2:
     @classmethod
@@ -367,21 +501,127 @@ Can be used for realtime diffusion with autoqueue.
     } 
 
     def screencap(self, x, y, width, height, num_frames, delay):
+        start_time = time.time()
         captures = []
         bbox = (x, y, x + width, y + height)
         
         for _ in range(num_frames):
             # Capture screen
             screen_capture = ImageGrab.grab(bbox=bbox)
-            screen_capture_torch = torch.tensor(np.array(screen_capture), dtype=torch.float32) / 255.0
-            screen_capture_torch = screen_capture_torch.unsqueeze(0)
+            screen_capture_torch = torch.from_numpy(np.array(screen_capture, dtype=np.float32) / 255.0).unsqueeze(0)
             captures.append(screen_capture_torch)
             
             # Wait for a short delay if more than one frame is to be captured
             if num_frames > 1:
                 time.sleep(delay)
+
+        elapsed_time = time.time() - start_time
+        print(f"screengrab took {elapsed_time} seconds.")
         
         return (torch.cat(captures, dim=0),)
+    
+class Screencap_mss:
+
+    @classmethod
+    def IS_CHANGED(cls):
+
+        return
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "screencap"
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = """
+Captures an area specified by screen coordinates.  
+Can be used for realtime diffusion with autoqueue.
+"""
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                 "x": ("INT", {"default": 0,"min": 0, "max": 4096, "step": 1}),
+                 "y": ("INT", {"default": 0,"min": 0, "max": 4096, "step": 1}),
+                 "width": ("INT", {"default": 512,"min": 0, "max": 4096, "step": 1}),
+                 "height": ("INT", {"default": 512,"min": 0, "max": 4096, "step": 1}),
+                 "num_frames": ("INT", {"default": 1,"min": 1, "max": 255, "step": 1}),
+                 "delay": ("FLOAT", {"default": 0.1,"min": 0.0, "max": 10.0, "step": 0.01}),
+        },
+    } 
+
+    def screencap(self, x, y, width, height, num_frames, delay):
+        from mss import mss
+        captures = []
+        with mss() as sct:
+            bbox = {'top': y, 'left': x, 'width': width, 'height': height}
+            
+            for _ in range(num_frames):
+                sct_img = sct.grab(bbox)
+                img_np = np.array(sct_img)
+                img_torch = torch.from_numpy(img_np[..., [2, 1, 0]]).float() / 255.0
+                captures.append(img_torch)
+                
+                if num_frames > 1:
+                    time.sleep(delay)
+        
+        return (torch.stack(captures, 0),)
+    
+class WebcamCaptureCV2:
+
+    @classmethod
+    def IS_CHANGED(cls):
+        return
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "capture"
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = """
+Captures a frame from a webcam using CV2.  
+Can be used for realtime diffusion with autoqueue.
+"""
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                 "x": ("INT", {"default": 0,"min": 0, "max": 4096, "step": 1}),
+                 "y": ("INT", {"default": 0,"min": 0, "max": 4096, "step": 1}),
+                 "width": ("INT", {"default": 512,"min": 0, "max": 4096, "step": 1}),
+                 "height": ("INT", {"default": 512,"min": 0, "max": 4096, "step": 1}),
+                 "cam_index": ("INT", {"default": 0,"min": 0, "max": 255, "step": 1}),
+                 "release": ("BOOLEAN", {"default": False}),
+            },
+        } 
+
+    def capture(self, x, y, cam_index, width, height, release):
+        # Check if the camera index has changed or the capture object doesn't exist
+        if not hasattr(self, "cap") or self.cap is None or self.current_cam_index != cam_index:
+            if hasattr(self, "cap") and self.cap is not None:
+                self.cap.release()
+            self.current_cam_index = cam_index
+            self.cap = cv2.VideoCapture(cam_index)
+            try:
+                self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+                self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            except:
+                pass
+            if not self.cap.isOpened():
+                raise Exception("Could not open webcam")
+    
+        ret, frame = self.cap.read()
+        if not ret:
+            raise Exception("Failed to capture image from webcam")
+    
+        # Crop the frame to the specified bbox
+        frame = frame[y:y+height, x:x+width]
+        img_torch = torch.from_numpy(frame[..., [2, 1, 0]]).float() / 255.0
+    
+        if release:
+            self.cap.release()
+            self.cap = None
+    
+        return (img_torch.unsqueeze(0),)
     
 class AddLabel:
     @classmethod
@@ -411,7 +651,6 @@ class AddLabel:
                 "caption": ("STRING", {"default": "", "forceInput": True}),
             }
             }
-    
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "addlabel"
     CATEGORY = "KJNodes/text"
@@ -471,7 +710,7 @@ ComfyUI/custom_nodes/ComfyUI-KJNodes/fonts
         if caption == "":
             processed_images = [process_image(img, text) for img in image]
         else:
-            assert len(caption) == batch_size, "Number of captions does not match number of images"
+            assert len(caption) == batch_size, f"Number of captions {(len(caption))} does not match number of images"
             processed_images = [process_image(img, cap) for img, cap in zip(image, caption)]
         processed_batch = torch.cat(processed_images, dim=0)
 
@@ -501,7 +740,7 @@ class GetImageSizeAndCount:
     RETURN_TYPES = ("IMAGE","INT", "INT", "INT",)
     RETURN_NAMES = ("image", "width", "height", "count",)
     FUNCTION = "getsize"
-    CATEGORY = "KJNodes/masking"
+    CATEGORY = "KJNodes/image"
     DESCRIPTION = """
 Returns width, height and batch size of the image,  
 and passes it through unchanged.  
@@ -560,14 +799,14 @@ but allows setting sub-batches for reduced VRAM usage.
         
         device = model_management.get_torch_device()
         upscale_model.to(device)
-        in_img = images.movedim(-1,-3).to(device)
+        in_img = images.movedim(-1,-3)
         
         steps = in_img.shape[0]
         pbar = ProgressBar(steps)
         t = []
         
         for start_idx in range(0, in_img.shape[0], per_batch):
-            sub_images = upscale_model(in_img[start_idx:start_idx+per_batch])
+            sub_images = upscale_model(in_img[start_idx:start_idx+per_batch].to(device))
             t.append(sub_images.cpu())
             # Calculate the number of images processed in this batch
             batch_count = sub_images.shape[0]
@@ -663,7 +902,7 @@ class MergeImageChannels:
             
             },
             "optional": {
-                "mask": ("MASK", {"default": None}),
+                "alpha": ("MASK", {"default": None}),
                 },
             }
     
@@ -683,7 +922,7 @@ Merges channel data into an image.
         ], dim=-1)
         image = image.squeeze(-2)
         if alpha is not None:
-            image = torch.cat([image, alpha], dim=-1)
+            image = torch.cat([image, alpha.unsqueeze(-1)], dim=-1)
         return (image,)
 
 class ImagePadForOutpaintMasked:
@@ -868,10 +1107,14 @@ nodes for example.
             mask_adjusted = mask * mask_opacity
             mask_image = mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])).movedim(1, -1).expand(-1, -1, -1, 3).clone()
 
-            color_list = list(map(int, mask_color.split(', ')))
-            mask_image[:, :, :, 0] = color_list[0] // 255 # Red channel
-            mask_image[:, :, :, 1] = color_list[1] // 255 # Green channel
-            mask_image[:, :, :, 2] = color_list[2] // 255 # Blue channel
+            if ',' in mask_color:
+                color_list = np.clip([int(channel) for channel in mask_color.split(',')], 0, 255) # RGB format
+            else:
+                mask_color = mask_color.lstrip('#')
+                color_list = [int(mask_color[i:i+2], 16) for i in (0, 2, 4)] # Hex format
+            mask_image[:, :, :, 0] = color_list[0] / 255 # Red channel
+            mask_image[:, :, :, 1] = color_list[1] / 255 # Green channel
+            mask_image[:, :, :, 2] = color_list[2] / 255 # Blue channel
             
             preview, = ImageCompositeMasked.composite(self, image, mask_image, 0, 0, True, mask_adjusted)
         if pass_through:
@@ -980,25 +1223,42 @@ batch, starting from start_index.
     def INPUT_TYPES(s):
         return {
             "required": {
-                 "images": ("IMAGE",),
                  "start_index": ("INT", {"default": 0,"min": -1, "max": 4096, "step": 1}),
                  "num_frames": ("INT", {"default": 1,"min": 1, "max": 4096, "step": 1}),
         },
         "optional": {
+            "images": ("IMAGE",),
             "masks": ("MASK",),
         }
     } 
     
-    def imagesfrombatch(self, images, start_index, num_frames, masks=None):
-        if start_index == -1:
-            start_index = len(images) - num_frames
-        if start_index < 0 or start_index >= len(images):
-            raise ValueError("GetImageRangeFromBatch: Start index is out of range")
-        end_index = start_index + num_frames
-        if end_index > len(images):
-            raise ValueError("GetImageRangeFromBatch: End index is out of range")
-        chosen_images = images[start_index:end_index]
-        chosen_masks = masks[start_index:end_index] if masks is not None else None
+    def imagesfrombatch(self, start_index, num_frames, images=None, masks=None):
+
+        chosen_images = None
+        chosen_masks = None
+
+        # Process images if provided
+        if images is not None:
+            if start_index == -1:
+                start_index = len(images) - num_frames
+            if start_index < 0 or start_index >= len(images):
+                raise ValueError("Start index is out of range")
+            end_index = start_index + num_frames
+            if end_index > len(images):
+                raise ValueError("End index is out of range")
+            chosen_images = images[start_index:end_index]
+
+        # Process masks if provided
+        if masks is not None:
+            if start_index == -1:
+                start_index = len(masks) - num_frames
+            if start_index < 0 or start_index >= len(masks):
+                raise ValueError("Start index is out of range for masks")
+            end_index = start_index + num_frames
+            if end_index > len(masks):
+                raise ValueError("End index is out of range for masks")
+            chosen_masks = masks[start_index:end_index]
+
         return (chosen_images, chosen_masks,)
     
 class GetImagesFromBatchIndexed:
@@ -1198,6 +1458,48 @@ with the **inputcount** and clicking update.
                 image = torch.sub(image, new_image)
         return (image,)    
 
+class ImageConcatMulti:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
+                "image_1": ("IMAGE", ),
+                "image_2": ("IMAGE", ),
+                "direction": (
+                [   'right',
+                    'down',
+                    'left',
+                    'up',
+                ],
+            {
+            "default": 'right'
+             }),
+            "match_image_size": ("BOOLEAN", {"default": False}),
+            },
+    }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
+    FUNCTION = "combine"
+    CATEGORY = "KJNodes/image"
+    DESCRIPTION = """
+Creates an image from multiple images.  
+You can set how many inputs the node has,  
+with the **inputcount** and clicking update.
+"""
+
+    def combine(self, inputcount, direction, match_image_size, **kwargs):
+        image = kwargs["image_1"]
+        first_image_shape = None
+        if first_image_shape is None:
+            first_image_shape = image.shape
+        for c in range(1, inputcount):
+            new_image = kwargs[f"image_{c + 1}"]
+            image, = ImageConcanate.concanate(self, image, new_image, direction, match_image_size, first_image_shape=first_image_shape)
+        first_image_shape = None
+        return (image,)
+
 class PreviewAnimation:
     def __init__(self):
         self.output_dir = folder_paths.get_temp_directory()
@@ -1299,6 +1601,7 @@ class ImageResizeKJ:
                 "width_input": ("INT", { "forceInput": True}),
                 "height_input": ("INT", { "forceInput": True}),
                 "get_image_size": ("IMAGE",),
+                "crop": (["disabled","center"],),
             }
         }
 
@@ -1318,43 +1621,45 @@ Keep proportions keeps the aspect ratio of the image, by
 highest dimension.  
 """
 
-    def resize(self, image, width, height, keep_proportion, upscale_method, divisible_by, width_input=None, height_input=None, get_image_size=None):
+    def resize(self, image, width, height, keep_proportion, upscale_method, divisible_by, 
+               width_input=None, height_input=None, get_image_size=None, crop="disabled"):
         B, H, W, C = image.shape
+
         if width_input:
             width = width_input
         if height_input:
             height = height_input
         if get_image_size is not None:
             _, height, width, _ = get_image_size.shape
-
+        
         if keep_proportion and get_image_size is None:
-            # If one of the dimensions is zero, calculate it to maintain the aspect ratio
-            if width == 0 and height != 0:
-                ratio = height / H
-                width = round(W * ratio)
-            elif height == 0 and width != 0:
-                ratio = width / W
-                height = round(H * ratio)
-            elif width != 0 and height != 0:
-                # Scale based on which dimension is smaller in proportion to the desired dimensions
-                ratio = min(width / W, height / H)
-                width = round(W * ratio)
-                height = round(H * ratio)
+                # If one of the dimensions is zero, calculate it to maintain the aspect ratio
+                if width == 0 and height != 0:
+                    ratio = height / H
+                    width = round(W * ratio)
+                elif height == 0 and width != 0:
+                    ratio = width / W
+                    height = round(H * ratio)
+                elif width != 0 and height != 0:
+                    # Scale based on which dimension is smaller in proportion to the desired dimensions
+                    ratio = min(width / W, height / H)
+                    width = round(W * ratio)
+                    height = round(H * ratio)
         else:
             if width == 0:
                 width = W
             if height == 0:
                 height = H
-    
+      
         if divisible_by > 1 and get_image_size is None:
             width = width - (width % divisible_by)
             height = height - (height % divisible_by)
-
+        
         image = image.movedim(-1,1)
-        scaled = common_upscale(image, width, height, upscale_method, 'disabled')
-        scaled = scaled.movedim(1,-1)
+        image = common_upscale(image, width, height, upscale_method, crop)
+        image = image.movedim(1,-1)
 
-        return(scaled, scaled.shape[2], scaled.shape[1],)
+        return(image, image.shape[2], image.shape[1],)
     
 class LoadAndResizeImage:
     _color_channels = ["alpha", "red", "green", "blue"]
@@ -1371,20 +1676,40 @@ class LoadAndResizeImage:
                     "repeat": ("INT", { "default": 1, "min": 1, "max": 4096, "step": 1, }),
                     "keep_proportion": ("BOOLEAN", { "default": False }),
                     "divisible_by": ("INT", { "default": 2, "min": 0, "max": 512, "step": 1, }),
-                    "mask_channel": (s._color_channels, ), 
+                    "mask_channel": (s._color_channels, {"tooltip": "Channel to use for the mask output"}), 
+                    "background_color": ("STRING", { "default": "", "tooltip": "Fills the alpha channel with the specified color."}),
                     },
                 }
 
     CATEGORY = "KJNodes/image"
-    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT",)
-    RETURN_NAMES = ("image", "mask", "width", "height",)
+    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT", "STRING",)
+    RETURN_NAMES = ("image", "mask", "width", "height","image_path",)
     FUNCTION = "load_image"
 
-    def load_image(self, image, resize, width, height, repeat, keep_proportion, divisible_by, mask_channel):
+    def load_image(self, image, resize, width, height, repeat, keep_proportion, divisible_by, mask_channel, background_color):
+        from PIL import ImageColor, Image, ImageOps, ImageSequence
+        import numpy as np
+        import torch
         image_path = folder_paths.get_annotated_filepath(image)
 
         import node_helpers
         img = node_helpers.pillow(Image.open, image_path)
+
+        # Process the background_color
+        if background_color:
+            try:
+                # Try to parse as RGB tuple
+                bg_color_rgba = tuple(int(x.strip()) for x in background_color.split(','))
+            except ValueError:
+                # If parsing fails, it might be a hex color or named color
+                if background_color.startswith('#') or background_color.lower() in ImageColor.colormap:
+                    bg_color_rgba = ImageColor.getrgb(background_color)
+                else:
+                    raise ValueError(f"Invalid background color: {background_color}")
+
+            bg_color_rgba += (255,)  # Add alpha channel
+        else:
+            bg_color_rgba = None  # No background color specified
         
         output_images = []
         output_masks = []
@@ -1410,12 +1735,28 @@ class LoadAndResizeImage:
         else:
             width, height = W, H
 
-        for i in ImageSequence.Iterator(img):
-            i = node_helpers.pillow(ImageOps.exif_transpose, i)
+        for frame in ImageSequence.Iterator(img):
+            frame = node_helpers.pillow(ImageOps.exif_transpose, frame)
 
-            if i.mode == 'I':
-                i = i.point(lambda i: i * (1 / 255))
-            image = i.convert("RGB")
+            if frame.mode == 'I':
+                frame = frame.point(lambda i: i * (1 / 255))
+            
+            if frame.mode == 'P':
+                frame = frame.convert("RGBA")
+            elif 'A' in frame.getbands():
+                frame = frame.convert("RGBA")
+            
+            # Extract alpha channel if it exists
+            if 'A' in frame.getbands() and bg_color_rgba:
+                alpha_mask = np.array(frame.getchannel('A')).astype(np.float32) / 255.0
+                alpha_mask = 1. - torch.from_numpy(alpha_mask)
+                bg_image = Image.new("RGBA", frame.size, bg_color_rgba)
+                # Composite the frame onto the background
+                frame = Image.alpha_composite(bg_image, frame)
+            else:
+                alpha_mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+            
+            image = frame.convert("RGB")
 
             if len(output_images) == 0:
                 w = image.size[0]
@@ -1428,17 +1769,19 @@ class LoadAndResizeImage:
 
             image = np.array(image).astype(np.float32) / 255.0
             image = torch.from_numpy(image)[None,]
-            mask = None
+            
             c = mask_channel[0].upper()
-            if c in i.getbands():
+            if c in frame.getbands():
                 if resize:
-                    i = i.resize((width, height), Image.Resampling.BILINEAR)
-                mask = np.array(i.getchannel(c)).astype(np.float32) / 255.0
+                    frame = frame.resize((width, height), Image.Resampling.BILINEAR)
+                mask = np.array(frame.getchannel(c)).astype(np.float32) / 255.0
                 mask = torch.from_numpy(mask)
-                if c == 'A':
-                     mask = 1. - mask
+                if c == 'A' and bg_color_rgba:
+                    mask = alpha_mask
+                elif c == 'A':
+                    mask = 1. - mask
             else:
-                mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
+                mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
 
             output_images.append(image)
             output_masks.append(mask.unsqueeze(0))
@@ -1453,12 +1796,11 @@ class LoadAndResizeImage:
                 output_image = output_image.repeat(repeat, 1, 1, 1)
                 output_mask = output_mask.repeat(repeat, 1, 1)
 
-     
-        return (output_image, output_mask, width, height)
+        return (output_image, output_mask, width, height, image_path)
         
 
     @classmethod
-    def IS_CHANGED(s, image):
+    def IS_CHANGED(s, image, **kwargs):
         image_path = folder_paths.get_annotated_filepath(image)
         m = hashlib.sha256()
         with open(image_path, 'rb') as f:
@@ -1471,3 +1813,129 @@ class LoadAndResizeImage:
             return "Invalid image file: {}".format(image)
 
         return True
+
+class LoadImagesFromFolderKJ:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "folder": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "image_load_cap": ("INT", {"default": 0, "min": 0, "step": 1}),
+                "start_index": ("INT", {"default": 0, "min": 0, "step": 1}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "MASK", "INT", "STRING",)
+    RETURN_NAMES = ("image", "mask", "count", "image_path",)
+    FUNCTION = "load_images"
+
+    CATEGORY = "image"
+
+    def load_images(self, folder, image_load_cap, start_index):
+        if not os.path.isdir(folder):
+            raise FileNotFoundError(f"Folder '{folder} cannot be found.'")
+        dir_files = os.listdir(folder)
+        if len(dir_files) == 0:
+            raise FileNotFoundError(f"No files in directory '{folder}'.")
+
+        # Filter files by extension
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.webp']
+        dir_files = [f for f in dir_files if any(f.lower().endswith(ext) for ext in valid_extensions)]
+
+        dir_files = sorted(dir_files)
+        dir_files = [os.path.join(folder, x) for x in dir_files]
+
+        # start at start_index
+        dir_files = dir_files[start_index:]
+
+        images = []
+        masks = []
+        image_path_list = []
+
+        limit_images = False
+        if image_load_cap > 0:
+            limit_images = True
+        image_count = 0
+
+        has_non_empty_mask = False
+
+        for image_path in dir_files:
+            if os.path.isdir(image_path) and os.path.ex:
+                continue
+            if limit_images and image_count >= image_load_cap:
+                break
+            i = Image.open(image_path)
+            i = ImageOps.exif_transpose(i)
+            image = i.convert("RGB")
+            image = np.array(image).astype(np.float32) / 255.0
+            image = torch.from_numpy(image)[None,]
+            if 'A' in i.getbands():
+                mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+                mask = 1. - torch.from_numpy(mask)
+                has_non_empty_mask = True
+            else:
+                mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+            images.append(image)
+            masks.append(mask)
+            image_path_list.append(image_path)
+            image_count += 1
+
+        if len(images) == 1:
+            return (images[0], masks[0], 1)
+
+        elif len(images) > 1:
+            image1 = images[0]
+            mask1 = None
+
+            for image2 in images[1:]:
+                if image1.shape[1:] != image2.shape[1:]:
+                    image2 = common_upscale(image2.movedim(-1, 1), image1.shape[2], image1.shape[1], "bilinear", "center").movedim(1, -1)
+                image1 = torch.cat((image1, image2), dim=0)
+
+            for mask2 in masks[1:]:
+                if has_non_empty_mask:
+                    if image1.shape[1:3] != mask2.shape:
+                        mask2 = torch.nn.functional.interpolate(mask2.unsqueeze(0).unsqueeze(0), size=(image1.shape[2], image1.shape[1]), mode='bilinear', align_corners=False)
+                        mask2 = mask2.squeeze(0)
+                    else:
+                        mask2 = mask2.unsqueeze(0)
+                else:
+                    mask2 = mask2.unsqueeze(0)
+
+                if mask1 is None:
+                    mask1 = mask2
+                else:
+                    mask1 = torch.cat((mask1, mask2), dim=0)
+
+            return (image1, mask1, len(images), image_path_list)
+
+class ImageGridtoBatch:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "image": ("IMAGE", ),
+                    "columns": ("INT", {"default": 3, "min": 2, "max": 8, "tooltip": "The number of columns in the grid."}),
+                    }
+                }
+    
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "decompose"
+    CATEGORY = "KJNodes/image"
+    DESCRIPTION = "Converts a grid of images to a batch of images."
+        
+    def decompose(self, image, columns):
+       B, H, W, C = image.shape
+       orig_h = H // columns
+       orig_w = W // columns
+       
+       # Reshape and permute the image to get the grid
+       image = image.view(B, columns, orig_h, columns, orig_w, C)
+       image = image.permute(0, 1, 3, 2, 4, 5).contiguous()
+       image = image.view(B, columns * columns, orig_h, orig_w, C)
+       
+       # Reshape to the final batch tensor
+       img_tensor = image.view(-1, orig_h, orig_w, C)
+       
+       return img_tensor,

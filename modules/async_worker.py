@@ -353,7 +353,7 @@ def worker():
             else:
                 input_images = [HWC3(async_task.layer_input_image)]
             try:
-                options = async_task.params_backend.pop('ui_options', {})
+                options = async_task.params_backend.get('ui_options', {})
                 comfy_task = get_comfy_task(async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback)

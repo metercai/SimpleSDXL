@@ -1,6 +1,4 @@
 import torch
-import torch.nn.functional as F
-import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
@@ -9,7 +7,7 @@ import json, re, os, io, time
 import model_management
 import folder_paths
 from nodes import MAX_RESOLUTION
-from comfy.utils import common_upscale
+from comfy.utils import common_upscale, ProgressBar
 
 script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 folder_paths.add_model_folder_path("kjnodes_fonts", os.path.join(script_directory, "fonts"))
@@ -263,6 +261,8 @@ class CondPassThrough:
     def INPUT_TYPES(s):
         return {
             "required": {
+            },
+            "optional": {
                 "positive": ("CONDITIONING", ),
                 "negative": ("CONDITIONING", ),
             }, 
@@ -277,14 +277,16 @@ class CondPassThrough:
     workaround for Set node not allowing bypassed inputs.
 """
 
-    def passthrough(self, positive, negative):
+    def passthrough(self, positive=None, negative=None):
         return (positive, negative,)
 
 class ModelPassThrough:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {
+            "required": {             
+            },
+            "optional": {
                 "model": ("MODEL", ),
             }, 
     }
@@ -298,8 +300,8 @@ class ModelPassThrough:
     workaround for Set node not allowing bypassed inputs.
 """
 
-    def passthrough(self, model):
-        return (model,)
+    def passthrough(self, model=None):
+            return (model,)
 
 def append_helper(t, mask, c, set_area_to_bounds, strength):
         n = [t[0], t[1].copy()]
@@ -715,9 +717,13 @@ class WidgetToString:
                 "widget_name": ("STRING", {"multiline": False}),
                 "return_all": ("BOOLEAN", {"default": False}),
             },
-            
+            "optional": {
+                         "any_input": (any, {}),
+                         "node_title": ("STRING", {"multiline": False}),
+                         },
             "hidden": {"extra_pnginfo": "EXTRA_PNGINFO",
-                       "prompt": "PROMPT"},
+                       "prompt": "PROMPT",
+                       "unique_id": "UNIQUE_ID",},
         }
 
     RETURN_TYPES = ("STRING", )
@@ -725,42 +731,82 @@ class WidgetToString:
     CATEGORY = "KJNodes/text"
     DESCRIPTION = """
 Selects a node and it's specified widget and outputs the value as a string.  
-To see node id's, enable node id display from Manager badge menu.
+If no node id or title is provided it will use the 'any_input' link and use that node.  
+To see node id's, enable node id display from Manager badge menu.  
+Alternatively you can search with the node title. Node titles ONLY exist if they  
+are manually edited!  
+The 'any_input' is required for making sure the node you want the value from exists in the workflow.
 """
 
-    def get_widget_value(self, id, widget_name, extra_pnginfo, prompt, return_all=False):
+    def get_widget_value(self, id, widget_name, extra_pnginfo, prompt, unique_id, return_all=False, any_input=None, node_title=""):
         workflow = extra_pnginfo["workflow"]
+        #print(json.dumps(workflow, indent=4))
         results = []
+        node_id = None  # Initialize node_id to handle cases where no match is found
+        link_id = None
+        link_to_node_map = {}
+
         for node in workflow["nodes"]:
-            node_id = node["id"]
-
-            if node_id != id:
-                continue
-
-            values = prompt[str(node_id)]
-            if "inputs" in values:
-                if return_all:
-                    results.append(', '.join(f'{k}: {str(v)}' for k, v in values["inputs"].items()))
-                elif widget_name in values["inputs"]:
-                    v = str(values["inputs"][widget_name])  # Convert to string here
-                    return (v, )
+            if node_title:
+                if "title" in node:
+                    if node["title"] == node_title:
+                        node_id = node["id"]
+                        break
                 else:
-                    raise NameError(f"Widget not found: {id}.{widget_name}")
+                    print("Node title not found.")
+            elif id != 0:
+                if node["id"] == id:
+                    node_id = id
+                    break
+            elif any_input is not None:
+                if node["type"] == "WidgetToString" and node["id"] == int(unique_id) and not link_id:
+                    for node_input in node["inputs"]:
+                        if node_input["name"] == "any_input":
+                            link_id = node_input["link"]
+                    
+                # Construct a map of links to node IDs for future reference
+                node_outputs = node.get("outputs", None)
+                if not node_outputs:
+                    continue
+                for output in node_outputs:
+                    node_links = output.get("links", None)
+                    if not node_links:
+                        continue
+                    for link in node_links:
+                        link_to_node_map[link] = node["id"]
+                        if link_id and link == link_id:
+                            break
+        
+        if link_id:
+            node_id = link_to_node_map.get(link_id, None)
+
+        if node_id is None:
+            raise ValueError("No matching node found for the given title or id")
+
+        values = prompt[str(node_id)]
+        if "inputs" in values:
+            if return_all:
+                results.append(', '.join(f'{k}: {str(v)}' for k, v in values["inputs"].items()))
+            elif widget_name in values["inputs"]:
+                v = str(values["inputs"][widget_name])  # Convert to string here
+                return (v, )
+            else:
+                raise NameError(f"Widget not found: {node_id}.{widget_name}")
         if not results:
-            raise NameError(f"Node not found: {id}")
+            raise NameError(f"Node not found: {node_id}")
         return (', '.join(results).strip(', '), )
 
-class DummyLatentOut:
+class DummyOut:
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-            "latent": ("LATENT",),
+            "any_input": (any, {}),
             }
         }
 
-    RETURN_TYPES = ("LATENT",)
+    RETURN_TYPES = (any,)
     FUNCTION = "dummy"
     CATEGORY = "KJNodes/misc"
     OUTPUT_NODE = True
@@ -769,8 +815,8 @@ Does nothing, used to trigger generic workflow output.
 A way to get previews in the UI without saving anything to disk.
 """
 
-    def dummy(self, latent):
-        return (latent,)
+    def dummy(self, any_input):
+        return (any_input,)
     
 class FlipSigmasAdjusted:
     @classmethod
@@ -837,10 +883,11 @@ SVD:
     def customsigmas(self, sigmas_string, interpolate_to_steps):
         sigmas_list = sigmas_string.split(', ')
         sigmas_float_list = [float(sigma) for sigma in sigmas_list]
-        sigmas_tensor = torch.tensor(sigmas_float_list)
-        if len(sigmas_tensor) != interpolate_to_steps:
-            sigmas_tensor = self.loglinear_interp(sigmas_tensor, interpolate_to_steps)
-        return (sigmas_tensor,)
+        sigmas_tensor = torch.FloatTensor(sigmas_float_list)
+        if len(sigmas_tensor) != interpolate_to_steps + 1:
+            sigmas_tensor = self.loglinear_interp(sigmas_tensor, interpolate_to_steps + 1)
+        sigmas_tensor[-1] = 0
+        return (sigmas_tensor.float(),)
      
     def loglinear_interp(self, t_steps, num_steps):
         """
@@ -898,10 +945,9 @@ class InjectNoiseToLatent:
             noised = mask * noised + (1-mask) * latents["samples"]
         if mix_randn_amount > 0:
             if seed is not None:
-                torch.manual_seed(seed)
-            rand_noise = torch.randn_like(noised)
-            noised = ((1 - mix_randn_amount) * noised + mix_randn_amount *
-                            rand_noise) / ((mix_randn_amount**2 + (1-mix_randn_amount)**2) ** 0.5)
+                generator = torch.manual_seed(seed)
+                rand_noise = torch.randn(noised.size(), dtype=noised.dtype, layout=noised.layout, generator=generator, device="cpu")
+                noised = noised + (mix_randn_amount * rand_noise)
         samples["samples"] = noised
         return (samples,)
  
@@ -953,6 +999,11 @@ class GenerateNoise:
             "optional": {
             "model": ("MODEL", ),
             "sigmas": ("SIGMAS", ),
+            "latent_channels": (
+            [   '4',
+                '16',
+            ],
+           ),
             }
             }
     
@@ -963,10 +1014,10 @@ class GenerateNoise:
 Generates noise for injection or to be used as empty latents on samplers with add_noise off.
 """
         
-    def generatenoise(self, batch_size, width, height, seed, multiplier, constant_batch_noise, normalize, sigmas=None, model=None):
+    def generatenoise(self, batch_size, width, height, seed, multiplier, constant_batch_noise, normalize, sigmas=None, model=None, latent_channels=4):
 
         generator = torch.manual_seed(seed)
-        noise = torch.randn([batch_size, 4, height // 8, width // 8], dtype=torch.float32, layout=torch.strided, generator=generator, device="cpu")
+        noise = torch.randn([batch_size, int(latent_channels), height // 8, width // 8], dtype=torch.float32, layout=torch.strided, generator=generator, device="cpu")
         if sigmas is not None:
             sigma = sigmas[0] - sigmas[-1]
             sigma /= model.model.latent_format.scale_factor
@@ -978,6 +1029,8 @@ Generates noise for injection or to be used as empty latents on samplers with ad
             noise = noise / noise.std()
         if constant_batch_noise:
             noise = noise[0].repeat(batch_size, 1, 1, 1)
+
+        
         return ({"samples":noise}, )
 
 def camera_embeddings(elevation, azimuth):
@@ -1331,6 +1384,12 @@ https://huggingface.co/roborovski/superprompt-v1
         from transformers import T5Tokenizer, T5ForConditionalGeneration
 
         checkpoint_path = os.path.join(script_directory, "models","superprompt-v1")
+        if not os.path.exists(checkpoint_path):
+                print(f"Downloading model to: {checkpoint_path}")
+                from huggingface_hub import snapshot_download
+                snapshot_download(repo_id="roborovski/superprompt-v1", 
+                                  local_dir=checkpoint_path, 
+                                  local_dir_use_symlinks=False)
         tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small", legacy=False)
 
         model = T5ForConditionalGeneration.from_pretrained(checkpoint_path, device_map=device)
@@ -1477,6 +1536,7 @@ or a .txt file with RealEstate camera intrinsics and coordinates, in a 3D plot.
 
     def customize_legend(self, list_label):
         from matplotlib.patches import Patch
+        import matplotlib.pyplot as plt
         list_handle = []
         for idx, label in enumerate(list_label):
             color = plt.cm.rainbow(idx / len(list_label))
@@ -1651,3 +1711,236 @@ If no image is provided, mode is set to text-to-image
             except json.JSONDecodeError:
                 # If the response is not valid JSON, raise a different exception
                 raise Exception(f"Server error: {response.text}")
+            
+class CheckpointPerturbWeights:
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "model": ("MODEL",),
+            "joint_blocks": ("FLOAT", {"default": 0.02, "min": 0.001, "max": 10.0, "step": 0.001}),
+            "final_layer": ("FLOAT", {"default": 0.02, "min": 0.001, "max": 10.0, "step": 0.001}),
+            "rest_of_the_blocks": ("FLOAT", {"default": 0.02, "min": 0.001, "max": 10.0, "step": 0.001}),
+            "seed": ("INT", {"default": 123,"min": 0, "max": 0xffffffffffffffff, "step": 1}),
+            }
+        }
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "mod"
+    OUTPUT_NODE = True
+
+    CATEGORY = "KJNodes/experimental"
+
+    def mod(self, seed, model, joint_blocks, final_layer, rest_of_the_blocks):
+        import copy
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        device = model_management.get_torch_device()
+        model_copy = copy.deepcopy(model)
+        model_copy.model.to(device)
+        keys = model_copy.model.diffusion_model.state_dict().keys()
+
+        dict = {}
+        for key in keys:
+            dict[key] = model_copy.model.diffusion_model.state_dict()[key]
+
+        pbar = ProgressBar(len(keys))
+        for k in keys:
+            v = dict[k]
+            print(f'{k}: {v.std()}') 
+            if k.startswith('joint_blocks'):
+                multiplier = joint_blocks
+            elif k.startswith('final_layer'):
+                multiplier = final_layer
+            else:
+                multiplier = rest_of_the_blocks
+            dict[k] += torch.normal(torch.zeros_like(v) * v.mean(), torch.ones_like(v) * v.std() * multiplier).to(device)
+            pbar.update(1)
+        model_copy.model.diffusion_model.load_state_dict(dict)
+        return model_copy,
+    
+class DifferentialDiffusionAdvanced():
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "model": ("MODEL", ),
+                    "samples": ("LATENT",),
+                    "mask": ("MASK",),
+                    "multiplier": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.001}),
+                            }}
+    RETURN_TYPES = ("MODEL", "LATENT")
+    FUNCTION = "apply"
+    CATEGORY = "_for_testing"
+    INIT = False
+
+    def apply(self, model, samples, mask, multiplier):
+        self.multiplier = multiplier
+        model = model.clone()
+        model.set_model_denoise_mask_function(self.forward)
+        s = samples.copy()
+        s["noise_mask"] = mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1]))
+        return (model, s)
+
+    def forward(self, sigma: torch.Tensor, denoise_mask: torch.Tensor, extra_options: dict):
+        model = extra_options["model"]
+        step_sigmas = extra_options["sigmas"]
+        sigma_to = model.inner_model.model_sampling.sigma_min
+        if step_sigmas[-1] > sigma_to:
+            sigma_to = step_sigmas[-1]
+        sigma_from = step_sigmas[0]
+
+        ts_from = model.inner_model.model_sampling.timestep(sigma_from)
+        ts_to = model.inner_model.model_sampling.timestep(sigma_to)
+        current_ts = model.inner_model.model_sampling.timestep(sigma[0])
+
+        threshold = (current_ts - ts_to) / (ts_from - ts_to) / self.multiplier
+
+        return (denoise_mask >= threshold).to(denoise_mask.dtype)
+    
+class FluxBlockLoraSelect:
+    def __init__(self):
+        self.loaded_lora = None
+
+    @classmethod
+    def INPUT_TYPES(s):
+        arg_dict = {}
+        argument = ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000.0, "step": 0.01})
+
+        for i in range(19):
+            arg_dict["double_blocks.{}.".format(i)] = argument
+
+        for i in range(38):
+            arg_dict["single_blocks.{}.".format(i)] = argument
+
+        return {"required": arg_dict}
+    
+    RETURN_TYPES = ("SELECTEDBLOCKS", )
+    RETURN_NAMES = ("blocks", )
+    OUTPUT_TOOLTIPS = ("The modified diffusion model.",)
+    FUNCTION = "load_lora"
+
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = "Select individual block alpha values, value of 0 removes the block altogether"
+
+    def load_lora(self, **kwargs):
+        return (kwargs,)
+    
+class FluxBlockLoraLoader:
+    def __init__(self):
+        self.loaded_lora = None
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                "model": ("MODEL", {"tooltip": "The diffusion model the LoRA will be applied to."}),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the diffusion model. This value can be negative."}),
+                
+                },
+                "optional": {
+                    "lora_name": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
+                    "opt_lora_path": ("STRING", {"forceInput": True, "tooltip": "Absolute path of the LoRA."}),
+                    "blocks": ("SELECTEDBLOCKS",),
+                }
+               }
+    
+    RETURN_TYPES = ("MODEL", "STRING", )
+    RETURN_NAMES = ("model", "rank", )
+    OUTPUT_TOOLTIPS = ("The modified diffusion model.", "possible rank of the LoRA.")
+    FUNCTION = "load_lora"
+    CATEGORY = "KJNodes/experimental"
+
+    def load_lora(self, model, strength_model, lora_name=None, opt_lora_path=None, blocks=None):
+        from comfy.utils import load_torch_file
+        import comfy.lora
+
+        if opt_lora_path:
+            lora_path = opt_lora_path
+        else:
+            lora_path = folder_paths.get_full_path("loras", lora_name)
+        
+        lora = None
+        if self.loaded_lora is not None:
+            if self.loaded_lora[0] == lora_path:
+                lora = self.loaded_lora[1]
+            else:
+                temp = self.loaded_lora
+                self.loaded_lora = None
+                del temp
+        
+        if lora is None:
+            lora = load_torch_file(lora_path, safe_load=True)
+            # Find the first key that ends with "weight"
+        rank = "unknown"
+        weight_key = next((key for key in lora.keys() if key.endswith('weight')), None)
+        # Print the shape of the value corresponding to the key
+        if weight_key:
+            print(f"Shape of the first 'weight' key ({weight_key}): {lora[weight_key].shape}")
+            rank = str(lora[weight_key].shape[0])
+        else:
+            print("No key ending with 'weight' found.")
+            rank = "Couldn't find rank"
+        self.loaded_lora = (lora_path, lora)
+
+        key_map = {}
+        if model is not None:
+            key_map = comfy.lora.model_lora_keys_unet(model.model, key_map)
+
+        loaded = comfy.lora.load_lora(lora, key_map)
+
+        if blocks is not None:
+            keys_to_delete = []
+
+            for block in blocks:
+                for key in list(loaded.keys()):  # Convert keys to a list to avoid runtime error due to size change
+                    match = False
+                    if isinstance(key, str) and block in key:
+                        match = True
+                    elif isinstance(key, tuple):
+                        for k in key:
+                            if block in k:
+                                match = True
+                                break
+
+                    if match:
+                        ratio = blocks[block]
+                        if ratio == 0:
+                            keys_to_delete.append(key)  # Collect keys to delete
+                        else:
+                            value = loaded[key]
+                            if isinstance(value, tuple) and len(value) > 1 and isinstance(value[1], tuple):
+                                # Handle the tuple format
+                                if len(value[1]) > 3:
+                                    loaded[key] = (value[0], value[1][:-3] + (ratio, value[1][-2], value[1][-1]))
+                                else:
+                                    loaded[key] = (value[0], value[1][:-2] + (ratio, value[1][-1]))
+                            else:
+                                # Handle the simpler format directly
+                                loaded[key] = (value[0], ratio)
+
+            # Now perform the deletion of keys
+            for key in keys_to_delete:
+                del loaded[key]
+
+            print("loading lora keys:")
+            for key, value in loaded.items():
+                if isinstance(value, tuple) and len(value) > 1 and isinstance(value[1], tuple):
+                    # Handle the tuple format
+                    if len(value[1]) > 2:
+                        alpha = value[1][-3]  # Assuming the alpha value is the third last element in the tuple
+                    else:
+                        alpha = value[1][-2]  # Adjust according to the second format's structure
+                else:
+                    # Handle the simpler format directly
+                    alpha = value[1] if len(value) > 1 else None
+                print(f"Key: {key}, Alpha: {alpha}")
+
+
+        if model is not None:
+            new_modelpatcher = model.clone()
+            k = new_modelpatcher.add_patches(loaded, strength_model)  
+    
+        k = set(k)
+        for x in loaded:
+            if (x not in k):
+                print("NOT LOADED {}".format(x))
+
+        return (new_modelpatcher, rank)

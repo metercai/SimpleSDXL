@@ -138,7 +138,7 @@ def get_system_message():
 
 
 def preset_instruction():
-    head = "<div style='max-width:100%; max-height:98px; overflow:hidden'>"
+    head = "<div style='max-width:100%; max-height:86px; overflow:hidden'>"
     foot = "</div>"
     body = '预置包简介:<span style="position: absolute;right: 0;"><a href="https://gitee.com/metercai/SimpleSDXL/blob/SimpleSDXL/presets/readme.md">\U0001F4DD 什么是预置包</a></span>'
     body += f'<iframe id="instruction" src="{get_preset_inc_url()}" frameborder="0" scrolling="no" width="100%"></iframe>'

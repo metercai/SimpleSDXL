@@ -307,13 +307,16 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
 
     wildcard = wildcard[0].split('|')[0]
     state_params.update({"wildcard_in_wildcards": wildcard})
-    if prompt[-1]=='[':
-        state_params["array_wildcards_mode"] = '['
-        prompt = prompt[:-1]
-    elif prompt[-1]=='_':
-        state_params["array_wildcards_mode"] = '_'
-        if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
+    if len(prompt)>0:
+        if prompt[-1]=='[':
+            state_params["array_wildcards_mode"] = '['
             prompt = prompt[:-1]
+        elif prompt[-1]=='_':
+            state_params["array_wildcards_mode"] = '_'
+            if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
+                prompt = prompt[:-1]
+    else:
+        state_params["array_wildcards_mode"] = '['
     
     if state_params["array_wildcards_mode"] == '[':
         new_tag = f'[__{wildcard}__]'
@@ -325,6 +328,7 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
 def add_word_to_prompt(wildcard, index, prompt):
     global wildcards, wildcards_list
 
+    print(f'wildcard:{wildcard}, index:{index}, prompt:{prompt}')
     wildcard = wildcard[0].split('|')[0]
     words = wildcards[wildcard]
     word = words[index]
