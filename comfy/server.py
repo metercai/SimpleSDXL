@@ -31,7 +31,6 @@ from model_filemanager import download_model, DownloadModelStatus
 from typing import Optional
 from api_server.routes.internal.internal_routes import InternalRoutes
 
-
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
     UNENCODED_PREVIEW_IMAGE = 2
@@ -41,6 +40,21 @@ async def send_socket_catch_exception(function, message):
         await function(message)
     except (aiohttp.ClientError, aiohttp.ClientPayloadError, ConnectionResetError) as err:
         logging.warning("send error: {}".format(err))
+
+def get_comfyui_version():
+    comfyui_version = "unknown"
+    repo_path = os.path.dirname(os.path.realpath(__file__))
+    try:
+        import pygit2
+        repo = pygit2.Repository(repo_path)
+        comfyui_version = repo.describe(describe_strategy=pygit2.GIT_DESCRIBE_TAGS)
+    except Exception:
+        try:
+            import subprocess
+            comfyui_version = subprocess.check_output(["git", "describe", "--tags"], cwd=repo_path).decode('utf-8')
+        except Exception as e:
+            logging.warning(f"Failed to get ComfyUI version: {e}")
+    return comfyui_version.strip()
 
 @web.middleware
 async def cache_control(request: web.Request, handler):
@@ -401,16 +415,20 @@ class PromptServer():
             return web.json_response(dt["__metadata__"])
 
         @routes.get("/system_stats")
-        async def get_queue(request):
+        async def system_stats(request):
             device = comfy.model_management.get_torch_device()
             device_name = comfy.model_management.get_torch_device_name(device)
             vram_total, torch_vram_total = comfy.model_management.get_total_memory(device, torch_total_too=True)
             vram_free, torch_vram_free = comfy.model_management.get_free_memory(device, torch_free_too=True)
+
             system_stats = {
                 "system": {
                     "os": os.name,
+                    "comfyui_version": get_comfyui_version(),
                     "python_version": sys.version,
-                    "embedded_python": os.path.split(os.path.split(sys.executable)[0])[1] == "python_embeded"
+                    "pytorch_version": comfy.model_management.torch_version,
+                    "embedded_python": os.path.split(os.path.split(sys.executable)[0])[1] == "python_embeded",
+                    "argv": sys.argv
                 },
                 "devices": [
                     {
@@ -586,7 +604,9 @@ class PromptServer():
         @routes.post("/internal/models/download")
         async def download_handler(request):
             async def report_progress(filename: str, status: DownloadModelStatus):
-                await self.send_json("download_progress", status.to_dict())
+                payload = status.to_dict()
+                payload['download_path'] = filename
+                await self.send_json("download_progress", payload)
 
             data = await request.json()
             url = data.get('url')

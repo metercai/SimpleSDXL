@@ -52,7 +52,7 @@
   },
   "9": {
     "inputs": {
-      "image": "2024-05-13_00-42-31_2592 (4).png",
+      "image": "2321.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -62,12 +62,15 @@
   },
   "19": {
     "inputs": {
-      "seed": 100361857014338,
+      "seed": [
+        "60",
+        0
+      ],
       "steps": 25,
       "cfg": 2.05,
       "sampler_name": "dpmpp_2m",
       "scheduler": "karras",
-      "denoise": 0.9,
+      "denoise": 1,
       "model": [
         "37",
         0
@@ -120,7 +123,7 @@
   },
   "37": {
     "inputs": {
-      "model_path": "iclight_sd15_fc_unet_ldm.safetensors",
+      "model_path": "iclight_sd15_fbc_unet_ldm.safetensors",
       "model": [
         "2",
         0
@@ -133,14 +136,14 @@
   },
   "39": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "interpolation": "nearest",
-      "keep_proportion": true,
+      "method": "fill / crop",
       "condition": "always",
       "multiple_of": 0,
       "image": [
-        "54",
+        "9",
         0
       ]
     },
@@ -181,7 +184,7 @@
   "45": {
     "inputs": {
       "pixels": [
-        "39",
+        "54",
         0
       ],
       "vae": [
@@ -291,13 +294,13 @@
   "53": {
     "inputs": {
       "images": [
-        "7",
+        "62",
         0
       ]
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "result_image"
+      "title": "SaveImageWebsocket"
     }
   },
   "54": {
@@ -305,8 +308,9 @@
       "rem_mode": "RMBG-1.4",
       "image_output": "Preview",
       "save_prefix": "ComfyUI",
+      "torchscript_jit": false,
       "images": [
-        "9",
+        "39",
         0
       ]
     },
@@ -315,21 +319,9 @@
       "title": "Image Remove Bg"
     }
   },
-  "55": {
-    "inputs": {
-      "images": [
-        "54",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "56": {
     "inputs": {
-      "image": "00007-447766443-0.5.jpg",
+      "image": "tu1.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -348,7 +340,7 @@
         2
       ],
       "interpolation": "nearest",
-      "keep_proportion": false,
+      "method": "fill / crop",
       "condition": "always",
       "multiple_of": 0,
       "image": [
@@ -366,11 +358,110 @@
       "pixels": [
         "57",
         0
+      ],
+      "vae": [
+        "2",
+        2
       ]
     },
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE Encode"
+    }
+  },
+  "59": {
+    "inputs": {
+      "seed": [
+        "60",
+        0
+      ],
+      "steps": 20,
+      "cfg": 2,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.3,
+      "model": [
+        "2",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "60": {
+    "inputs": {
+      "seed": 942815886211124
+    },
+    "class_type": "easy seed",
+    "_meta": {
+      "title": "sync_seed"
+    }
+  },
+  "61": {
+    "inputs": {
+      "samples": [
+        "59",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "62": {
+    "inputs": {
+      "mode": "add",
+      "blur_sigma": 6,
+      "blend_factor": 1,
+      "target": [
+        "61",
+        0
+      ],
+      "source": [
+        "39",
+        0
+      ],
+      "mask": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "DetailTransfer",
+    "_meta": {
+      "title": "Detail Transfer"
+    }
+  },
+  "64": {
+    "inputs": {
+      "amount": 6,
+      "device": "auto",
+      "mask": [
+        "54",
+        1
+      ]
+    },
+    "class_type": "MaskBlur+",
+    "_meta": {
+      "title": "🔧 Mask Blur"
     }
   }
 }

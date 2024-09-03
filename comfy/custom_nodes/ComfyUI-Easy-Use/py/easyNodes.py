@@ -81,7 +81,6 @@ class wildcardsPrompt:
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("text", "populated_text")
     OUTPUT_IS_LIST = (True, True)
-    OUTPUT_NODE = True
     FUNCTION = "main"
 
     CATEGORY = "EasyUse/Prompt"
@@ -162,7 +161,6 @@ class stylesPromptSelector:
 
     CATEGORY = 'EasyUse/Prompt'
     FUNCTION = 'run'
-    OUTPUT_NODE = True
 
     def run(self, styles, positive='', negative='', prompt=None, extra_pnginfo=None, my_unique_id=None):
         values = []
@@ -667,7 +665,6 @@ class latentCompositeMaskedWithCond:
     RETURN_TYPES = ("PIPE_LINE", "LATENT", "CONDITIONING")
     RETURN_NAMES = ("pipe", "latent", "conditioning",)
     FUNCTION = "run"
-    OUTPUT_NODE = True
 
     CATEGORY = "EasyUse/Latent"
 
@@ -805,8 +802,6 @@ class easySeed:
 
     CATEGORY = "EasyUse/Seed"
 
-    OUTPUT_NODE = True
-
     def doit(self, seed=0, prompt=None, extra_pnginfo=None, my_unique_id=None):
         return seed,
 
@@ -940,7 +935,7 @@ class fullLoader:
         # Conditioning add controlnet
         if optional_controlnet_stack is not None and len(optional_controlnet_stack) > 0:
             for controlnet in optional_controlnet_stack:
-                positive_embeddings_final, negative_embeddings_final = easyControlnet().apply(controlnet[0], controlnet[5], positive_embeddings_final, negative_embeddings_final, controlnet[1], start_percent=controlnet[2], end_percent=controlnet[3], control_net=None, scale_soft_weights=controlnet[4], mask=None, easyCache=easyCache, use_cache=True, model=model)
+                positive_embeddings_final, negative_embeddings_final = easyControlnet().apply(controlnet[0], controlnet[5], positive_embeddings_final, negative_embeddings_final, controlnet[1], start_percent=controlnet[2], end_percent=controlnet[3], control_net=None, scale_soft_weights=controlnet[4], mask=None, easyCache=easyCache, use_cache=True, model=model, vae=vae)
 
         log_node_warn("加载完毕...")
         pipe = {
@@ -1896,6 +1891,7 @@ class kolorsLoader:
         log_node_warn("处理完毕...")
         pipe = {
             "model": model,
+            "chatglm3_model": chatglm3_model,
             "positive": positive_embeddings_final,
             "negative": negative_embeddings_final,
             "vae": vae,
@@ -1929,9 +1925,62 @@ class kolorsLoader:
 
         return (chatglm3_model, None, None)
 
+# Flux Loader
+class fluxLoader(fullLoader):
+    @classmethod
+    def INPUT_TYPES(cls):
+        checkpoints = folder_paths.get_filename_list("checkpoints")
+        loras = ["None"] + folder_paths.get_filename_list("loras")
+        return {
+            "required": {
+                "ckpt_name": (checkpoints,),
+                "vae_name": (["Baked VAE"] + folder_paths.get_filename_list("vae"),),
+                "lora_name": (loras,),
+                "lora_model_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
+                "lora_clip_strength": ("FLOAT", {"default": 1.0, "min": -10.0, "max": 10.0, "step": 0.01}),
+                "resolution": (resolution_strings, {"default": "1024 x 1024"}),
+                "empty_latent_width": ("INT", {"default": 1024, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                "empty_latent_height": ("INT", {"default": 1024, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+
+                "positive": ("STRING", {"default": "", "placeholder": "Positive", "multiline": True}),
+
+                "batch_size": ("INT", {"default": 1, "min": 1, "max": 64}),
+            },
+            "optional": {
+                "model_override": ("MODEL",),
+                "clip_override": ("CLIP",),
+                "vae_override": ("VAE",),
+                "optional_lora_stack": ("LORA_STACK",),
+                "optional_controlnet_stack": ("CONTROL_NET_STACK",),
+            },
+            "hidden": {"prompt": "PROMPT", "my_unique_id": "UNIQUE_ID"}
+        }
+
+    RETURN_TYPES = ("PIPE_LINE", "MODEL", "VAE")
+    RETURN_NAMES = ("pipe", "model", "vae")
+
+    FUNCTION = "fluxloader"
+    CATEGORY = "EasyUse/Loaders"
+
+    def fluxloader(self, ckpt_name, vae_name,
+                    lora_name, lora_model_strength, lora_clip_strength,
+                    resolution, empty_latent_width, empty_latent_height,
+                    positive, batch_size, model_override=None, clip_override=None, vae_override=None, optional_lora_stack=None, optional_controlnet_stack=None,
+                    a1111_prompt_style=False, prompt=None,
+                    my_unique_id=None):
+
+        return super().adv_pipeloader(ckpt_name, 'Default', vae_name, 0,
+                                      lora_name, lora_model_strength, lora_clip_strength,
+                                      resolution, empty_latent_width, empty_latent_height,
+                                      positive, 'none', 'comfy',
+                                      '', 'none', 'comfy',
+                                      batch_size, model_override, clip_override, vae_override, optional_lora_stack=optional_lora_stack,
+                                      optional_controlnet_stack=optional_controlnet_stack,
+                                      a1111_prompt_style=a1111_prompt_style, prompt=prompt,
+                                      my_unique_id=my_unique_id)
+
 
 # Dit Loader
-from .dit.utils import string_to_dtype
 from .dit.pixArt.config import pixart_conf, pixart_res
 
 class pixArtLoader:
@@ -2194,14 +2243,13 @@ class controlnetSimple:
 
     RETURN_TYPES = ("PIPE_LINE", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("pipe", "positive", "negative")
-    OUTPUT_NODE = True
 
     FUNCTION = "controlnetApply"
     CATEGORY = "EasyUse/Loaders"
 
     def controlnetApply(self, pipe, image, control_net_name, control_net=None, strength=1, scale_soft_weights=1, union_type=None):
 
-        positive, negative = easyControlnet().apply(control_net_name, image, pipe["positive"], pipe["negative"], strength, 0, 1, control_net, scale_soft_weights, mask=None, easyCache=easyCache, model=pipe['model'])
+        positive, negative = easyControlnet().apply(control_net_name, image, pipe["positive"], pipe["negative"], strength, 0, 1, control_net, scale_soft_weights, mask=None, easyCache=easyCache, model=pipe['model'], vae=pipe['vae'])
 
         new_pipe = {
             "model": pipe['model'],
@@ -2243,7 +2291,6 @@ class controlnetAdvanced:
 
     RETURN_TYPES = ("PIPE_LINE", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("pipe", "positive", "negative")
-    OUTPUT_NODE = True
 
     FUNCTION = "controlnetApply"
     CATEGORY = "EasyUse/Loaders"
@@ -2251,7 +2298,7 @@ class controlnetAdvanced:
 
     def controlnetApply(self, pipe, image, control_net_name, control_net=None, strength=1, start_percent=0, end_percent=1, scale_soft_weights=1):
         positive, negative = easyControlnet().apply(control_net_name, image, pipe["positive"], pipe["negative"],
-                                                    strength, start_percent, end_percent, control_net, scale_soft_weights, union_type=None, mask=None, easyCache=easyCache, model=pipe['model'])
+                                                    strength, start_percent, end_percent, control_net, scale_soft_weights, union_type=None, mask=None, easyCache=easyCache, model=pipe['model'], vae=pipe['vae'])
 
         new_pipe = {
             "model": pipe['model'],
@@ -2261,7 +2308,7 @@ class controlnetAdvanced:
             "clip": pipe['clip'],
 
             "samples": pipe["samples"],
-            "images": pipe["images"],
+            "images": image,
             "seed": 0,
 
             "loader_settings": pipe["loader_settings"]
@@ -2295,7 +2342,6 @@ class controlnetPlusPlus:
 
     RETURN_TYPES = ("PIPE_LINE", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("pipe", "positive", "negative")
-    OUTPUT_NODE = True
 
     FUNCTION = "controlnetApply"
     CATEGORY = "EasyUse/Loaders"
@@ -2307,6 +2353,12 @@ class controlnetPlusPlus:
                 soft_weight_cls = ALL_NODE_CLASS_MAPPINGS['ScaledSoftControlNetWeights']
                 (weights, timestep_keyframe) = soft_weight_cls().load_weights(scale_soft_weights, False)
                 cn_adv_cls = ALL_NODE_CLASS_MAPPINGS['ACN_ControlNet++LoaderSingle']
+                if union_type == 'auto':
+                    union_type = 'none'
+                elif union_type == 'canny/lineart/anime_lineart/mlsd':
+                    union_type = 'canny/lineart/mlsd'
+                elif union_type == 'repaint':
+                    union_type = 'inpaint/outpaint'
                 control_net, = cn_adv_cls().load_controlnet_plusplus(control_net_name, union_type)
                 apply_adv_cls = ALL_NODE_CLASS_MAPPINGS['ACN_AdvancedControlNetApply']
                 positive, negative, _ = apply_adv_cls().apply_controlnet(pipe["positive"], pipe["negative"], control_net, image, strength, start_percent, end_percent, timestep_kf=timestep_keyframe,)
@@ -2718,7 +2770,6 @@ class icLightApply:
     RETURN_TYPES = ("MODEL", "IMAGE")
     RETURN_NAMES = ("model", "lighting_image")
     FUNCTION = "apply"
-    OUTPUT_NODE = True
     CATEGORY = "EasyUse/Adapter"
 
     def batch(self, image1, image2):
@@ -2783,14 +2834,13 @@ class icLightApply:
         return (m, lighting_image)
 
 
-def insightface_loader(provider):
+def insightface_loader(provider, name='buffalo_l'):
     try:
         from insightface.app import FaceAnalysis
     except ImportError as e:
         raise Exception(e)
-
     path = os.path.join(folder_paths.models_dir, "insightface")
-    model = FaceAnalysis(name="buffalo_l", root=path, providers=[provider + 'ExecutionProvider', ])
+    model = FaceAnalysis(name=name, root=path, providers=[provider + 'ExecutionProvider', ])
     model.prepare(ctx_id=0, det_size=(640, 640))
     return model
 
@@ -2811,6 +2861,7 @@ class ipadapter:
         self.faceid_presets = [
             'FACEID',
             'FACEID PLUS - SD1.5 only',
+            "FACEID PLUS KOLORS",
             'FACEID PLUS V2',
             'FACEID PORTRAIT (style transfer)',
             'FACEID PORTRAIT UNNORM - SDXL only (strong)'
@@ -2826,7 +2877,7 @@ class ipadapter:
         preset = preset.lower()
         clipvision_list = folder_paths.get_filename_list("clip_vision")
 
-        if preset.startswith("plus (kolors"):
+        if preset.startswith("plus (kolors") or preset.startswith("faceid plus kolors"):
             pattern = 'Vit.Large.patch14.336\.(bin|safetensors)$'
         elif preset.startswith("vit-g"):
             pattern = '(ViT.bigG.14.*39B.b160k|ipadapter.*sdxl|sdxl.*model\.(bin|safetensors))'
@@ -2911,6 +2962,12 @@ class ipadapter:
                 pattern = 'faceid.sd15\.(safetensors|bin)$'
                 lora_pattern = 'faceid.sd15.lora\.safetensors$'
             is_insightface = True
+        elif preset.startswith("faceid plus kolors"):
+            if is_sdxl:
+                pattern = '(kolors.ip.adapter.faceid.plus|ipa.faceid.plus)\.(safetensors|bin)$'
+            else:
+                raise Exception("faceid plus kolors model is not supported for SD1.5")
+            is_insightface = True
         elif preset.startswith("faceid plus -"):
             if is_sdxl:
                 raise Exception("faceid plus model is not supported for SDXL")
@@ -2977,7 +3034,13 @@ class ipadapter:
             model = st_model
             del st_model
 
-        if not "ip_adapter" in model.keys() or not model["ip_adapter"]:
+        model_keys = model.keys()
+        if "adapter_modules" in model_keys:
+            model["ip_adapter"] = model["adapter_modules"]
+            model["faceidplusv2"] = True
+            del model['adapter_modules']
+
+        if not "ip_adapter" in model_keys or not model["ip_adapter"]:
             raise Exception("invalid IPAdapter model {}".format(file))
 
         if 'plusv2' in file.lower():
@@ -3063,7 +3126,7 @@ class ipadapter:
                     log_node_info("easy ipadapterApply", f"Using InsightFaceModel {icache_key} Cached")
                     _, insightface = backend_cache.cache[icache_key][1]
                 else:
-                    insightface = insightface_loader(provider)
+                    insightface = insightface_loader(provider, 'antelopev2' if preset == 'FACEID PLUS KOLORS' else 'buffalo_l')
                     if cache_mode in ["all", "insightface only"]:
                         backend_cache.update_cache(icache_key, 'insightface',(False, insightface))
                 pipeline['insightface']['provider'] = provider
@@ -3105,7 +3168,7 @@ class ipadapterApply(ipadapter):
     CATEGORY = "EasyUse/Adapter"
     FUNCTION = "apply"
 
-    def apply(self, model, image, preset, lora_strength, provider, weight, weight_faceidv2, start_at, end_at, cache_mode, use_tiled, attn_mask=None, optional_ipadapter=None):
+    def apply(self, model, image, preset, lora_strength, provider, weight, weight_faceidv2, start_at, end_at, cache_mode, use_tiled, attn_mask=None, optional_ipadapter=None, weight_kolors=None):
         images, masks = image, [None]
         model, ipadapter = self.load_model(model, preset, lora_strength, provider, clip_vision=None, optional_ipadapter=optional_ipadapter, cache_mode=cache_mode)
         if use_tiled and preset not in self.faceid_presets:
@@ -3114,11 +3177,13 @@ class ipadapterApply(ipadapter):
             cls = ALL_NODE_CLASS_MAPPINGS["IPAdapterTiled"]
             model, images, masks = cls().apply_tiled(model, ipadapter, image, weight, "linear", start_at, end_at, sharpening=0.0, combine_embeds="concat", image_negative=None, attn_mask=attn_mask, clip_vision=None, embeds_scaling='V only')
         else:
-            if preset in ['FACEID PLUS V2', 'FACEID PORTRAIT (style transfer)']:
+            if preset in ['FACEID PLUS KOLORS', 'FACEID PLUS V2', 'FACEID PORTRAIT (style transfer)']:
                 if "IPAdapterAdvanced" not in ALL_NODE_CLASS_MAPPINGS:
                     self.error()
                 cls = ALL_NODE_CLASS_MAPPINGS["IPAdapterAdvanced"]
-                model, images = cls().apply_ipadapter(model, ipadapter, start_at=start_at, end_at=end_at, weight=weight, weight_type="linear", combine_embeds="concat", weight_faceidv2=weight_faceidv2, image=image, image_negative=None, clip_vision=None, attn_mask=attn_mask, insightface=None, embeds_scaling='V only')
+                if weight_kolors is None:
+                    weight_kolors = weight
+                model, images = cls().apply_ipadapter(model, ipadapter, start_at=start_at, end_at=end_at, weight=weight, weight_type="linear", combine_embeds="concat", weight_faceidv2=weight_faceidv2, image=image, image_negative=None, clip_vision=None, attn_mask=attn_mask, insightface=None, embeds_scaling='V only', weight_kolors=weight_kolors)
             else:
                 if "IPAdapter" not in ALL_NODE_CLASS_MAPPINGS:
                     self.error()
@@ -3172,14 +3237,18 @@ class ipadapterApplyAdvanced(ipadapter):
     CATEGORY = "EasyUse/Adapter"
     FUNCTION = "apply"
 
-    def apply(self, model, image, preset, lora_strength, provider, weight, weight_faceidv2, weight_type, combine_embeds, start_at, end_at, embeds_scaling, cache_mode, use_tiled, use_batch, sharpening, weight_style=1.0, weight_composition=1.0, image_style=None, image_composition=None, expand_style=False, image_negative=None, clip_vision=None, attn_mask=None, optional_ipadapter=None, layer_weights=None):
+    def apply(self, model, image, preset, lora_strength, provider, weight, weight_faceidv2, weight_type, combine_embeds, start_at, end_at, embeds_scaling, cache_mode, use_tiled, use_batch, sharpening, weight_style=1.0, weight_composition=1.0, image_style=None, image_composition=None, expand_style=False, image_negative=None, clip_vision=None, attn_mask=None, optional_ipadapter=None, layer_weights=None, weight_kolors=None):
         images, masks = image, [None]
         model, ipadapter = self.load_model(model, preset, lora_strength, provider, clip_vision=clip_vision, optional_ipadapter=optional_ipadapter, cache_mode=cache_mode)
+
+        if weight_kolors is None:
+            weight_kolors = weight
+
         if layer_weights:
             if "IPAdapterMS" not in ALL_NODE_CLASS_MAPPINGS:
                 self.error()
             cls = ALL_NODE_CLASS_MAPPINGS["IPAdapterAdvanced"]
-            model, images = cls().apply_ipadapter(model, ipadapter, weight=weight, weight_type=weight_type, start_at=start_at, end_at=end_at, combine_embeds=combine_embeds, weight_faceidv2=weight_faceidv2, image=image, image_negative=image_negative, weight_style=weight_style, weight_composition=weight_composition, image_style=image_style, image_composition=image_composition, expand_style=expand_style, clip_vision=clip_vision, attn_mask=attn_mask, insightface=None, embeds_scaling=embeds_scaling, layer_weights=layer_weights)
+            model, images = cls().apply_ipadapter(model, ipadapter, weight=weight, weight_type=weight_type, start_at=start_at, end_at=end_at, combine_embeds=combine_embeds, weight_faceidv2=weight_faceidv2, image=image, image_negative=image_negative, weight_style=weight_style, weight_composition=weight_composition, image_style=image_style, image_composition=image_composition, expand_style=expand_style, clip_vision=clip_vision, attn_mask=attn_mask, insightface=None, embeds_scaling=embeds_scaling, layer_weights=layer_weights, weight_kolors=weight_kolors)
         elif use_tiled:
             if use_batch:
                 if "IPAdapterTiledBatch" not in ALL_NODE_CLASS_MAPPINGS:
@@ -3199,10 +3268,47 @@ class ipadapterApplyAdvanced(ipadapter):
                 if "IPAdapterAdvanced" not in ALL_NODE_CLASS_MAPPINGS:
                     self.error()
                 cls = ALL_NODE_CLASS_MAPPINGS["IPAdapterAdvanced"]
-            model, images = cls().apply_ipadapter(model, ipadapter, weight=weight, weight_type=weight_type, start_at=start_at, end_at=end_at, combine_embeds=combine_embeds, weight_faceidv2=weight_faceidv2, image=image, image_negative=image_negative, weight_style=1.0, weight_composition=1.0, image_style=image_style, image_composition=image_composition, expand_style=expand_style, clip_vision=clip_vision, attn_mask=attn_mask, insightface=None, embeds_scaling=embeds_scaling)
+            model, images = cls().apply_ipadapter(model, ipadapter, weight=weight, weight_type=weight_type, start_at=start_at, end_at=end_at, combine_embeds=combine_embeds, weight_faceidv2=weight_faceidv2, image=image, image_negative=image_negative, weight_style=1.0, weight_composition=1.0, image_style=image_style, image_composition=image_composition, expand_style=expand_style, clip_vision=clip_vision, attn_mask=attn_mask, insightface=None, embeds_scaling=embeds_scaling, weight_kolors=weight_kolors)
         if images is None:
             images = image
         return (model, images, masks, ipadapter)
+
+class ipadapterApplyFaceIDKolors(ipadapterApplyAdvanced):
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        ipa_cls = cls()
+        presets = ipa_cls.presets
+        weight_types = ipa_cls.weight_types
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "image": ("IMAGE",),
+                "preset": (['FACEID PLUS KOLORS'], {"default":"FACEID PLUS KOLORS"}),
+                "lora_strength": ("FLOAT", {"default": 0.6, "min": 0, "max": 1, "step": 0.01}),
+                "provider": (["CPU", "CUDA", "ROCM", "DirectML", "OpenVINO", "CoreML"],),
+                "weight": ("FLOAT", {"default": 0.8, "min": -1, "max": 3, "step": 0.05}),
+                "weight_faceidv2": ("FLOAT", {"default": 1.0, "min": -1, "max": 5.0, "step": 0.05}),
+                "weight_kolors": ("FLOAT", {"default": 0.8, "min": -1, "max": 5.0, "step": 0.05}),
+                "weight_type": (weight_types,),
+                "combine_embeds": (["concat", "add", "subtract", "average", "norm average"],),
+                "start_at": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "end_at": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "embeds_scaling": (['V only', 'K+V', 'K+V w/ C penalty', 'K+mean(V) w/ C penalty'],),
+                "cache_mode": (["insightface only", "clip_vision only", "ipadapter only", "all", "none"], {"default": "all"},),
+                "use_tiled": ("BOOLEAN", {"default": False},),
+                "use_batch": ("BOOLEAN", {"default": False},),
+                "sharpening": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.05}),
+            },
+
+            "optional": {
+                "image_negative": ("IMAGE",),
+                "attn_mask": ("MASK",),
+                "clip_vision": ("CLIP_VISION",),
+                "optional_ipadapter": ("IPADAPTER",),
+            }
+        }
+
 
 class ipadapterStyleComposition(ipadapter):
     def __init__(self):
@@ -3609,7 +3715,6 @@ class instantIDApply(instantID):
 
     RETURN_TYPES = ("PIPE_LINE", "MODEL", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("pipe", "model", "positive", "negative")
-    OUTPUT_NODE = True
 
     FUNCTION = "apply"
     CATEGORY = "EasyUse/Adapter"
@@ -3657,7 +3762,6 @@ class instantIDApplyAdvanced(instantID):
 
     RETURN_TYPES = ("PIPE_LINE", "MODEL", "CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("pipe", "model", "positive", "negative")
-    OUTPUT_NODE = True
 
     FUNCTION = "apply_advanced"
     CATEGORY = "EasyUse/Adapter"
@@ -3802,7 +3906,6 @@ class samplerSettings:
 
     RETURN_TYPES = ("PIPE_LINE", )
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -3883,7 +3986,6 @@ class samplerSettingsAdvanced:
 
     RETURN_TYPES = ("PIPE_LINE", )
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -3969,7 +4071,6 @@ class samplerSettingsNoiseIn:
 
     RETURN_TYPES = ("PIPE_LINE", )
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4133,85 +4234,9 @@ class samplerCustomSettings:
 
     RETURN_TYPES = ("PIPE_LINE", )
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
-
-    def ip2p(self, positive, negative, vae=None, pixels=None, latent=None):
-        if latent is not None:
-            concat_latent = latent
-        else:
-            x = (pixels.shape[1] // 8) * 8
-            y = (pixels.shape[2] // 8) * 8
-
-            if pixels.shape[1] != x or pixels.shape[2] != y:
-                x_offset = (pixels.shape[1] % 8) // 2
-                y_offset = (pixels.shape[2] % 8) // 2
-                pixels = pixels[:, x_offset:x + x_offset, y_offset:y + y_offset, :]
-
-            concat_latent = vae.encode(pixels)
-
-        out_latent = {}
-        out_latent["samples"] = torch.zeros_like(concat_latent)
-
-        out = []
-        for conditioning in [positive, negative]:
-            c = []
-            for t in conditioning:
-                d = t[1].copy()
-                d["concat_latent_image"] = concat_latent
-                n = [t[0], d]
-                c.append(n)
-            out.append(c)
-        return (out[0], out[1], out_latent)
-
-    def get_inversed_euler_sampler(self):
-        @torch.no_grad()
-        def sample_inversed_euler(model, x, sigmas, extra_args=None, callback=None, disable=None, s_churn=0., s_tmin=0.,
-                                  s_tmax=float('inf'), s_noise=1.):
-            """Implements Algorithm 2 (Euler steps) from Karras et al. (2022)."""
-            extra_args = {} if extra_args is None else extra_args
-            s_in = x.new_ones([x.shape[0]])
-            for i in trange(1, len(sigmas), disable=disable):
-                sigma_in = sigmas[i - 1]
-
-                if i == 1:
-                    sigma_t = sigmas[i]
-                else:
-                    sigma_t = sigma_in
-
-                denoised = model(x, sigma_t * s_in, **extra_args)
-
-                if i == 1:
-                    d = (x - denoised) / (2 * sigmas[i])
-                else:
-                    d = (x - denoised) / sigmas[i - 1]
-
-                dt = sigmas[i] - sigmas[i - 1]
-                x = x + d * dt
-                if callback is not None:
-                    callback(
-                        {'x': x, 'i': i, 'sigma': sigmas[i], 'sigma_hat': sigmas[i], 'denoised': denoised})
-            return x / sigmas[-1]
-
-        ksampler = comfy.samplers.KSAMPLER(sample_inversed_euler)
-        return (ksampler,)
-
-    def get_custom_cls(self, sampler_name):
-        try:
-            cls = custom_samplers.__dict__[sampler_name]
-            return cls()
-        except:
-            raise Exception(f"Custom sampler {sampler_name} not found, Please updated your ComfyUI")
-
-    def add_model_patch_option(self, model):
-        if 'transformer_options' not in model.model_options:
-            model.model_options['transformer_options'] = {}
-        to = model.model_options['transformer_options']
-        if "model_patch" not in to:
-            to["model_patch"] = {}
-        return to
 
     def settings(self, pipe, guider, cfg, cfg_negative, sampler_name, scheduler, coeff, steps, sigma_max, sigma_min, rho, beta_d, beta_min, eps_s, flip_sigmas, denoise, add_noise, seed, image_to_latent=None, latent=None, optional_sampler=None, optional_sigmas=None, prompt=None, extra_pnginfo=None, my_unique_id=None):
 
@@ -4221,60 +4246,6 @@ class samplerCustomSettings:
         positive = pipe['positive']
         negative = pipe['negative']
         batch_size = pipe["loader_settings"]["batch_size"] if "batch_size" in pipe["loader_settings"] else 1
-        _guider, sigmas = None, None
-
-        # sigmas
-        if optional_sigmas is not None:
-            sigmas = optional_sigmas
-        else:
-            match scheduler:
-                case 'vp':
-                    sigmas, = self.get_custom_cls('VPScheduler').get_sigmas(steps, beta_d, beta_min, eps_s)
-                case 'karrasADV':
-                    sigmas, = self.get_custom_cls('KarrasScheduler').get_sigmas(steps, sigma_max, sigma_min, rho)
-                case 'exponentialADV':
-                    sigmas, = self.get_custom_cls('ExponentialScheduler').get_sigmas(steps, sigma_max, sigma_min)
-                case 'polyExponential':
-                    sigmas, = self.get_custom_cls('PolyexponentialScheduler').get_sigmas(steps, sigma_max, sigma_min,
-                                                                                         rho)
-                case 'sdturbo':
-                    sigmas, = self.get_custom_cls('SDTurboScheduler').get_sigmas(model, steps, denoise)
-                case 'alignYourSteps':
-                    model_type = get_sd_version(model)
-                    if model_type == 'unknown':
-                        model_type = 'sdxl'
-                        # raise Exception("This Model not supported")
-                    sigmas, = alignYourStepsScheduler().get_sigmas(model_type.upper(), steps, denoise)
-                case 'gits':
-                    sigmas, = gitsScheduler().get_sigmas(coeff, steps, denoise)
-                case _:
-                    sigmas, = self.get_custom_cls('BasicScheduler').get_sigmas(model, scheduler, steps, denoise)
-
-            # filp_sigmas
-            if flip_sigmas:
-                sigmas, = self.get_custom_cls('FlipSigmas').get_sigmas(sigmas)
-
-        #######################################################################################
-        # brushnet
-        to = None
-        transformer_options = model.model_options['transformer_options'] if "transformer_options" in model.model_options else {}
-        if 'model_patch' in transformer_options and 'brushnet' in transformer_options['model_patch']:
-            to = self.add_model_patch_option(model)
-            mp = to['model_patch']
-            if isinstance(model.model.model_config, comfy.supported_models.SD15):
-                mp['SDXL'] = False
-            elif isinstance(model.model.model_config, comfy.supported_models.SDXL):
-                mp['SDXL'] = True
-            else:
-                print('Base model type: ', type(model.model.model_config))
-                raise Exception("Unsupported model type: ", type(model.model.model_config))
-
-            mp['all_sigmas'] = sigmas
-            mp['unet'] = model.model.diffusion_model
-            mp['step'] = 0
-            mp['total_steps'] = 1
-        #
-        #######################################################################################
 
         if image_to_latent is not None:
             _, height, width, _ = image_to_latent.shape
@@ -4300,33 +4271,11 @@ class samplerCustomSettings:
             samples = pipe["samples"]
             images = pipe["images"]
 
-        # guider
-        if guider == 'CFG':
-            _guider, = self.get_custom_cls('CFGGuider').get_guider(model, positive, negative, cfg)
-        elif guider in ['DualCFG', 'IP2P+DualCFG']:
-            _guider, =  self.get_custom_cls('DualCFGGuider').get_guider(model, positive, middle, negative, cfg, cfg_negative)
-        else:
-            _guider, = self.get_custom_cls('BasicGuider').get_guider(model, positive)
-
-        # sampler
-        if optional_sampler:
-            sampler = optional_sampler
-        else:
-            if sampler_name == 'inversed_euler':
-                sampler, = self.get_inversed_euler_sampler()
-            else:
-                sampler, = self.get_custom_cls('KSamplerSelect').get_sampler(sampler_name)
-
-        # noise
-        if add_noise == 'disable':
-            noise, = self.get_custom_cls('DisableNoise').get_noise()
-        else:
-            noise, = self.get_custom_cls('RandomNoise').get_noise(seed)
 
         new_pipe = {
-            "model": pipe['model'],
-            "positive": pipe['positive'],
-            "negative": pipe['negative'],
+            "model": model,
+            "positive": positive,
+            "negative": negative,
             "vae": pipe['vae'],
             "clip": pipe['clip'],
 
@@ -4336,17 +4285,27 @@ class samplerCustomSettings:
 
             "loader_settings": {
                 **pipe["loader_settings"],
+                "middle": pipe['negative'],
                 "steps": steps,
                 "cfg": cfg,
+                "cfg_negative": cfg_negative,
                 "sampler_name": sampler_name,
                 "scheduler": scheduler,
                 "denoise": denoise,
+                "add_noise": add_noise,
                 "custom": {
-                    "noise": noise,
-                    "guider": _guider,
-                    "sampler": sampler,
-                    "sigmas": sigmas,
-                }
+                    "guider": guider,
+                    "coeff": coeff,
+                    "sigma_max": sigma_max,
+                    "sigma_min": sigma_min,
+                    "rho": rho,
+                    "beta_d": beta_d,
+                    "beta_min": beta_min,
+                    "eps_s": beta_min,
+                    "flip_sigmas": flip_sigmas
+                },
+                "optional_sampler": optional_sampler,
+                "optional_sigmas": optional_sigmas
             }
         }
 
@@ -4383,7 +4342,6 @@ class sdTurboSettings:
 
     RETURN_TYPES = ("PIPE_LINE",)
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4481,7 +4439,6 @@ class cascadeSettings:
 
     RETURN_TYPES = ("PIPE_LINE",)
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4589,7 +4546,6 @@ class layerDiffusionSettings:
 
     RETURN_TYPES = ("PIPE_LINE",)
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4690,7 +4646,6 @@ class layerDiffusionSettingsADDTL:
 
     RETURN_TYPES = ("PIPE_LINE",)
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4752,7 +4707,6 @@ class dynamicCFGSettings:
 
     RETURN_TYPES = ("PIPE_LINE",)
     RETURN_NAMES = ("pipe",)
-    OUTPUT_NODE = True
 
     FUNCTION = "settings"
     CATEGORY = "EasyUse/PreSampling"
@@ -4906,6 +4860,176 @@ class samplerFull:
     FUNCTION = "run"
     CATEGORY = "EasyUse/Sampler"
 
+    def ip2p(self, positive, negative, vae=None, pixels=None, latent=None):
+        if latent is not None:
+            concat_latent = latent
+        else:
+            x = (pixels.shape[1] // 8) * 8
+            y = (pixels.shape[2] // 8) * 8
+
+            if pixels.shape[1] != x or pixels.shape[2] != y:
+                x_offset = (pixels.shape[1] % 8) // 2
+                y_offset = (pixels.shape[2] % 8) // 2
+                pixels = pixels[:, x_offset:x + x_offset, y_offset:y + y_offset, :]
+
+            concat_latent = vae.encode(pixels)
+
+        out_latent = {}
+        out_latent["samples"] = torch.zeros_like(concat_latent)
+
+        out = []
+        for conditioning in [positive, negative]:
+            c = []
+            for t in conditioning:
+                d = t[1].copy()
+                d["concat_latent_image"] = concat_latent
+                n = [t[0], d]
+                c.append(n)
+            out.append(c)
+        return (out[0], out[1], out_latent)
+
+    def get_inversed_euler_sampler(self):
+        @torch.no_grad()
+        def sample_inversed_euler(model, x, sigmas, extra_args=None, callback=None, disable=None, s_churn=0., s_tmin=0.,s_tmax=float('inf'), s_noise=1.):
+            """Implements Algorithm 2 (Euler steps) from Karras et al. (2022)."""
+            extra_args = {} if extra_args is None else extra_args
+            s_in = x.new_ones([x.shape[0]])
+            for i in trange(1, len(sigmas), disable=disable):
+                sigma_in = sigmas[i - 1]
+
+                if i == 1:
+                    sigma_t = sigmas[i]
+                else:
+                    sigma_t = sigma_in
+
+                denoised = model(x, sigma_t * s_in, **extra_args)
+
+                if i == 1:
+                    d = (x - denoised) / (2 * sigmas[i])
+                else:
+                    d = (x - denoised) / sigmas[i - 1]
+
+                dt = sigmas[i] - sigmas[i - 1]
+                x = x + d * dt
+                if callback is not None:
+                    callback(
+                        {'x': x, 'i': i, 'sigma': sigmas[i], 'sigma_hat': sigmas[i], 'denoised': denoised})
+            return x / sigmas[-1]
+
+        ksampler = comfy.samplers.KSAMPLER(sample_inversed_euler)
+        return (ksampler,)
+
+    def get_custom_cls(self, sampler_name):
+        try:
+            cls = custom_samplers.__dict__[sampler_name]
+            return cls()
+        except:
+            raise Exception(f"Custom sampler {sampler_name} not found, Please updated your ComfyUI")
+
+    def add_model_patch_option(self, model):
+        if 'transformer_options' not in model.model_options:
+            model.model_options['transformer_options'] = {}
+        to = model.model_options['transformer_options']
+        if "model_patch" not in to:
+            to["model_patch"] = {}
+        return to
+
+    def get_sampler_custom(self, model, positive, negative, seed, loader_settings):
+        _guider = None
+        middle = loader_settings['middle'] if "middle" in loader_settings else negative
+        steps = loader_settings['steps'] if "steps" in loader_settings else 20
+        cfg = loader_settings['cfg'] if "cfg" in loader_settings else 8.0
+        cfg_negative = loader_settings['cfg_negative'] if "cfg_negative" in loader_settings else 8.0
+        sampler_name = loader_settings['sampler_name'] if "sampler_name" in loader_settings else "euler"
+        scheduler = loader_settings['scheduler'] if "scheduler" in loader_settings else "normal"
+        guider = loader_settings['custom']['guider'] if "guider" in loader_settings['custom'] else "CFG"
+        beta_d = loader_settings['custom']['beta_d'] if "beta_d" in loader_settings['custom'] else 0.1
+        beta_min = loader_settings['custom']['beta_min'] if "beta_min" in loader_settings['custom'] else 0.1
+        eps_s = loader_settings['custom']['eps_s'] if "eps_s" in loader_settings['custom'] else 0.1
+        sigma_max = loader_settings['custom']['sigma_max'] if "sigma_max" in loader_settings['custom'] else 14.61
+        sigma_min = loader_settings['custom']['sigma_min'] if "sigma_min" in loader_settings['custom'] else 0.03
+        rho = loader_settings['custom']['rho'] if "rho" in loader_settings['custom'] else 7.0
+        coeff = loader_settings['custom']['coeff'] if "coeff" in loader_settings['custom'] else 1.2
+        flip_sigmas = loader_settings['custom']['flip_sigmas'] if "flip_sigmas" in loader_settings['custom'] else False
+        denoise = loader_settings['denoise'] if "denoise" in loader_settings else 1.0
+        add_noise = loader_settings['add_noise'] if "add_noise" in loader_settings else "enable"
+        optional_sigmas = loader_settings['optional_sigmas'] if "optional_sigmas" in loader_settings else None
+        optional_sampler = loader_settings['optional_sampler'] if "optional_sampler" in loader_settings else None
+
+        # sigmas
+        if optional_sigmas is not None:
+            sigmas = optional_sigmas
+        else:
+            if scheduler == 'vp':
+                sigmas, = self.get_custom_cls('VPScheduler').get_sigmas(steps, beta_d, beta_min, eps_s)
+            elif scheduler == 'karrasADV':
+                sigmas, = self.get_custom_cls('KarrasScheduler').get_sigmas(steps, sigma_max, sigma_min, rho)
+            elif scheduler == 'exponentialADV':
+                sigmas, = self.get_custom_cls('ExponentialScheduler').get_sigmas(steps, sigma_max, sigma_min)
+            elif scheduler == 'polyExponential':
+                sigmas, = self.get_custom_cls('PolyexponentialScheduler').get_sigmas(steps, sigma_max, sigma_min, rho)
+            elif scheduler == 'sdturbo':
+                sigmas, = self.get_custom_cls('SDTurboScheduler').get_sigmas(model, steps, denoise)
+            elif scheduler == 'alignYourSteps':
+                model_type = get_sd_version(model)
+                if model_type == 'unknown':
+                    model_type = 'sdxl'
+                sigmas, = alignYourStepsScheduler().get_sigmas(model_type.upper(), steps, denoise)
+            elif scheduler == 'gits':
+                sigmas, = gitsScheduler().get_sigmas(coeff, steps, denoise)
+            else:
+                sigmas, = self.get_custom_cls('BasicScheduler').get_sigmas(model, scheduler, steps, denoise)
+
+        # filp_sigmas
+        if flip_sigmas:
+            sigmas, = self.get_custom_cls('FlipSigmas').get_sigmas(sigmas)
+
+        #######################################################################################
+        # brushnet
+        to = None
+        transformer_options = model.model_options['transformer_options'] if "transformer_options" in model.model_options else {}
+        if 'model_patch' in transformer_options and 'brushnet' in transformer_options['model_patch']:
+            to = self.add_model_patch_option(model)
+            mp = to['model_patch']
+            if isinstance(model.model.model_config, comfy.supported_models.SD15):
+                mp['SDXL'] = False
+            elif isinstance(model.model.model_config, comfy.supported_models.SDXL):
+                mp['SDXL'] = True
+            else:
+                print('Base model type: ', type(model.model.model_config))
+                raise Exception("Unsupported model type: ", type(model.model.model_config))
+
+            mp['all_sigmas'] = sigmas
+            mp['unet'] = model.model.diffusion_model
+            mp['step'] = 0
+            mp['total_steps'] = 1
+        #######################################################################################
+        # guider
+        if guider == 'CFG':
+            _guider, = self.get_custom_cls('CFGGuider').get_guider(model, positive, negative, cfg)
+        elif guider in ['DualCFG', 'IP2P+DualCFG']:
+            _guider, = self.get_custom_cls('DualCFGGuider').get_guider(model, positive, middle,
+                                                                       negative, cfg, cfg_negative)
+        else:
+            _guider, = self.get_custom_cls('BasicGuider').get_guider(model, positive)
+
+        # sampler
+        if optional_sampler:
+            _sampler = optional_sampler
+        else:
+            if sampler_name == 'inversed_euler':
+                _sampler, = self.get_inversed_euler_sampler()
+            else:
+                _sampler, = self.get_custom_cls('KSamplerSelect').get_sampler(sampler_name)
+
+        # noise
+        if add_noise == 'disable':
+            noise, = self.get_custom_cls('DisableNoise').get_noise()
+        else:
+            noise, = self.get_custom_cls('RandomNoise').get_noise(seed)
+
+        return (noise, _guider, _sampler, sigmas)
+
     def run(self, pipe, steps, cfg, sampler_name, scheduler, denoise, image_output, link_id, save_prefix, seed=None, model=None, positive=None, negative=None, latent=None, vae=None, clip=None, xyPlot=None, tile_size=None, prompt=None, extra_pnginfo=None, my_unique_id=None, force_full_denoise=False, disable_noise=False, downscale_options=None, image=None):
 
         samp_model = model if model is not None else pipe["model"]
@@ -4917,7 +5041,7 @@ class samplerFull:
 
         samp_seed = seed if seed is not None else pipe['seed']
 
-        samp_custom = pipe["loader_settings"]["custom"] if "custom" in pipe["loader_settings"] else None
+        samp_custom = pipe["loader_settings"] if "custom" in pipe["loader_settings"] else None
 
         steps = steps if steps is not None else pipe['loader_settings']['steps']
         start_step = pipe['loader_settings']['start_step'] if 'start_step' in pipe['loader_settings'] else 0
@@ -4936,8 +5060,6 @@ class samplerFull:
         if add_noise == "disable":
             disable_noise = True
 
-
-        # When model is colors
         def downscale_model_unet(samp_model):
             # 获取Unet参数
             if "PatchModelAddDownscale" in ALL_NODE_CLASS_MAPPINGS:
@@ -5008,16 +5130,12 @@ class samplerFull:
             start_time = int(time.time() * 1000)
             # 开始推理
             if samp_custom is not None:
-                guider = samp_custom['guider'] if 'guider' in samp_custom else None
-                _sampler = samp_custom['sampler'] if 'sampler' in samp_custom else None
-                sigmas = samp_custom['sigmas'] if 'sigmas' in samp_custom else None
-                noise = samp_custom['noise'] if 'noise' in samp_custom else None
-                samp_samples, _ = sampler.custom_advanced_ksampler(noise, guider, _sampler, sigmas, samp_samples)
+                noise, _guider, _sampler, sigmas = self.get_sampler_custom(samp_model, samp_positive, samp_negative, samp_seed, samp_custom)
+                samp_samples, _ = sampler.custom_advanced_ksampler(noise, _guider, _sampler, sigmas, samp_samples)
             elif scheduler == 'align_your_steps':
                 model_type = get_sd_version(samp_model)
                 if model_type == 'unknown':
                     model_type = 'sdxl'
-                    # raise Exception("This Model not supported")
                 sigmas, = alignYourStepsScheduler().get_sigmas(model_type.upper(), steps, denoise)
                 _sampler = comfy.samplers.sampler_object(sampler_name)
                 samp_samples = sampler.custom_ksampler(samp_model, samp_seed, steps, cfg, _sampler, sigmas, samp_positive, samp_negative, samp_samples, disable_noise=disable_noise, preview_latent=preview_latent)
@@ -5106,9 +5224,6 @@ class samplerFull:
 
             if image_output in ("Sender", "Sender&Save"):
                 PromptServer.instance.send_sync("img-send", {"link_id": link_id, "images": results})
-
-            if hasattr(ModelPatcher, "original_calculate_weight"):
-                ModelPatcher.calculate_weight = ModelPatcher.original_calculate_weight
 
             return {"ui": {"images": results},
                     "result": sampler.get_output(new_pipe,)}
@@ -5221,9 +5336,6 @@ class samplerFull:
             }
 
             del pipe
-
-            if hasattr(ModelPatcher, "original_calculate_weight"):
-                ModelPatcher.calculate_weight = ModelPatcher.original_calculate_weight
 
             if image_output in ("Hide", "Hide&Save"):
                 return sampler.get_output(new_pipe)
@@ -5661,7 +5773,6 @@ class samplerSDTurbo:
 
         if image_output in ("Sender", "Sender&Save"):
             PromptServer.instance.send_sync("img-send", {"link_id": link_id, "images": results})
-
 
         return {"ui": {"images": results},
                 "result": sampler.get_output(new_pipe, )}
@@ -6847,17 +6958,19 @@ class pipeEditPrompt:
             log_node_warn(f'pipeEdit[{my_unique_id}]', "Model missing from pipeLine")
 
         from .kolors.loader import is_kolors_model
-        if is_kolors_model(model):
+        model_type = get_sd_version(model)
+        if model_type == 'sdxl' and is_kolors_model(model):
             auto_clean_gpu = pipe["loader_settings"]["auto_clean_gpu"] if "auto_clean_gpu" in pipe["loader_settings"] else False
+            chatglm3_model = pipe["chatglm3_model"] if "chatglm3_model" in pipe else None
             # text encode
             log_node_warn("正在进行正向提示词编码...")
             positive_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, positive, auto_clean_gpu)
             log_node_warn("正在进行负面提示词编码...")
             negative_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, negative, auto_clean_gpu)
         else:
-            model_type = get_sd_version(model)
             clip_skip = pipe["loader_settings"]["clip_skip"] if "clip_skip" in pipe["loader_settings"] else -1
             lora_stack = pipe.get("lora_stack") if pipe is not None and "lora_stack" in pipe else []
+            clip = pipe.get("clip") if pipe is not None and "clip" in pipe else None
             positive_token_normalization = pipe["loader_settings"]["positive_token_normalization"] if "positive_token_normalization" in pipe["loader_settings"] else "none"
             positive_weight_interpretation = pipe["loader_settings"]["positive_weight_interpretation"] if "positive_weight_interpretation" in pipe["loader_settings"] else "comfy"
             negative_token_normalization = pipe["loader_settings"]["negative_token_normalization"] if "negative_token_normalization" in pipe["loader_settings"] else "none"
@@ -7393,14 +7506,12 @@ class sliderControl:
     RETURN_NAMES = ("layer_weights",)
 
     FUNCTION = "control"
-    OUTPUT_NODE = True
 
     CATEGORY = "EasyUse/Util"
 
     def control(self, mode, model_type, prompt=None, my_unique_id=None, extra_pnginfo=None):
         values = ''
         if my_unique_id in prompt:
-            print(prompt[my_unique_id])
             if 'values' in prompt[my_unique_id]["inputs"]:
                 values = prompt[my_unique_id]["inputs"]['values']
 
@@ -7447,7 +7558,6 @@ class stableDiffusion3API:
 
 #---------------------------------------------------------------API 结束----------------------------------------------------------------------
 
-
 NODE_CLASS_MAPPINGS = {
     # seed 随机种
     "easy seed": easySeed,
@@ -7474,6 +7584,7 @@ NODE_CLASS_MAPPINGS = {
     "easy dynamiCrafterLoader": dynamiCrafterLoader,
     "easy cascadeLoader": cascadeLoader,
     "easy kolorsLoader": kolorsLoader,
+    "easy fluxLoader": fluxLoader,
     "easy pixArtLoader": pixArtLoader,
     "easy loraStack": loraStack,
     "easy controlnetStack": controlnetStack,
@@ -7484,6 +7595,7 @@ NODE_CLASS_MAPPINGS = {
     # Adapter 适配器
     "easy ipadapterApply": ipadapterApply,
     "easy ipadapterApplyADV": ipadapterApplyAdvanced,
+    "easy ipadapterApplyFaceIDKolors": ipadapterApplyFaceIDKolors,
     "easy ipadapterApplyEncoder": ipadapterApplyEncoder,
     "easy ipadapterApplyEmbeds": ipadapterApplyEmbeds,
     "easy ipadapterApplyRegional": ipadapterApplyRegional,
@@ -7593,6 +7705,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "easy dynamiCrafterLoader": "EasyLoader (DynamiCrafter)",
     "easy cascadeLoader": "EasyCascadeLoader",
     "easy kolorsLoader": "EasyLoader (Kolors)",
+    "easy fluxLoader": "EasyLoader (Flux)",
     "easy hunyuanDiTLoader": "EasyLoader (HunyuanDiT)",
     "easy pixArtLoader": "EasyLoader (PixArt)",
     "easy loraStack": "EasyLoraStack",
@@ -7604,6 +7717,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # Adapter 适配器
     "easy ipadapterApply": "Easy Apply IPAdapter",
     "easy ipadapterApplyADV": "Easy Apply IPAdapter (Advanced)",
+    "easy ipadapterApplyFaceIDKolors": "Easy Apply IPAdapter (FaceID Kolors)",
     "easy ipadapterStyleComposition": "Easy Apply IPAdapter (StyleComposition)",
     "easy ipadapterApplyEncoder": "Easy Apply IPAdapter (Encoder)",
     "easy ipadapterApplyRegional": "Easy Apply IPAdapter (Regional)",

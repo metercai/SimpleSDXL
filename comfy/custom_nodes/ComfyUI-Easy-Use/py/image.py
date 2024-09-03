@@ -404,46 +404,6 @@ class imagePixelPerfect:
 
     return {"ui": {"text": text}, "result": (result,)}
 
-# 图片到遮罩
-class imageToMask:
-  @classmethod
-  def INPUT_TYPES(s):
-    return {"required": {
-        "image": ("IMAGE",),
-        "channel": (['red', 'green', 'blue'],),
-       }
-    }
-
-  RETURN_TYPES = ("MASK",)
-  FUNCTION = "convert"
-  CATEGORY = "EasyUse/Image"
-
-  def convert_to_single_channel(self, image, channel='red'):
-    # Convert to RGB mode to access individual channels
-    image = image.convert('RGB')
-
-    # Extract the desired channel and convert to greyscale
-    if channel == 'red':
-      channel_img = image.split()[0].convert('L')
-    elif channel == 'green':
-      channel_img = image.split()[1].convert('L')
-    elif channel == 'blue':
-      channel_img = image.split()[2].convert('L')
-    else:
-      raise ValueError(
-        "Invalid channel option. Please choose 'red', 'green', or 'blue'.")
-
-    # Convert the greyscale channel back to RGB mode
-    channel_img = Image.merge(
-      'RGB', (channel_img, channel_img, channel_img))
-
-    return channel_img
-
-  def convert(self, image, channel='red'):
-    image = self.convert_to_single_channel(tensor2pil(image), channel)
-    image = pil2tensor(image)
-    return (image.squeeze().mean(2),)
-
 # 图像保存 (简易)
 from nodes import PreviewImage, SaveImage
 class imageSaveSimple:
@@ -1523,46 +1483,46 @@ class removeLocalImage:
 
 
 # 姿势编辑器
-class poseEditor:
-  @classmethod
-  def INPUT_TYPES(self):
-    temp_dir = folder_paths.get_temp_directory()
-
-    if not os.path.isdir(temp_dir):
-      os.makedirs(temp_dir)
-
-    temp_dir = folder_paths.get_temp_directory()
-
-    return {"required":
-              {"image": (sorted(os.listdir(temp_dir)),)},
-            }
-
-  RETURN_TYPES = ("IMAGE",)
-  FUNCTION = "output_pose"
-
-  CATEGORY = "EasyUse/Image"
-
-  def output_pose(self, image):
-    image_path = os.path.join(folder_paths.get_temp_directory(), image)
-    # print(f"Create: {image_path}")
-
-    i = Image.open(image_path)
-    image = i.convert("RGB")
-    image = np.array(image).astype(np.float32) / 255.0
-    image = torch.from_numpy(image)[None,]
-
-    return (image,)
-
-  @classmethod
-  def IS_CHANGED(self, image):
-    image_path = os.path.join(
-      folder_paths.get_temp_directory(), image)
-    # print(f'Change: {image_path}')
-
-    m = hashlib.sha256()
-    with open(image_path, 'rb') as f:
-      m.update(f.read())
-    return m.digest().hex()
+# class poseEditor:
+#   @classmethod
+#   def INPUT_TYPES(self):
+#     temp_dir = folder_paths.get_temp_directory()
+#
+#     if not os.path.isdir(temp_dir):
+#       os.makedirs(temp_dir)
+#
+#     temp_dir = folder_paths.get_temp_directory()
+#
+#     return {"required":
+#               {"image": (sorted(os.listdir(temp_dir)),)},
+#             }
+#
+#   RETURN_TYPES = ("IMAGE",)
+#   FUNCTION = "output_pose"
+#
+#   CATEGORY = "EasyUse/🚫 Deprecated"
+#
+#   def output_pose(self, image):
+#     image_path = os.path.join(folder_paths.get_temp_directory(), image)
+#     # print(f"Create: {image_path}")
+#
+#     i = Image.open(image_path)
+#     image = i.convert("RGB")
+#     image = np.array(image).astype(np.float32) / 255.0
+#     image = torch.from_numpy(image)[None,]
+#
+#     return (image,)
+#
+#   @classmethod
+#   def IS_CHANGED(self, image):
+#     image_path = os.path.join(
+#       folder_paths.get_temp_directory(), image)
+#     # print(f'Change: {image_path}')
+#
+#     m = hashlib.sha256()
+#     with open(image_path, 'rb') as f:
+#       m.update(f.read())
+#     return m.digest().hex()
 
 NODE_CLASS_MAPPINGS = {
   "easy imageInsetCrop": imageInsetCrop,
@@ -1575,7 +1535,6 @@ NODE_CLASS_MAPPINGS = {
   "easy imageScaleDownBy": imageScaleDownBy,
   "easy imageScaleDownToSize": imageScaleDownToSize,
   "easy imageRatio": imageRatio,
-  "easy imageToMask": imageToMask,
   "easy imageConcat": imageConcat,
   "easy imageListToImageBatch": imageListToImageBatch,
   "easy imageBatchToImageList": imageBatchToImageList,
@@ -1595,7 +1554,6 @@ NODE_CLASS_MAPPINGS = {
   "easy joinImageBatch": JoinImageBatch,
   "easy humanSegmentation": humanSegmentation,
   "easy removeLocalImage": removeLocalImage,
-  "easy poseEditor": poseEditor
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -1609,7 +1567,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy imageScaleDownBy": "Image Scale Down By",
   "easy imageScaleDownToSize": "Image Scale Down To Size",
   "easy imageRatio": "ImageRatio",
-  "easy imageToMask": "ImageToMask",
   "easy imageHSVMask": "ImageHSVMask",
   "easy imageConcat": "imageConcat",
   "easy imageListToImageBatch": "Image List To Image Batch",
@@ -1630,5 +1587,4 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy imageToBase64": "Image To Base64",
   "easy humanSegmentation": "Human Segmentation",
   "easy removeLocalImage": "Remove Local Image",
-  "easy poseEditor": "PoseEditor",
 }
