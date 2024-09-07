@@ -24,6 +24,7 @@ re_imagesize = re.compile(r"^(\d+)x(\d+)$")
 get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
 get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
+get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value='', visible=x not in y, interactive=x not in z)
 
 def get_layout_visible_inter_loras(y,z,max_number):
     x = 'loras'
@@ -69,6 +70,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
     results.append(get_layout_visible_inter('guidance_scale', visible, inter))
+    results.append(get_layout_empty_visible_inter('negative_prompt', visible, inter))
     results.append(gr.update(visible=True if 'blank.inc.html' not in preset_url else False))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
     #for i in range(modules.config.default_max_lora_number):
@@ -84,7 +86,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("mixing_image_prompt_and_inpaint"))
     results.append(update_value_if_existed("backfill_prompt"))
     results.append(update_value_if_existed("translation_methods"))
-    results.append(False if template_engine!='Fooocus' else update_value_if_existed("input_image_checkbox"))
+    results.append(False if template_engine not in ['Fooocus', 'Comfy'] else update_value_if_existed("input_image_checkbox"))
     results.append(state_params)
 
     return results

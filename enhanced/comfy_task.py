@@ -2,7 +2,8 @@ import os
 import zipfile
 import shutil
 import modules.config as config
-from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, sysinfo, refresh_models_info
+from shared import sysinfo
+from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, refresh_models_info
 from modules.model_loader import load_file_from_url
 
 default_method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
@@ -211,6 +212,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 if 'lora_1' in default_params:
                     task_method = 'flux_base2_gguf'
                 comfy_params.delete_params(['base_model_dtype'])
+            if task_method == 'flux_base':
+                comfy_params.update_params({"prompt2": default_params["prompt"]})
             check_download_flux_model(default_params["base_model"], default_params["clip_model"])
         return ComfyTask(task_method, comfy_params)
     else:  # SeamlessTiled

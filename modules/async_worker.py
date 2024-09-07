@@ -193,6 +193,12 @@ class AsyncTask:
                     "lora_1": self.loras[0][0],
                     "lora_1_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=2 else 0 if self.loras[0][1]<0 else 1,
                     })
+        else:
+            if self.task_name == 'Kolors+':
+                self.params_backend.update({
+                    "lora_speedup": 'Hyper-SDXL-8steps-lora.safetensors',
+                    "lora_speedup_strength": 0,
+                    })
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
@@ -1401,6 +1407,7 @@ def worker():
             from enhanced.latent_preview import get_previewer
             from ldm_patched.modules.latent_formats import SDXL as SDXL_format
 
+            ldm_patched.modules.model_management.throw_exception_if_processing_interrupted()
             latents = callback_kwargs["latents"]
             preview_format = "JPEG"
             latent_format = SDXL_format()
@@ -1453,7 +1460,7 @@ def worker():
                 if async_task.last_stop == 'skip':
                     if async_task.task_class == 'Fooocus':
                         del task['c'], task['uc']  # Save memory
-                    print('User skipped')
+                    print(f'User skipped')
                     async_task.last_stop = False
                     continue
                 else:

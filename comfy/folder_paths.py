@@ -53,7 +53,9 @@ user_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), "user
 filename_list_cache: dict[str, tuple[list[str], dict[str, float], float]] = {}
 
 def map_legacy(folder_name: str) -> str:
-    legacy = {"unet": "diffusion_models"}
+    legacy = {"unet": "diffusion_models",
+              "llm": "llms",
+              }
     return legacy.get(folder_name, folder_name)
 
 if not os.path.exists(input_directory):

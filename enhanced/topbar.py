@@ -18,10 +18,9 @@ import modules.style_sorter as style_sorter
 import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
-import launch
+import shared
 from enhanced.simpleai import comfyd, models_info, modelsinfo, models_info_muid, refresh_models_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-from shared import BUTTON_NUM
 
 css = '''
 '''
@@ -52,7 +51,7 @@ def get_preset_name_list():
     sorted_files = [f[0] for f in sorted_file_times]
     sorted_files.pop(sorted_files.index(f'{config.preset}.json'))
     sorted_files.insert(0, f'{config.preset}.json')
-    presets = sorted_files[:BUTTON_NUM]
+    presets = sorted_files[:shared.BUTTON_NUM]
     name_list = ''
     for i in range(len(presets)):
         name_list += f'{presets[i][:-5]},'
@@ -119,11 +118,11 @@ def get_system_message():
     f_log_path = os.path.abspath("./update_log.md")
     s_log_path = os.path.abspath("./simplesdxl_log.md")
     if len(update_msg_f)>0:
-        body_f = f'<b id="update_f">[Fooocus最新更新]</b>: {update_msg_f}<a href="{args_manager.args.webroot}/file={f_log_path}">更多>></a>   '
+        body_f = f'<b id="update_f">[Fooocus更新信息]</b>: {update_msg_f}<a href="{args_manager.args.webroot}/file={f_log_path}">更多>></a>   '
     else:
         body_f = '<b id="update_f"> </b>'
     if len(update_msg_s)>0:
-        body_s = f'<b id="update_s">[SimpleSDXL最新更新]</b>: {update_msg_s}<a href="{args_manager.args.webroot}/file={s_log_path}">更多>></a>'
+        body_s = f'<b id="update_s">[系统消息 - 已更新内容]</b>: {update_msg_s}<a href="{args_manager.args.webroot}/file={s_log_path}">更多>></a>'
     else:
          body_s = '<b id="update_s"> </b>'
     import mistune
@@ -288,7 +287,7 @@ def get_preset_inc_url(preset_name='blank'):
 def refresh_nav_bars(state_params):
     state_params.update({"__nav_name_list": get_preset_name_list()})
     preset_name_list = state_params["__nav_name_list"].split(',')
-    for i in range(BUTTON_NUM-len(preset_name_list)):
+    for i in range(shared.BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
     results = []
     if state_params["__is_mobile"]:
@@ -298,7 +297,7 @@ def refresh_nav_bars(state_params):
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
         name += '\u2B07' if is_models_file_absent(name) else ''
-        visible_flag = i<(5 if state_params["__is_mobile"] else BUTTON_NUM)
+        visible_flag = i<(5 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
         else: 
@@ -322,7 +321,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)
-    results += [gr.update()] * (BUTTON_NUM-preset_nums)
+    results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     results += [backend_params]
     state_params["gallery_state"]='preview'
     return results
@@ -339,7 +338,7 @@ def process_after_generation(state_params):
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 6)
-    results += [gr.update()] * (BUTTON_NUM-preset_nums)
+    results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     
     if len(state_params["__output_list"]) > 0:
         output_index = state_params["__output_list"][0].split('/')[0]
@@ -370,7 +369,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * (34 + BUTTON_NUM) + [state_params] + [gr.update()] * 55
+        return [gr.update()] * (35 + shared.BUTTON_NUM) + [state_params] + [gr.update()] * 55
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -388,6 +387,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         comfyd.stop()
    
     default_model = preset_prepared.get('base_model')
+    previous_default_models = preset_prepared.get('previous_default_models', [])
     checkpoint_downloads = preset_prepared.get('checkpoint_downloads', {})
     embeddings_downloads = preset_prepared.get('embeddings_downloads', {})
     lora_downloads = preset_prepared.get('lora_downloads', {})
@@ -410,7 +410,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         if 'merged' in default_model:
             preset_prepared.update({'default_overwrite_step': 6})
 
-    download_models(default_model, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads)
+    download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads)
 
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
@@ -422,8 +422,24 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     return results
 
 
-def download_models(default_model, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
+def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
     from modules.util import get_file_from_folder_list
+
+    if shared.args.disable_preset_download:
+        print('Skipped model download.')
+        return default_model, checkpoint_downloads
+
+    if not shared.args.always_download_new_model:
+        if not os.path.isfile(get_file_from_folder_list(default_model, config.paths_checkpoints)):
+            for alternative_model_name in previous_default_models:
+                if os.path.isfile(get_file_from_folder_list(alternative_model_name, config.paths_checkpoints)):
+                    print(f'You do not have [{default_model}] but you have [{alternative_model_name}].')
+                    print(f'Fooocus will use [{alternative_model_name}] to avoid downloading new models, '
+                          f'but you are not using the latest models.')
+                    print('Use --always-download-new-model to avoid fallback and always get new models.')
+                    checkpoint_downloads = {}
+                    default_model = alternative_model_name
+                    break
 
     for file_name, url in checkpoint_downloads.items():
         model_dir = os.path.dirname(get_file_from_folder_list(file_name, config.paths_checkpoints))
@@ -440,7 +456,6 @@ def download_models(default_model, checkpoint_downloads, embeddings_downloads, l
 
 
 from transformers import CLIPTokenizer
-import shared
 import shutil
 
 cur_clip_path = os.path.join(config.path_clip_vision, "clip-vit-large-patch14")

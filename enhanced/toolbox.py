@@ -18,7 +18,7 @@ from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from enhanced.simpleai import models_info, models_info_muid, refresh_models_info, sync_model_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-from enhanced.simpleai import sysinfo
+from shared import sysinfo
 
 css = '''
 .toolbox {

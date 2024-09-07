@@ -24,7 +24,8 @@ def load_file_from_muid(
     cached_file = os.path.abspath(os.path.join(model_dir, filename))
     if not os.path.exists(cached_file):
         import requests
-        from enhanced.simpleai import models_hub_host as hub, token as token_did, sysinfo
+        from enhanced.simpleai import models_hub_host as hub
+        from shared import token as token_did, sysinfo
         location = sysinfo["location"]
 
         try:
