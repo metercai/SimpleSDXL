@@ -188,6 +188,12 @@ default_class_params = {
         'backend_params': {},
         },
     'Comfy': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': sampler_list,
+        'available_scheduler_name': scheduler_list,
+        'backend_params': {},
         },
     'Kolors': {
         'disvisible': ["backend_selection", "performance_selection"],

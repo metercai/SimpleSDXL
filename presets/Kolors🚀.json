@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Kolors+",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
+	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras-4", "refiner_model"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "kolors_text2image2",
@@ -15,7 +15,7 @@
     "default_loras": [
         [
             "Hyper-SDXL-8steps-lora.safetensors",
-            1.0
+            0.75
         ],
         [
             "None",
