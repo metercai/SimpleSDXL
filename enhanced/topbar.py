@@ -19,7 +19,7 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import shared
-from enhanced.simpleai import comfyd, models_info, modelsinfo, models_info_muid, refresh_models_info
+from enhanced.simpleai import comfyd, modelsinfo
 from modules.model_loader import load_file_from_url, load_file_from_muid
 
 css = '''
@@ -59,7 +59,6 @@ def get_preset_name_list():
     return name_list
 
 def is_models_file_absent(preset_name):
-    #refresh_models_info()
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
@@ -67,11 +66,10 @@ def is_models_file_absent(preset_name):
         if config_preset["default_model"] and config_preset["default_model"] != 'None':
             if 'Flux' in preset_name and config_preset["default_model"]== 'auto':
                 config_preset["default_model"] = comfy_task.get_default_base_Flux_name('+' in preset_name)
-            if "checkpoints/"+config_preset["default_model"] not in models_info.keys():
-                return True
+            model_key = f'checkpoints/{config_preset["default_model"]}'
+            return not modelsinfo.exists_model_key(model_key)
         if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
-            if "checkpoints/"+config_preset["default_refiner"] not in models_info.keys():
-                return True
+           return not modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_refiner"])
     return False
 
 
@@ -144,19 +142,6 @@ def preset_instruction():
     
     return head + body + foot
 
-
-def embeddings_model_split(prompt, prompt_negative):
-    prompt_tags = re.findall(r'[\(](.*?)[)]', prompt_negative) + re.findall(r'[\(](.*?)[)]', prompt)
-    embeddings = []
-    for e in prompt_tags:
-        embed = e.split(':')
-        if len(embed)>2 and embed[0] == 'embedding':
-            embeddings += [embed[1]]
-    embeds = []
-    for k in models_info.keys():
-            if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
-                embeds += [k]
-    return embeds
 
 
 get_system_params_js = '''

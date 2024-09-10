@@ -3,23 +3,22 @@ import sys
 import json
 import gradio as gr
 import shared
-from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
+from simpleai_base import simpleai_base, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
-from simpleai_base.models_info import get_models_info, get_modelsinfo, set_scan_models_hash, refresh_models_info_from_path, models_info_path, sync_model_info
+from simpleai_base.models_info import ModelsInfo, sync_model_info
 from build_launcher import is_win32_standalone_build
 
-simpleai_config = config
 #comfyd.echo_off = False
 args_comfyd = [[]]
 modelsinfo = None #get_modelsinfo()
-models_info, models_info_muid, models_info_file = get_models_info()
+modelsinfo_filename = 'models_info.json'
 
-def refresh_models_info():
-    global modelsinfo, models_info, models_info_muid, models_info_file
-    #refresh_models_info_from_path()
-    modelsinfo = get_modelsinfo()
-    models_info, models_info_muid, models_info_file = get_models_info()
-    return
+def init_modelsinfo(models_root, path_map):
+    global modelsinfo, modelsinfo_filename
+    models_info_path = os.path.abspath(os.path.join(models_root, modelsinfo_filename))
+    if not modelsinfo:
+        modelsinfo = ModelsInfo(models_info_path, path_map)
+    return modelsinfo
 
 def reset_simpleai_args():
     global args_comfyd
@@ -37,7 +36,7 @@ def reset_simpleai_args():
 #set_scan_models_hash(True)
 
 
-identity_note = '将身份ID与手机号绑定，可以固定本地密钥。既可以在本地存储和管理个人配置信息，又可以参与创意分享等会员服务。详情可见说明文档。'
+identity_note = '将身份ID与手机号绑定，可以固定本地密钥。既可以在本地存储和管理个人配置信息，又可以参与创意分享等互助服务。详情可见说明文档。'
 
 from ldm_patched.modules.model_management import unload_all_models, soft_empty_cache
 

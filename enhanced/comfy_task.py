@@ -3,7 +3,7 @@ import zipfile
 import shutil
 import modules.config as config
 from shared import sysinfo
-from enhanced.simpleai import ComfyTaskParams, models_info, modelsinfo, refresh_models_info
+from enhanced.simpleai import ComfyTaskParams, modelsinfo 
 from modules.model_loader import load_file_from_url
 
 default_method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
@@ -44,16 +44,17 @@ def get_default_base_SD3m_name():
     dtype = 0 if sysinfo["gpu_memory"]<VRAM8G and sysinfo["ram_total"]<RAM16G else 1 if sysinfo["gpu_memory"]<VRAM16G and sysinfo["ram_total"]<RAM32G else 2
     for i in range(dtype, -1 ,-1):
         sd3name = default_base_SD3m_name_list[i]
-        if f'checkpoints/{sd3name}' in models_info:
+        if modelsinfo.exists_model_key(f'checkpoints/{sd3name}'):
             return sd3name
     return default_base_SD3m_name_list[0]
 
-default_base_Flux_name_list = ['flux1-dev.safetensors', 'flux1-dev-bnb-nf4.safetensors', 'flux1-dev-bnb-nf4-v2.safetensors', 'FLUX.1-schnell-dev-merged.safetensors', 'flux1-schnell.safetensors', 'flux1-schnell-bnb-nf4.safetensors']
+default_base_Flux_name_list = ['flux1-dev.safetensors', 'flux1-dev-bnb-nf4.safetensors', 'flux1-dev-bnb-nf4-v2.safetensors', 'flux-hyp8-Q5_K_M.gguf', 'flux1-schnell.safetensors', 'flux1-schnell-bnb-nf4.safetensors']
 flux_model_urls = {
     "flux1-dev.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-dev.safetensors",
     "flux1-dev-bnb-nf4-v2.safetensors": "https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/flux1-dev-bnb-nf4-v2.safetensors",
     "flux1-schnell.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-schnell.safetensor",
-    "flux1-schnell-bnb-nf4.safetensors": "https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/flux1-schnell-bnb-nf4.safetensors"
+    "flux1-schnell-bnb-nf4.safetensors": "https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/flux1-schnell-bnb-nf4.safetensors",
+    "flux-hyp8-Q5_K_M.gguf": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
     }
 
 def get_default_base_Flux_name(plus=False):
@@ -64,7 +65,7 @@ def get_default_base_Flux_name(plus=False):
             checklist = [default_base_Flux_name_list[4], default_base_Flux_name_list[5], default_base_Flux_name_list[3]]
     else:
         if is_highlevel_device():
-            checklist = [default_base_Flux_name_list[0], default_base_Flux_name_list[2], default_base_Flux_name_list[1]]
+            checklist = [default_base_Flux_name_list[0], default_base_Flux_name_list[2], default_base_Flux_name_list[1], default_base_Flux_name_list[3]]
         else:
             checklist = [default_base_Flux_name_list[2], default_base_Flux_name_list[1], default_base_Flux_name_list[3]]
     for i in range(0, len(checklist)):
@@ -122,7 +123,6 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 raise ValueError("input_images cannot be None for this method")
             images = {"input_image": input_images[0]}
             if 'iclight_enable' in options and options["iclight_enable"]:
-                #if f'checkpoints/{default_base_SD15_name}' not in models_info:
                 if modelsinfo.exists_model(catalog="checkpoints", model_path=default_base_SD15_name):
                     config.downloading_base_sd15_model()
                 comfy_params.update_params({"base_model": default_base_SD15_name})
@@ -172,6 +172,15 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
     elif task_name == 'Flux':
         comfy_params = ComfyTaskParams(default_params)
         base_model = default_params['base_model']
+        if base_model == 'auto':
+            model_dev = 'flux1-dev.safetensors'
+            model_nf4 = 'flux1-dev-bnb-nf4-v2.safetensors'
+            model_hyp8 = 'flux-hyp8-Q5_K_M.gguf'
+            base_model = model_nf4 if sysinfo["gpu_memory"]<=VRAM8G1 else model_dev
+            if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model) and modelsinfo.exists_model(catalog="checkpoints", model_path=model_hyp8):
+                base_model = model_hyp8
+                default_params['steps'] = 8
+            default_params['base_model'] = base_model  
         base_model_key = f'checkpoints/{base_model}'
         if 'nf4' in base_model.lower() and 'bnb' in base_model.lower():
             if sysinfo["gpu_memory"]<VRAM8G:
@@ -179,13 +188,11 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             else:
                 task_method = 'flux_base_nf4'
             comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
-            check_download_flux_model(default_params["base_model"])
-        elif 'fp8' in base_model.lower() and base_model_key in models_info and models_info[base_model_key]["size"]/(1024*1024*1024)>15:
+        elif 'fp8' in base_model.lower() and modelsinfo.exists_model_key(base_model_key)  and modelsinfo.get_model_key_info(base_model_key)["size"]/(1024*1024*1024)>15:
             task_method = 'flux_base_fp8'
             if 'lora_1' in default_params:
                 task_method = 'flux_base2_fp8'
             comfy_params.delete_params(['clip_model', 'base_model_dtype'])
-            check_download_flux_model(default_params["base_model"])
         else:
             if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
                 comfy_params.update_params({
@@ -212,9 +219,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 if 'lora_1' in default_params:
                     task_method = 'flux_base2_gguf'
                 comfy_params.delete_params(['base_model_dtype'])
-            if task_method == 'flux_base':
-                comfy_params.update_params({"prompt2": default_params["prompt"]})
-            check_download_flux_model(default_params["base_model"], default_params["clip_model"])
+        check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
         return ComfyTask(task_method, comfy_params)
     else:  # SeamlessTiled
         comfy_params = ComfyTaskParams(default_params)
@@ -241,48 +246,47 @@ kolors_scheduler_list = [ "EulerDiscreteScheduler",
 default_kolors_scheduler = kolors_scheduler_list[0]
 
 def check_task_model():
+    #check_model_files_from_download_of_preset_file
     pass
 
 def check_download_kolors_model(path_root):
     check_modle_file = [
             "diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin",
-            "unet/kolors_unet_fp16.safetensors",
-            "vae/sdxl_fp16.vae.safetensors",
+            "diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors",
+            "diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors",
             ]
     path_temp = os.path.join(path_root, 'temp')
     if not os.path.exists(path_temp):
         os.makedirs(path_temp)
     exists_kolors_model_path = False
-    for f in models_info:
-        if '00007-of-00007.bin' in f and f.startswith('diffusers/Kolors'):
-            exists_kolors_model_path = True
-    if not exists_kolors_model_path:
+    if not modelsinfo.exists_model_key(check_modle_file[0]):
         load_file_from_url(
-            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_simpleai_diffusers_fp16.zip',
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_0909.zip',
             model_dir=path_temp,
-            file_name='models_kolors_simpleai_diffusers_fp16.zip'
+            file_name='models_kolors_fp16_simpleai_0909.zip'
         )
-        downfile = os.path.join(path_temp, 'models_kolors_simpleai_diffusers_fp16.zip')
+        downfile = os.path.join(path_temp, 'models_kolors_fp16_simpleai_0909.zip')
         with zipfile.ZipFile(downfile, 'r') as zipf:
             print(f'extractall: {downfile}')
-            zipf.extractall(path_temp)
-        shutil.move(os.path.join(path_temp, 'models/diffusers/Kolors'), config.paths_diffusers[0])
-        shutil.rmtree(os.path.join(path_temp, 'models'))
+            zipf.extractall(path_root)
+        shutil.move(os.path.join(path_temp, 'SimpleModels/diffusers/Kolors'), config.paths_diffusers[0])
         os.remove(downfile)
+        shutil.rmtree(path_temp)
+        modelsinfo.refresh_from_path()
     
-    if check_modle_file[1] not in models_info:
-        path_org = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
-        path_dst = os.path.join(config.path_unet, 'kolors_unet_fp16.safetensors')
+    if not modelsinfo.exists_model_key(check_modle_file[1]):
+        path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
+        path_org = os.path.join(config.path_unet, 'kolors_unet_fp16.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')
         shutil.copy(path_org, path_dst)
 
-    if check_modle_file[2] not in models_info:
-        path_org = os.path.join(config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
-        path_dst = os.path.join(config.path_vae, 'sdxl_fp16.vae.safetensors')
+    if not modelsinfo.exists_model_key(check_modle_file[2]):
+        path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
+        path_org = os.path.join(config.path_vae, 'sdxl_fp16.vae.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')
         shutil.copy(path_org, path_dst)
    
-    refresh_models_info()    
+    modelsinfo.refresh_from_path()  
     return
 
 def check_download_base_model(base_model):
@@ -319,6 +323,19 @@ def check_download_flux_model(base_model, clip_model=None):
             else:
                 load_file_from_url(
                     url='https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+        elif 'hyp8' in base_model:
+            if '_K' in base_model:
+                load_file_from_url(
+                    url='https://huggingface.co/mhnakif/flux-hyp8-gguf-k/tree/main/{base_model}',
+                    model_dir=config.paths_checkpoints[0],
+                    file_name=base_model
+                )
+            else:
+                load_file_from_url(
+                    url='https://huggingface.co/mhnakif/flux-hyp8/tree/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )

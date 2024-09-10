@@ -34,7 +34,7 @@ import enhanced.version as version
 import enhanced.wildcards as wildcards
 import enhanced.simpleai as simpleai
 import enhanced.comfy_task as comfy_task
-from enhanced.simpleai import models_info, comfyd 
+from enhanced.simpleai import comfyd 
 
 def get_task(*args):
     args = list(args)
@@ -220,7 +220,6 @@ with shared.gradio_root:
                     params_note_delete_button = gr.Button(value='Enter', visible=False)
                     params_note_regen_button = gr.Button(value='Enter', visible=False)
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
-                    params_note_embed_button = gr.Button(value='Enter', visible=False)
                 with gr.Group(visible=False, elem_classes='identity_note') as identity_dialog:
                     identity_note_info = gr.Markdown(elem_classes='note_info', value=simpleai.identity_note)
                     with gr.Tab(label='New Identity') as new_id_tab:
@@ -310,7 +309,6 @@ with shared.gradio_root:
                 image_tools_box_title = gr.Markdown('<b>ToolBox</b>', visible=True)
                 prompt_info_button = gr.Button(value='ViewMeta', size='sm', visible=True)
                 prompt_regen_button = gr.Button(value='ReGenerate', size='sm', visible=True)
-                prompt_embed_button = gr.Button(value='EmbedMeta', size='sm', visible=not modules.config.default_save_metadata_to_images)
                 prompt_delete_button = gr.Button(value='DeleteImage', size='sm', visible=True)
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
             
@@ -449,7 +447,7 @@ with shared.gradio_root:
                     
                     with gr.TabItem(label='Layer_iclight') as layer_tab:
                         with gr.Row():
-                            layer_method = gr.Radio(label='Layer case', choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0], show_label=True, container=False)
+                            layer_method = gr.Radio(choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0], container=False)
                         with gr.Row():
                             with gr.Column():
                                 layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
@@ -813,28 +811,6 @@ with shared.gradio_root:
                     sync_model_info = gr.Checkbox(label='Sync model info', interactive=False, info='Improve usability and transferability for preset and embedinfo.', value=False, container=False)
                     with gr.Column(visible=False) as info_sync_texts:
                         models_infos = []
-                        keylist = sorted(models_info.keys())
-                        with gr.Tab(label='Checkpoints'):
-                            for k in keylist:
-                                if k.startswith('checkpoints'):
-                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
-                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
-                                    downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
-                                    models_infos += [downURL]
-                        with gr.Tab(label='LoRAs'):
-                            for k in keylist:
-                                if k.startswith('loras'):
-                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
-                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
-                                    downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
-                                    models_infos += [downURL]
-                        with gr.Tab(label='Others'):
-                            for k in keylist:
-                                if not k.startswith('checkpoints') and not k.startswith('loras'):
-                                    muid = '' if not models_info[k]['muid'] else models_info[k]['muid']
-                                    durl = None if not models_info[k]['url'] else models_info[k]['url']
-                                    downURL = gr.Textbox(label=k.split('/')[1], info=f'MUID={muid}', value=durl, placeholder="Type Download URL here.", max_lines=1)
-                                    models_infos += [downURL]
                 info_sync_button = gr.Button(label='Sync', value='\U0001f504 Sync Remote Info', visible=False, variant='secondary', elem_classes='refresh_button')
                 info_progress = gr.Markdown('Note: If MUID is not obtained after synchronizing, it means that it is a new model file. You need to add an available download URL before.', visible=False)
                 sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
@@ -936,7 +912,7 @@ with shared.gradio_root:
                                                        info='Image Prompt parameters are not included. Use png and a1111 for compatibility with Civitai.',
                                                        visible=modules.config.default_save_metadata_to_images)
 
-                            save_metadata_to_images.change(lambda x: [gr.update(visible=x), gr.update(visible=not x)], inputs=[save_metadata_to_images], outputs=[metadata_scheme, prompt_embed_button], queue=False, show_progress=False)
+                            save_metadata_to_images.change(lambda x: [gr.update(visible=x)], inputs=[save_metadata_to_images], outputs=[metadata_scheme], queue=False, show_progress=False)
 
                     with gr.Tab(label='Control'):
                         debugging_cn_preprocessor = gr.Checkbox(label='Debug Preprocessors', value=False,
@@ -1037,7 +1013,7 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):
-                with gr.Row(visible=True):
+                with gr.Row(visible=False):
                     binding_id_button = gr.Button(value='Binding Identity', visible=True)
                 with gr.Row():
                     language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
@@ -1392,8 +1368,6 @@ with shared.gradio_root:
         .then(fn=lambda x: x, inputs=state_topbar, outputs=system_params, queue=False, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js=topbar.refresh_topbar_status_js)
 
-    prompt_embed_button.click(toolbox.toggle_note_box_embed, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_embed_button, params_note_box, state_topbar], show_progress=False)
-    params_note_embed_button.click(toolbox.embed_params, inputs=state_topbar, outputs=[params_note_embed_button, params_note_box, state_topbar], show_progress=False)
     
 
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + load_data_outputs

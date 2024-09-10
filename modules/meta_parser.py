@@ -13,7 +13,7 @@ import modules.sdxl_styles
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
-from enhanced.simpleai import models_info, models_info_file
+from enhanced.simpleai import modelsinfo
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 
@@ -57,7 +57,11 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
     sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
     scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
-    
+    file_filter = modules.flags.model_file_filter.get(template_engine, [])
+    base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
+    if template_engine in ['Fooocus', 'Comfy']:
+        base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+
     params_backend  = enginedata_dict.get('backend_params', default_params.get('backend_params', default_class_params['Fooocus']['backend_params']))
     params_backend.update({'backend_engine': template_engine})
     results = [params_backend]
@@ -66,7 +70,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
     results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
-    results.append(get_layout_visible_inter('base_model', visible, inter))
+    results.append(get_layout_choices_visible_inter(base_model_list, 'base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
     results.append(get_layout_visible_inter('overwrite_step', visible, inter))
     results.append(get_layout_visible_inter('guidance_scale', visible, inter))
@@ -354,10 +358,10 @@ def get_sha256(filepath):
     if not os.path.isfile(filepath):
         return ''
     if filepath not in hash_cache:
-        if filepath in models_info_file:
-            hash_cache[filepath] = models_info[models_info_file[filepath]]['muid']
-        else:
-            hash_cache[filepath] = sha256(filepath)
+        filehash = modelsinfo.get_file_muid(filepath)
+        if not filehash:
+            filehash = sha256(filepath)
+        hash_cache[filepath] = filehash
     return hash_cache[filepath]
 
 

@@ -210,14 +210,14 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     return dp
 
 path_models_root = get_path_models_root()
-paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/'], True)
-paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/'], True)
+paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/', '../models/checkpoints/'], True)
+paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/', '../models/loras/'], True)
 path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
 path_vae_approx = get_dir_or_set_default('path_vae_approx', f'{path_models_root}/vae_approx/')
 path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
 path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
-paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/'], True)
-paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/'], True)
+paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/', '../models/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/', '../models/controlnet/'], True)
 path_clip = get_dir_or_set_default('path_clip', f'{path_models_root}/clip/')
 path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
@@ -231,17 +231,19 @@ path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
 paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
 
-from enhanced.simpleai import simpleai_config
-simpleai_config.path_models_root = path_models_root
-simpleai_config.paths_checkpoints = paths_checkpoints
-simpleai_config.paths_loras = paths_loras
-simpleai_config.path_embeddings = path_embeddings
-simpleai_config.paths_diffusers = paths_diffusers
-simpleai_config.paths_controlnet = paths_controlnet
-simpleai_config.paths_inpaint = paths_inpaint
-simpleai_config.paths_llms = paths_llms
-simpleai_config.path_unet = path_unet
-simpleai_config.path_vae = path_vae
+from enhanced.simpleai import init_modelsinfo
+modelsinfo = init_modelsinfo(path_models_root, dict(
+    checkpoints=paths_checkpoints,
+    loras=paths_loras,
+    embeddings=[path_embeddings],
+    diffusers=paths_diffusers,
+    DIFFUSERS=paths_diffusers,
+    controlnet=paths_controlnet,
+    inpaint=paths_inpaint,
+    llms=paths_llms,
+    unet=[path_unet],
+    vae=[path_vae]
+    ))
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -985,9 +987,9 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
 
 def update_files():
     global model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
-    model_filenames = get_model_filenames(paths_checkpoints)
-    lora_filenames = get_model_filenames(paths_loras)
-    vae_filenames = get_model_filenames(path_vae)
+    model_filenames = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    lora_filenames = modelsinfo.get_model_names('loras')
+    vae_filenames = modelsinfo.get_model_names('vae')
     wildcard_filenames = get_files_from_folder(path_wildcards, ['.txt'])
     available_presets = get_presets()
     return
@@ -1202,5 +1204,4 @@ def downloading_hydit_model():
     return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
 
 update_files()
-from enhanced.simpleai import refresh_models_info 
-refresh_models_info()
+modelsinfo.refresh_from_path(scan_hash=True)

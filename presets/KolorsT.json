@@ -1,0 +1,57 @@
+{
+    "default_engine": {
+        "backend_engine": "Comfy",
+        "disvisible": ["backend_selection", "performance_selection"],
+        "disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
+        "available_aspect_ratios_selection": "Common",
+        "backend_params": {
+                "task_method": "seamlesstiled_kolors",
+                "tiling": "enable",
+		"tiled_offset_x": 0,
+		"tiled_offset_y": 0
+                }
+        },
+    "default_model": "None",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+	[
+	    "None",
+	    1.0
+	],
+	[
+            "None",
+            1.0
+        ],
+	[
+            "None",
+            1.0
+        ],
+	[
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 5.0,
+    "default_sample_sharpness": 2.0,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "sgm_uniform",
+    "default_performance": "Speed",
+    "default_prompt_negative": "anime,photorealistic,35mm film,deformed,glitch,low contrast,noisy,",
+    "default_styles": [
+    ],
+    "default_aspect_ratio": "1024*1024",
+    "default_overwrite_step": 30,
+    "checkpoint_downloads": {
+    },
+    "embeddings_downloads": {},
+    "lora_downloads": {
+    },
+    "previous_default_models": [
+    ],
+    "default_save_metadata_to_images": true
+}

@@ -13,8 +13,11 @@ class AsyncTask:
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
         import args_manager
+        import re
 
         from enhanced.simpleai import comfyd
+
+        normalize_lines = lambda text: re.sub(r'[\r\n]+', ' ', text)
 
         self.args = args.copy()
         self.yields = []
@@ -29,7 +32,8 @@ class AsyncTask:
 
         args.reverse()
         self.generate_image_grid = args.pop()
-        self.prompt = args.pop()
+        self.prompt = normalize_lines(args.pop())
+        print(f'reciver prompt:{self.prompt}')
         self.negative_prompt = args.pop()
         self.style_selections = args.pop()
 
