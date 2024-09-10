@@ -1,14 +1,13 @@
 import os
 import sys
-import json
 import gradio as gr
 import shared
-from simpleai_base import simpleai_base, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
+from simpleai_base import simpleai_base, utils, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from build_launcher import is_win32_standalone_build
 
-#comfyd.echo_off = False
+#utils.echo_off = False
 args_comfyd = [[]]
 modelsinfo = None #get_modelsinfo()
 modelsinfo_filename = 'models_info.json'

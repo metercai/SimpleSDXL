@@ -250,7 +250,7 @@ def check_task_model():
     pass
 
 def check_download_kolors_model(path_root):
-    check_modle_file = [
+    check_model_file = [
             "diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin",
             "diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors",
             "diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors",
@@ -258,8 +258,7 @@ def check_download_kolors_model(path_root):
     path_temp = os.path.join(path_root, 'temp')
     if not os.path.exists(path_temp):
         os.makedirs(path_temp)
-    exists_kolors_model_path = False
-    if not modelsinfo.exists_model_key(check_modle_file[0]):
+    if not modelsinfo.exists_model_key(check_model_file[0]):
         load_file_from_url(
             url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_0909.zip',
             model_dir=path_temp,
@@ -274,13 +273,13 @@ def check_download_kolors_model(path_root):
         shutil.rmtree(path_temp)
         modelsinfo.refresh_from_path()
     
-    if not modelsinfo.exists_model_key(check_modle_file[1]):
+    if not modelsinfo.exists_model_key(check_model_file[1]):
         path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
         path_org = os.path.join(config.path_unet, 'kolors_unet_fp16.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')
         shutil.copy(path_org, path_dst)
 
-    if not modelsinfo.exists_model_key(check_modle_file[2]):
+    if not modelsinfo.exists_model_key(check_model_file[2]):
         path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
         path_org = os.path.join(config.path_vae, 'sdxl_fp16.vae.safetensors')
         print(f'model file copy: {path_org} to {path_dst}')

@@ -67,7 +67,7 @@ def is_models_file_absent(preset_name):
             if 'Flux' in preset_name and config_preset["default_model"]== 'auto':
                 config_preset["default_model"] = comfy_task.get_default_base_Flux_name('+' in preset_name)
             model_key = f'checkpoints/{config_preset["default_model"]}'
-            return not modelsinfo.exists_model_key(model_key)
+            return not modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_model"])
         if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
            return not modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_refiner"])
     return False
