@@ -71,8 +71,9 @@ def load_file_from_url(
         print(f'Downloading: "{url}" to {cached_file}\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)
-        #from enhanced.simpleai import refresh_models_info
-        #refresh_models_info()
+        from enhanced.simpleai import modelsinfo
+        modelsinfo.refresh_file('add', cached_file)
+
 
     return cached_file
 

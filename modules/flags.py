@@ -158,6 +158,13 @@ available_aspect_ratios_list = {
 
 backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+', 'Flux']
 
+model_file_filter = {
+        'SD3m'   : ['sd3_medium'],
+        'Flux'   : ['flux'],
+        'HyDiT'  : ['hunyuan'],
+        }
+model_file_filter['Fooocus'] = model_file_filter['SD3m'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
+
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
 task_class_mapping = {

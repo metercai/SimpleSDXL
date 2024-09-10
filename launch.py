@@ -93,6 +93,11 @@ def check_base_environment():
     #python -m pip install torch==2.1.0.post2 torchvision==0.16.0.post2 torchaudio==2.1.0.post2 intel-extension-for-pytorch==2.1.30 --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/
 
 def prepare_environment():
+    REINSTALL_ALL = False
+    TRY_INSTALL_XFORMERS = False
+
+    target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
+
     torch_ver = '2.3.1'
     torchvisio_ver = '0.18.1'
     if shared.sysinfo['gpu_brand'] == 'NVIDIA':
@@ -225,7 +230,7 @@ def reset_env_args():
     if '--location' in sys.argv:
         shared.sysinfo["location"] = args.location
 
-    if shared.sysinfo["location"] !='CN':
+    if shared.sysinfo["location"] == 'CN':
         os.environ['HF_MIRROR'] = 'hf-mirror.com'
         if '--language' not in sys.argv:
             shared.args.language='default'
@@ -241,13 +246,6 @@ def reset_env_args():
     from enhanced.simpleai import reset_simpleai_args
     reset_simpleai_args()
 
-
-REINSTALL_ALL = False
-TRY_INSTALL_XFORMERS = False
-
-target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
-
-os.environ['HF_MIRROR'] = 'hf-mirror.com'
 
 #build_launcher()
 shared.token, shared.sysinfo = check_base_environment()
@@ -288,6 +286,10 @@ os.environ["U2NET_HOME"] = config.paths_inpaint[0]
 os.environ["BERT_HOME"] = config.paths_llms[0]
 os.environ['GRADIO_TEMP_DIR'] = config.temp_path
 
+if shared.args.hf_mirror is not None :
+    os.environ['HF_MIRROR'] = str(shared.args.hf_mirror)
+    print("Set hf_mirror to:", shared.args.hf_mirror)
+
 if config.temp_path_cleanup_on_launch:
     print(f'[Cleanup] Attempting to delete content of temp dir {config.temp_path}')
     result = delete_folder_content(config.temp_path, '[Cleanup] ')
@@ -296,26 +298,22 @@ if config.temp_path_cleanup_on_launch:
     else:
         print(f"[Cleanup] Failed to delete content of temp dir.")
 
+pyhash_key = shared.token.get_pyhash_key(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver())
+reset_env_args()
+#print(f"{' ' * 8}(\"{pyhash_key}\", \"{shared.sysinfo['pyhash']}\")")
+env_ready_code = shared.token.check_ready(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver(), config.path_models_root)
+print(f'Env_ready_code: {env_ready_code}')
+#if env_ready_code!=0 and env_ready_code!=4:
+#    print("系统环境检测不达标。请根据前面提示信息，重新检查并更新后再启动!")
+#    print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+#    sys.exit(0)
+
 config.default_base_model_name, config.checkpoint_downloads = download_models(
     config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
     config.embeddings_downloads, config.lora_downloads, config.vae_downloads)
 
 config.update_files()
 init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenames, config.paths_loras)
-
-if shared.args.hf_mirror is not None :
-    os.environ['HF_MIRROR'] = str(shared.args.hf_mirror)
-    print("Set hf_mirror to:", shared.args.hf_mirror)
-
-pyhash_key = shared.token.get_pyhash_key(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver())
-reset_env_args()
-#print(f"{' ' * 8}(\"{pyhash_key}\", \"{shared.sysinfo['pyhash']}\")")
-env_ready_code = shared.token.check_ready(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver(), config.path_models_root)
-print(f'env_ready_code:{env_ready_code}')
-#if env_ready_code!=0 and env_ready_code!=4:
-#    print("系统环境检测不达标。请根据前面提示信息，重新检查并更新后再启动!")
-#    print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
-#    sys.exit(0)
 
 from webui import *
 
