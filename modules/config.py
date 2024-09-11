@@ -881,6 +881,7 @@ allow_missing_preset_key = [
     "styles_definition",
     "instruction",
     "reference",
+    "previous_default_models",
     ]
 
 REWRITE_PRESET = False
