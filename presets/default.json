@@ -1,5 +1,5 @@
 {
-    "default_model": "juggernaut-X-RunDiffusion-NSFW.safetensors",
+    "default_model": "juggernautXL_juggXIByRundiffusion.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -38,14 +38,13 @@
     "default_aspect_ratio": "1152*896",
     "default_overwrite_step": -1,
     "checkpoint_downloads": {
-        "juggernaut-X-RunDiffusion-NSFW.safetensors": "https://huggingface.co/RunDiffusion/Juggernaut-X-v10/resolve/main/Juggernaut-X-RunDiffusion-NSFW.safetensors"
+        "juggernautXL_juggXIByRundiffusion.safetensors": "https://huggingface.co/RunDiffusion/Juggernaut-XI-v11/resolve/main/juggernautXL_juggXIByRundiffusion.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {
         "sd_xl_offset_example-lora_1.0.safetensors": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors"
     },
     "previous_default_models": [
-	"juggernautXL_juggXIByRundiffusion.safetensors",
 	"juggernaut-X-RunDiffusion-NSFW.safetensors",
 	"juggernautXL_v9Rundiffusionphoto2.safetensors",
 	"juggernautXL_v8Rundiffusion.safetensors",
