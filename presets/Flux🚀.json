@@ -38,7 +38,7 @@
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
-    "default_overwrite_step": 8,
+    "default_overwrite_step": 12,
     "checkpoint_downloads": {
         "flux-hyp8-Q5_K_M.gguf": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
     },
