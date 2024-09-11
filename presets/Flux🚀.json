@@ -40,7 +40,7 @@
     "default_aspect_ratio": "1280*720",
     "default_overwrite_step": 8,
     "checkpoint_downloads": {
-        "flux1-schnell.safetensors": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
+        "flux-hyp8-Q5_K_M.gguf": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
     },
     "embeddings_downloads": {},
     "lora_downloads": {},
