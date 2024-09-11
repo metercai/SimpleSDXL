@@ -368,7 +368,7 @@ def worker():
                         default_params, input_images, options)
                 imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback)
             except ValueError as e:
-                print(f"comfy_task: input_image is None: {e}")
+                print(f"comfy_task_error: {e}")
                 empty_path = [np.zeros((width, height), dtype=np.uint8)]
                 imgs = empty_path
                 current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
