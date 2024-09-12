@@ -1,6 +1,6 @@
 {
-  "last_node_id": 137,
-  "last_link_id": 191,
+  "last_node_id": 141,
+  "last_link_id": 197,
   "nodes": [
     {
       "id": 70,
@@ -33,138 +33,6 @@
       "widgets_values": [
         "sdxl_fp16.vae.safetensors"
       ]
-    },
-    {
-      "id": 131,
-      "type": "MZ_ChatGLM3_V2",
-      "pos": [
-        1350,
-        50
-      ],
-      "size": {
-        "0": 395.505126953125,
-        "1": 158.75376892089844
-      },
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "chatglm3_model",
-          "type": "CHATGLM3MODEL",
-          "link": 189,
-          "label": "chatglm3_model",
-          "slot_index": 0
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            184
-          ],
-          "shape": 3,
-          "label": "CONDITIONING",
-          "slot_index": 0
-        }
-      ],
-      "title": "prompt",
-      "properties": {
-        "Node name for S&R": "MZ_ChatGLM3_V2"
-      },
-      "widgets_values": [
-        "刘亦非，繁华大街，身穿汉服，手举牌子，上面 写着 “真牛！”"
-      ]
-    },
-    {
-      "id": 128,
-      "type": "LoraLoaderModelOnly",
-      "pos": [
-        1741,
-        -99
-      ],
-      "size": {
-        "0": 315,
-        "1": 82
-      },
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 191,
-          "label": "model"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            180
-          ],
-          "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
-        }
-      ],
-      "title": "lora_speedup",
-      "properties": {
-        "Node name for S&R": "LoraLoaderModelOnly"
-      },
-      "widgets_values": [
-        "Hyper-SDXL-8steps-lora.safetensors",
-        1
-      ]
-    },
-    {
-      "id": 10,
-      "type": "VAEDecode",
-      "pos": [
-        1831,
-        73
-      ],
-      "size": {
-        "0": 250,
-        "1": 46
-      },
-      "flags": {},
-      "order": 8,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "samples",
-          "type": "LATENT",
-          "link": 9,
-          "label": "samples"
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 92,
-          "label": "vae",
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            11,
-            188
-          ],
-          "shape": 3,
-          "label": "IMAGE",
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEDecode"
-      }
     },
     {
       "id": 9,
@@ -230,9 +98,9 @@
           "links": [
             185
           ],
+          "slot_index": 0,
           "shape": 3,
-          "label": "CONDITIONING",
-          "slot_index": 0
+          "label": "CONDITIONING"
         }
       ],
       "title": "negative_prompt",
@@ -242,129 +110,6 @@
       "widgets_values": [
         ""
       ]
-    },
-    {
-      "id": 6,
-      "type": "KSampler",
-      "pos": [
-        1775,
-        221
-      ],
-      "size": {
-        "0": 315,
-        "1": 475
-      },
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 180,
-          "label": "model",
-          "slot_index": 0
-        },
-        {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "link": 184,
-          "label": "positive",
-          "slot_index": 1
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "link": 185,
-          "label": "negative",
-          "slot_index": 2
-        },
-        {
-          "name": "latent_image",
-          "type": "LATENT",
-          "link": 8,
-          "label": "latent_image",
-          "slot_index": 3
-        }
-      ],
-      "outputs": [
-        {
-          "name": "LATENT",
-          "type": "LATENT",
-          "links": [
-            9
-          ],
-          "shape": 3,
-          "label": "LATENT",
-          "slot_index": 0
-        }
-      ],
-      "title": "main_sampler",
-      "properties": {
-        "Node name for S&R": "KSampler"
-      },
-      "widgets_values": [
-        608980608082327,
-        "randomize",
-        8,
-        1.5,
-        "euler_ancestral",
-        "sgm_uniform",
-        1
-      ]
-    },
-    {
-      "id": 11,
-      "type": "PreviewImage",
-      "pos": [
-        2353,
-        -77
-      ],
-      "size": {
-        "0": 670.8212890625,
-        "1": 717.841064453125
-      },
-      "flags": {},
-      "order": 9,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 11,
-          "label": "images"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      }
-    },
-    {
-      "id": 134,
-      "type": "SaveImageWebsocket",
-      "pos": [
-        2110,
-        229
-      ],
-      "size": {
-        "0": 210,
-        "1": 246
-      },
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 188,
-          "label": "images"
-        }
-      ],
-      "title": "result_image",
-      "properties": {
-        "Node name for S&R": "SaveImageWebsocket"
-      }
     },
     {
       "id": 136,
@@ -388,9 +133,9 @@
             189,
             190
           ],
+          "slot_index": 0,
           "shape": 3,
-          "label": "chatglm3_model",
-          "slot_index": 0
+          "label": "chatglm3_model"
         }
       ],
       "title": "llms_model",
@@ -422,9 +167,9 @@
           "links": [
             191
           ],
+          "slot_index": 0,
           "shape": 3,
-          "label": "model",
-          "slot_index": 0
+          "label": "model"
         }
       ],
       "properties": {
@@ -432,6 +177,433 @@
       },
       "widgets_values": [
         "kolors_unet_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "PreviewImage",
+      "pos": [
+        2379,
+        95
+      ],
+      "size": {
+        "0": 670.8212890625,
+        "1": 717.841064453125
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 11,
+          "label": "images"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 138,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1493,
+        -112
+      ],
+      "size": [
+        215.45905478106442,
+        82
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 192,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            194
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "lora_2",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        0
+      ]
+    },
+    {
+      "id": 139,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1742,
+        -109
+      ],
+      "size": {
+        "0": 215.4590606689453,
+        "1": 82
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 194,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            195
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "lora_3",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        0
+      ]
+    },
+    {
+      "id": 140,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1984,
+        -110
+      ],
+      "size": {
+        "0": 215.4590606689453,
+        "1": 82
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 195,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            196
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "lora_4",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        0
+      ]
+    },
+    {
+      "id": 141,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        2239,
+        -111
+      ],
+      "size": {
+        "0": 215.4590606689453,
+        "1": 82
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 196,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            197
+          ],
+          "shape": 3,
+          "label": "MODEL",
+          "slot_index": 0
+        }
+      ],
+      "title": "lora_5",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        0
+      ]
+    },
+    {
+      "id": 134,
+      "type": "SaveImageWebsocket",
+      "pos": [
+        2141,
+        251
+      ],
+      "size": {
+        "0": 210,
+        "1": 246
+      },
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 188,
+          "label": "images"
+        }
+      ],
+      "title": "result_image",
+      "properties": {
+        "Node name for S&R": "SaveImageWebsocket"
+      }
+    },
+    {
+      "id": 6,
+      "type": "KSampler",
+      "pos": [
+        1796,
+        241
+      ],
+      "size": {
+        "0": 315,
+        "1": 475
+      },
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 197,
+          "slot_index": 0,
+          "label": "model"
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 184,
+          "slot_index": 1,
+          "label": "positive"
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 185,
+          "slot_index": 2,
+          "label": "negative"
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 8,
+          "slot_index": 3,
+          "label": "latent_image"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            9
+          ],
+          "slot_index": 0,
+          "shape": 3,
+          "label": "LATENT"
+        }
+      ],
+      "title": "main_sampler",
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        608980608082327,
+        "randomize",
+        8,
+        1.5,
+        "euler_ancestral",
+        "sgm_uniform",
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [
+        1952,
+        103
+      ],
+      "size": {
+        "0": 250,
+        "1": 46
+      },
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 9,
+          "label": "samples"
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 92,
+          "slot_index": 1,
+          "label": "vae"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            11,
+            188
+          ],
+          "slot_index": 0,
+          "shape": 3,
+          "label": "IMAGE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 131,
+      "type": "MZ_ChatGLM3_V2",
+      "pos": [
+        1339,
+        50
+      ],
+      "size": {
+        "0": 395.505126953125,
+        "1": 158.75376892089844
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "chatglm3_model",
+          "type": "CHATGLM3MODEL",
+          "link": 189,
+          "slot_index": 0,
+          "label": "chatglm3_model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            184
+          ],
+          "slot_index": 0,
+          "shape": 3,
+          "label": "CONDITIONING"
+        }
+      ],
+      "title": "prompt",
+      "properties": {
+        "Node name for S&R": "MZ_ChatGLM3_V2"
+      },
+      "widgets_values": [
+        "刘亦非，繁华大街，身穿汉服，手举牌子，上面 写着 “真牛！”"
+      ]
+    },
+    {
+      "id": 128,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        1248,
+        -113
+      ],
+      "size": [
+        213.2440057429419,
+        82
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 191,
+          "label": "model"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            192
+          ],
+          "slot_index": 0,
+          "shape": 3,
+          "label": "MODEL"
+        }
+      ],
+      "title": "lora_1",
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Hyper-SDXL-8steps-lora.safetensors",
+        0
       ]
     }
   ],
@@ -467,14 +639,6 @@
       10,
       1,
       "VAE"
-    ],
-    [
-      180,
-      128,
-      0,
-      6,
-      0,
-      "MODEL"
     ],
     [
       184,
@@ -523,16 +687,56 @@
       128,
       0,
       "MODEL"
+    ],
+    [
+      192,
+      128,
+      0,
+      138,
+      0,
+      "MODEL"
+    ],
+    [
+      194,
+      138,
+      0,
+      139,
+      0,
+      "MODEL"
+    ],
+    [
+      195,
+      139,
+      0,
+      140,
+      0,
+      "MODEL"
+    ],
+    [
+      196,
+      140,
+      0,
+      141,
+      0,
+      "MODEL"
+    ],
+    [
+      197,
+      141,
+      0,
+      6,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.9229599817706413,
+      "scale": 0.5730855330116805,
       "offset": [
-        -1003.568787754798,
-        194.74309970259708
+        -752.9337593780249,
+        415.78556364206474
       ]
     }
   },
