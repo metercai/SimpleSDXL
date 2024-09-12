@@ -8,7 +8,7 @@
       "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
-        "128",
+        "141",
         0
       ],
       "positive": [
@@ -80,7 +80,7 @@
   "128": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 1,
+      "strength_model": 0,
       "model": [
         "130",
         0
@@ -88,7 +88,7 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "lora_speedup"
+      "title": "lora_1"
     }
   },
   "130": {
@@ -145,6 +145,62 @@
     "class_type": "DownloadAndLoadChatGLM3",
     "_meta": {
       "title": "llms_model"
+    }
+  },
+  "138": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "128",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_2"
+    }
+  },
+  "139": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "138",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_3"
+    }
+  },
+  "140": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "139",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_4"
+    }
+  },
+  "141": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "140",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_5"
     }
   }
 }

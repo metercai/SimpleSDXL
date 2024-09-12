@@ -187,21 +187,15 @@ class AsyncTask:
         if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
-            if self.task_name == 'Kolors+':
-                self.params_backend.update({
-                    "lora_speedup": self.loras[0][0],
-                    "lora_speedup_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=1 else 0 if self.loras[0][1]<0 else 1,
-                    })
-            elif self.task_name == 'Flux':
+            if self.task_name in ['Kolors+', 'Flux']:
                 self.params_backend.update({
                     "lora_1": self.loras[0][0],
-                    "lora_1_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=2 else 0 if self.loras[0][1]<0 else 1,
+                    "lora_1_strength": self.loras[0][1],
                     })
-        else:
-            if self.task_name == 'Kolors+':
+            if len(self.loras) > 1 and self.task_name in ['Kolors+']:
                 self.params_backend.update({
-                    "lora_speedup": 'Hyper-SDXL-8steps-lora.safetensors',
-                    "lora_speedup_strength": 0,
+                    "lora_2": self.loras[1][0],
+                    "lora_2_strength": self.loras[1][1],
                     })
         ui_options = {
             'iclight_enable': self.iclight_enable,
