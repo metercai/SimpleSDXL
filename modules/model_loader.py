@@ -69,6 +69,7 @@ def load_file_from_url(
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
         print(f'Downloading: "{url}" to {cached_file}\n')
+        print(f'正在下载模型文件: "{url}"，如果慢可自行用工具下载后保存到: {cached_file}\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)
         from enhanced.simpleai import modelsinfo

@@ -106,7 +106,7 @@ COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ances
                   "lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_sde", "dpmpp_sde_gpu",
                   "dpmpp_2m", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm",
                   "ipndm", "ipndm_v", "deis"]   
-comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"]
+comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform", "beta"]
 comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
 
 aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common', 'Flux']
@@ -198,8 +198,8 @@ default_class_params = {
         'disvisible': [],
         'disinteractive': [],
         'available_aspect_ratios_selection': 'SDXL',
-        'available_sampler_name': sampler_list,
-        'available_scheduler_name': scheduler_list,
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {},
         },
     'Kolors': {
