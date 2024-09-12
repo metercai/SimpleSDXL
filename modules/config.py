@@ -104,9 +104,6 @@ def try_load_deprecated_user_path_config():
 
 try_load_deprecated_user_path_config()
 
-preset = args_manager.args.preset
-theme = args_manager.args.theme
-
 def get_presets():
     preset_folder = 'presets'
     presets = ['initial']
@@ -139,6 +136,7 @@ def try_get_preset_content(preset):
 available_presets = get_presets()
 preset = args_manager.args.preset
 config_dict.update(try_get_preset_content(preset))
+theme = args_manager.args.theme
 
 def get_path_output() -> str:
     """
