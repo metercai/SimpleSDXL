@@ -28,7 +28,7 @@ def reset_simpleai_args():
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}', '--disable-smart-memory']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
-    args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
+    #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd
     return
 
