@@ -360,14 +360,16 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     state_params.update({"__preset": preset})
-    state_params.update({"__prompt": prompt})
-    state_params.update({"__negative_prompt": negative_prompt})
+    #state_params.update({"__prompt": prompt})
+    #state_params.update({"__negative_prompt": negative_prompt})
 
     config_preset = config.try_get_preset_content(preset)
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
     #print(f'preset_prepared:{preset_prepared}')
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
+    state_params.update({"engine": engine})
+
     if comfyd_active_checkbox:
         comfyd.stop()
    

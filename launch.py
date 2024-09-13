@@ -278,7 +278,7 @@ if shared.args.async_cuda_allocation:
 import warnings
 import logging
 logging.basicConfig(level=logging.ERROR)
-warnings.filterwarnings("ignore", category=UserWarning, module="confy.custom_nodes, hydit, torch.utils")
+warnings.filterwarnings("ignore", category=UserWarning, module="comfy.custom_nodes, torch.utils")
 
 from modules import config
 from modules.hash_cache import init_cache
