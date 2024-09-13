@@ -57,10 +57,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
     sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
     scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
-    file_filter = modules.flags.model_file_filter.get(template_engine, [])
-    base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
-    if template_engine in ['Fooocus', 'Comfy']:
-        base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    base_model_list = modules.config.get_base_model_list(state_params.get('engine', 'Fooocus'))
 
     params_backend  = enginedata_dict.get('backend_params', default_params.get('backend_params', default_class_params['Fooocus']['backend_params']))
     params_backend.update({'backend_engine': template_engine})

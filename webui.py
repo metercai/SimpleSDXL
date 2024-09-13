@@ -994,22 +994,23 @@ with shared.gradio_root:
                 dev_mode.change(dev_mode_checked, inputs=[dev_mode], outputs=[dev_tools],
                                 queue=False, show_progress=False)
 
-                def refresh_files_clicked():
-                    modules.config.update_files()
-                    results = [gr.update(choices=modules.config.model_filenames)]
-                    results += [gr.update(choices=['None'] + modules.config.model_filenames)]
-                    results += [gr.update(choices=[flags.default_vae] + modules.config.vae_filenames)]
+                def refresh_files_clicked(state_params):
+                    engine = state_params.get('engine', 'Fooocus')
+                    model_filenames, lora_filenames, vae_filenames = modules.config.update_files(engine)
+                    results = [gr.update(choices=model_filenames)]
+                    results += [gr.update(choices=['None'] + model_filenames)]
+                    results += [gr.update(choices=[flags.default_vae] + vae_filenames)]
                     if not args_manager.args.disable_preset_selection:
                         results += [gr.update(choices=modules.config.available_presets)]
                     for i in range(modules.config.default_max_lora_number):
                         results += [gr.update(interactive=True),
-                                    gr.update(choices=['None'] + modules.config.lora_filenames), gr.update()]
+                                    gr.update(choices=['None'] + lora_filenames), gr.update()]
                     return results
 
                 refresh_files_output = [base_model, refiner_model, vae_name]
                 if not args_manager.args.disable_preset_selection:
                     refresh_files_output += [preset_selection]
-                refresh_files.click(refresh_files_clicked, [], refresh_files_output + lora_ctrls,
+                refresh_files.click(refresh_files_clicked, [state_topbar], refresh_files_output + lora_ctrls,
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced'):

@@ -349,9 +349,11 @@ temp_path_cleanup_on_launch = get_config_item_or_set_default(
 default_engine = get_config_item_or_set_default(
     key='default_engine',
     default_value={},
-    validator=lambda x: isinstance(x, str),
+    validator=lambda x: isinstance(x, dict),
     expected_type=dict
 )
+backend_engine = default_engine.get("backend_engine", "Fooocus")
+
 default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',
     default_value='model.safetensors',
@@ -403,13 +405,13 @@ default_sample_sharpness = get_config_item_or_set_default(
 default_sampler = get_config_item_or_set_default(
     key='default_sampler',
     default_value=ads.default['sampler_name'],
-    validator=lambda x: x in modules.flags.sampler_list,
+    validator=lambda x: x in modules.flags.sampler_list if backend_engine == 'Fooocus' else modules.flags.comfy_sampler_list,
     expected_type=str
 )
 default_scheduler = get_config_item_or_set_default(
     key='default_scheduler',
     default_value=ads.default['scheduler_name'],
-    validator=lambda x: x in modules.flags.scheduler_list,
+    validator=lambda x: x in modules.flags.scheduler_list if backend_engine == 'Fooocus' else modules.flags.comfy_scheduler_list,
     expected_type=str
 )
 default_vae = get_config_item_or_set_default(
@@ -528,7 +530,7 @@ available_aspect_ratios = get_config_item_or_set_default(
 )
 default_aspect_ratio = get_config_item_or_set_default(
     key='default_aspect_ratio',
-    default_value='1152*896' if '1152*896' in available_aspect_ratios else available_aspect_ratios[0],
+    default_value='1152*896' if '1152*896' in available_aspect_ratios else '1024*1024',
     validator=lambda x: x in available_aspect_ratios,
     expected_type=str
 )
@@ -984,14 +986,21 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
     return files
 
 
-def update_files():
+def get_base_model_list(engine='Fooocus'):
+    file_filter = modules.flags.model_file_filter.get(engine, [])
+    base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
+    if engine in ['Fooocus', 'Comfy']:
+        base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    return base_model_list
+
+def update_files(engine='Fooocus'):
     global model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
-    model_filenames = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    model_filenames = get_base_model_list(engine)
     lora_filenames = modelsinfo.get_model_names('loras')
     vae_filenames = modelsinfo.get_model_names('vae')
     wildcard_filenames = get_files_from_folder(path_wildcards, ['.txt'])
     available_presets = get_presets()
-    return
+    return model_filenames, lora_filenames, vae_filenames
 
 
 def downloading_inpaint_models(v):
