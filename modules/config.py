@@ -987,6 +987,7 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
 
 
 def get_base_model_list(engine='Fooocus'):
+    global modelsinfo
     file_filter = modules.flags.model_file_filter.get(engine, [])
     base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
     if engine in ['Fooocus', 'Comfy']:
@@ -994,7 +995,8 @@ def get_base_model_list(engine='Fooocus'):
     return base_model_list
 
 def update_files(engine='Fooocus'):
-    global model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
+    global modelsinfo, model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
+    modelsinfo.refresh_from_path()
     model_filenames = get_base_model_list(engine)
     lora_filenames = modelsinfo.get_model_names('loras')
     vae_filenames = modelsinfo.get_model_names('vae')

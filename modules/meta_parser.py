@@ -49,15 +49,14 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
         presetdata_dict = json.loads(presetdata)
     assert isinstance(presetdata_dict, dict)
     enginedata_dict = presetdata_dict.get('engine', {})
-    #print(f'enginedata:{enginedata_dict}')
-    template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', task_class_mapping['Fooocus'])))
-    template_engine = enginedata_dict.get('backend_engine', template_engine)
+    template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', 
+        task_class_mapping[enginedata_dict.get('backend_engine', 'Fooocus')])))
     default_params = default_class_params[template_engine]
     visible = enginedata_dict.get('disvisible', default_params.get('disvisible', default_class_params['Fooocus']['disvisible']))
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
     sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
     scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
-    base_model_list = modules.config.get_base_model_list(state_params.get('engine', 'Fooocus'))
+    base_model_list = modules.config.get_base_model_list(template_engine)
 
     params_backend  = enginedata_dict.get('backend_params', default_params.get('backend_params', default_class_params['Fooocus']['backend_params']))
     params_backend.update({'backend_engine': template_engine})
@@ -723,11 +722,13 @@ class SIMPLEMetadataParser(MetadataParser):
 
     def to_json(self, metadata: dict) -> dict:
 
+        engine = get_taskclass_by_fullname(metadata.get('Backend Engine', metadata.get('backend_engine', task_class_mapping['Fooocus'])))
+        model_filenames = modules.config.get_base_model_list(engine)
         for key, value in metadata.items():
             if value in ['', 'None']:
                 continue
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
-                metadata[key] = self.replace_value_with_filename(key, value, modules.config.model_filenames)
+                metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
             elif key.startswith('LoRA '):
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
             elif key in ['vae', 'VAE']:

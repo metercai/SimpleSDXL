@@ -1265,16 +1265,7 @@ with shared.gradio_root:
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
                 print('Could not find metadata in the image!')
-                parsed_parameters = {}
-            else:
-                metadata_parser = modules.meta_parser.get_metadata_parser(metadata_scheme)
-                parsed_parameters = metadata_parser.to_json(parameters)
-           
-            results = modules.meta_parser.switch_layout_template(parsed_parameters, state_params)
-            results += modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating, inpaint_mode)
-            engine = parsed_parameters.get("Backend Engine", parsed_parameters.get("backend_engine", "SDXL-Fooocus"))
-            print(f'[MetaData] Reset_params: -->{engine} from the image file.')
-            return results
+            return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
 
         reset_preset_layout = [params_backend, performance_selection, scheduler_name, sampler_name, input_image_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction] + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox, state_topbar]
@@ -1282,8 +1273,6 @@ with shared.gradio_root:
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
-        reset_params = [prompt, negative_prompt, style_selections, performance_selection, aspect_ratios_selection, sharpness, guidance_scale, base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, adaptive_cfg, overwrite_step, overwrite_switch, inpaint_engine] + lora_ctrls + [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, seed_random, image_seed, clip_skip, vae_name] + freeu_ctrls
-        reset_params_in = ctrls[2:] + [seed_random]
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
         nav_bars = [bar_title] + bar_buttons
         protections = [prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars[1:]
@@ -1384,10 +1373,6 @@ with shared.gradio_root:
                .then(fn=lambda x: {}, inputs=system_params, outputs=system_params, _js=topbar.refresh_topbar_status_js) \
                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
                .then(inpaint_engine_state_change, inputs=[inpaint_engine_state] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
-
-    enhance_mask_dino_prompt_text_ctrls = []
-    for index in range(modules.config.default_enhance_tabs):
-        enhance_mask_dino_prompt_text_ctrls += [enhance_ctrls[1 + index * 16]]
 
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \

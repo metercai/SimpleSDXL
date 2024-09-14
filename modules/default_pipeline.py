@@ -292,12 +292,13 @@ def free_everything():
     ldm_patched.modules.model_management.unload_and_free_everything()
     return
 
-refresh_everything(
-    refiner_model_name=modules.config.default_refiner_model_name,
-    base_model_name=modules.config.default_base_model_name,
-    loras=get_enabled_loras(modules.config.default_loras),
-    vae_name=modules.config.default_vae,
-)
+if modules.config.backend_engine == 'Fooocus':
+    refresh_everything(
+        refiner_model_name=modules.config.default_refiner_model_name,
+        base_model_name=modules.config.default_base_model_name,
+        loras=get_enabled_loras(modules.config.default_loras),
+        vae_name=modules.config.default_vae,
+    )
 
 
 @torch.no_grad()

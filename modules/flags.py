@@ -255,7 +255,7 @@ default_class_params = {
         },
     'Flux': {
         'disvisible': ["backend_selection", "performance_selection"],
-        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras-4", "refiner_model"],
         'available_aspect_ratios_selection': 'Flux',
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,

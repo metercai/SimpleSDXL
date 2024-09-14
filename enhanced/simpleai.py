@@ -26,13 +26,12 @@ def reset_simpleai_args():
         xformers_version=xformers_version,
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}', '--disable-smart-memory']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}'], ['--disable-smart-memory']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
     #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd
     return
 
-#set_scan_models_hash(True)
 
 
 identity_note = '将身份ID与手机号绑定，可以固定本地密钥。既可以在本地存储和管理个人配置信息，又可以参与创意分享等互助服务。详情可见说明文档。'
