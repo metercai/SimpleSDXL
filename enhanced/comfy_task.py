@@ -195,9 +195,11 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             comfy_params.delete_params(['clip_model', 'base_model_dtype'])
         else:
             if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
-                comfy_params.update_params({
-                    "clip_model": 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 else 't5xxl_fp8_e4m3fn.safetensors'
-                })
+                clip_model = 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 else 't5xxl_fp8_e4m3fn.safetensors'
+                if not modelsinfo.exists_model("clip", clip_model):
+                    if clip_model == 't5xxl_fp16.safetensors' and modelsinfo.exists_model("clip", 't5xxl_fp8_e4m3fn.safetensors'):
+                        clip_model = 't5xxl_fp8_e4m3fn.safetensors'
+                comfy_params.update_params({"clip_model": clip_model})
             if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
                 comfy_params.update_params({
                     "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'fp8' in base_model.lower() or 'lora_1' in default_params else 'default' #'fp16'
