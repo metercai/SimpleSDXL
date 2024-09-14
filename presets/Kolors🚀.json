@@ -34,7 +34,7 @@
             1.0
         ]
     ],
-    "default_cfg_scale": 5,
+    "default_cfg_scale": 1,
     "default_sample_sharpness": 2,
     "default_sampler": "euler_ancestral",
     "default_scheduler": "sgm_uniform",

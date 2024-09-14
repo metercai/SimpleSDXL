@@ -334,7 +334,7 @@ def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
     metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
     metadata = copy.deepcopy(metainfo)
-    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
+    metadata['Refiner Model'] = metainfo.get('Refiner Model', 'None')
     state_params.update({"note_box_state": ['',0,0]})
 
     results = reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode)
