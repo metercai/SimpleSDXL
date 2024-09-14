@@ -175,9 +175,11 @@ class AsyncTask:
         self.images_to_enhance_count = 0
         self.enhance_stats = {}
 
+        #print(f'params_backend:{self.params_backend}')
         self.task_class = self.params_backend.pop('backend_engine', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
+        #print(f'task_class={self.task_class}, task_name={self.task_name}, task_method={self.task_method}')
         if 'layer' in self.current_tab and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
@@ -201,7 +203,7 @@ class AsyncTask:
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
             }
-        if self.task_name == 'default':
+        if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
         
 

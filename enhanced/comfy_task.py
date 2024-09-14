@@ -302,45 +302,45 @@ def check_download_flux_model(base_model, clip_model=None):
         if 'nf4' in base_model:
             if 'schnell' in base_model:
                 load_file_from_url(
-                    url='https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/{base_model}',
+                    url=f'https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
             else:
                 load_file_from_url(
-                    url='https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/{base_model}',
+                    url=f'https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
         elif 'fp8' in base_model:
             if 'schnell' in base_model:
                 load_file_from_url(
-                    url='https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/{base_model}',
+                    url=f'https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
             else:
                 load_file_from_url(
-                    url='https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/{base_model}',
+                    url=f'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
         elif 'hyp8' in base_model:
             if '_K' in base_model:
                 load_file_from_url(
-                    url='https://huggingface.co/mhnakif/flux-hyp8-gguf-k/tree/main/{base_model}',
+                    url=f'https://huggingface.co/mhnakif/flux-hyp8-gguf-k/tree/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
             else:
                 load_file_from_url(
-                    url='https://huggingface.co/mhnakif/flux-hyp8/tree/main/{base_model}',
+                    url=f'https://huggingface.co/mhnakif/flux-hyp8/tree/main/{base_model}',
                     model_dir=config.paths_checkpoints[0],
                     file_name=base_model
                 )
         else:
             load_file_from_url(
-                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
+                url=f'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
                 model_dir=config.paths_checkpoints[0],
                 file_name=base_model
             )

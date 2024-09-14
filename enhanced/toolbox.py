@@ -316,13 +316,9 @@ def delete_image(state_params):
     return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
-def reset_image_params(state_params, is_generating, inpaint_mode):
-    [choice, selected] = state_params["prompt_info"]
-    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
-    metadata = copy.deepcopy(metainfo)
-    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-    state_params.update({"note_box_state": ['',0,0]})
-
+def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode):
+    if metadata is None:
+        metadata = {}
     metadata_scheme = meta_parser.MetadataScheme('simple')
     metadata_parser = meta_parser.get_metadata_parser(metadata_scheme)
     parsed_parameters = metadata_parser.to_json(metadata)
@@ -330,7 +326,18 @@ def reset_image_params(state_params, is_generating, inpaint_mode):
     results = meta_parser.switch_layout_template(parsed_parameters, state_params)
     results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
 
-    print(f'[ToolBox] Reset_params: -->{parsed_parameters["Backend Engine"]} params from current image log file.')
+    engine_name = parsed_parameters.get("Backend Engine", parsed_parameters.get("backend_engine", "SDXL-Fooocus"))
+    print(f'[ToolBox] Reset_params_from_image: -->{engine_name} params from the image with embedded parameters.')
+    return results
+
+def reset_image_params(state_params, is_generating, inpaint_mode):
+    [choice, selected] = state_params["prompt_info"]
+    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+    metadata = copy.deepcopy(metainfo)
+    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
+    state_params.update({"note_box_state": ['',0,0]})
+
+    results = reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode)
     return results + [gr.update(visible=False)] * 2
 
 
