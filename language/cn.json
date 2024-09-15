@@ -139,7 +139,7 @@
   "Extreme Speed": "极速",
   "\uD83D\uDD0E Type here to search styles ...": "\uD83D\uDD0E 输入关键词搜索风格...",
   "Type negative prompt here.": "在这里输入负向提示词。",
-  "Enhance": "用生成的图片，自动增强修图",
+  "Enhance": "生成图片后自动修图",
   "Enhance+": "增强修图",
   "Advanced+": "高级选项",
   "Advanced Control": "高级提示：内容元素-ImagePrompt，边缘检测-PyraCanny，结构深度-CPDS，脸部交换-FaceSwap",
