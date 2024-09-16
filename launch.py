@@ -13,7 +13,7 @@ import enhanced.version as version
 
 from pathlib import Path
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
+from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
 
 #print('[System PATH] ' + str(sys.path))
 print('[System ARGV] ' + str(sys.argv))
