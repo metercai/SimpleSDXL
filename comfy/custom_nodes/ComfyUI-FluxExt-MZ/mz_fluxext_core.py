@@ -99,11 +99,11 @@ def Flux1PartialLoad_Patch(args={}):
         return pre_only_single_blocks_forward_hook
 
     def pre_only_model_forward_hook(module, inp):
-        #print("double_blocks to cpu")
+        # print("double_blocks to cpu")
         double_blocks_to_cpu()
-        #print("single_blocks to cpu")
+        # print("single_blocks to cpu")
         single_blocks_to_cpu()
-        #print("other to cuda")
+        # print("other to cuda")
         other_to_cuda()
         return inp
 

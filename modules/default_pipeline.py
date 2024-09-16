@@ -266,6 +266,14 @@ def refresh_everything(refiner_model_name, base_model_name, loras,
     clear_all_caches()
     return
 
+@torch.no_grad()
+@torch.inference_mode()
+def reload_expansion():
+    global final_expansion
+    if final_expansion is None:
+        final_expansion = FooocusExpansion()
+    return
+
 def free_everything():
     global model_base, model_refiner, final_unet, final_clip, final_vae, final_refiner_unet, final_refiner_vae, final_expansion, loaded_ControlNets
     
@@ -284,12 +292,13 @@ def free_everything():
     ldm_patched.modules.model_management.unload_and_free_everything()
     return
 
-refresh_everything(
-    refiner_model_name=modules.config.default_refiner_model_name,
-    base_model_name=modules.config.default_base_model_name,
-    loras=get_enabled_loras(modules.config.default_loras),
-    vae_name=modules.config.default_vae,
-)
+if modules.config.backend_engine == 'Fooocus':
+    refresh_everything(
+        refiner_model_name=modules.config.default_refiner_model_name,
+        base_model_name=modules.config.default_base_model_name,
+        loras=get_enabled_loras(modules.config.default_loras),
+        vae_name=modules.config.default_vae,
+    )
 
 
 @torch.no_grad()

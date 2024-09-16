@@ -13,8 +13,11 @@ class AsyncTask:
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
         import args_manager
+        import re
 
         from enhanced.simpleai import comfyd
+
+        normalize_lines = lambda text: re.sub(r'[\r\n]+', ' ', text)
 
         self.args = args.copy()
         self.yields = []
@@ -29,7 +32,8 @@ class AsyncTask:
 
         args.reverse()
         self.generate_image_grid = args.pop()
-        self.prompt = args.pop()
+        self.prompt = normalize_lines(args.pop())
+        print(f'reciver prompt:{self.prompt}')
         self.negative_prompt = args.pop()
         self.style_selections = args.pop()
 
@@ -171,9 +175,11 @@ class AsyncTask:
         self.images_to_enhance_count = 0
         self.enhance_stats = {}
 
+        #print(f'params_backend:{self.params_backend}')
         self.task_class = self.params_backend.pop('backend_engine', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
+        #print(f'task_class={self.task_class}, task_name={self.task_name}, task_method={self.task_method}')
         if 'layer' in self.current_tab and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
@@ -182,16 +188,22 @@ class AsyncTask:
       
         if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
             self.task_name = self.task_class
-        if len(self.loras) > 0 and self.task_name == 'Kolors+':
-            self.params_backend.update({
-                "lora_speedup": self.loras[0][0],
-                "lora_speedup_strength": self.loras[0][1] if self.loras[0][1]>=0 and self.loras[0][1]<=1 else 0 if self.loras[0][1]<0 else 1,
-                })
+        if len(self.loras) > 0:
+            if self.task_name in ['Kolors+', 'Flux']:
+                self.params_backend.update({
+                    "lora_1": self.loras[0][0],
+                    "lora_1_strength": self.loras[0][1],
+                    })
+            if len(self.loras) > 1 and (self.task_name in ['Kolors+'] or 'base2_gguf' in self.task_method):
+                self.params_backend.update({
+                    "lora_2": self.loras[1][0],
+                    "lora_2_strength": self.loras[1][1],
+                    })
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
             }
-        if self.task_name == 'default':
+        if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
         
 
@@ -347,12 +359,12 @@ def worker():
             else:
                 input_images = [HWC3(async_task.layer_input_image)]
             try:
-                options = async_task.params_backend.pop('ui_options', {})
+                options = async_task.params_backend.get('ui_options', {})
                 comfy_task = get_comfy_task(async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback)
             except ValueError as e:
-                print(f"comfy_task: input_image is None: {e}")
+                print(f"comfy_task_error: {e}")
                 empty_path = [np.zeros((width, height), dtype=np.uint8)]
                 imgs = empty_path
                 current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
@@ -456,7 +468,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+']:
+                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+', 'Flux']:
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None
@@ -740,7 +752,7 @@ def worker():
                                                           modules.config.default_max_lora_number,
                                                           lora_filenames=lora_filenames)
         loras += async_task.performance_loras
-        if async_task.task_class == 'Fooocus':
+        if async_task.task_class in ['Fooocus']:
             if advance_progress:
                 current_progress += 1
             progressbar(async_task, current_progress, 'Loading models ...')
@@ -749,6 +761,8 @@ def worker():
                                     loras=loras, base_model_additional_loras=base_model_additional_loras,
                                     use_synthetic_refiner=use_synthetic_refiner, vae_name=async_task.vae_name)
             pipeline.set_clip_skip(async_task.clip_skip)
+        else:
+            pipeline.reload_expansion()
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, 'Processing prompts ...')
@@ -823,7 +837,7 @@ def worker():
                 print(f'[Prompt Expansion] {expansion}')
                 t['expansion'] = expansion
                 t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
-        if async_task.task_class == 'Fooocus':
+        if async_task.task_class in ['Fooocus']:
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):
@@ -1171,7 +1185,7 @@ def worker():
             print(f'[TaskEngine] Enable Fooocus backend.')
             comfyd.stop()
 
-        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+']:
+        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+'] and 'kolors' not in async_task.task_name.lower():
             async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
             async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
 
@@ -1393,6 +1407,7 @@ def worker():
             from enhanced.latent_preview import get_previewer
             from ldm_patched.modules.latent_formats import SDXL as SDXL_format
 
+            ldm_patched.modules.model_management.throw_exception_if_processing_interrupted()
             latents = callback_kwargs["latents"]
             preview_format = "JPEG"
             latent_format = SDXL_format()
@@ -1445,7 +1460,7 @@ def worker():
                 if async_task.last_stop == 'skip':
                     if async_task.task_class == 'Fooocus':
                         del task['c'], task['uc']  # Save memory
-                    print('User skipped')
+                    print(f'User skipped')
                     async_task.last_stop = False
                     continue
                 else:

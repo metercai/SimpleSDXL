@@ -1,4 +1,4 @@
-import time, os, psutil
+import re, time, os, psutil
 import folder_paths
 import comfy.utils
 import comfy.sd
@@ -238,7 +238,11 @@ class easyLoader:
             config_path = folder_paths.get_full_path("configs", config_name)
             loaded_ckpt = comfy.sd.load_checkpoint(config_path, ckpt_path, output_vae=True, output_clip=output_clip, embedding_directory=folder_paths.get_folder_paths("embeddings"))
         else:
-            loaded_ckpt = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=output_clip, output_clipvision=output_clipvision, embedding_directory=folder_paths.get_folder_paths("embeddings"))
+            model_options = {}
+            if re.search("nf4", ckpt_name):
+                from ..bitsandbytes_NF4 import OPS
+                model_options = {"custom_operations": OPS}
+            loaded_ckpt = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=output_clip, output_clipvision=output_clipvision, embedding_directory=folder_paths.get_folder_paths("embeddings"), model_options=model_options)
 
         self.add_to_cache("ckpt", cache_name, loaded_ckpt[0])
         self.add_to_cache("bvae", cache_name, loaded_ckpt[2])
@@ -308,6 +312,8 @@ class easyLoader:
             clip_type = comfy.sd.CLIPType.STABLE_CASCADE
         elif type == 'sd3':
             clip_type = comfy.sd.CLIPType.SD3
+        elif type == 'flux':
+            clip_type = comfy.sd.CLIPType.FLUX
         elif type == 'stable_audio':
             clip_type = comfy.sd.CLIPType.STABLE_AUDIO
         clip_path = folder_paths.get_full_path("clip", clip_name)
@@ -418,7 +424,7 @@ class easyLoader:
 
             return None
 
-    def load_main(self, ckpt_name, config_name, vae_name, lora_name, lora_model_strength, lora_clip_strength, optional_lora_stack, model_override, clip_override, vae_override, prompt):
+    def load_main(self, ckpt_name, config_name, vae_name, lora_name, lora_model_strength, lora_clip_strength, optional_lora_stack, model_override, clip_override, vae_override, prompt, nf4=False):
         model: ModelPatcher | None = None
         clip: comfy.sd.CLIP | None = None
         vae: comfy.sd.VAE | None = None

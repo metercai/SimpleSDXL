@@ -16,9 +16,9 @@ import modules.meta_parser as meta_parser
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from enhanced.simpleai import models_info, models_info_muid, refresh_models_info, sync_model_info
+from enhanced.simpleai import sync_model_info
 from modules.model_loader import load_file_from_url, load_file_from_muid
-from enhanced.simpleai import sysinfo
+from shared import sysinfo
 
 css = '''
 .toolbox {
@@ -172,13 +172,13 @@ def toggle_prompt_info(state_params):
 def check_preset_models(checklist, state_params):
     note_box_state = state_params["note_box_state"]
     note_box_state[2] = 0
-    for i in range(len(checklist)):
-        if checklist[i] and checklist[i] != 'None':
-            k1 = "checkpoints/"+checklist[i]
-            k2 = "loras/"+checklist[i]
-            if (i<2 and (k1 not in models_info.keys() or not models_info[k1]['muid'])) or (i>=2 and (k2 not in models_info.keys() or not models_info[k2]['muid'])):
-                note_box_state[2] = 1
-                break
+    #for i in range(len(checklist)):
+    #    if checklist[i] and checklist[i] != 'None':
+    #        k1 = "checkpoints/"+checklist[i]
+    #        k2 = "loras/"+checklist[i]
+    #        if (i<2 and (k1 not in models_info.keys() or not models_info[k1]['muid'])) or (i>=2 and (k2 not in models_info.keys() or not models_info[k2]['muid'])):
+    #            note_box_state[2] = 1
+    #            break
     state_params.update({"note_box_state": note_box_state})
     return state_params
 
@@ -234,18 +234,6 @@ def toggle_note_box_preset(*args):
     checklist = args[2:]
     state_params = check_preset_models(checklist, state_params)
     return toggle_note_box('preset', state_params)
-
-
-def toggle_note_box_embed(*args):
-    args = list(args)
-    state_params = args.pop()
-    for i in range(len(config.default_loras)):
-        del args[4+i]
-        del args[4+i+1]
-    checklist = args[2:]
-    state_params = check_preset_models(checklist, state_params)
-    return toggle_note_box('embed', state_params)
-
 
 
 filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
@@ -328,13 +316,9 @@ def delete_image(state_params):
     return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 
 
-def reset_image_params(state_params, is_generating, inpaint_mode):
-    [choice, selected] = state_params["prompt_info"]
-    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
-    metadata = copy.deepcopy(metainfo)
-    metadata['Refiner Model'] = 'None' if metainfo['Refiner Model']=='' else metainfo['Refiner Model']
-    state_params.update({"note_box_state": ['',0,0]})
-
+def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode):
+    if metadata is None:
+        metadata = {}
     metadata_scheme = meta_parser.MetadataScheme('simple')
     metadata_parser = meta_parser.get_metadata_parser(metadata_scheme)
     parsed_parameters = metadata_parser.to_json(metadata)
@@ -342,7 +326,18 @@ def reset_image_params(state_params, is_generating, inpaint_mode):
     results = meta_parser.switch_layout_template(parsed_parameters, state_params)
     results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
 
-    print(f'[ToolBox] Reset_params: -->{parsed_parameters["Backend Engine"]} params from current image log file.')
+    engine_name = parsed_parameters.get("Backend Engine", parsed_parameters.get("backend_engine", "SDXL-Fooocus"))
+    print(f'[ToolBox] Reset_params_from_image: -->{engine_name} params from the image with embedded parameters.')
+    return results
+
+def reset_image_params(state_params, is_generating, inpaint_mode):
+    [choice, selected] = state_params["prompt_info"]
+    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+    metadata = copy.deepcopy(metainfo)
+    metadata['Refiner Model'] = metainfo.get('Refiner Model', 'None')
+    state_params.update({"note_box_state": ['',0,0]})
+
+    results = reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode)
     return results + [gr.update(visible=False)] * 2
 
 
@@ -448,13 +443,7 @@ def save_preset(*args):
         if not seed_random:
             preset["default_image_seed"] = image_seed
 
-        def get_muid_link(k):
-            muid = ''
-            if k in models_info.keys():
-                muid = models_info[k]['muid']
-            return '' if muid is None else f'MUID:{muid}'
-
-        preset["checkpoint_downloads"] = {base_model: get_muid_link("checkpoints/"+base_model)}
+        preset["checkpoint_downloads"] = {}
         if refiner_model and refiner_model != 'None':
             preset["checkpoint_downloads"].update({refiner_model: get_muid_link("checkpoints/"+refiner_model)})
 
@@ -466,14 +455,8 @@ def save_preset(*args):
             if len(embed)>2 and embed[0] == 'embedding':
                 embeddings.update({embed[1]:embed[2]})
         embeddings = embeddings.keys()
-        for k in models_info.keys():
-            if k.startswith('embeddings') and k[11:].split('.')[0] in embeddings:
-                preset["embeddings_downloads"].update({k[11:]: get_muid_link(k)})
+        preset["embeddings_downloads"] = {} 
 
-        #preset["lora_downloads"] = {}
-        #for m,w in loras:
-        #    if m != 'None':
-        #        preset["lora_downloads"].update({m: get_muid_link("loras/"+m)})
 
         m_dict = {}
         for key in style_selections:
@@ -495,71 +478,6 @@ def save_preset(*args):
     return results
 
 
-def embed_params(state_params):
-    refresh_models_info()
-    sync_model_info([])
-    [choice, selected] = state_params["prompt_info"]
-    info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
-    #print(f'info:{info}')
-    filename = info['Filename']
-    file_path = os.path.join(os.path.join(config.path_outputs, "20{}".format(choice.split('/')[0])), filename)
-    img = Image.open(file_path)
-    embed_dirs = os.path.join(config.path_outputs, 'embed')
-    if not os.path.exists(embed_dirs):
-        os.mkdir(embed_dirs)
-    embed_file = os.path.join(embed_dirs, filename)
-    metadata = get_embed_metadata(info)
-    pnginfo = PngInfo()
-    pnginfo.add_text("Comment", json.dumps(metadata), True)
-    img.save(embed_file, pnginfo=pnginfo)
-    print(f'[ToolBox] Embed_params: embed {len(metadata.keys())} params to image and save to {embed_file}.')
-    return [gr.update(visible=False)] * 2 + [state_params]
-
-def get_embed_metadata(info, extra=None):
-
-    metadata = {}
-    for x in info.keys():
-        if x != 'Filename':
-            metadata.update({x: info[x]})
-
-    # the models(checkpoint, lora, embeddings) and styles referenced by the image
-    resource_id = lambda x:f'HASH:{models_info[x]["hash"]}' if not models_info[x]['muid'] else f'MUID:{models_info[x]["muid"]}'
-    m_dict = {info["Base Model"]: resource_id("checkpoints/" + info["Base Model"])}
-    if info['Refiner Model'] and info['Refiner Model'] != 'None':
-        m_dict.update({info["Refiner Model"]: resource_id("checkpoints/" + info["Refiner Model"])})
-    metadata.update({'checkpoint_downloads': m_dict}) 
-    
-    m_dict = {}
-    for key in info:
-        if key.startswith('LoRA ['):
-            m_dict.update({key[6:-8]: resource_id("loras/" + key[6:-8])})
-    if len(m_dict.keys())>0:
-        metadata.update({'lora_downloads': m_dict})
-
-    embeddings = topbar.embeddings_model_split(info["Prompt"], info["Negative Prompt"])
-    m_dict = {}
-    for key in embeddings:
-        m_dict.update({key[11:]: resource_id(key)})
-    if len(m_dict.keys())>0:
-        metadata.update({'embeddings_downloads': m_dict})
-
-    styles_name = [f[1:-1] for f in info['Styles'][1:-1].split(', ')]
-    for key in styles_name:
-        if key!='Fooocus V2':
-            m_dict.update({key: sdxl_styles.styles[key]})
-    if len(m_dict.keys())>0:
-        metadata.update({'styles_definition': m_dict})
-    metadata.update({'created_by': sysinfo['did']})
-    metadata.update({'created_timestamp': time.time()})
-    metadata.update({'software': f'{version.branch}_{version.get_simplesdxl_ver()}'})
-    metadata.update({'version': 'v1.0'})
-    if "Version" in metadata.keys():
-        metadata.pop("Version")
-
-    return metadata
-
-
-
 def sync_model_info_click(*args):
 
     downurls = list(args)
@@ -568,9 +486,9 @@ def sync_model_info_click(*args):
     results = []
     nums = 0
     for k in keylist:
-        muid = ' ' if models_info[k]['muid'] is None else models_info[k]['muid']
-        durl = None if models_info[k]['url'] is None else models_info[k]['url']
-        nums += 1 if models_info[k]['muid'] is None else 0
+        muid = ' ' 
+        durl = None 
+        nums += 1 
         results += [gr.update(info=f'MUID={muid}', value=durl)]
     if nums:
         print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')

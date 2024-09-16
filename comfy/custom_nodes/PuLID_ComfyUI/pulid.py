@@ -217,6 +217,9 @@ class PulidModelLoader:
                 elif key.startswith("ip_adapter."):
                     st_model["ip_adapter"][key.replace("ip_adapter.", "")] = model[key]
             model = st_model
+        
+        # Also initialize the model, takes longer to load but then it doesn't have to be done every time you change parameters in the apply node
+        model = PulidModel(model)
 
         return (model,)
 
@@ -300,7 +303,7 @@ class ApplyPulid:
             dtype = torch.float16 if comfy.model_management.should_use_fp16() else torch.float32
 
         eva_clip.to(device, dtype=dtype)
-        pulid_model = PulidModel(pulid).to(device, dtype=dtype)
+        pulid_model = pulid.to(device, dtype=dtype)
 
         if attn_mask is not None:
             if attn_mask.dim() > 3:
@@ -373,7 +376,8 @@ class ApplyPulid:
             bg = sum(parsing_out == i for i in bg_label).bool()
             white_image = torch.ones_like(face)
             face_features_image = torch.where(bg, white_image, to_gray(face))
-            face_features_image = T.functional.resize(face_features_image, eva_clip.image_size, T.InterpolationMode.BICUBIC).to(device, dtype=dtype)
+            # apparently MPS only supports NEAREST interpolation?
+            face_features_image = T.functional.resize(face_features_image, eva_clip.image_size, T.InterpolationMode.BICUBIC if 'cuda' in device.type else T.InterpolationMode.NEAREST).to(device, dtype=dtype)
             face_features_image = T.functional.normalize(face_features_image, eva_clip.image_mean, eva_clip.image_std)
             
             id_cond_vit, id_vit_hidden = eva_clip(face_features_image, return_all_features=False, return_hidden=True, shuffle=False)

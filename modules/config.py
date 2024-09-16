@@ -104,9 +104,6 @@ def try_load_deprecated_user_path_config():
 
 try_load_deprecated_user_path_config()
 
-preset = args_manager.args.preset
-theme = args_manager.args.theme
-
 def get_presets():
     preset_folder = 'presets'
     presets = ['initial']
@@ -139,6 +136,7 @@ def try_get_preset_content(preset):
 available_presets = get_presets()
 preset = args_manager.args.preset
 config_dict.update(try_get_preset_content(preset))
+theme = args_manager.args.theme
 
 def get_path_output() -> str:
     """
@@ -210,14 +208,14 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     return dp
 
 path_models_root = get_path_models_root()
-paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/'], True)
-paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/'], True)
+paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/', '../models/checkpoints/'], True)
+paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/', '../models/loras/'], True)
 path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
 path_vae_approx = get_dir_or_set_default('path_vae_approx', f'{path_models_root}/vae_approx/')
 path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
 path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
-paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/'], True)
-paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/'], True)
+paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/', '../models/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/', '../models/controlnet/'], True)
 path_clip = get_dir_or_set_default('path_clip', f'{path_models_root}/clip/')
 path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
@@ -231,17 +229,19 @@ path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
 paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
 
-from enhanced.simpleai import simpleai_config
-simpleai_config.path_models_root = path_models_root
-simpleai_config.paths_checkpoints = paths_checkpoints
-simpleai_config.paths_loras = paths_loras
-simpleai_config.path_embeddings = path_embeddings
-simpleai_config.paths_diffusers = paths_diffusers
-simpleai_config.paths_controlnet = paths_controlnet
-simpleai_config.paths_inpaint = paths_inpaint
-simpleai_config.paths_llms = paths_llms
-simpleai_config.path_unet = path_unet
-simpleai_config.path_vae = path_vae
+from enhanced.simpleai import init_modelsinfo
+modelsinfo = init_modelsinfo(path_models_root, dict(
+    checkpoints=paths_checkpoints,
+    loras=paths_loras,
+    embeddings=[path_embeddings],
+    diffusers=paths_diffusers,
+    DIFFUSERS=paths_diffusers,
+    controlnet=paths_controlnet,
+    inpaint=paths_inpaint,
+    llms=paths_llms,
+    unet=[path_unet],
+    vae=[path_vae]
+    ))
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
@@ -349,9 +349,11 @@ temp_path_cleanup_on_launch = get_config_item_or_set_default(
 default_engine = get_config_item_or_set_default(
     key='default_engine',
     default_value={},
-    validator=lambda x: isinstance(x, str),
+    validator=lambda x: isinstance(x, dict),
     expected_type=dict
 )
+backend_engine = default_engine.get("backend_engine", "Fooocus")
+
 default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',
     default_value='model.safetensors',
@@ -403,13 +405,13 @@ default_sample_sharpness = get_config_item_or_set_default(
 default_sampler = get_config_item_or_set_default(
     key='default_sampler',
     default_value=ads.default['sampler_name'],
-    validator=lambda x: x in modules.flags.sampler_list,
+    validator=lambda x: x in modules.flags.sampler_list if backend_engine == 'Fooocus' else modules.flags.comfy_sampler_list,
     expected_type=str
 )
 default_scheduler = get_config_item_or_set_default(
     key='default_scheduler',
     default_value=ads.default['scheduler_name'],
-    validator=lambda x: x in modules.flags.scheduler_list,
+    validator=lambda x: x in modules.flags.scheduler_list if backend_engine == 'Fooocus' else modules.flags.comfy_scheduler_list,
     expected_type=str
 )
 default_vae = get_config_item_or_set_default(
@@ -528,7 +530,7 @@ available_aspect_ratios = get_config_item_or_set_default(
 )
 default_aspect_ratio = get_config_item_or_set_default(
     key='default_aspect_ratio',
-    default_value='1152*896' if '1152*896' in available_aspect_ratios else available_aspect_ratios[0],
+    default_value='1152*896' if '1152*896' in available_aspect_ratios else '1024*1024',
     validator=lambda x: x in available_aspect_ratios,
     expected_type=str
 )
@@ -808,13 +810,13 @@ reference = ''
 
 default_describe_apply_prompts_checkbox = get_config_item_or_set_default(
     key='default_describe_apply_prompts_checkbox',
-    default_value=True,
+    default_value=False,
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
 default_describe_content_type = get_config_item_or_set_default(
     key='default_describe_content_type',
-    default_value=[modules.flags.describe_type_photo],
+    default_value=[modules.flags.describe_type_photo, modules.flags.describe_type_anime],
     validator=lambda x: all(k in modules.flags.describe_types for k in x),
     expected_type=list
 )
@@ -879,6 +881,7 @@ allow_missing_preset_key = [
     "styles_definition",
     "instruction",
     "reference",
+    "previous_default_models",
     ]
 
 REWRITE_PRESET = False
@@ -972,7 +975,7 @@ wildcard_filenames = []
 
 def get_model_filenames(folder_paths, extensions=None, name_filter=None):
     if extensions is None:
-        extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch', '.sft']
+        extensions = ['.pth', '.ckpt', '.bin', '.safetensors', '.fooocus.patch', '.gguf']
     files = []
 
     if not isinstance(folder_paths, list):
@@ -983,14 +986,23 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
     return files
 
 
-def update_files():
-    global model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
-    model_filenames = get_model_filenames(paths_checkpoints)
-    lora_filenames = get_model_filenames(paths_loras)
-    vae_filenames = get_model_filenames(path_vae)
+def get_base_model_list(engine='Fooocus'):
+    global modelsinfo
+    file_filter = modules.flags.model_file_filter.get(engine, [])
+    base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
+    if engine in ['Fooocus', 'Comfy']:
+        base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    return base_model_list
+
+def update_files(engine='Fooocus'):
+    global modelsinfo, model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
+    modelsinfo.refresh_from_path()
+    model_filenames = get_base_model_list(engine)
+    lora_filenames = modelsinfo.get_model_names('loras')
+    vae_filenames = modelsinfo.get_model_names('vae')
     wildcard_filenames = get_files_from_folder(path_wildcards, ['.txt'])
     available_presets = get_presets()
-    return
+    return model_filenames, lora_filenames, vae_filenames
 
 
 def downloading_inpaint_models(v):
@@ -1202,5 +1214,4 @@ def downloading_hydit_model():
     return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
 
 update_files()
-from enhanced.simpleai import refresh_models_info 
-refresh_models_info()
+modelsinfo.refresh_from_path(scan_hash=True)

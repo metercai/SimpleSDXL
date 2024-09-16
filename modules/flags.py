@@ -106,7 +106,7 @@ COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ances
                   "lms", "dpm_fast", "dpm_adaptive", "dpmpp_2s_ancestral", "dpmpp_sde", "dpmpp_sde_gpu",
                   "dpmpp_2m", "dpmpp_2m_sde", "dpmpp_2m_sde_gpu", "dpmpp_3m_sde", "dpmpp_3m_sde_gpu", "ddpm", "lcm",
                   "ipndm", "ipndm_v", "deis"]   
-comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform"]
+comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ["normal", "karras", "exponential", "sgm_uniform", "simple", "ddim_uniform", "beta"]
 comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
 
 aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common', 'Flux']
@@ -158,6 +158,13 @@ available_aspect_ratios_list = {
 
 backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+', 'Flux']
 
+model_file_filter = {
+        'SD3m'   : ['sd3_medium'],
+        'Flux'   : ['flux'],
+        'HyDiT'  : ['hunyuan'],
+        }
+model_file_filter['Fooocus'] = model_file_filter['SD3m'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
+
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
 task_class_mapping = {
@@ -188,6 +195,12 @@ default_class_params = {
         'backend_params': {},
         },
     'Comfy': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {},
         },
     'Kolors': {
         'disvisible': ["backend_selection", "performance_selection"],
@@ -242,7 +255,7 @@ default_class_params = {
         },
     'Flux': {
         'disvisible': ["backend_selection", "performance_selection"],
-        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model"],
+        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras-4", "refiner_model"],
         'available_aspect_ratios_selection': 'Flux',
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,
