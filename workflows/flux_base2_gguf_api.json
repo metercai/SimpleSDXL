@@ -132,7 +132,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 174185563030371
+      "noise_seed": 1108800523501100
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -186,8 +186,8 @@
   },
   "31": {
     "inputs": {
-      "lora_name": "furry_lora.safetensors",
-      "strength_model": 1,
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
       "model": [
         "36",
         0
@@ -227,7 +227,7 @@
   },
   "39": {
     "inputs": {
-      "max_shift": 1.15,
+      "max_shift": 1.1500000000000001,
       "base_shift": 0.5,
       "width": [
         "37",
@@ -238,13 +238,27 @@
         0
       ],
       "model": [
-        "31",
+        "40",
         0
       ]
     },
     "class_type": "ModelSamplingFlux",
     "_meta": {
       "title": "ModelSamplingFlux"
+    }
+  },
+  "40": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_2"
     }
   }
 }
