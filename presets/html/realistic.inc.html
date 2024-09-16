@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style type="text/css">
+    .imgtext {
+      position: relative;
+      max-height: 110px;
+    }
+    .text {
+      position:fixed;
+      left: 0;
+      right: 1%;
+      margin: 0;
+      padding: 0;
+    }
+    .imgbox {
+      position:fixed;
+      right: 0;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      left: 99%;
+      max-width: 140px;
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(1, 1fr);
+      justify-items: center;
+      align-items: center;
+      grid-gap: 1px;
+    }
+    .imgbox img {
+      width: 72px;
+      object-fit: cover;
+    }
+  </style>
+  <script>
+    function get_url_params() {
+      var current={theme:"light", lang:"cn"};
+      var url=document.documentURI.split("?");
+      if (url.length>1) {
+          var args=url[1].split("&");
+          for (var i=0;i<args.length;i++) {
+              var arg=args[i].split("=");
+              if (arg.length>1) {
+                  switch(arg[0]) {
+                      case "__theme": current.theme=arg[1];break;
+                      case "__lang": current.lang=arg[1];break;
+                  }
+              }
+          }
+      }
+      return current;
+    }
+  </script>
+  <base target="_blank">
+</head>
+<body style="width: 100%;margin: 0;padding: 0;display: flex;flex-direction: column;flex-grow: 1;">
+<div id="imgtext" class="imgtext">
+    <div class="text" id="text">
+        <span id="descr" style="float: left; color: white; font-size: 12px;">预置包内置的 realisticStockPhoto 是在civitai网站人气很高的写实类SDXL精调模型。该模型出的写实照片仿真度高，皮肤细腻，纹理保真，非常适合人物写真场景使用。</span>
+    </div>
+    <div class="imgbox">
+    </div>
+</div>
+<script>
+params = get_url_params();
+set_text_color(params);
+
+function set_text_color(info) {
+    pos1 = document.getElementById("descr");
+    pos2 = document.getElementById("more");
+    if (info.theme == "dark") {
+        pos1.style.color = "#f9fafb";
+        pos2.style.color = "#f9fafb";
+    } else {
+        pos1.style.color = "#1f2937";
+        pos2.style.color = "#1f2937";
+    }
+}
+
+</script>
+</body>
+</html>

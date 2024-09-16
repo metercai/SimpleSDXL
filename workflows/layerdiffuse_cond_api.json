@@ -1,7 +1,10 @@
 {
   "3": {
     "inputs": {
-      "seed": 795135597808708,
+      "seed": [
+        "48",
+        0
+      ],
       "steps": 30,
       "cfg": 4,
       "sampler_name": "dpmpp_2m_sde_gpu",
@@ -100,13 +103,13 @@
   "20": {
     "inputs": {
       "images": [
-        "42",
+        "14",
         0
       ]
     },
     "class_type": "PreviewImage",
     "_meta": {
-      "title": "result_image"
+      "title": "preview_image"
     }
   },
   "28": {
@@ -153,7 +156,7 @@
   },
   "30": {
     "inputs": {
-      "image": "welcome2.jpg",
+      "image": "2321.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -166,7 +169,7 @@
       "width": 1024,
       "height": 1024,
       "interpolation": "nearest",
-      "keep_proportion": true,
+      "method": "fill / crop",
       "condition": "always",
       "multiple_of": 8,
       "image": [
@@ -196,6 +199,7 @@
       "rem_mode": "RMBG-1.4",
       "image_output": "Preview",
       "save_prefix": "ComfyUI",
+      "torchscript_jit": false,
       "images": [
         "33",
         0
@@ -226,7 +230,10 @@
   },
   "40": {
     "inputs": {
-      "seed": 800548109459035,
+      "seed": [
+        "48",
+        0
+      ],
       "steps": 20,
       "cfg": 4,
       "sampler_name": "dpmpp_2m_sde_gpu",
@@ -257,6 +264,7 @@
   "41": {
     "inputs": {
       "amount": 6,
+      "device": "auto",
       "mask": [
         "37",
         1
@@ -277,7 +285,7 @@
         0
       ],
       "source": [
-        "30",
+        "33",
         0
       ],
       "mask": [
@@ -288,6 +296,43 @@
     "class_type": "DetailTransfer",
     "_meta": {
       "title": "Detail Transfer"
+    }
+  },
+  "46": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "47": {
+    "inputs": {
+      "images": [
+        "46",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "48": {
+    "inputs": {
+      "seed": 1097287083922452
+    },
+    "class_type": "easy seed",
+    "_meta": {
+      "title": "sync_seed"
     }
   }
 }

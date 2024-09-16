@@ -14,6 +14,7 @@ wildcards_max_bfs_depth = 64
 wildcards = {}
 wildcards_list = {}
 wildcards_translation = {}
+wildcards_words_translation = {}
 wildcards_template = {}
 wildcards_weight_range = {}
 
@@ -80,39 +81,37 @@ def get_wildcards_samples(path="root"):
             print(f'[Wildcards] The level of wildcards is too depth: {wildcards_path}.')
     #print(f'wildcards_list:{wildcards_list}')
     if wildcards_list_all:
+        load_words_translation(True)
         print(f'[Wildcards] Refresh and Load {len(wildcards_list_all)}/{len(wildcards.keys())} wildcards: {", ".join(wildcards_list_all)}.')
     if args.language=='cn':
         if len(wildcards_translation.keys())==0:
-            wildcards_translation_file = os.path.join(wildcards_path, 'cn.json')
+            wildcards_translation_file = os.path.join(wildcards_path, 'cn_list.json')
             if os.path.exists(wildcards_translation_file):
                 with open(wildcards_translation_file, "r", encoding="utf-8") as json_file:
                     wildcards_translation.update(json.load(json_file))
-                update_flag = False
-                for x in wildcards_list[path]:
-                    if f'list/{x}' not in wildcards_translation.keys():
-                        wildcards_translation.update({f'list/{x}': translator.convert(x, 'Big Model', 'cn')})
-                        update_flag = True
-                if update_flag:
-                    with open(wildcards_translation_file, "w", encoding="utf-8") as json_file:
-                        json.dump(wildcards_translation, json_file)
-            else:
-                for wildcard in wildcards_list["root"]:
-                    wildcards_translation.update({f'list/{wildcard}': translator.convert(wildcard, 'Big Model', 'cn')})
-                #for wildcard in wildcards.keys():
-                #    for word in wildcards[wildcard]:
-                #        wildcards_translation.update({f'word/{wildcard}/{word}': translator.convert(word, 'Big Model', 'cn')})
-                with open(wildcards_translation_file, "w", encoding="utf-8") as json_file:
-                    json.dump(wildcards_translation, json_file)
-        return [['{}|{}'.format(x, wildcards_translation[f'list/{x}'])] for x in wildcards_list[path]]
+    return [[get_wildcard_translation(x)] for x in wildcards_list[path]]
 
-    return [[x] for x in wildcards_list[path]]
+get_wildcard_translation = lambda x: x if args.language!='cn' or f'list/{x}' not in wildcards_translation else wildcards_translation[f'list/{x}']
+
+def load_words_translation(reload_flag=False):
+    global wildcards_path, wildcards_words_translation
+    if len(wildcards_words_translation.keys())==0 or reload_flag:
+        translation_file = os.path.join(wildcards_path, 'cn_words.json')
+        if os.path.exists(translation_file):
+            with open(translation_file, "r", encoding="utf-8") as json_file:
+                wildcards_words_translation.update(json.load(json_file))
 
 def get_words_of_wildcard_samples(wildcard="root"):
-    global wildcards, wildcards_list
+    global wildcards, wildcards_list, wildcards_path, wildcards_words_translation
 
     if wildcard == "root":
-        return [[x] for x in wildcards[wildcards_list[wildcard][0]]]
-    words = [[x] for x in wildcards[wildcard]]
+        wildcard = wildcards_list[wildcard][0]
+    if args.language=='cn':
+        if len(wildcards_words_translation.keys())==0:
+            load_words_translation()
+        words = [[x if x not in wildcards_words_translation else wildcards_words_translation[x]] for x in wildcards[wildcard]]
+    else:
+        words = [[x] for x in wildcards[wildcard]]
     return words
 
 def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
@@ -243,14 +242,14 @@ def replace_wildcard(text, rng):
 def get_words(arrays, totalMult, index):
     if(len(arrays) == 1):
         word = arrays[0][index]
-        if word[0] == '(' and word[-1] == ')':
-            word = word[1:-1]
+        #if word[0] == '(' and word[-1] == ')':
+        #    word = word[1:-1]
         return [word]
     else:
         words = arrays[0]
         word = words[index % len(words)]
-        if word[0] == '(' and word[-1] == ')':
-            word = word[1:-1]
+        #if word[0] == '(' and word[-1] == ')':
+        #    word = word[1:-1]
         index -= index % len(words)
         index /= len(words)
         index = math.floor(index)
@@ -307,20 +306,23 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
 
     wildcard = wildcard[0].split('|')[0]
     state_params.update({"wildcard_in_wildcards": wildcard})
-    if prompt[-1]=='[':
-        state_params["array_wildcards_mode"] = '['
-        prompt = prompt[:-1]
-    elif prompt[-1]=='_':
-        state_params["array_wildcards_mode"] = '_'
-        if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
+    if len(prompt)>0:
+        if prompt[-1]=='[':
+            state_params["array_wildcards_mode"] = '['
             prompt = prompt[:-1]
+        elif prompt[-1]=='_':
+            state_params["array_wildcards_mode"] = '_'
+            if len(prompt)==1 or len(prompt)>2 and prompt[-2]!='_':
+                prompt = prompt[:-1]
+    else:
+        state_params["array_wildcards_mode"] = '['
     
     if state_params["array_wildcards_mode"] == '[':
         new_tag = f'[__{wildcard}__]'
     else:
         new_tag = f'__{wildcard}__'
     prompt = f'{prompt.strip()} {new_tag}'
-    return gr.update(value=prompt), gr.Dataset.update(label=f'{wildcard}:', samples=get_words_of_wildcard_samples(wildcard)), gr.update(open=True)
+    return gr.update(value=prompt), gr.Dataset.update(label=f'{get_wildcard_translation(wildcard)}:', samples=get_words_of_wildcard_samples(wildcard)), gr.update(open=True)
 
 def add_word_to_prompt(wildcard, index, prompt):
     global wildcards, wildcards_list

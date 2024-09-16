@@ -111,7 +111,6 @@ class easySampler:
         # add model patch
         # brushnet
         add_model_patch(model)
-        # kolors
         #######################################################################################
         samples = comfy.sample.sample(model, noise, steps, cfg, sampler_name, scheduler, positive, negative,
                                       latent_image,
@@ -167,6 +166,9 @@ class easySampler:
     def custom_advanced_ksampler(self, noise, guider, sampler, sigmas, latent_image):
         latent = latent_image
         latent_image = latent["samples"]
+        latent = latent.copy()
+        latent_image = comfy.sample.fix_empty_latent_channels(guider.model_patcher, latent_image)
+        latent["samples"] = latent_image
 
         noise_mask = None
         if "noise_mask" in latent:

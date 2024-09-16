@@ -80,7 +80,7 @@ def has_chinese(text):
     _text = text
     _text = re.sub(r'<.*?>', '', _text)
     _text = re.sub(r'__.*?__', '', _text)
-    _text = re.sub(r'embedding:.*?(\d+)?', '', _text)
+    _text = re.sub(r'embedding:.*?$', '', _text)
     for char in _text:
         if '\u4e00' <= char <= '\u9fff':
             has_cn = True
@@ -95,7 +95,6 @@ def translate(text):
     if not os.path.exists(zh_en_model_path):
         zh_en_model_path = 'Helsinki-NLP/opus-mt-zh-en'
 
-    print(zh_en_model_path)
     if zh_en_model is None:
 
         zh_en_model = AutoModelForSeq2SeqLM.from_pretrained(zh_en_model_path).eval()

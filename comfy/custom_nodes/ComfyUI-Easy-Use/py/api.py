@@ -7,7 +7,6 @@ import folder_paths
 from folder_paths import get_directory_by_type
 from server import PromptServer
 from .config import RESOURCES_DIR, FOOOCUS_STYLES_DIR, FOOOCUS_STYLES_SAMPLES
-from .logic import ConvertAnything
 from .libs.model import easyModelManager
 from .libs.utils import getMetadata, cleanGPUUsedForce, get_local_filepath
 from .libs.cache import remove_cache
@@ -123,18 +122,6 @@ async def getStylesImage(request):
             return web.Response(text=FOOOCUS_STYLES_SAMPLES + name + '.jpg')
     return web.Response(status=400)
 
-# convert type
-@PromptServer.instance.routes.post("/easyuse/convert")
-async def convertType(request):
-    post = await request.post()
-    type = post.get('type')
-    if type:
-        ConvertAnything.RETURN_TYPES = (type.upper(),)
-        ConvertAnything.RETURN_NAMES = (type,)
-        return web.Response(status=200)
-    else:
-        return web.Response(status=400)
-
 # get models lists
 @PromptServer.instance.routes.get("/easyuse/models/list")
 async def getModelsList(request):
@@ -150,11 +137,15 @@ async def getModelsList(request):
 # get models thumbnails
 @PromptServer.instance.routes.get("/easyuse/models/thumbnail")
 async def getModelsThumbnail(request):
+    limit = 500
+    if "limit" in request.rel_url.query:
+        limit = request.rel_url.query.get("limit")
+        limit = int(limit)
     checkpoints = folder_paths.get_filename_list("checkpoints_thumb")
     loras = folder_paths.get_filename_list("loras_thumb")
     checkpoints_full = []
     loras_full = []
-    if len(checkpoints) + len(loras) >= 500:
+    if len(checkpoints) + len(loras) >= limit:
         return web.Response(status=400)
     for index, i in enumerate(checkpoints):
         full_path = folder_paths.get_full_path('checkpoints_thumb', str(i))

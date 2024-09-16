@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style type="text/css">
+    .imgtext {
+      position: relative;
+      max-height: 110px;
+    }
+    .text {
+      position:fixed;
+      left: 0;
+      right: 1%;
+      margin: 0;
+      padding: 0;
+    }
+    .imgbox {
+      position:fixed;
+      right: 0;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      left: 99%;
+      max-width: 140px;
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(1, 1fr);
+      justify-items: center;
+      align-items: center;
+      grid-gap: 1px;
+    }
+    .imgbox img {
+      width: 72px;
+      object-fit: cover;
+    }
+  </style>
+  <script>
+    function get_url_params() {
+      var current={theme:"light", lang:"cn"};
+      var url=document.documentURI.split("?");
+      if (url.length>1) {
+          var args=url[1].split("&");
+          for (var i=0;i<args.length;i++) {
+              var arg=args[i].split("=");
+              if (arg.length>1) {
+                  switch(arg[0]) {
+                      case "__theme": current.theme=arg[1];break;
+                      case "__lang": current.lang=arg[1];break;
+                  }
+              }
+          }
+      }
+      return current;
+    }
+  </script>
+  <base target="_blank">
+</head>
+<body style="width: 100%;margin: 0;padding: 0;display: flex;flex-direction: column;flex-grow: 1;">
+<div id="imgtext" class="imgtext">
+    <div class="text" id="text">
+        <span id="descr" style="float: left; color: white; font-size: 12px;">Kolors 是快手发布的中文图像生成模型。它能很好的理解中文语义，具有丰富的中文元素。模型架构与SDXL同源，具有很好的SDXL生态兼容性。Kolors🚀预置包采用标准采样器，配置了8步加速lora，并做了精调，在速度和质量上取得很好的平衡，适合中文元素的本地快速出图。</span>
+    </div>
+    <div class="imgbox">
+    </div>
+</div>
+<script>
+params = get_url_params();
+set_text_color(params);
+
+function set_text_color(info) {
+    pos1 = document.getElementById("descr");
+    pos2 = document.getElementById("more");
+    if (info.theme == "dark") {
+        pos1.style.color = "#f9fafb";
+        pos2.style.color = "#f9fafb";
+    } else {
+        pos1.style.color = "#1f2937";
+        pos2.style.color = "#1f2937";
+    }
+}
+
+</script>
+</body>
+</html>

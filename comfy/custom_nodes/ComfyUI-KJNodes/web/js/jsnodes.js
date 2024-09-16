@@ -31,6 +31,7 @@ app.registerExtension({
 				break;
 			case "ImageBatchMulti":
 			case "ImageAddMulti":
+			case "ImageConcatMulti":
 				nodeType.prototype.onNodeCreated = function () {
 				this._type = "IMAGE"
 				this.inputs_offset = nodeData.name.includes("selective")?1:0
@@ -74,14 +75,71 @@ app.registerExtension({
 						});
 					}
 					break;
+			
+			case "FluxBlockLoraSelect":
+				nodeType.prototype.onNodeCreated = function () {
+					this.addWidget("button", "Set all", null, () => {
+						const userInput = prompt("Enter the values to set for widgets (e.g., s0,1,2-7=2.0, d0,1,2-7=2.0, or 1.0):", "");
+						if (userInput) {
+							const regex = /([sd])?(\d+(?:,\d+|-?\d+)*?)?=(\d+(\.\d+)?)/;
+							const match = userInput.match(regex);
+							if (match) {
+								const type = match[1];
+								const indicesPart = match[2];
+								const value = parseFloat(match[3]);
+			
+								let targetWidgets = [];
+								if (type === 's') {
+									targetWidgets = this.widgets.filter(widget => widget.name.includes("single"));
+								} else if (type === 'd') {
+									targetWidgets = this.widgets.filter(widget => widget.name.includes("double"));
+								} else {
+									targetWidgets = this.widgets; // No type specified, all widgets
+								}
+			
+								if (indicesPart) {
+									const indices = indicesPart.split(',').flatMap(part => {
+										if (part.includes('-')) {
+											const [start, end] = part.split('-').map(Number);
+											return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+										}
+										return Number(part);
+									});
+			
+									for (const index of indices) {
+										if (index < targetWidgets.length) {
+											targetWidgets[index].value = value;
+										}
+									}
+								} else {
+									// No indices provided, set value for all target widgets
+									for (const widget of targetWidgets) {
+										widget.value = value;
+									}
+								}
+							} else if (!isNaN(parseFloat(userInput))) {
+								// Single value provided, set it for all widgets
+								const value = parseFloat(userInput);
+								for (const widget of this.widgets) {
+									widget.value = value;
+								}
+							} else {
+								alert("Invalid input format. Please use the format s0,1,2-7=2.0, d0,1,2-7=2.0, or 1.0");
+							}
+						} else {
+							alert("Invalid input. Please enter a value.");
+						}
+					});
+				};
+				break;
 
 			case "GetMaskSizeAndCount":
 				const onGetMaskSizeConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
-					const v = onGetMaskSizeConnectInput?.(this, arguments);
-					targetSlot.outputs[1]["name"] = "width"
-					targetSlot.outputs[2]["name"] = "height" 
-					targetSlot.outputs[3]["name"] = "count"
+					const v = onGetMaskSizeConnectInput? onGetMaskSizeConnectInput.apply(this, arguments): undefined
+					this.outputs[1]["name"] = "width"
+					this.outputs[2]["name"] = "height" 
+					this.outputs[3]["name"] = "count"
 					return v;
 				}
 				const onGetMaskSizeExecuted = nodeType.prototype.onExecuted;
@@ -98,10 +156,10 @@ app.registerExtension({
 			case "GetImageSizeAndCount":
 				const onGetImageSizeConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
-					const v = onGetImageSizeConnectInput?.(this, arguments);
-					targetSlot.outputs[1]["name"] = "width"
-					targetSlot.outputs[2]["name"] = "height" 
-					targetSlot.outputs[3]["name"] = "count"
+					const v = onGetImageSizeConnectInput? onGetImageSizeConnectInput.apply(this, arguments): undefined
+					this.outputs[1]["name"] = "width"
+					this.outputs[2]["name"] = "height" 
+					this.outputs[3]["name"] = "count"
 					return v;
 				}
 				const onGetImageSizeExecuted = nodeType.prototype.onExecuted;
@@ -118,8 +176,8 @@ app.registerExtension({
 			case "PreviewAnimation":
 				const onPreviewAnimationConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
-					const v = onPreviewAnimationConnectInput?.(this, arguments);
-					targetSlot.title = "Preview Animation"
+					const v = onPreviewAnimationConnectInput? onPreviewAnimationConnectInput.apply(this, arguments): undefined
+					this.title = "Preview Animation"
 					return v;
 				}
 				const onPreviewAnimationExecuted = nodeType.prototype.onExecuted;
@@ -134,9 +192,9 @@ app.registerExtension({
 			case "VRAM_Debug":
 				const onVRAM_DebugConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
-					const v = onVRAM_DebugConnectInput?.(this, arguments);
-					targetSlot.outputs[3]["name"] = "freemem_before"
-					targetSlot.outputs[4]["name"] = "freemem_after" 
+					const v = onVRAM_DebugConnectInput? onVRAM_DebugConnectInput.apply(this, arguments): undefined
+					this.outputs[3]["name"] = "freemem_before"
+					this.outputs[4]["name"] = "freemem_after" 
 					return v;
 				}
 				const onVRAM_DebugExecuted = nodeType.prototype.onExecuted;
@@ -150,27 +208,29 @@ app.registerExtension({
 				break;
 
 			case "JoinStringMulti":
+				const originalOnNodeCreated = nodeType.prototype.onNodeCreated || function() {};
 				nodeType.prototype.onNodeCreated = function () {
-				this._type = "STRING"
-				this.inputs_offset = nodeData.name.includes("selective")?1:0
-				this.addWidget("button", "Update inputs", null, () => {
-					if (!this.inputs) {
-						this.inputs = [];
-					}
-					const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
-						if(target_number_of_inputs===this.inputs.length)return; // already set, do nothing
-
-						if(target_number_of_inputs < this.inputs.length){
-							for(let i = this.inputs.length; i>=this.inputs_offset+target_number_of_inputs; i--)
-									this.removeInput(i)
+					originalOnNodeCreated.apply(this, arguments);
+			
+					this._type = "STRING";
+					this.inputs_offset = nodeData.name.includes("selective") ? 1 : 0;
+					this.addWidget("button", "Update inputs", null, () => {
+						if (!this.inputs) {
+							this.inputs = [];
 						}
-						else{
-							for(let i = this.inputs.length+1-this.inputs_offset; i <= target_number_of_inputs; ++i)
-								this.addInput(`string_${i}`, this._type)
-							}
-						});
-					}
-					break;
+						const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
+						if (target_number_of_inputs === this.inputs.length) return; // already set, do nothing
+			
+						if (target_number_of_inputs < this.inputs.length) {
+							for (let i = this.inputs.length; i >= this.inputs_offset + target_number_of_inputs; i--)
+								this.removeInput(i);
+						} else {
+							for (let i = this.inputs.length + 1 - this.inputs_offset; i <= target_number_of_inputs; ++i)
+								this.addInput(`string_${i}`, this._type);
+						}
+					});
+				}
+				break;
 			case "SoundReactive":
 				nodeType.prototype.onNodeCreated = function () {
 					let audioContext;

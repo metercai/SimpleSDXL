@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-kwaikolorswrapper"
+description = "Rudimentary wrapper that runs [a/Kwai-Kolors](https://huggingface.co/Kwai-Kolors/Kolors) text2image pipeline using diffusers."
+version = "1.0.1"
+license = "Apache-2.0"
+dependencies = ["diffusers>=0.28.2", "transformers>=4.26.1", "sentencepiece", "accelerate", "cpm-kernels"]
+
+[project.urls]
+Repository = "https://github.com/kijai/ComfyUI-KwaiKolorsWrapper"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "kijai"
+DisplayName = "ComfyUI-KwaiKolorsWrapper"
+Icon = ""

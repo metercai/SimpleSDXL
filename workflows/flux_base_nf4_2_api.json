@@ -180,8 +180,8 @@
   },
   "31": {
     "inputs": {
-      "double_blocks_cuda_size": 4,
-      "single_blocks_cuda_size": 6,
+      "double_blocks_cuda_size": 7,
+      "single_blocks_cuda_size": 7,
       "model": [
         "29",
         0

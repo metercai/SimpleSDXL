@@ -1,47 +1,40 @@
 import os
 import sys
-import json
 import gradio as gr
-from simpleai_base import simpleai_base, comfyd, models_hub_host, config, torch_version, xformers_version, cuda_version, comfyclient_pipeline
+import shared
+from simpleai_base import simpleai_base, utils, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
-from simpleai_base.models_info import get_models_info, get_modelsinfo, set_scan_models_hash, refresh_models_info_from_path, models_info_path, sync_model_info
+from simpleai_base.models_info import ModelsInfo, sync_model_info
 from build_launcher import is_win32_standalone_build
-from args_manager import args
 
-
-simpleai_config = config
-token = None
-sysinfo = {"location": "CN"}
-#comfyd.echo_off = False
+#utils.echo_off = False
 args_comfyd = [[]]
 modelsinfo = None #get_modelsinfo()
-models_info, models_info_muid, models_info_file = get_models_info()
+modelsinfo_filename = 'models_info.json'
 
-def refresh_models_info():
-    global modelsinfo, models_info, models_info_muid, models_info_file
-    #refresh_models_info_from_path()
-    modelsinfo = get_modelsinfo()
-    models_info, models_info_muid, models_info_file = get_models_info()
-    return
+def init_modelsinfo(models_root, path_map):
+    global modelsinfo, modelsinfo_filename
+    models_info_path = os.path.abspath(os.path.join(models_root, modelsinfo_filename))
+    if not modelsinfo:
+        modelsinfo = ModelsInfo(models_info_path, path_map)
+    return modelsinfo
 
-def reset_simpleai_args(launch_token, launch_sysinfo):
-    global token, sysinfo, args_comfyd
-    token = launch_token
-    sysinfo = launch_sysinfo
-    sysinfo.update(dict(
+def reset_simpleai_args():
+    global args_comfyd
+    shared.sysinfo.update(dict(
         torch_version=torch_version,
         xformers_version=xformers_version,
         cuda_version=cuda_version))
-    comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = sysinfo["loopback_port"]
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{sysinfo["loopback_port"]}']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
-    args_comfyd += [["--cuda-malloc"]] if not args.disable_async_cuda_allocation and not args.async_cuda_allocation else []
+    comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}'], ['--disable-smart-memory']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
+    args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
+    #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd
     return
 
-#set_scan_models_hash(True)
 
 
-identity_note = '将手机号与身份私钥绑定，获得固定的可信数字身份标识，就可以存储、找回和分享非公开资源，也可以具备云端登录和算力共享的能力，详情可见。'
+identity_note = '将身份ID与手机号绑定，可以固定本地密钥。既可以在本地存储和管理个人配置信息，又可以参与创意分享等互助服务。详情可见说明文档。'
 
 from ldm_patched.modules.model_management import unload_all_models, soft_empty_cache
 

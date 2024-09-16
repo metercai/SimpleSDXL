@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter
 import numpy as np
 from ..utility.utility import pil2tensor
 import folder_paths
+from comfy.utils import common_upscale
 
 def plot_coordinates_to_tensor(coordinates, height, width, bbox_height, bbox_width, size_multiplier, prompt):
         import matplotlib
@@ -113,6 +114,7 @@ class SplineEditor:
                 [   
                     'path',
                     'time',
+                    'controlpoints'
                 ],
                 {
                     "default": 'time'
@@ -632,7 +634,7 @@ and returns that as the selected output type.
                   
         # Convert mean_values to the specified output_type
         if output_type == 'list':
-            out = mean_values,
+            out = mean_values
         elif output_type == 'pandas series':
             try:
                 import pandas as pd
@@ -1245,3 +1247,147 @@ CreateInstanceDiffusionTracking -node.
         image_tensor_batch = torch.stack(modified_images).cpu().float()
         
         return image_tensor_batch,
+
+class PointsEditor:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "points_store": ("STRING", {"multiline": False}),
+                "coordinates": ("STRING", {"multiline": False}),
+                "neg_coordinates": ("STRING", {"multiline": False}),
+                "bbox_store": ("STRING", {"multiline": False}),
+                "bboxes": ("STRING", {"multiline": False}),
+                "bbox_format": (
+                [   
+                    'xyxy',
+                    'xywh',
+                ],
+                ),
+                "width": ("INT", {"default": 512, "min": 8, "max": 4096, "step": 8}),
+                "height": ("INT", {"default": 512, "min": 8, "max": 4096, "step": 8}),
+                "normalize": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "bg_image": ("IMAGE", ),
+            },
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "BBOX", "MASK", "IMAGE")
+    RETURN_NAMES = ("positive_coords", "negative_coords", "bbox", "bbox_mask", "cropped_image")
+    FUNCTION = "pointdata"
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = """
+# WORK IN PROGRESS  
+Do not count on this as part of your workflow yet,  
+probably contains lots of bugs and stability is not  
+guaranteed!!  
+  
+## Graphical editor to create coordinates
+
+**Shift + click** to add a positive (green) point.
+**Shift + right click** to add a negative (red) point.
+**Ctrl + click** to draw a box.  
+**Right click on a point** to delete it.    
+Note that you can't delete from start/end of the points array.  
+  
+To add an image select the node and copy/paste or drag in the image.  
+Or from the bg_image input on queue (first frame of the batch).  
+
+**THE IMAGE IS SAVED TO THE NODE AND WORKFLOW METADATA**  
+you can clear the image from the context menu by right clicking on the canvas  
+
+"""
+
+    def pointdata(self, points_store, bbox_store, width, height, coordinates, neg_coordinates, normalize, bboxes, bbox_format="xyxy", bg_image=None):
+        import io
+        import base64
+        
+        coordinates = json.loads(coordinates)
+        pos_coordinates = []
+        for coord in coordinates:
+            coord['x'] = int(round(coord['x']))
+            coord['y'] = int(round(coord['y']))
+            if normalize:
+                norm_x = coord['x'] / width
+                norm_y = coord['y'] / height
+                pos_coordinates.append({'x': norm_x, 'y': norm_y})
+            else:
+                pos_coordinates.append({'x': coord['x'], 'y': coord['y']})
+
+        if neg_coordinates:
+            coordinates = json.loads(neg_coordinates)
+            neg_coordinates = []
+            for coord in coordinates:
+                coord['x'] = int(round(coord['x']))
+                coord['y'] = int(round(coord['y']))
+                if normalize:
+                    norm_x = coord['x'] / width
+                    norm_y = coord['y'] / height
+                    neg_coordinates.append({'x': norm_x, 'y': norm_y})
+                else:
+                    neg_coordinates.append({'x': coord['x'], 'y': coord['y']})
+
+        # Create a blank mask
+        mask = np.zeros((height, width), dtype=np.uint8)
+        bboxes = json.loads(bboxes)
+        print(bboxes)
+        valid_bboxes = []
+        for bbox in bboxes:
+            if (bbox.get("startX") is None or
+                bbox.get("startY") is None or
+                bbox.get("endX") is None or
+                bbox.get("endY") is None):
+                continue  # Skip this bounding box if any value is None
+            else:                
+                # Ensure that endX and endY are greater than startX and startY
+                x_min = min(int(bbox["startX"]), int(bbox["endX"]))
+                y_min = min(int(bbox["startY"]), int(bbox["endY"]))
+                x_max = max(int(bbox["startX"]), int(bbox["endX"]))
+                y_max = max(int(bbox["startY"]), int(bbox["endY"]))
+                
+                valid_bboxes.append((x_min, y_min, x_max, y_max))
+
+            bboxes_xyxy = []
+            for bbox in valid_bboxes:
+                x_min, y_min, x_max, y_max = bbox
+                bboxes_xyxy.append((x_min, y_min, x_max, y_max))
+                mask[y_min:y_max, x_min:x_max] = 1  # Fill the bounding box area with 1s
+
+            if bbox_format == "xywh":
+                bboxes_xywh = []
+                for bbox in valid_bboxes:
+                    x_min, y_min, x_max, y_max = bbox
+                    width = x_max - x_min
+                    height = y_max - y_min
+                    bboxes_xywh.append((x_min, y_min, width, height))
+                bboxes = bboxes_xywh
+            else:
+                bboxes = bboxes_xyxy           
+
+        mask_tensor = torch.from_numpy(mask)
+        mask_tensor = mask_tensor.unsqueeze(0).float().cpu()
+
+        if bg_image is not None and len(valid_bboxes) > 0:
+            x_min, y_min, x_max, y_max = bboxes[0]
+            cropped_image = bg_image[:, y_min:y_max, x_min:x_max, :]
+
+        elif bg_image is not None:
+            cropped_image = bg_image
+
+        if bg_image is None:
+            return (json.dumps(pos_coordinates), json.dumps(neg_coordinates), bboxes, mask_tensor)
+        else:
+            transform = transforms.ToPILImage()
+            image = transform(bg_image[0].permute(2, 0, 1))
+            buffered = io.BytesIO()
+            image.save(buffered, format="JPEG", quality=75)
+
+            # Step 3: Encode the image bytes to a Base64 string
+            img_bytes = buffered.getvalue()
+            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+        
+            return {
+                "ui": {"bg_image": [img_base64]}, 
+                "result": (json.dumps(pos_coordinates), json.dumps(neg_coordinates), bboxes, mask_tensor, cropped_image)
+            }

@@ -11,10 +11,8 @@ def calculate_weight_adjust_channel(func):
     """Patches ComfyUI's LoRA weight application to accept multi-channel inputs."""
 
     @functools.wraps(func)
-    def calculate_weight(
-        self: ModelPatcher, patches, weight: torch.Tensor, key: str
-    ) -> torch.Tensor:
-        weight = func(self, patches, weight, key)
+    def calculate_weight(patches, weight: torch.Tensor, key: str) -> torch.Tensor:
+        weight = func(patches, weight, key)
 
         for p in patches:
             alpha = p[0]

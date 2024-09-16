@@ -1,0 +1,193 @@
+{
+  "9": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "10": {
+    "inputs": {
+      "samples": [
+        "139",
+        0
+      ],
+      "vae": [
+        "140",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "70": {
+    "inputs": {
+      "vae_name": "sdxl_fp16.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "130": {
+    "inputs": {
+      "unet_name": "kolors_unet_fp16.safetensors"
+    },
+    "class_type": "MZ_KolorsUNETLoaderV2",
+    "_meta": {
+      "title": "MinusZone - KolorsUNETLoaderV2"
+    }
+  },
+  "131": {
+    "inputs": {
+      "text": "这张图片展示了一个精心设计的无缝图案,其细腻与和谐之处令人印象深刻,图案以淡雅的蓝色为基调,营造出一种宁静而深邃的氛围,仿佛让人置身于广阔的天空或深邃的海洋之中,蓝色的底色之上,巧妙地融入了纯净的白色,两者相互交织,形成了一种清新脱俗的视觉效果,在这片蓝白相间的广阔空间里,黄色的小花如同点点繁星般点缀其中,它们或聚或散,分布得恰到好处,既不过于密集显得拥挤,也不过于稀疏而失去点缀的效果,这些小黄花以其明亮的色彩,为整个图案增添了一抹生机与活力,仿佛是春天里最早绽放的花朵,宣告着生命的到来,而在小黄花的周围,绿色的叶子作为陪衬,以柔和的姿态环绕着它们,这些叶子形态各异,有的宽大厚实,有的细长如针,但它们都以一种自然流畅的方式融入图案之中,与小黄花共同构成了一幅生动的自然画卷,绿色的加入,不仅让图案的色彩更加丰富饱满,也赋予了它更多的生命力与活力,整个图案的设计非常讲究,无论是色彩的搭配还是元素的布局,都显得那么和谐统一,图案中的每一个细节都经过精心雕琢,没有任何重叠或遗漏之处,呈现出一种完美的平衡感,这种平衡感不仅让图案看起来更加美观大方,也让人在欣赏时能够感受到一种宁静与舒适,",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "132": {
+    "inputs": {
+      "text": "anime,photorealistic,35mm film,deformed,glitch,low contrast,noisy,",
+      "chatglm3_model": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "134": {
+    "inputs": {
+      "images": [
+        "141",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "136": {
+    "inputs": {
+      "precision": "quant8"
+    },
+    "class_type": "DownloadAndLoadChatGLM3",
+    "_meta": {
+      "title": "llms_model"
+    }
+  },
+  "138": {
+    "inputs": {
+      "tiling": "enable",
+      "copy_model": "Make a copy",
+      "model": [
+        "130",
+        0
+      ]
+    },
+    "class_type": "SeamlessTile",
+    "_meta": {
+      "title": "seamless_tile"
+    }
+  },
+  "139": {
+    "inputs": {
+      "seed": 206780372535210,
+      "tiling": "enable",
+      "steps": 30,
+      "cfg": 5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "138",
+        0
+      ],
+      "positive": [
+        "131",
+        0
+      ],
+      "negative": [
+        "132",
+        0
+      ],
+      "latent_image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "TiledKSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "140": {
+    "inputs": {
+      "tiling": "enable",
+      "copy_vae": "Make a copy",
+      "vae": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "MakeCircularVAE",
+    "_meta": {
+      "title": "vae_tiled"
+    }
+  },
+  "141": {
+    "inputs": {
+      "x_percent": 0,
+      "y_percent": 0,
+      "pixels": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "OffsetImage",
+    "_meta": {
+      "title": "offset_image"
+    }
+  },
+  "144": {
+    "inputs": {
+      "images": [
+        "145",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "145": {
+    "inputs": {
+      "x_percent": 50,
+      "y_percent": 50,
+      "pixels": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "OffsetImage",
+    "_meta": {
+      "title": "Offset Image"
+    }
+  }
+}

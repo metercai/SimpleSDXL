@@ -11,7 +11,9 @@ from .utils.patches import calculate_weight_adjust_channel
 from .utils.image import generate_gradient_image, LightPosition
 from nodes import MAX_RESOLUTION
 from comfy.model_patcher import ModelPatcher
+from comfy import lora
 import model_management
+import logging
 
 from load_file_from_url import load_file_from_url, load_model_for_iclight
 
@@ -39,11 +41,10 @@ Used with ICLightConditioning -node
 
     def load(self, model, model_path):
         type_str = str(type(model.model.model_config).__name__)
-
         if "SD15" not in type_str:
             raise Exception(f"Attempted to load {type_str} model, IC-Light is only compatible with SD 1.5 models.")
 
-        print("LoadAndApplyICLightUnet: Checking and Loading IC-Light Unet path")
+        print("LoadAndApplyICLightUnet: Checking IC-Light Unet path")
         model_full_path = folder_paths.get_full_path("unet", model_path)
         if not os.path.exists(model_full_path):
             raise Exception("Invalid model path")
@@ -52,9 +53,9 @@ Used with ICLightConditioning -node
             model_clone = model.clone()
 
             iclight_state_dict = load_torch_file(model_full_path)
-
+            
             print("LoadAndApplyICLightUnet: Attempting to add patches with IC-Light Unet weights")
-            try:
+            try:          
                 if 'conv_in.weight' in iclight_state_dict:
                     iclight_state_dict = convert_iclight_unet(iclight_state_dict)
                     in_channels = iclight_state_dict["diffusion_model.input_blocks.0.0.weight"].shape[1]
@@ -72,20 +73,23 @@ Used with ICLightConditioning -node
 
             #Patch ComfyUI's LoRA weight application to accept multi-channel inputs. Thanks @huchenlei
             try:
-                ModelPatcher.calculate_weight = calculate_weight_adjust_channel(ModelPatcher.calculate_weight)
-            except:
-                raise Exception("IC-Light: Could not patch calculate_weight")
+                if hasattr(lora, 'calculate_weight'):
+                    lora.calculate_weight = calculate_weight_adjust_channel(lora.calculate_weight)
+                else:
+                    raise Exception("IC-Light: The 'calculate_weight' function does not exist in 'lora'")
+            except Exception as e:
+                raise Exception(f"IC-Light: Could not patch calculate_weight - {str(e)}")
+            
             # Mimic the existing IP2P class to enable extra_conds
             def bound_extra_conds(self, **kwargs):
                  return ICLight.extra_conds(self, **kwargs)
             new_extra_conds = types.MethodType(bound_extra_conds, model_clone.model)
             model_clone.add_object_patch("extra_conds", new_extra_conds)
+            
 
-
-            model_clone.model.model_config.unet_config["in_channels"] = in_channels
+            model_clone.model.model_config.unet_config["in_channels"] = in_channels        
 
             return (model_clone, )
-
 
 import comfy
 class ICLight:
@@ -448,6 +452,16 @@ class DetailTransfer:
     FUNCTION = "process"
     CATEGORY = "IC-Light"
 
+    def adjust_mask(self, mask, target_tensor):
+        # Add a channel dimension and repeat to match the channel number of the target tensor
+        if len(mask.shape) == 3:
+            mask = mask.unsqueeze(1)  # Add a channel dimension
+            target_channels = target_tensor.shape[1]
+            mask = mask.expand(-1, target_channels, -1, -1)  # Expand the channel dimension to match the target tensor's channels
+    
+        return mask
+
+
     def process(self, target, source, mode, blur_sigma, blend_factor, mask=None):
         B, H, W, C = target.shape
         device = model_management.get_torch_device()
@@ -494,6 +508,8 @@ class DetailTransfer:
         
         tensor_out = torch.lerp(target_tensor, tensor_out, blend_factor)
         if mask is not None:
+            # Call the function and pass in mask and target_tensor
+            mask = self.adjust_mask(mask, target_tensor)
             mask = mask.to(device)
             tensor_out = torch.lerp(target_tensor, tensor_out, mask)
         tensor_out = torch.clamp(tensor_out, 0, 1)
