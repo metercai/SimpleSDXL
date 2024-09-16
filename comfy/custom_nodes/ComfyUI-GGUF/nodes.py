@@ -147,8 +147,7 @@ class GGUFModelPatcher(comfy.model_patcher.ModelPatcher):
         if is_quantized(weight):
             out_weight = weight.to(device_to)
             patches = move_patch_to_device(patches, self.load_device if self.patch_on_device else self.offload_device)
-            # TODO: do we ever have legitimate duplicate patches? (i.e. patch on top of patched weight)
-            out_weight.patches = [(calculate_weight, patches, key)]
+            out_weight.patches.append((calculate_weight, patches, key))
         else:
             inplace_update = self.weight_inplace_update or inplace_update
             if key not in self.backup:
@@ -178,34 +177,12 @@ class GGUFModelPatcher(comfy.model_patcher.ModelPatcher):
                 if len(patches) > 0:
                     p.patches = []
         # TODO: Find another way to not unload after patches
+        device_to = device_to if comfy.model_management.DISABLE_SMART_MEMORY else None
         return super().unpatch_model(device_to=device_to, unpatch_weights=unpatch_weights)
 
-    mmap_released = False
     def load(self, *args, force_patch_weights=False, **kwargs):
         # always call `patch_weight_to_device` even for lowvram
-        super().load(*args, force_patch_weights=True, **kwargs)
-
-        # make sure nothing stays linked to mmap after first load
-        if not self.mmap_released:
-            linked = []
-            if kwargs.get("lowvram_model_memory", 0) > 0:
-                for n, m in self.model.named_modules():
-                    if hasattr(m, "weight"):
-                        device = getattr(m.weight, "device", None)
-                        if device == self.offload_device:
-                            linked.append((n, m))
-                            continue
-                    if hasattr(m, "bias"):
-                        device = getattr(m.bias, "device", None)
-                        if device == self.offload_device:
-                            linked.append((n, m))
-                            continue
-            if linked:
-                print(f"Attempting to release mmap ({len(linked)})")
-                for n, m in linked:
-                    # TODO: possible to OOM, find better way to detach
-                    m.to(self.load_device).to(self.offload_device)
-            self.mmap_released = True
+        return super().load(*args, force_patch_weights=True, **kwargs)
 
     def clone(self, *args, **kwargs):
         n = GGUFModelPatcher(self.model, self.load_device, self.offload_device, self.size, weight_inplace_update=self.weight_inplace_update)
