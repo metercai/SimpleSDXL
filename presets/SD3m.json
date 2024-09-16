@@ -1,7 +1,6 @@
 { 
     "default_engine": {
 	"backend_engine": "SD3m",
-	"task_method": "sd3_base",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
 	"available_aspect_ratios_selection": "Common",

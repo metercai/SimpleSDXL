@@ -194,7 +194,7 @@ class AsyncTask:
                     "lora_1": self.loras[0][0],
                     "lora_1_strength": self.loras[0][1],
                     })
-            if len(self.loras) > 1 and self.task_name in ['Kolors+']:
+            if len(self.loras) > 1 and (self.task_name in ['Kolors+'] or 'base2_gguf' in self.task_method):
                 self.params_backend.update({
                     "lora_2": self.loras[1][0],
                     "lora_2_strength": self.loras[1][1],

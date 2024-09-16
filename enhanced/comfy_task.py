@@ -179,7 +179,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             base_model = model_nf4 if sysinfo["gpu_memory"]<=VRAM8G1 else model_dev
             if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model) and modelsinfo.exists_model(catalog="checkpoints", model_path=model_hyp8):
                 base_model = model_hyp8
-                default_params['steps'] = 8
+                default_params['steps'] = 12
             default_params['base_model'] = base_model  
         base_model_key = f'checkpoints/{base_model}'
         if 'nf4' in base_model.lower() and 'bnb' in base_model.lower():

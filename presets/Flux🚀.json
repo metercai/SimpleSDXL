@@ -1,10 +1,12 @@
 { 
     "default_engine": {
 	"backend_engine": "Flux",
-	"task_method": "flux_base",
 	"disvisible": ["backend_selection", "performance_selection", "negative_prompt"],
-	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "negative_prompt", "loras-4", "refiner_model" ],
-	"available_aspect_ratios_selection": "Flux"
+	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "negative_prompt", "loras-3", "refiner_model" ],
+	"available_aspect_ratios_selection": "Flux",
+	"backend_params": {
+            "task_method": "flux_base2_gguf"
+            }
     	},
     "default_model": "flux-hyp8-Q5_K_M.gguf",
     "default_refiner": "None",
