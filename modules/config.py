@@ -810,7 +810,7 @@ reference = ''
 
 default_describe_apply_prompts_checkbox = get_config_item_or_set_default(
     key='default_describe_apply_prompts_checkbox',
-    default_value=True,
+    default_value=False,
     validator=lambda x: isinstance(x, bool),
     expected_type=bool
 )
