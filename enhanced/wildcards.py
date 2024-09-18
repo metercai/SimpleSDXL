@@ -117,7 +117,10 @@ def get_words_of_wildcard_samples(wildcard="root"):
 def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
     global wildcards
 
-    words = wildcards[wildcard]
+    if wildcard is None or wildcard=='':
+        words = []
+    else:
+        words = wildcards[wildcard]
     words_result = []
     number0 = number
     if method=='L' or method=='l':
@@ -257,7 +260,7 @@ def get_words(arrays, totalMult, index):
 
 
 def apply_arrays(text, index, arrays, mult):
-    if len(arrays) == 0:
+    if len(arrays) == 0 or mult == 0:
         return text
     
     tags = array_regex1.findall(text)

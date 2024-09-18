@@ -273,7 +273,6 @@ def check_download_kolors_model(path_root):
         shutil.move(os.path.join(path_temp, 'SimpleModels/diffusers/Kolors'), config.paths_diffusers[0])
         os.remove(downfile)
         shutil.rmtree(path_temp)
-        modelsinfo.refresh_from_path()
     
     if not modelsinfo.exists_model_key(check_model_file[1]):
         path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')

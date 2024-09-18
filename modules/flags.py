@@ -267,6 +267,8 @@ default_class_params = {
         },
     }
 
+get_engine_default_params = lambda x: default_class_params['Fooocus'] if x not in default_class_params else default_class_params[x]
+get_engine_default_backend_params = lambda x: get_engine_default_params(x).get('backend_params', default_class_params['Fooocus']['backend_params'])
 
 class MetadataScheme(Enum):
     FOOOCUS = 'fooocus'

@@ -43,7 +43,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.19"
-    REINSTALL_BASE = False
+    REINSTALL_BASE = True
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
