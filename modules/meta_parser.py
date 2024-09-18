@@ -56,15 +56,17 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
     sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
     scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
-    base_model_list = modules.config.get_base_model_list(template_engine)
 
-    params_backend  = enginedata_dict.get('backend_params', default_params.get('backend_params', default_class_params['Fooocus']['backend_params']))
+    params_backend  = enginedata_dict.get('backend_params', modules.flags.get_engine_default_backend_params(template_engine))
     params_backend.update({'backend_engine': template_engine})
+    task_method = params_backend.get('task_method', None)
+    base_model_list = modules.config.get_base_model_list(template_engine, task_method)
+
     results = [params_backend]
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
-    results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
+    results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_choices_visible_inter(base_model_list, 'base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
@@ -98,7 +100,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
     if isinstance(raw_metadata, str):
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
-    
+   
     results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
@@ -334,20 +336,6 @@ def get_lora(key: str, fallback: str | None, source_dict: dict, results: list, p
         results.append('None')
         results.append(1)
 
-def get_loras_simple(loras: dict, results: list):
-    nums = len(loras) if len(loras) <= modules.config.default_max_lora_number else modules.config.default_max_lora_number
-    loras = loras[:nums]
-    for n, w in loras:
-        results.append(True)
-        results.append(n)
-        results.append(float(w))
-    if nums < modules.config.default_max_lora_number:
-        for i in range(modules.config.default_max_lora_number - nums):
-            results.append(True)
-            results.append('None')
-            results.append(1)
- 
-
 
 def get_sha256(filepath):
     global hash_cache
@@ -430,19 +418,19 @@ class MetadataParser(ABC):
         self.base_model_name = Path(base_model_name).stem
 
         if base_model_name not in ['', 'None']:
-            base_model_path = get_file_from_folder_list(base_model_name, modules.config.paths_checkpoints)
-            self.base_model_hash = sha256_from_cache(base_model_path)
+            base_model_path = modelsinfo.get_model_filepath('checkpoints', base_model_name)
+            self.base_model_hash = modelsinfo.get_file_muid(base_model_path)
 
         if refiner_model_name not in ['', 'None']:
             self.refiner_model_name = Path(refiner_model_name).stem
-            refiner_model_path = get_file_from_folder_list(refiner_model_name, modules.config.paths_checkpoints)
-            self.refiner_model_hash = sha256_from_cache(refiner_model_path)
+            refiner_model_path = modelsinfo.get_model_filepath('checkpoints', refiner_model_name)
+            self.refiner_model_hash = modelsinfo.get_file_muid(refiner_model_path)
 
         self.loras = []
         for (lora_name, lora_weight) in loras:
             if lora_name != 'None':
-                lora_path = get_file_from_folder_list(lora_name, modules.config.paths_loras)
-                lora_hash = sha256_from_cache(lora_path)
+                lora_path = modelsinfo.get_model_filepath('loras', lora_name)
+                lora_hash = modelsinfo.get_file_muid(lora_path)
                 self.loras.append((Path(lora_name).stem, lora_weight, lora_hash))
         self.vae_name = Path(vae_name).stem
         if styles_definition != 'None':
@@ -726,6 +714,8 @@ class SIMPLEMetadataParser(MetadataParser):
         model_filenames = modules.config.get_base_model_list(engine)
         for key, value in metadata.items():
             if value in ['', 'None']:
+                if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
+                    metadata[key] = 'None'
                 continue
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
                 metadata[key] = self.replace_value_with_filename(key, value, model_filenames)

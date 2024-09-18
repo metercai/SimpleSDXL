@@ -994,7 +994,8 @@ with shared.gradio_root:
 
                 def refresh_files_clicked(state_params):
                     engine = state_params.get('engine', 'Fooocus')
-                    model_filenames, lora_filenames, vae_filenames = modules.config.update_files(engine)
+                    task_method = state_params.get('task_method', None)
+                    model_filenames, lora_filenames, vae_filenames = modules.config.update_files(engine, task_method)
                     results = [gr.update(choices=model_filenames)]
                     results += [gr.update(choices=['None'] + model_filenames)]
                     results += [gr.update(choices=[flags.default_vae] + vae_filenames)]

@@ -33,7 +33,6 @@ class AsyncTask:
         args.reverse()
         self.generate_image_grid = args.pop()
         self.prompt = normalize_lines(args.pop())
-        print(f'reciver prompt:{self.prompt}')
         self.negative_prompt = args.pop()
         self.style_selections = args.pop()
 
@@ -180,7 +179,7 @@ class AsyncTask:
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
         #print(f'task_class={self.task_class}, task_name={self.task_name}, task_method={self.task_method}')
-        if 'layer' in self.current_tab and self.input_image_checkbox:
+        if 'layer' in self.current_tab and self.task_class == 'Fooocus' and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
             self.task_method = self.layer_method

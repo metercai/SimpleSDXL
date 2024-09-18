@@ -16,7 +16,7 @@ def init_modelsinfo(models_root, path_map):
     global modelsinfo, modelsinfo_filename
     models_info_path = os.path.abspath(os.path.join(models_root, modelsinfo_filename))
     if not modelsinfo:
-        modelsinfo = ModelsInfo(models_info_path, path_map)
+        modelsinfo = ModelsInfo(models_info_path, path_map, True)
     return modelsinfo
 
 def reset_simpleai_args():
@@ -26,7 +26,9 @@ def reset_simpleai_args():
         xformers_version=xformers_version,
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}'], ['--disable-smart-memory']] + ([["--windows-standalone-build"]] if is_win32_standalone_build else [])
+    smart_memory = [] if shared.sysinfo['gpu_memory']<8180 else [['--disable-smart-memory']]
+    windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
     #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd

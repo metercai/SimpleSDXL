@@ -986,18 +986,20 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
     return files
 
 
-def get_base_model_list(engine='Fooocus'):
+def get_base_model_list(engine='Fooocus', task_method=None):
     global modelsinfo
     file_filter = modules.flags.model_file_filter.get(engine, [])
     base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
     if engine in ['Fooocus', 'Comfy']:
         base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)
+    elif task_method == 'flux_base2_gguf':
+        base_model_list = [f for f in base_model_list if ("hyp8" in f or "hyp16" in f) and f.endswith("gguf")]
     return base_model_list
 
-def update_files(engine='Fooocus'):
+def update_files(engine='Fooocus', task_method=None):
     global modelsinfo, model_filenames, lora_filenames, vae_filenames, wildcard_filenames, available_presets
     modelsinfo.refresh_from_path()
-    model_filenames = get_base_model_list(engine)
+    model_filenames = get_base_model_list(engine, task_method)
     lora_filenames = modelsinfo.get_model_names('loras')
     vae_filenames = modelsinfo.get_model_names('vae')
     wildcard_filenames = get_files_from_folder(path_wildcards, ['.txt'])

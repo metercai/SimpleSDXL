@@ -370,6 +370,9 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
 
+    task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
+    state_params.update({"task_method": task_method})
+
     if comfyd_active_checkbox:
         comfyd.stop()
    

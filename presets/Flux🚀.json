@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Flux",
 	"disvisible": ["backend_selection", "performance_selection", "negative_prompt"],
-	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "negative_prompt", "base_model", "loras-3", "refiner_model" ],
+	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "negative_prompt", "loras-3", "refiner_model" ],
 	"available_aspect_ratios_selection": "Flux",
 	"backend_params": {
             "task_method": "flux_base2_gguf"
