@@ -16,7 +16,7 @@ def init_modelsinfo(models_root, path_map):
     global modelsinfo, modelsinfo_filename
     models_info_path = os.path.abspath(os.path.join(models_root, modelsinfo_filename))
     if not modelsinfo:
-        modelsinfo = ModelsInfo(models_info_path, path_map, True)
+        modelsinfo = ModelsInfo(models_info_path, path_map)
     return modelsinfo
 
 def reset_simpleai_args():

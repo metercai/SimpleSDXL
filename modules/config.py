@@ -1216,4 +1216,3 @@ def downloading_hydit_model():
     return os.path.join(paths_checkpoints[0], 'hunyuan_dit_1.2.safetensors')
 
 update_files()
-modelsinfo.refresh_from_path(scan_hash=True)
