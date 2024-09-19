@@ -146,7 +146,7 @@ def inpaint_mode_change(mode, inpaint_engine_version):
             gr.Dataset.update(visible=False, samples=modules.config.example_inpaint_prompts),
             True, inpaint_engine_version, 1.0, 0.0
         ]
-
+    
     return [
         gr.update(visible=False, value=''), gr.update(visible=True),
         gr.Dataset.update(visible=False, samples=modules.config.example_inpaint_prompts),
@@ -1175,11 +1175,15 @@ with shared.gradio_root:
         ], show_progress=False, queue=False)
 
         # load configured default_inpaint_method
-        default_inpaint_ctrls = [inpaint_mode, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field]
-        for mode, disable_initial_latent, engine, strength, respective_field in [default_inpaint_ctrls] + enhance_inpaint_update_ctrls:
-            shared.gradio_root.load(inpaint_mode_change, inputs=[mode, inpaint_engine_state], outputs=[
-                inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, disable_initial_latent,
-                engine, strength, respective_field
+        # default_inpaint_ctrls = [inpaint_mode, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field]
+        shared.gradio_root.load(inpaint_mode_change, inputs=[inpaint_mode, inpaint_engine_state], outputs=[
+                inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, 
+                inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field
+            ], show_progress=False, queue=False)
+
+        for mode, disable_initial_latent, engine, strength, respective_field in enhance_inpaint_update_ctrls:
+            shared.gradio_root.load(enhance_inpaint_mode_change, inputs=[mode, inpaint_engine_state], outputs=[
+                disable_initial_latent, engine, strength, respective_field
             ], show_progress=False, queue=False)
 
         generate_mask_button.click(fn=generate_mask,

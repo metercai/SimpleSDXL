@@ -9,15 +9,14 @@ from build_launcher import is_win32_standalone_build
 
 #utils.echo_off = False
 args_comfyd = [[]]
-modelsinfo = None #get_modelsinfo()
 modelsinfo_filename = 'models_info.json'
 
 def init_modelsinfo(models_root, path_map):
-    global modelsinfo, modelsinfo_filename
+    global modelsinfo_filename
     models_info_path = os.path.abspath(os.path.join(models_root, modelsinfo_filename))
-    if not modelsinfo:
-        modelsinfo = ModelsInfo(models_info_path, path_map)
-    return modelsinfo
+    if not shared.modelsinfo:
+        shared.modelsinfo = ModelsInfo(models_info_path, path_map)
+    return shared.modelsinfo
 
 def reset_simpleai_args():
     global args_comfyd

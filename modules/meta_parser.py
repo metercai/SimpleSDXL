@@ -12,8 +12,8 @@ import modules.config
 import modules.sdxl_styles
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
-from modules.util import quote, unquote, extract_styles_from_prompt, is_json, get_file_from_folder_list, sha256
-from enhanced.simpleai import modelsinfo
+from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256
+from shared import modelsinfo
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 
@@ -102,7 +102,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
     assert isinstance(loaded_parameter_dict, dict)
    
     results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
-
+    
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
     get_str('negative_prompt', 'Negative Prompt', loaded_parameter_dict, results)
@@ -360,6 +360,10 @@ def parse_meta_from_preset(preset_content):
             if settings_key in items:
                 loras = items[settings_key]
             for index, lora in enumerate(loras[:modules.config.default_max_lora_number]):
+                if len(lora) == 2:
+                    lora[0] = lora[0].replace('\\', os.sep).replace('/', os.sep)
+                elif  len(lora) == 3:
+                    lora[1] = lora[1].replace('\\', os.sep).replace('/', os.sep)
                 preset_prepared[f'lora_combined_{index + 1}'] = ' : '.join(map(str, lora))
         elif settings_key == "default_aspect_ratio":
             if settings_key in items and items[settings_key] is not None:
@@ -377,6 +381,8 @@ def parse_meta_from_preset(preset_content):
 
         if settings_key == "default_styles" or settings_key == "default_aspect_ratio":
             preset_prepared[meta_key] = str(preset_prepared[meta_key])
+        if settings_key in ["default_model", "default_refiner"]:
+            preset_prepared[meta_key] = preset_prepared[meta_key].replace('\\', os.sep).replace('/', os.sep)
 
     return preset_prepared
 

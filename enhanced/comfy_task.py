@@ -2,8 +2,8 @@ import os
 import zipfile
 import shutil
 import modules.config as config
-from shared import sysinfo
-from enhanced.simpleai import ComfyTaskParams, modelsinfo 
+from shared import sysinfo, modelsinfo
+from enhanced.simpleai import ComfyTaskParams
 from modules.model_loader import load_file_from_url
 
 default_method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
