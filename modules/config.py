@@ -324,7 +324,7 @@ default_loras = get_config_item_or_set_default(
         or len(y) == 2 and isinstance(y[0], str) and isinstance(y[1], numbers.Number)
         for y in x)
 )
-default_loras = [(y[0], y[1], y[2]) if len(y) == 3 else (True, y[0], y[1]) for y in default_loras]
+default_loras = [(y[0], y[1].replace('\\', os.sep).replace('/', os.sep), y[2]) if len(y) == 3 else (True, y[0].replace('\\', os.sep).replace('/', os.sep), y[1]) for y in default_loras]
 default_max_lora_number = get_config_item_or_set_default(
     key='default_max_lora_number',
     default_value=len(default_loras) if isinstance(default_loras, list) and len(default_loras) > 0 else ads.default['max_lora_number'],
@@ -359,7 +359,8 @@ default_base_model_name = default_model = get_config_item_or_set_default(
     default_value='model.safetensors',
     validator=lambda x: isinstance(x, str),
     expected_type=str
-)
+).replace('\\', os.sep).replace('/', os.sep)
+
 previous_default_models = get_config_item_or_set_default(
     key='previous_default_models',
     default_value=[],
@@ -371,7 +372,8 @@ default_refiner_model_name = default_refiner = get_config_item_or_set_default(
     default_value='None',
     validator=lambda x: isinstance(x, str),
     expected_type=str
-)
+).replace('\\', os.sep).replace('/', os.sep)
+
 default_refiner_switch = get_config_item_or_set_default(
     key='default_refiner_switch',
     default_value=0.8,

@@ -43,7 +43,7 @@
     "default_aspect_ratio": "1152*896",
     "default_overwrite_step": 28,
     "checkpoint_downloads": {
-        "sd3_medium_incl_clips.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips_t5xxlfp8.safetensors"
+        "sd3_medium_incl_clips_t5xxlfp8.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips_t5xxlfp8.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {} 
