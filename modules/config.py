@@ -792,6 +792,13 @@ default_comfyd_active_checkbox = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, bool)
 )
 
+default_image_catalog_max_number = get_config_item_or_set_default(
+    key='default_image_catalog_max_number',
+    default_value=ads.default['image_catalog_max_number'],
+    validator=lambda x: isinstance(x, int),
+    expected_type=int
+)
+
 default_mixing_image_prompt_and_vary_upscale = get_config_item_or_set_default(
     key='default_mixing_image_prompt_and_vary_upscale',
     default_value=ads.default['mixing_image_prompt_and_vary_upscale'],
@@ -870,6 +877,7 @@ possible_preset_keys = {
     "default_mixing_image_prompt_and_inpaint": "mixing_image_prompt_and_inpaint",
     "default_backfill_prompt": "backfill_prompt",
     "default_translation_methods": "translation_methods",
+    "default_image_catalog_max_number": "image_catalog_max_number",
     "styles_definition": "styles_definition",
     "instruction": "instruction",
     "reference": "reference",

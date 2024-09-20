@@ -21,24 +21,29 @@ images_ads = {}
 image_types = ['.png', '.jpg', '.jpeg', '.webp']
 output_images_regex = re.compile(r'\d{4}-\d{2}-\d{2}')
 
-def refresh_output_list(max_per_page):
+def refresh_output_list(max_per_page, max_catalog):
     global image_types
 
     listdirs = [f for f in os.listdir(config.path_outputs) if output_images_regex.findall(f) and os.path.isdir(os.path.join(config.path_outputs,f))]
     if listdirs is None:
         return None
     listdirs1 = listdirs.copy()
+    total_nums = 0
     for index in listdirs:
         path_gallery = os.path.join(config.path_outputs, index)
         nums = len(util.get_files_from_folder(path_gallery, image_types, None))
+        total_nums += nums
         if nums > max_per_page:
             max_page_no = math.ceil(nums/max_per_page)
             for i in range(1,max_page_no+1):
                 listdirs1.append("{}/{}".format(index, str(i).zfill(len(str(max_page_no)))))
             listdirs1.remove(index)
     output_list = sorted([f[2:] for f in listdirs1], reverse=True)
-    print(f'[Gallery] Refresh_output_catalog: loaded {len(output_list)} images_catalogs.')
-    return output_list
+    pages = len(output_list)
+    display_max_pages = max_catalog
+    print(f'[Gallery] Refresh_output_catalog: A total of {total_nums} images and {pages} pages, displaying the latest {pages if pages<display_max_pages else display_max_pages} pages.')
+    output_list = output_list[:display_max_pages]
+    return output_list, total_nums, pages
 
 
 def images_list_update(choice, state_params):
