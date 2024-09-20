@@ -96,6 +96,7 @@ default = {
     'translation_methods': 'Third APIs',
     'backend': 'SDXL',
     'comfyd_active_checkbox': False,
+    'image_catalog_max_number': 65,
     'clip_skip': 2,
     'vae': 'Default (model)',
     'developer_debug_mode_checkbox': True

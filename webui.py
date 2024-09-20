@@ -234,7 +234,8 @@ with shared.gradio_root:
                     identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input, identity_vcode_input, state_topbar], outputs=state_topbar)
                     identity_confirm_button.click(simpleai.confirm_identity, inputs=[identity_phrase_input, state_topbar], outputs=state_topbar)
 
-                with gr.Accordion("Finished Images Index:", open=False, visible=False) as index_radio:
+                with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
+                    gallery_index_stat = gr.Textbox(value='', visible=False)
                     gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
             with gr.Group():
@@ -1022,9 +1023,11 @@ with shared.gradio_root:
                     prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=not args_manager.args.disable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
                     image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
+                    #finished_catalog_max_number = gr.Slider(label='Catalog Max Number', minimum=1, maximum=60, step=5, value=1)
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
+                    
                     
                     def sync_params_backend(v, params):
                         params.update({'translation_methods':v})
@@ -1279,6 +1282,8 @@ with shared.gradio_root:
             .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections, show_progress=False) \
             .then(fn=update_history_link, outputs=history_link) \
+            .then(lambda x: x['__finished_nums_pages'], inputs=state_topbar, outputs=gallery_index_stat, queue=False, show_progress=False) \
+            .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
 
         reset_button.click(lambda: [worker.AsyncTask(args=[]), False, gr.update(visible=True, interactive=True)] +
@@ -1349,7 +1354,9 @@ with shared.gradio_root:
                 .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
     prompt_delete_button.click(toolbox.toggle_note_box_delete, inputs=state_topbar, outputs=[params_note_info, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
-    params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False)
+    params_note_delete_button.click(toolbox.delete_image, inputs=state_topbar, outputs=[gallery, gallery_index, params_note_delete_button, params_note_box, state_topbar], show_progress=False) \
+            .then(lambda x: x['__finished_nums_pages'], inputs=state_topbar, outputs=gallery_index_stat, queue=False, show_progress=False) \
+            .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}')
     
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box, state_topbar], show_progress=False)
     params_note_regen_button.click(toolbox.reset_image_params, inputs=[state_topbar, state_is_generating, inpaint_mode], outputs=reset_preset_layout + reset_preset_func + load_data_outputs + [params_note_regen_button, params_note_box], show_progress=False)
@@ -1384,6 +1391,8 @@ with shared.gradio_root:
                       .then(topbar.sync_message, inputs=state_topbar, outputs=[state_topbar]) \
                       .then(lambda x: x, inputs=aspect_ratios_selections[0], outputs=aspect_ratios_selection, queue=False, show_progress=False) \
                       .then(lambda x: None, inputs=aspect_ratios_selections[0], queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}') \
+                      .then(lambda x: x['__finished_nums_pages'], inputs=state_topbar, outputs=gallery_index_stat, queue=False, show_progress=False) \
+                      .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
                       .then(fn=lambda: None, _js='refresh_grid_delayed')
 
 def dump_default_english_config():

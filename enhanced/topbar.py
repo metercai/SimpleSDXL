@@ -242,12 +242,19 @@ def init_nav_bars(state_params, request: gr.Request):
             state_params.update({"__max_per_page": 9})
         else:
             state_params.update({"__max_per_page": 18})
-    state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
+    if "__max_catalog" not in state_params.keys():
+        state_params.update({"__max_catalog": config.default_image_catalog_max_number })
+    max_per_page = state_params["__max_per_page"]
+    max_catalog = state_params["__max_catalog"]
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog)
+    state_params.update({"__output_list": output_list})
+    state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     state_params.update({"infobox_state": 0})
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
+    state_params.update({"init_process": 'finished'})
     results = refresh_nav_bars(state_params)
     results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
@@ -313,9 +320,13 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
 
 
 def process_after_generation(state_params):
-    if "__max_per_page" not in state_params.keys():
-        state_params.update({"__max_per_page": 18})
-    state_params.update({"__output_list": gallery_util.refresh_output_list(state_params["__max_per_page"])})
+    #if "__max_per_page" not in state_params.keys():
+    #    state_params.update({"__max_per_page": 18})
+    max_per_page = state_params["__max_per_page"]
+    max_catalog = state_params["__max_catalog"]
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog)
+    state_params.update({"__output_list": output_list})
+    state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio

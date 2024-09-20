@@ -90,6 +90,21 @@ function refresh_aspect_ratios_label(value) {
     label.textContent = translation + " - " + htmlDecode(value);
 }
 
+function refresh_finished_images_catalog_label(value) {
+    label = document.querySelector('#finished_images_catalog div span');
+    translation = getTranslation("Finished Images Catalog");
+    if (typeof translation == "undefined") {
+        translation = "Finished Images Catalog";
+    }
+    translation_stat = getTranslation("total: xxx images and yyy pages");
+    if (typeof translation_stat == "undefined") {
+        translation_stat = "total: xxx images and yyy pages";
+    }
+    xxx = value.split(",")[0]
+    yyy = value.split(",")[1]
+    label.textContent = translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
+}
+
 function localizeWholePage() {
     console.log("in localize")
     processNode(gradioApp());

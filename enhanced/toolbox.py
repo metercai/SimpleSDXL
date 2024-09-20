@@ -240,7 +240,9 @@ filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
 
 def delete_image(state_params):
     [choice, selected] = state_params["prompt_info"]
-    info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+    max_per_page = state_params["__max_per_page"]
+    max_catalog = state_params["__max_catalog"]
+    info = gallery.get_images_prompt(choice, selected, max_per_page)
     file_name = info["Filename"]
     output_index = choice.split('/')
     dir_path = os.path.join(config.path_outputs, "20{}".format(output_index[0]))
@@ -290,28 +292,41 @@ def delete_image(state_params):
         os.remove(log_path)
         os.rmdir(dir_path)
         index = state_params["__output_list"].index(choice)
-        state_params.update({"__output_list": gallery.refresh_output_list(state_params["__max_per_page"])})
+        output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog)
+        state_params.update({"__output_list": output_list})
+        state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
         if index>= len(state_params["__output_list"]):
             index = len(state_params["__output_list"]) -1
             if index<0:
                 index = 0
         choice = state_params["__output_list"][index]
-    elif image_list_nums < state_params["__max_per_page"]:
+    elif image_list_nums < max_per_page:
         if selected > image_list_nums-1:
             selected = image_list_nums-1
+        finished_nums_pages = state_params["__finished_nums_pages"]
+        finished_nums = int(finished_nums_pages.split(',')[0])-1
+        finished_pages = finished_nums_pages.split(',')[1]
+        state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     else:
-        if image_list_nums % state_params["__max_per_page"] == 0:
+        if image_list_nums % max_per_page == 0:
             page = int(output_index[1])
-            if page > image_list_nums//state_params["__max_per_page"]:
-                page = image_list_nums//state_params["__max_per_page"]
+            if page > image_list_nums//max_per_page:
+                page = image_list_nums//max_per_page
             if page == 1:
                 choice = output_index[0]
             else:
                 choice = output_index[0] + '/' + str(page)
-            state_params.update({"__output_list": gallery.refresh_output_list(state_params["__max_per_page"])})
+            output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog)
+            state_params.update({"__output_list": output_list})
+            state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
+        else:
+            finished_nums_pages = state_params["__finished_nums_pages"]
+            finished_nums = int(finished_nums_pages.split(',')[0])-1
+            finished_pages = finished_nums_pages.split(',')[1]
+            state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
 
     state_params.update({"prompt_info":[choice, selected]})
-    images_gallery = gallery.get_images_from_gallery_index(choice, state_params["__max_per_page"])
+    images_gallery = gallery.get_images_from_gallery_index(choice, max_per_page)
     state_params.update({"note_box_state": ['',0,0]})
     return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
 

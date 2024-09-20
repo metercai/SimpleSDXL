@@ -89,6 +89,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("backfill_prompt"))
     results.append(update_value_if_existed("translation_methods"))
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] else update_value_if_existed("input_image_checkbox"))
+    if 'image_catalog_max_number' in presetdata_dict:
+        state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
     results.append(state_params)
 
     return results
@@ -144,7 +146,6 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
 
     for i in range(modules.config.default_max_lora_number):
         get_lora(f'lora_combined_{i + 1}', f'LoRA {i + 1}', loaded_parameter_dict, results, performance_filename)
-
 
     return results
 
