@@ -32,7 +32,6 @@
     "default_prompt_negative": "",
     "default_styles": [
         "Fooocus V2",
-        "Fooocus Enhance",
         "Fooocus Sharp"
     ],
     "default_aspect_ratio": "1152*896",

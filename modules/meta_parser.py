@@ -104,7 +104,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
     assert isinstance(loaded_parameter_dict, dict)
    
     results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
-    
+
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
     get_str('negative_prompt', 'Negative Prompt', loaded_parameter_dict, results)
@@ -654,6 +654,7 @@ class FooocusMetadataParser(MetadataParser):
         return MetadataScheme.FOOOCUS
 
     def to_json(self, metadata: dict) -> dict:
+
         for key, value in metadata.items():
             if value in ['', 'None']:
                 continue
@@ -716,7 +717,6 @@ class SIMPLEMetadataParser(MetadataParser):
 
 
     def to_json(self, metadata: dict) -> dict:
-
         engine = get_taskclass_by_fullname(metadata.get('Backend Engine', metadata.get('backend_engine', task_class_mapping['Fooocus'])))
         model_filenames = modules.config.get_base_model_list(engine)
         for key, value in metadata.items():
@@ -726,6 +726,8 @@ class SIMPLEMetadataParser(MetadataParser):
                 continue
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
                 metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
+                if metadata[key]=='None':
+                    print(f'[MetaParser] ⚠️  WARNING! The model is not available in the local: {value}.')
             elif key.startswith('LoRA '):
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
             elif key in ['vae', 'VAE']:
@@ -817,6 +819,9 @@ def read_info_from_image(file) -> tuple[str | None, MetadataScheme | None]:
             parameters = params_lora_fixed(parameters)
 
     try:
+        if metadata_scheme == 'fooocus':
+            metadata_scheme = 'simple'
+            parameters.update({'metadata_scheme': 'simple'})
         metadata_scheme = MetadataScheme(metadata_scheme)
     except ValueError:
         metadata_scheme = None
@@ -827,7 +832,6 @@ def read_info_from_image(file) -> tuple[str | None, MetadataScheme | None]:
 
         if isinstance(parameters, str):
             metadata_scheme = MetadataScheme.A1111
-
     return parameters, metadata_scheme
 
 def params_lora_fixed(parameters):
