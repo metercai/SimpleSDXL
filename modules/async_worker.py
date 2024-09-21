@@ -458,8 +458,7 @@ def worker():
                 d.append(('CLIP Skip', 'clip_skip', async_task.clip_skip))
             d.append(('Sampler', 'sampler', async_task.sampler_name))
             d.append(('Scheduler', 'scheduler', async_task.scheduler_name))
-            if async_task.task_class == 'Fooocus':
-                d.append(('VAE', 'vae', async_task.vae_name))
+            d.append(('VAE', 'vae', async_task.vae_name))
             d.append(('Seed', 'seed', str(task['task_seed'])))
 
             if async_task.freeu_enabled:
