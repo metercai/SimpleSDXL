@@ -313,14 +313,6 @@ with shared.gradio_root:
             
             with gr.Row(visible=modules.config.default_image_prompt_checkbox) as image_input_panel:
                 with gr.Tabs(selected=modules.config.default_selected_image_input_tab_id):
-                    with gr.Tab(label='Upscale or Variation', id='uov_tab') as uov_tab:
-                        with gr.Row():
-                            with gr.Column():
-                                uov_input_image = grh.Image(label='Image', source='upload', type='numpy', show_label=False)
-                            with gr.Column():
-                                mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale', value=False)
-                                uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=modules.config.default_uov_method)
-                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Documentation</a>')
                     with gr.Tab(label='Image Prompt', id='ip_tab') as ip_tab:
                         with gr.Row():
                             ip_advanced = gr.Checkbox(label='Advanced Control', value=modules.config.default_image_prompt_advanced_checkbox, container=False)
@@ -353,6 +345,7 @@ with shared.gradio_root:
 
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
+
                         gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Documentation</a>')
 
                         def ip_advance_checked(x):
@@ -365,6 +358,23 @@ with shared.gradio_root:
                                            outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
                                            queue=False, show_progress=False)
 
+                    with gr.Tab(label='Upscale or Variation', id='uov_tab') as uov_tab:
+                        with gr.Row():
+                            with gr.Column():
+                                uov_input_image = grh.Image(label='Image', source='upload', type='numpy', show_label=False)
+                            with gr.Column():
+                                mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale', value=False)
+                                uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=modules.config.default_uov_method)
+                        with gr.Row():
+                            overwrite_upscale_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Upscale"',
+                                                               minimum=-1, maximum=1.0, step=0.001,
+                                                               value=modules.config.default_overwrite_upscale,
+                                                               info='Set as negative number to disable. For developer debugging.')
+                            overwrite_vary_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Vary"',
+                                                            minimum=-1, maximum=1.0, step=0.001, value=-1,
+                                                            info='Set as negative number to disable. For developer debugging.')
+                        gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Documentation</a>')
+                    
                     with gr.Tab(label='Inpaint or Outpaint', id='inpaint_tab') as inpaint_tab:
                         with gr.Row():
                             mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint', value=False, container=False)
@@ -380,7 +390,6 @@ with shared.gradio_root:
                                                                      label='Additional Prompt Quick List',
                                                                      components=[inpaint_additional_prompt],
                                                                      visible=False)
-                                gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Documentation</a>')
                                 example_inpaint_prompts.click(lambda x: x[0], inputs=example_inpaint_prompts, outputs=inpaint_additional_prompt, show_progress=False, queue=False)
 
                             with gr.Column(visible=modules.config.default_inpaint_advanced_masking_checkbox) as inpaint_mask_generation_col:
@@ -443,8 +452,22 @@ with shared.gradio_root:
                                                                    inpaint_mask_advanced_options,
                                                                    example_inpaint_mask_dino_prompt_text],
                                                           queue=False, show_progress=False)
-                    
-                    with gr.TabItem(label='Layer_iclight') as layer_tab:
+                        with gr.Row():
+                            inpaint_strength = gr.Slider(label='Inpaint Denoising Strength',
+                                                     minimum=0.0, maximum=1.0, step=0.001, value=1.0,
+                                                     info='Same as the denoising strength in A1111 inpaint. '
+                                                          'Only used in inpaint, not used in outpaint. '
+                                                          '(Outpaint always use 1.0)')
+                            inpaint_respective_field = gr.Slider(label='Inpaint Respective Field',
+                                                             minimum=0.0, maximum=1.0, step=0.001, value=0.618,
+                                                             info='The area to inpaint. '
+                                                                  'Value 0 is same as "Only Masked" in A1111. '
+                                                                  'Value 1 is same as "Whole Image" in A1111. '
+                                                                  'Only used in inpaint, not used in outpaint. '
+                                                                  '(Outpaint always use 1.0)')
+                        gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Documentation</a>') 
+
+                    with gr.TabItem(label='Layer_iclight', id='layer_tab') as layer_tab:
                         with gr.Row():
                             layer_method = gr.Radio(choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0], container=False)
                         with gr.Row():
@@ -652,14 +675,21 @@ with shared.gradio_root:
                         aspect_ratios_selection = gr.Textbox(value='', visible=False) 
                         aspect_ratios_selections = []
                         for template in flags.aspect_ratios_templates:
-                            aspect_ratios_selections.append(gr.Radio(label='Aspect Ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
+                            aspect_ratios_selections.append(gr.Radio(label='aspect ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
                         
                         for aspect_ratios_select in aspect_ratios_selections:
                             aspect_ratios_select.change(lambda x: x, inputs=aspect_ratios_select, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        overwrite_width = gr.Slider(label='Forced Overwrite of Generating Width',
+                                                    minimum=-1, maximum=2048, step=1, value=-1,
+                                                    info='Set as -1 to disable. For developer debugging. '
+                                                         'Results will be worse for non-standard numbers that SDXL is not trained on.')
+                        overwrite_height = gr.Slider(label='Forced Overwrite of Generating Height',
+                                                     minimum=-1, maximum=2048, step=1, value=-1)
+
                     output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
-
+                       
                 negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
                                              info='Describing what you do not want to see.', lines=2,
                                              elem_id='negative_prompt',
@@ -819,6 +849,10 @@ with shared.gradio_root:
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=0.01, maximum=30.0, step=0.01,
                                            value=modules.config.default_cfg_scale,
                                            info='Higher value means style is cleaner, vivider, and more artistic.')
+                overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
+                                                   minimum=-1, maximum=200, step=1,
+                                                   value=modules.config.default_overwrite_step,
+                                                   info='Set as -1 to disable. For developer debugging.')
                 sharpness = gr.Slider(label='Image Sharpness', minimum=0.0, maximum=30.0, step=0.001,
                                       value=modules.config.default_sample_sharpness,
                                       info='Higher value means image and texture are sharper.')
@@ -827,6 +861,10 @@ with shared.gradio_root:
 
                 with gr.Column(visible=modules.config.default_developer_debug_mode_checkbox) as dev_tools:
                     with gr.Tab(label='Debug Tools'):
+                        sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
+                                                   value=modules.config.default_sampler)
+                        scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
+                                                     value=modules.config.default_scheduler)
                         adm_scaler_positive = gr.Slider(label='Positive ADM Guidance Scaler', minimum=0.1, maximum=3.0,
                                                         step=0.001, value=1.5, info='The scaler multiplied to positive ADM (use 1.0 to disable). ')
                         adm_scaler_negative = gr.Slider(label='Negative ADM Guidance Scaler', minimum=0.1, maximum=3.0,
@@ -845,40 +883,16 @@ with shared.gradio_root:
                         clip_skip = gr.Slider(label='CLIP Skip', minimum=1, maximum=flags.clip_skip_max, step=1,
                                                  value=modules.config.default_clip_skip,
                                                  info='Bypass CLIP layers to avoid overfitting (use 1 to not skip any layers, 2 is recommended).')
-                        sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
-                                                   value=modules.config.default_sampler)
-                        scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
-                                                     value=modules.config.default_scheduler)
                         vae_name = gr.Dropdown(label='VAE', choices=[modules.flags.default_vae] + modules.config.vae_filenames,
                                                      value=modules.config.default_vae, show_label=True)
 
                         generate_image_grid = gr.Checkbox(label='Generate Image Grid for Each Batch',
                                                           info='(Experimental) This may cause performance problems on some computers and certain internet conditions.',
                                                           value=False)
-
-                        overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
-                                                   minimum=-1, maximum=200, step=1,
-                                                   value=modules.config.default_overwrite_step,
-                                                   info='Set as -1 to disable. For developer debugging.')
                         overwrite_switch = gr.Slider(label='Forced Overwrite of Refiner Switch Step',
                                                      minimum=-1, maximum=200, step=1,
                                                      value=modules.config.default_overwrite_switch,
                                                      info='Set as -1 to disable. For developer debugging.')
-                        overwrite_width = gr.Slider(label='Forced Overwrite of Generating Width',
-                                                    minimum=-1, maximum=2048, step=1, value=-1,
-                                                    info='Set as -1 to disable. For developer debugging. '
-                                                         'Results will be worse for non-standard numbers that SDXL is not trained on.')
-                        overwrite_height = gr.Slider(label='Forced Overwrite of Generating Height',
-                                                     minimum=-1, maximum=2048, step=1, value=-1,
-                                                     info='Set as -1 to disable. For developer debugging. '
-                                                          'Results will be worse for non-standard numbers that SDXL is not trained on.')
-                        overwrite_vary_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Vary"',
-                                                            minimum=-1, maximum=1.0, step=0.001, value=-1,
-                                                            info='Set as negative number to disable. For developer debugging.')
-                        overwrite_upscale_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Upscale"',
-                                                               minimum=-1, maximum=1.0, step=0.001,
-                                                               value=modules.config.default_overwrite_upscale,
-                                                               info='Set as negative number to disable. For developer debugging.')
 
                         disable_preview = gr.Checkbox(label='Disable Preview', value=modules.config.default_black_out_nsfw,
                                                       interactive=not modules.config.default_black_out_nsfw,
@@ -941,18 +955,6 @@ with shared.gradio_root:
                                                      value=modules.config.default_inpaint_engine_version,
                                                      choices=flags.inpaint_engine_versions,
                                                      info='Version of Fooocus inpaint model. If set, use performance Quality or Speed (no performance LoRAs) for best results.')
-                        inpaint_strength = gr.Slider(label='Inpaint Denoising Strength',
-                                                     minimum=0.0, maximum=1.0, step=0.001, value=1.0,
-                                                     info='Same as the denoising strength in A1111 inpaint. '
-                                                          'Only used in inpaint, not used in outpaint. '
-                                                          '(Outpaint always use 1.0)')
-                        inpaint_respective_field = gr.Slider(label='Inpaint Respective Field',
-                                                             minimum=0.0, maximum=1.0, step=0.001, value=0.618,
-                                                             info='The area to inpaint. '
-                                                                  'Value 0 is same as "Only Masked" in A1111. '
-                                                                  'Value 1 is same as "Whole Image" in A1111. '
-                                                                  'Only used in inpaint, not used in outpaint. '
-                                                                  '(Outpaint always use 1.0)')
                         inpaint_erode_or_dilate = gr.Slider(label='Mask Erode or Dilate',
                                                             minimum=-64, maximum=64, step=1, value=0,
                                                             info='Positive value will make white area in the mask larger, '
