@@ -409,6 +409,14 @@ div:has(> #positive_prompt) {
   overflow: auto; 
   padding-right: 2px;
   max-height: 100%;
+  scrollbar-width: thin;      /* Firefox */
+  -ms-overflow-style: none;   /* IE 和 Edge */
+}
+
+/* 针对Webkit内核浏览器（如Chrome、Safari） */
+#style_selections_tab::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .contain .tabs .tabitem.style_selections_tab .style_selections .wrap[data-testid="checkbox-group"] label {
@@ -560,17 +568,17 @@ div.prose.tokenCounter {
   position: sticky;   /* 设为sticky */
   top: 0;             /* 设置sticky的顶部位置 */
   
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* IE 和 Edge */
+  scrollbar-width: thin;      /* Firefox */
+  -ms-overflow-style: none;   /* IE 和 Edge */
 }
 
 /* 针对Webkit内核浏览器（如Chrome、Safari） */
 #scrollable-box::-webkit-scrollbar {
-    width: 0;
-    height: 0;
+    width: 5px;
 }
 #scrollable-box::-webkit-scrollbar-thumb {
     background-color: transparent;
+    border-radius: 10px;
 }
 #scrollable-box::-webkit-scrollbar-track {
     background-color: transparent;

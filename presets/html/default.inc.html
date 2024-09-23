@@ -69,13 +69,12 @@ set_text_color(params);
 
 function set_text_color(info) {
     pos1 = document.getElementById("descr");
-    pos2 = document.getElementById("more");
-    if (info.theme == "dark") {
-        pos1.style.color = "#f9fafb";
-        pos2.style.color = "#f9fafb";
-    } else {
-        pos1.style.color = "#1f2937";
-        pos2.style.color = "#1f2937";
+    if (pos1) {
+	if (info.theme == "dark") {
+            pos1.style.color = "#f9fafb";
+    	} else {
+            pos1.style.color = "#1f2937";
+    	}
     }
 }
 
