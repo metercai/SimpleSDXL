@@ -19,7 +19,7 @@ Q_alphabet = 'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖ
 B_alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 translator_org = ['baidu', 'alibaba', 'sogou', 'caiyun']
-translator_default = translator_org[random.randint(0,2)]
+translator_default = translator_org[random.randint(1,2)]
 translator_path = os.path.join(paths_llms[0], 'nllb-200-distilled-600M')
 translator_slim_path = os.path.join(paths_llms[0], 'Helsinki-NLP/opus-mt-zh-en')
 is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
@@ -81,7 +81,7 @@ def translate2en_apis(text):
     except Exception as e:
         try:
             print(f'[Translator] Change another translator because of {e}')
-            translator_default = translator_org[random.randint(0,2)]
+            translator_default = translator_org[random.randint(1,2)]
             return ts.translate_text(text, translator=translator_default, to_language='en')
         except Exception as e:
             print(f'[Translator] Error during translation of APIs methods: {e}')

@@ -382,7 +382,7 @@ with shared.gradio_root:
                             invert_mask_checkbox = gr.Checkbox(label='Invert Mask When Generating', value=modules.config.default_invert_mask_checkbox, container=False)
                         with gr.Row():
                             with gr.Column():
-                                inpaint_input_image = grh.Image(label='Image', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas', show_label=False)
+                                inpaint_input_image = grh.Image(label='Image', source='upload', type='numpy', tool='sketch', height=350, brush_color="#FFFFFF", elem_id='inpaint_canvas', show_label=False)
                                 inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.config.default_inpaint_method, label='Method')
                                 inpaint_additional_prompt = gr.Textbox(placeholder="Describe what you want to inpaint.", elem_id='inpaint_additional_prompt', label='Inpaint Additional Prompt', visible=False)
                                 outpaint_selections = gr.CheckboxGroup(choices=['Left', 'Right', 'Top', 'Bottom'], value=[], label='Outpaint Direction')
@@ -393,7 +393,7 @@ with shared.gradio_root:
                                 example_inpaint_prompts.click(lambda x: x[0], inputs=example_inpaint_prompts, outputs=inpaint_additional_prompt, show_progress=False, queue=False)
 
                             with gr.Column(visible=modules.config.default_inpaint_advanced_masking_checkbox) as inpaint_mask_generation_col:
-                                inpaint_mask_image = grh.Image(label='Mask Upload', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", mask_opacity=1, elem_id='inpaint_mask_canvas')
+                                inpaint_mask_image = grh.Image(label='Mask Upload', source='upload', type='numpy', tool='sketch', height=350, brush_color="#FFFFFF", mask_opacity=1, elem_id='inpaint_mask_canvas')
                                 inpaint_mask_model = gr.Dropdown(label='Mask generation model',
                                                                  choices=flags.inpaint_mask_models,
                                                                  value=modules.config.default_inpaint_mask_model)
@@ -418,40 +418,6 @@ with shared.gradio_root:
                                     inpaint_mask_text_threshold = gr.Slider(label="Text Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.05)
                                     inpaint_mask_sam_max_detections = gr.Slider(label="Maximum number of detections", info="Set to 0 to detect all", minimum=0, maximum=10, value=modules.config.default_sam_max_detections, step=1, interactive=True)
                                 generate_mask_button = gr.Button(value='Generate mask from image')
-
-                                def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug, params_extra):
-                                    from extras.inpaint_mask import generate_mask_from_image
-
-                                    extras = {}
-                                    sam_options = None
-                                    if mask_model == 'u2net_cloth_seg':
-                                        extras['cloth_category'] = cloth_category
-                                    elif mask_model == 'sam':
-                                        sam_options = SAMOptions(
-                                            dino_prompt=translator.convert(dino_prompt_text, params_extra['translation_methods']),
-                                            dino_box_threshold=box_threshold,
-                                            dino_text_threshold=text_threshold,
-                                            dino_erode_or_dilate=dino_erode_or_dilate,
-                                            dino_debug=dino_debug,
-                                            max_detections=sam_max_detections,
-                                            model_type=sam_model
-                                        )
-
-                                    mask, _, _, _ = generate_mask_from_image(image, mask_model, extras, sam_options)
-
-                                    return mask
-
-
-                                inpaint_mask_model.change(lambda x: [gr.update(visible=x == 'u2net_cloth_seg')] +
-                                                                    [gr.update(visible=x == 'sam')] * 2 +
-                                                                    [gr.Dataset.update(visible=x == 'sam',
-                                                                                       samples=modules.config.example_enhance_detection_prompts)],
-                                                          inputs=inpaint_mask_model,
-                                                          outputs=[inpaint_mask_cloth_category,
-                                                                   inpaint_mask_dino_prompt_text,
-                                                                   inpaint_mask_advanced_options,
-                                                                   example_inpaint_mask_dino_prompt_text],
-                                                          queue=False, show_progress=False)
                         with gr.Row():
                             inpaint_strength = gr.Slider(label='Inpaint Denoising Strength',
                                                      minimum=0.0, maximum=1.0, step=0.001, value=1.0,
@@ -465,7 +431,41 @@ with shared.gradio_root:
                                                                   'Value 1 is same as "Whole Image" in A1111. '
                                                                   'Only used in inpaint, not used in outpaint. '
                                                                   '(Outpaint always use 1.0)')
-                        gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Documentation</a>') 
+                        gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Documentation</a>')
+                        
+                        def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug, params_extra):
+                            from extras.inpaint_mask import generate_mask_from_image
+
+                            extras = {}
+                            sam_options = None
+                            if mask_model == 'u2net_cloth_seg':
+                                extras['cloth_category'] = cloth_category
+                            elif mask_model == 'sam':
+                                sam_options = SAMOptions(
+                                    dino_prompt=translator.convert(dino_prompt_text, params_extra['translation_methods']),
+                                    dino_box_threshold=box_threshold,
+                                    dino_text_threshold=text_threshold,
+                                    dino_erode_or_dilate=dino_erode_or_dilate,
+                                    dino_debug=dino_debug,
+                                    max_detections=sam_max_detections,
+                                    model_type=sam_model
+                                )
+
+                            mask, _, _, _ = generate_mask_from_image(image, mask_model, extras, sam_options)
+
+                            return mask
+
+
+                        inpaint_mask_model.change(lambda x: [gr.update(visible=x == 'u2net_cloth_seg')] +
+                                                                    [gr.update(visible=x == 'sam')] * 2 +
+                                                                    [gr.Dataset.update(visible=x == 'sam',
+                                                                                       samples=modules.config.example_enhance_detection_prompts)],
+                                                          inputs=inpaint_mask_model,
+                                                          outputs=[inpaint_mask_cloth_category,
+                                                                   inpaint_mask_dino_prompt_text,
+                                                                   inpaint_mask_advanced_options,
+                                                                   example_inpaint_mask_dino_prompt_text],
+                                                          queue=False, show_progress=False)
 
                     with gr.TabItem(label='Layer_iclight', id='layer_tab') as layer_tab:
                         with gr.Row():
@@ -656,20 +656,20 @@ with shared.gradio_root:
 
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
-            current_tab = gr.Textbox(value='uov', visible=False)
+            current_tab = gr.Textbox(value='ip', visible=False)
 
-        with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
-            with gr.Tab(label='Setting'):
+        with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox, elem_id="scrollable-box") as advanced_column:
+            with gr.Tab(label='Setting', elem_id="scrollable-box"):
                 preset_instruction = gr.HTML(visible=False, value=topbar.preset_instruction())
                 if not args_manager.args.disable_preset_selection:
                     preset_selection = gr.Radio(label='Preset',
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 visible=False, interactive=True)
-                performance_selection = gr.Radio(label='Performance',
+                with gr.Group():
+                    performance_selection = gr.Radio(label='Performance',
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
-                with gr.Group():
                     image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
                     with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
                         aspect_ratios_selection = gr.Textbox(value='', visible=False) 
@@ -690,12 +690,12 @@ with shared.gradio_root:
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
                        
-                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
+                    negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
                                              info='Describing what you do not want to see.', lines=2,
                                              elem_id='negative_prompt',
                                              value=modules.config.default_prompt_negative)
-                seed_random = gr.Checkbox(label='Random', value=True)
-                image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
+                    seed_random = gr.Checkbox(label='Random', value=True)
+                    image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
 
                 def random_checked(r):
                     return gr.update(visible=not r)
@@ -802,7 +802,7 @@ with shared.gradio_root:
                     lambda: None, _js='()=>{refresh_style_localization();}')
                 prompt.change(lambda x,y: calculateTokenCounter(x,y), inputs=[prompt, style_selections], outputs=prompt_token_counter)
 
-            with gr.Tab(label='Models'):
+            with gr.Tab(label='Models', elem_id="scrollable-box"):
                 with gr.Group():
                     with gr.Row():
                         base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
@@ -845,7 +845,7 @@ with shared.gradio_root:
                 #sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
                 #info_sync_button.click(toolbox.sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
 
-            with gr.Tab(label='Advanced'):
+            with gr.Tab(label='Advanced', elem_id="scrollable-box"):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=0.01, maximum=30.0, step=0.01,
                                            value=modules.config.default_cfg_scale,
                                            info='Higher value means style is cleaner, vivider, and more artistic.')
@@ -1015,7 +1015,7 @@ with shared.gradio_root:
                 refresh_files.click(refresh_files_clicked, [state_topbar], refresh_files_output + lora_ctrls,
                                     queue=False, show_progress=False)
 
-            with gr.Tab(label='Enhanced'):
+            with gr.Tab(label='Enhanced', elem_id="scrollable-box"):
                 with gr.Row(visible=False):
                     binding_id_button = gr.Button(value='Binding Identity', visible=True)
                 with gr.Row():
