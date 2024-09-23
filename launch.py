@@ -235,7 +235,7 @@ def reset_env_args():
     if shared.sysinfo["location"] == 'CN':
         os.environ['HF_MIRROR'] = 'hf-mirror.com'
         if '--language' not in sys.argv:
-            shared.args.language='default'
+            shared.args.language='cn'
 
     if '--listen' not in sys.argv:
         if is_ipynb():

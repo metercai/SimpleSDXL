@@ -65,21 +65,22 @@ function set_theme_by_ui(theme) {
     }
 }
 
-function set_iframe_src(theme, lang, url) {
-    const url_params = Object.fromEntries(new URLSearchParams(window.location.search));
-    var theme_ifr = url_params['__theme'] || theme;
-    var lang_ifr = url_params['__lang'] || lang;
-    var newIframeUrl = url;
-    if (newIframeUrl.includes('?')) {
-        newIframeUrl += '&';
-    } else {
-        newIframeUrl += '?';
-    }
-    newIframeUrl += "__theme="+theme_ifr+"&__lang="+lang_ifr;
-    const instruction = gradioApp().getElementById('instruction');
-    if (instruction!=null) {
-	    instruction.src = newIframeUrl;
-    }
+function set_iframe_src(theme = 'default', lang = 'cn', url) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('__theme') || theme;
+    const langParam = urlParams.get('__lang') || lang;
+
+    console.log("langParam:"+langParam)
+
+    // 构建新的iframe URL
+    const newIframeUrl = `${url}${url.includes('?') ? '&' : '?'}__theme=${themeParam}&__lang=${langParam}`;
+
+    // 获取iframe元素并设置src属性
+    const iframe = gradioApp().getElementById('instruction');
+    if (iframe) {
+        iframe.src = newIframeUrl;
+    } 
+
 }
 
 function closeSysMsg() {

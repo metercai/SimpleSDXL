@@ -775,7 +775,7 @@ class SIMPLEMetadataParser(MetadataParser):
             path = Path(filename)
             if key.startswith('LoRA '):
                 name, weight = value.split(' : ')
-                if name == path.stem:
+                if Path(name).stem == path.stem or name == path.stem:
                     return f'{filename} : {weight}'
             elif Path(value).stem == path.stem or value == path.stem:
                 return filename
