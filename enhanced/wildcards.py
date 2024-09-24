@@ -307,7 +307,7 @@ def apply_wildcards(wildcard_text, rng, directory=wildcards_path):
 def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
     global wildcards, wildcards_list
 
-    wildcard = wildcard[0].split('|')[0]
+    wildcard = wildcards_list['root'][wildcard]
     state_params.update({"wildcard_in_wildcards": wildcard})
     if len(prompt)>0:
         if prompt[-1]=='[':
@@ -330,7 +330,7 @@ def add_wildcards_and_array_to_prompt(wildcard, prompt, state_params):
 def add_word_to_prompt(wildcard, index, prompt):
     global wildcards, wildcards_list
 
-    wildcard = wildcard[0].split('|')[0]
+    wildcard = wildcards_list['root'][wildcard]
     words = wildcards[wildcard]
     word = words[index]
     prompt = f'{prompt.strip()} {word}'
