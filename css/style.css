@@ -568,18 +568,39 @@ div.prose.tokenCounter {
   position: sticky;   /* 设为sticky */
   top: 0;             /* 设置sticky的顶部位置 */
   
-  scrollbar-width: thin;      /* Firefox */
-  -ms-overflow-style: none;   /* IE 和 Edge */
+  scrollbar-width: thin !important;      /* Firefox */
+  -ms-overflow-style: -ms-autohiding-scrollbar !important;   /* IE 和 Edge */
 }
 
 /* 针对Webkit内核浏览器（如Chrome、Safari） */
 #scrollable-box::-webkit-scrollbar {
-    width: 5px;
+    width: 5px !important;
 }
 #scrollable-box::-webkit-scrollbar-thumb {
     background-color: transparent;
     border-radius: 10px;
 }
 #scrollable-box::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+#scrollable-box-hidden {
+  max-height: 100vh;  /* 设定最大高度 */
+  overflow-y: auto;   /* 启用垂直滚动条 */
+  position: sticky;   /* 设为sticky */
+  top: 0;             /* 设置sticky的顶部位置 */
+
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE 和 Edge */
+}
+
+/* 针对Webkit内核浏览器（如Chrome、Safari） */
+#scrollable-box-hidden::-webkit-scrollbar {
+    display: none;
+}
+#scrollable-box-hidden::-webkit-scrollbar-thumb {
+    background-color: transparent;
+}
+#scrollable-box-hidden::-webkit-scrollbar-track {
     background-color: transparent;
 }
