@@ -42,8 +42,8 @@ def check_base_environment():
     print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.20"
-    REINSTALL_BASE = True
+    ver_required = "0.3.21"
+    REINSTALL_BASE = False
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
