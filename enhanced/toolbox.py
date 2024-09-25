@@ -45,6 +45,7 @@ css = '''
     padding: 6px;
     line-height: 120%;
     border: groove;
+    color: var(--neutral-800);
 }
 
 .infobox_mobi {
@@ -136,9 +137,9 @@ toolbox_note_regenerate_title='Extract parameters to backfill for regeneration. 
 toolbox_note_embed_title='Embed parameters into images for easy identification of image sources and communication and learning.'
 toolbox_note_missing_muid='The model in the params and configuration is missing MUID. And the system will spend some time calculating the hash of model files and synchronizing information to obtain the muid for usability and transferability.'
 
-def make_infobox_markdown(info):
+def make_infobox_markdown(info, theme):
     bgcolor = '#ddd'
-    if config.theme == "dark":
+    if theme == "dark":
         bgcolor = '#444'
     html = f'<div style="background: {bgcolor}">'
     if info:
@@ -166,7 +167,7 @@ def toggle_prompt_info(state_params):
     #print(f'[ToolBox] Toggle_image_info: {infobox_state}')
     [choice, selected] = state_params["prompt_info"]
     prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
-    return gr.update(value=make_infobox_markdown(prompt_info), visible=infobox_state), state_params
+    return gr.update(value=make_infobox_markdown(prompt_info, state_params['__theme']), visible=infobox_state), state_params
 
 
 def check_preset_models(checklist, state_params):

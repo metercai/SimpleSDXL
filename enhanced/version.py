@@ -33,6 +33,6 @@ def get_branch():
         branch = repo.head.shorthand
         if branch=="main":
             branch = "Fooocus"
-        commit_id = repo.head.target.hex[:7]
+        commit_id = f'{repo.head.target}'[:7]
     return branch
 
