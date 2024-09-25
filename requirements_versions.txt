@@ -31,7 +31,6 @@ pixeloe
 polygraphy==0.47.1
 protobuf==3.19.0
 psutil==6.0.0 #
-pygit2==1.12.2
 pytorch_lightning==2.3.3 #
 pyyaml==6.0.1 #
 sacremoses==0.1.1

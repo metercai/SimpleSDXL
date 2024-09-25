@@ -904,23 +904,6 @@ if REWRITE_PRESET and isinstance(args_manager.args.preset, str):
     exit(0)
 
 
-def add_ratio(x):
-    a, b = x.replace('*', ' ').split(' ')[:2]
-    a, b = int(a), int(b)
-    g = math.gcd(a, b)
-    c, d = a // g, b // g
-    if (a, b) == (576, 1344):
-        c, d = 9, 21
-    elif (a, b) == (1344, 576):
-        c, d = 21, 9
-    elif (a, b) == (768, 1280):
-        c, d = 9, 15
-    elif (a, b) == (1280, 768):
-        c, d = 15, 9
-    return f'{a}×{b} <span style="color: grey;"> \U00002223 {c}:{d}</span>'
-
-
-
 default_aspect_ratio = modules.flags.default_aspect_ratios['SDXL']
 available_aspect_ratios_labels = modules.flags.available_aspect_ratios_list['SDXL']
 
