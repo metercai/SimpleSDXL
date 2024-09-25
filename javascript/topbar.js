@@ -49,8 +49,6 @@ async function fetchTranslationsFor(newLocale) {
 function set_theme_by_ui(theme) {
     const gradioURL = window.location.href;
     const urls = gradioURL.split('?');
-    if (theme=="dark") new_theme="light";
-    if (theme=="light") new_theme="dark";
     const params = new URLSearchParams(window.location.search);
     const url_params = Object.fromEntries(params);
     let url_lang = locale_lang;
@@ -59,9 +57,9 @@ function set_theme_by_ui(theme) {
     }
     if (url_params["__theme"]!=null) {
         url_theme=url_params["__theme"];
-	if (url_theme == new_theme) 
+	if (url_theme == theme) 
 	    return
-	window.location.replace(urls[0]+"?__theme="+new_theme+"&__lang="+url_lang+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000));
+	window.location.replace(urls[0]+"?__theme="+theme+"&__lang="+url_lang+"&t="+Date.now()+"."+Math.floor(Math.random() * 10000));
     }
 }
 

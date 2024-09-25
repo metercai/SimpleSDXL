@@ -32,7 +32,7 @@ try:
             if local_branch_ref not in list(repo.references):
                 remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
                 remote_branch = repo.references[remote_reference]
-                new_branch = repo.create_branch(branch_name, repo[remote_branch.target.hex])
+                new_branch = repo.create_branch(branch_name, repo[remote_branch.target])
                 new_branch.upstream = remote_branch
             else:
                 new_branch = repo.lookup_branch(branch_name)
@@ -46,7 +46,7 @@ try:
             if local_branch_ref not in list(repo.references):
                 remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
                 remote_branch = repo.references[remote_reference]
-                new_branch = repo.create_branch(branch_name, repo[remote_branch.target.hex])
+                new_branch = repo.create_branch(branch_name, repo[remote_branch.target])
                 new_branch.upstream = remote_branch
             else:
                 new_branch = repo.lookup_branch(branch_name)

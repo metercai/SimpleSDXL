@@ -217,7 +217,7 @@ def get_resolution(key: str, fallback: str | None, source_dict: dict, results: l
     try:
         h = source_dict.get(key, source_dict.get(fallback, default))
         width, height = eval(h)
-        formatted = modules.config.add_ratio(f'{width}*{height}')
+        formatted = modules.flags.add_ratio(f'{width}*{height}')
         engine = get_taskclass_by_fullname(source_dict.get('Backend Engine', source_dict.get('backend_engine', task_class_mapping['Fooocus']))) 
         if 'engine' in source_dict:
             engine = source_dict['engine'].get('backend_engine', engine)
