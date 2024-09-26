@@ -1,7 +1,11 @@
 ## SimpleSDXL2 - 最强中文创意生图，6G显存玩转混元、可图、SD3m和Flux！
 <div align=center><img src="https://github.com/user-attachments/assets/98715a4d-9f4a-4846-ae62-eb8d69793d31"></div>
 
-### B站视频推荐：[6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU 
+### 🚀 飞书wiki: [《SimpleSDXL创意生图应用指南》](https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe), 包括如何快速下载、安装和运行，如何操作进行创意出图，在不同应用场景下如何使用SimpleSDXL等等。
+
+### 🚀 B站视频推荐：[6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU 
+
+
 ## 🔔 最新更新 / Update
 - [2024-09-16] <b>解锁Flux的lora和可图lora。自动修图开关移到增强修图标签内。添加提示面板开关，可点击触发批量通配符面板。反推提示词和图片参数提取两个标签移入参数设置栏。添加基于预置包的基础模型过滤功能。修复Comfyd引擎的跳过和中断逻辑bug。优化预置包参数和预置包导航。Flux模型自动适配硬件环境。优选Hyp8Q5KM模型，支持Flux Lora，兼具速度与质量的平衡。新增两个无缝贴图的预置包。升级comfyd到最新版。优化下载安装和启动流程，强制基础包检测，并提供模型包安装脚本。</b>
 - [2024.08.20] 新架构进一步优化，提升在Windows环境的兼容性，压缩Fooocus和Comfy后端切换的资源消耗。优化支持最低6G显存的Flux模型出图，提供质量优先的Fluxdev和速度优先的Flux+两个预置包，并可根据系统资源自动适配。同步升级主线v2.5.5，优化增强修图UI，更符合Fooocus交互习惯。
@@ -13,20 +17,7 @@
 <b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
 Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
 
-## Windows安装使用
-<img width="600" align=right src="https://github.com/user-attachments/assets/a0a085f5-5c82-47a8-b49e-c72b9ae46910">
-
-### 快速下载
-- 程序包： [正式版_win_0916-2.1G](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0916)， [测试版 win_dev_0912(2.2G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL2_win.exe.7z0912)
-- 模型包：[基础包25G<b>必下</b>](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_slim_simpleai_0908.zip)，[增强包13G](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_enhance_simpleai_0908.zip)，[扩展包41G(SD3_HY_PonyV6_PGv25_aPencilXL_rsPhoto)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_SD3_HY_PonyV6_PGv25_aPencilXL_rsPhoto_simpleai_0909.zip)，[可图包15G](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/mmodels_kolors_fp16_simpleai_0909.zip)，[Flux1低显存(8G以下)包23G](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux1_nf4v2_Q5km_t5f8_simpleai_0909.zip)，[Flux1全量(fp16)包26G](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux1_fp16_simpleai_0909.zip)
-
-### 安装运行：
-- 选择剩余空间大于50G的固态盘，新建工作目录SimpleAI，将下载的程序包和模型包放入该目录。
-- 去除程序包尾缀，如".7z0916"，双击exe文件解压到当前目录。
-- 进入解压后的程序包文件夹，点击运行"安装模型再启动"脚本。
-- 第一次运行后，在SimpleSDXL目录下会生成 config.txt文件，可以自行修改和添加模型路径。
-- 模型根目录和出图目录可以自定义，但需用记事本打开启动脚本文件run_SimpleSDXL.bat，自行修改。
-
+## 安装下载和使用，参见wiki: [《SimpleSDXL创意生图应用指南》](https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe), 包括如何快速下载、安装和运行，如何操作进行创意出图，在不同应用场景下如何使用SimpleSDXL等等。
 
 ### 如果对旧版情有独钟，可选择不升级，运行旧版
 - SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.zip (30G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.zip)
@@ -105,36 +96,8 @@ Enhanced parameter management for instant viewing and embedding of images, and c
 - [ ] **算力云化** 前后端分离，本机的出图算力后端可支持远程的前端出图调用，实现前端操控和出图计算的分离，让无GPU卡设备也可使用SDXL模型出图。
 - [x] **主线同步** SimpleSDXL的增强代码保持良好的结构，与Fooocus主线版本保持良好的兼容性和扩展性，可以及时同步主线的新增能力和Bug修复。
 
-## Linux安装使用 / Install & Usage
-### 安装 Anaconda 
 
-    curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh 
-    bash Miniconda3-latest-Linux-x86_64.sh
-### 安装应用环境
-
-    mkdir SimpleAI;cd SimpleAI
-    git clone https://github.com/metercai/SimpleSDXL.git
-    #国内用户可换用gitee源: https://gitee.com/metercai/SimpleSDXL.git
-    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_0731.zip
-    wget https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_0731.zip
-    unzip -d -o models_base_0731.zip 
-    unzip -d -o models_ckpt_0731.zip
-    mkdir outputs
-    conda env create -f environment.yaml
-    conda activate simpleai
-    pip install packaging pygit2==1.12.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-### 启动服务
-
-    cd SimpleSDXL
-    python entry_with_update.py --models-root ../SimpleModels --output-path ../outputs
-    # 云端部署可以配置： ip, port, webroot 等参数
-    # python entry_with_update.py --listen 0.0.0.0 --port 8889 --webroot /sdxl --preset realistic
-    # Enter English UI : --language en
-    # python entry_with_update.py --language en
-
-
-## 在线交流：qq群：938075852  新年新版本，需要增加哪些新功能，进群畅聊
+## 在线交流：qq群：938075852  如何使用，有哪些新需求，进群畅聊
 <div align=center><img width="250" src="https://github.com/metercai/SimpleSDXL/assets/5652458/28f8c604-79eb-467d-956c-b9137c784194"></div>
 
 ## Star History
