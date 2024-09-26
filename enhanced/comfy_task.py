@@ -50,9 +50,9 @@ def get_default_base_SD3m_name():
 
 default_base_Flux_name_list = ['flux1-dev.safetensors', 'flux1-dev-bnb-nf4.safetensors', 'flux1-dev-bnb-nf4-v2.safetensors', 'flux-hyp8-Q5_K_M.gguf', 'flux1-schnell.safetensors', 'flux1-schnell-bnb-nf4.safetensors']
 flux_model_urls = {
-    "flux1-dev.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-dev.safetensors",
+    "flux1-dev.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/flux1-dev.safetensors",
     "flux1-dev-bnb-nf4-v2.safetensors": "https://huggingface.co/lllyasviel/flux1-dev-bnb-nf4/resolve/main/flux1-dev-bnb-nf4-v2.safetensors",
-    "flux1-schnell.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1-schnell.safetensor",
+    "flux1-schnell.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/flux1-schnell.safetensor",
     "flux1-schnell-bnb-nf4.safetensors": "https://huggingface.co/silveroxides/flux1-nf4-weights/resolve/main/flux1-schnell-bnb-nf4.safetensors",
     "flux-hyp8-Q5_K_M.gguf": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
     }
@@ -341,7 +341,7 @@ def check_download_flux_model(base_model, clip_model=None):
                 )
         else:
             load_file_from_url(
-                url=f'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_model}',
+                url=f'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/{base_model}',
                 model_dir=config.paths_checkpoints[0],
                 file_name=base_model
             )
@@ -360,7 +360,7 @@ def check_download_flux_model(base_model, clip_model=None):
             )
         if not modelsinfo.exists_model(catalog="vae", model_path='ae.safetensors'):
             load_file_from_url(
-                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ae.safetensors',
+                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/ae.safetensors',
                 model_dir=config.path_vae,
                 file_name='ae.safetensors'
             )

@@ -50,7 +50,7 @@
     "default_aspect_ratio": "1024*1024",
     "default_overwrite_step": 30,
     "checkpoint_downloads": {
-        "juggernautXL_juggXIByRundiffusion.safetensors": "https://huggingface.co/RunDiffusion/Juggernaut-XI-v11/resolve/main/juggernautXL_juggXIByRundiffusion.safetensors"
+        "juggernautXL_juggXIByRundiffusion.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ckpt/juggernautXL_juggXIByRundiffusion.safetensors"
     },
     "embeddings_downloads": {},
     "lora_downloads": {
