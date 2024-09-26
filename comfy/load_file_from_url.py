@@ -47,7 +47,7 @@ def load_model_for_iclight():
     load_model_for_path(models_url, "unet")
 
     models_url = dict({
-        "realisticVisionV60B1_v51VAE.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/realisticVisionV60B1_v51VAE.safetensors"
+        "realisticVisionV60B1_v51VAE.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ckpt/realisticVisionV60B1_v51VAE.safetensors"
         })
     load_model_for_path(models_url, "checkpoints")
 

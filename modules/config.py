@@ -1186,15 +1186,15 @@ def downloading_superprompter_model():
 
 def downloading_sd3_medium_model():
     load_file_from_url(
-        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3_medium_incl_clips.safetensors',
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/sd3m/sd3_medium_incl_clips_t5xxlfp8.safetensors',
         model_dir=paths_checkpoints[0],
-        file_name='sd3_medium_incl_clips.safetensors'
+        file_name='sd3_medium_incl_clips_t5xxlfp8.safetensors'
     )
-    return os.path.join(paths_checkpoints[0], 'sd3_medium_incl_clips.safetensors')
+    return os.path.join(paths_checkpoints[0], 'sd3_medium_incl_clips_t5xxlfp8.safetensors')
 
 def downloading_base_sd15_model():
     load_file_from_url(
-        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/realisticVisionV60B1_v51VAE.safetensors',
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/ckpt/realisticVisionV60B1_v51VAE.safetensors',
         model_dir=paths_checkpoints[0],
         file_name='realisticVisionV60B1_v51VAE.safetensors'
     )
