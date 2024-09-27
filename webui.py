@@ -221,17 +221,25 @@ with shared.gradio_root:
                     params_note_preset_button = gr.Button(value='Enter', visible=False)
                 with gr.Group(visible=False, elem_classes='identity_note') as identity_dialog:
                     identity_note_info = gr.Markdown(elem_classes='note_info', value=simpleai.identity_note)
-                    with gr.Tab(label='New Identity') as new_id_tab:
+                    with gr.Tab(label='Bind Identity') as bind_id_tab:
                         identity_nick_input = gr.Textbox(show_label=False, placeholder="Type nickname here.", min_width=70, elem_classes='identity_input')
                         identity_tele_input = gr.Textbox(show_label=False, placeholder="Type telephone here.", min_width=70, elem_classes='identity_input')
-                        identity_getvcode_button = gr.Button(value='Get Verification Code', visible=True)
-                        identity_vcode_input = gr.Textbox(show_label=False, placeholder="Type vcode here.", min_width=70, elem_classes='identity_input')
+                        #identity_getvcode_button = gr.Button(value='Get Verification Code', visible=True)
+                        #identity_vcode_input = gr.Textbox(show_label=False, placeholder="Type vcode here.", min_width=70, elem_classes='identity_input')
                         identity_bind_button = gr.Button(value='Bind identity', min_width=150, visible=True)
                     with gr.Tab(label='Confirm Identity') as confirm_id_tab:
                         identity_phrase_input = gr.Textbox(show_label=False, type='password', placeholder="Type id phrases here.", min_width=150, elem_classes='identity_input')
                         identity_confirm_button = gr.Button(value='Confirm identity', visible=True)
-                    identity_getvcode_button.click(simpleai.get_vcode, inputs=[identity_nick_input, identity_tele_input, state_topbar], outputs=state_topbar)
-                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input, identity_vcode_input, state_topbar], outputs=state_topbar)
+                    with gr.Tab(label='Toggle Identity') as toggle_id_tab:
+                        identity_tele_another_input = gr.Textbox(show_label=False, placeholder="Type telephone here.", min_width=70, elem_classes='identity_input')
+                        identity_phrase_another_input = gr.Textbox(show_label=False, type='password', placeholder="Type id phrases here.", min_width=150, elem_classes='identity_input')
+                        identity_confirm_toggle_button = gr.Button(value='Toggle identity', visible=True)
+                    with gr.Tab(label='Unbind Identity') as unbind_id_tab:
+                        identity_phrase_unbind_input = gr.Textbox(show_label=False, type='password', placeholder="Type id phrases here.", min_width=150, elem_classes='identity_input')
+                        identity_unbind_button = gr.Button(value='Unbind identity', visible=True)
+
+                    #identity_getvcode_button.click(simpleai.get_vcode, inputs=[identity_nick_input, identity_tele_input, state_topbar], outputs=state_topbar)
+                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input, state_topbar], outputs=state_topbar)
                     identity_confirm_button.click(simpleai.confirm_identity, inputs=[identity_phrase_input, state_topbar], outputs=state_topbar)
 
                 with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
@@ -1021,17 +1029,17 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Enhanced', elem_id="scrollable-box"):
-                with gr.Row(visible=False):
+                with gr.Row(visible=True):
                     binding_id_button = gr.Button(value='Binding Identity', visible=True)
                 with gr.Row():
                     language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
                     background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
                 with gr.Group():
-                    prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=not args_manager.args.disable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
                     image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
                     #finished_catalog_max_number = gr.Slider(label='Catalog Max Number', minimum=1, maximum=60, step=5, value=1)
                     backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                    prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
                     translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
                     mobile_url = gr.Checkbox(label=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/', value=True, info='Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.', interactive=False)
                     

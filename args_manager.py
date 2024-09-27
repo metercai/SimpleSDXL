@@ -50,6 +50,7 @@ args_parser.parser.add_argument("--config", type=str, help="Set the path of conf
 args_parser.parser.add_argument("--disable-comfyd", action='store_true',
                                 help="disable auto start comfyd server at launch", default=False)
 
+
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,
     in_browser=True,

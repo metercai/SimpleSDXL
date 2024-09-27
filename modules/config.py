@@ -143,23 +143,15 @@ def get_path_output() -> str:
     Checking output path argument and overriding default path.
     """
     global config_dict
-    path_output = 'outputs'
-    if args_manager.args.output_path:
-        path_output = args_manager.args.output_path
-        path_output_abs = os.path.abspath(path_output)
-        config_dict['path_outputs'] = path_output_abs
-    path_output = get_dir_or_set_default('path_outputs', f'../{path_output}')
+    path_output = 'outputs' if not args_manager.args.output_path else args_manager.args.output_path
+    path_output = get_dir_or_set_default('path_outputs', path_output)
     print(f'The path_output: {path_output}')
     return path_output
 
 def get_path_models_root() -> str:
     global config_dict
-    models_root = 'models'
-    if args_manager.args.models_root:
-        models_root = args_manager.args.models_root
-        path_models_root = os.path.abspath(models_root)
-        config_dict['path_models_root'] = path_models_root
-    path_models_root = get_dir_or_set_default('path_models_root', f'../{models_root}')
+    models_root = 'models' if not args_manager.args.models_root else args_manager.args.models_root
+    path_models_root = get_dir_or_set_default('path_models_root', models_root)
     print(f'The path_models_root: {path_models_root}')
     return path_models_root
 
@@ -196,31 +188,35 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     if isinstance(default_value, list):
         dp = []
         for path in default_value:
-            abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), path))
-            dp.append(abs_path)
+            abs_path = os.path.abspath(os.path.join(shared.root, path))
+            if not os.path.isabs(path):
+                path = os.path.relpath(abs_path, shared.root)
+            dp.append(path)
             os.makedirs(abs_path, exist_ok=True)
     else:
-        dp = os.path.abspath(os.path.join(os.path.dirname(__file__), default_value))
+        dp = os.path.abspath(os.path.join(shared.root, default_value))
         os.makedirs(dp, exist_ok=True)
+        if not os.path.isabs(default_value):
+            dp = os.path.relpath(dp, shared.root)
         if as_array:
             dp = [dp]
     config_dict[key] = dp
     return dp
 
 path_models_root = get_path_models_root()
-paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/', '../models/checkpoints/'], True)
-paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/', '../models/loras/'], True)
+paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/', 'models/checkpoints/'], True)
+paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/', 'models/loras/'], True)
 path_embeddings = get_dir_or_set_default('path_embeddings', f'{path_models_root}/embeddings/')
 path_vae_approx = get_dir_or_set_default('path_vae_approx', f'{path_models_root}/vae_approx/')
 path_vae = get_dir_or_set_default('path_vae', f'{path_models_root}/vae/')
 path_upscale_models = get_dir_or_set_default('path_upscale_models', f'{path_models_root}/upscale_models/')
-paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/', '../models/inpaint/'], True)
-paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/', '../models/controlnet/'], True)
+paths_inpaint = get_dir_or_set_default('path_inpaint', [f'{path_models_root}/inpaint/', 'models/inpaint/'], True)
+paths_controlnet = get_dir_or_set_default('path_controlnet', [f'{path_models_root}/controlnet/', 'models/controlnet/'], True)
 path_clip = get_dir_or_set_default('path_clip', f'{path_models_root}/clip/')
 path_clip_vision = get_dir_or_set_default('path_clip_vision', f'{path_models_root}/clip_vision/')
 path_fooocus_expansion = get_dir_or_set_default('path_fooocus_expansion', f'{path_models_root}/prompt_expansion/fooocus_expansion')
 paths_llms = get_dir_or_set_default('path_llms', [f'{path_models_root}/llms/'], True)
-path_wildcards = get_dir_or_set_default('path_wildcards', '../wildcards/')
+path_wildcards = get_dir_or_set_default('path_wildcards', 'wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', f'{path_models_root}/safety_checker/')
 path_sam = paths_inpaint[0]
 path_outputs = get_path_output()
@@ -940,10 +936,13 @@ comfyui:
      rembg: {rembg}
      layer_model: {layer_model}
      vae: {vae}
+     ipadapter: {ipadapter}
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
-config_comfy_text = config_comfy_formatted_text.format(models_root=path_models_root, checkpoints=paths2str(paths_checkpoints,'checkpoints'), clip_vision=path_clip_vision, clip=path_clip, controlnets=paths2str(paths_controlnet,'controlnet'), diffusers=paths2str(paths_diffusers,'diffusers'), embeddings=path_embeddings, loras=paths2str(paths_loras, 'loras'), upscale_models=path_upscale_models, unet=paths2str([path_unet]+paths_checkpoints, 'unet'), rembg=path_rembg, layer_model=path_layer_model, vae=path_vae)
+comfyd_paths_fix = lambda p: p #[p1 if os.path.isabs(p1) else os.path.relpath(p1, os.path.join(shared.root, 'comfy')) for p1 in p] if isinstance(p, list) else p if os.path.isabs(p) else os.path.relpath(p, os.path.join(shared.root, 'comfy'))
+
+config_comfy_text = config_comfy_formatted_text.format(models_root=comfyd_paths_fix(path_models_root), checkpoints=paths2str(comfyd_paths_fix(paths_checkpoints),'checkpoints'), clip_vision=comfyd_paths_fix(path_clip_vision), clip=comfyd_paths_fix(path_clip), controlnets=paths2str(comfyd_paths_fix(paths_controlnet),'controlnet'), diffusers=paths2str(comfyd_paths_fix(paths_diffusers),'diffusers'), embeddings=comfyd_paths_fix(path_embeddings), loras=paths2str(comfyd_paths_fix(paths_loras), 'loras'), upscale_models=comfyd_paths_fix(path_upscale_models), unet=paths2str(comfyd_paths_fix([path_unet]+paths_checkpoints), 'unet'), rembg=comfyd_paths_fix(path_rembg), layer_model=comfyd_paths_fix(path_layer_model), vae=comfyd_paths_fix(path_vae), ipadapter=paths2str(comfyd_paths_fix(paths_controlnet),'ipadapter'))
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 
