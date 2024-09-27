@@ -223,8 +223,10 @@ function(system_params) {
 def init_nav_bars(state_params, request: gr.Request):
     #print(f'request.headers:{request.headers}')
     if "__lang" not in state_params.keys():
-        if request.headers["accept-language"].startswith('zh-CN') and args_manager.args.language == 'default':
+        if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
+        else:
+            print(f'no accept-language in request.headers:{request.headers}')
         state_params.update({"__lang": args_manager.args.language}) 
     if "__theme" not in state_params.keys():
         state_params.update({"__theme": args_manager.args.theme})
@@ -232,6 +234,7 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__preset": config.preset})
     if "__session" not in state_params.keys() and "cookie" in request.headers.keys():
         cookies = dict([(s.split('=')[0], s.split('=')[1]) for s in request.headers["cookie"].split('; ')])
+        #print(f'cookies in request.headers:{cookies}, {request.headers}')
         if "SESSION" in cookies.keys():
             state_params.update({"__session": cookies["SESSION"]})
     user_agent = request.headers["user-agent"]
@@ -291,7 +294,7 @@ def refresh_nav_bars(state_params):
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
         name += '\u2B07' if is_models_file_absent(name) else ''
-        visible_flag = i<(5 if state_params["__is_mobile"] else shared.BUTTON_NUM)
+        visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
         else: 

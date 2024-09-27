@@ -92,6 +92,8 @@ def select_gallery_progress(state_params, evt: gr.SelectData):
 def get_images_from_gallery_index(choice, max_per_page):
     global images_list
 
+    if choice is None:
+        return []
     page = 0
     _page = choice.split("/")
     if len(_page) > 1:
