@@ -300,7 +300,7 @@ def delete_image(state_params):
             index = len(state_params["__output_list"]) -1
             if index<0:
                 index = 0
-        choice = state_params["__output_list"][index]
+        choice = None if len(output_list)==0 else state_params["__output_list"][index]
     elif image_list_nums < max_per_page:
         if selected > image_list_nums-1:
             selected = image_list_nums-1
@@ -329,7 +329,7 @@ def delete_image(state_params):
     state_params.update({"prompt_info":[choice, selected]})
     images_gallery = gallery.get_images_from_gallery_index(choice, max_per_page)
     state_params.update({"note_box_state": ['',0,0]})
-    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice), gr.update(visible=False), gr.update(visible=False), state_params
+    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice, visible=True if choice else False), gr.update(visible=False), gr.update(visible=False), state_params
 
 
 def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode):
