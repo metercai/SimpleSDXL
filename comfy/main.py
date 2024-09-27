@@ -166,7 +166,10 @@ def prompt_worker(q, server):
                 need_gc = False
 
 async def run(server, address='', port=8188, verbose=True, call_on_start=None):
-    await asyncio.gather(server.start(address, port, verbose, call_on_start), server.publish_loop())
+    addresses = []
+    for addr in address.split(","):
+        addresses.append((addr, port))
+    await asyncio.gather(server.start_multi_address(addresses, call_on_start), server.publish_loop())
 
 
 def hijack_progress(server):
@@ -248,12 +251,15 @@ if __name__ == "__main__":
     if args.quick_test_for_ci:
         exit(0)
 
+    os.makedirs(folder_paths.get_temp_directory(), exist_ok=True)
     call_on_start = None
     if args.auto_launch:
         def startup_server(scheme, address, port):
             import webbrowser
             if os.name == 'nt' and address == '0.0.0.0':
                 address = '127.0.0.1'
+            if ':' in address:
+                address = "[{}]".format(address)
             webbrowser.open(f"{scheme}://{address}:{port}")
         call_on_start = startup_server
 

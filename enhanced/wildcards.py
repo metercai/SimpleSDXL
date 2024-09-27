@@ -333,6 +333,11 @@ def add_word_to_prompt(wildcard, index, prompt):
     wildcard = wildcards_list['root'][wildcard]
     words = wildcards[wildcard]
     word = words[index]
+    prompt = prompt.strip()
+    for tag in [f'[__{wildcard}__]', f'__{wildcard}__']:
+        if prompt.endswith(tag):
+            prompt = prompt[:-1*len(tag)]
+            break
     prompt = f'{prompt.strip()} {word}'
     return gr.update(value=prompt)
 

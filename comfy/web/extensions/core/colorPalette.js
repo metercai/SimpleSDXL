@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {app} from "../../scripts/app.js";
 import {$el} from "../../scripts/ui.js";
 
@@ -783,3 +784,8 @@ app.registerExtension({
 		});
 	},
 });
+=======
+// Shim for extensions/core/colorPalette.ts
+export const defaultColorPalette = window.comfyAPI.colorPalette.defaultColorPalette;
+export const getColorPalette = window.comfyAPI.colorPalette.getColorPalette;
+>>>>>>> master
