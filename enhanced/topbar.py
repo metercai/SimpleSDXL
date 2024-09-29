@@ -223,8 +223,10 @@ function(system_params) {
 def init_nav_bars(state_params, request: gr.Request):
     #print(f'request.headers:{request.headers}')
     if "__lang" not in state_params.keys():
-        if request.headers["accept-language"].startswith('zh-CN') and args_manager.args.language == 'default':
+        if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
+        else:
+            print(f'[Topbar] No accept-language in request.headers:{request.headers}')
         state_params.update({"__lang": args_manager.args.language}) 
     if "__theme" not in state_params.keys():
         state_params.update({"__theme": args_manager.args.theme})
@@ -291,7 +293,7 @@ def refresh_nav_bars(state_params):
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
         name += '\u2B07' if is_models_file_absent(name) else ''
-        visible_flag = i<(5 if state_params["__is_mobile"] else shared.BUTTON_NUM)
+        visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, visible=visible_flag)]
         else: 

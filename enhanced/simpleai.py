@@ -35,16 +35,14 @@ def reset_simpleai_args():
 
 
 
-identity_note = '将身份ID与手机号绑定，可以固定本地密钥。既可以在本地存储和管理个人配置信息，又可以参与创意分享等互助服务。详情可见说明文档。'
+identity_note = '将数字身份与手机号绑定，既可以用固定密钥存储和管理个人配置信息，避免数据丢失，又可以参与创意分享等互助服务。'
 
 from ldm_patched.modules.model_management import unload_all_models, soft_empty_cache
 
 def get_vcode(nick, tele, state):
-    unload_all_models()
     return state
 
 def bind_identity(nick, tele, vcode, state):
-    soft_empty_cache(True)
     return state
 
 def confirm_identity(phrase, state):

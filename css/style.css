@@ -84,18 +84,18 @@ div:has(> #positive_prompt) {
 }
 
 .type_row{
-  height: 100px !important;
+  height: 96px !important;
 }
 
 .type_row_half{
-  height: 50px !important;
+  height: 48px !important;
   font-size: 14px !important;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .type_row_third{
-  height: 33px !important;
+  height: 32px !important;
   font-size: 14px !important; 
   white-space: nowrap;
   overflow: hidden;

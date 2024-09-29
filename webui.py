@@ -239,10 +239,10 @@ with shared.gradio_root:
                     gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio, state_topbar], show_progress=False)
             with gr.Group():
-                with gr.Row(elem_classes='type_row'):
+                with gr.Row():
                     with gr.Column(scale=12):
                         prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
-                                        container=False, autofocus=False, elem_classes='type_row', lines=1024)
+                                        container=False, autofocus=False, lines=4)
 
                         def calculateTokenCounter(text, style_selections):
                             if len(text) < 1:
