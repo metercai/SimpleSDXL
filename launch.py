@@ -77,10 +77,11 @@ def check_base_environment():
 
     from simpleai_base import simpleai_base
     print("Checking ...")
-    token = simpleai_base.init_local(f'SimpleSDXL_User')
+    token = simpleai_base.init_local('SimpleSDXL')
     sysinfo = json.loads(token.get_sysinfo().to_json())
-    sysinfo.update(dict(did=token.get_did()))
+    sysinfo.update(dict(did=token.get_sys_did()))
     print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
+    #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, exe_dir: {sysinfo["exe_dir"]}, exe_name:{sysinfo["exe_name"]}')
 
     if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
         print(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
@@ -226,7 +227,7 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
 
 def reset_env_args():
     shared.sysinfo = json.loads(shared.token.get_sysinfo().to_json())
-    shared.sysinfo.update(dict(did=shared.token.get_did()))
+    shared.sysinfo.update(dict(did=shared.token.get_sys_did()))
     #print(f'sysinfo/基础环境信息:{sysinfo}')
 
     if '--location' in sys.argv:
@@ -250,8 +251,11 @@ def reset_env_args():
 
 
 #build_launcher()
+#os.environ["SIMPLEAI_VERBOSE"] = "on"
 shared.token, shared.sysinfo = check_base_environment()
-print(f'[SimpleAI] local_did/本地身份ID: {shared.token.get_did()}')
+print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did()}')
+print(f'[SimpleAI] nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, guest_did/身份标识: {shared.token.get_guest_did()}')
+print(f'loopback_port: {shared.sysinfo["loopback_port"]}')
 
 prepare_environment()
 shared.args = ini_args()

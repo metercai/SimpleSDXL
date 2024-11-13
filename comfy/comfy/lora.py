@@ -294,6 +294,7 @@ def model_lora_keys_unet(model, key_map={}):
             unet_key = "diffusion_model.{}".format(diffusers_keys[k])
             key_lora = k[:-len(".weight")].replace(".", "_")
             key_map["lora_unet_{}".format(key_lora)] = unet_key
+            key_map["lycoris_{}".format(key_lora)] = unet_key #simpletuner lycoris format
 
             diffusers_lora_prefix = ["", "unet."]
             for p in diffusers_lora_prefix:
@@ -315,6 +316,10 @@ def model_lora_keys_unet(model, key_map={}):
 
                 key_lora = "lora_transformer_{}".format(k[:-len(".weight")].replace(".", "_")) #OneTrainer lora
                 key_map[key_lora] = to
+
+                key_lora = "lycoris_{}".format(k[:-len(".weight")].replace(".", "_")) #simpletuner lycoris format
+                key_map[key_lora] = to
+
 
     if isinstance(model, comfy.model_base.AuraFlow): #Diffusers lora AuraFlow
         diffusers_keys = comfy.utils.auraflow_to_diffusers(model.model_config.unet_config, output_prefix="diffusion_model.")
@@ -342,10 +347,10 @@ def model_lora_keys_unet(model, key_map={}):
     return key_map
 
 
-def weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype):
+def weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype, function):
     dora_scale = comfy.model_management.cast_to_device(dora_scale, weight.device, intermediate_dtype)
     lora_diff *= alpha
-    weight_calc = weight + lora_diff.type(weight.dtype)
+    weight_calc = weight + function(lora_diff).type(weight.dtype)
     weight_norm = (
         weight_calc.transpose(0, 1)
         .reshape(weight_calc.shape[1], -1)
@@ -414,7 +419,7 @@ def calculate_weight(patches, weight, key, intermediate_dtype=torch.float32):
             weight *= strength_model
 
         if isinstance(v, list):
-            v = (calculate_weight(v[1:], comfy.model_management.cast_to_device(v[0], weight.device, intermediate_dtype, copy=True), key, intermediate_dtype=intermediate_dtype), )
+            v = (calculate_weight(v[1:], v[0][1](comfy.model_management.cast_to_device(v[0][0], weight.device, intermediate_dtype, copy=True), inplace=True), key, intermediate_dtype=intermediate_dtype), )
 
         if len(v) == 1:
             patch_type = "diff"
@@ -452,7 +457,7 @@ def calculate_weight(patches, weight, key, intermediate_dtype=torch.float32):
             try:
                 lora_diff = torch.mm(mat1.flatten(start_dim=1), mat2.flatten(start_dim=1)).reshape(weight.shape)
                 if dora_scale is not None:
-                    weight = function(weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype))
+                    weight = weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype, function)
                 else:
                     weight += function(((strength * alpha) * lora_diff).type(weight.dtype))
             except Exception as e:
@@ -498,7 +503,7 @@ def calculate_weight(patches, weight, key, intermediate_dtype=torch.float32):
             try:
                 lora_diff = torch.kron(w1, w2).reshape(weight.shape)
                 if dora_scale is not None:
-                    weight = function(weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype))
+                    weight = weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype, function)
                 else:
                     weight += function(((strength * alpha) * lora_diff).type(weight.dtype))
             except Exception as e:
@@ -535,7 +540,7 @@ def calculate_weight(patches, weight, key, intermediate_dtype=torch.float32):
             try:
                 lora_diff = (m1 * m2).reshape(weight.shape)
                 if dora_scale is not None:
-                    weight = function(weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype))
+                    weight = weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype, function)
                 else:
                     weight += function(((strength * alpha) * lora_diff).type(weight.dtype))
             except Exception as e:
@@ -576,7 +581,7 @@ def calculate_weight(patches, weight, key, intermediate_dtype=torch.float32):
                     lora_diff += torch.mm(b1, b2).reshape(weight.shape)
 
                 if dora_scale is not None:
-                    weight = function(weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype))
+                    weight = weight_decompose(dora_scale, weight, lora_diff, alpha, strength, intermediate_dtype, function)
                 else:
                     weight += function(((strength * alpha) * lora_diff).type(weight.dtype))
             except Exception as e:

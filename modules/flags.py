@@ -9,8 +9,10 @@ strong_variation = 'Vary (Strong)'
 upscale_15 = 'Upscale (1.5x)'
 upscale_2 = 'Upscale (2x)'
 upscale_fast = 'Upscale (Fast 2x)'
+hires_fix = 'Upscale (Hires.fix)'
 
 uov_list = [disabled, subtle_variation, strong_variation, upscale_15, upscale_2, upscale_fast]
+uov_list_flux = [disabled, subtle_variation, strong_variation, hires_fix, upscale_15, upscale_2, upscale_fast]
 
 enhancement_uov_before = "Before First Enhancement"
 enhancement_uov_after = "After Last Enhancement"
@@ -76,6 +78,7 @@ cn_ip = "ImagePrompt"
 cn_ip_face = "FaceSwap"
 cn_canny = "PyraCanny"
 cn_cpds = "CPDS"
+cn_pose = "OpenPose"
 
 ip_list = [cn_ip, cn_canny, cn_cpds, cn_ip_face]
 default_ip = cn_ip
@@ -192,6 +195,7 @@ default_class_params = {
         'available_aspect_ratios_selection': 'SDXL',
         'available_sampler_name': sampler_list,
         'available_scheduler_name': scheduler_list,
+        'available_uov_method': uov_list,
         'backend_params': {},
         },
     'Comfy': {
@@ -259,6 +263,7 @@ default_class_params = {
         'available_aspect_ratios_selection': 'Flux',
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,
+        'available_uov_method': uov_list_flux,
         'backend_params': {
             "task_method": "flux_base",
             "clip_model": "auto",
