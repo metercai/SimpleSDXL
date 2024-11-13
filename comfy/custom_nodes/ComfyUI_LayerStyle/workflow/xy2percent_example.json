@@ -1,0 +1,369 @@
+{
+  "last_node_id": 39,
+  "last_link_id": 51,
+  "nodes": [
+    {
+      "id": 19,
+      "type": "LayerUtility: ImageBlendAdvance",
+      "pos": [
+        1216,
+        -65
+      ],
+      "size": {
+        "0": 315,
+        "1": 338
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "background_image",
+          "type": "IMAGE",
+          "link": 11
+        },
+        {
+          "name": "layer_image",
+          "type": "IMAGE",
+          "link": 12
+        },
+        {
+          "name": "layer_mask",
+          "type": "MASK",
+          "link": 13
+        },
+        {
+          "name": "x_percent",
+          "type": "FLOAT",
+          "link": 50,
+          "widget": {
+            "name": "x_percent"
+          }
+        },
+        {
+          "name": "y_percent",
+          "type": "FLOAT",
+          "link": 51,
+          "widget": {
+            "name": "y_percent"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            47
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LayerUtility: ImageBlendAdvance"
+      },
+      "widgets_values": [
+        true,
+        "normal",
+        100,
+        73.67,
+        27.7,
+        "horizontal",
+        1,
+        1,
+        0,
+        "lanczos",
+        0.11
+      ]
+    },
+    {
+      "id": 37,
+      "type": "PreviewImage",
+      "pos": [
+        1619,
+        -22
+      ],
+      "size": {
+        "0": 370.21087646484375,
+        "1": 246
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 47
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 9,
+      "type": "LoadImage",
+      "pos": [
+        330,
+        -144
+      ],
+      "size": {
+        "0": 367.4229431152344,
+        "1": 314
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            11,
+            48
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "3840x2160car.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 38,
+      "type": "LayerUtility: XY to Percent",
+      "pos": [
+        794,
+        90
+      ],
+      "size": {
+        "0": 330,
+        "1": 102
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "background_image",
+          "type": "IMAGE",
+          "link": 48
+        },
+        {
+          "name": "layer_image",
+          "type": "IMAGE",
+          "link": 49
+        }
+      ],
+      "outputs": [
+        {
+          "name": "x_percent",
+          "type": "FLOAT",
+          "links": [
+            50
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "x_percent",
+          "type": "FLOAT",
+          "links": [
+            51
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LayerUtility: XY to Percent"
+      },
+      "widgets_values": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 8,
+      "type": "LoadImage",
+      "pos": [
+        446,
+        224
+      ],
+      "size": {
+        "0": 239.99867248535156,
+        "1": 314
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            12,
+            49
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            13
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "512x512 (16).png",
+        "image"
+      ]
+    },
+    {
+      "id": 39,
+      "type": "LayerUtility: XY to Percent",
+      "pos": [
+        2528.760279127389,
+        562.5934934379641
+      ],
+      "size": {
+        "0": 330,
+        "1": 102
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "background_image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "layer_image",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "x_percent",
+          "type": "FLOAT",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "x_percent",
+          "type": "FLOAT",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LayerUtility: XY to Percent"
+      },
+      "widgets_values": [
+        0,
+        0
+      ]
+    }
+  ],
+  "links": [
+    [
+      11,
+      9,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      8,
+      0,
+      19,
+      1,
+      "IMAGE"
+    ],
+    [
+      13,
+      8,
+      1,
+      19,
+      2,
+      "MASK"
+    ],
+    [
+      47,
+      19,
+      0,
+      37,
+      0,
+      "IMAGE"
+    ],
+    [
+      48,
+      9,
+      0,
+      38,
+      0,
+      "IMAGE"
+    ],
+    [
+      49,
+      8,
+      0,
+      38,
+      1,
+      "IMAGE"
+    ],
+    [
+      50,
+      38,
+      0,
+      19,
+      3,
+      "FLOAT"
+    ],
+    [
+      51,
+      38,
+      1,
+      19,
+      4,
+      "FLOAT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

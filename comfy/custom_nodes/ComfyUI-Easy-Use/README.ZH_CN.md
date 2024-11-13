@@ -38,6 +38,7 @@
 - 支持 sd3 模型
 - 支持 kolors 模型
 - 支持 flux 模型
+- 支持 惰性条件判断（ifElse）和 for循环
 
 ## 👨🏻‍🔧 安装
 
@@ -60,11 +61,32 @@ git clone https://github.com/yolain/ComfyUI-Easy-Use
 
 ## 📜 更新日志
 
+**v1.2.4**
+
+- 增加 `easy imageSplitTiles` and `easy imageTilesFromBatch` - 图像分块
+- 支持 `model_override`,`vae_override`,`clip_override` 可以在 `easy fullLoader` 中单独输入
+- 增加 `easy saveImageLazy`
+- 增加 `easy loadImageForLoop`
+- 增加 `easy isFileExist`
+- 增加 `easy saveText`
+
+**v1.2.3**
+
+- `easy showAnything` 和 `easy cleanGPUUsed` 增加输出插槽
+- 添加新的人体分割在 `easy humanSegmentation` 节点上 - 代码从 [ComfyUI_Human_Parts](https://github.com/metal3d/ComfyUI_Human_Parts) 整合
+- 当你在 `easy preSamplingCustom` 节点上选择basicGuider，CFG>0 且当前模型为Flux时，将使用FluxGuidance
+- 增加 `easy loraStackApply` and `easy controlnetStackApply`
+
 **v1.2.2**
 
+- 增加 `easy batchAny`
+- 增加 `easy anythingIndexSwitch`
+- 增加 `easy forLoopStart` 和 `easy forLoopEnd`  
+- 增加 `easy ifElse`
 - 增加 v2 版本新前端代码
 - 增加 `easy fluxLoader`
 - 增加 `controlnetApply` 相关节点对sd3和hunyuanDiT的支持
+- 修复 当使用fooocus inpaint后，再使用Lora模型无法生效的问题
 
 **v1.2.1**
 

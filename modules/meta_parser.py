@@ -10,10 +10,11 @@ from PIL import Image
 import fooocus_version
 import modules.config
 import modules.sdxl_styles
+import shared
+
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256
-from shared import modelsinfo
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 
@@ -21,10 +22,11 @@ re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
 re_imagesize = re.compile(r"^(\d+)x(\d+)$")
 
+get_layout_visible = lambda x,y:gr.update(visible=x not in y)
 get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
 get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
-get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value='', visible=x not in y, interactive=x not in z)
+get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=None, visible=x not in y, interactive=x not in z)
 
 def get_layout_visible_inter_loras(y,z,max_number):
     x = 'loras'
@@ -56,11 +58,21 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
     sampler_list = enginedata_dict.get('available_sampler_name', default_params.get('available_sampler_name', default_class_params['Fooocus']['available_sampler_name']))
     scheduler_list = enginedata_dict.get('available_scheduler_name', default_params.get('available_scheduler_name', default_class_params['Fooocus']['available_scheduler_name']))
+    uov_method_list = enginedata_dict.get('available_uov_method', default_params.get('available_uov_method', default_class_params['Fooocus']['available_uov_method']))
 
     params_backend  = enginedata_dict.get('backend_params', modules.flags.get_engine_default_backend_params(template_engine))
-    params_backend.update({'backend_engine': template_engine})
+    params_backend.update(dict(
+            nickname=state_params["user_name"],
+            user_did=state_params["user_did"],
+            translation_methods=modules.config.default_translation_methods,
+            backfill_prompt=modules.config.default_backfill_prompt,
+            comfyd_active_checkbox=modules.config.default_comfyd_active_checkbox,
+            backend_engine=template_engine 
+            ))
+
     task_method = params_backend.get('task_method', None)
     base_model_list = modules.config.get_base_model_list(template_engine, task_method)
+    engine_class_display = template_engine if template_engine!='Fooocus' else 'SDXL'
 
     results = [params_backend]
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
@@ -74,12 +86,19 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('guidance_scale', visible, inter))
     results.append(get_layout_empty_visible_inter('negative_prompt', visible, inter))
     results.append(gr.update(visible=True if 'blank.inc.html' not in preset_url else False))
+    results.append(gr.update(visible=False)) # identity_dialog
+    state_params['identity_dialog'] = False
+
+    # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
+    results.append(engine_class_display)
+    results.append(get_layout_choices_visible_inter(uov_method_list, 'uov_method', visible, inter))
+    results.append(get_layout_empty_visible_inter('layer_method', visible, inter))
+    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter))
+    results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
+    results.append(get_layout_empty_visible_inter('enhance_input_image', visible, inter))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
-    #for i in range(modules.config.default_max_lora_number):
-    #    results += [get_layout_visible_inter('loras', visible, inter)] * 3
 
-
-    #[output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox, state_topbar]
+    #[output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
     # if default_X in config_prese then update the value to gr.X else update with default value in ads.default[X]
     update_value_if_existed = lambda x: gr.update() if x not in presetdata_dict else presetdata_dict[x]
     results.append(update_value_if_existed("output_format"))
@@ -91,7 +110,6 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] else update_value_if_existed("input_image_checkbox"))
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
-    results.append(state_params)
 
     return results
 
@@ -343,7 +361,7 @@ def get_sha256(filepath):
     if not os.path.isfile(filepath):
         return ''
     if filepath not in hash_cache:
-        filehash = modelsinfo.get_file_muid(filepath)
+        filehash = shared.modelsinfo.get_file_muid(filepath)
         if not filehash:
             filehash = sha256(filepath)
         hash_cache[filepath] = filehash
@@ -425,19 +443,19 @@ class MetadataParser(ABC):
         self.base_model_name = Path(base_model_name).stem
 
         if base_model_name not in ['', 'None']:
-            base_model_path = modelsinfo.get_model_filepath('checkpoints', base_model_name)
-            self.base_model_hash = modelsinfo.get_file_muid(base_model_path)
+            base_model_path = shared.modelsinfo.get_model_filepath('checkpoints', base_model_name)
+            self.base_model_hash = shared.modelsinfo.get_file_muid(base_model_path)
 
         if refiner_model_name not in ['', 'None']:
             self.refiner_model_name = Path(refiner_model_name).stem
-            refiner_model_path = modelsinfo.get_model_filepath('checkpoints', refiner_model_name)
-            self.refiner_model_hash = modelsinfo.get_file_muid(refiner_model_path)
+            refiner_model_path = shared.modelsinfo.get_model_filepath('checkpoints', refiner_model_name)
+            self.refiner_model_hash = shared.modelsinfo.get_file_muid(refiner_model_path)
 
         self.loras = []
         for (lora_name, lora_weight) in loras:
             if lora_name != 'None':
-                lora_path = modelsinfo.get_model_filepath('loras', lora_name)
-                lora_hash = modelsinfo.get_file_muid(lora_path)
+                lora_path = shared.modelsinfo.get_model_filepath('loras', lora_name)
+                lora_hash = shared.modelsinfo.get_file_muid(lora_path)
                 self.loras.append((Path(lora_name).stem, lora_weight, lora_hash))
         self.vae_name = Path(vae_name).stem
         if styles_definition != 'None':
@@ -850,7 +868,7 @@ def get_exif(metadata: str | None, metadata_scheme: str):
     exif[0x9286] = metadata
     # 0x0131 = Software
     import enhanced.version as version
-    exif[0x0131] = f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'
+    exif[0x0131] = f'{version.branch}_{version.get_simplesdxl_ver()}'
     # 0x927C = MakerNote
     exif[0x927C] = metadata_scheme
     return exif

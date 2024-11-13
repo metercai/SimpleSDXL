@@ -18,6 +18,9 @@ from .encoders import IDEncoder
 INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
 
 MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
+CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
+CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
+
 if "pulid" not in folder_paths.folder_names_and_paths:
     current_paths = [MODELS_DIR]
 else:
@@ -256,7 +259,7 @@ class PulidEvaClipLoader:
     def load_eva_clip(self):
         from .eva_clip.factory import create_model_and_transforms
 
-        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True)
+        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
 
         model = model.visual
 
@@ -338,6 +341,7 @@ class ApplyPulid:
             det_model='retinaface_resnet50',
             save_ext='png',
             device=device,
+            model_rootpath=CONTROLNET_DIR,
         )
 
         face_helper.face_parse = None

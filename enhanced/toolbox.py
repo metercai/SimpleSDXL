@@ -16,119 +16,9 @@ import modules.meta_parser as meta_parser
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from enhanced.simpleai import sync_model_info
+from enhanced.simpleai import sync_model_info, get_path_in_user_dir
 from modules.model_loader import load_file_from_url, load_file_from_muid
 from shared import sysinfo
-
-css = '''
-.toolbox {
-    height: auto;
-    position: absolute;
-    top: 210px;
-    left: 86%;
-    width: 100px !important;
-    z-index: 20;
-    text-align: center;
-}
-
-.infobox {
-    height: auto;
-    position: absolute;
-    top: -15rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28rem !important;
-    z-index: 20;
-    text-align: left;
-    opacity: 0.85;
-    border-radius: 8px;
-    padding: 6px;
-    line-height: 120%;
-    border: groove;
-    color: var(--neutral-800);
-}
-
-.infobox_mobi {
-    height: auto;
-    position: absolute;
-    top: -16rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 22rem !important;
-    z-index: 20;
-    text-align: left;
-    opacity: 0.85;
-    border-radius: 8px;
-    padding: 6px;
-    line-height: 120%;
-    border: groove;
-}
-
-
-.toolbox_note {
-    height: auto;
-    position: absolute;
-    top: 160px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px !important;
-    z-index: 21;
-    text-align: left;
-    opacity: 1;
-    border-radius: 8px;
-    padding: 0px;
-    border: groove;
-}
-
-.identity_note {
-    height: auto;
-    position: absolute;
-    top: 160px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 400px !important;
-    z-index: 21;
-    text-align: left;
-    opacity: 1;
-    border-radius: 8px;
-    padding: 0px;
-    border: groove;
-}
-
-.note_info {
-    padding: 8px;
-}
-
-.note_text {
-    padding: 2px;
-    text-align: center;
-}
-.preset_input textarea {
-    width: 120px;
-}
-
-.tag_array {
-    height: auto;
-    position: absolute;
-    top: 180px;
-    left: 15%;
-    width: 580px !important;
-    z-index: 22;
-}
-
-.taglib_button {
-    height: 35px;
-    transform: translate(5%, 35%);
-}
-
-.min_pad0 {
-    padding: 0px !important;
-}
-
-.min_pad {
-    padding: 2px !important;
-}
-'''
 
 
 # app context
@@ -166,7 +56,7 @@ def toggle_prompt_info(state_params):
     state_params.update({"infobox_state": infobox_state})
     #print(f'[ToolBox] Toggle_image_info: {infobox_state}')
     [choice, selected] = state_params["prompt_info"]
-    prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+    prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
     return gr.update(value=make_infobox_markdown(prompt_info, state_params['__theme']), visible=infobox_state), state_params
 
 
@@ -200,10 +90,10 @@ def toggle_note_box(item, state_params):
     flag = note_box_state[1]
     title_extra = ""
     if note_box_state[2]:
-        title_extra = '\n' + toolbox_note_missing_muid
+        title_extra = '\n' # + toolbox_note_missing_muid
     if item == 'delete':
         [choice, selected] = state_params["prompt_info"]
-        info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+        info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
         return gr.update(value=f'DELETE the image from output directory and logs!', visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'regen':
         return gr.update(value=toolbox_note_regenerate_title, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
@@ -243,10 +133,12 @@ def delete_image(state_params):
     [choice, selected] = state_params["prompt_info"]
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
-    info = gallery.get_images_prompt(choice, selected, max_per_page)
+    user_did = state_params["user_did"]
+    info = gallery.get_images_prompt(choice, selected, max_per_page, user_did=user_did)
     file_name = info["Filename"]
     output_index = choice.split('/')
-    dir_path = os.path.join(config.path_outputs, "20{}".format(output_index[0]))
+    user_path_outputs = os.path.join(config.path_outputs, user_did)
+    dir_path = os.path.join(user_path_outputs, "20{}".format(output_index[0]))
     
     log_path = os.path.join(dir_path, 'log.html')
     if os.path.exists(log_path):
@@ -288,12 +180,12 @@ def delete_image(state_params):
         os.remove(file_path)
     print(f'[ToolBox] Delete image file: {file_path}')
 
-    image_list_nums = len(gallery.refresh_images_catalog(output_index[0], True))
+    image_list_nums = len(gallery.refresh_images_catalog(output_index[0], True, user_did))
     if image_list_nums<=0:
         os.remove(log_path)
         os.rmdir(dir_path)
         index = state_params["__output_list"].index(choice)
-        output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog)
+        output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog, user_did)
         state_params.update({"__output_list": output_list})
         state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
         if index>= len(state_params["__output_list"]):
@@ -317,7 +209,7 @@ def delete_image(state_params):
                 choice = output_index[0]
             else:
                 choice = output_index[0] + '/' + str(page)
-            output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog)
+            output_list, finished_nums, finished_pages = gallery.refresh_output_list(max_per_page, max_catalog, user_did)
             state_params.update({"__output_list": output_list})
             state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
         else:
@@ -327,9 +219,9 @@ def delete_image(state_params):
             state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
 
     state_params.update({"prompt_info":[choice, selected]})
-    images_gallery = gallery.get_images_from_gallery_index(choice, max_per_page)
+    images_gallery = gallery.get_images_from_gallery_index(choice, max_per_page, user_did)
     state_params.update({"note_box_state": ['',0,0]})
-    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice, visible=True if choice else False), gr.update(visible=False), gr.update(visible=False), state_params
+    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice, visible=True if choice else False), gr.update(visible=False), gr.update(visible=False), state_params, state_params['__finished_nums_pages']
 
 
 def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode):
@@ -348,7 +240,7 @@ def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mo
 
 def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
-    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"])
+    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = metainfo.get('Refiner Model', 'None')
     state_params.update({"note_box_state": ['',0,0]})
@@ -371,6 +263,8 @@ def save_preset(*args):
     args.reverse()
     name = args.pop()
     backend_params = dict(args.pop())
+    state_params = dict(args.pop())
+
     output_format = args.pop()
     inpaint_advanced_masking_checkbox = args.pop()
     mixing_image_prompt_and_vary_upscale = args.pop()
@@ -378,7 +272,6 @@ def save_preset(*args):
     backfill_prompt = args.pop()
     translation_methods = args.pop()
     input_image_checkbox = args.pop()
-    state_params = dict(args.pop())
 
     advanced_checkbox = args.pop()
     image_number = int(args.pop())
@@ -482,15 +375,17 @@ def save_preset(*args):
             preset["styles_definition"] = m_dict
 
         #print(f'preset:{preset}')
-        save_path = 'presets/' + name + '.json'
+        save_path = get_path_in_user_dir(state_params['user_did'], name + '.json', catalog='presets')
         with open(save_path, "w", encoding="utf-8") as json_file:
             json.dump(preset, json_file, indent=4)
 
         state_params.update({"__preset": name})
         print(f'[ToolBox] Saved the current params and reset to {save_path}.')
     state_params.update({"note_box_state": ['',0,0]})
-    results = [gr.update(visible=False)] * 3 + [state_params]
+    results = [gr.update(visible=False)] * 3
+    results += [gr.Dataset.update(samples=topbar.get_preset_samples(state_params['user_did']))]
     results += topbar.refresh_nav_bars(state_params)
+    results += topbar.update_topbar_js_params(state_params)
     return results
 
 

@@ -110,6 +110,9 @@ class AsyncTask:
         self.backfill_prompt = self.params_backend.pop('backfill_prompt')
         self.translation_methods = self.params_backend.pop('translation_methods')
         self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
+        self.nickname = self.params_backend.pop('nickname')
+        self.user_did = self.params_backend.pop('user_did')
+
 
         self.save_final_enhanced_image_only = args.pop() if not args_manager.args.disable_image_log else False
         self.save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
@@ -226,6 +229,7 @@ def worker():
     import random
     import copy
     import cv2
+    import re
     import modules.default_pipeline as pipeline
     import modules.core as core
     import modules.flags as flags
@@ -239,6 +243,7 @@ def worker():
     import fooocus_version
     import enhanced.wildcards as wildcards
     import enhanced.version as version
+    import enhanced.translator as translator
 
     from extras.censor import default_censor
     from modules.sdxl_styles import apply_style, get_random_style, fooocus_expansion, apply_arrays, random_style_name
@@ -252,7 +257,7 @@ def worker():
     from modules.meta_parser import get_metadata_parser
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
-    import enhanced.translator as translator
+    from enhanced.all_parameters import default as default_params
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -352,16 +357,17 @@ def worker():
                 denoise=denoising_strength,
                 seed=task['task_seed'],
                 )
-            default_params.update(async_task.params_backend)
-            if async_task.layer_input_image is None:
-                input_images = None
-            else:
-                input_images = [HWC3(async_task.layer_input_image)]
+            params_backend = async_task.params_backend.copy()
+            input_images = params_backend.pop('input_images') if 'input_images' in async_task.params_backend else None
+            options = params_backend.pop('ui_options') if 'ui_options' in async_task.params_backend else {}
+            default_params.update(params_backend)
             try:
-                options = async_task.params_backend.get('ui_options', {})
+                user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
-                imgs = comfypipeline.process_flow(comfy_task.name, comfy_task.params, comfy_task.images, callback=callback)
+                imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
+                if inpaint_worker.current_task is not None:
+                    imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
             except ValueError as e:
                 print(f"comfy_task_error: {e}")
                 empty_path = [np.zeros((width, height), dtype=np.uint8)]
@@ -482,8 +488,11 @@ def worker():
             d.append(('Backend Engine', 'backend_engine', async_task.task_class_full))
             d.append(('Metadata Scheme', 'metadata_scheme',
                       async_task.metadata_scheme.value if async_task.save_metadata_to_images else async_task.save_metadata_to_images))
-            d.append(('Version', 'version', f'Fooocus v{fooocus_version.version} {version.branch}_{version.get_simplesdxl_ver()}'))
-            img_paths.append(log(x, d, metadata_parser, async_task.output_format, task, persist_image))
+            if not shared.token.is_guest(async_task.user_did):
+                d.append(('User', 'created_by', f'{async_task.nickname}({async_task.user_did})'))
+
+            d.append(('Version', 'version', f'{version.branch}_{version.get_simplesdxl_ver()}'))
+            img_paths.append(log(x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did))
 
         return img_paths
 
@@ -492,23 +501,30 @@ def worker():
             cn_img, cn_stop, cn_weight = task
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
 
-            if not async_task.skipping_cn_preprocessor:
+            if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = preprocessors.canny_pyramid(cn_img, async_task.canny_low_threshold,
                                                      async_task.canny_high_threshold)
 
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img)
+            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
+        #for task in async_task.cn_tasks[flags.cn_pose]:
+        #    cn_img, cn_stop, cn_weight = task
+        #    cn_img = resize_image(HWC3(cn_img), width=width, height=height)
+        #    cn_img = HWC3(cn_img)
+        #    task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
+        #    if async_task.debugging_cn_preprocessor:
+        #        yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_cpds]:
             cn_img, cn_stop, cn_weight = task
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
 
-            if not async_task.skipping_cn_preprocessor:
+            if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = preprocessors.cpds(cn_img)
 
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img)
+            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_ip]:
@@ -518,24 +534,30 @@ def worker():
             # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
             cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
 
-            task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_path)
+            if async_task.task_class in ['Fooocus']:
+                task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_path)
+            else:
+                task[0] = cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_ip_face]:
             cn_img, cn_stop, cn_weight = task
             cn_img = HWC3(cn_img)
 
-            if not async_task.skipping_cn_preprocessor:
+            if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = extras.face_crop.crop_image(cn_img)
 
             # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
             cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
 
-            task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_face_path)
+            if async_task.task_class in ['Fooocus']:
+                task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_face_path)
+            else:
+                task[0] = cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         all_ip_tasks = async_task.cn_tasks[flags.cn_ip] + async_task.cn_tasks[flags.cn_ip_face]
-        if len(all_ip_tasks) > 0:
+        if len(all_ip_tasks) > 0 and async_task.task_class in ['Fooocus']:
             pipeline.final_unet = ip_adapter.patch_model(pipeline.final_unet, all_ip_tasks)
 
     def apply_vary(async_task, uov_method, denoising_strength, uov_input_image, switch, current_progress, advance_progress=False):
@@ -552,6 +574,14 @@ def worker():
         elif shape_ceil > 2048:
             print(f'[Vary] Image is resized because it is too big.')
             shape_ceil = 2048
+        
+        if async_task.task_class in flags.comfy_classes:
+            H, W, C = uov_input_image.shape
+            width = W
+            height = H
+            initial_latent = None
+            return uov_input_image, denoising_strength, initial_latent, width, height, current_progress
+        
         uov_input_image = set_image_shape_ceil(uov_input_image, shape_ceil)
         initial_pixels = core.numpy_to_pytorch(uov_input_image)
         if advance_progress:
@@ -587,6 +617,13 @@ def worker():
             yield_result(async_task, inpaint_worker.current_task.visualize_mask_processing(), 100,
                          async_task.black_out_nsfw, do_not_show_finished_images=True)
             raise EarlyReturnException
+        
+        if async_task.task_class in flags.comfy_classes:
+            inpaint_mask = inpaint_worker.current_task.interested_mask
+            inpaint_image = inpaint_worker.current_task.interested_image
+            height, width = inpaint_worker.current_task.image.shape[:2]  # inpaint_image.shape[:2]  ?
+            print(f'inpaint to comfy:(H, W)=({height}, {width}), inpaint_image(H, W)=({inpaint_image.shape[:2]}), inpaint_mask(H, W)=({inpaint_mask.shape[:2]})')
+            return denoising_strength, initial_latent, width, height, current_progress
 
         if advance_progress:
             current_progress += 1
@@ -662,10 +699,22 @@ def worker():
             inpaint_mask = np.ascontiguousarray(inpaint_mask.copy())
             async_task.inpaint_strength = 1.0
             async_task.inpaint_respective_field = 1.0
+            print(f'in apply_outpaint: (H, W)=({H}, {W}) -> ({inpaint_image.shape[0]}, {inpaint_image.shape[1]})')
         return inpaint_image, inpaint_mask
 
     def apply_upscale(async_task, uov_input_image, uov_method, switch, current_progress, advance_progress=False):
         H, W, C = uov_input_image.shape
+        if async_task.task_class in flags.comfy_classes:
+            width = W
+            height = H
+            initial_latent = None
+            direct_return = False
+            tiled = True
+            denoising_strength = 0.382
+            if async_task.overwrite_upscale_strength > 0:
+                denoising_strength = async_task.overwrite_upscale_strength
+            return direct_return, uov_input_image, denoising_strength, initial_latent, tiled, width, height, current_progress
+
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, f'Upscaling image from {str((W, H))} ...')
@@ -696,11 +745,12 @@ def worker():
             direct_return = False
         if direct_return:
             return direct_return, uov_input_image, None, None, None, None, None, current_progress
-
+        
         tiled = True
         denoising_strength = 0.382
         if async_task.overwrite_upscale_strength > 0:
             denoising_strength = async_task.overwrite_upscale_strength
+
         initial_pixels = core.numpy_to_pytorch(uov_input_image)
         if advance_progress:
             current_progress += 1
@@ -1023,7 +1073,7 @@ def worker():
             if len(async_task.cn_tasks[flags.cn_ip_face]) > 0:
                 clip_vision_path, ip_negative_path, ip_adapter_face_path = modules.config.downloading_ip_adapters(
                     'face')
-        if async_task.current_tab == 'enhance' and async_task.enhance_input_image is not None:
+        if async_task.current_tab == 'enhance' and async_task.enhance_input_image is not None and async_task.task_class in ['Fooocus']:
             goals.append('enhance')
             skip_prompt_processing = True
             async_task.enhance_input_image = HWC3(async_task.enhance_input_image)
@@ -1036,7 +1086,7 @@ def worker():
             goals.append('vary')
         elif 'upscale' in uov_method:
             goals.append('upscale')
-            if 'fast' in uov_method:
+            if 'fast' in uov_method and async_task.task_class in ['Fooocus']:
                 skip_prompt_processing = True
                 steps = 0
             else:
@@ -1186,6 +1236,7 @@ def worker():
         if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+'] and 'kolors' not in async_task.task_name.lower():
             async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
             async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
+            async_task.inpaint_additional_prompt = translator.convert(async_task.inpaint_additional_prompt, async_task.translation_methods)
 
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
@@ -1257,11 +1308,12 @@ def worker():
                 goals, inpaint_head_model_path, inpaint_image, inpaint_mask, inpaint_parameterized, ip_adapter_face_path,
                 ip_adapter_path, ip_negative_path, skip_prompt_processing, use_synthetic_refiner)
 
-        # Load or unload CNs
-        progressbar(async_task, current_progress, 'Loading control models ...')
-        pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
-        ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_path)
-        ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_face_path)
+        if async_task.task_class in ['Fooocus']:
+            # Load or unload CNs
+            progressbar(async_task, current_progress, 'Loading control models ...')
+            pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
+            ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_path)
+            ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_face_path)
 
         async_task.steps, switch, width, height = apply_overrides(async_task, async_task.steps, height, width)
 
@@ -1282,7 +1334,7 @@ def worker():
             progressbar(async_task, current_progress, 'Image processing ...')
 
         should_enhance = async_task.enhance_checkbox and (async_task.enhance_uov_method != flags.disabled.casefold() or len(async_task.enhance_ctrls) > 0)
-
+        
         if 'vary' in goals:
             async_task.uov_input_image, denoising_strength, initial_latent, width, height, current_progress = apply_vary(
                 async_task, async_task.uov_method, denoising_strength, async_task.uov_input_image, switch,
@@ -1302,7 +1354,7 @@ def worker():
                 yield_result(async_task, uov_input_image_path, 100, async_task.black_out_nsfw, False,
                              do_not_show_finished_images=True)
                 return
-
+        
         if 'inpaint' in goals:
             try:
                 denoising_strength, initial_latent, width, height, current_progress = apply_inpaint(async_task,
@@ -1319,7 +1371,12 @@ def worker():
                                                                                                     advance_progress=True)
             except EarlyReturnException:
                 return
-
+        
+        #if inpaint_image is not None:
+        #    print(f'after apply_inpaint: width={width}, height={height}, denoising_strength={denoising_strength}, inpaint_image(H,W)={inpaint_image.shape[:2]}')
+        #else:
+        #    print(f'after apply_inpaint: width={width}, height={height}, denoising_strength={denoising_strength}')
+        
         if 'cn' in goals:
             apply_control_nets(async_task, height, ip_adapter_face_path, ip_adapter_path, width, current_progress)
             if async_task.debugging_cn_preprocessor:
@@ -1375,7 +1432,7 @@ def worker():
         final_scheduler_name = patch_samplers(async_task)
         print(f'Using {final_scheduler_name} scheduler.')
 
-        if async_task.task_class == 'Fooocus':
+        if async_task.task_class in ['Fooocus']:
             async_task.yields.append(['preview', (current_progress, 'Moving model to GPU ...', None)])
         else:
             async_task.yields.append(['preview', (current_progress, f'Process {async_task.task_class} Task ...', None)])
@@ -1399,7 +1456,7 @@ def worker():
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
             async_task.yields.append(['preview', (
                 int(current_progress + async_task.callback_steps),
-                f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
+                f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         def callback_hydittask(pipe, step, time_steps, callback_kwargs):
             from enhanced.latent_preview import get_previewer
@@ -1420,7 +1477,7 @@ def worker():
             return callback_kwargs
 
         callback_function = callback
-        if async_task.task_class != 'Fooocus':
+        if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
             #ldm_patched.modules.model_management.unload_and_free_everything()
             async_task.refiner_model_name = ''
@@ -1431,6 +1488,119 @@ def worker():
                 callback_function = callback_hydittask
             elif async_task.task_class == 'Kolors':
                 async_task.base_model_name = default_kolors_base_model_name
+            
+            input_images = None
+            if async_task.layer_input_image is not None:
+                input_images = comfypipeline.ComfyInputImage([])
+                input_images.set_image('input_image', HWC3(async_task.layer_input_image))
+            if "_aio" in async_task.task_method:
+                input_images = comfypipeline.ComfyInputImage([])
+                if '.gguf' in async_task.base_model_name:
+                    async_task.params_backend['base_model_gguf'] = async_task.base_model_name
+                    if 'hyp8-Q8' in async_task.base_model_name or 'hyp8-Q6' in async_task.base_model_name:
+                        async_task.params_backend['i2i_model_type'] = 2 # hyp8
+                        async_task.params_backend['clip_model'] = 't5xxl_fp16.safetensors'
+                    else:
+                        async_task.params_backend['i2i_model_type'] = 3 # hyp8 low
+                        async_task.params_backend['clip_model'] = 't5xxl_fp8_e4m3fn.safetensors'
+                else:
+                    async_task.params_backend['i2i_model_type'] = 1 # dev full-size
+                    async_task.params_backend['clip_model'] = 't5xxl_fp16.safetensors'
+                    async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
+                if async_task.canny_low_threshold != default_params['canny_low_threshold']:
+                    async_task.params_backend['i2i_canny_low'] = async_task.canny_low_threshold
+                if async_task.canny_high_threshold != default_params['canny_high_threshold']:
+                    async_task.params_backend['i2i_canny_high'] = async_task.canny_high_threshold
+                if 'cn' in goals:
+                    async_task.params_backend['i2i_function'] = 1 # iamge prompt
+                    i = 1
+                    for task in async_task.cn_tasks[flags.cn_ip]:
+                        if i > 4:
+                            break
+                        cn_img, cn_stop, cn_weight = task
+                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
+                        async_task.params_backend[f'i2i_ip_fn{i}'] = 1 # IPadapter
+                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
+                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        i = i+1
+                    for task in async_task.cn_tasks[flags.cn_canny]:
+                        if i > 4:
+                            break
+                        cn_img, cn_stop, cn_weight = task
+                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
+                        async_task.params_backend[f'i2i_ip_fn{i}'] = 2 # canny
+                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
+                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        i = i+1
+                    for task in async_task.cn_tasks[flags.cn_cpds]:
+                        if i > 4:
+                            break
+                        cn_img, cn_stop, cn_weight = task
+                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
+                        async_task.params_backend[f'i2i_ip_fn{i}'] = 3 # depty
+                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
+                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        i = i+1
+                    for task in async_task.cn_tasks[flags.cn_ip_face]:
+                        if i > 4:
+                            break
+                        cn_img, cn_stop, cn_weight = task
+                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
+                        async_task.params_backend[f'i2i_ip_fn{i}'] = 4 # face
+                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
+                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        i = i+1
+                if 'vary' in goals or 'upscale' in goals:
+                    async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
+                    input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
+                    tiled_size = lambda x, p: x+16 if int(x*p) < 2048 else int(x*p)/math.ceil(int(x*p)/2048)+16
+                    tiled_steps = [10, 6, 4]
+                    match = re.search(r'\((?:Fast )?([\d.]+)x\)', async_task.uov_method)
+                    match_multiple = 1.0 if not match else float(match.group(1))
+                    match_multiple = match_multiple if match_multiple<4.0 else 4.0
+                    print(f'async_task.uov_method: {async_task.uov_method}')
+                    if 'vary' in async_task.uov_method and 'subtle' in async_task.uov_method:
+                        async_task.params_backend['i2i_uov_fn'] = 2
+                    elif 'vary' in async_task.uov_method and 'strong' in async_task.uov_method:
+                        async_task.params_backend['i2i_uov_fn'] = 3
+                    elif 'upscale' in async_task.uov_method and 'fast' in async_task.uov_method and match:
+                        async_task.params_backend['i2i_uov_fn'] = 1
+                        async_task.params_backend['i2i_uov_multiple'] = match_multiple
+                    elif 'upscale' in async_task.uov_method and match:
+                        async_task.params_backend['i2i_uov_fn'] = 4
+                        async_task.params_backend['i2i_uov_multiple'] = match_multiple
+                        async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
+                        async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
+                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[async_task.params_backend['i2i_model_type']]
+                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
+                        all_steps = steps * async_task.image_number
+                    elif 'hires.fix' in async_task.uov_method:
+                        async_task.params_backend['i2i_uov_fn'] = 5
+                        async_task.params_backend['i2i_uov_hires_fix_is_blurred'] = False
+                        async_task.params_backend['i2i_uov_hires_fix_w'] = 0.6
+                        async_task.params_backend['i2i_uov_hires_fix_s'] = 0.5
+                    else:
+                        async_task.params_backend['i2i_uov_fn'] = 0
+                    async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
+                    #if 'upscale' in goals:
+                    #    async_task.params_backend['i2i_uov_upscale_denoise'] = denoising_strength #async_task.overwrite_upscale_strength
+                    #if 'vary' in goals:
+                    #    async_task.params_backend['i2i_uov_vary_denoise'] = denoising_strength #async_task.overwrite_vary_strength
+                if 'inpaint' in goals:
+                    async_task.params_backend['i2i_function'] = 3 # iamge inpaint
+                    input_images.set_image(f'i2i_inpaint_image', inpaint_worker.current_task.interested_image)
+                    input_images.set_image(f'i2i_inpaint_mask', inpaint_worker.current_task.interested_mask)
+                    if async_task.invert_mask_checkbox:
+                        async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
+                    if 'cn' in goals:
+                        async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
+                    if len(async_task.outpaint_selections)>0:
+                        async_task.params_backend['i2i_inpaint_fn'] = 1  # out
+                    else:
+                        async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
+            async_task.params_backend['input_images'] = input_images
+
+
 
         ldm_patched.modules.model_management.print_memory_info()
 
@@ -1456,7 +1626,7 @@ def worker():
 
             except ldm_patched.modules.model_management.InterruptProcessingException:
                 if async_task.last_stop == 'skip':
-                    if async_task.task_class == 'Fooocus':
+                    if async_task.task_class in ['Fooocus']:
                         del task['c'], task['uc']  # Save memory
                     print(f'User skipped')
                     async_task.last_stop = False
@@ -1465,7 +1635,7 @@ def worker():
                     print('User stopped')
                     break
 
-            if async_task.task_class == 'Fooocus':
+            if async_task.task_class in ['Fooocus']:
                 del task['c'], task['uc']  # Save memory
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
@@ -1634,7 +1804,7 @@ def worker():
         time.sleep(0.01)
         if len(async_tasks) > 0:
             task = async_tasks.pop(0)
-
+            print(f'get task')
             try:
                 handler(task)
                 if task.generate_image_grid:

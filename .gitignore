@@ -87,5 +87,6 @@ wd-v1-4-moat-tagger-v2.csv
 /comfy/temp/
 /comfy/extra_model_paths.yaml
 /comfy/user/default/*.json
+comfy/user/
 /comfy/custom_nodes/comfyui_controlnet_aux/config.yaml
 /patch_pyhash.py*

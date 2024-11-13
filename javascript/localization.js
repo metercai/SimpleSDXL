@@ -81,8 +81,8 @@ function refresh_style_localization() {
 }
 
 function refresh_aspect_ratios_label(value) {
-    label = document.querySelector('#aspect_ratios_accordion div span');
-    translation = getTranslation("Aspect Ratios");
+    var label = document.querySelector('#aspect_ratios_accordion div span');
+    var translation = getTranslation("Aspect Ratios");
     if (typeof translation == "undefined") {
         translation = "Aspect Ratios";
     }
@@ -91,18 +91,48 @@ function refresh_aspect_ratios_label(value) {
 }
 
 function refresh_finished_images_catalog_label(value) {
-    label = document.querySelector('#finished_images_catalog div span');
-    translation = getTranslation("Finished Images Catalog");
+    var label = document.querySelector('#finished_images_catalog div span');
+    var translation = getTranslation("Finished Images Catalog");
     if (typeof translation == "undefined") {
-        translation = "Finished Images Catalog";
-    }
-    translation_stat = getTranslation("total: xxx images and yyy pages");
+        translation = "'s Finished Images Catalog";
+    } else { translation = "的" + translation; }
+    var translation_stat = getTranslation("total: xxx images and yyy pages");
     if (typeof translation_stat == "undefined") {
         translation_stat = "total: xxx images and yyy pages";
     }
-    xxx = value.split(",")[0]
-    yyy = value.split(",")[1]
-    label.textContent = translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
+    var xxx = value.split(",")[0]
+    var yyy = value.split(",")[1]
+    label.textContent = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
+}
+
+function refresh_identity_center_label() {
+    let label = document.getElementById("identity_center");
+    var translation = getTranslation("IdentityCenter");
+    if (typeof translation == "undefined") {
+        translation = "IdentityCenter";
+    }
+    label.textContent = translation + "(" + nickname + ")";
+}
+
+function refresh_input_image_tab_label() {
+    var items = ["Image Prompt", "Upscale or Variation", "Inpaint or Outpaint"]
+    var imageInputTabs = document.getElementById('image_input_tabs');
+    var tabNav = imageInputTabs.querySelector('.tab-nav');
+    var buttons = tabNav.querySelectorAll('button');
+    buttons.forEach(function(button) {
+	let itemText = button.getAttribute('data-original-text');
+	if (items.includes(itemText)) {
+	    var translation = getTranslation(itemText);
+	    if (typeof translation == "undefined") {
+                translation = itemText;
+            }
+	    let class_name = task_class_name !== "Fooocus" ? "." + task_class_name : "";
+	    button.textContent = translation + class_name;
+	    button.addEventListener('click', function() {
+                button.textContent = translation + class_name;
+            });
+	}
+    });
 }
 
 function localizeWholePage() {

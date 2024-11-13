@@ -1,12 +1,17 @@
 import os, torch
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
-from .utils import easySave
+from .utils import easySave, get_sd_version
 from .adv_encode import advanced_encode
 from .controlnet import easyControlnet
 from .log import log_node_warn
 from ..layer_diffuse import LayerDiffuse
 from ..config import RESOURCES_DIR
+from nodes import CLIPTextEncode
+try:
+    from comfy_extras.nodes_flux import FluxGuidance
+except:
+    FluxGuidance = None
 
 class easyXYPlot():
 
@@ -15,6 +20,7 @@ class easyXYPlot():
         self.y_node_type, self.y_type = sampler.safe_split(xyPlotData.get("y_axis"), ': ')
         self.x_values = xyPlotData.get("x_vals") if self.x_type != "None" else []
         self.y_values = xyPlotData.get("y_vals") if self.y_type != "None" else []
+        self.custom_font = xyPlotData.get("custom_font")
 
         self.grid_spacing = xyPlotData.get("grid_spacing")
         self.latent_id = 0
@@ -54,7 +60,10 @@ class easyXYPlot():
             value_label = f"ControlNet {index + 1}"
 
         if value_type in ['Lora', 'Checkpoint']:
-            value_label = f"{os.path.basename(os.path.splitext(value.split(',')[0])[0])}"
+            arr = value.split(',')
+            model_name = os.path.basename(os.path.splitext(arr[0])[0])
+            trigger_words = ' ' + arr[3] if len(arr[3]) > 2 else ''
+            value_label = f"{model_name}{trigger_words}"
 
         if value_type in ["ModelMergeBlocks"]:
             if ":" in value:
@@ -87,8 +96,10 @@ class easyXYPlot():
         return plot_image_vars, value_label
 
     @staticmethod
-    def get_font(font_size):
-        return ImageFont.truetype(str(Path(os.path.join(RESOURCES_DIR, 'OpenSans-Medium.ttf'))), font_size)
+    def get_font(font_size, font_path=None):
+        if font_path is None:
+            font_path = str(Path(os.path.join(RESOURCES_DIR, 'OpenSans-Medium.ttf')))
+        return ImageFont.truetype(font_path, font_size)
 
     @staticmethod
     def update_label(label, value, num_items):
@@ -118,7 +129,7 @@ class easyXYPlot():
         return bg_width, bg_height, x_offset_initial, y_offset
 
     def adjust_font_size(self, text, initial_font_size, label_width):
-        font = self.get_font(initial_font_size)
+        font = self.get_font(initial_font_size, self.custom_font)
         text_width = font.getbbox(text)
         if text_width and text_width[2]:
             text_width = text_width[2]
@@ -146,7 +157,7 @@ class easyXYPlot():
         label_bg = Image.new('RGBA', (label_width, label_height), color=(255, 255, 255, 0))
         d = ImageDraw.Draw(label_bg)
 
-        font = self.get_font(font_size)
+        font = self.get_font(font_size, self.custom_font)
 
         # Check if text will fit, if not insert ellipsis and reduce text
         if self.textsize(d, text, font=font)[0] > label_width:
@@ -183,6 +194,8 @@ class easyXYPlot():
         a1111_prompt_style = plot_image_vars['a1111_prompt_style'] if "a1111_prompt_style" in plot_image_vars else False
         clip = clip if clip is not None else plot_image_vars["clip"]
         steps = plot_image_vars['steps'] if "steps" in plot_image_vars else 1
+
+        sd_version = get_sd_version(plot_image_vars['model'])
 
         # 高级用法
         if plot_image_vars["x_node_type"] == "advanced" or plot_image_vars["y_node_type"] == "advanced":
@@ -338,7 +351,7 @@ class easyXYPlot():
                 clip = clip if clip is not None else plot_image_vars["clip"]
 
                 xy_values = x_value if self.x_type == "Lora" else y_value
-                lora_name, lora_model_strength, lora_clip_strength = xy_values.split(",")
+                lora_name, lora_model_strength, lora_clip_strength, _ = xy_values.split(",")
                 lora_stack = [{"lora_name": lora_name, "model": model, "clip" :clip, "model_strength": float(lora_model_strength), "clip_strength": float(lora_clip_strength)}]
                 if 'lora_stack' in plot_image_vars:
                     lora_stack = lora_stack + plot_image_vars['lora_stack']
@@ -352,11 +365,14 @@ class easyXYPlot():
                 if self.x_type == 'Positive Prompt S/R' or self.y_type == 'Positive Prompt S/R':
                     positive = x_value if self.x_type == "Positive Prompt S/R" else y_value
 
-                positive = advanced_encode(clip, positive,
-                                            plot_image_vars['positive_token_normalization'],
-                                            plot_image_vars['positive_weight_interpretation'],
-                                            w_max=1.0,
-                                            apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
+                if sd_version == 'flux':
+                    positive, = CLIPTextEncode().encode(clip, positive)
+                else:
+                    positive = advanced_encode(clip, positive,
+                                                plot_image_vars['positive_token_normalization'],
+                                                plot_image_vars['positive_weight_interpretation'],
+                                                w_max=1.0,
+                                                apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
 
                 # if "positive_cond" in plot_image_vars:
                 #     positive = positive + plot_image_vars["positive_cond"]
@@ -365,11 +381,14 @@ class easyXYPlot():
                 if self.x_type == 'Negative Prompt S/R' or self.y_type == 'Negative Prompt S/R':
                     negative = x_value if self.x_type == "Negative Prompt S/R" else y_value
 
-                negative = advanced_encode(clip, negative,
-                                            plot_image_vars['negative_token_normalization'],
-                                            plot_image_vars['negative_weight_interpretation'],
-                                            w_max=1.0,
-                                            apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
+                if sd_version == 'flux':
+                    negative, = CLIPTextEncode().encode(clip, negative)
+                else:
+                    negative = advanced_encode(clip, negative,
+                                                plot_image_vars['negative_token_normalization'],
+                                                plot_image_vars['negative_weight_interpretation'],
+                                                w_max=1.0,
+                                                apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
                 # if "negative_cond" in plot_image_vars:
                 #     negative = negative + plot_image_vars["negative_cond"]
 
@@ -388,6 +407,11 @@ class easyXYPlot():
                         start_percent = item[3]
                         end_percent = item[4]
                         positive, negative = easyControlnet().apply(control_net_name, image, positive, negative, strength, start_percent, end_percent, None, 1)
+            # Flux guidance
+            if self.x_type == "Flux Guidance" or self.y_type == "Flux Guidance":
+                positive = plot_image_vars["positive_cond"] if "positive" in plot_image_vars else None
+                flux_guidance = float(x_value) if self.x_type == "Flux Guidance" else float(y_value)
+                positive, = FluxGuidance().append(positive, flux_guidance)
 
         # 简单用法
         if plot_image_vars["x_node_type"] == "loader" or plot_image_vars["y_node_type"] == "loader":
@@ -407,15 +431,21 @@ class easyXYPlot():
             clip = clip.clone()
             clip.clip_layer(plot_image_vars['clip_skip'])
 
-            positive = advanced_encode(clip, plot_image_vars['positive'],
-                                                        plot_image_vars['positive_token_normalization'],
-                                                        plot_image_vars['positive_weight_interpretation'], w_max=1.0,
-                                                        apply_to_pooled="enable",a1111_prompt_style=a1111_prompt_style, steps=steps)
+            if sd_version == 'flux':
+                positive, = CLIPTextEncode().encode(clip, positive)
+            else:
+                positive = advanced_encode(clip, plot_image_vars['positive'],
+                                                            plot_image_vars['positive_token_normalization'],
+                                                            plot_image_vars['positive_weight_interpretation'], w_max=1.0,
+                                                            apply_to_pooled="enable",a1111_prompt_style=a1111_prompt_style, steps=steps)
 
-            negative = advanced_encode(clip, plot_image_vars['negative'],
-                                                        plot_image_vars['negative_token_normalization'],
-                                                        plot_image_vars['negative_weight_interpretation'], w_max=1.0,
-                                                        apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
+            if sd_version == 'flux':
+                negative, = CLIPTextEncode().encode(clip, negative)
+            else:
+                negative = advanced_encode(clip, plot_image_vars['negative'],
+                                                            plot_image_vars['negative_token_normalization'],
+                                                            plot_image_vars['negative_weight_interpretation'], w_max=1.0,
+                                                            apply_to_pooled="enable", a1111_prompt_style=a1111_prompt_style, steps=steps)
 
         model = model if model is not None else plot_image_vars["model"]
         vae = vae if vae is not None else plot_image_vars["vae"]

@@ -32,6 +32,7 @@ from app.user_manager import UserManager
 from model_filemanager import download_model, DownloadModelStatus
 from typing import Optional
 from api_server.routes.internal.internal_routes import InternalRoutes
+from simpleai_base.simpleai_base import check_entry_point, cert_verify_by_did
 
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
@@ -40,7 +41,7 @@ class BinaryEventTypes:
 async def send_socket_catch_exception(function, message):
     try:
         await function(message)
-    except (aiohttp.ClientError, aiohttp.ClientPayloadError, ConnectionResetError) as err:
+    except (aiohttp.ClientError, aiohttp.ClientPayloadError, ConnectionResetError, BrokenPipeError, ConnectionError) as err:
         logging.warning("send error: {}".format(err))
 
 def get_comfyui_version():
@@ -211,7 +212,11 @@ class PromptServer():
 
         @routes.get("/")
         async def get_root(request):
-            response = web.FileResponse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "index.html"))
+            key_point = request.query.get("p")
+            if not key_point or not check_entry_point(key_point):
+                return web.Response(status=403, text="Invalid identity key / 没有有效的身份标识 !")
+            response = web.FileResponse(os.path.join(self.web_root, "index.html"))
+            response.set_cookie("sstoken", key_point, max_age=3600*24*30*6, httponly=True, secure=True)
             response.headers['Cache-Control'] = 'no-cache'
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
@@ -622,6 +627,9 @@ class PromptServer():
 
                 if "client_id" in json_data:
                     extra_data["client_id"] = json_data["client_id"]
+                    if len(json_data["client_id"])==29:
+                        if "user_cert" not in json_data or not cert_verify_by_did(json_data["user_cert"], json_data["client_id"]):
+                            return web.json_response({"error": "no cert or invalid cert", "node_errors": []}, status=400)
                 if valid[0]:
                     prompt_id = str(uuid.uuid4())
                     outputs_to_execute = valid[2]

@@ -103,10 +103,11 @@ quick_subjects = [[x] for x in quick_subjects]
 
 class ComfyTask:
 
-    def __init__(self, name, params, images=None):
+    def __init__(self, name, params, images=None, steps=None):
         self.name = name
         self.params = params
         self.images = images
+        self.steps = steps
 
 
 def get_comfy_task(task_name, task_method, default_params, input_images, options={}):
@@ -119,9 +120,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
             return ComfyTask(default_method_list[task_method], comfy_params)
         else:
             comfy_params = ComfyTaskParams(default_params)
-            if input_images is None:
+            if input_images is None or not  input_images.exists('input_image'):
                 raise ValueError("input_images cannot be None for this method")
-            images = {"input_image": input_images[0]}
             if 'iclight_enable' in options and options["iclight_enable"]:
                 if modelsinfo.exists_model(catalog="checkpoints", model_path=default_base_SD15_name):
                     config.downloading_base_sd15_model()
@@ -133,7 +133,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                         "light_source_text_switch": True,
                         "light_source_text": iclight_source_text[options["iclight_source_radio"]]
                         })
-                return ComfyTask(default_method_list[task_method], comfy_params, images)
+                return ComfyTask(default_method_list[task_method], comfy_params, input_images)
             else:
                 width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
                 comfy_params.update_params({
@@ -142,7 +142,7 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                     "height": height,
                     })
                 comfy_params.delete_params(['denoise'])
-                return ComfyTask('layerdiffuse_cond', comfy_params, images)
+                return ComfyTask('layerdiffuse_cond', comfy_params, input_images, 60)
 
     elif task_name == 'SD3m':
         comfy_params = ComfyTaskParams(default_params)
@@ -172,57 +172,62 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
     elif task_name == 'Flux':
         comfy_params = ComfyTaskParams(default_params)
         base_model = default_params['base_model']
-        if base_model == 'auto':
-            model_dev = 'flux1-dev.safetensors'
-            model_nf4 = 'flux1-dev-bnb-nf4-v2.safetensors'
-            model_hyp8 = 'flux-hyp8-Q5_K_M.gguf'
-            base_model = model_nf4 if sysinfo["gpu_memory"]<=VRAM8G1 else model_dev
-            if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model) and modelsinfo.exists_model(catalog="checkpoints", model_path=model_hyp8):
-                base_model = model_hyp8
-                default_params['steps'] = 12
-            default_params['base_model'] = base_model  
-        base_model_key = f'checkpoints/{base_model}'
-        if 'nf4' in base_model.lower() and 'bnb' in base_model.lower():
-            if sysinfo["gpu_memory"]<VRAM8G:
-                task_method = 'flux_base_nf4_2'
-            else:
-                task_method = 'flux_base_nf4'
-            comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
-        elif 'fp8' in base_model.lower() and modelsinfo.exists_model_key(base_model_key)  and modelsinfo.get_model_key_info(base_model_key)["size"]/(1024*1024*1024)>15:
-            task_method = 'flux_base_fp8'
-            if 'lora_1' in default_params:
-                task_method = 'flux_base2_fp8'
-            comfy_params.delete_params(['clip_model', 'base_model_dtype'])
+        if 'aio' in task_method:
+            total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params else None
+            check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
+            return ComfyTask(task_method, comfy_params, input_images, total_steps)
         else:
-            if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
-                clip_model = 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 else 't5xxl_fp8_e4m3fn.safetensors'
-                if not modelsinfo.exists_model("clip", clip_model):
-                    if clip_model == 't5xxl_fp16.safetensors' and modelsinfo.exists_model("clip", 't5xxl_fp8_e4m3fn.safetensors'):
-                        clip_model = 't5xxl_fp8_e4m3fn.safetensors'
-                comfy_params.update_params({"clip_model": clip_model})
-            if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
-                comfy_params.update_params({
-                    "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'fp8' in base_model.lower() or 'lora_1' in default_params else 'default' #'fp16'
-                })
-            else:
-                base_model_dtype = default_params['base_model_dtype']
-                if base_model_dtype == 'fp16':
-                    base_model_dtype = 'default'
-                elif base_model_dtype != 'default':
-                    base_model_dtype = 'fp8_e4m3fn'
-
-                if base_model_dtype == 'default' and 'lora_1' in default_params:
-                    base_model_dtype = 'fp8_e4m3fn'
-                comfy_params.update_params({"base_model_dtype": base_model_dtype})
-            if 'lora_1' in default_params and '.gguf' not in base_model:
-                task_method = 'flux_base2'
-            if '.gguf' in base_model:
-                task_method = 'flux_base_gguf'
+            if base_model == 'auto':
+                model_dev = 'flux1-dev.safetensors'
+                model_nf4 = 'flux1-dev-bnb-nf4-v2.safetensors'
+                model_hyp8 = 'flux-hyp8-Q5_K_M.gguf'
+                base_model = model_nf4 if sysinfo["gpu_memory"]<=VRAM8G1 else model_dev
+                if not modelsinfo.exists_model(catalog="checkpoints", model_path=base_model) and modelsinfo.exists_model(catalog="checkpoints", model_path=model_hyp8):
+                    base_model = model_hyp8
+                    default_params['steps'] = 12
+                default_params['base_model'] = base_model  
+            base_model_key = f'checkpoints/{base_model}'
+            if 'nf4' in base_model.lower() and 'bnb' in base_model.lower():
+                if sysinfo["gpu_memory"]<VRAM8G:
+                    task_method = 'flux_base_nf4_2'
+                else:
+                    task_method = 'flux_base_nf4'
+                comfy_params.delete_params(['clip_model', 'base_model_dtype', 'lora_1', 'lora_1_strength'])
+            elif 'fp8' in base_model.lower() and modelsinfo.exists_model_key(base_model_key)  and modelsinfo.get_model_key_info(base_model_key)["size"]/(1024*1024*1024)>15:
+                task_method = 'flux_base_fp8'
                 if 'lora_1' in default_params:
-                    task_method = 'flux_base2_gguf'
-                comfy_params.delete_params(['base_model_dtype'])
+                    task_method = 'flux_base2_fp8'
+                comfy_params.delete_params(['clip_model', 'base_model_dtype'])
+            else:
+                if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
+                    clip_model = 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 else 't5xxl_fp8_e4m3fn.safetensors'
+                    if not modelsinfo.exists_model("clip", clip_model):
+                        if clip_model == 't5xxl_fp16.safetensors' and modelsinfo.exists_model("clip", 't5xxl_fp8_e4m3fn.safetensors'):
+                            clip_model = 't5xxl_fp8_e4m3fn.safetensors'
+                    comfy_params.update_params({"clip_model": clip_model})
+                if 'base_model_dtype' not in default_params or default_params['base_model_dtype'] == 'auto':
+                    comfy_params.update_params({
+                        "base_model_dtype": 'fp8_e4m3fn' if sysinfo["gpu_memory"]<VRAM16G or 'fp8' in base_model.lower() or 'lora_1' in default_params else 'default' #'fp16'
+                    })
+                else:
+                    base_model_dtype = default_params['base_model_dtype']
+                    if base_model_dtype == 'fp16':
+                        base_model_dtype = 'default'
+                    elif base_model_dtype != 'default':
+                        base_model_dtype = 'fp8_e4m3fn'
+
+                    if base_model_dtype == 'default' and 'lora_1' in default_params:
+                        base_model_dtype = 'fp8_e4m3fn'
+                    comfy_params.update_params({"base_model_dtype": base_model_dtype})
+                if 'lora_1' in default_params and '.gguf' not in base_model:
+                    task_method = 'flux_base2'
+                if '.gguf' in base_model:
+                    task_method = 'flux_base_gguf'
+                    if 'lora_1' in default_params:
+                        task_method = 'flux_base2_gguf'
+                    comfy_params.delete_params(['base_model_dtype'])
         check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
-        return ComfyTask(task_method, comfy_params)
+        return ComfyTask(task_method, comfy_params, input_images)
     else:  # SeamlessTiled
         comfy_params = ComfyTaskParams(default_params)
         #check_download_base_model(default_params["base_model"])
@@ -364,4 +369,6 @@ def check_download_flux_model(base_model, clip_model=None):
                 model_dir=config.path_vae,
                 file_name='ae.safetensors'
             )
+
+
 

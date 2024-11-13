@@ -255,8 +255,8 @@
         "negative_prompt": "ugly, deformed, noisy, blurry, low contrast"
     },
     {
-        "name": "Mandola Art",
-        "prompt": "Mandola art style, {prompt}, complex, circular design, mandola",
+        "name": "Mandala Art",
+        "prompt": "Mandala art style, {prompt}, complex, circular design, mandala",
         "negative_prompt": "ugly, deformed, noisy, blurry, low contrast"
     },
     {

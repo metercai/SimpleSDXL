@@ -1,4 +1,5 @@
 import os
+import json
 import hashlib
 import folder_paths
 import torch
@@ -7,18 +8,21 @@ import comfy.utils
 import comfy.model_management
 from comfy_extras.nodes_compositing import JoinImageWithAlpha
 from server import PromptServer
-from nodes import MAX_RESOLUTION
-from PIL import Image, ImageDraw, ImageFilter
+from nodes import MAX_RESOLUTION, NODE_CLASS_MAPPINGS as ALL_NODE_CLASS_MAPPINGS
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
+from PIL.PngImagePlugin import PngInfo
+import torch.nn.functional as F
 from torchvision.transforms import Resize, CenterCrop, GaussianBlur
 from torchvision.transforms.functional import to_pil_image
 from .libs.log import log_node_info
-from .libs.utils import AlwaysEqualProxy
+from .libs.utils import AlwaysEqualProxy, ByPassTypeTuple
+from .libs.cache import cache, update_cache, remove_cache
 from .libs.image import pil2tensor, tensor2pil, ResizeMode, get_new_bounds, RGB2RGBA, image2mask
 from .libs.colorfix import adain_color_fix, wavelet_color_fix
 from .libs.chooser import ChooserMessage, ChooserCancelled
 from .config import REMBG_DIR, REMBG_MODELS, HUMANPARSING_MODELS, MEDIAPIPE_MODELS, MEDIAPIPE_DIR
 
-
+any_type = AlwaysEqualProxy("*")
 # 图像数量
 class imageCount:
   @classmethod
@@ -318,6 +322,30 @@ class imageScaleDownToSize(imageScaleDownBy):
     scale_by = min(scale_by, 1.0)
     return self.image_scale_down_by(images, scale_by)
 
+class imageScaleToNormPixels:
+  upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "lanczos"]
+  @classmethod
+  def INPUT_TYPES(s):
+    return {
+      "required": {
+        "image": ("IMAGE",),
+        "upscale_method": (s.upscale_methods,),
+        "scale_by": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 8.0, "step": 0.01}),
+      }
+    }
+
+  RETURN_TYPES = ("IMAGE",)
+  RETURN_NAMES = ("image",)
+  FUNCTION = "scale"
+  CATEGORY = "EasyUse/Image"
+
+  def scale(self, image, upscale_method, scale_by):
+    height, width = image.shape[1:3]
+    width = int(width * scale_by - width * scale_by % 8)
+    height = int(height * scale_by - height * scale_by % 8)
+    upscale_image_cls = ALL_NODE_CLASS_MAPPINGS['ImageScale']
+    image, = upscale_image_cls().upscale(image, upscale_method, width, height, "disabled")
+    return (image,)
 
 # 图像比率
 class imageRatio:
@@ -437,7 +465,6 @@ class imageSaveSimple:
     else:
       return SaveImage().save_images(images, filename_prefix, prompt, extra_pnginfo)
 
-
 # 图像批次合并
 class JoinImageBatch:
   """Turns an image batch into one big image."""
@@ -485,13 +512,15 @@ class imageListToImageBatch:
     if len(images) <= 1:
       return (images[0],)
     else:
-      image1 = images[0]
-      for image2 in images[1:]:
-        if image1.shape[1:] != image2.shape[1:]:
-          image2 = comfy.utils.common_upscale(image2.movedim(-1, 1), image1.shape[2], image1.shape[1], "lanczos",
+      image_shape = images[0].shape
+      for i, img in enumerate(images):
+        if image_shape[1:] == img[1:]:
+          continue
+        else:
+          images[i] = comfy.utils.common_upscale(img.movedim(-1, 1), img.shape[2], image_shape[1], "lanczos",
                                               "center").movedim(1, -1)
-        image1 = torch.cat((image1, image2), dim=0)
-      return (image1,)
+      images = torch.cat(images, dim=0)
+      return (images,)
 
 
 class imageBatchToImageList:
@@ -579,6 +608,138 @@ class imageSplitGrid:
 
     return (torch.cat(new_images, dim=0),)
 
+class imageSplitTiles:
+
+  @classmethod
+  def INPUT_TYPES(s):
+    return {
+      "required": {
+        "image": ("IMAGE",),
+        "overlap_ratio": ("FLOAT", {"default": 0, "min": 0, "max": 0.5, "step": 0.01, }),
+        "overlap_offset": ("INT", {"default": 0, "min": - MAX_RESOLUTION // 2, "max": MAX_RESOLUTION // 2, "step": 1, }),
+        "tiles_rows": ("INT", {"default": 2, "min": 1, "max": 50, "step": 1}),
+        "tiles_cols": ("INT", {"default": 2, "min": 1, "max": 50, "step": 1}),
+      },
+      "optional": {
+        "norm": ("BOOLEAN", {"default": True}),
+      }
+    }
+
+  RETURN_TYPES = ("IMAGE", "MASK", "OVERLAP", "INT")
+  RETURN_NAMES = ("tiles", "masks", "overlap", "total")
+  FUNCTION = "doit"
+  CATEGORY = "EasyUse/Image"
+
+  def doit(self, image, overlap_ratio, overlap_offset, tiles_rows, tiles_cols, norm=True):
+    height, width = image.shape[1:3]
+
+    total = tiles_rows * tiles_cols
+    tile_w = int(width // tiles_cols)
+    tile_h = int(height // tiles_rows)
+
+    overlap_w = int(tile_w * overlap_ratio) + overlap_offset
+    overlap_h = int(tile_h * overlap_ratio) + overlap_offset
+
+    overlap_w = min(tile_w // 2, overlap_w)
+    overlap_h = min(tile_h // 2, overlap_h)
+
+    if norm:
+      overlap_w = int(overlap_w - overlap_w % 8)
+      overlap_h = int(overlap_h - overlap_h % 8)
+
+    if tiles_rows == 1:
+      overlap_h = 0
+    if tiles_cols == 1:
+      overlap_w = 0
+
+    solid_mask_cls = ALL_NODE_CLASS_MAPPINGS['SolidMask']
+    feather_mask_cls = ALL_NODE_CLASS_MAPPINGS['FeatherMask']
+
+    tiles, masks = [], []
+
+    x, y = 0, 0
+    for i in range(tiles_rows):
+      for j in range(tiles_cols):
+        y1 = i * tile_h
+        x1 = j * tile_w
+
+        if i > 0:
+          y1 -= overlap_h
+        if j > 0:
+          x1 -= overlap_w
+
+        y2 = y1 + tile_h + overlap_h
+        x2 = x1 + tile_w + overlap_w
+
+        if y2 > height:
+          y2 = height
+          y1 = y2 - tile_h - overlap_h
+        if x2 > width:
+          x2 = width
+          x1 = x2 - tile_w - overlap_w
+
+        tile = image[:, y1:y2, x1:x2, :]
+        h = tile.shape[1]
+        w = tile.shape[2]
+        tiles.append(tile)
+
+        fearing_left = overlap_w if overlap_w * j > 0 else 0
+        fearing_top = overlap_h if overlap_h * i > 0 else 0
+        fearing_right = 0
+        fearing_bottom = 0
+
+        mask, = solid_mask_cls().solid(1, w, h)
+        mask, = feather_mask_cls().feather(mask, fearing_left, fearing_top, fearing_right, fearing_bottom)
+        masks.append(mask)
+
+    tiles = torch.cat(tiles, dim=0)
+    masks = torch.cat(masks, dim=0)
+
+    return (tiles, masks, (overlap_w, overlap_h, tile_w, tile_h, tiles_rows, tiles_cols), total)
+
+class imageTilesFromBatch:
+  @classmethod
+  def INPUT_TYPES(s):
+    return {
+      "required": {
+        "tiles": ("IMAGE",),
+        "masks": ("MASK",),
+        "overlap": ("OVERLAP",),
+        "index":("INT", {"default": 0, "min": 0, "max": 10000, "step": 1}),
+      },
+    }
+
+  RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT")
+  RETURN_NAMES = ("image", "mask", "x", "y")
+  FUNCTION = "doit"
+  CATEGORY = "EasyUse/Image"
+
+  def imageFromBatch(self, image, batch_index, length=1):
+    s_in = image
+    batch_index = min(s_in.shape[0] - 1, batch_index)
+    length = min(s_in.shape[0] - batch_index, length)
+    s = s_in[batch_index:batch_index + length].clone()
+    return s
+
+  def maskFromBatch(self, mask, start, length=1):
+    if length > mask.shape[0]:
+        length = mask.shape[0]
+    start = min(start, mask.shape[0]-1)
+    length = min(mask.shape[0]-start, length)
+    return mask[start:start + length]
+
+  def doit(self, tiles, masks, overlap, index):
+    tile = self.imageFromBatch(tiles, index)
+    mask = self.maskFromBatch(masks, index)
+    overlap_w, overlap_h, tile_w, tile_h, tiles_rows, tiles_cols = overlap
+
+    x = tile_w * (index % tiles_cols) - overlap_w if (index % tiles_cols) > 0 else 0
+    y = tile_h * (index // tiles_cols) - overlap_h if tiles_rows > 1 and index > tiles_cols - 1 else 0
+
+    return (tile, mask, x, y)
+
+
+
 class imagesSplitImage:
     @classmethod
     def INPUT_TYPES(s):
@@ -597,7 +758,6 @@ class imagesSplitImage:
       new_images = torch.chunk(images, len(images), dim=0)
       return new_images
 
-
 class imageConcat:
   @classmethod
   def INPUT_TYPES(s):
@@ -613,6 +773,10 @@ class imageConcat:
   CATEGORY = "EasyUse/Image"
 
   def concat(self, image1, image2, direction, match_image_size):
+    if image1 is None:
+      return (image2,)
+    elif image2 is None:
+      return (image1,)
     if match_image_size:
       image2 = torch.nn.functional.interpolate(image2, size=(image1.shape[2], image1.shape[3]), mode="bilinear")
     if direction == 'right':
@@ -886,13 +1050,17 @@ class imageDetailTransfer:
 
 
   def transfer(self, target, source, mode, blur_sigma, blend_factor, image_output, save_prefix, mask=None, prompt=None, extra_pnginfo=None):
-    batch_size, height, width, _ = target.shape
+    batch_size, height, width, _ = source.shape
     device = comfy.model_management.get_torch_device()
     target_tensor = target.permute(0, 3, 1, 2).clone().to(device)
     source_tensor = source.permute(0, 3, 1, 2).clone().to(device)
 
     if target.shape[1:] != source.shape[1:]:
-      source_tensor = comfy.utils.common_upscale(source_tensor, width, height, "bilinear", "disabled")
+      target_tensor = comfy.utils.common_upscale(target_tensor, width, height, "bilinear", "disabled")
+    if mask is not None and target.shape[1:] != mask.shape[1:]:
+      mask = mask.unsqueeze(1)
+      mask = F.interpolate(mask, size=(height, width), mode="bilinear")
+      mask = mask.squeeze(1)
 
     if source.shape[0] < batch_size:
       source = source[0].unsqueeze(0).repeat(batch_size, 1, 1, 1)
@@ -964,12 +1132,12 @@ class imageInterrogator:
     RETURN_NAMES = ("prompt",)
     FUNCTION = "interrogate"
     CATEGORY = "EasyUse/Image"
-    OUTPUT_NODE = True
+    OUTPUT_NODE = False
     OUTPUT_IS_LIST = (True,)
 
     def interrogate(self, image, mode, use_lowvram=False):
       prompt = ci.image_to_prompt(image, mode, low_vram=use_lowvram)
-      return {"ui":{"text":prompt},"result":(prompt,)}
+      return (prompt,)
 
 # 人类分割器
 class humanSegmentation:
@@ -980,7 +1148,7 @@ class humanSegmentation:
         return {
           "required":{
             "image": ("IMAGE",),
-            "method": (["selfie_multiclass_256x256", "human_parsing_lip"],),
+            "method": (["selfie_multiclass_256x256", "human_parsing_lip", "human_parts (deeplabv3p)"],),
             "confidence": ("FLOAT", {"default": 0.4, "min": 0.05, "max": 0.95, "step": 0.01},),
             "crop_multi": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 10.0, "step": 0.001},),
           },
@@ -1108,13 +1276,26 @@ class humanSegmentation:
 
         output_image, = JoinImageWithAlpha().join_image_with_alpha(image, alpha)
 
+      elif method == "human_parts (deeplabv3p)":
+        from .human_parsing.run_parsing import HumanParts
+        onnx_path = os.path.join(folder_paths.models_dir, 'onnx')
+        human_parts_path = os.path.join(onnx_path, 'human-parts')
+        model_path = get_local_filepath(HUMANPARSING_MODELS['human-parts']['model_url'], human_parts_path)
+        parsing = HumanParts(model_path=model_path)
+
+        mask, = parsing(image, mask_components)
+
+        alpha = 1.0 - mask
+
+        output_image, = JoinImageWithAlpha().join_image_with_alpha(image, alpha)
+
+
       # use crop
       bbox = [[0, 0, 0, 0]]
       if crop_multi > 0.0:
         output_image, mask, bbox = imageCropFromMask().crop(output_image, mask, crop_multi, crop_multi, 1.0)
 
       return (output_image, mask, bbox)
-
 
 class imageCropFromMask:
     @classmethod
@@ -1445,7 +1626,7 @@ class removeLocalImage:
   def INPUT_TYPES(s):
       return {
         "required": {
-          "any": (AlwaysEqualProxy("*"),),
+          "any": (any_type,),
           "file_name": ("STRING",{"default":""}),
         },
       }
@@ -1481,7 +1662,87 @@ class removeLocalImage:
       PromptServer.instance.send_sync("easyuse-toast", {"content": "Removed Failed", "type": 'error'})
     return ()
 
+try:
+    from comfy_execution.graph_utils import GraphBuilder, is_link
+except:
+    GraphBuilder = None
+class loadImagesForLoop:
+  @classmethod
+  def INPUT_TYPES(s):
+    return {
+      "required": {
+        "directory": ("STRING", {"default": ""}),
+      },
+      "optional": {
+        "start_index": ("INT", {"default": 0, "min": 0, "step": 1}),
+        "limit": ("INT", {"default":-1, "min":-1, "max": 10000}),
+        "initial_value1": (any_type,),
+        "initial_value2": (any_type,),
+      },
+      "hidden": {
+        "initial_value0": (any_type,),
+        "prompt": "PROMPT",
+        "extra_pnginfo": "EXTRA_PNGINFO",
+        "unique_id": "UNIQUE_ID"
+      }
+    }
 
+  RETURN_TYPES = ByPassTypeTuple(tuple(["FLOW_CONTROL", "INT", "IMAGE", "MASK", "STRING", any_type, any_type]))
+  RETURN_NAMES = ByPassTypeTuple(tuple(["flow", "index", "image", "mask", "name", "value1", "value2"]))
+
+  FUNCTION = "load_images"
+
+  CATEGORY = "image"
+
+  def load_images(self, directory: str, start_index: int = 0, limit: int =-1, prompt=None, extra_pnginfo=None, unique_id=None, **kwargs):
+    if not os.path.isdir(directory):
+      raise FileNotFoundError(f"Directory '{directory}' cannot be found.")
+    dir_files = os.listdir(directory)
+    if len(dir_files) == 0:
+      raise FileNotFoundError(f"No files in directory '{directory}'.")
+
+    # Filter files by extension
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.webp']
+    dir_files = [f for f in dir_files if any(f.lower().endswith(ext) for ext in valid_extensions)]
+
+    dir_files = sorted(dir_files)
+    dir_files = [os.path.join(directory, x) for x in dir_files]
+
+    graph = GraphBuilder()
+    index = 0
+    if limit == -1:
+      files_length = len(dir_files)
+      total = files_length - start_index if start_index > 0 else files_length
+    else:
+      total = limit
+    unique_id = unique_id.split('.')[len(unique_id.split('.')) - 1] if "." in unique_id else unique_id
+    update_cache('forloop' + str(unique_id), 'forloop', total)
+    if "initial_value0" in kwargs:
+      index = kwargs["initial_value0"]
+    # start at start_index
+    image_path = dir_files[start_index+index]
+
+    name = os.path.splitext(os.path.basename(image_path))[0]
+
+    i = Image.open(image_path)
+    i = ImageOps.exif_transpose(i)
+    image = i.convert("RGB")
+    image = np.array(image).astype(np.float32) / 255.0
+    image = torch.from_numpy(image)[None,]
+
+    if 'A' in i.getbands():
+      mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+      mask = 1. - torch.from_numpy(mask)
+    else:
+      mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+
+    while_open = graph.node("easy whileLoopStart", condition=total, initial_value0=index, initial_value1=kwargs.get('initial_value1',None), initial_value2=kwargs.get('initial_value2',None))
+    outputs = [kwargs.get('initial_value1',None), kwargs.get('initial_value2',None)]
+
+    return {
+      "result": tuple(["stub", index, image, mask, name] + outputs),
+      "expand": graph.finalize(),
+    }
 # 姿势编辑器
 # class poseEditor:
 #   @classmethod
@@ -1524,6 +1785,84 @@ class removeLocalImage:
 #       m.update(f.read())
 #     return m.digest().hex()
 
+class saveImageLazy():
+  def __init__(self):
+    self.output_dir = folder_paths.get_output_directory()
+    self.type = "output"
+    self.compress_level = 4
+
+  @classmethod
+  def INPUT_TYPES(s):
+    return {"required":
+          {"images": ("IMAGE",),
+           "filename_prefix": ("STRING", {"default": "ComfyUI"}),
+           "save_metadata": ("BOOLEAN", {"default": True}),
+           },
+        "optional":{},
+        "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
+      }
+
+  RETURN_TYPES = ("IMAGE",)
+  RETURN_NAMES = ("images",)
+  OUTPUT_NODE = False
+  FUNCTION = "save"
+  CATEGORY = "EasyUse/Image"
+
+  def save(self, images, filename_prefix, save_metadata, prompt=None, extra_pnginfo=None):
+    extension = 'png'
+
+    full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
+      filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
+
+    results = list()
+    for (batch_number, image) in enumerate(images):
+      i = 255. * image.cpu().numpy()
+      img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+      metadata = None
+
+      filename_with_batch_num = filename.replace(
+        "%batch_num%", str(batch_number))
+
+      counter = 1
+
+      if os.path.exists(full_output_folder) and os.listdir(full_output_folder):
+        filtered_filenames = list(filter(
+          lambda filename: filename.startswith(
+            filename_with_batch_num + "_")
+                           and filename[len(filename_with_batch_num) + 1:-4].isdigit(),
+          os.listdir(full_output_folder)
+        ))
+
+        if filtered_filenames:
+          max_counter = max(
+            int(filename[len(filename_with_batch_num) + 1:-4])
+            for filename in filtered_filenames
+          )
+          counter = max_counter + 1
+
+      file = f"{filename_with_batch_num}_{counter:05}.{extension}"
+
+      save_path = os.path.join(full_output_folder, file)
+
+      if save_metadata:
+        metadata = PngInfo()
+        if prompt is not None:
+          metadata.add_text("prompt", json.dumps(prompt))
+        if extra_pnginfo is not None:
+          for x in extra_pnginfo:
+            metadata.add_text(
+              x, json.dumps(extra_pnginfo[x]))
+
+      img.save(save_path, pnginfo=metadata)
+
+      results.append({
+        "filename": file,
+        "subfolder": subfolder,
+        "type": self.type
+      })
+
+    return {"ui": {"images": results} , "result": (images,)}
+
 NODE_CLASS_MAPPINGS = {
   "easy imageInsetCrop": imageInsetCrop,
   "easy imageCount": imageCount,
@@ -1534,6 +1873,7 @@ NODE_CLASS_MAPPINGS = {
   "easy imageScaleDown": imageScaleDown,
   "easy imageScaleDownBy": imageScaleDownBy,
   "easy imageScaleDownToSize": imageScaleDownToSize,
+  "easy imageScaleToNormPixels": imageScaleToNormPixels,
   "easy imageRatio": imageRatio,
   "easy imageConcat": imageConcat,
   "easy imageListToImageBatch": imageListToImageBatch,
@@ -1541,6 +1881,8 @@ NODE_CLASS_MAPPINGS = {
   "easy imageSplitList": imageSplitList,
   "easy imageSplitGrid": imageSplitGrid,
   "easy imagesSplitImage": imagesSplitImage,
+  "easy imageSplitTiles": imageSplitTiles,
+  "easy imageTilesFromBatch": imageTilesFromBatch,
   "easy imageCropFromMask": imageCropFromMask,
   "easy imageUncropFromBBOX": imageUncropFromBBOX,
   "easy imageSave": imageSaveSimple,
@@ -1549,11 +1891,13 @@ NODE_CLASS_MAPPINGS = {
   "easy imageColorMatch": imageColorMatch,
   "easy imageDetailTransfer": imageDetailTransfer,
   "easy imageInterrogator": imageInterrogator,
+  "easy loadImagesForLoop": loadImagesForLoop,
   "easy loadImageBase64": loadImageBase64,
   "easy imageToBase64": imageToBase64,
   "easy joinImageBatch": JoinImageBatch,
   "easy humanSegmentation": humanSegmentation,
   "easy removeLocalImage": removeLocalImage,
+  "easy saveImageLazy": saveImageLazy,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -1566,6 +1910,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy imageScaleDown": "Image Scale Down",
   "easy imageScaleDownBy": "Image Scale Down By",
   "easy imageScaleDownToSize": "Image Scale Down To Size",
+  "easy imageScaleToNormPixels": "ImageScaleToNormPixels",
   "easy imageRatio": "ImageRatio",
   "easy imageHSVMask": "ImageHSVMask",
   "easy imageConcat": "imageConcat",
@@ -1573,10 +1918,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy imageBatchToImageList": "Image Batch To Image List",
   "easy imageSplitList": "imageSplitList",
   "easy imageSplitGrid": "imageSplitGrid",
+  "easy imageSplitTiles": "imageSplitTiles",
+  "easy imageTilesFromBatch": "imageTilesFromBatch",
   "easy imagesSplitImage": "imagesSplitImage",
   "easy imageCropFromMask": "imageCropFromMask",
   "easy imageUncropFromBBOX": "imageUncropFromBBOX",
-  "easy imageSave": "SaveImage (Simple)",
+  "easy imageSave": "Save Image (Simple)",
   "easy imageRemBg": "Image Remove Bg",
   "easy imageChooser": "Image Chooser",
   "easy imageColorMatch": "Image Color Match",
@@ -1584,7 +1931,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy imageInterrogator": "Image To Prompt",
   "easy joinImageBatch": "JoinImageBatch",
   "easy loadImageBase64": "Load Image (Base64)",
+  "easy loadImagesForLoop": "Load Images For Loop",
   "easy imageToBase64": "Image To Base64",
   "easy humanSegmentation": "Human Segmentation",
   "easy removeLocalImage": "Remove Local Image",
+  "easy saveImageLazy": "Save Image (Lazy)",
 }

@@ -72,7 +72,7 @@ def load_file_from_url(
         print(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，然后重启应用。\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)
-        from enhanced.simpleai import modelsinfo
+        from shared import modelsinfo
         modelsinfo.refresh_file('add', cached_file, url)
 
 
