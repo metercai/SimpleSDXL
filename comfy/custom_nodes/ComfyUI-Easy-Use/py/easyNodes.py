@@ -13,10 +13,10 @@ from urllib.request import urlopen
 from PIL import Image
 
 from server import PromptServer
-from nodes import MAX_RESOLUTION, LatentFromBatch, RepeatLatentBatch, NODE_CLASS_MAPPINGS as ALL_NODE_CLASS_MAPPINGS, ConditioningSetMask, ConditioningConcat, CLIPTextEncode, VAEEncodeForInpaint, InpaintModelConditioning
+from nodes import MAX_RESOLUTION, LatentFromBatch, RepeatLatentBatch, NODE_CLASS_MAPPINGS as ALL_NODE_CLASS_MAPPINGS, ConditioningSetMask, ConditioningConcat, CLIPTextEncode, VAEEncodeForInpaint, InpaintModelConditioning, ConditioningZeroOut
 from .config import MAX_SEED_NUM, BASE_RESOLUTIONS, RESOURCES_DIR, INPAINT_DIR, FOOOCUS_STYLES_DIR, FOOOCUS_INPAINT_HEAD, FOOOCUS_INPAINT_PATCH, BRUSHNET_MODELS, POWERPAINT_MODELS, IPADAPTER_DIR, IPADAPTER_CLIPVISION_MODELS, IPADAPTER_MODELS, DYNAMICRAFTER_DIR, DYNAMICRAFTER_MODELS, IC_LIGHT_MODELS
 from .layer_diffuse import LayerDiffuse, LayerMethod
-from .xyplot import XYplot_ModelMergeBlocks, XYplot_CFG, XYplot_Lora, XYplot_Checkpoint, XYplot_Denoise, XYplot_Steps, XYplot_PromptSR, XYplot_Positive_Cond, XYplot_Negative_Cond, XYplot_Positive_Cond_List, XYplot_Negative_Cond_List, XYplot_SeedsBatch, XYplot_Control_Net, XYplot_Sampler_Scheduler
+from .xyplot import *
 
 from .libs.log import log_node_info, log_node_error, log_node_warn
 from .libs.adv_encode import advanced_encode
@@ -186,7 +186,7 @@ class stylesPromptSelector:
         for index, val in enumerate(values):
             if 'prompt' in all_styles[val]:
                 if "{prompt}" in all_styles[val]['prompt'] and has_prompt == False:
-                    positive_prompt = all_styles[val]['prompt'].format(prompt=positive)
+                    positive_prompt = all_styles[val]['prompt'].replace('{prompt}', positive)
                     has_prompt = True
                 else:
                     positive_prompt += ', ' + all_styles[val]['prompt'].replace(', {prompt}', '').replace('{prompt}', '')
@@ -687,7 +687,7 @@ class latentCompositeMaskedWithCond:
             a1111_prompt_style = pipe["loader_settings"]["a1111_prompt_style"]
             positive_cond = pipe["positive"]
 
-            log_node_warn("正在处理提示词编码...")
+            log_node_warn("Positive encoding...")
             steps = pipe["loader_settings"]["steps"] if "steps" in pipe["loader_settings"] else 1
             positive_embeddings_final = advanced_encode(clip, positive,
                                          positive_token_normalization,
@@ -732,7 +732,7 @@ class injectNoiseToLatent:
                 "noise": ("LATENT",),
                 "mask": ("MASK",),
                 "mix_randn_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000.0, "step": 0.001}),
-                # "seed": ("INT", {"default": 123, "min": 0, "max": 0xffffffffffffffff, "step": 1}),
+                "seed": ("INT", {"default": 123, "min": 0, "max": 0xffffffffffffffff, "step": 1}),
             }
         }
 
@@ -740,7 +740,7 @@ class injectNoiseToLatent:
     FUNCTION = "inject"
     CATEGORY = "EasyUse/Latent"
 
-    def inject(self,strength, normalize, average, pipe_to_noise=None, noise=None, image_to_latent=None, latent=None, mix_randn_amount=0, mask=None):
+    def inject(self,strength, normalize, average, pipe_to_noise=None, noise=None, image_to_latent=None, latent=None, mix_randn_amount=0, mask=None, seed=None):
 
         vae = pipe_to_noise["vae"] if pipe_to_noise is not None else pipe_to_noise["vae"]
         batch_size = pipe_to_noise["loader_settings"]["batch_size"] if pipe_to_noise is not None and "batch_size" in pipe_to_noise["loader_settings"] else 1
@@ -755,7 +755,7 @@ class injectNoiseToLatent:
         elif latent is not None:
             latents = latent
         else:
-            raise Exception("InjectNoiseToLatent: No input latent provided")
+            latents = {"samples": noise["samples"].clone()}
 
         samples = latents.copy()
         if latents["samples"].shape != noise["samples"].shape:
@@ -774,8 +774,8 @@ class injectNoiseToLatent:
                 mask = mask.repeat((noised.shape[0] - 1) // mask.shape[0] + 1, 1, 1, 1)[:noised.shape[0]]
             noised = mask * noised + (1 - mask) * latents["samples"]
         if mix_randn_amount > 0:
-            # if seed is not None:
-            #     torch.manual_seed(seed)
+            if seed is not None:
+                torch.manual_seed(seed)
             rand_noise = torch.randn_like(noised)
             noised = ((1 - mix_randn_amount) * noised + mix_randn_amount *
                       rand_noise) / ((mix_randn_amount ** 2 + (1 - mix_randn_amount) ** 2) ** 0.5)
@@ -895,7 +895,8 @@ class fullLoader:
             "negative_token_normalization": (["none", "mean", "length", "length+mean"],),
             "negative_weight_interpretation": (["comfy",  "A1111", "comfy++", "compel", "fixed attention"],),
 
-            "batch_size": ("INT", {"default": 1, "min": 1, "max": 64}),
+            "batch_size": (
+            "INT", {"default": 1, "min": 1, "max": 4096, "tooltip": "The number of latent images in the batch."})
         },
             "optional": {"model_override": ("MODEL",), "clip_override": ("CLIP",), "vae_override": ("VAE",), "optional_lora_stack": ("LORA_STACK",), "optional_controlnet_stack": ("CONTROL_NET_STACK",), "a1111_prompt_style": ("BOOLEAN", {"default": a1111_prompt_style_default}),},
             "hidden": {"prompt": "PROMPT", "my_unique_id": "UNIQUE_ID"}
@@ -920,7 +921,7 @@ class fullLoader:
         easyCache.update_loaded_objects(prompt)
 
         # Load models
-        log_node_warn("正在加载模型...")
+        log_node_warn("Loading models...")
         model, clip, vae, clip_vision, lora_stack = easyCache.load_main(ckpt_name, config_name, vae_name, lora_name, lora_model_strength, lora_clip_strength, optional_lora_stack, model_override, clip_override, vae_override, prompt)
 
         # Create Empty Latent
@@ -932,12 +933,14 @@ class fullLoader:
         positive_embeddings_final, positive_wildcard_prompt, model, clip = prompt_to_cond('positive', model, clip, clip_skip, lora_stack, positive, positive_token_normalization, positive_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache, model_type=model_type)
         negative_embeddings_final, negative_wildcard_prompt, model, clip = prompt_to_cond('negative', model, clip, clip_skip, lora_stack, negative, negative_token_normalization, negative_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache, model_type=model_type)
 
+        if negative_embeddings_final is None:
+            negative_embeddings_final, = ConditioningZeroOut().zero_out(positive_embeddings_final)
+
         # Conditioning add controlnet
         if optional_controlnet_stack is not None and len(optional_controlnet_stack) > 0:
             for controlnet in optional_controlnet_stack:
                 positive_embeddings_final, negative_embeddings_final = easyControlnet().apply(controlnet[0], controlnet[5], positive_embeddings_final, negative_embeddings_final, controlnet[1], start_percent=controlnet[2], end_percent=controlnet[3], control_net=None, scale_soft_weights=controlnet[4], mask=None, easyCache=easyCache, use_cache=True, model=model, vae=vae)
 
-        log_node_warn("加载完毕...")
         pipe = {
             "model": model,
             "positive": positive_embeddings_final,
@@ -996,7 +999,7 @@ class a1111Loader(fullLoader):
 
                 "positive": ("STRING", {"default":"", "placeholder": "Positive", "multiline": True}),
                 "negative": ("STRING", {"default":"", "placeholder": "Negative", "multiline": True}),
-                "batch_size": ("INT", {"default": 1, "min": 1, "max": 64}),
+                "batch_size": ("INT", {"default": 1, "min": 1, "max": 4096, "tooltip": "The number of latent images in the batch."})
             },
             "optional": {
                 "optional_lora_stack": ("LORA_STACK",),
@@ -1048,7 +1051,7 @@ class comfyLoader(fullLoader):
                 "positive": ("STRING", {"default": "", "placeholder": "Positive", "multiline": True}),
                 "negative": ("STRING", {"default": "", "placeholder": "Negative", "multiline": True}),
 
-                "batch_size": ("INT", {"default": 1, "min": 1, "max": 64}),
+                "batch_size": ("INT", {"default": 1, "min": 1, "max": 4096, "tooltip": "The number of latent images in the batch."})
             },
             "optional": {"optional_lora_stack": ("LORA_STACK",), "optional_controlnet_stack": ("CONTROL_NET_STACK",),},
             "hidden": {"prompt": "PROMPT", "my_unique_id": "UNIQUE_ID"}
@@ -1222,7 +1225,6 @@ class cascadeLoader:
         is_positive_linked_styles_selector = is_linked_styles_selector(prompt, my_unique_id, 'positive')
         is_negative_linked_styles_selector = is_linked_styles_selector(prompt, my_unique_id, 'negative')
 
-        log_node_warn("正在处理提示词...")
         positive_seed = find_wildcards_seed(my_unique_id, positive, prompt)
         # Translate cn to en
         if has_chinese(positive):
@@ -1258,7 +1260,6 @@ class cascadeLoader:
 
         image = easySampler.pil2tensor(Image.new('RGB', (1, 1), (0, 0, 0)))
 
-        log_node_warn("处理结束...")
         pipe = {
             "model": model,
             "positive": positive_embeddings_final,
@@ -1880,15 +1881,14 @@ class kolorsLoader:
 
 
         # text encode
-        log_node_warn("正在进行正向提示词编码...")
+        log_node_warn("Positive encoding...")
         positive_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, positive, auto_clean_gpu)
-        log_node_warn("正在进行负面提示词编码...")
+        log_node_warn("Negative encoding...")
         negative_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, negative, auto_clean_gpu)
 
         # empty latent
         samples = sampler.emptyLatent(resolution, empty_latent_width, empty_latent_height, batch_size)
 
-        log_node_warn("处理完毕...")
         pipe = {
             "model": model,
             "chatglm3_model": chatglm3_model,
@@ -1969,11 +1969,14 @@ class fluxLoader(fullLoader):
                     a1111_prompt_style=False, prompt=None,
                     my_unique_id=None):
 
+        if positive == '':
+            positive = None
+
         return super().adv_pipeloader(ckpt_name, 'Default', vae_name, 0,
                                       lora_name, lora_model_strength, lora_clip_strength,
                                       resolution, empty_latent_width, empty_latent_height,
                                       positive, 'none', 'comfy',
-                                      '', 'none', 'comfy',
+                                      None, 'none', 'comfy',
                                       batch_size, model_override, clip_override, vae_override, optional_lora_stack=optional_lora_stack,
                                       optional_controlnet_stack=optional_controlnet_stack,
                                       a1111_prompt_style=a1111_prompt_style, prompt=prompt,
@@ -2429,10 +2432,7 @@ class LLLiteLoader:
 # ---------------------------------------------------------------加载器 结束----------------------------------------------------------------------#
 
 #---------------------------------------------------------------Inpaint 开始----------------------------------------------------------------------#
-
 # FooocusInpaint
-from .libs.fooocus import InpaintHead, InpaintWorker
-
 class applyFooocusInpaint:
     @classmethod
     def INPUT_TYPES(s):
@@ -2451,7 +2451,7 @@ class applyFooocusInpaint:
     FUNCTION = "apply"
 
     def apply(self, model, latent, head, patch):
-
+        from .fooocus import InpaintHead, InpaintWorker
         head_file = get_local_filepath(FOOOCUS_INPAINT_HEAD[head]["model_url"], INPAINT_DIR)
         inpaint_head_model = InpaintHead()
         sd = torch.load(head_file, map_location='cpu')
@@ -2726,6 +2726,69 @@ class applyInpaint:
 # ---------------------------------------------------------------Inpaint 结束----------------------------------------------------------------------#
 
 #---------------------------------------------------------------适配器 开始----------------------------------------------------------------------#
+class applyLoraStack:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "lora_stack": ("LORA_STACK",),
+                "model": ("MODEL",),
+            },
+            "optional": {
+                "optional_clip": ("CLIP",),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL", "CLIP")
+    RETURN_NAMES = ("model", "clip")
+    CATEGORY = "EasyUse/Adapter"
+    FUNCTION = "apply"
+
+    def apply(self, lora_stack, model, optional_clip=None):
+        clip = None
+        if lora_stack is not None and len(lora_stack) > 0:
+            for lora in lora_stack:
+                lora = {"lora_name": lora[0], "model": model, "clip": optional_clip, "model_strength": lora[1],
+                        "clip_strength": lora[2]}
+                model, clip = easyCache.load_lora(lora, model, optional_clip, use_cache=False)
+        return (model, clip)
+
+class applyControlnetStack:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "controlnet_stack": ("CONTROL_NET_STACK",),
+                "pipe": ("PIPE_LINE",),
+            },
+            "optional": {
+            }
+        }
+
+    RETURN_TYPES = ("PIPE_LINE",)
+    RETURN_NAMES = ("pipe",)
+    CATEGORY = "EasyUse/Adapter"
+    FUNCTION = "apply"
+
+    def apply(self, controlnet_stack, pipe):
+
+        positive = pipe['positive']
+        negative = pipe['negative']
+        model = pipe['model']
+        vae = pipe['vae']
+
+        if controlnet_stack is not None and len(controlnet_stack) >0:
+            for controlnet in controlnet_stack:
+                positive, negative = easyControlnet().apply(controlnet[0], controlnet[5], positive, negative, controlnet[1], start_percent=controlnet[2], end_percent=controlnet[3], control_net=None, scale_soft_weights=controlnet[4], mask=None, easyCache=easyCache, use_cache=False, model=model, vae=vae)
+
+        new_pipe = {
+            **pipe,
+            "positive": positive,
+            "negetive": negative,
+        }
+        del pipe
+
+        return (new_pipe,)
 
 # 风格对齐
 from .libs.styleAlign import styleAlignBatch, SHARE_NORM_OPTIONS, SHARE_ATTN_OPTIONS
@@ -3530,24 +3593,32 @@ class ipadapterApplyRegional(ipadapter):
 
     def apply(self, pipe, image, positive, negative, image_weight, prompt_weight, weight_type, start_at, end_at, mask=None, optional_ipadapter_params=None, prompt=None, my_unique_id=None):
         model = pipe['model']
-        clip = pipe['clip']
-        clip_skip = pipe['loader_settings']['clip_skip']
-        a1111_prompt_style = pipe['loader_settings']['a1111_prompt_style']
-        pipe_lora_stack = pipe['loader_settings']['lora_stack']
-        positive_token_normalization = pipe['loader_settings']['positive_token_normalization']
-        positive_weight_interpretation = pipe['loader_settings']['positive_weight_interpretation']
-        negative_token_normalization = pipe['loader_settings']['negative_token_normalization']
-        negative_weight_interpretation = pipe['loader_settings']['negative_weight_interpretation']
+
         if positive == '':
             positive = pipe['loader_settings']['positive']
         if negative == '':
             negative = pipe['loader_settings']['negative']
 
-        if not clip:
-            raise Exception("No CLIP found")
+        if "clip" not in pipe or not pipe['clip']:
+            if "chatglm3_model" in pipe:
+                chatglm3_model = pipe['chatglm3_model']
+                # text encode
+                log_node_warn("Positive encoding...")
+                positive_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, positive, False)
+                log_node_warn("Negative encoding...")
+                negative_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, negative, False)
+        else:
+            clip = pipe['clip']
+            clip_skip = pipe['loader_settings']['clip_skip']
+            a1111_prompt_style = pipe['loader_settings']['a1111_prompt_style']
+            pipe_lora_stack = pipe['loader_settings']['lora_stack']
+            positive_token_normalization = pipe['loader_settings']['positive_token_normalization']
+            positive_weight_interpretation = pipe['loader_settings']['positive_weight_interpretation']
+            negative_token_normalization = pipe['loader_settings']['negative_token_normalization']
+            negative_weight_interpretation = pipe['loader_settings']['negative_weight_interpretation']
 
-        positive_embeddings_final, positive_wildcard_prompt, model, clip = prompt_to_cond('positive', model, clip, clip_skip, pipe_lora_stack, positive, positive_token_normalization, positive_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache)
-        negative_embeddings_final, negative_wildcard_prompt, model, clip = prompt_to_cond('negative', model, clip, clip_skip, pipe_lora_stack, negative, negative_token_normalization, negative_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache)
+            positive_embeddings_final, positive_wildcard_prompt, model, clip = prompt_to_cond('positive', model, clip, clip_skip, pipe_lora_stack, positive, positive_token_normalization, positive_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache)
+            negative_embeddings_final, negative_wildcard_prompt, model, clip = prompt_to_cond('negative', model, clip, clip_skip, pipe_lora_stack, negative, negative_token_normalization, negative_weight_interpretation, a1111_prompt_style, my_unique_id, prompt, easyCache)
 
         #ipadapter regional
         if "IPAdapterRegionalConditioning" not in ALL_NODE_CLASS_MAPPINGS:
@@ -4205,8 +4276,8 @@ class samplerCustomSettings:
         return {"required": {
                      "pipe": ("PIPE_LINE",),
                      "guider": (['CFG','DualCFG','IP2P+DualCFG','Basic'],{"default":"Basic"}),
-                     "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
-                     "cfg_negative": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
+                     "cfg": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0}),
+                     "cfg_negative": ("FLOAT", {"default": 1.5, "min": 0.0, "max": 100.0}),
                      "sampler_name": (comfy.samplers.KSampler.SAMPLERS + ['inversed_euler'],),
                      "scheduler": (comfy.samplers.KSampler.SCHEDULERS + ['karrasADV','exponentialADV','polyExponential', 'sdturbo', 'vp', 'alignYourSteps', 'gits'],),
                      "coeff": ("FLOAT", {"default": 1.20, "min": 0.80, "max": 1.50, "step": 0.05}),
@@ -4829,11 +4900,11 @@ class samplerFull:
         return {"required":
                 {"pipe": ("PIPE_LINE",),
                  "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                 "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
+                 "cfg": ("FLOAT", {"default": 8, "min": 0.0, "max": 100.0}),
                  "sampler_name": (comfy.samplers.KSampler.SAMPLERS,),
                  "scheduler": (comfy.samplers.KSampler.SCHEDULERS+new_schedulers,),
                  "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                 "image_output": (["Hide", "Preview", "Preview&Choose", "Save", "Hide&Save", "Sender", "Sender&Save"],),
+                 "image_output": (["Hide", "Preview", "Preview&Choose", "Save", "Hide&Save", "Sender", "Sender&Save", "None"],),
                  "link_id": ("INT", {"default": 0, "min": 0, "max": sys.maxsize, "step": 1}),
                  "save_prefix": ("STRING", {"default": "ComfyUI"}),
                  },
@@ -5005,6 +5076,14 @@ class samplerFull:
             mp['total_steps'] = 1
         #######################################################################################
         # guider
+        if cfg > 0 and get_sd_version(model) == 'flux':
+            c = []
+            for t in positive:
+                n = [t[0], t[1]]
+                n[1]['guidance'] = cfg
+                c.append(n)
+            positive = c
+
         if guider == 'CFG':
             _guider, = self.get_custom_cls('CFGGuider').get_guider(model, positive, negative, cfg)
         elif guider in ['DualCFG', 'IP2P+DualCFG']:
@@ -5076,19 +5155,19 @@ class samplerFull:
                             width_downscale_factor = float(width / context_dim)
                             height_downscale_factor = float(height / context_dim)
                             if width_downscale_factor > 1.75:
-                                log_node_warn("正在收缩模型Unet...")
-                                log_node_warn("收缩系数:" + str(width_downscale_factor))
+                                log_node_warn("Patch model unet add downscale...")
+                                log_node_warn("Downscale factor:" + str(width_downscale_factor))
                                 (samp_model,) = cls().patch(samp_model, downscale_options['block_number'], width_downscale_factor, 0, 0.35, True, "bicubic",
                                                             "bicubic")
                             elif height_downscale_factor > 1.25:
-                                log_node_warn("正在收缩模型Unet...")
-                                log_node_warn("收缩系数:" + str(height_downscale_factor))
+                                log_node_warn("Patch model unet add downscale....")
+                                log_node_warn("Downscale factor:" + str(height_downscale_factor))
                                 (samp_model,) = cls().patch(samp_model, downscale_options['block_number'], height_downscale_factor, 0, 0.35, True, "bicubic",
                                                             "bicubic")
                 else:
                     cls = ALL_NODE_CLASS_MAPPINGS['PatchModelAddDownscale']
-                    log_node_warn("正在收缩模型Unet...")
-                    log_node_warn("收缩系数:" + str(downscale_options['downscale_factor']))
+                    log_node_warn("Patch model unet add downscale....")
+                    log_node_warn("Downscale factor:" + str(downscale_options['downscale_factor']))
                     (samp_model,) = cls().patch(samp_model, downscale_options['block_number'], downscale_options['downscale_factor'], downscale_options['start_percent'], downscale_options['end_percent'], downscale_options['downscale_after_skip'], downscale_options['downscale_method'], downscale_options['upscale_method'])
             return samp_model
 
@@ -5131,7 +5210,7 @@ class samplerFull:
             # 开始推理
             if samp_custom is not None:
                 noise, _guider, _sampler, sigmas = self.get_sampler_custom(samp_model, samp_positive, samp_negative, samp_seed, samp_custom)
-                samp_samples, _ = sampler.custom_advanced_ksampler(noise, _guider, _sampler, sigmas, samp_samples)
+                samp_samples, samp_blend_samples = sampler.custom_advanced_ksampler(noise, _guider, _sampler, sigmas, samp_samples, preview_latent=preview_latent)
             elif scheduler == 'align_your_steps':
                 model_type = get_sd_version(samp_model)
                 if model_type == 'unknown':
@@ -5150,23 +5229,27 @@ class samplerFull:
             latent = samp_samples["samples"]
 
             # 解码图片
-            if tile_size is not None:
-                samp_images = samp_vae.decode_tiled(latent, tile_x=tile_size // 8, tile_y=tile_size // 8, )
+            if image_output == 'None':
+                samp_images, new_images, alpha, results = None, None, None, None
+                spent_time = 'Diffusion:' + str((end_time - start_time) / 1000) + '″'
             else:
-                samp_images = samp_vae.decode(latent).cpu()
+                if tile_size is not None:
+                    samp_images = samp_vae.decode_tiled(latent, tile_x=tile_size // 8, tile_y=tile_size // 8, )
+                else:
+                    samp_images = samp_vae.decode(latent).cpu()
 
-            # LayerDiffusion Decode
-            if layerDiffuse is not None:
-                new_images, samp_images, alpha = layerDiffuse.layer_diffusion_decode(layer_diffusion_method, latent, samp_blend_samples, samp_images, samp_model)
-            else:
-                new_images = samp_images
-                alpha = None
+                # LayerDiffusion Decode
+                if layerDiffuse is not None:
+                    new_images, samp_images, alpha = layerDiffuse.layer_diffusion_decode(layer_diffusion_method, latent, samp_blend_samples, samp_images, samp_model)
+                else:
+                    new_images = samp_images
+                    alpha = None
 
-            # 推理总耗时（包含解码）
-            end_decode_time = int(time.time() * 1000)
-            spent_time = 'Diffusion:' + str((end_time-start_time)/1000)+'″, VAEDecode:' + str((end_decode_time-end_time)/1000)+'″ '
+                # 推理总耗时（包含解码）
+                end_decode_time = int(time.time() * 1000)
+                spent_time = 'Diffusion:' + str((end_time-start_time)/1000)+'″, VAEDecode:' + str((end_decode_time-end_time)/1000)+'″ '
 
-            results = easySave(new_images, save_prefix, image_output, prompt, extra_pnginfo)
+                results = easySave(new_images, save_prefix, image_output, prompt, extra_pnginfo)
 
             new_pipe = {
                 **pipe,
@@ -5218,9 +5301,8 @@ class samplerFull:
                 return {"ui": {"images": results},
                         "result": sampler.get_output(new_pipe,)}
 
-            if image_output in ("Hide", "Hide&Save"):
-                return {"ui": {},
-                    "result": sampler.get_output(new_pipe,)}
+            if image_output in ("Hide", "Hide&Save", "None"):
+                return {"ui":{}, "result":sampler.get_output(new_pipe,)}
 
             if image_output in ("Sender", "Sender&Save"):
                 PromptServer.instance.send_sync("img-send", {"link_id": link_id, "images": results})
@@ -5337,13 +5419,13 @@ class samplerFull:
 
             del pipe
 
-            if image_output in ("Hide", "Hide&Save"):
-                return sampler.get_output(new_pipe)
+            if image_output in ("Hide", "Hide&Save", "None"):
+                return {"ui": {}, "result": sampler.get_output(new_pipe,)}
 
-            return {"ui": {"images": results}, "result": (sampler.get_output(new_pipe))}
+            return {"ui": {"images": results}, "result": sampler.get_output(new_pipe)}
 
         preview_latent = True
-        if image_output in ("Hide", "Hide&Save"):
+        if image_output in ("Hide", "Hide&Save", "None"):
             preview_latent = False
 
         xyplot_id = next((x for x in prompt if "XYPlot" in str(prompt[x]["class_type"])), None)
@@ -5351,10 +5433,30 @@ class samplerFull:
             xyPlot = None
         else:
             xyPlot = pipe["loader_settings"]["xyplot"] if "xyplot" in pipe["loader_settings"] else xyPlot
-        if xyPlot is not None:
-            return process_xyPlot(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed, samp_positive, samp_negative, steps, cfg, sampler_name, scheduler, denoise, image_output, link_id, save_prefix, tile_size, prompt, extra_pnginfo, my_unique_id, preview_latent, xyPlot, force_full_denoise, disable_noise, samp_custom)
+
+        # Fooocus model patch
+        model_options = samp_model.model_options if samp_model.model_options else samp_model.model.model_options
+        transformer_options = model_options["transformer_options"] if "transformer_options" in model_options else {}
+        if "fooocus" in transformer_options:
+            from .fooocus import applyFooocusInpaint
+            del transformer_options["fooocus"]
+            with applyFooocusInpaint():
+                if xyPlot is not None:
+                    return process_xyPlot(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed, samp_positive,
+                                          samp_negative, steps, cfg, sampler_name, scheduler, denoise, image_output,
+                                          link_id, save_prefix, tile_size, prompt, extra_pnginfo, my_unique_id,
+                                          preview_latent, xyPlot, force_full_denoise, disable_noise, samp_custom)
+                else:
+                    return process_sample_state(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed,
+                                                samp_positive, samp_negative, steps, start_step, last_step, cfg,
+                                                sampler_name, scheduler, denoise, image_output, link_id, save_prefix,
+                                                tile_size, prompt, extra_pnginfo, my_unique_id, preview_latent,
+                                                force_full_denoise, disable_noise, samp_custom)
         else:
-            return process_sample_state(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed, samp_positive, samp_negative, steps, start_step, last_step, cfg, sampler_name, scheduler, denoise, image_output, link_id, save_prefix, tile_size, prompt, extra_pnginfo, my_unique_id, preview_latent, force_full_denoise, disable_noise, samp_custom)
+            if xyPlot is not None:
+                return process_xyPlot(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed, samp_positive, samp_negative, steps, cfg, sampler_name, scheduler, denoise, image_output, link_id, save_prefix, tile_size, prompt, extra_pnginfo, my_unique_id, preview_latent, xyPlot, force_full_denoise, disable_noise, samp_custom)
+            else:
+                return process_sample_state(pipe, samp_model, samp_clip, samp_samples, samp_vae, samp_seed, samp_positive, samp_negative, steps, start_step, last_step, cfg, sampler_name, scheduler, denoise, image_output, link_id, save_prefix, tile_size, prompt, extra_pnginfo, my_unique_id, preview_latent, force_full_denoise, disable_noise, samp_custom)
 
 # 简易采样器
 class samplerSimple(samplerFull):
@@ -5363,7 +5465,7 @@ class samplerSimple(samplerFull):
     def INPUT_TYPES(cls):
         return {"required":
                 {"pipe": ("PIPE_LINE",),
-                 "image_output": (["Hide", "Preview", "Preview&Choose", "Save", "Hide&Save", "Sender", "Sender&Save"],{"default": "Preview"}),
+                 "image_output": (["Hide", "Preview", "Preview&Choose", "Save", "Hide&Save", "Sender", "Sender&Save", "None"],{"default": "Preview"}),
                  "link_id": ("INT", {"default": 0, "min": 0, "max": sys.maxsize, "step": 1}),
                  "save_prefix": ("STRING", {"default": "ComfyUI"}),
                  },
@@ -5389,6 +5491,42 @@ class samplerSimple(samplerFull):
                                  None, model, None, None, None, None, None, None,
                                  None, prompt, extra_pnginfo, my_unique_id, force_full_denoise, disable_noise)
 
+class samplerSimpleCustom(samplerFull):
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required":
+                {"pipe": ("PIPE_LINE",),
+                 "image_output": (["Hide", "Preview", "Preview&Choose", "Save", "Hide&Save", "Sender", "Sender&Save", "None"],{"default": "None"}),
+                 "link_id": ("INT", {"default": 0, "min": 0, "max": sys.maxsize, "step": 1}),
+                 "save_prefix": ("STRING", {"default": "ComfyUI"}),
+                 },
+                "optional": {
+                    "model": ("MODEL",),
+                },
+                "hidden":
+                  {"tile_size": "INT", "prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO", "my_unique_id": "UNIQUE_ID",
+                    "embeddingsList": (folder_paths.get_filename_list("embeddings"),)
+                  }
+                }
+
+
+    RETURN_TYPES = ("PIPE_LINE", "LATENT", "LATENT", "IMAGE")
+    RETURN_NAMES = ("pipe", "output", "denoised_output", "image")
+    OUTPUT_NODE = True
+    FUNCTION = "simple"
+    CATEGORY = "EasyUse/Sampler"
+
+    def simple(self, pipe, image_output, link_id, save_prefix, model=None, tile_size=None, prompt=None, extra_pnginfo=None, my_unique_id=None, force_full_denoise=False, disable_noise=False):
+
+        result = super().run(pipe, None, None, None, None, None, image_output, link_id, save_prefix,
+                                 None, model, None, None, None, None, None, None,
+                                 None, prompt, extra_pnginfo, my_unique_id, force_full_denoise, disable_noise)
+
+        pipe = result["result"][0] if "result" in result else None
+
+        return ({"ui": result['ui'], "result": (pipe, pipe["samples"], pipe["blend_samples"], pipe["images"])})
+
 # 简易采样器 (Tiled)
 class samplerSimpleTiled(samplerFull):
 
@@ -5400,7 +5538,7 @@ class samplerSimpleTiled(samplerFull):
         return {"required":
                 {"pipe": ("PIPE_LINE",),
                  "tile_size": ("INT", {"default": 512, "min": 320, "max": 4096, "step": 64}),
-                 "image_output": (["Hide", "Preview", "Save", "Hide&Save", "Sender", "Sender&Save"],{"default": "Preview"}),
+                 "image_output": (["Hide", "Preview", "Save", "Hide&Save", "Sender", "Sender&Save", "None"],{"default": "Preview"}),
                  "link_id": ("INT", {"default": 0, "min": 0, "max": sys.maxsize, "step": 1}),
                  "save_prefix": ("STRING", {"default": "ComfyUI"})
                  },
@@ -5435,7 +5573,7 @@ class samplerSimpleLayerDiffusion(samplerFull):
     def INPUT_TYPES(cls):
         return {"required":
                 {"pipe": ("PIPE_LINE",),
-                 "image_output": (["Hide", "Preview", "Save", "Hide&Save", "Sender", "Sender&Save"],{"default": "Preview"}),
+                 "image_output": (["Hide", "Preview", "Save", "Hide&Save", "Sender", "Sender&Save"], {"default": "Preview"}),
                  "link_id": ("INT", {"default": 0, "min": 0, "max": sys.maxsize, "step": 1}),
                  "save_prefix": ("STRING", {"default": "ComfyUI"})
                  },
@@ -6031,8 +6169,7 @@ class unsampler:
         noise = torch.zeros(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, device="cpu")
         noise_mask = None
         if "noise_mask" in latent:
-            noise_mask = comfy.sample.prepare_mask(latent["noise_mask"], noise.shape, device)
-
+            noise_mask = comfy.sampler_helpers.prepare_mask(latent["noise_mask"], noise.shape, device)
 
         noise = noise.to(device)
         latent_image = latent_image.to(device)
@@ -6741,9 +6878,9 @@ class pipeIn:
         vae = vae if vae is not None else pipe.get("vae")
         if vae is None:
             log_node_warn(f'pipeIn[{my_unique_id}]', "VAE missing from pipeLine")
-        clip = clip if clip is not None else pipe.get("clip")
-        if clip is None:
-            log_node_warn(f'pipeIn[{my_unique_id}]', "Clip missing from pipeLine")
+        clip = clip if clip is not None else pipe.get("clip") if pipe is not None and "clip" in pipe else None
+        # if clip is None:
+        #     log_node_warn(f'pipeIn[{my_unique_id}]', "Clip missing from pipeLine")
         if latent is not None:
             samples = latent
         elif image is None:
@@ -6963,9 +7100,9 @@ class pipeEditPrompt:
             auto_clean_gpu = pipe["loader_settings"]["auto_clean_gpu"] if "auto_clean_gpu" in pipe["loader_settings"] else False
             chatglm3_model = pipe["chatglm3_model"] if "chatglm3_model" in pipe else None
             # text encode
-            log_node_warn("正在进行正向提示词编码...")
+            log_node_warn("Positive encoding...")
             positive_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, positive, auto_clean_gpu)
-            log_node_warn("正在进行负面提示词编码...")
+            log_node_warn("Negative encoding...")
             negative_embeddings_final = chatglm3_adv_text_encode(chatglm3_model, negative, auto_clean_gpu)
         else:
             clip_skip = pipe["loader_settings"]["clip_skip"] if "clip_skip" in pipe["loader_settings"] else -1
@@ -7124,7 +7261,7 @@ class pipeXYPlot:
 
     CATEGORY = "EasyUse/Pipe"
 
-    def plot(self, grid_spacing, output_individuals, flip_xy, x_axis, x_values, y_axis, y_values, pipe=None):
+    def plot(self, grid_spacing, output_individuals, flip_xy, x_axis, x_values, y_axis, y_values, pipe=None, font_path=None):
         def clean_values(values):
             original_values = values.split("; ")
             cleaned_values = []
@@ -7171,6 +7308,7 @@ class pipeXYPlot:
                    "x_vals": x_values,
                    "y_axis": y_axis,
                    "y_vals": y_values,
+                   "custom_font": font_path,
                    "grid_spacing": grid_spacing,
                    "output_individuals": output_individuals}
 
@@ -7184,9 +7322,36 @@ class pipeXYPlot:
         return (new_pipe, xy_plot,)
 
 # pipeXYPlotAdvanced
+import platform
 class pipeXYPlotAdvanced:
+    if platform.system() == "Windows":
+        system_root = os.environ.get("SystemRoot")
+        user_root = os.environ.get("USERPROFILE")
+        font_dir = os.path.join(system_root, "Fonts") if system_root else None
+        user_font_dir = os.path.join(user_root, "AppData","Local","Microsoft","Windows", "Fonts") if user_root else None
+
+    # Default debian-based Linux & MacOS font dirs
+    elif platform.system() == "Linux":
+        font_dir = "/usr/share/fonts/truetype"
+        user_font_dir = None
+    elif platform.system() == "Darwin":
+        font_dir = "/System/Library/Fonts"
+        user_font_dir = None
+    else:
+        font_dir = None
+        user_font_dir = None
+
     @classmethod
     def INPUT_TYPES(s):
+        if s.font_dir and os.path.exists(s.font_dir):
+            font_dir = s.font_dir
+            files_list = [f for f in os.listdir(font_dir) if os.path.isfile(os.path.join(font_dir, f)) and f.lower().endswith(".ttf")]
+        else:
+            files_list = []
+
+        if s.user_font_dir and os.path.exists(s.user_font_dir):
+            files_list = files_list + [f for f in os.listdir(s.user_font_dir) if os.path.isfile(os.path.join(s.user_font_dir, f)) and f.lower().endswith(".ttf")]
+
         return {
             "required": {
                 "pipe": ("PIPE_LINE",),
@@ -7197,6 +7362,7 @@ class pipeXYPlotAdvanced:
             "optional": {
                 "X": ("X_Y",),
                 "Y": ("X_Y",),
+                "font": (["None"] + files_list,)
             },
             "hidden": {"my_unique_id": "UNIQUE_ID"}
         }
@@ -7207,7 +7373,11 @@ class pipeXYPlotAdvanced:
 
     CATEGORY = "EasyUse/Pipe"
 
-    def plot(self, pipe, grid_spacing, output_individuals, flip_xy, X=None, Y=None, my_unique_id=None):
+    def plot(self, pipe, grid_spacing, output_individuals, flip_xy, X=None, Y=None, font=None, my_unique_id=None):
+        font_path = os.path.join(self.font_dir, font) if font != "None" else None
+        if font_path and not os.path.exists(font_path):
+            font_path = os.path.join(self.user_font_dir, font)
+
         if X != None:
             x_axis = X.get('axis')
             x_values = X.get('values')
@@ -7406,7 +7576,7 @@ class pipeXYPlotAdvanced:
 
             del pipe
 
-        return pipeXYPlot().plot(grid_spacing, output_individuals, flip_xy, x_axis, x_values, y_axis, y_values, new_pipe)
+        return pipeXYPlot().plot(grid_spacing, output_individuals, flip_xy, x_axis, x_values, y_axis, y_values, new_pipe, font_path)
 
 #---------------------------------------------------------------节点束 结束----------------------------------------------------------------------
 
@@ -7593,6 +7763,8 @@ NODE_CLASS_MAPPINGS = {
     "easy controlnetLoader++": controlnetPlusPlus,
     "easy LLLiteLoader": LLLiteLoader,
     # Adapter 适配器
+    "easy loraStackApply": applyLoraStack,
+    "easy controlnetStackApply": applyControlnetStack,
     "easy ipadapterApply": ipadapterApply,
     "easy ipadapterApplyADV": ipadapterApplyAdvanced,
     "easy ipadapterApplyFaceIDKolors": ipadapterApplyFaceIDKolors,
@@ -7629,6 +7801,7 @@ NODE_CLASS_MAPPINGS = {
     # kSampler k采样器
     "easy fullkSampler": samplerFull,
     "easy kSampler": samplerSimple,
+    "easy kSamplerCustom": samplerSimpleCustom,
     "easy kSamplerTiled": samplerSimpleTiled,
     "easy kSamplerLayerDiffusion": samplerSimpleLayerDiffusion,
     "easy kSamplerInpainting": samplerSimpleInpainting,
@@ -7657,6 +7830,7 @@ NODE_CLASS_MAPPINGS = {
     "easy XYInputs: Seeds++ Batch": XYplot_SeedsBatch,
     "easy XYInputs: Steps": XYplot_Steps,
     "easy XYInputs: CFG Scale": XYplot_CFG,
+    "easy XYInputs: FluxGuidance": XYplot_FluxGuidance,
     "easy XYInputs: Sampler/Scheduler": XYplot_Sampler_Scheduler,
     "easy XYInputs: Denoise": XYplot_Denoise,
     "easy XYInputs: Checkpoint": XYplot_Checkpoint,
@@ -7715,6 +7889,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "easy controlnetLoader++": "EasyControlnet++",
     "easy LLLiteLoader": "EasyLLLite",
     # Adapter 适配器
+    "easy loraStackApply": "Easy Apply LoraStack",
+    "easy controlnetStackApply": "Easy Apply CnetStack",
     "easy ipadapterApply": "Easy Apply IPAdapter",
     "easy ipadapterApplyADV": "Easy Apply IPAdapter (Advanced)",
     "easy ipadapterApplyFaceIDKolors": "Easy Apply IPAdapter (FaceID Kolors)",
@@ -7750,6 +7926,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "easy preSamplingLayerDiffusionADDTL": "PreSampling (LayerDiffuse ADDTL)",
     # kSampler k采样器
     "easy kSampler": "EasyKSampler",
+    "easy kSamplerCustom": "EasyKSampler (Custom)",
     "easy fullkSampler": "EasyKSampler (Full)",
     "easy kSamplerTiled": "EasyKSampler (Tiled Decode)",
     "easy kSamplerLayerDiffusion": "EasyKSampler (LayerDiffuse)",
@@ -7779,6 +7956,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "easy XYInputs: Seeds++ Batch": "XY Inputs: Seeds++ Batch //EasyUse",
     "easy XYInputs: Steps": "XY Inputs: Steps //EasyUse",
     "easy XYInputs: CFG Scale": "XY Inputs: CFG Scale //EasyUse",
+    "easy XYInputs: FluxGuidance": "XY Inputs: Flux Guidance //EasyUse",
     "easy XYInputs: Sampler/Scheduler": "XY Inputs: Sampler/Scheduler //EasyUse",
     "easy XYInputs: Denoise": "XY Inputs: Denoise //EasyUse",
     "easy XYInputs: Checkpoint": "XY Inputs: Checkpoint //EasyUse",

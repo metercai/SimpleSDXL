@@ -543,3 +543,4 @@ def get_image_size_info(image: np.ndarray, aspect_ratios: list) -> str:
         return size_info
     except Exception as e:
         return f'Error reading image: {e}'
+

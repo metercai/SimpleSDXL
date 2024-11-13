@@ -2,6 +2,7 @@ import os
 import json
 import math
 import numbers
+import shutil
 
 import args_manager
 import tempfile
@@ -239,6 +240,13 @@ modelsinfo = init_modelsinfo(path_models_root, dict(
     vae=[path_vae]
     ))
 
+shared.path_outputs = path_outputs
+guest_path_outputs = os.path.join(path_outputs, shared.token.get_guest_did())
+if not os.path.exists(guest_path_outputs):
+    os.rename(path_outputs, shared.token.get_guest_did())
+    os.makedirs(path_outputs, exist_ok=True)
+    shutil.move(shared.token.get_guest_did(), os.path.join(path_outputs, shared.token.get_guest_did()))
+
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
 
@@ -336,6 +344,8 @@ temp_path = init_temp_path(get_config_item_or_set_default(
     validator=lambda x: isinstance(x, str),
     expected_type=str
 ), default_temp_path)
+shared.temp_path = temp_path
+
 temp_path_cleanup_on_launch = get_config_item_or_set_default(
     key='temp_path_cleanup_on_launch',
     default_value=True,

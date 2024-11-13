@@ -1,5 +1,6 @@
 import os
 import json
+import hashlib
 import gradio as gr
 import modules.util as util
 import modules.config as config
@@ -19,11 +20,13 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import shared
-from enhanced.simpleai import comfyd
+import cv2
+import numpy as np
+import base64
+from enhanced.simpleai import comfyd, get_path_in_user_dir
 from modules.model_loader import load_file_from_url, load_file_from_muid
-
-css = '''
-'''
+from modules.private_logger import get_current_html_path
+from simpleai_base.simpleai_base import export_user_qrcode_svg, get_user_info_from_identity_qr
 
 # app context
 nav_name_list = ''
@@ -45,20 +48,63 @@ def get_welcome_image(is_mobile=False):
         file_welcome = random.choice(welcomes)
     return file_welcome
 
-def get_preset_name_list():
+def get_preset_name_list(user_did=None):
+    if user_did and not shared.token.is_guest(user_did):
+        user_preset_file = get_path_in_user_dir(user_did, 'presets.txt')
+        if not os.path.exists(user_preset_file):
+            path_preset = os.path.abspath(f'./presets/')
+            presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
+            file_times = [(f[:-5], os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
+            user_path_preset = get_path_in_user_dir(user_did, 'presets')
+            if os.path.exists(user_path_preset):
+                presets2 = [p for p in util.get_files_from_folder(user_path_preset, ['.json'], None) if not p.startswith('.')]
+                file_times2 = [(f'{f[:-5]}_', os.path.getmtime(os.path.join(user_path_preset, f))) for f in presets2]
+                file_times = file_times + file_times2
+            presets = sorted(file_times, key=lambda x: x[1], reverse=True)
+            presets = [f[0] for f in presets]
+            if config.preset in presets:
+                presets.remove(config.preset)
+            presets.insert(0, config.preset)
+            presets = presets[:shared.BUTTON_NUM]
+            presets_list = ','.join(presets)
+            with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
+                nav_preset_file.write(presets_list)
+        else:
+            with open(user_preset_file, 'r', encoding="utf-8") as nav_preset_file:
+                presets_list = nav_preset_file.read()
+    else:
+        path_preset = os.path.abspath(f'./presets/')
+        presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
+        file_times = [(f[:-5], os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
+        presets = sorted(file_times, key=lambda x: x[1], reverse=True)
+        presets = [f[0] for f in presets]
+        if config.preset in presets:
+            presets.remove(config.preset)
+        presets.insert(0, config.preset)
+        presets = presets[:shared.BUTTON_NUM]
+        presets_list = ','.join(presets)
+    return presets_list
+
+
+preset_samples = {}
+def get_preset_samples(user_did=None):
+    global preset_samples
     path_preset = os.path.abspath(f'./presets/')
-    presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
-    file_times = [(f, os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
-    sorted_file_times = sorted(file_times, key=lambda x: x[1], reverse=True)
-    sorted_files = [f[0] for f in sorted_file_times]
-    sorted_files.pop(sorted_files.index(f'{config.preset}.json'))
-    sorted_files.insert(0, f'{config.preset}.json')
-    presets = sorted_files[:shared.BUTTON_NUM]
-    name_list = ''
-    for i in range(len(presets)):
-        name_list += f'{presets[i][:-5]},'
-    name_list = name_list[:-1]
-    return name_list
+    presets = [p[:-5] for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
+    presets.remove(config.preset)
+    if user_did and not shared.token.is_guest(user_did):
+        user_path_preset = get_path_in_user_dir(user_did, 'presets')
+        if os.path.exists(user_path_preset):
+            presets2 = [p for p in util.get_files_from_folder(user_path_preset, ['.json'], None) if not p.startswith('.')]
+            presets2 = [f'{p[:-5]}.' for p in presets2]
+            presets = presets + presets2
+    presets = sorted(presets)
+    presets = [[p] for p in presets]
+    if user_did:
+        preset_samples[user_did] = presets
+    else:
+        preset_samples['guest'] = presets
+    return presets
 
 def is_models_file_absent(preset_name):
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
@@ -144,81 +190,21 @@ def preset_instruction():
     
     return head + body + foot
 
-
-
 get_system_params_js = '''
 function(system_params) {
     const params = new URLSearchParams(window.location.search);
+    const sessionCookie = getCookie('aitoken');
     const url_params = Object.fromEntries(params);
-    if (url_params["__lang"]!=null) {
-        lang=url_params["__lang"];
-        system_params["__lang"]=lang;
-    }
-    if (url_params["__theme"]!=null) {
-        theme=url_params["__theme"];
-        system_params["__theme"]=theme;
-    }
+    if (url_params["__lang"]) 
+        system_params["__lang"]=url_params["__lang"];
+    if (url_params["__theme"]) 
+        system_params["__theme"]=url_params["__theme"];
+    if (sessionCookie) 
+        system_params["__session"]=sessionCookie;
     setObserver();
-
     return system_params;
 }
 '''
-
-
-refresh_topbar_status_js = '''
-function(system_params) {
-    const preset=system_params["__preset"];
-    const theme=system_params["__theme"];
-    const nav_name_list_str = system_params["__nav_name_list"];
-    let nav_name_list = new Array();
-    nav_name_list = nav_name_list_str.split(",")
-    for (let i=0;i<nav_name_list.length;i++) {
-        let item_id = "bar"+i;
-        let item_name = nav_name_list[i];
-        let nav_item = gradioApp().getElementById(item_id);
-        if (nav_item!=null) {
-            if (item_name != preset) {
-                if (theme == "light") {
-                    nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.background= 'var(--neutral-100)';
-                } else {
-                    nav_item.style.color = 'var(--neutral-400)';
-                    nav_item.style.background= 'var(--neutral-700)';
-                }
-            } else {
-                if (theme == 'light') {
-                    nav_item.style.color = 'var(--neutral-800)';
-                    nav_item.style.background= 'var(--secondary-200)';
-                } else {
-                    nav_item.style.color = 'white';
-                    nav_item.style.background= 'var(--secondary-400)';
-                }
-            }
-        }
-    }
-    const message=system_params["__message"];
-    if (message!=null && message.length>60) {
-        showSysMsg(message, theme);
-    }
-    let infobox=gradioApp().getElementById("infobox");
-    if (infobox!=null) {
-        let css = infobox.getAttribute("class")
-        if (browser.device.is_mobile && css.indexOf("infobox_mobi")<0)
-            infobox.setAttribute("class", css.replace("infobox", "infobox_mobi"));
-    }
-    webpath = system_params["__webpath"];
-    const lang=system_params["__lang"];
-    if (lang!=null) {
-        set_language(lang);
-    }
-    let preset_url = system_params["__preset_url"];
-    if (preset_url!=null) {
-        set_iframe_src(theme,lang,preset_url);
-    }
-    return {}
-}
-'''
-
 
 def init_nav_bars(state_params, request: gr.Request):
     #print(f'request.headers:{request.headers}')
@@ -232,11 +218,26 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__theme": args_manager.args.theme})
     if "__preset" not in state_params.keys():
         state_params.update({"__preset": config.preset})
-    if "__session" not in state_params.keys() and "cookie" in request.headers.keys():
-        cookies = dict([(s.split('=')[0], s.split('=')[1]) for s in request.headers["cookie"].split('; ')])
-        #print(f'cookies in request.headers:{cookies}, {request.headers}')
-        if "SESSION" in cookies.keys():
-            state_params.update({"__session": cookies["SESSION"]})
+    ua_hash = hashlib.sha256(request.headers['user-agent'].encode('utf-8')).hexdigest()
+    state_params.update({"ua_hash": ua_hash})
+    if "__session" not in state_params.keys():
+        sstoken = shared.token.get_guest_sstoken(ua_hash)
+        state_params.update({"sstoken": sstoken})
+        user_did = shared.token.get_guest_did()
+    else:
+        #print(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
+        user_did = shared.token.check_sstoken_and_get_did(state_params["__session"], ua_hash)
+        if user_did == "Unknown":
+            sstoken = shared.token.get_guest_sstoken(ua_hash)
+            state_params.update({"sstoken": sstoken})
+            user_did = shared.token.get_guest_did()
+        else:
+            state_params.update({"sstoken": ''})
+    state_params.update({"user_did": user_did})
+    state_params.update({"user_name":  shared.token.get_user_context(user_did).get_nickname()})
+    state_params.update({"sys_did":  shared.token.get_sys_did()})
+    #state_params.update({"user_qr":  "" if shared.token.is_guest(user_did) else export_user_qrcode_svg(user_did)})
+
     user_agent = request.headers["user-agent"]
     if "__is_mobile" not in state_params.keys():
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
@@ -249,27 +250,33 @@ def init_nav_bars(state_params, request: gr.Request):
             state_params.update({"__max_per_page": 18})
     if "__max_catalog" not in state_params.keys():
         state_params.update({"__max_catalog": config.default_image_catalog_max_number })
-    max_per_page = state_params["__max_per_page"]
-    max_catalog = state_params["__max_catalog"]
-    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog)
-    state_params.update({"__output_list": output_list})
-    state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
+    #max_per_page = state_params["__max_per_page"]
+    #max_catalog = state_params["__max_catalog"]
+    #output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
+    #state_params.update({"__output_list": output_list})
+    #state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     state_params.update({"infobox_state": 0})
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
-    state_params.update({"init_process": 'finished'})
-    results = refresh_nav_bars(state_params)
-    results += [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
+    state_params.update({"__nav_name_list": get_preset_name_list(user_did)})
+    state_params.update({"preset_store": False})
+    state_params.update({"engine": 'Fooocus'})
+    results = [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
-    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_advanced_masking_checkbox)]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
     results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
-    
+    params_backend = dict(
+            nickname=state_params["user_name"],
+            user_did=user_did,
+            translation_methods=config.default_translation_methods,
+            backfill_prompt=config.default_backfill_prompt,
+            comfyd_active_checkbox=config.default_comfyd_active_checkbox)
+    results += [params_backend] 
     return results
 
 def get_preset_inc_url(preset_name='blank'):
@@ -282,7 +289,6 @@ def get_preset_inc_url(preset_name='blank'):
         return f'{args_manager.args.webroot}/file={blank_inc_path}'
 
 def refresh_nav_bars(state_params):
-    state_params.update({"__nav_name_list": get_preset_name_list()})
     preset_name_list = state_params["__nav_name_list"].split(',')
     for i in range(shared.BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
@@ -296,31 +302,37 @@ def refresh_nav_bars(state_params):
         name += '\u2B07' if is_models_file_absent(name) else ''
         visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
-            results += [gr.update(value=name, visible=visible_flag)]
+            results += [gr.update(value=name, interactive=True, visible=visible_flag)]
         else: 
             results += [gr.update(value='', interactive=False, visible=visible_flag)]
     return results
 
 
 def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox):
-    if "__nav_name_list" not in state_params.keys():
-        state_params.update({"__nav_name_list": get_preset_name_list()})
     superprompter.remove_superprompt()
     remove_tokenizer()
-    backend_params.update({
-        'backfill_prompt': backfill_prompt,
-        'translation_methods': translation_methods,
-        'comfyd_active_checkbox': comfyd_active_checkbox,
-        'preset': state_params["__preset"],
-        })
+    backend_params.update(dict(
+        nickname=state_params["user_name"],
+        user_did=state_params["user_did"],
+        translation_methods=translation_methods,
+        backfill_prompt=backfill_prompt,
+        comfyd_active_checkbox=comfyd_active_checkbox,
+        preset=state_params["__preset"]
+        ))
+
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=False)] * (preset_nums + 6)
+    results += [gr.update(interactive=False)] * (preset_nums + 7)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
+    # params_backend, preset_store, identity_dialog
     results += [backend_params]
+    results += [gr.update(visible=False)]*2
+
     state_params["gallery_state"]='preview'
+    state_params["preset_store"]=False
+    state_params["identity_dialog"]=False
     return results
 
 
@@ -329,22 +341,27 @@ def process_after_generation(state_params):
     #    state_params.update({"__max_per_page": 18})
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
-    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog)
+    user_did = state_params["user_did"]
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state_params.update({"__output_list": output_list})
     state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=True)] * (preset_nums + 6)
+    results += [gr.update(interactive=True)] * (preset_nums + 7)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
+    # [history_link, gallery_index_stat]
+    results += [state_params['__finished_nums_pages']]
+    results += [update_history_link(user_did)]
     
+
     if len(state_params["__output_list"]) > 0:
         output_index = state_params["__output_list"][0].split('/')[0]
-        gallery_util.refresh_images_catalog(output_index, True)
-        gallery_util.parse_html_log(output_index, True)
+        gallery_util.refresh_images_catalog(output_index, True, user_did)
+        gallery_util.parse_html_log(output_index, True, user_did)
     
     return results
 
@@ -363,14 +380,15 @@ def down_absent_model(state_params):
     state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
     return gr.update(visible=False), state_params
 
+reset_layout_num = 0
 
 def reset_layout_params(prompt, negative_prompt, state_params, is_generating, inpaint_mode, comfyd_active_checkbox):
-    global system_message, preset_down_note_info
+    global system_message, preset_down_note_info, reset_layout_num1, reset_layout_num2
 
     state_params.update({"__message": system_message})
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
-        return [gr.update()] * (35 + shared.BUTTON_NUM) + [state_params] + [gr.update()] * 55
+        return refresh_nav_bars(state_params) + [gr.update()] * reset_layout_num + update_after_identity_sub(state_params)
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
@@ -385,6 +403,8 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
+    print(f'engine:{engine}')
+    #state_params.update({"task_class_name": engine})
 
     task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
     state_params.update({"task_method": task_method})
@@ -424,7 +444,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     results = refresh_nav_bars(state_params)
     results += meta_parser.switch_layout_template(preset_prepared, state_params, preset_url)
     results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
-
+    results += update_after_identity_sub(state_params)
     return results
 
 
@@ -458,6 +478,156 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
         load_file_from_url(url=url, model_dir=config.path_vae, file_name=file_name)
 
     return default_model, checkpoint_downloads
+
+def toggle_preset_store(state):
+    if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
+        if 'preset_store' in state:
+            flag = state['preset_store']
+        else:
+            state['preset_store'] = False
+            flag = False
+        state['preset_store'] = not flag
+        state['identity_dialog'] = False
+        return [gr.update(visible=not flag)] + update_topbar_js_params(state) + [gr.update(visible=False)]
+    else:
+        state['identity_dialog'] = False
+        return [gr.update()] + update_topbar_js_params(state) + [gr.update(visible=False)]
+
+def update_navbar_from_mystore(selected_preset, state):
+    global preset_samples
+    print(f'selected_preset:{selected_preset}')
+    selected_preset = preset_samples[state['user_did'] if not shared.token.is_guest(state["user_did"]) else 'guest'][selected_preset][0]
+    results = refresh_nav_bars(state)
+    nav_list_str = state["__nav_name_list"]
+    nav_array = nav_list_str.split(',')
+    if selected_preset in ["default", state["__preset"]]:
+        return results + [state] + update_topbar_js_params(state)
+    if selected_preset in nav_array:
+        nav_array.remove(selected_preset)
+        print(f'[PresetStore] Withdraw the preset/回撤预置包: {selected_preset}.')
+    else:
+        if len(nav_array) >= shared.BUTTON_NUM:
+            return results + [state] + update_topbar_js_params(state)
+        nav_array.append(selected_preset)
+        print(f'[PresetStore] Launch the preset/启用预置包: {selected_preset}.')
+    state["__nav_name_list"] = ','.join(nav_array)
+    if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
+        user_preset_file = get_path_in_user_dir(state["user_did"], 'presets.txt')
+        with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
+            nav_preset_file.write(state["__nav_name_list"])
+    #print(f'__nav_name_list:{state["__nav_name_list"]}')
+    return refresh_nav_bars(state) + update_topbar_js_params(state)
+
+
+def update_topbar_js_params(state):
+    system_params= dict(
+        __preset=state["__preset"],
+        __theme=state["__theme"],
+        __nav_name_list=state["__nav_name_list"],
+        sstoken=state["sstoken"],
+        user_name=state["user_name"],
+        user_did=state["user_did"],
+        is_guest=shared.token.is_guest(state["user_did"]),
+        task_class_name=state["engine"],
+        preset_store=state["preset_store"],
+        __message=state["__message"],
+        __webpath=state["__webpath"],
+        __lang=state["__lang"],
+        __preset_url=state["__preset_url"],
+        __finished_nums_pages=state["__finished_nums_pages"],
+        user_qr="" if 'user_qr' not in state else state["user_qr"]
+        )
+    return [system_params]
+
+
+def export_identity(state):
+    if not shared.token.is_guest(state["user_did"]):
+        state["user_qr"] = export_user_qrcode_svg(state["user_did"])
+        #print(f'user_qrcode_svg: {state["user_qr"]}')
+    return update_topbar_js_params(state)[0]
+
+def trigger_input_identity(img):
+    image = util.HWC3(img)
+    qr_code_detector = cv2.QRCodeDetector()
+    data, bbox, _ = qr_code_detector.detectAndDecode(image)
+    if bbox is not None:
+        try:
+            user_did, nickname, telephone = get_user_info_from_identity_qr(data)
+        except Exception as e:
+            print("qrcode parse error")
+            user_did, nickname, telephone = '', '', ''
+    else:
+        user_did, nickname, telephone = '', '', ''
+    return [nickname, telephone]
+
+def update_history_link(user_did):
+    return gr.update(value='' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>')
+
+def update_comfyd_url(user_did):
+    entry_point = shared.token.get_entry_point(user_did, comfyd.get_entry_point_id())
+    entry_url = None if entry_point == '' else f'http://{args_manager.args.listen}:{shared.sysinfo["loopback_port"]}{args_manager.args.webroot}/'
+    entry_point_url = '' if entry_url is None else f'<a href="{entry_url}?p={entry_point}" target="_blank">{entry_url}</a><div>Click and Entry embedded ComfyUI from here.</div>'
+    return entry_point_url
+   
+identity_introduce = '''
+当前为游客，点击"身份管理"绑定身份，可获取更多服务：<br>
+1，解锁“我的预置”功能，支持个性化的预置包导航。<br>
+2，独立的出图存储空间和日志历史页面，确保隐私安全。<br>
+3，可将当前参数环境保存为自己的定制预置包。<br>
+4，解锁内嵌Comfyd引擎，支持Flux/Kolors/SD3等新模型。<br>
+5，解锁更多配置，包括参数工具/翻译器/定制OBP等。<br>
+6，其他计划中的个性化服务、增强功能及互助服务。<br>
+如：我的通配符、大模型扩写、创意分享、预置包市场等<br>
+<br>
+系统默认将绑定的第一个身份设为管理员，赋予超级功能: <br>
+1，可一键进入内嵌Comfyd工作流引擎的操作界面；<br>
+2，可管理内嵌Comfyd引擎常驻配置。<br>
+3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
+4，申请生成二次打包的授权标识(待上线)。<br>
+<br>
+SimpleSDXL采用独特的分布式身份管理。即每个系统是独立的身份自管理节点，拥有多用户隔离空间，并确保隐私安全。同时会在官方根节点存有身份的加密副本，可确保身份跨节点漫游与找回。具体原理与规则说明>> <br>
+'''
+
+def update_after_identity(state):
+    results = refresh_nav_bars(state)
+    results += update_after_identity_sub(state)
+    return results
+
+def update_after_identity_sub(state):
+    #[gallery_index, index_radio, gallery_index_stat, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
+    max_per_page = state["__max_per_page"]
+    max_catalog = state["__max_catalog"]
+    nickname = state["user_name"]
+    user_did = state["user_did"]
+    print(f'[UserBase] Current identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}).')
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
+    state.update({"__output_list": output_list})
+    state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
+
+    results = [gr.update(choices=output_list, value=None), gr.update(visible=len(output_list)>0, open=False)]
+    results += [state['__finished_nums_pages']]
+    results += [gr.update(visible=False if 'preset_store' not in state else state['preset_store'])]
+    results += [gr.Dataset.update(samples=get_preset_samples(user_did))]
+    results += [update_history_link(user_did)]
+    results += [gr.update(visible=shared.token.is_guest(user_did))]
+    results += [gr.update(visible=shared.token.is_admin(user_did))]
+    results += [gr.update(value=update_comfyd_url(user_did))]
+    results += [gr.update(visible=not shared.token.is_guest(user_did))]
+    results += update_topbar_js_params(state)
+    return results
+
+def update_upscale_size_of_image(image, uov_method):
+    if image is not None:
+        H, W, C = util.HWC3(image).shape
+    else:
+        return ''
+    match = re.search(r'\((?:Fast )?([\d.]+)x\)', uov_method)
+    match_multiple = 1.0 if not match else float(match.group(1))
+    match_multiple = match_multiple if match_multiple<4.0 else 4.0 
+    width = int(W * match_multiple)
+    height = int(H * match_multiple)
+
+    return f'{W} x {H} | {width} x {height}'
 
 
 from transformers import CLIPTokenizer

@@ -84,18 +84,18 @@ div:has(> #positive_prompt) {
 }
 
 .type_row{
-  height: 100px !important;
+  height: 96px !important;
 }
 
 .type_row_half{
-  height: 50px !important;
+  height: 48px !important;
   font-size: 14px !important;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .type_row_third{
-  height: 33px !important;
+  height: 32px !important;
   font-size: 14px !important; 
   white-space: nowrap;
   overflow: hidden;
@@ -485,18 +485,17 @@ iframe::-webkit-scrollbar {
     padding: 0px;
 }
 
-.bar_title {
-    width: 50px !important;
+.bar_store {
+    width: 60px !important;
     padding: 0px;
-    position: absolute;
-    left: 4px;
-    top: 2px;
+    left: 1px;
+    top: 1px;
     white-space: nowrap;
     overflow: hidden;
 }
 
 .bar_button {
-    width: 40px !important;
+    width: 50px !important;
     padding: 0px;
     white-space: nowrap;
     overflow: hidden;
@@ -551,11 +550,196 @@ div.prose.tokenCounter {
   min-height: auto;
 }
 
-.identity_input textarea {
-    width: 180px;
-    padding: 3px 3px;
-    height: 32px;
-    margin: 3px 3px;
+
+.engineClass {
+  width: auto; 
+  position: absolute;
+  right: 4px;
+  top: 10px;
+  padding: 1px 8px;
+  opacity: 1;
+  color: var(--neutral-100);
+  background-color: var(--secondary-400);
+  border-radius: var(--radius-md);
+  /*font-size: 1.6em !important; */
+}
+
+.identityIntroduce {
+  width: auto;
+  padding: 10px 10px;
+  opacity: 1;
+  /*color: var(--neutral-100);
+  background-color: var(--secondary-400);*/
+  border-radius: var(--radius-md);
+  /*font-size: 1.6em !important; */
+}
+
+
+.toolbox {
+    height: auto;
+    position: absolute;
+    top: 210px;
+    left: 86%;
+    width: 100px !important;
+    z-index: 20;
+    text-align: center;
+}
+
+.preset_store {
+    height: auto;
+    position: absolute;
+    top: 31px;
+    left: 0px;
+    width: 100%;
+    z-index: 21;
+    text-align: left;
+    padding: 10px;
+    background-color: darkslategray;
+}
+
+.infobox {
+    height: auto;
+    position: absolute;
+    top: -15rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28rem !important;
+    z-index: 20;
+    text-align: left;
+    opacity: 0.85;
+    border-radius: 8px;
+    padding: 6px;
+    line-height: 120%;
+    border: groove;
+    color: var(--neutral-800);
+}
+
+.infobox_mobi {
+    height: auto;
+    position: absolute;
+    top: -16rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22rem !important;
+    z-index: 20;
+    text-align: left;
+    opacity: 0.85;
+    border-radius: 8px;
+    padding: 6px;
+    line-height: 120%;
+    border: groove;
+}
+
+.toolbox_note {
+    height: auto;
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px !important;
+    z-index: 21;
+    text-align: left;
+    opacity: 1;
+    border-radius: 8px;
+    padding: 0px;
+    border: groove;
+}
+
+.identity_note {
+    height: auto;
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px !important;
+    z-index: 21;
+    text-align: left;
+    opacity: 1;
+    border-radius: 8px;
+    padding: 0px;
+    border: groove;
+}
+
+.note_info {
+    padding: 8px;
+}
+
+.input_note_info {
+    top: 6px;
+}
+
+.note_text {
+    padding: 2px;
+    text-align: center;
+}
+.preset_input textarea {
+    width: 120px;
+}
+
+.tag_array {
+    height: auto;
+    position: absolute;
+    top: 180px;
+    left: 15%;
+    width: 580px !important;
+    z-index: 22;
+}
+
+.taglib_button {
+    height: 35px;
+    transform: translate(5%, 35%);
+}
+
+.min_pad0 {
+    padding: 0px !important;
+}
+
+.min_pad {
+    padding: 2px !important;
+}
+
+.identity_input {
+    padding: 0px 0px !important;
+    height: 42px;
+    min-width: min(160px, 100%) !important;
+}
+
+.identity_input2 {
+    padding: 0px 0px !important;
+    height: 42px;
+    min-width: min(40px, 100%) !important;
+}
+
+.identity_qr {
+    align-content: flex-start;
+}
+
+.identity_input textarea,
+.identity_input input {
+    border-radius: 0 !important;
+}
+
+.identity_button {
+    height: 28pt;
+    padding: unset !important;
+    margin: auto !important;
+    font-weight: bold !important;
+}
+
+.identity_export {
+    height: 20pt;
+    padding: unset !important;
+    margin: auto !important;
+    font-weight: bold !important;
+    margin-top: 6px !important;
+}
+
+.uov_image_size {
+    height: auto;
+}
+
+.uov_image_size textarea {
+    height: 38px !important;
 }
 
 .iclight_source {
