@@ -26,7 +26,7 @@ import base64
 from enhanced.simpleai import comfyd, get_path_in_user_dir
 from modules.model_loader import load_file_from_url, load_file_from_muid
 from modules.private_logger import get_current_html_path
-from simpleai_base.simpleai_base import export_user_qrcode_svg, get_user_info_from_identity_qr
+from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 
 # app context
 nav_name_list = ''
@@ -403,7 +403,6 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
-    print(f'engine:{engine}')
     #state_params.update({"task_class_name": engine})
 
     task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
@@ -495,7 +494,6 @@ def toggle_preset_store(state):
 
 def update_navbar_from_mystore(selected_preset, state):
     global preset_samples
-    print(f'selected_preset:{selected_preset}')
     selected_preset = preset_samples[state['user_did'] if not shared.token.is_guest(state["user_did"]) else 'guest'][selected_preset][0]
     results = refresh_nav_bars(state)
     nav_list_str = state["__nav_name_list"]
@@ -542,7 +540,7 @@ def update_topbar_js_params(state):
 
 def export_identity(state):
     if not shared.token.is_guest(state["user_did"]):
-        state["user_qr"] = export_user_qrcode_svg(state["user_did"])
+        state["user_qr"] = export_identity_qrcode_svg(state["user_did"])
         #print(f'user_qrcode_svg: {state["user_qr"]}')
     return update_topbar_js_params(state)[0]
 
@@ -552,7 +550,7 @@ def trigger_input_identity(img):
     data, bbox, _ = qr_code_detector.detectAndDecode(image)
     if bbox is not None:
         try:
-            user_did, nickname, telephone = get_user_info_from_identity_qr(data)
+            user_did, nickname, telephone = import_identity_qrcode(data)
         except Exception as e:
             print("qrcode parse error")
             user_did, nickname, telephone = '', '', ''

@@ -1558,7 +1558,6 @@ def worker():
                     match = re.search(r'\((?:Fast )?([\d.]+)x\)', async_task.uov_method)
                     match_multiple = 1.0 if not match else float(match.group(1))
                     match_multiple = match_multiple if match_multiple<4.0 else 4.0
-                    print(f'async_task.uov_method: {async_task.uov_method}')
                     if 'vary' in async_task.uov_method and 'subtle' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 2
                     elif 'vary' in async_task.uov_method and 'strong' in async_task.uov_method:
@@ -1804,7 +1803,6 @@ def worker():
         time.sleep(0.01)
         if len(async_tasks) > 0:
             task = async_tasks.pop(0)
-            print(f'get task')
             try:
                 handler(task)
                 if task.generate_image_grid:
