@@ -248,8 +248,6 @@ model_cata_map = {
     'insightface': [path_insightface]
     }
 
-print(f'model_cata_map:{model_cata_map}')
-
 from enhanced.simpleai import init_modelsinfo
 modelsinfo = init_modelsinfo(path_models_root, model_cata_map)
 
