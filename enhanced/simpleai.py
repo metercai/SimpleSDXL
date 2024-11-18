@@ -64,6 +64,12 @@ def get_path_in_user_dir(user_did, filename, catalog=None):
         return path_file
     return None
 
+def start_fast_comfyd(fast):
+    if fast:
+        comfyd.start(args_patch=[["--fast"]], force=True)
+    else:
+        comfyd.start(args_patch=[[]], force=True)
+
 identity_note = '使用绑定手机号的可信数字身份，既可用固定密钥存储和管理个人配置，避免数据丢失，又可参与创意分享等互助服务。'
 identity_note_1 = '当前浏览器已绑定身份访问。若要更换身份或在别处绑定，需先"解除绑定"。同一时刻同一身份只能在一处绑定。若需要完全离线使用身份，可导出身份二维码后妥善保存，在身份信息输入界面按提示导入。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'

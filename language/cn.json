@@ -393,7 +393,8 @@
 
   "Enable Comfyd always active": "启用Comfyd服务常驻",
   "Enabling will improve execution speed but occupy some memory.": "启用服务常驻会提高执行速度，但会多占用一些GPU内存。",
-
+  "Enable some untested speed up optimizations for Comfyd": "启用Comfyd激进加速策略。",
+  "Effective for some Nvidia cards, not rigorously tested, use as appropriate.": "针对部分Nvidia显卡有效(40系为主)，未经严格测试，酌情使用。",
 
   "SuperPrompter": "超级提示词扩展",
   "SuperPrompt": "提示扩展",

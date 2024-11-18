@@ -188,7 +188,7 @@ class AsyncTask:
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
       
-        if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3m'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3m']:
+        if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3x'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
             if self.task_name in ['Kolors+', 'Flux']:

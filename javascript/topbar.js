@@ -229,6 +229,20 @@ function checkAndUpdateSession(sstoken, days) {
     }
 }
 
+function setLinkColor(theme) {
+    let linkColorHover;
+    let linkColorVisited;
+    if (theme === 'dark') {
+	const darkElement = document.querySelector('.dark');
+	if (darkElement) {
+	    darkElement.style.setProperty('--link-text-color', 'var(--secondary-300)');
+	    darkElement.style.setProperty('--link-text-color-hover', 'var(--secondary-200)');
+	    darkElement.style.setProperty('--link-text-color-visited', 'var(--secondary-300)');
+	}
+    }
+}
+
+
 async function refresh_identity_qrcode(nickname, did, user_qrcode) {
     let Canvg;
 
@@ -266,6 +280,7 @@ function refresh_topbar_status_js(system_params) {
     const theme=system_params["__theme"];
     const nav_name_list_str = system_params["__nav_name_list"];
     checkAndUpdateSession(system_params["sstoken"], 90);
+    setLinkColor(theme);
     nickname = system_params["user_name"];
     task_class_name = system_params["task_class_name"];
     if (nav_name_list_str) {
@@ -350,7 +365,6 @@ function refresh_topbar_status_js(system_params) {
 	    await Promise.all([
             	refresh_identity_qrcode(nickname, system_params["user_did"], system_params["user_qr"]),
             ]);
-	    console.log('QR code refreshed successfully');
         } catch (error) {
             console.error('Error refreshing QR code:', error);
         }
