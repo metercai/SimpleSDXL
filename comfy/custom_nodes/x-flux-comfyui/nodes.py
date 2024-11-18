@@ -39,11 +39,11 @@ from comfy.utils import get_attr, set_attr
 from .clip import FluxClipViT
 
 
-dir_xlabs = folder_paths.models_dir #dir_xlabs = os.path.join(folder_paths.models_dir, "xlabs")
+dir_xlabs = folder_paths.models_dir # os.path.join(folder_paths.models_dir, "xlabs")
 #os.makedirs(dir_xlabs, exist_ok=True)
 dir_xlabs_loras = os.path.join(dir_xlabs, "loras")
 os.makedirs(dir_xlabs_loras, exist_ok=True)
-dir_xlabs_controlnets = os.path.join(dir_xlabs, "controlnets")
+dir_xlabs_controlnets = os.path.join(dir_xlabs, "controlnet")
 os.makedirs(dir_xlabs_controlnets, exist_ok=True)
 dir_xlabs_flux = os.path.join(dir_xlabs, "flux")
 os.makedirs(dir_xlabs_flux, exist_ok=True)

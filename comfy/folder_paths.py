@@ -30,7 +30,6 @@ def reset_folder_names_and_paths(models_root):
     folder_names_and_paths["embeddings"] = ([os.path.join(models_dir, "embeddings")], supported_pt_extensions)
     folder_names_and_paths["diffusers"] = ([os.path.join(models_dir, "diffusers")], ["folder"])
     folder_names_and_paths["vae_approx"] = ([os.path.join(models_dir, "vae_approx")], supported_pt_extensions)
-
     folder_names_and_paths["controlnet"] = ([os.path.join(models_dir, "controlnet"), os.path.join(models_dir, "t2i_adapter")], supported_pt_extensions)
     folder_names_and_paths["gligen"] = ([os.path.join(models_dir, "gligen")], supported_pt_extensions)
 
@@ -91,6 +90,7 @@ extension_mimetypes_cache = {
 def map_legacy(folder_name: str) -> str:
     legacy = {"unet": "diffusion_models",
               "llm": "llms",
+              "clip": "text_encoders",
               }
     return legacy.get(folder_name, folder_name)
 

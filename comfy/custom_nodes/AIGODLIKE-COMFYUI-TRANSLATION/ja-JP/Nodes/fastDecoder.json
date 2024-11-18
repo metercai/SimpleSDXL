@@ -1,0 +1,11 @@
+{
+    "FastLatentToImage": {
+        "title": "プレビューLatent",
+        "inputs": {
+            "latent": "Latent"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    }
+}

@@ -24,7 +24,7 @@ import cv2
 import numpy as np
 import base64
 from enhanced.simpleai import comfyd, get_path_in_user_dir
-from modules.model_loader import load_file_from_url, load_file_from_muid
+from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 
@@ -49,6 +49,7 @@ def get_welcome_image(is_mobile=False):
     return file_welcome
 
 def get_preset_name_list(user_did=None):
+
     if user_did and not shared.token.is_guest(user_did):
         user_preset_file = get_path_in_user_dir(user_did, 'presets.txt')
         if not os.path.exists(user_preset_file):
@@ -58,7 +59,7 @@ def get_preset_name_list(user_did=None):
             user_path_preset = get_path_in_user_dir(user_did, 'presets')
             if os.path.exists(user_path_preset):
                 presets2 = [p for p in util.get_files_from_folder(user_path_preset, ['.json'], None) if not p.startswith('.')]
-                file_times2 = [(f'{f[:-5]}_', os.path.getmtime(os.path.join(user_path_preset, f))) for f in presets2]
+                file_times2 = [(f'{f[:-5]}.', os.path.getmtime(os.path.join(user_path_preset, f))) for f in presets2]
                 file_times = file_times + file_times2
             presets = sorted(file_times, key=lambda x: x[1], reverse=True)
             presets = [f[0] for f in presets]
@@ -91,7 +92,6 @@ def get_preset_samples(user_did=None):
     global preset_samples
     path_preset = os.path.abspath(f'./presets/')
     presets = [p[:-5] for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
-    presets.remove(config.preset)
     if user_did and not shared.token.is_guest(user_did):
         user_path_preset = get_path_in_user_dir(user_did, 'presets')
         if os.path.exists(user_path_preset):
@@ -99,6 +99,8 @@ def get_preset_samples(user_did=None):
             presets2 = [f'{p[:-5]}.' for p in presets2]
             presets = presets + presets2
     presets = sorted(presets)
+    refresh_model_list(presets, user_did)
+    presets.remove(config.preset)
     presets = [[p] for p in presets]
     if user_did:
         preset_samples[user_did] = presets
@@ -107,6 +109,11 @@ def get_preset_samples(user_did=None):
     return presets
 
 def is_models_file_absent(preset_name):
+    if preset_name in presets_model_list:
+        if check_models_exists(preset_name):
+            return False
+        else:
+            return True
     preset_path = os.path.abspath(f'./presets/{preset_name}.json')
     if os.path.exists(preset_path):
         with open(preset_path, "r", encoding="utf-8") as json_file:
@@ -389,10 +396,12 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     system_message = 'system message was displayed!'
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
         return refresh_nav_bars(state_params) + [gr.update()] * reset_layout_num + update_after_identity_sub(state_params)
-    if '\u2B07' in state_params["bar_button"]:
-        gr.Info(preset_down_note_info)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
+    if '\u2B07' in state_params["bar_button"]:
+        gr.Info(preset_down_note_info)
+        download_model_files(preset, state_params["user_did"])
+
     state_params.update({"__preset": preset})
     #state_params.update({"__prompt": prompt})
     #state_params.update({"__negative_prompt": negative_prompt})
@@ -419,7 +428,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     vae_downloads = preset_prepared.get('vae_downloads', {})
 
     model_dtype = preset_prepared.get('engine', {}).get('backend_params', {}).get('base_model_dtype', '')
-    if engine == 'SD3m' and  model_dtype == 'auto':
+    if engine == 'SD3x' and  model_dtype == 'auto':
         base_model = comfy_task.get_default_base_SD3m_name()
         if shared.modelsinfo.exists_model(catalog="checkpoints", model_path=base_model):
             default_model = base_model
@@ -496,16 +505,17 @@ def update_navbar_from_mystore(selected_preset, state):
     global preset_samples
     selected_preset = preset_samples[state['user_did'] if not shared.token.is_guest(state["user_did"]) else 'guest'][selected_preset][0]
     results = refresh_nav_bars(state)
+    results2 = update_topbar_js_params(state)
     nav_list_str = state["__nav_name_list"]
     nav_array = nav_list_str.split(',')
     if selected_preset in ["default", state["__preset"]]:
-        return results + [state] + update_topbar_js_params(state)
+        return results + results2
     if selected_preset in nav_array:
         nav_array.remove(selected_preset)
         print(f'[PresetStore] Withdraw the preset/回撤预置包: {selected_preset}.')
     else:
         if len(nav_array) >= shared.BUTTON_NUM:
-            return results + [state] + update_topbar_js_params(state)
+            return results + results2
         nav_array.append(selected_preset)
         print(f'[PresetStore] Launch the preset/启用预置包: {selected_preset}.')
     state["__nav_name_list"] = ','.join(nav_array)
@@ -581,7 +591,7 @@ identity_introduce = '''
 1，可一键进入内嵌Comfyd工作流引擎的操作界面；<br>
 2，可管理内嵌Comfyd引擎常驻配置。<br>
 3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
-4，申请生成二次打包的授权标识(待上线)。<br>
+4，申请预置包发布和二次打包的授权标识(待上线)。<br>
 <br>
 SimpleSDXL采用独特的分布式身份管理。即每个系统是独立的身份自管理节点，拥有多用户隔离空间，并确保隐私安全。同时会在官方根节点存有身份的加密副本，可确保身份跨节点漫游与找回。具体原理与规则说明>> <br>
 '''

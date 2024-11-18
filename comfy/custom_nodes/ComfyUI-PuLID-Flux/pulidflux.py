@@ -196,6 +196,7 @@ class PulidFluxInsightFaceLoader:
     CATEGORY = "pulid"
 
     def load_insightface(self, provider):
+        print(f'load_insightface, provider={provider}')
         model = FaceAnalysis(name="antelopev2", root=INSIGHTFACE_DIR, providers=[provider + 'ExecutionProvider',]) # alternative to buffalo_l
         model.prepare(ctx_id=0, det_size=(640, 640))
 
@@ -214,7 +215,6 @@ class PulidFluxEvaClipLoader:
 
     def load_eva_clip(self):
         from .eva_clip.factory import create_model_and_transforms
-        print(f'PulidFluxEvaClipLoader: cache_dir={CLIP_DIR}')
         model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
 
         model = model.visual
@@ -293,7 +293,7 @@ class ApplyPulidFlux:
         )
 
         face_helper.face_parse = None
-        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device)
+        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device, model_rootpath=CONTROLNET_DIR)
 
         bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
         cond = []

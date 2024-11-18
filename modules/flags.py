@@ -159,14 +159,14 @@ available_aspect_ratios_list = {
 }
 
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT', 'HyDiT+', 'Flux']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT', 'HyDiT+', 'Flux']
 
 model_file_filter = {
-        'SD3m'   : ['sd3_medium'],
+        'SD3x'   : ['sd3'],
         'Flux'   : ['flux'],
         'HyDiT'  : ['hunyuan'],
         }
-model_file_filter['Fooocus'] = model_file_filter['SD3m'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
+model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
 
 language_radio = lambda x: '中文' if x=='cn' else 'En'
 
@@ -175,7 +175,7 @@ task_class_mapping = {
             'Comfy'  : 'SDXL-Comfy',
             'Kolors' : 'Kwai-Kolors',
             'Kolors+': 'Kwai-Kolors+',
-            'SD3m'   : 'SD3-medium',
+            'SD3x'   : 'SD3m-SD3.5x',
             'HyDiT'  : 'Hunyuan-DiT',
             'HyDiT+' : 'Hunyuan-DiT+',
             'Flux'   : 'Flux.1',
@@ -186,7 +186,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3m', 'HyDiT+', 'Flux']
+comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT+', 'Flux']
 
 default_class_params = {
     'Fooocus': {
@@ -228,7 +228,7 @@ default_class_params = {
             "llms_model": "quant8",
             },
         },
-    'SD3m': {
+    'SD3x': {
         'disvisible': ["backend_selection", "performance_selection"],
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
         'available_aspect_ratios_selection': 'Common',

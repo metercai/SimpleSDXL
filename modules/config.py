@@ -225,20 +225,33 @@ path_unet = get_dir_or_set_default('path_unet', f'{path_models_root}/unet')
 path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
 paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}/diffusers/'], True)
+path_ipadapter = get_dir_or_set_default('path_ipadapter', f'{path_models_root}/ipadapter')
+path_pulid = get_dir_or_set_default('path_pulid', f'{path_models_root}/pulid')
+path_insightface = get_dir_or_set_default('path_insightface', f'{path_models_root}/insightface')
+
+model_cata_map = {
+    'checkpoints': paths_checkpoints,
+    'loras': paths_loras,
+    'embeddings': [path_embeddings],
+    'vae': [path_vae],
+    'upscale_models': [path_upscale_models],
+    'inpaint': paths_inpaint,
+    'controlnet': paths_controlnet,
+    'clip': [path_clip],
+    'clip_vision': [path_clip_vision],
+    'llms': paths_llms,
+    'unet': [path_unet],
+    'rembg': [path_rembg],
+    'layer_model': [path_layer_model],
+    'pulid': [path_pulid],
+    'ipadapter': [path_ipadapter],
+    'insightface': [path_insightface]
+    }
+
+print(f'model_cata_map:{model_cata_map}')
 
 from enhanced.simpleai import init_modelsinfo
-modelsinfo = init_modelsinfo(path_models_root, dict(
-    checkpoints=paths_checkpoints,
-    loras=paths_loras,
-    embeddings=[path_embeddings],
-    diffusers=paths_diffusers,
-    DIFFUSERS=paths_diffusers,
-    controlnet=paths_controlnet,
-    inpaint=paths_inpaint,
-    llms=paths_llms,
-    unet=[path_unet],
-    vae=[path_vae]
-    ))
+modelsinfo = init_modelsinfo(path_models_root, model_cata_map)
 
 shared.path_outputs = path_outputs
 guest_path_outputs = os.path.join(path_outputs, shared.token.get_guest_did())
@@ -947,12 +960,33 @@ comfyui:
      layer_model: {layer_model}
      vae: {vae}
      ipadapter: {ipadapter}
+     inpaint: {inpaint}
+     pulid: {pulid}
+     insightface: {insightface}
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
 comfyd_paths_fix = lambda p: p #[p1 if os.path.isabs(p1) else os.path.relpath(p1, os.path.join(shared.root, 'comfy')) for p1 in p] if isinstance(p, list) else p if os.path.isabs(p) else os.path.relpath(p, os.path.join(shared.root, 'comfy'))
 
-config_comfy_text = config_comfy_formatted_text.format(models_root=comfyd_paths_fix(path_models_root), checkpoints=paths2str(comfyd_paths_fix(paths_checkpoints),'checkpoints'), clip_vision=comfyd_paths_fix(path_clip_vision), clip=comfyd_paths_fix(path_clip), controlnets=paths2str(comfyd_paths_fix(paths_controlnet),'controlnet'), diffusers=paths2str(comfyd_paths_fix(paths_diffusers),'diffusers'), embeddings=comfyd_paths_fix(path_embeddings), loras=paths2str(comfyd_paths_fix(paths_loras), 'loras'), upscale_models=comfyd_paths_fix(path_upscale_models), unet=paths2str(comfyd_paths_fix([path_unet]+paths_checkpoints), 'unet'), rembg=comfyd_paths_fix(path_rembg), layer_model=comfyd_paths_fix(path_layer_model), vae=comfyd_paths_fix(path_vae), ipadapter=paths2str(comfyd_paths_fix(paths_controlnet),'ipadapter'))
+config_comfy_text = config_comfy_formatted_text.format(
+        models_root=comfyd_paths_fix(path_models_root), 
+        checkpoints=paths2str(comfyd_paths_fix(paths_checkpoints),'checkpoints'), 
+        clip_vision=comfyd_paths_fix(path_clip_vision), 
+        clip=comfyd_paths_fix(path_clip), 
+        controlnets=paths2str(comfyd_paths_fix(paths_controlnet),'controlnet'), 
+        diffusers=paths2str(comfyd_paths_fix(paths_diffusers),'diffusers'), 
+        embeddings=comfyd_paths_fix(path_embeddings), 
+        loras=paths2str(comfyd_paths_fix(paths_loras), 'loras'), 
+        upscale_models=comfyd_paths_fix(path_upscale_models), 
+        unet=paths2str(comfyd_paths_fix([path_unet]+paths_checkpoints), 'unet'), 
+        rembg=comfyd_paths_fix(path_rembg), 
+        layer_model=comfyd_paths_fix(path_layer_model), 
+        vae=comfyd_paths_fix(path_vae), 
+        ipadapter=comfyd_paths_fix(path_ipadapter), 
+        inpaint=paths2str(comfyd_paths_fix(paths_inpaint),'inpaint'), 
+        pulid=comfyd_paths_fix(path_pulid), 
+        insightface=comfyd_paths_fix(path_insightface))
+
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 

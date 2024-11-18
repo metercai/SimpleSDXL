@@ -1,0 +1,20 @@
+{
+    "Terminal Log //CM": {
+        "title": "Лог терминала (Менеджер)",
+        "widgets": {
+            "text": "text",
+            "mode": "режим",
+            "lines": "строк"
+        }
+    },
+	"RandomNoise": {
+        "title": "Случайный шум (Менеджер)",
+        "widgets": {
+            "noise_seed": "text",
+            "control_after_generate": "control_after_generate"
+        },
+		    "outputs": {
+		"NOISE": "NOISE"
+		}
+    }
+}

@@ -175,6 +175,8 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         if 'aio' in task_method:
             total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
+            if 'base_model_gguf' in default_params:
+                comfy_params.delete_params(['base_model'])
             return ComfyTask(task_method, comfy_params, input_images, total_steps)
         else:
             if base_model == 'auto':

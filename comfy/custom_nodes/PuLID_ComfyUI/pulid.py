@@ -20,7 +20,6 @@ INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
 MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
 CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
 CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
-
 if "pulid" not in folder_paths.folder_names_and_paths:
     current_paths = [MODELS_DIR]
 else:
@@ -231,7 +230,7 @@ class PulidInsightFaceLoader:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "provider": (["CPU", "CUDA", "ROCM"], ),
+                "provider": (["CPU", "CUDA", "ROCM", "CoreML"], ),
             },
         }
 
@@ -345,7 +344,7 @@ class ApplyPulid:
         )
 
         face_helper.face_parse = None
-        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device)
+        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=devicei, model_rootpath=CONTROLNET_DIR)
 
         bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
         cond = []
@@ -358,11 +357,13 @@ class ApplyPulid:
                 face_analysis.det_model.input_size = size
                 face = face_analysis.get(image[i])
                 if face:
-                    face = sorted(face, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]), reverse=True)[-1]
+                    face = sorted(face, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]))[-1]
                     iface_embeds = torch.from_numpy(face.embedding).unsqueeze(0).to(device, dtype=dtype)
                     break
             else:
-                raise Exception('insightface: No face detected.')
+                # No face detected, skip this image
+                print('Warning: No face detected in image', i)
+                continue
 
             # get eva_clip embeddings
             face_helper.clean_all()
@@ -371,7 +372,8 @@ class ApplyPulid:
             face_helper.align_warp_face()
 
             if len(face_helper.cropped_faces) == 0:
-                raise Exception('facexlib: No face detected.')
+                # No face detected, skip this image
+                continue
             
             face = face_helper.cropped_faces[0]
             face = image_to_tensor(face).unsqueeze(0).permute(0,3,1,2).to(device)
@@ -406,6 +408,11 @@ class ApplyPulid:
             
             cond.append(pulid_model.get_image_embeds(id_cond, id_vit_hidden))
             uncond.append(pulid_model.get_image_embeds(id_uncond, id_vit_hidden_uncond))
+
+        if not cond:
+            # No faces detected, return the original model
+            print("pulid warning: No faces detected in any of the given images, returning unmodified model.")
+            return (work_model,)
         
         # average embeddings
         cond = torch.cat(cond).to(device, dtype=dtype)
@@ -452,7 +459,7 @@ class ApplyPulid:
                 number += 1
         for index in range(10):
             patch_kwargs["module_key"] = str(number*2+1)
-            set_model_patch_replace(work_model, patch_kwargs, ("middle", 0, index))
+            set_model_patch_replace(work_model, patch_kwargs, ("middle", 1, index))
             number += 1
 
         return (work_model,)

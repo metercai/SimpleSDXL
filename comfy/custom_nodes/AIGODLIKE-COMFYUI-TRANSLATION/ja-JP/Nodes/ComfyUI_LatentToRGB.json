@@ -1,0 +1,11 @@
+{
+    "LatentToRGB": {
+        "title": "Latent画像プレビュー",
+        "inputs": {
+            "samples": "Latent"
+        },
+        "outputs": {
+            "IMAGE": "图像"
+        }
+    }
+}
