@@ -102,19 +102,19 @@ def prepare_environment():
 
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-    torch_ver = '2.3.1'
-    torchvisio_ver = '0.18.1'
+    torch_ver = '2.4.1'
+    torchvisio_ver = '0.19.1'
     if shared.sysinfo['gpu_brand'] == 'NVIDIA':
-        torch_index_url = "https://download.pytorch.org/whl/cu121"
+        torch_index_url = "https://download.pytorch.org/whl/cu124"
     elif shared.sysinfo['gpu_brand'] == 'AMD':
         if platform.system() == "Windows":
             #pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
             #pip install torch-directml
             torch_index_url = "https://download.pytorch.org/whl/"
         else:
-            torch_index_url = "https://download.pytorch.org/whl/rocm6.0"
-            torch_ver = '2.3.1'
-            torchvisio_ver = '0.18.1'
+            torch_index_url = "https://download.pytorch.org/whl/rocm6.2"
+            torch_ver = '2.4.1'
+            torchvisio_ver = '0.19.1'
     elif shared.sysinfo['gpu_brand'] == 'INTEL':
         torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
     else:
@@ -137,13 +137,13 @@ def prepare_environment():
         run(f'"{python}" -m {torch_command}', "Installing torchaudio", "Couldn't install torchaudio", live=True)
 
     if TRY_INSTALL_XFORMERS:
-        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-win_amd64.whl'
-        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu121/xformers-0.0.26-cp310-cp310-manylinux2014_x86_64.whl'
+        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu124/xformers-0.0.28.post1-cp310-cp310-win_amd64.whl'
+        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu124/xformers-0.0.28.post1-cp310-cp310-manylinux_2_28_x86_64.whl'
         if not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.26')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.28.post1')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.26", live=True)
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.28.post1", live=True)
                 else:
                     print("Installation of xformers is not supported in this version of Python.")
                     print(
@@ -151,7 +151,7 @@ def prepare_environment():
                     if not is_installed("xformers"):
                         exit(0)
             elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.26")
+                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.28.post1")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
@@ -255,7 +255,6 @@ def reset_env_args():
 shared.token, shared.sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did()}')
 print(f'[SimpleAI] nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, guest_did/身份标识: {shared.token.get_guest_did()}')
-print(f'loopback_port: {shared.sysinfo["loopback_port"]}')
 
 prepare_environment()
 shared.args = ini_args()

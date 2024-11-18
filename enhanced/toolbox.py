@@ -17,7 +17,7 @@ import modules.meta_parser as meta_parser
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from enhanced.simpleai import sync_model_info, get_path_in_user_dir
-from modules.model_loader import load_file_from_url, load_file_from_muid
+from modules.model_loader import load_file_from_url
 from shared import sysinfo
 
 
