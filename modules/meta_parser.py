@@ -73,6 +73,9 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     task_method = params_backend.get('task_method', None)
     base_model_list = modules.config.get_base_model_list(template_engine, task_method)
     engine_class_display = template_engine if template_engine!='Fooocus' else 'SDXL'
+    if template_engine!='Fooocus' and shared.token.is_guest(state_params["user_did"]):
+        gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运>行,请先完成身份绑定. ')
+        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运行,请先完成身份绑定. ')
 
     results = [params_backend]
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
@@ -92,8 +95,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
     results.append(engine_class_display)
     results.append(get_layout_choices_visible_inter(uov_method_list, 'uov_method', visible, inter))
-    results.append(get_layout_empty_visible_inter('layer_method', visible, inter))
-    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter))
+    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_empty_visible_inter('enhance_input_image', visible, inter))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
