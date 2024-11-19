@@ -14,6 +14,7 @@ class AsyncTask:
         from modules.config import default_max_lora_number
         import args_manager
         import re
+        import shared
 
         from enhanced.simpleai import comfyd
 
