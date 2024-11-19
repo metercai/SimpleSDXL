@@ -198,6 +198,7 @@ def unbind_identity(nick, tele, state, phrase):
             state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
+            state["preset_store"] = False
             result = [note4, gr.update(visible=True)] + [gr.update(interactive=True, visible=True)] + [gr.update(interactive=True, visible=True, value="")]*2 + [gr.update(interactive=True, visible=True)] + [gr.update(visible=False)]*8
         else: # 口令不对, 解绑失败, 重新输入口令, 再次解绑
             result = [note4_1] + [gr.update(visible=False)]*8 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)]

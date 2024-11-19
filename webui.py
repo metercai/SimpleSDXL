@@ -491,10 +491,10 @@ with shared.gradio_root:
 
                     with gr.Tab(label='Layer_iclight', id='layer_tab') as layer_tab:
                         with gr.Row():
-                            layer_method = gr.Radio(choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0], container=False)
+                            layer_method = gr.Radio(choices=comfy_task.default_method_names, value=comfy_task.default_method_names[0], interactive=False, container=False)
                         with gr.Row():
                             with gr.Column():
-                                layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True)
+                                layer_input_image = grh.Image(label='Drag given image to here', source='upload', type='numpy', visible=True, interactive=False)
                             with gr.Column():
                                 with gr.Group():
                                     iclight_enable = gr.Checkbox(label='Enable IC-Light', value=True)
@@ -1403,7 +1403,7 @@ with shared.gradio_root:
             .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
             .then(fn=lambda x: '' if 'user_qr' not in x else x.pop('user_qr'), inputs=state_topbar,  show_progress=False)
 
-    after_identity = [gallery_index, index_radio, gallery_index_stat, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
+    after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
     identity_phrases_confirm_button.click(lambda a, b, c, d: simpleai.set_phrases(a,b,c,d,'confirm'), inputs=identity_input + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')

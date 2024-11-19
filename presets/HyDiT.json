@@ -40,9 +40,10 @@
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1024*1024",
-    "checkpoint_downloads": {
-        "hunyuan_dit_1.2.safetensors": "https://huggingface.co/comfyanonymous/hunyuan_dit_comfyui/resolve/main/hunyuan_dit_1.2.safetensors"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
-    "lora_downloads": {} 
+    "lora_downloads": {},
+    "model_list": [
+        "checkpoints,hunyuan_dit_1.2.safetensors,8240228270,0,"
+        ] 
 }

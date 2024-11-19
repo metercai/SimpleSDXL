@@ -187,7 +187,9 @@ class AsyncTask:
             self.task_name = 'default'
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
-      
+        if self.task_class not in ['Fooocus'] and shared.token.is_guest(self.user_did):
+            print(f'[TaskEngine] This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运>行,请先完成身份绑定. ')
+
         if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3x'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:

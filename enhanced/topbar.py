@@ -403,8 +403,6 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         download_model_files(preset, state_params["user_did"])
 
     state_params.update({"__preset": preset})
-    #state_params.update({"__prompt": prompt})
-    #state_params.update({"__negative_prompt": negative_prompt})
 
     config_preset = config.try_get_preset_content(preset)
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
@@ -412,11 +410,10 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
-    #state_params.update({"task_class_name": engine})
 
     task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
     state_params.update({"task_method": task_method})
-
+    
     if comfyd_active_checkbox:
         comfyd.stop()
    
@@ -441,8 +438,8 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
             checkpoint_downloads = {}
         else:
             checkpoint_downloads = {default_model: comfy_task.flux_model_urls[default_model]}
-        if 'merged' in default_model:
-            preset_prepared.update({'default_overwrite_step': 6})
+            if 'merged' in default_model:
+                preset_prepared.update({'default_overwrite_step': 6})
 
     download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads)
 
@@ -589,11 +586,11 @@ identity_introduce = '''
 <br>
 系统默认将绑定的第一个身份设为管理员，赋予超级功能: <br>
 1，可一键进入内嵌Comfyd工作流引擎的操作界面；<br>
-2，可管理内嵌Comfyd引擎常驻配置。<br>
+2，可管理内嵌Comfyd引擎参数配置。<br>
 3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
 4，申请预置包发布和二次打包的授权标识(待上线)。<br>
 <br>
-SimpleSDXL采用独特的分布式身份管理。即每个系统是独立的身份自管理节点，拥有多用户隔离空间，并确保隐私安全。同时会在官方根节点存有身份的加密副本，可确保身份跨节点漫游与找回。具体原理与规则说明>> <br>
+SimpleSDXL采用独特的分布式身份管理机制。即每个系统是独立的身份自管理节点，拥有多用户相互隔离的数据空间，可保障隐私安全。同时会在官方根节点保存身份的加密副本，可确保身份跨节点漫游。具体原理与规则说明>> <br>
 '''
 
 def update_after_identity(state):
@@ -602,7 +599,7 @@ def update_after_identity(state):
     return results
 
 def update_after_identity_sub(state):
-    #[gallery_index, index_radio, gallery_index_stat, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
+    #[gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
     max_per_page = state["__max_per_page"]
     max_catalog = state["__max_catalog"]
     nickname = state["user_name"]
@@ -614,6 +611,7 @@ def update_after_identity_sub(state):
 
     results = [gr.update(choices=output_list, value=None), gr.update(visible=len(output_list)>0, open=False)]
     results += [state['__finished_nums_pages']]
+    results += [gr.update(interactive=True if state["engine"]=='Fooocus' and not shared.token.is_guest(user_did) else False)] *2
     results += [gr.update(visible=False if 'preset_store' not in state else state['preset_store'])]
     results += [gr.Dataset.update(samples=get_preset_samples(user_did))]
     results += [update_history_link(user_did)]
