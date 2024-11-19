@@ -1,0 +1,73 @@
+{ 
+    "default_engine": {
+	"backend_engine": "Flux",
+	"disvisible": ["backend_selection", "performance_selection", "negative_prompt"],
+	"disinteractive": ["enhance_checkbox", "performance_selection", "negative_prompt", "loras-4", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image" ],
+	"available_aspect_ratios_selection": "Flux",
+	"backend_params": {
+	    "task_method": "flux_aio"
+	    }
+    	},
+    "default_model": "flux-hyp8-Q5_K_M.gguf",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 3.5,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1280*720",
+    "default_overwrite_step": 20,
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+	"checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
+	"controlnet,flux.1-dev_canny_controlnet_v3.safetensors,1487623552,0,",
+	"controlnet,flux.1-dev_depth_controlnet_v3.safetensors,1487623552,0,",
+	"controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",
+	"controlnet,flux.1-dev_controlnet_inpainting.safetensors,4281803800,0,",
+	"ipadapter,flux.1-ip_adapter.safetensors,1057356424,0,",
+        "pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
+        "clip,EVA02_CLIP_L_336_psz14_s6B.pt,856461210,0,",
+        "clip_vision,clip-vit-large-patch14.bin,1710671599,0,",
+	"controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
+        "controlnet,parsing_bisenet.pth,53289463,0,",
+        "inpaint,MAT_Places512_G_fp16.safetensors,125280278,0,",
+        "insightface,models/antelopev2/1k3d68.onnx,143607619,0,",
+	"insightface,models/antelopev2/2d106det.onnx,5030888,0,",
+        "insightface,models/antelopev2/genderage.onnx,1322532,0,",
+        "insightface,models/antelopev2/glintr100.onnx,260665334,0,",
+        "insightface,models/antelopev2/scrfd_10g_bnkps.onnx,16923827,0,",
+	"upscale_models,4x-UltraSharp.pth,66961958,0,",
+        "clip,t5xxl_fp16.safetensors,9787841024,0,",
+        "clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
+        "clip,clip_l.safetensors,246144152,0,",
+	"vae,ae.safetensors,335304388,0,",
+	"loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,"
+    	]
+}
