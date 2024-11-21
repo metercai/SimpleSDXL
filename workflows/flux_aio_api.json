@@ -185,7 +185,7 @@
   },
   "257": {
     "inputs": {
-      "clip_name1": "t5xxl_fp16.safetensors",
+      "clip_name1": "clip_l.safetensors",
       "clip_name2": "clip_l.safetensors",
       "type": "flux"
     },
@@ -196,7 +196,7 @@
   },
   "258": {
     "inputs": {
-      "unet_name": "flux1-dev.safetensors",
+      "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
       "weight_dtype": "fp8_e4m3fn"
     },
     "class_type": "UNETLoader",
@@ -248,7 +248,7 @@
   },
   "262": {
     "inputs": {
-      "unet_name": "flux-hyp8-Q8_0.gguf"
+      "unet_name": "flux-hyp8-Q5_K_M.gguf"
     },
     "class_type": "UnetLoaderGGUF",
     "_meta": {
@@ -772,7 +772,7 @@
         0
       ],
       "mask": [
-        "1915",
+        "1995",
         0
       ]
     },
@@ -805,7 +805,7 @@
         0
       ],
       "model": [
-        "1927",
+        "1314",
         0
       ],
       "positive": [
@@ -2354,7 +2354,7 @@
         0
       ],
       "on_true": [
-        "328",
+        "1975",
         0
       ],
       "on_false": [
@@ -3870,7 +3870,7 @@
   },
   "1330": {
     "inputs": {
-      "value": 1
+      "value": 2
     },
     "class_type": "easy int",
     "_meta": {
@@ -4614,11 +4614,11 @@
       "height": 720,
       "swap": false,
       "batch_size": 1,
-      "positive": "green GUNDAM",
+      "positive": "",
       "negative": "",
-      "seed": 274759281585286,
-      "steps": 20,
-      "cfg": 8,
+      "seed": 450100155823335,
+      "steps": 12,
+      "cfg": 3.5,
       "denoise": 0
     },
     "class_type": "Co_Input_Zho",
@@ -4673,36 +4673,6 @@
     "class_type": "easy float",
     "_meta": {
       "title": "i2i_uov_multiple"
-    }
-  },
-  "1900": {
-    "inputs": {
-      "seed": 1010842596841417,
-      "inpaint_model": [
-        "1901",
-        0
-      ],
-      "image": [
-        "1911",
-        0
-      ],
-      "mask": [
-        "1894",
-        0
-      ]
-    },
-    "class_type": "INPAINT_InpaintWithModel",
-    "_meta": {
-      "title": "Inpaint (using Model)"
-    }
-  },
-  "1901": {
-    "inputs": {
-      "model_name": "MAT_Places512_G_fp16.safetensors"
-    },
-    "class_type": "INPAINT_LoadInpaintModel",
-    "_meta": {
-      "title": "Load Inpaint Model"
     }
   },
   "1906": {
@@ -4775,46 +4745,6 @@
       "title": "🔧 Image Resize"
     }
   },
-  "1915": {
-    "inputs": {
-      "amount": 16,
-      "device": "cpu",
-      "mask": [
-        "1917",
-        0
-      ]
-    },
-    "class_type": "MaskBlur+",
-    "_meta": {
-      "title": "🔧 Mask Blur"
-    }
-  },
-  "1917": {
-    "inputs": {
-      "expand": 10,
-      "tapered_corners": true,
-      "mask": [
-        "1894",
-        0
-      ]
-    },
-    "class_type": "GrowMask",
-    "_meta": {
-      "title": "GrowMask"
-    }
-  },
-  "1927": {
-    "inputs": {
-      "model": [
-        "1314",
-        0
-      ]
-    },
-    "class_type": "DifferentialDiffusion",
-    "_meta": {
-      "title": "Differential Diffusion"
-    }
-  },
   "1929": {
     "inputs": {
       "boolean": [
@@ -4822,11 +4752,11 @@
         0
       ],
       "on_true": [
-        "1900",
+        "1963",
         0
       ],
       "on_false": [
-        "1911",
+        "1992",
         0
       ]
     },
@@ -4943,6 +4873,453 @@
     "class_type": "ImageColorMatch+",
     "_meta": {
       "title": "🔧 Image Color Match"
+    }
+  },
+  "1952": {
+    "inputs": {
+      "seed": 318085733760521,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "1999",
+        0
+      ],
+      "positive": [
+        "2000",
+        0
+      ],
+      "negative": [
+        "2000",
+        1
+      ],
+      "latent_image": [
+        "2000",
+        3
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "1953": {
+    "inputs": {
+      "pixels": [
+        "1972",
+        0
+      ],
+      "vae": [
+        "1966",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "1956": {
+    "inputs": {
+      "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "loadsdxlmodel"
+    }
+  },
+  "1960": {
+    "inputs": {
+      "text": [
+        "1890",
+        4
+      ],
+      "clip": [
+        "1966",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "sdxlcliptext"
+    }
+  },
+  "1961": {
+    "inputs": {
+      "conditioning": [
+        "1960",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "1963": {
+    "inputs": {
+      "samples": [
+        "1952",
+        0
+      ],
+      "vae": [
+        "1966",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1966": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_juggXIByRundiffusion.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "loadsdxlcheckpoint"
+    }
+  },
+  "1971": {
+    "inputs": {
+      "amount": 20,
+      "device": "cpu",
+      "mask": [
+        "1894",
+        0
+      ]
+    },
+    "class_type": "MaskBlur+",
+    "_meta": {
+      "title": "🔧 Mask Blur"
+    }
+  },
+  "1972": {
+    "inputs": {
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "lanczos",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "1911",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "1973": {
+    "inputs": {
+      "upscale_model": [
+        "1974",
+        0
+      ],
+      "image": [
+        "328",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "1974": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "1975": {
+    "inputs": {
+      "boolean": [
+        "1933",
+        0
+      ],
+      "on_true": [
+        "1977",
+        0
+      ],
+      "on_false": [
+        "1993",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "1977": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "upscale_method": "lanczos",
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "1973",
+        0
+      ],
+      "get_image_size": [
+        "1911",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "1984": {
+    "inputs": {
+      "width": [
+        "1972",
+        1
+      ],
+      "height": [
+        "1972",
+        2
+      ],
+      "keep_proportions": true,
+      "mask": [
+        "1971",
+        0
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
+    }
+  },
+  "1989": {
+    "inputs": {
+      "expand": 30,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 50,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "1894",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "1991": {
+    "inputs": {
+      "width": [
+        "1972",
+        1
+      ],
+      "height": [
+        "1972",
+        2
+      ],
+      "keep_proportions": true,
+      "mask": [
+        "1989",
+        0
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
+    }
+  },
+  "1992": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "upscale_method": "lanczos",
+      "keep_proportion": true,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "1911",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "1993": {
+    "inputs": {
+      "width": 440,
+      "height": 512,
+      "upscale_method": "lanczos",
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "1973",
+        0
+      ],
+      "get_image_size": [
+        "1911",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "1994": {
+    "inputs": {
+      "width": [
+        "1992",
+        1
+      ],
+      "height": [
+        "1992",
+        2
+      ],
+      "keep_proportions": true,
+      "mask": [
+        "1894",
+        0
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
+    }
+  },
+  "1995": {
+    "inputs": {
+      "boolean": [
+        "1933",
+        0
+      ],
+      "on_true": [
+        "1991",
+        0
+      ],
+      "on_false": [
+        "1994",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "1996": {
+    "inputs": {
+      "mask": [
+        "1971",
+        0
+      ]
+    },
+    "class_type": "MaskPreview+",
+    "_meta": {
+      "title": "🔧 Mask Preview"
+    }
+  },
+  "1997": {
+    "inputs": {
+      "images": [
+        "1911",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "1998": {
+    "inputs": {
+      "head": "fooocus_inpaint_head.pth",
+      "patch": "inpaint_v26.fooocus.patch"
+    },
+    "class_type": "INPAINT_LoadFooocusInpaint",
+    "_meta": {
+      "title": "Load Fooocus Inpaint"
+    }
+  },
+  "1999": {
+    "inputs": {
+      "model": [
+        "2002",
+        0
+      ],
+      "patch": [
+        "1998",
+        0
+      ],
+      "latent": [
+        "2000",
+        2
+      ]
+    },
+    "class_type": "INPAINT_ApplyFooocusInpaint",
+    "_meta": {
+      "title": "Apply Fooocus Inpaint"
+    }
+  },
+  "2000": {
+    "inputs": {
+      "positive": [
+        "1961",
+        0
+      ],
+      "negative": [
+        "1961",
+        0
+      ],
+      "vae": [
+        "1966",
+        2
+      ],
+      "pixels": [
+        "1972",
+        0
+      ],
+      "mask": [
+        "1984",
+        0
+      ]
+    },
+    "class_type": "INPAINT_VAEEncodeInpaintConditioning",
+    "_meta": {
+      "title": "VAE Encode & Inpaint Conditioning"
+    }
+  },
+  "2002": {
+    "inputs": {
+      "lora_name": "sdxl_lightning_4step_lora.safetensors",
+      "strength_model": 1,
+      "model": [
+        "1956",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
     }
   }
 }

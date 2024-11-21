@@ -47,17 +47,17 @@
     "vae_downloads": {},
     "model_list": [
 	"checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
+	"checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
 	"controlnet,flux.1-dev_canny_controlnet_v3.safetensors,1487623552,0,",
 	"controlnet,flux.1-dev_depth_controlnet_v3.safetensors,1487623552,0,",
 	"controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",
-	"controlnet,flux.1-dev_controlnet_inpainting.safetensors,4281803800,0,",
 	"ipadapter,flux.1-ip_adapter.safetensors,1057356424,0,",
         "pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,EVA02_CLIP_L_336_psz14_s6B.pt,856461210,0,",
         "clip_vision,clip-vit-large-patch14.bin,1710671599,0,",
 	"controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
         "controlnet,parsing_bisenet.pth,53289463,0,",
-        "inpaint,MAT_Places512_G_fp16.safetensors,125280278,0,",
+        "inpaint,inpaint_v26.fooocus.patch,1323362033,0,",
         "insightface,models/antelopev2/1k3d68.onnx,143607619,0,",
 	"insightface,models/antelopev2/2d106det.onnx,5030888,0,",
         "insightface,models/antelopev2/genderage.onnx,1322532,0,",
@@ -68,6 +68,7 @@
         "clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
         "clip,clip_l.safetensors,246144152,0,",
 	"vae,ae.safetensors,335304388,0,",
-	"loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,"
+	"loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
+	"loras,sdxl_lightning_4step_lora.safetensors,393854592,0,"
     	]
 }
