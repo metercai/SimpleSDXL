@@ -146,14 +146,14 @@ def get_path_output() -> str:
     global config_dict
     path_output = 'outputs' if not args_manager.args.output_path else args_manager.args.output_path
     path_output = get_dir_or_set_default('path_outputs', path_output)
-    print(f'The path_output: {path_output}')
+    print(f'The path_output: {os.path.abspath(path_output)}')
     return path_output
 
 def get_path_models_root() -> str:
     global config_dict
     models_root = 'models' if not args_manager.args.models_root else args_manager.args.models_root
     path_models_root = get_dir_or_set_default('path_models_root', models_root)
-    print(f'The path_models_root: {path_models_root}')
+    print(f'The path_models_root: {os.path.abspath(path_models_root)}')
     return path_models_root
 
 def get_dir_or_set_default(key, default_value, as_array=False, make_directory=False):
@@ -228,11 +228,15 @@ paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}
 path_ipadapter = get_dir_or_set_default('path_ipadapter', f'{path_models_root}/ipadapter')
 path_pulid = get_dir_or_set_default('path_pulid', f'{path_models_root}/pulid')
 path_insightface = get_dir_or_set_default('path_insightface', f'{path_models_root}/insightface')
+path_users = os.path.join(os.path.dirname(path_outputs), 'users')
+print(f'The path_users: {os.path.abspath(path_users)}')
 
 model_cata_map = {
     'checkpoints': paths_checkpoints,
     'loras': paths_loras,
     'embeddings': [path_embeddings],
+    'diffusers': paths_diffusers,
+    'DIFFUSERS': paths_diffusers,
     'vae': [path_vae],
     'upscale_models': [path_upscale_models],
     'inpaint': paths_inpaint,
@@ -252,11 +256,18 @@ from enhanced.simpleai import init_modelsinfo
 modelsinfo = init_modelsinfo(path_models_root, model_cata_map)
 
 shared.path_outputs = path_outputs
-guest_path_outputs = os.path.join(path_outputs, shared.token.get_guest_did())
+shared.token.set_user_base_dir(path_users)
+guest_path_outputs = os.path.join(path_outputs, 'guest_user')
 if not os.path.exists(guest_path_outputs):
-    os.rename(path_outputs, shared.token.get_guest_did())
+    os.rename(path_outputs, 'guest_user')
     os.makedirs(path_outputs, exist_ok=True)
-    shutil.move(shared.token.get_guest_did(), os.path.join(path_outputs, shared.token.get_guest_did()))
+    shutil.move('guest_user', os.path.join(path_outputs, 'guest_user'))
+
+def get_user_path_outputs(user_did=None):
+    if not user_did or shared.token.is_guest(user_did):
+        return os.path.join(shared.path_outputs, 'guest_user')
+    else:
+        return os.path.join(shared.path_outputs, user_did)
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys

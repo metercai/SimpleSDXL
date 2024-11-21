@@ -110,16 +110,15 @@ class ComfyTask:
         self.steps = steps
 
 
-def get_comfy_task(task_name, task_method, default_params, input_images, options={}):
+def get_comfy_task(user_did, task_name, task_method, default_params, input_images, options={}):
     global defaul_method_names, default_method_list
 
+    comfy_params = ComfyTaskParams(default_params, user_did, config.path_outputs)
     if task_name == 'default':
         if task_method == default_method_names[1]:
-            comfy_params = ComfyTaskParams(default_params)
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
             return ComfyTask(default_method_list[task_method], comfy_params)
         else:
-            comfy_params = ComfyTaskParams(default_params)
             if input_images is None or not  input_images.exists('input_image'):
                 raise ValueError("input_images cannot be None for this method")
             if 'iclight_enable' in options and options["iclight_enable"]:
@@ -145,7 +144,6 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                 return ComfyTask('layerdiffuse_cond', comfy_params, input_images, 60)
 
     elif task_name == 'SD3x':
-        comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_sd3_medium_model()
         if 'base_model_dtype' in default_params:
@@ -153,7 +151,6 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         return ComfyTask(task_method, comfy_params)
     
     elif task_name in ['Kolors+', 'Kolors']:
-        comfy_params = ComfyTaskParams(default_params)
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G else 'fp16'
@@ -164,14 +161,13 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
         return ComfyTask(task_method, comfy_params)
     
     elif task_name in ['HyDiT+', 'HyDiT']:
-        comfy_params = ComfyTaskParams(default_params)
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_hydit_model()
         return ComfyTask(task_method, comfy_params)
     
     elif task_name == 'Flux':
-        comfy_params = ComfyTaskParams(default_params)
         base_model = default_params['base_model']
+        clip_model = '' if 'clip_model' not in default_params else default_params['clip_model']
         if 'aio' in task_method:
             total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
@@ -228,10 +224,9 @@ def get_comfy_task(task_name, task_method, default_params, input_images, options
                     if 'lora_1' in default_params:
                         task_method = 'flux_base2_gguf'
                     comfy_params.delete_params(['base_model_dtype'])
-        check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
+            check_download_flux_model(base_model, clip_model)
         return ComfyTask(task_method, comfy_params, input_images)
     else:  # SeamlessTiled
-        comfy_params = ComfyTaskParams(default_params)
         #check_download_base_model(default_params["base_model"])
         return ComfyTask(task_method, comfy_params)
 
