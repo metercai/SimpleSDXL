@@ -74,8 +74,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     base_model_list = modules.config.get_base_model_list(template_engine, task_method)
     engine_class_display = template_engine if template_engine!='Fooocus' else 'SDXL'
     if template_engine!='Fooocus' and shared.token.is_guest(state_params["user_did"]):
-        gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运>行,请先完成身份绑定. ')
-        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运行,请先完成身份绑定. ')
+        gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first.')
+        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first / 该预置包需要绑定身份后才能正常运行, 请先完成身份绑定.')
 
     results = [params_backend]
     results.append(get_layout_visible_inter('performance_selection', visible, inter))

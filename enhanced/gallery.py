@@ -26,16 +26,7 @@ output_images_regex = re.compile(r'\d{4}-\d{2}-\d{2}')
 def refresh_output_list(max_per_page, max_catalog, user_did=None):
     global image_types, images_list, images_list_keys, images_prompt, images_prompt_keys, images_ads
 
-    path_outputs = config.path_outputs
-    guest_did = shared.token.get_guest_did()
-    guest_path_outputs = os.path.join(path_outputs, guest_did)
-    if not os.path.exists(guest_path_outputs):
-        os.rename(path_outputs, guest_did)
-        os.makedirs(path_outputs, exist_ok=True)
-        shutil.move(guest_did, os.path.join(path_outputs, guest_did))
-    if not user_did:
-        user_did = guest_did
-    user_path_outputs = os.path.join(path_outputs, user_did)
+    user_path_outputs = config.get_user_path_outputs(user_did)
     if not os.path.exists(user_path_outputs):
         print(f'[Gallery] Makedirs for new user: {user_path_outputs}')
         os.makedirs(user_path_outputs, exist_ok=True)
@@ -141,7 +132,7 @@ def get_images_from_gallery_index(choice, max_per_page, user_did=None):
             images_gallery = images_list[user_did][choice][(page-1)*max_per_page:page*max_per_page]
         else:
             images_gallery = images_list[user_did][choice][nums-max_per_page:]
-    user_path_outputs = os.path.join(config.path_outputs, user_did)
+    user_path_outputs = config.get_user_path_outputs(user_did)
     images_gallery = [os.path.join(os.path.join(user_path_outputs, "20{}".format(choice)), f) for f in images_gallery]
     #print(f'[Gallery]Get images from index: choice={choice}, page={page}, images_gallery={images_gallery}')
     return images_gallery
@@ -162,7 +153,7 @@ def refresh_images_catalog(choice: str, passthrough = False, user_did=None):
         images_list_keys[user_did].append(choice)
         #print(f'[Gallery] Refresh_images_list: hit cache {len(images_list[user_did][choice])} image_items of {choice}.')
         return images_list[user_did][choice]
-    user_path_outputs = os.path.join(config.path_outputs, user_did)
+    user_path_outputs = config.get_user_path_outputs(user_did)
     images_list_new = sorted([f for f in util.get_files_from_folder(os.path.join(user_path_outputs, "20{}".format(choice)), image_types, None)], reverse=True)
     if len(images_list_new)==0:
         parse_html_log(choice, passthrough, user_did)
@@ -244,7 +235,7 @@ def parse_html_log(choice: str, passthrough = False, user_did=None):
         images_prompt_keys[user_did].append(choice)
         #print(f'[Gallery] Parse_html_log: hit cache {len(images_prompt[user_did][choice])} image_infos of {choice}.')
         return
-    user_path_outputs = os.path.join(config.path_outputs, user_did)
+    user_path_outputs = config.get_user_path_outputs(user_did)
     html_file = os.path.join(os.path.join(user_path_outputs, "20{}".format(choice)), 'log.html')
     if not os.path.exists(html_file):
         return

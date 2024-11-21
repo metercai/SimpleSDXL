@@ -20,7 +20,6 @@ INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
 MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
 CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
 CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
-
 if "pulid" not in folder_paths.folder_names_and_paths:
     current_paths = [MODELS_DIR]
 else:
@@ -75,7 +74,9 @@ def forward_orig(
     y: Tensor,
     guidance: Tensor = None,
     control=None,
+    transformer_options={},
 ) -> Tensor:
+    patches_replace = transformer_options.get("patches_replace", {})
     if img.ndim != 3 or txt.ndim != 3:
         raise ValueError("Input img and txt tensors must have 3 dimensions.")
 
@@ -87,15 +88,26 @@ def forward_orig(
             raise ValueError("Didn't get guidance strength for guidance distilled model.")
         vec = vec + self.guidance_in(timestep_embedding(guidance, 256).to(img.dtype))
 
-    vec = vec + self.vector_in(y)
+    vec = vec + self.vector_in(y[:,:self.params.vec_in_dim])
     txt = self.txt_in(txt)
 
     ids = torch.cat((txt_ids, img_ids), dim=1)
     pe = self.pe_embedder(ids)
 
     ca_idx = 0
+    blocks_replace = patches_replace.get("dit", {})
     for i, block in enumerate(self.double_blocks):
-        img, txt = block(img=img, txt=txt, vec=vec, pe=pe)
+        if ("double_block", i) in blocks_replace:
+            def block_wrap(args):
+                out = {}
+                out["img"], out["txt"] = block(img=args["img"], txt=args["txt"], vec=args["vec"], pe=args["pe"])
+                return out
+
+            out = blocks_replace[("double_block", i)]({"img": img, "txt": txt, "vec": vec, "pe": pe}, {"original_block": block_wrap})
+            txt = out["txt"]
+            img = out["img"]
+        else:
+            img, txt = block(img=img, txt=txt, vec=vec, pe=pe)
 
         if control is not None: # Controlnet
             control_i = control.get("input")
@@ -116,7 +128,16 @@ def forward_orig(
     img = torch.cat((txt, img), 1)
 
     for i, block in enumerate(self.single_blocks):
-        img = block(img, vec=vec, pe=pe)
+        if ("single_block", i) in blocks_replace:
+            def block_wrap(args):
+                out = {}
+                out["img"] = block(args["img"], vec=args["vec"], pe=args["pe"])
+                return out
+
+            out = blocks_replace[("single_block", i)]({"img": img, "vec": vec, "pe": pe}, {"original_block": block_wrap})
+            img = out["img"]
+        else:
+            img = block(img, vec=vec, pe=pe)
 
         if control is not None: # Controlnet
             control_o = control.get("output")
@@ -196,7 +217,6 @@ class PulidFluxInsightFaceLoader:
     CATEGORY = "pulid"
 
     def load_insightface(self, provider):
-        print(f'load_insightface, provider={provider}')
         model = FaceAnalysis(name="antelopev2", root=INSIGHTFACE_DIR, providers=[provider + 'ExecutionProvider',]) # alternative to buffalo_l
         model.prepare(ctx_id=0, det_size=(640, 640))
 
@@ -215,6 +235,7 @@ class PulidFluxEvaClipLoader:
 
     def load_eva_clip(self):
         from .eva_clip.factory import create_model_and_transforms
+
         model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
 
         model = model.visual
@@ -281,7 +302,7 @@ class ApplyPulidFlux:
             attn_mask = attn_mask.to(device, dtype=dtype)
 
         image = tensor_to_image(image)
-        print(f'FaceRestoreHelper: model_rootpath={CONTROLNET_DIR}')
+
         face_helper = FaceRestoreHelper(
             upscale_factor=1,
             face_size=512,

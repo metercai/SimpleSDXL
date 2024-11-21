@@ -366,7 +366,8 @@ def worker():
             default_params.update(params_backend)
             try:
                 user_cert = shared.token.get_register_cert(async_task.user_did)
-                comfy_task = get_comfy_task(async_task.task_name, async_task.task_method, 
+                print(f'user_did: {async_task.user_did}, user_cert: {user_cert}')
+                comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
                 if inpaint_worker.current_task is not None:
@@ -1573,7 +1574,7 @@ def worker():
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
                         async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
-                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[async_task.params_backend['i2i_model_type']]
+                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[async_task.params_backend['i2i_model_type']-1 if async_task.params_backend['i2i_model_type']>0 and async_task.params_backend['i2i_model_type']<4 else 2]
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:

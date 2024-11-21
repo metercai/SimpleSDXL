@@ -31,7 +31,7 @@ def reset_simpleai_args():
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
-    comfyd_images_path = os.path.join(shared.path_outputs, shared.token.get_guest_did())
+    comfyd_images_path = shared.path_outputs #os.path.join(shared.path_outputs, shared.token.get_guest_did())
     comfyd_output = os.path.join(comfyd_images_path, 'comfyd_outputs')
     comfyd_intput = os.path.join(comfyd_images_path, 'comfyd_inputs')
     if not os.path.exists(comfyd_output):
@@ -50,7 +50,10 @@ def reset_simpleai_args():
 def get_path_in_user_dir(user_did, filename, catalog=None):
     if user_did and filename:
         path = catalog if catalog else filename
+        if shared.token.is_guest(user_did):
+            user_did = 'guest_user'
         path_file = shared.token.get_path_in_user_dir(user_did, path)
+        #print(f'get_path_in_user_dir: {path_file}')
         if catalog: 
             path_file = os.path.join(path_file, filename)
         path_file = os.path.abspath(path_file)
@@ -133,7 +136,6 @@ def bind_identity(nick, tele, state):
 def verify_identity(nick, tele, state, vcode):
     if check_vcode(vcode):
         next_cmd = shared.token.check_user_verify_code(nick, tele, vcode)
-        print(f'next_cmd:{next_cmd}')
         if next_cmd == 'create':  # 验证成功, 创建新身份, 开始设置口令
             result = [note2_1, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         elif next_cmd == 'recall': # 验证并找回身份, 要求直接输入口令
