@@ -224,6 +224,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                     if 'lora_1' in default_params:
                         task_method = 'flux_base2_gguf'
                     comfy_params.delete_params(['base_model_dtype'])
+            print(f'in flux: clip_model={clip_model}')
             check_download_flux_model(base_model, clip_model)
         return ComfyTask(task_method, comfy_params, input_images)
     else:  # SeamlessTiled
