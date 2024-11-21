@@ -630,7 +630,7 @@ class PromptServer():
                     if len(json_data["client_id"])==29:
                         if "user_cert" not in json_data or not cert_verify_by_did(json_data["user_cert"], json_data["client_id"]):
                             if "user_cert" in json_data:
-                                print(f'user_did: {json_data["client_id"]}, user_cert: {json_data["user_cert"]}')
+                                pass #print(f'user_did: {json_data["client_id"]}, user_cert: {json_data["user_cert"]}')
                             return web.json_response({"error": "no cert or invalid cert", "node_errors": []}, status=400)
                 if valid[0]:
                     prompt_id = str(uuid.uuid4())

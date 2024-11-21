@@ -366,7 +366,6 @@ def worker():
             default_params.update(params_backend)
             try:
                 user_cert = shared.token.get_register_cert(async_task.user_did)
-                print(f'user_did: {async_task.user_did}, user_cert: {user_cert}')
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
@@ -1557,7 +1556,7 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_size = lambda x, p: x+16 if int(x*p) < 2048 else int(x*p)/math.ceil(int(x*p)/2048)+16
+                    tiled_size = lambda x, p: x+16 if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
                     tiled_steps = [10, 6, 4]
                     match = re.search(r'\((?:Fast )?([\d.]+)x\)', async_task.uov_method)
                     match_multiple = 1.0 if not match else float(match.group(1))
@@ -1576,7 +1575,7 @@ def worker():
                         async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[async_task.params_backend['i2i_model_type']-1 if async_task.params_backend['i2i_model_type']>0 and async_task.params_backend['i2i_model_type']<4 else 2]
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
-                        all_steps = steps * async_task.image_number
+                        all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
                         async_task.params_backend['i2i_uov_hires_fix_is_blurred'] = False
