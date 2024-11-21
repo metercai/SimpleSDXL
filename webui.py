@@ -222,9 +222,9 @@ with shared.gradio_root:
                     with gr.Tabs():
                         with gr.Tab(label='IdentityCard') as bind_id_tab:
                             with gr.Row():
-                                with gr.Column(scale=19, min_width=250):
+                                with gr.Column(scale=5, min_width=250):
                                     current_id_info = gr.Markdown(elem_classes='note_info')
-                                with gr.Column(scale=5, min_width=50):
+                                with gr.Column(scale=1, min_width=50):
                                     identity_export_btn = gr.Button(value='Export identity', size='sm', min_width=35, elem_classes='identity_export', visible=False)
                             with gr.Row():
                                 input_id_info = gr.Markdown(elem_classes='input_note_info', value='<b>Input Identity Info or Upload QrCode of Identity</b>')

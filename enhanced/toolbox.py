@@ -137,7 +137,7 @@ def delete_image(state_params):
     info = gallery.get_images_prompt(choice, selected, max_per_page, user_did=user_did)
     file_name = info["Filename"]
     output_index = choice.split('/')
-    user_path_outputs = os.path.join(config.path_outputs, user_did)
+    user_path_outputs = config.get_user_path_outputs(user_did)
     dir_path = os.path.join(user_path_outputs, "20{}".format(output_index[0]))
     
     log_path = os.path.join(dir_path, 'log.html')

@@ -20,7 +20,7 @@ def get_current_html_path(output_format=None, user_did=None):
 
     if not user_did:
         user_did = shared.token.get_guest_did()
-    user_path_outputs = os.path.join(modules.config.path_outputs, user_did)
+    user_path_outputs = modules.config.get_user_path_outputs(user_did)
     output_format = output_format if output_format else modules.config.default_output_format
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=user_path_outputs,
                                                                          extension=output_format)
@@ -31,7 +31,7 @@ def get_current_html_path(output_format=None, user_did=None):
 def log(img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None) -> str:
     if not user_did:
         user_did = shared.token.get_guest_did()
-    user_path_outputs = os.path.join(modules.config.path_outputs, user_did)
+    user_path_outputs = modules.config.get_user_path_outputs(user_did)
     
     path_outputs = modules.config.temp_path if args_manager.args.disable_image_log or not persist_image else user_path_outputs
     output_format = output_format if output_format else modules.config.default_output_format
