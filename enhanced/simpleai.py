@@ -254,7 +254,7 @@ def toggle_identity_dialog(state):
     state['identity_dialog'] = not flag
     is_guest = shared.token.is_guest(state["user_did"])
     result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '', None]
-    result = [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)]
+    result = [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)] + result
     return result
 
 
