@@ -226,17 +226,18 @@ with shared.gradio_root:
                                     current_id_info = gr.Markdown(elem_classes='note_info')
                                 with gr.Column(scale=1, min_width=50):
                                     identity_export_btn = gr.Button(value='Export identity', size='sm', min_width=35, elem_classes='identity_export', visible=False)
-                            with gr.Row():
-                                input_id_info = gr.Markdown(elem_classes='input_note_info', value='<b>Input Identity Info or Upload QrCode of Identity</b>')
-                            with gr.Row():
+                            with gr.Row(visible=True) as input_identity:
+                                with gr.Column(scale=4, min_width=126):
+                                    input_qr_title = gr.Markdown(elem_classes='input_note_info', value='<b>Upload QrCode to bind</b>')
+                                    identity_qr = grh.Image(label='Identity QrCode', source='upload', type='numpy', height=126, width=126, elem_classes='identity_qr')
                                 with gr.Column(scale=4, min_width=150):
+                                    input_id_title = gr.Markdown(elem_classes='input_note_info', value='<b>Input identity to bind</b>')
                                     identity_nick_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type nickname here.", min_width=50, elem_classes='identity_input2')
                                     identity_tele_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type telephone here.", min_width=50, elem_classes='identity_input2')
                                     identity_bind_button = gr.Button(value='Bind identity', min_width=40, visible=True)
-                                with gr.Column(scale=3, min_width=126):
-                                    identity_qr = grh.Image(label='Identity QrCode', source='upload', type='numpy', height=126, elem_classes='identity_qr')
-                            with gr.Row():
-                                identity_reset_button = gr.Button(value='Reset identity', min_width=150, visible=False)
+                            with gr.Row(visible=False) as input_id_display:
+                                input_id_info = gr.Markdown(elem_classes='input_note_info', value='input identity', min_width=200, visible=True)
+                                identity_change_button = gr.Button(value='Change identity', min_width=40, visible=True)
                             with gr.Row():
                                 identity_vcode_input = gr.Textbox(show_label=False, max_lines=1, container=False, visible=False, placeholder="Type Verification here.", min_width=70, elem_classes='identity_input')
                                 identity_verify_button = gr.Button(value='Verify identity', elem_classes='identity_button', visible=False)
@@ -248,7 +249,19 @@ with shared.gradio_root:
                                 identity_unbind_button = gr.Button(value='Unbind identity', min_width=35, elem_classes='identity_button', visible=False)
                     identity_note_info = gr.Markdown(elem_classes='note_info', value=simpleai.identity_note)
                 
-                identity_qr.upload(topbar.trigger_input_identity, inputs=identity_qr, outputs=[identity_nick_input, identity_tele_input], show_progress=False, queue=False)
+                    identity_input = [identity_nick_input, identity_tele_input, identity_qr]
+                    identity_input_info = [input_id_info, state_topbar]
+                    identity_crtl = [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
+                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input], outputs=identity_crtl + [input_id_info], show_progress=False)
+                    identity_change_button.click(simpleai.change_identity,  outputs=identity_crtl + identity_input, show_progress=False)
+                    identity_verify_button.click(simpleai.verify_identity, inputs=identity_input_info + [identity_vcode_input], outputs=identity_crtl, show_progress=False)
+                    identity_phrases_set_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'set'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info], show_progress=False)
+                    identity_export_btn.click(topbar.export_identity, inputs=state_topbar, outputs=system_params, show_progress=False) \
+                        .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
+                        .then(fn=lambda x: '' if 'user_qr' not in x else x.pop('user_qr'), inputs=state_topbar,  show_progress=False)
+
+                    identity_qr.upload(simpleai.trigger_input_identity, inputs=identity_qr, outputs=identity_crtl + [input_id_info], show_progress=False, queue=False)
+                
                 nav_bars = [bar_store_button] + bar_buttons
                 bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 preset_store_list.click(topbar.update_navbar_from_mystore, inputs=[preset_store_list, state_topbar], outputs=nav_bars + [system_params], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
@@ -1393,27 +1406,17 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
 
     
-    identity_input = [identity_nick_input, identity_tele_input, state_topbar]
-    identity_crtl = [identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_reset_button, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
-    identity_bind_button.click(simpleai.bind_identity, inputs=identity_input, outputs=identity_crtl, show_progress=False)
-    identity_reset_button.click(simpleai.reset_identity,  outputs=identity_crtl, show_progress=False)
-    identity_verify_button.click(simpleai.verify_identity, inputs=identity_input + [identity_vcode_input], outputs=identity_crtl, show_progress=False)
-    identity_phrases_set_button.click(lambda a, b, c, d: simpleai.set_phrases(a,b,c,d,'set'), inputs=identity_input + [identity_phrase_input], outputs=identity_crtl + [current_id_info], show_progress=False)
-    identity_export_btn.click(topbar.export_identity, inputs=state_topbar, outputs=system_params, show_progress=False) \
-            .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
-            .then(fn=lambda x: '' if 'user_qr' not in x else x.pop('user_qr'), inputs=state_topbar,  show_progress=False)
-
     after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
-    identity_phrases_confirm_button.click(lambda a, b, c, d: simpleai.set_phrases(a,b,c,d,'confirm'), inputs=identity_input + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + identity_input + [current_id_info, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_phrase_input, identity_unbind_button, identity_export_btn, identity_dialog, current_id_info], show_progress=False)
+    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn], show_progress=False)
 
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)

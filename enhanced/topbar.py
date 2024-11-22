@@ -563,7 +563,7 @@ def trigger_input_identity(img):
             user_did, nickname, telephone = '', '', ''
     else:
         user_did, nickname, telephone = '', '', ''
-    return [nickname, telephone]
+    return [gr.update(visible=False), gr.update(visible=True), f'{nickname}, {telephone}']
 
 def update_history_link(user_did):
     return gr.update(value='' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>')
