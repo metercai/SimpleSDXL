@@ -224,9 +224,7 @@ def confirm_identity(input_id_info, state, phrase):
 
 def unbind_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
-        inputs = input_id_info.split(',')
-        nick, tele = inputs[0].strip(), inputs[1].strip()
-        context = shared.token.unbind_and_return_guest(nick, tele, phrase)
+        context = shared.token.unbind_and_return_guest(state["user_did"], phrase)
         if shared.token.is_guest(context.get_did()):
             state["user_name"] = context.get_nickname()
             state["user_did"] = context.get_did()
