@@ -4,9 +4,12 @@ import shutil
 import re
 import gradio as gr
 import shared
+import cv2
+import modules.util as util
 from simpleai_base import simpleai_base, utils, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
+from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 from build_launcher import is_win32_standalone_build
 
 #utils.echo_off = False
@@ -114,52 +117,77 @@ theme_color = {
     "light": "blue",
     }
 
-current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>用户昵称: <span style="color: {theme_color[t]};">{x}</span><br>身份标识: <span style="color: {theme_color[t]};">{y}</span><br>系统标识: <span style="color: {theme_color[t]};">{z}</span>'
+current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <span style="color: {theme_color[t]};">' + f'{x}' + f'</span><br>身份标识: <span style="color: {theme_color[t]};">{y}</span><br>系统标识: <span style="color: {theme_color[t]};">{z}</span>'
 
 #[identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_reset_button, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_confirm_button, identity_phrases_set_button, identity_confirm_button, identity_unbind_button]
+# [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
+# [identity_nick_input, identity_tele_input, identity_qr]
 
-def bind_identity(nick, tele, state):
+def trigger_input_identity(img):
+    image = util.HWC3(img)
+    qr_code_detector = cv2.QRCodeDetector()
+    data, bbox, _ = qr_code_detector.detectAndDecode(image)
+    if bbox is not None:
+        try:
+            user_did, nickname, telephone = import_identity_qrcode(data)
+        except Exception as e:
+            print("qrcode parse error")
+            user_did, nickname, telephone = '', '', ''
+    else:
+        user_did, nickname, telephone = '', '', ''
+    return  bind_identity(nickname, telephone)
+
+
+def bind_identity(nick, tele):
     if check_input(nick, tele):
         where = shared.token.check_local_user_token(nick, tele)
         if where == 'local': # 本地密钥, 输入身份口令
-            result = [note1_2, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
+            result = [note1_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         elif where == 'remote': # 远程找回, 输入验证码
-            result = [note1_1, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
+            result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True)]*2 + [gr.update(visible=False)]*5
         elif where == 'immature': # 本地遗留密钥,重设身份口令
-            result = [note2_8, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
+            result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)]
         else:  # 过程出错, 重新输入绑定信息,再来
-            result = [note1_5, gr.update()] + [gr.update(interactive=True, visible=True)] + [gr.update(interactive=True, visible=True, value="")]*2 + [gr.update(interactive=True, visible=True)] + [gr.update(visible=False)]*8
+            result = [note1_5] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
     else: # 身份信息不合规, 重新输入
-        result = [note1_4, gr.update()] + [gr.update(interactive=True, visible=True)] + [gr.update(interactive=True, visible=True, value="")]*2 + [gr.update(interactive=True, visible=True)] + [gr.update(visible=False)]*8
-    return result
+        result = [note1_4] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
+    return result + [f'{nick}, {tele}']
 
-def verify_identity(nick, tele, state, vcode):
+def change_identity():
+    return [identity_note] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7 + ['', '', None]
+
+
+def verify_identity(input_id_info, state, vcode):
     if check_vcode(vcode):
+        inputs = input_id_info.split(',')
+        nick, tele = inputs[0].strip(), inputs[1].strip()
         next_cmd = shared.token.check_user_verify_code(nick, tele, vcode)
         if next_cmd == 'create':  # 验证成功, 创建新身份, 开始设置口令
-            result = [note2_1, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
+            result = [note2_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         elif next_cmd == 'recall': # 验证并找回身份, 要求直接输入口令
-            result = [note1_3, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
+            result = [note1_3] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         else:  # 验证失败, 重新输入
             if 'error:' in next_cmd:
                 count = next_cmd.split(':')[1]
                 note = note2_4 + f'还剩<span style="color: {theme_color[state["__theme"]]};">{count}</span>次机会。'
             else:
                 note = note2_4
-            result = [note, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
+            result = [note] + [gr.update(visible=False)] + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
     else: # 验证码格式错误, 重新输入
-        result = [note2_3, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*6
+        result = [note2_3] + [gr.update(visible=False)] + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
     return result
 
-def set_phrases(nick, tele, state, phrase, steps):
+def set_phrases(input_id_info, state, phrase, steps):
     if steps == 'set':
         if check_phrase(phrase):  # 第一次设置, 要求二次确认
             state["user_phrase"] = phrase
-            result = [note2_2, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2
+            result = [note2_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2
         else: # 口令格式不对, 重新设置
-            result = [note2_5, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
+            result = [note2_5] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
     else:
         if state["user_phrase"] == phrase:
+            inputs = input_id_info.split(',')
+            nick, tele = inputs[0].strip(), inputs[1].strip()
             context = shared.token.set_phrase_and_get_context(nick, tele, phrase)
             if not shared.token.is_guest(context.get_did()):
                 state["user_name"] = context.get_nickname()
@@ -167,33 +195,37 @@ def set_phrases(nick, tele, state, phrase, steps):
                 state["sys_did"] = context.get_sys_did()
                 state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
                 note = f'身份口令设置成功，完成身份绑定。请牢记身份口令: `{phrase}` ，解除绑定或再次绑定都需要，建议抄写到私人笔记，仅限自己可见。'
-                result = [note] + [gr.update(visible=False)]*8 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)]
+                result = [note] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
             else: # 设置身份口令失败, 重新设置
-                result = [note2_6, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
+                result = [note2_6] + [gr.update(visible=False)]  + [gr.update(visible=True)]*2 + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         else: # 口令两次不一致, 重新设置
-            result = [note2_7, gr.update()] + [gr.update(interactive=False)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')]+ [gr.update(visible=True)] + [gr.update(visible=False)]*3
+            result = [note2_7] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')]+ [gr.update(visible=True)] + [gr.update(visible=False)]*3
         state["user_phrase"] = ''
     id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
     return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
 
-def confirm_identity(nick, tele, state, phrase):
+def confirm_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
+        inputs = input_id_info.split(',')
+        nick, tele = inputs[0].strip(), inputs[1].strip()
         context = shared.token.get_user_context_with_phrase(nick, tele, phrase)
         if shared.token.is_guest(context.get_did()): # 口令不对, 绑定失败, 重新输入口令, 再次绑定
-            result = [note3_1, gr.update()] + [gr.update(interactive=True)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
+            result = [note3_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         else: # 绑定成功, 转解绑输入
             state["user_name"] = context.get_nickname()
             state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
-            result = [note3] + [gr.update(visible=False)]*8 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)]
+            result = [note3] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
     else: # 口令格式不对, 重新输入口令, 再次绑定
-        result = [note3_2, gr.update()] + [gr.update(interactive=True)]*4 + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
+        result = [note3_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
     id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
     return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
 
-def unbind_identity(nick, tele, state, phrase):
+def unbind_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
+        inputs = input_id_info.split(',')
+        nick, tele = inputs[0].strip(), inputs[1].strip()
         context = shared.token.unbind_and_return_guest(nick, tele, phrase)
         if shared.token.is_guest(context.get_did()):
             state["user_name"] = context.get_nickname()
@@ -201,19 +233,18 @@ def unbind_identity(nick, tele, state, phrase):
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
             state["preset_store"] = False
-            result = [note4, gr.update(visible=True)] + [gr.update(interactive=True, visible=True)] + [gr.update(interactive=True, visible=True, value="")]*2 + [gr.update(interactive=True, visible=True)] + [gr.update(visible=False)]*8
+            result = [note4, gr.update(visible=True)] + [gr.update(visible=False)]*8 + ['', '', None]
         else: # 口令不对, 解绑失败, 重新输入口令, 再次解绑
-            result = [note4_1] + [gr.update(visible=False)]*8 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)]
+            result = [note4_1] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)] + ['', '', None]
     else: # 口令格式不对, 重新输入口令, 再次解绑
-        result = [note3_2] + [gr.update(visible=False)]*8 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)]
+        result = [note3_2] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)] + ['', '', None]
     id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
     return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
 
-def reset_identity():
-    return [identity_note, gr.update(visible=True)] + [gr.update(interactive=True, visible=True)] + [gr.update(interactive=True, visible=True, value="")]*2 + [gr.update(interactive=True, visible=True)] + [gr.update(visible=False)]*9
 
-
-# identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_phrase_input, identity_unbind_button, identity_export_btn, identity_dialog, current_id_info
+# [identity_dialog, current_id_info, identity_export_btn]
+# [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
+# [identity_nick_input, identity_tele_input, identity_qr]
 def toggle_identity_dialog(state):
     if 'identity_dialog' in state:
         flag = state['identity_dialog']
@@ -222,8 +253,9 @@ def toggle_identity_dialog(state):
         flag = False
     state['identity_dialog'] = not flag
     is_guest = shared.token.is_guest(state["user_did"])
-    result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(interactive=True, visible=is_guest)]*4 + [gr.update(visible=not is_guest)]*3
-    return result + [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])]
+    result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '', None]
+    result = [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)]
+    return result
 
 
 is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
