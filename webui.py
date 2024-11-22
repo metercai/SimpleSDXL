@@ -1416,7 +1416,7 @@ with shared.gradio_root:
     identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + identity_input + [current_id_info, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn], show_progress=False)
+    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
 
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
