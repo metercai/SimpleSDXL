@@ -55,6 +55,8 @@ def get_path_in_user_dir(user_did, filename, catalog=None):
         path = catalog if catalog else filename
         if shared.token.is_guest(user_did):
             user_did = 'guest_user'
+        elif shared.token.is_admin(user_did):
+            user_did = 'admin_user'
         path_file = shared.token.get_path_in_user_dir(user_did, path)
         #print(f'get_path_in_user_dir: {path_file}')
         if catalog: 
@@ -82,8 +84,8 @@ note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份
 note1_1 = '本地未匹配到数字身份，由云端根节点参与验证，请注意查收手机短信的身份验证码，用其找回加密副本或创建新身份。'
 note1_2 = f'已匹配到本地的数字身份，{note1_0}'
 note1_3 = f'已匹配到云端加密副本, {note1_0}'
-note1_4 = '身份信息格式检验不通过。昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
-note1_5 = '与云端根节点连接异常，无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
+note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
+note1_5 = '无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
 
 note2_0 = '最少8位含大写、小写字母及数字的组合，每种字符至少1个。\n**<span style="color: red;">特别提醒</span>**<span style="color: red;">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
 note2_1 = f'身份已验证，请按提示预设个人身份口令，{note2_0}'
@@ -91,7 +93,7 @@ note2_2 = f'身份口令遗失无法找回，请重复输入预设的身份口�
 note2_3 = '身份验码证格式不对，请正确输入短信里的身份验证码，重新进行"身份验证"。'
 note2_4 = '身份验码证未通过，请正确输入短信里的身份验证码，重新进行"身份验证"。'
 note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令，{note2_0}'
-note2_6 = f'身份口令设置失败，请重新预设个人的身份口令，{note2_0}'
+note2_6 = f'身份口令设置异常，请重新输入身份信息进行身份绑定。'
 note2_7 = f'身份口令与上次不一致，请重新预设个人身份口令，{note2_0}'
 note2_8 = f'已匹配到本地的数字身份，请按提示预设个人身份口令，{note2_0}'
 
@@ -126,15 +128,21 @@ current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <
 def trigger_input_identity(img):
     image = util.HWC3(img)
     qr_code_detector = cv2.QRCodeDetector()
-    data, bbox, _ = qr_code_detector.detectAndDecode(image)
-    if bbox is not None:
-        try:
-            user_did, nickname, telephone = import_identity_qrcode(data)
-        except Exception as e:
-            print("qrcode parse error")
+    try:
+        data, bbox, data_bytes = qr_code_detector.detectAndDecode(image)
+        if bbox is not None:
+            try:
+                import base64
+                print(f'data:len={len(data)},{data}, data_bytes:len={len(data_bytes)},{data_bytes}')
+                user_did, nickname, telephone = import_identity_qrcode(data)
+            except Exception as e:
+                print("qrcode parse error")
+                user_did, nickname, telephone = '', '', ''
+        else:
             user_did, nickname, telephone = '', '', ''
-    else:
-        user_did, nickname, telephone = '', '', ''
+    except UnicodeDecodeError as e:
+        print(f'bbox:{bbox}, data_bytes:{data_bytes}')
+
     return  bind_identity(nickname, telephone)
 
 
@@ -146,7 +154,7 @@ def bind_identity(nick, tele):
         elif where == 'remote': # 远程找回, 输入验证码
             result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True)]*2 + [gr.update(visible=False)]*5
         elif where == 'immature': # 本地遗留密钥,重设身份口令
-            result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)]
+            result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         else:  # 过程出错, 重新输入绑定信息,再来
             result = [note1_5] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
     else: # 身份信息不合规, 重新输入
@@ -197,7 +205,7 @@ def set_phrases(input_id_info, state, phrase, steps):
                 note = f'身份口令设置成功，完成身份绑定。请牢记身份口令: `{phrase}` ，解除绑定或再次绑定都需要，建议抄写到私人笔记，仅限自己可见。'
                 result = [note] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
             else: # 设置身份口令失败, 重新设置
-                result = [note2_6] + [gr.update(visible=False)]  + [gr.update(visible=True)]*2 + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
+                result = [note2_6] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
         else: # 口令两次不一致, 重新设置
             result = [note2_7] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')]+ [gr.update(visible=True)] + [gr.update(visible=False)]*3
         state["user_phrase"] = ''
