@@ -1500,15 +1500,12 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:
                     async_task.params_backend['base_model_gguf'] = async_task.base_model_name
-                    if 'hyp8-Q8' in async_task.base_model_name or 'hyp8-Q6' in async_task.base_model_name:
+                    if 'hyp8' in async_task.base_model_name.lower() and ( 'q8' in async_task.base_model_name.lower() or 'q6' in async_task.base_model_name.lower()):
                         async_task.params_backend['i2i_model_type'] = 2 # hyp8
-                        async_task.params_backend['clip_model'] = 't5xxl_fp16.safetensors'
                     else:
                         async_task.params_backend['i2i_model_type'] = 3 # hyp8 low
-                        async_task.params_backend['clip_model'] = 't5xxl_fp8_e4m3fn.safetensors'
                 else:
                     async_task.params_backend['i2i_model_type'] = 1 # dev full-size
-                    async_task.params_backend['clip_model'] = 't5xxl_fp16.safetensors'
                     async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
                 if async_task.canny_low_threshold != default_params['canny_low_threshold']:
                     async_task.params_backend['i2i_canny_low'] = async_task.canny_low_threshold
