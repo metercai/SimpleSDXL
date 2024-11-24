@@ -266,6 +266,8 @@ if not os.path.exists(guest_path_outputs):
 def get_user_path_outputs(user_did=None):
     if not user_did or shared.token.is_guest(user_did):
         return os.path.join(shared.path_outputs, 'guest_user')
+    elif shared.token.is_admin(user_did):
+        return os.path.join(shared.path_outputs, 'admin_user')
     else:
         return os.path.join(shared.path_outputs, user_did)
 

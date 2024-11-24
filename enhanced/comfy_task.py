@@ -173,6 +173,9 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
             if 'base_model_gguf' in default_params:
                 comfy_params.delete_params(['base_model'])
+            if 'clip_model' not in default_params or default_params['clip_model'] == 'auto':
+                clip_model = 't5xxl_fp16.safetensors' if sysinfo["gpu_memory"]>VRAM8G1 and sysinfo["ram_total"]>RAM32G1 and modelsinfo.exists_model("clip", 't5xxl_fp16.safetensors') else 't5xxl_fp8_e4m3fn.safetensors'
+                comfy_params.update_params({"clip_model": clip_model})
             return ComfyTask(task_method, comfy_params, input_images, total_steps)
         else:
             if base_model == 'auto':
