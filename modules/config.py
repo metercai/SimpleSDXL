@@ -228,6 +228,7 @@ paths_diffusers = get_dir_or_set_default('path_diffusers', [f'{path_models_root}
 path_ipadapter = get_dir_or_set_default('path_ipadapter', f'{path_models_root}/ipadapter')
 path_pulid = get_dir_or_set_default('path_pulid', f'{path_models_root}/pulid')
 path_insightface = get_dir_or_set_default('path_insightface', f'{path_models_root}/insightface')
+path_style_models = get_dir_or_set_default('path_style_models', f'{path_models_root}/style_models')
 path_users = os.path.join(os.path.dirname(path_outputs), 'users')
 print(f'The path_users: {os.path.abspath(path_users)}')
 
@@ -249,7 +250,8 @@ model_cata_map = {
     'layer_model': [path_layer_model],
     'pulid': [path_pulid],
     'ipadapter': [path_ipadapter],
-    'insightface': [path_insightface]
+    'insightface': [path_insightface],
+    'style_models': [path_style_models]
     }
 
 from enhanced.simpleai import init_modelsinfo
@@ -1036,6 +1038,8 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
 def get_base_model_list(engine='Fooocus', task_method=None):
     global modelsinfo
     file_filter = modules.flags.model_file_filter.get(engine, [])
+    if engine in ['Flux'] and 'aio' in task_method:
+        file_filter = [file_filter + ['!nf4']]
     base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
     if engine in ['Fooocus', 'Comfy']:
         base_model_list = modelsinfo.get_model_names('checkpoints', modules.flags.model_file_filter['Fooocus'], reverse=True)

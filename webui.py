@@ -236,7 +236,7 @@ with shared.gradio_root:
                                     identity_tele_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type telephone here.", min_width=50, elem_classes='identity_input2')
                                     identity_bind_button = gr.Button(value='Bind identity', min_width=40, visible=True)
                             with gr.Row(visible=False) as input_id_display:
-                                input_id_info = gr.Markdown(elem_classes='input_note_info', value='input identity', min_width=200, visible=True)
+                                input_id_info = gr.Markdown(elem_classes='input_id_info', value='input identity', min_width=200, visible=True)
                                 identity_change_button = gr.Button(value='Change identity', min_width=40, visible=True)
                             with gr.Row():
                                 identity_vcode_input = gr.Textbox(show_label=False, max_lines=1, container=False, visible=False, placeholder="Type Verification here.", min_width=70, elem_classes='identity_input')
