@@ -20,6 +20,7 @@ INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
 MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
 CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
 CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
+
 if "pulid" not in folder_paths.folder_names_and_paths:
     current_paths = [MODELS_DIR]
 else:
@@ -234,6 +235,7 @@ class PulidFluxEvaClipLoader:
     CATEGORY = "pulid"
 
     def load_eva_clip(self):
+        #global CLIP_DIR
         from .eva_clip.factory import create_model_and_transforms
 
         model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
@@ -265,20 +267,22 @@ class ApplyPulidFlux:
             },
             "optional": {
                 "attn_mask": ("MASK", ),
+                "source_face_selection": (["largest_face","center_face"], {"default": "center_face"}),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID"
             },
         }
 
-    RETURN_TYPES = ("MODEL",)
+    RETURN_TYPES = ("MODEL", "IMAGE")
+    RETURN_NAMES = ("model", "face_used")
     FUNCTION = "apply_pulid_flux"
     CATEGORY = "pulid"
 
     def __init__(self):
         self.pulid_data_dict = None
 
-    def apply_pulid_flux(self, model, pulid_flux, eva_clip, face_analysis, image, weight, start_at, end_at, attn_mask=None, unique_id=None):
+    def apply_pulid_flux(self, model, pulid_flux, eva_clip, face_analysis, image, weight, start_at, end_at, attn_mask=None, unique_id=None, source_face_selection="center_face"):
         device = comfy.model_management.get_torch_device()
         # Why should I care what args say, when the unet model has a different dtype?!
         # Am I missing something?!
@@ -318,6 +322,7 @@ class ApplyPulidFlux:
 
         bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
         cond = []
+        align_faces = []
 
         # Analyse multiple images at multiple sizes and combine largest area embeddings
         for i in range(image.shape[0]):
@@ -342,7 +347,10 @@ class ApplyPulidFlux:
             # get eva_clip embeddings
             face_helper.clean_all()
             face_helper.read_image(image[i])
-            face_helper.get_face_landmarks_5(only_center_face=True)
+            if source_face_selection == "largest_face":
+                face_helper.get_face_landmarks_5(only_keep_largest=True)
+            else:
+                face_helper.get_face_landmarks_5(only_center_face=True)
             face_helper.align_warp_face()
 
             if len(face_helper.cropped_faces) == 0:
@@ -378,6 +386,7 @@ class ApplyPulidFlux:
 
             # Pulid_encoder
             cond.append(pulid_flux.get_embeds(id_cond, id_vit_hidden))
+            align_faces.append(align_face.permute(0, 2, 3, 1))
 
         if not cond:
             # No faces detected, return the original model
@@ -419,8 +428,9 @@ class ApplyPulidFlux:
 
         # Keep a reference for destructor (if node is deleted the data will be deleted as well)
         self.pulid_data_dict = {'data': flux_model.pulid_data, 'unique_id': unique_id}
-
-        return (model,)
+        
+        align_faces = torch.cat(align_faces)
+        return (model, align_faces)
 
     def __del__(self):
         # Destroy the data for this node

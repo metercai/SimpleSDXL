@@ -78,12 +78,12 @@ def start_fast_comfyd(fast):
     else:
         comfyd.start(args_patch=[[]], force=True)
 
-identity_note = '使用绑定手机号的可信数字身份，既可用固定密钥存储和管理个人配置，避免数据丢失，又可参与创意分享等互助服务。'
-identity_note_1 = '当前浏览器已绑定身份访问。若要更换身份或在别处绑定，需先"解除绑定"。同一时刻同一身份只能在一处绑定。若需要完全离线使用身份，可导出身份二维码后妥善保存，在身份信息输入界面按提示导入。'
+identity_note = '使用绑定手机号的可信数字身份，可存储和管理个人配置数据，可参与创意分享等互助服务。默认绑定的第一个身份拥有超级管理权限。'
+identity_note_1 = '身份已绑定当前浏览器和应用节点。若要更换身份或在别处绑定，需先"解除绑定"。同身份同一时刻只能绑定一处。导出身份二维码可适用离线和漫游场景，请导出后妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
-note1_1 = '本地未匹配到数字身份，由云端根节点参与验证，请注意查收手机短信的身份验证码，用其找回加密副本或创建新身份。'
+note1_1 = '本地未匹配到数字身份，云端根节点将参与验证，请注意查收手机短信的身份验证码，用其找回加密副本或创建新身份。'
 note1_2 = f'已匹配到本地的数字身份，{note1_0}'
-note1_3 = f'已匹配到云端加密副本, {note1_0}'
+note1_3 = f'已匹配到身份在云端的加密副本, {note1_0}'
 note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
 note1_5 = '无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
 
@@ -101,17 +101,8 @@ note3 = f'绑定成功! {identity_note_1}'
 note3_1 = '身份绑定不成功，请重新输入个人身份口令，再次确认身份。'
 note3_2 = '输入的身份口令格式不对，最少8位的大写、小写字母及数字的组合，每种字符至少1个。请重新输入个人身份口令。'
 
-note4 = '身份已成功解绑，当前浏览器和应用服务回退到游客模式。'
+note4 = '身份已成功解绑，当前浏览器和应用节点的服务回退到游客模式。'
 note4_1 = '身份解绑不成功，请重新输入个人身份口令，再次确认身份。'
-
-identity_help = '''
-  我们的身份系统采用独创的分布式数字身份系统，其即具有安全性和隐私保护特性，也具有统一可流动性:
-  **安全性**
-  **隐私保护**
-  **可用性**
-  **一致性**
-'''
-
 
 
 theme_color = {
@@ -119,7 +110,9 @@ theme_color = {
     "light": "blue",
     }
 
-current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <span style="color: {theme_color[t]};">' + f'{x}' + f'</span><br>身份标识: <span style="color: {theme_color[t]};">{y}</span><br>系统标识: <span style="color: {theme_color[t]};">{z}</span>'
+id_info_css = lambda x: f'style="color: {theme_color[x]};"'
+#lambda x: f'style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px; color: {theme_color[x]};"'
+current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>系统标识: <span {id_info_css(t)}>{z}</span>'
 
 #[identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_reset_button, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_confirm_button, identity_phrases_set_button, identity_confirm_button, identity_unbind_button]
 # [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
@@ -133,7 +126,6 @@ def trigger_input_identity(img):
         if bbox is not None:
             try:
                 import base64
-                print(f'data:len={len(data)},{data}, data_bytes:len={len(data_bytes)},{data_bytes}')
                 user_did, nickname, telephone = import_identity_qrcode(data)
             except Exception as e:
                 print("qrcode parse error")

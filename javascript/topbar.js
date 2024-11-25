@@ -292,6 +292,7 @@ function refresh_topbar_status_js(system_params) {
             let item_name = nav_name_list[i];
             let nav_item = gradioApp().getElementById(item_id);
             if (nav_item!=null) {
+		nav_item.setAttribute('data-original-text', item_name);
                 if (item_name != preset) {
                     if (theme == "light") {
                         nav_item.style.color = 'var(--neutral-400)';

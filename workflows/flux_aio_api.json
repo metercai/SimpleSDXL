@@ -59,43 +59,6 @@
       "title": "SaveImageWebsocket"
     }
   },
-  "128": {
-    "inputs": {
-      "strength": [
-        "1079",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1082",
-        0
-      ],
-      "positive": [
-        "5",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "133",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "48",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
   "131": {
     "inputs": {
       "width": [
@@ -114,52 +77,6 @@
     "class_type": "EmptyLatentImage",
     "_meta": {
       "title": "Empty Latent Image"
-    }
-  },
-  "133": {
-    "inputs": {
-      "control_net_name": "flux.1-dev_canny_controlnet_v3.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "136": {
-    "inputs": {
-      "strength": [
-        "1079",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1082",
-        0
-      ],
-      "positive": [
-        "5",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "1873",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "1943",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
     }
   },
   "140": {
@@ -555,13 +472,9 @@
   },
   "307": {
     "inputs": {
-      "value": "a*b",
+      "value": "a*2",
       "a": [
         "313",
-        0
-      ],
-      "b": [
-        "1899",
         0
       ]
     },
@@ -572,14 +485,10 @@
   },
   "308": {
     "inputs": {
-      "value": "a*b",
+      "value": "a*2",
       "a": [
         "313",
         1
-      ],
-      "b": [
-        "1899",
-        0
       ]
     },
     "class_type": "SimpleMath+",
@@ -749,38 +658,6 @@
       "title": "VAE Decode"
     }
   },
-  "330": {
-    "inputs": {
-      "pixels": [
-        "1929",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "331": {
-    "inputs": {
-      "samples": [
-        "330",
-        0
-      ],
-      "mask": [
-        "1995",
-        0
-      ]
-    },
-    "class_type": "SetLatentNoiseMask",
-    "_meta": {
-      "title": "Set Latent Noise Mask"
-    }
-  },
   "332": {
     "inputs": {
       "seed": [
@@ -805,20 +682,20 @@
         0
       ],
       "model": [
-        "1314",
+        "2096",
         0
       ],
       "positive": [
-        "1315",
+        "2008",
         0
       ],
       "negative": [
-        "140",
-        0
+        "2008",
+        1
       ],
       "latent_image": [
-        "331",
-        0
+        "2008",
+        2
       ]
     },
     "class_type": "KSampler",
@@ -850,11 +727,11 @@
         0
       ],
       "model": [
-        "1211",
+        "2037",
         0
       ],
       "positive": [
-        "653",
+        "2277",
         0
       ],
       "negative": [
@@ -887,110 +764,6 @@
       "title": "VAE Decode"
     }
   },
-  "439": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "440",
-        0
-      ],
-      "b": [
-        "443",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "440": {
-    "inputs": {
-      "value": [
-        "684",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "443": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "444": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "440",
-        0
-      ],
-      "b": [
-        "538",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "446": {
-    "inputs": {
-      "boolean": [
-        "439",
-        0
-      ],
-      "on_true": [
-        "5",
-        0
-      ],
-      "on_false": [
-        "128",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "447": {
-    "inputs": {
-      "boolean": [
-        "444",
-        0
-      ],
-      "on_true": [
-        "136",
-        0
-      ],
-      "on_false": [
-        "446",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "538": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "542": {
     "inputs": {
       "low_threshold": [
@@ -1013,92 +786,6 @@
     "class_type": "CannyEdgePreprocessor",
     "_meta": {
       "title": "Canny Edge"
-    }
-  },
-  "550": {
-    "inputs": {
-      "strength": [
-        "1075",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1083",
-        0
-      ],
-      "positive": [
-        "447",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "133",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "551": {
-    "inputs": {
-      "strength": [
-        "1075",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1083",
-        0
-      ],
-      "positive": [
-        "447",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "1873",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "1946",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "558": {
-    "inputs": {
-      "value": [
-        "1242",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
     }
   },
   "567": {
@@ -1125,92 +812,6 @@
       "title": "Canny Edge"
     }
   },
-  "575": {
-    "inputs": {
-      "strength": [
-        "1080",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1084",
-        0
-      ],
-      "positive": [
-        "641",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "133",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "567",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "576": {
-    "inputs": {
-      "strength": [
-        "1080",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1084",
-        0
-      ],
-      "positive": [
-        "641",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "1873",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "1947",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "583": {
-    "inputs": {
-      "value": [
-        "1296",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "592": {
     "inputs": {
       "low_threshold": [
@@ -1233,314 +834,6 @@
     "class_type": "CannyEdgePreprocessor",
     "_meta": {
       "title": "Canny Edge"
-    }
-  },
-  "600": {
-    "inputs": {
-      "strength": [
-        "1081",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1085",
-        0
-      ],
-      "positive": [
-        "647",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "133",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "592",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "601": {
-    "inputs": {
-      "strength": [
-        "1081",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1085",
-        0
-      ],
-      "positive": [
-        "647",
-        0
-      ],
-      "negative": [
-        "140",
-        0
-      ],
-      "control_net": [
-        "1873",
-        0
-      ],
-      "vae": [
-        "256",
-        0
-      ],
-      "image": [
-        "1948",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
-    }
-  },
-  "608": {
-    "inputs": {
-      "value": [
-        "1307",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "637": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "558",
-        0
-      ],
-      "b": [
-        "443",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "639": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "558",
-        0
-      ],
-      "b": [
-        "538",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "640": {
-    "inputs": {
-      "boolean": [
-        "637",
-        0
-      ],
-      "on_true": [
-        "447",
-        0
-      ],
-      "on_false": [
-        "550",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "641": {
-    "inputs": {
-      "boolean": [
-        "639",
-        0
-      ],
-      "on_true": [
-        "551",
-        0
-      ],
-      "on_false": [
-        "640",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "643": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "583",
-        0
-      ],
-      "b": [
-        "443",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "645": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "583",
-        0
-      ],
-      "b": [
-        "538",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "646": {
-    "inputs": {
-      "boolean": [
-        "643",
-        0
-      ],
-      "on_true": [
-        "641",
-        0
-      ],
-      "on_false": [
-        "575",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "647": {
-    "inputs": {
-      "boolean": [
-        "645",
-        0
-      ],
-      "on_true": [
-        "576",
-        0
-      ],
-      "on_false": [
-        "646",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "649": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "608",
-        0
-      ],
-      "b": [
-        "443",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "651": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "608",
-        0
-      ],
-      "b": [
-        "538",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "652": {
-    "inputs": {
-      "boolean": [
-        "649",
-        0
-      ],
-      "on_true": [
-        "647",
-        0
-      ],
-      "on_false": [
-        "600",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "653": {
-    "inputs": {
-      "boolean": [
-        "651",
-        0
-      ],
-      "on_true": [
-        "601",
-        0
-      ],
-      "on_false": [
-        "652",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "661": {
@@ -1846,11 +1139,11 @@
         0
       ],
       "on_true": [
-        "1211",
+        "2037",
         0
       ],
       "on_false": [
-        "261",
+        "2092",
         0
       ]
     },
@@ -2354,7 +1647,7 @@
         0
       ],
       "on_true": [
-        "1975",
+        "1977",
         0
       ],
       "on_false": [
@@ -2474,43 +1767,6 @@
       "title": "i2i_ip_fn4_s"
     }
   },
-  "1090": {
-    "inputs": {
-      "ipadatper": "flux.1-ip_adapter.safetensors",
-      "clip_vision": "clip-vit-large-patch14.bin",
-      "provider": "GPU"
-    },
-    "class_type": "LoadFluxIPAdapter",
-    "_meta": {
-      "title": "Load Flux IPAdatpter"
-    }
-  },
-  "1091": {
-    "inputs": {
-      "begin_strength": [
-        "1079",
-        0
-      ],
-      "end_strength": 0.5,
-      "smothing_type": "Linear",
-      "model": [
-        "1755",
-        0
-      ],
-      "ip_adapter_flux": [
-        "1090",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "ApplyAdvancedFluxIPAdapter",
-    "_meta": {
-      "title": "Apply Advanced Flux IPAdapter"
-    }
-  },
   "1092": {
     "inputs": {
       "boolean": [
@@ -2518,11 +1774,11 @@
         0
       ],
       "on_true": [
-        "1091",
+        "2117",
         0
       ],
       "on_false": [
-        "1755",
+        "5",
         0
       ]
     },
@@ -2561,7 +1817,7 @@
         0
       ],
       "model": [
-        "261",
+        "2092",
         0
       ],
       "pulid_flux": [
@@ -2674,32 +1930,6 @@
       "title": "Int"
     }
   },
-  "1159": {
-    "inputs": {
-      "begin_strength": [
-        "1075",
-        0
-      ],
-      "end_strength": 0.5,
-      "smothing_type": "Linear",
-      "model": [
-        "1092",
-        0
-      ],
-      "ip_adapter_flux": [
-        "1090",
-        0
-      ],
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "ApplyAdvancedFluxIPAdapter",
-    "_meta": {
-      "title": "Apply Advanced Flux IPAdapter"
-    }
-  },
   "1160": {
     "inputs": {
       "boolean": [
@@ -2707,7 +1937,7 @@
         0
       ],
       "on_true": [
-        "1159",
+        "2118",
         0
       ],
       "on_false": [
@@ -2803,32 +2033,6 @@
       "title": "Compare"
     }
   },
-  "1172": {
-    "inputs": {
-      "begin_strength": [
-        "1080",
-        0
-      ],
-      "end_strength": 0.5,
-      "smothing_type": "Linear",
-      "model": [
-        "1160",
-        0
-      ],
-      "ip_adapter_flux": [
-        "1090",
-        0
-      ],
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "ApplyAdvancedFluxIPAdapter",
-    "_meta": {
-      "title": "Apply Advanced Flux IPAdapter"
-    }
-  },
   "1173": {
     "inputs": {
       "boolean": [
@@ -2836,7 +2040,7 @@
         0
       ],
       "on_true": [
-        "1172",
+        "2119",
         0
       ],
       "on_false": [
@@ -2949,32 +2153,6 @@
       "title": "Compare"
     }
   },
-  "1210": {
-    "inputs": {
-      "begin_strength": [
-        "1081",
-        0
-      ],
-      "end_strength": 0.5,
-      "smothing_type": "Linear",
-      "model": [
-        "1173",
-        0
-      ],
-      "ip_adapter_flux": [
-        "1090",
-        0
-      ],
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "ApplyAdvancedFluxIPAdapter",
-    "_meta": {
-      "title": "Apply Advanced Flux IPAdapter"
-    }
-  },
   "1211": {
     "inputs": {
       "boolean": [
@@ -2982,7 +2160,7 @@
         0
       ],
       "on_true": [
-        "1210",
+        "2120",
         0
       ],
       "on_false": [
@@ -3720,7 +2898,7 @@
         0
       ],
       "on_true": [
-        "653",
+        "2277",
         0
       ],
       "on_false": [
@@ -3758,11 +2936,11 @@
         0
       ],
       "on_true": [
-        "1211",
+        "2037",
         0
       ],
       "on_false": [
-        "261",
+        "2092",
         0
       ]
     },
@@ -3778,7 +2956,7 @@
         0
       ],
       "on_true": [
-        "653",
+        "2277",
         0
       ],
       "on_false": [
@@ -3870,7 +3048,7 @@
   },
   "1330": {
     "inputs": {
-      "value": 2
+      "value": 1
     },
     "class_type": "easy int",
     "_meta": {
@@ -3947,7 +3125,7 @@
   },
   "1651": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 1
     },
     "class_type": "easy float",
     "_meta": {
@@ -4267,7 +3445,7 @@
         0
       ],
       "on_false": [
-        "261",
+        "2092",
         0
       ]
     },
@@ -4316,43 +3494,6 @@
       "title": "If else"
     }
   },
-  "1747": {
-    "inputs": {
-      "boolean": [
-        "1219",
-        0
-      ],
-      "on_true": [
-        "1214",
-        0
-      ],
-      "on_false": [
-        "1745",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1755": {
-    "inputs": {
-      "boolean": false,
-      "on_true": [
-        "261",
-        0
-      ],
-      "on_false": [
-        "1747",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "1791": {
     "inputs": {
       "boolean": [
@@ -4392,7 +3533,7 @@
   },
   "1797": {
     "inputs": {
-      "comparison": "a != b",
+      "comparison": "a == b",
       "a": [
         "265",
         0
@@ -4414,7 +3555,7 @@
         0
       ],
       "on_true": [
-        "1802",
+        "258",
         0
       ],
       "on_false": [
@@ -4429,57 +3570,11 @@
   },
   "1801": {
     "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1802": {
-    "inputs": {
-      "boolean": [
-        "1805",
-        0
-      ],
-      "on_true": [
-        "258",
-        0
-      ],
-      "on_false": [
-        "262",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1803": {
-    "inputs": {
       "value": 1
     },
     "class_type": "easy int",
     "_meta": {
       "title": "Int"
-    }
-  },
-  "1805": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "265",
-        0
-      ],
-      "b": [
-        "1803",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
     }
   },
   "1811": {
@@ -4598,15 +3693,6 @@
       "title": "Resize Image"
     }
   },
-  "1873": {
-    "inputs": {
-      "control_net_name": "flux.1-dev_depth_controlnet_v3.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
   "1890": {
     "inputs": {
       "clip_skip": -1,
@@ -4616,7 +3702,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 450100155823335,
+      "seed": 55090862702754,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -4650,7 +3736,7 @@
     },
     "class_type": "easy int",
     "_meta": {
-      "title": "Inti2i_uov_tiled_height"
+      "title": "i2i_uov_tiled_height"
     }
   },
   "1894": {
@@ -4745,52 +3831,6 @@
       "title": "🔧 Image Resize"
     }
   },
-  "1929": {
-    "inputs": {
-      "boolean": [
-        "1933",
-        0
-      ],
-      "on_true": [
-        "1963",
-        0
-      ],
-      "on_false": [
-        "1992",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1933": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1330",
-        0
-      ],
-      "b": [
-        "1935",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1935": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "1943": {
     "inputs": {
       "resolution": [
@@ -4875,192 +3915,6 @@
       "title": "🔧 Image Color Match"
     }
   },
-  "1952": {
-    "inputs": {
-      "seed": 318085733760521,
-      "steps": 6,
-      "cfg": 1,
-      "sampler_name": "dpmpp_2m_sde_gpu",
-      "scheduler": "karras",
-      "denoise": 1,
-      "model": [
-        "1999",
-        0
-      ],
-      "positive": [
-        "2000",
-        0
-      ],
-      "negative": [
-        "2000",
-        1
-      ],
-      "latent_image": [
-        "2000",
-        3
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
-  "1953": {
-    "inputs": {
-      "pixels": [
-        "1972",
-        0
-      ],
-      "vae": [
-        "1966",
-        2
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "1956": {
-    "inputs": {
-      "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
-      "weight_dtype": "fp8_e4m3fn"
-    },
-    "class_type": "UNETLoader",
-    "_meta": {
-      "title": "loadsdxlmodel"
-    }
-  },
-  "1960": {
-    "inputs": {
-      "text": [
-        "1890",
-        4
-      ],
-      "clip": [
-        "1966",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "sdxlcliptext"
-    }
-  },
-  "1961": {
-    "inputs": {
-      "conditioning": [
-        "1960",
-        0
-      ]
-    },
-    "class_type": "ConditioningZeroOut",
-    "_meta": {
-      "title": "ConditioningZeroOut"
-    }
-  },
-  "1963": {
-    "inputs": {
-      "samples": [
-        "1952",
-        0
-      ],
-      "vae": [
-        "1966",
-        2
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
-    }
-  },
-  "1966": {
-    "inputs": {
-      "ckpt_name": "juggernautXL_juggXIByRundiffusion.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "loadsdxlcheckpoint"
-    }
-  },
-  "1971": {
-    "inputs": {
-      "amount": 20,
-      "device": "cpu",
-      "mask": [
-        "1894",
-        0
-      ]
-    },
-    "class_type": "MaskBlur+",
-    "_meta": {
-      "title": "🔧 Mask Blur"
-    }
-  },
-  "1972": {
-    "inputs": {
-      "width": 1280,
-      "height": 1280,
-      "interpolation": "lanczos",
-      "method": "keep proportion",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "1911",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "1973": {
-    "inputs": {
-      "upscale_model": [
-        "1974",
-        0
-      ],
-      "image": [
-        "328",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
-  "1974": {
-    "inputs": {
-      "model_name": "4x-UltraSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
-  "1975": {
-    "inputs": {
-      "boolean": [
-        "1933",
-        0
-      ],
-      "on_true": [
-        "1977",
-        0
-      ],
-      "on_false": [
-        "1993",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "1977": {
     "inputs": {
       "width": 512,
@@ -5070,7 +3924,7 @@
       "divisible_by": 2,
       "crop": "disabled",
       "image": [
-        "1973",
+        "2309",
         0
       ],
       "get_image_size": [
@@ -5083,34 +3937,13 @@
       "title": "Resize Image"
     }
   },
-  "1984": {
-    "inputs": {
-      "width": [
-        "1972",
-        1
-      ],
-      "height": [
-        "1972",
-        2
-      ],
-      "keep_proportions": true,
-      "mask": [
-        "1971",
-        0
-      ]
-    },
-    "class_type": "ResizeMask",
-    "_meta": {
-      "title": "Resize Mask"
-    }
-  },
   "1989": {
     "inputs": {
-      "expand": 30,
+      "expand": 10,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 50,
+      "blur_radius": 10,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -5127,12 +3960,12 @@
   "1991": {
     "inputs": {
       "width": [
-        "1972",
-        1
+        "2314",
+        0
       ],
       "height": [
-        "1972",
-        2
+        "2314",
+        0
       ],
       "keep_proportions": true,
       "mask": [
@@ -5150,8 +3983,19 @@
       "width": 1024,
       "height": 1024,
       "upscale_method": "lanczos",
-      "keep_proportion": true,
+      "keep_proportion": [
+        "2310",
+        0
+      ],
       "divisible_by": 2,
+      "width_input": [
+        "2314",
+        0
+      ],
+      "height_input": [
+        "2314",
+        0
+      ],
       "crop": "disabled",
       "image": [
         "1911",
@@ -5163,61 +4007,65 @@
       "title": "Resize Image"
     }
   },
-  "1993": {
+  "2004": {
     "inputs": {
-      "width": 440,
-      "height": 512,
-      "upscale_method": "lanczos",
-      "keep_proportion": false,
-      "divisible_by": 2,
-      "crop": "disabled",
-      "image": [
-        "1973",
-        0
-      ],
-      "get_image_size": [
-        "1911",
-        0
-      ]
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
     },
-    "class_type": "ImageResizeKJ",
+    "class_type": "CLIPVisionLoader",
     "_meta": {
-      "title": "Resize Image"
+      "title": "Load CLIP Vision"
     }
   },
-  "1994": {
+  "2007": {
     "inputs": {
-      "width": [
-        "1992",
-        1
+      "style_model_name": "flux1-redux-dev.safetensors"
+    },
+    "class_type": "StyleModelLoader",
+    "_meta": {
+      "title": "Load Style Model"
+    }
+  },
+  "2008": {
+    "inputs": {
+      "noise_mask": true,
+      "positive": [
+        "1315",
+        0
       ],
-      "height": [
-        "1992",
-        2
+      "negative": [
+        "140",
+        0
       ],
-      "keep_proportions": true,
+      "vae": [
+        "256",
+        0
+      ],
+      "pixels": [
+        "1992",
+        0
+      ],
       "mask": [
-        "1894",
+        "1991",
         0
       ]
     },
-    "class_type": "ResizeMask",
+    "class_type": "InpaintModelConditioning",
     "_meta": {
-      "title": "Resize Mask"
+      "title": "InpaintModelConditioning"
     }
   },
-  "1995": {
+  "2037": {
     "inputs": {
       "boolean": [
-        "1933",
+        "1219",
         0
       ],
       "on_true": [
-        "1991",
+        "1214",
         0
       ],
       "on_false": [
-        "1994",
+        "1745",
         0
       ]
     },
@@ -5226,100 +4074,1631 @@
       "title": "If else"
     }
   },
-  "1996": {
+  "2091": {
     "inputs": {
-      "mask": [
-        "1971",
-        0
-      ]
-    },
-    "class_type": "MaskPreview+",
-    "_meta": {
-      "title": "🔧 Mask Preview"
-    }
-  },
-  "1997": {
-    "inputs": {
-      "images": [
-        "1911",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
-  "1998": {
-    "inputs": {
-      "head": "fooocus_inpaint_head.pth",
-      "patch": "inpaint_v26.fooocus.patch"
-    },
-    "class_type": "INPAINT_LoadFooocusInpaint",
-    "_meta": {
-      "title": "Load Fooocus Inpaint"
-    }
-  },
-  "1999": {
-    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
       "model": [
-        "2002",
-        0
-      ],
-      "patch": [
-        "1998",
-        0
-      ],
-      "latent": [
-        "2000",
-        2
-      ]
-    },
-    "class_type": "INPAINT_ApplyFooocusInpaint",
-    "_meta": {
-      "title": "Apply Fooocus Inpaint"
-    }
-  },
-  "2000": {
-    "inputs": {
-      "positive": [
-        "1961",
-        0
-      ],
-      "negative": [
-        "1961",
-        0
-      ],
-      "vae": [
-        "1966",
-        2
-      ],
-      "pixels": [
-        "1972",
-        0
-      ],
-      "mask": [
-        "1984",
-        0
-      ]
-    },
-    "class_type": "INPAINT_VAEEncodeInpaintConditioning",
-    "_meta": {
-      "title": "VAE Encode & Inpaint Conditioning"
-    }
-  },
-  "2002": {
-    "inputs": {
-      "lora_name": "sdxl_lightning_4step_lora.safetensors",
-      "strength_model": 1,
-      "model": [
-        "1956",
+        "261",
         0
       ]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "LoraLoaderModelOnly"
+      "title": "lora_4"
+    }
+  },
+  "2092": {
+    "inputs": {
+      "lora_name": "flux1-depth-dev-lora.safetensors",
+      "strength_model": [
+        "2359",
+        0
+      ],
+      "model": [
+        "2091",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_5"
+    }
+  },
+  "2096": {
+    "inputs": {
+      "model": [
+        "1314",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "2105": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1082",
+        0
+      ],
+      "conditioning": [
+        "2378",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2106": {
+    "inputs": {
+      "start": [
+        "1082",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2108": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1083",
+        0
+      ],
+      "conditioning": [
+        "2379",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2109": {
+    "inputs": {
+      "start": [
+        "1083",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "1092",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2111": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1084",
+        0
+      ],
+      "conditioning": [
+        "2380",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2112": {
+    "inputs": {
+      "start": [
+        "1084",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "1160",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2114": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1085",
+        0
+      ],
+      "conditioning": [
+        "2381",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2115": {
+    "inputs": {
+      "start": [
+        "1085",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "1173",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2117": {
+    "inputs": {
+      "conditioning_1": [
+        "2106",
+        0
+      ],
+      "conditioning_2": [
+        "2105",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2118": {
+    "inputs": {
+      "conditioning_1": [
+        "2109",
+        0
+      ],
+      "conditioning_2": [
+        "2108",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2119": {
+    "inputs": {
+      "conditioning_1": [
+        "2112",
+        0
+      ],
+      "conditioning_2": [
+        "2111",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2120": {
+    "inputs": {
+      "conditioning_1": [
+        "2115",
+        0
+      ],
+      "conditioning_2": [
+        "2114",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2122": {
+    "inputs": {
+      "value": "(1-4)*a+4",
+      "a": [
+        "1079",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2124": {
+    "inputs": {
+      "value": "(1-4)*a+4",
+      "a": [
+        "1075",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2126": {
+    "inputs": {
+      "value": "(1-4)*a+4",
+      "a": [
+        "1080",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2128": {
+    "inputs": {
+      "value": "(1-4)*a+4",
+      "a": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2209": {
+    "inputs": {
+      "positive": [
+        "1211",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "pixels": [
+        "1943",
+        0
+      ]
+    },
+    "class_type": "InstructPixToPixConditioning",
+    "_meta": {
+      "title": "InstructPixToPixConditioning"
+    }
+  },
+  "2221": {
+    "inputs": {
+      "positive": [
+        "2264",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "pixels": [
+        "1946",
+        0
+      ]
+    },
+    "class_type": "InstructPixToPixConditioning",
+    "_meta": {
+      "title": "InstructPixToPixConditioning"
+    }
+  },
+  "2224": {
+    "inputs": {
+      "positive": [
+        "2269",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "pixels": [
+        "1947",
+        0
+      ]
+    },
+    "class_type": "InstructPixToPixConditioning",
+    "_meta": {
+      "title": "InstructPixToPixConditioning"
+    }
+  },
+  "2227": {
+    "inputs": {
+      "positive": [
+        "2273",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "pixels": [
+        "1948",
+        0
+      ]
+    },
+    "class_type": "InstructPixToPixConditioning",
+    "_meta": {
+      "title": "InstructPixToPixConditioning"
+    }
+  },
+  "2230": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1082",
+        0
+      ],
+      "conditioning": [
+        "2209",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2231": {
+    "inputs": {
+      "start": [
+        "1082",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "1211",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2233": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1083",
+        0
+      ],
+      "conditioning": [
+        "2221",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2234": {
+    "inputs": {
+      "start": [
+        "1083",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "2264",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2236": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1084",
+        0
+      ],
+      "conditioning": [
+        "2224",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2237": {
+    "inputs": {
+      "start": [
+        "1084",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "2269",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2239": {
+    "inputs": {
+      "start": 0,
+      "end": [
+        "1085",
+        0
+      ],
+      "conditioning": [
+        "2227",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2240": {
+    "inputs": {
+      "start": [
+        "1085",
+        0
+      ],
+      "end": 1,
+      "conditioning": [
+        "2273",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetTimestepRange",
+    "_meta": {
+      "title": "ConditioningSetTimestepRange"
+    }
+  },
+  "2242": {
+    "inputs": {
+      "conditioning_1": [
+        "2231",
+        0
+      ],
+      "conditioning_2": [
+        "2230",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2243": {
+    "inputs": {
+      "conditioning_1": [
+        "2234",
+        0
+      ],
+      "conditioning_2": [
+        "2233",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2244": {
+    "inputs": {
+      "conditioning_1": [
+        "2237",
+        0
+      ],
+      "conditioning_2": [
+        "2236",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2245": {
+    "inputs": {
+      "conditioning_1": [
+        "2240",
+        0
+      ],
+      "conditioning_2": [
+        "2239",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "2260": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "684",
+        0
+      ],
+      "b": [
+        "2261",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2261": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2262": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "684",
+        0
+      ],
+      "b": [
+        "2265",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2263": {
+    "inputs": {
+      "boolean": [
+        "2260",
+        0
+      ],
+      "on_true": [
+        "1211",
+        0
+      ],
+      "on_false": [
+        "2278",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2264": {
+    "inputs": {
+      "boolean": [
+        "2262",
+        0
+      ],
+      "on_true": [
+        "2242",
+        0
+      ],
+      "on_false": [
+        "2263",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2265": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2266": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1242",
+        0
+      ],
+      "b": [
+        "2261",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2267": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1242",
+        0
+      ],
+      "b": [
+        "2265",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2268": {
+    "inputs": {
+      "boolean": [
+        "2266",
+        0
+      ],
+      "on_true": [
+        "2264",
+        0
+      ],
+      "on_false": [
+        "2280",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2269": {
+    "inputs": {
+      "boolean": [
+        "2267",
+        0
+      ],
+      "on_true": [
+        "2243",
+        0
+      ],
+      "on_false": [
+        "2268",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2270": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1296",
+        0
+      ],
+      "b": [
+        "2261",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2271": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1296",
+        0
+      ],
+      "b": [
+        "2265",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2272": {
+    "inputs": {
+      "boolean": [
+        "2270",
+        0
+      ],
+      "on_true": [
+        "2269",
+        0
+      ],
+      "on_false": [
+        "2279",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2273": {
+    "inputs": {
+      "boolean": [
+        "2271",
+        0
+      ],
+      "on_true": [
+        "2244",
+        0
+      ],
+      "on_false": [
+        "2272",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2274": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1307",
+        0
+      ],
+      "b": [
+        "2261",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2275": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1307",
+        0
+      ],
+      "b": [
+        "2265",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2276": {
+    "inputs": {
+      "boolean": [
+        "2274",
+        0
+      ],
+      "on_true": [
+        "2273",
+        0
+      ],
+      "on_false": [
+        "2281",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2277": {
+    "inputs": {
+      "boolean": [
+        "2275",
+        0
+      ],
+      "on_true": [
+        "2245",
+        0
+      ],
+      "on_false": [
+        "2276",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2278": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0.004,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "1211",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2293",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "48",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2279": {
+    "inputs": {
+      "strength": [
+        "1080",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1084",
+        0
+      ],
+      "positive": [
+        "2269",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2293",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "567",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2280": {
+    "inputs": {
+      "strength": [
+        "1075",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1083",
+        0
+      ],
+      "positive": [
+        "2264",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2293",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "542",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2281": {
+    "inputs": {
+      "strength": [
+        "1081",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1085",
+        0
+      ],
+      "positive": [
+        "2273",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2293",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "592",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2289": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "1890",
+        6
+      ],
+      "steps": 15,
+      "cfg": 1,
+      "sampler_name": [
+        "1609",
+        3
+      ],
+      "scheduler": [
+        "1609",
+        4
+      ],
+      "start_at_step": 10,
+      "end_at_step": 15,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "1314",
+        0
+      ],
+      "positive": [
+        "2008",
+        0
+      ],
+      "negative": [
+        "2008",
+        1
+      ],
+      "latent_image": [
+        "2290",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "2290": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "1890",
+        6
+      ],
+      "steps": 10,
+      "cfg": 1,
+      "sampler_name": [
+        "1609",
+        3
+      ],
+      "scheduler": [
+        "1609",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": 10,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "2096",
+        0
+      ],
+      "positive": [
+        "2008",
+        0
+      ],
+      "negative": [
+        "2008",
+        1
+      ],
+      "latent_image": [
+        "2008",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "2291": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "1890",
+        6
+      ],
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": [
+        "1609",
+        3
+      ],
+      "scheduler": [
+        "1609",
+        4
+      ],
+      "start_at_step": 15,
+      "end_at_step": 20,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "1314",
+        0
+      ],
+      "positive": [
+        "2008",
+        0
+      ],
+      "negative": [
+        "2008",
+        1
+      ],
+      "latent_image": [
+        "2289",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "2293": {
+    "inputs": {
+      "control_net_name": "flux.1-dev_canny_controlnet_v3.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "2307": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "2308": {
+    "inputs": {
+      "samples": [
+        "2291",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "2309": {
+    "inputs": {
+      "boolean": [
+        "2310",
+        0
+      ],
+      "on_true": [
+        "2308",
+        0
+      ],
+      "on_false": [
+        "328",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2310": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1330",
+        0
+      ],
+      "b": [
+        "2312",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2312": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2314": {
+    "inputs": {
+      "boolean": [
+        "2310",
+        0
+      ],
+      "on_true": [
+        "2317",
+        0
+      ],
+      "on_false": [
+        "2316",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2316": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2317": {
+    "inputs": {
+      "value": 1280
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2354": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "684",
+        0
+      ],
+      "b": [
+        "2355",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2355": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2356": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1242",
+        0
+      ],
+      "b": [
+        "2355",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2357": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1296",
+        0
+      ],
+      "b": [
+        "2355",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2358": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1307",
+        0
+      ],
+      "b": [
+        "2355",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2359": {
+    "inputs": {
+      "boolean": [
+        "2354",
+        0
+      ],
+      "on_true": [
+        "1079",
+        0
+      ],
+      "on_false": [
+        "2362",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2362": {
+    "inputs": {
+      "boolean": [
+        "2356",
+        0
+      ],
+      "on_true": [
+        "1075",
+        0
+      ],
+      "on_false": [
+        "2363",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2363": {
+    "inputs": {
+      "boolean": [
+        "2357",
+        0
+      ],
+      "on_true": [
+        "1080",
+        0
+      ],
+      "on_false": [
+        "2364",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2364": {
+    "inputs": {
+      "boolean": [
+        "2358",
+        0
+      ],
+      "on_true": [
+        "1081",
+        0
+      ],
+      "on_false": [
+        "2375",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2374": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "Float"
+    }
+  },
+  "2375": {
+    "inputs": {
+      "boolean": [
+        "2358",
+        0
+      ],
+      "on_true": [
+        "1081",
+        0
+      ],
+      "on_false": [
+        "2374",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2378": {
+    "inputs": {
+      "downsampling_factor": [
+        "2122",
+        0
+      ],
+      "downsampling_function": "area",
+      "mode": "keep aspect ratio",
+      "weight": [
+        "1079",
+        0
+      ],
+      "autocrop_margin": 0.1,
+      "conditioning": [
+        "5",
+        0
+      ],
+      "style_model": [
+        "2007",
+        0
+      ],
+      "clip_vision": [
+        "2004",
+        0
+      ],
+      "image": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
+    }
+  },
+  "2379": {
+    "inputs": {
+      "downsampling_factor": [
+        "2124",
+        0
+      ],
+      "downsampling_function": "area",
+      "mode": "keep aspect ratio",
+      "weight": [
+        "1075",
+        0
+      ],
+      "autocrop_margin": 0.1,
+      "conditioning": [
+        "1092",
+        0
+      ],
+      "style_model": [
+        "2007",
+        0
+      ],
+      "clip_vision": [
+        "2004",
+        0
+      ],
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
+    }
+  },
+  "2380": {
+    "inputs": {
+      "downsampling_factor": [
+        "2126",
+        0
+      ],
+      "downsampling_function": "area",
+      "mode": "keep aspect ratio",
+      "weight": [
+        "1080",
+        0
+      ],
+      "autocrop_margin": 0.1,
+      "conditioning": [
+        "1160",
+        0
+      ],
+      "style_model": [
+        "2007",
+        0
+      ],
+      "clip_vision": [
+        "2004",
+        0
+      ],
+      "image": [
+        "704",
+        0
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
+    }
+  },
+  "2381": {
+    "inputs": {
+      "downsampling_factor": [
+        "2128",
+        0
+      ],
+      "downsampling_function": "area",
+      "mode": "keep aspect ratio",
+      "weight": [
+        "1081",
+        0
+      ],
+      "autocrop_margin": 0.1,
+      "conditioning": [
+        "1173",
+        0
+      ],
+      "style_model": [
+        "2007",
+        0
+      ],
+      "clip_vision": [
+        "2004",
+        0
+      ],
+      "image": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
     }
   }
 }

@@ -568,6 +568,8 @@ def worker():
             denoising_strength = 0.5
         if 'strong' in uov_method:
             denoising_strength = 0.85
+        if 'hires.fix' in uov_method:
+            denoising_strength = 1.0
         if async_task.overwrite_vary_strength > 0:
             denoising_strength = async_task.overwrite_vary_strength
         shape_ceil = get_image_shape_ceil(uov_input_image)
@@ -609,6 +611,7 @@ def worker():
                       advance_progress=False):
         if not skip_apply_outpaint:
             inpaint_image, inpaint_mask = apply_outpaint(async_task, inpaint_image, inpaint_mask)
+            denoising_strength = 1.0
 
         inpaint_worker.current_task = inpaint_worker.InpaintWorker(
             image=inpaint_image,
@@ -1501,11 +1504,11 @@ def worker():
                 if '.gguf' in async_task.base_model_name:
                     async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                     if 'hyp8' in async_task.base_model_name.lower() and ( 'q8' in async_task.base_model_name.lower() or 'q6' in async_task.base_model_name.lower()):
-                        async_task.params_backend['i2i_model_type'] = 2 # hyp8
+                        i2i_model_type = 2 # hyp8
                     else:
-                        async_task.params_backend['i2i_model_type'] = 3 # hyp8 low
+                        i2i_model_type = 3 # hyp8 low
                 else:
-                    async_task.params_backend['i2i_model_type'] = 1 # dev full-size
+                    i2i_model_type = 1 # dev full-size
                     async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
                 if async_task.canny_low_threshold != default_params['canny_low_threshold']:
                     async_task.params_backend['i2i_canny_low'] = async_task.canny_low_threshold
@@ -1570,14 +1573,14 @@ def worker():
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
                         async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
-                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[async_task.params_backend['i2i_model_type']-1 if async_task.params_backend['i2i_model_type']>0 and async_task.params_backend['i2i_model_type']<4 else 2]
+                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
-                        async_task.params_backend['i2i_uov_hires_fix_is_blurred'] = False
-                        async_task.params_backend['i2i_uov_hires_fix_w'] = 0.6
-                        async_task.params_backend['i2i_uov_hires_fix_s'] = 0.5
+                        async_task.params_backend['i2i_uov_hires_fix_blurred'] = 0.0
+                        async_task.params_backend['i2i_uov_hires_fix_w'] = 0.5
+                        async_task.params_backend['i2i_uov_hires_fix_s'] = 0.8
                     else:
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
@@ -1593,10 +1596,17 @@ def worker():
                         async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
                     if 'cn' in goals:
                         async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
+                    else:
+                        i2i_model_type = 2
+                        async_task.base_model_name = 'flux1-fill-dev-fp16-Q4_0-GGUF.gguf'
+                        async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
+                        async_task.steps = 20
+                        all_steps = async_task.steps * async_task.image_number
                     else:
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
+                async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
             async_task.params_backend['input_images'] = input_images
 
 

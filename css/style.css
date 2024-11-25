@@ -668,6 +668,15 @@ div.prose.tokenCounter {
     top: 6px;
 }
 
+.input_id_info {
+    padding: 6px 10px 0px 4px !important;
+    min-width: 50% !important;
+    height: 24px !important;
+    font-size: 14px !important;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .note_text {
     padding: 2px;
     text-align: center;
