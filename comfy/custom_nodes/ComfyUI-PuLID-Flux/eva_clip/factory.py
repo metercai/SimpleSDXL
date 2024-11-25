@@ -276,13 +276,13 @@ def create_model(
             checkpoint_path = ''
             pretrained_cfg = get_pretrained_cfg(model_name, pretrained)
             if pretrained_cfg:
-                checkpoint_path = download_pretrained(pretrained_cfg, cache_dir=cache_dir)
+                checkpoint_path = pretrained_cfg['hf_hub']#download_pretrained(pretrained_cfg, cache_dir=cache_dir)
             elif os.path.exists(pretrained):
                 checkpoint_path = pretrained
-
+            
+            checkpoint_path = os.path.join(cache_dir, os.path.basename(checkpoint_path))
             if checkpoint_path:
-                checkpoint_path = os.path.join(cache_dir, os.path.basename(checkpoint_path))
-                logging.info(f'Loading pretrained {model_name} weights ({pretrained}).')
+                logging.info(f'Loading pretrained {model_name} weights ({pretrained}): {checkpoint_path}')
                 load_checkpoint(model,
                                checkpoint_path,
                                model_key="model|module|state_dict",
