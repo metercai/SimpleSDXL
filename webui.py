@@ -140,18 +140,19 @@ def inpaint_mode_change(mode, inpaint_engine_version, outpaint, state):
 
     if inpaint_engine_version == 'empty':
         inpaint_engine_version = modules.config.default_inpaint_engine_version
-
+    
+    engine = 'Fooocus' if 'engine' not in state else state['engine']
     if mode == modules.flags.inpaint_option_modify:
         return [
             gr.update(visible=True), gr.update(visible=False, value=[]),
             gr.Dataset.update(visible=False, samples=modules.config.example_inpaint_prompts),
-            True, inpaint_engine_version, 1.0 if state['engine']=='Fooocus' else 0.85, 0.0
+            True, inpaint_engine_version, 1.0 if engine=='Fooocus' else 1.0, 0.0
         ]
     
     return [
         gr.update(visible=False, value=''), gr.update(visible=True),
         gr.Dataset.update(visible=False, samples=modules.config.example_inpaint_prompts),
-        False, inpaint_engine_version, 1.0 if state['engine']=='Fooocus' else 0.85 if len(outpaint)>0 else 0.7, 0.618
+        False, inpaint_engine_version, 1.0 if engine=='Fooocus' else 1.0 if len(outpaint)>0 else 1.0, 0.618
     ]
 
 def enhance_inpaint_mode_change(mode, inpaint_engine_version):
