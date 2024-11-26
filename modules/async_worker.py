@@ -1558,7 +1558,8 @@ def worker():
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
                     tiled_size = lambda x, p: x+16 if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
                     tiled_steps = [10, 6, 4]
-                    match = re.search(r'\((?:Fast )?([\d.]+)x\)', async_task.uov_method)
+                    print(f'aio parse, uov_method: {async_task.uov_method}')
+                    match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
                     match_multiple = 1.0 if not match else float(match.group(1))
                     match_multiple = match_multiple if match_multiple<4.0 else 4.0
                     if 'vary' in async_task.uov_method and 'subtle' in async_task.uov_method:

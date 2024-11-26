@@ -1798,7 +1798,7 @@
   },
   "1094": {
     "inputs": {
-      "provider": "CUDA"
+      "provider": "CPU"
     },
     "class_type": "PulidFluxInsightFaceLoader",
     "_meta": {
@@ -1816,6 +1816,7 @@
         "1082",
         0
       ],
+      "source_face_selection": "center_face",
       "model": [
         "2092",
         0
@@ -1961,6 +1962,7 @@
         "1083",
         0
       ],
+      "source_face_selection": "center_face",
       "model": [
         "1741",
         0
@@ -2064,6 +2066,7 @@
         "1084",
         0
       ],
+      "source_face_selection": "center_face",
       "model": [
         "1743",
         0
@@ -2184,6 +2187,7 @@
         "1085",
         0
       ],
+      "source_face_selection": "center_face",
       "model": [
         "1745",
         0

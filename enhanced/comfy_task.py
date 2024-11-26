@@ -169,7 +169,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
         base_model = default_params['base_model']
         clip_model = '' if 'clip_model' not in default_params else default_params['clip_model']
         if 'aio' in task_method:
-            total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['default_params'] == 1) else None
+            total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
             if 'base_model_gguf' in default_params:
                 comfy_params.delete_params(['base_model'])
