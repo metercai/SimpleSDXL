@@ -90,7 +90,7 @@ def check_models_exists(preset, user_did=None):
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)
                 if file_path is None or file_path == '' or size != os.path.getsize(file_path):
-                    print(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
+                    #print(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
                     return False
         return True
     return False

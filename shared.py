@@ -7,7 +7,7 @@ sysinfo = {"location": "CN"}
 args = None
 
 root = os.path.dirname(os.path.abspath(__file__))
-path_outputs = ''
+path_userhome = ''
 temp_path = ''
 
 modelsinfo = None

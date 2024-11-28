@@ -34,7 +34,7 @@ def reset_simpleai_args():
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
     args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
-    comfyd_images_path = shared.path_outputs #os.path.join(shared.path_outputs, shared.token.get_guest_did())
+    comfyd_images_path = os.path.join(shared.path_userhome, 'guest_user')
     comfyd_output = os.path.join(comfyd_images_path, 'comfyd_outputs')
     comfyd_intput = os.path.join(comfyd_images_path, 'comfyd_inputs')
     if not os.path.exists(comfyd_output):
@@ -53,10 +53,6 @@ def reset_simpleai_args():
 def get_path_in_user_dir(user_did, filename, catalog=None):
     if user_did and filename:
         path = catalog if catalog else filename
-        if shared.token.is_guest(user_did):
-            user_did = 'guest_user'
-        elif shared.token.is_admin(user_did):
-            user_did = 'admin_user'
         path_file = shared.token.get_path_in_user_dir(user_did, path)
         #print(f'get_path_in_user_dir: {path_file}')
         if catalog: 
@@ -88,14 +84,14 @@ note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国�
 note1_5 = '无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
 
 note2_0 = lambda x: f'最少8位含大写、小写字母及数字的组合，每种字符至少1个。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
-note2_1 = f'身份已验证，请按提示预设个人身份口令，{note2_0("green")}'
-note2_2 = f'身份口令遗失无法找回，请重复输入预设的身份口令，{note2_0("red")}'
+note2_1 = f'身份已验证，请按提示预设个人身份口令，{note2_0("lightseagreen")}'
+note2_2 = f'身份口令遗失无法找回，请重复输入预设的身份口令，{note2_0("darkorange")}'
 note2_3 = '身份验码证格式不对，请正确输入短信里的身份验证码，重新进行"身份验证"。'
 note2_4 = '身份验码证未通过，请正确输入短信里的身份验证码，重新进行"身份验证"。'
-note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令，{note2_0("green")}'
+note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令，{note2_0("lightseagreen")}'
 note2_6 = f'身份口令设置异常，请重新输入身份信息进行身份绑定。'
-note2_7 = f'身份口令与上次不一致，请重新预设个人身份口令，{note2_0("green")}'
-note2_8 = f'已匹配到本地的数字身份，请按提示预设个人身份口令，{note2_0("green")}'
+note2_7 = f'身份口令与上次不一致，请重新预设个人身份口令，{note2_0("lightseagreen")}'
+note2_8 = f'已匹配到本地的数字身份，请按提示预设个人身份口令，{note2_0("lightseagreen")}'
 
 note3 = f'绑定成功! {identity_note_1}'
 note3_1 = '身份绑定不成功，请重新输入个人身份口令，再次确认身份。'
@@ -144,7 +140,7 @@ def bind_identity(nick, tele):
         if where == 'local': # 本地密钥, 输入身份口令
             result = [note1_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         elif where == 'remote': # 远程找回, 输入验证码
-            result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True)]*2 + [gr.update(visible=False)]*5
+            result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*5
         elif where == 'immature': # 本地遗留密钥,重设身份口令
             result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         else:  # 过程出错, 重新输入绑定信息,再来
@@ -172,9 +168,9 @@ def verify_identity(input_id_info, state, vcode):
                 note = note2_4 + f'还剩<span style="color: {theme_color[state["__theme"]]};">{count}</span>次机会。'
             else:
                 note = note2_4
-            result = [note] + [gr.update(visible=False)] + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
+            result = [note] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*5
     else: # 验证码格式错误, 重新输入
-        result = [note2_3] + [gr.update(visible=False)] + [gr.update(visible=True)]*3 + [gr.update(visible=False)]*5
+        result = [note2_3] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*5
     return result
 
 def set_phrases(input_id_info, state, phrase, steps):

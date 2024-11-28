@@ -324,7 +324,7 @@ function refresh_topbar_status_js(system_params) {
     } else {
 	nav_store.style.background= '';
     }
-    if (system_params["is_guest"]) {
+    if (system_params["user_role"]=="guest") {
 	nav_store.innerHTML = "Presets";
     } else {
 	nav_store.innerHTML = "MyPresets";
@@ -360,7 +360,7 @@ function refresh_topbar_status_js(system_params) {
     if (image_num_pages) {
 	refresh_finished_images_catalog_label(image_num_pages);
     }
-    refresh_identity_center_label();
+    refresh_identity_center_label(system_params["user_role"]);
     (async () => {
         try {
 	    await Promise.all([

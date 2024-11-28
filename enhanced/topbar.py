@@ -532,7 +532,7 @@ def update_topbar_js_params(state):
         sstoken=state["sstoken"],
         user_name=state["user_name"],
         user_did=state["user_did"],
-        is_guest=shared.token.is_guest(state["user_did"]),
+        user_role='guest' if shared.token.is_guest(state["user_did"]) else 'admin' if shared.token.is_admin(state["user_did"]) else 'member',
         task_class_name=state["engine"],
         preset_store=state["preset_store"],
         __message=state["__message"],

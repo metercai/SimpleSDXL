@@ -105,13 +105,17 @@ function refresh_finished_images_catalog_label(value) {
     label.textContent = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
 }
 
-function refresh_identity_center_label() {
+function refresh_identity_center_label(role) {
     let label = document.getElementById("identity_center");
     var translation = getTranslation("IdentityCenter");
     if (typeof translation == "undefined") {
         translation = "IdentityCenter";
     }
-    label.textContent = translation + "(" + nickname + ")";
+    var display_name = nickname;
+    if (role=="admin") {
+	display_name = nickname + ", admin";
+    }
+    label.textContent = translation + "(" + display_name + ")";
 }
 
 function refresh_input_image_tab_label() {

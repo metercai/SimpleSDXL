@@ -569,7 +569,7 @@ def worker():
         if 'strong' in uov_method:
             denoising_strength = 0.85
         if 'hires.fix' in uov_method:
-            denoising_strength = 1.0
+            denoising_strength = 0.85
         if async_task.overwrite_vary_strength > 0:
             denoising_strength = async_task.overwrite_vary_strength
         shape_ceil = get_image_shape_ceil(uov_input_image)
@@ -716,7 +716,7 @@ def worker():
             initial_latent = None
             direct_return = False
             tiled = True
-            denoising_strength = 0.382
+            denoising_strength = 0.2 #0.382
             if async_task.overwrite_upscale_strength > 0:
                 denoising_strength = async_task.overwrite_upscale_strength
             return direct_return, uov_input_image, denoising_strength, initial_latent, tiled, width, height, current_progress
@@ -753,7 +753,7 @@ def worker():
             return direct_return, uov_input_image, None, None, None, None, None, current_progress
         
         tiled = True
-        denoising_strength = 0.382
+        denoising_strength = 0.2 #0.382
         if async_task.overwrite_upscale_strength > 0:
             denoising_strength = async_task.overwrite_upscale_strength
 
@@ -1556,7 +1556,7 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_size = lambda x, p: x+16 if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
+                    tiled_size = lambda x, p: (x+16) if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
                     tiled_steps = [10, 6, 4]
                     print(f'aio parse, uov_method: {async_task.uov_method}')
                     match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
@@ -1569,6 +1569,8 @@ def worker():
                     elif 'upscale' in async_task.uov_method and 'fast' in async_task.uov_method and match:
                         async_task.params_backend['i2i_uov_fn'] = 1
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
+                        width = int(width * match_multiple)
+                        height = int(height * match_multiple)
                     elif 'upscale' in async_task.uov_method and match:
                         async_task.params_backend['i2i_uov_fn'] = 4
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
@@ -1577,6 +1579,8 @@ def worker():
                         async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
+                        width = int(width * match_multiple)
+                        height = int(height * match_multiple)
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
                         async_task.params_backend['i2i_uov_hires_fix_blurred'] = 0.0
