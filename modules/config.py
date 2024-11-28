@@ -139,15 +139,15 @@ preset = args_manager.args.preset
 config_dict.update(try_get_preset_content(preset))
 theme = args_manager.args.theme
 
-def get_path_output() -> str:
+def get_path_userhome() -> str:
     """
-    Checking output path argument and overriding default path.
+    Checking users path argument and overriding default path.
     """
     global config_dict
-    path_output = 'outputs' if not args_manager.args.output_path else args_manager.args.output_path
-    path_output = get_dir_or_set_default('path_outputs', path_output)
-    print(f'The path_output: {os.path.abspath(path_output)}')
-    return path_output
+    path_userhome = 'users' if not args_manager.args.userhome_path else args_manager.args.userhome_path
+    path_userhome = get_dir_or_set_default('path_userhome', path_userhome)
+    print(f'The path_userhome: {os.path.abspath(path_userhome)}')
+    return path_userhome
 
 def get_path_models_root() -> str:
     global config_dict
@@ -204,6 +204,7 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
     config_dict[key] = dp
     return dp
 
+path_userhome = get_path_userhome()
 path_models_root = get_path_models_root()
 paths_checkpoints = get_dir_or_set_default('path_checkpoints', [f'{path_models_root}/checkpoints/', 'models/checkpoints/'], True)
 paths_loras = get_dir_or_set_default('path_loras', [f'{path_models_root}/loras/', 'models/loras/'], True)
@@ -220,7 +221,6 @@ paths_llms = get_dir_or_set_default('path_llms', [f'{path_models_root}/llms/'], 
 path_wildcards = get_dir_or_set_default('path_wildcards', 'wildcards/')
 path_safety_checker = get_dir_or_set_default('path_safety_checker', f'{path_models_root}/safety_checker/')
 path_sam = paths_inpaint[0]
-path_outputs = get_path_output()
 path_unet = get_dir_or_set_default('path_unet', f'{path_models_root}/unet')
 path_rembg = get_dir_or_set_default('path_rembg', f'{path_models_root}/rembg')
 path_layer_model = get_dir_or_set_default('path_layer_model', f'{path_models_root}/layer_model')
@@ -229,8 +229,6 @@ path_ipadapter = get_dir_or_set_default('path_ipadapter', f'{path_models_root}/i
 path_pulid = get_dir_or_set_default('path_pulid', f'{path_models_root}/pulid')
 path_insightface = get_dir_or_set_default('path_insightface', f'{path_models_root}/insightface')
 path_style_models = get_dir_or_set_default('path_style_models', f'{path_models_root}/style_models')
-path_users = os.path.join(os.path.dirname(path_outputs), 'users')
-print(f'The path_users: {os.path.abspath(path_users)}')
 
 model_cata_map = {
     'checkpoints': paths_checkpoints,
@@ -257,21 +255,18 @@ model_cata_map = {
 from enhanced.simpleai import init_modelsinfo
 modelsinfo = init_modelsinfo(path_models_root, model_cata_map)
 
-shared.path_outputs = path_outputs
-shared.token.set_user_base_dir(path_users)
-guest_path_outputs = os.path.join(path_outputs, 'guest_user')
-if not os.path.exists(guest_path_outputs):
-    os.rename(path_outputs, 'guest_user')
+shared.path_userhome = path_userhome
+shared.token.set_user_base_dir(path_userhome)
+guest_user_path = os.path.join(path_userhome, 'guest_user')
+path_outputs = os.path.join(guest_user_path, 'outputs')
+
+if not os.path.exists(path_outputs):
     os.makedirs(path_outputs, exist_ok=True)
-    shutil.move('guest_user', os.path.join(path_outputs, 'guest_user'))
 
 def get_user_path_outputs(user_did=None):
-    if not user_did or shared.token.is_guest(user_did):
-        return os.path.join(shared.path_outputs, 'guest_user')
-    elif shared.token.is_admin(user_did):
-        return os.path.join(shared.path_outputs, 'admin_user')
-    else:
-        return os.path.join(shared.path_outputs, user_did)
+    if user_did is None:
+        user_did = shared.token.get_guest_did()
+    return shared.token.get_path_in_user_dir(user_did, "outputs")
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
