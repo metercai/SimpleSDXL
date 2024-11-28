@@ -113,7 +113,7 @@ class ComfyTask:
 def get_comfy_task(user_did, task_name, task_method, default_params, input_images, options={}):
     global defaul_method_names, default_method_list
 
-    comfy_params = ComfyTaskParams(default_params, user_did, config.path_outputs)
+    comfy_params = ComfyTaskParams(default_params, user_did)
     if task_name == 'default':
         if task_method == default_method_names[1]:
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
