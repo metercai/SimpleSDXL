@@ -77,8 +77,8 @@ def start_fast_comfyd(fast):
 identity_note = '使用绑定手机号的可信数字身份，可存储和管理个人配置数据，可参与创意分享等互助服务。首个绑定身份拥有超级管理权限。'
 identity_note_1 = '身份已绑定当前浏览器和应用节点。若要更换身份或在别处绑定，需先"解除绑定"。同身份同一时刻最好只绑一处。导出身份二维码可适用离线和漫游场景，请导出后妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
-note1_1 = '本地未匹配到数字身份，云端根节点将参与验证，请注意查收手机短信的身份验证码，用其找回加密副本或创建新身份。'
-note1_2 = f'已匹配到本地的数字身份，{note1_0}'
+note1_1 = '未匹配到数字身份，请注意查收手机短信的身份验证码，用其创建新身份。'
+note1_2 = f'已匹配到数字身份，{note1_0}'
 note1_3 = f'已匹配到身份在云端的加密副本, {note1_0}'
 note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
 note1_5 = '无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
@@ -136,9 +136,9 @@ def trigger_input_identity(img):
 def bind_identity(nick, tele):
     if check_input(nick, tele):
         where = shared.token.check_local_user_token(nick, tele)
-        if where == 'local': # 本地密钥, 输入身份口令
+        if where in ['local', 'recall']: # 本地或远程有身份, 输入身份口令
             result = [note1_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
-        elif where == 'remote': # 远程找回, 输入验证码
+        elif where == 'create': # 新身份, 输入验证码
             result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*5
         elif where == 'immature': # 本地遗留密钥,重设身份口令
             result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3

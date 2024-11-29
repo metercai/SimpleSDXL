@@ -220,7 +220,6 @@ class PromptServer():
             response.headers['Cache-Control'] = 'no-cache'
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
-            folder_paths.set_output_directory(comfyd_output)
             return response
 
         @routes.post("/setvars")
