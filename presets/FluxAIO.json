@@ -47,7 +47,7 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
-        "checkpoints,flux1-fill-dev-fp16-Q4_0-GGUF.gguf,6799303968,0,",
+        "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
         "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
         "controlnet,flux.1-dev_canny_controlnet_v3.safetensors,1487623552,0,",
         "controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",

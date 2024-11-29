@@ -74,8 +74,8 @@ def start_fast_comfyd(fast):
     else:
         comfyd.start(args_patch=[[]], force=True)
 
-identity_note = '使用绑定手机号的可信数字身份，可存储和管理个人配置数据，可参与创意分享等互助服务。首个绑定的身份拥有超级系统管理权限。'
-identity_note_1 = '身份已绑定当前浏览器和应用节点。若要更换身份或在别处绑定，需先"解除绑定"。同身份同一时刻只能绑定一处。导出身份二维码可适用离线和漫游场景，请导出后妥善保存。'
+identity_note = '使用绑定手机号的可信数字身份，可存储和管理个人配置数据，可参与创意分享等互助服务。首个绑定身份拥有超级管理权限。'
+identity_note_1 = '身份已绑定当前浏览器和应用节点。若要更换身份或在别处绑定，需先"解除绑定"。同身份同一时刻最好只绑一处。导出身份二维码可适用离线和漫游场景，请导出后妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
 note1_1 = '本地未匹配到数字身份，云端根节点将参与验证，请注意查收手机短信的身份验证码，用其找回加密副本或创建新身份。'
 note1_2 = f'已匹配到本地的数字身份，{note1_0}'
@@ -97,7 +97,7 @@ note3 = f'绑定成功! {identity_note_1}'
 note3_1 = '身份绑定不成功，请重新输入个人身份口令，再次确认身份。'
 note3_2 = '输入的身份口令格式不对，最少8位的大写、小写字母及数字的组合，每种字符至少1个。请重新输入个人身份口令。'
 
-note4 = '身份已成功解绑，当前浏览器和应用节点的服务回退到游客模式。'
+note4 = '身份已成功解绑，当前应用节点的服务已回退到游客模式。'
 note4_1 = '身份解绑不成功，请重新输入个人身份口令，再次确认身份。'
 
 
@@ -110,7 +110,6 @@ id_info_css = lambda x: f'style="color: {theme_color[x]};"'
 #lambda x: f'style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px; color: {theme_color[x]};"'
 current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
 
-#[identity_note_info, input_id_info, identity_qr, identity_nick_input, identity_tele_input, identity_bind_button, identity_reset_button, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_confirm_button, identity_phrases_set_button, identity_confirm_button, identity_unbind_button]
 # [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
 # [identity_nick_input, identity_tele_input, identity_qr]
 

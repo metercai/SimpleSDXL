@@ -102,7 +102,7 @@ if not os.path.exists(input_directory):
 
 def set_output_directory(output_dir: str) -> None:
     global output_directory
-    output_directory = output_dir
+    output_directory = os.path.abspath(output_dir)
 
 def set_temp_directory(temp_dir: str) -> None:
     global temp_directory

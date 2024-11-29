@@ -220,7 +220,17 @@ class PromptServer():
             response.headers['Cache-Control'] = 'no-cache'
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
+            folder_paths.set_output_directory(comfyd_output)
             return response
+
+        @routes.post("/setvars")
+        async def set_variable(request):
+            json_data =  await request.json()
+            logging.info(f"got variable: {json_data}")
+            if "outputs" in json_data:
+                folder_paths.set_output_directory(json_data['outputs'])
+            return web.json_response({'feedback': 'ok'})
+
 
         @routes.get("/embeddings")
         def get_embeddings(self):

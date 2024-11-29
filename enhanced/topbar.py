@@ -609,6 +609,9 @@ def update_after_identity_sub(state):
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
 
+    if shared.token.is_admin(user_did):
+        comfyd.modify_variable({"outputs": shared.token.get_path_in_user_dir(user_did, "outputs")})
+
     results = [gr.update(choices=output_list, value=None), gr.update(visible=len(output_list)>0, open=False)]
     results += [state['__finished_nums_pages']]
     results += [gr.update(interactive=True if state["engine"]=='Fooocus' and not shared.token.is_guest(user_did) else False)] *2
