@@ -12,7 +12,7 @@ import comfy.model_management
 from insightface.app import FaceAnalysis
 from facexlib.parsing import init_parsing_model
 from facexlib.utils.face_restoration_helper import FaceRestoreHelper
-
+import logging
 from .eva_clip.constants import OPENAI_DATASET_MEAN, OPENAI_DATASET_STD
 from .encoders_flux import IDFormer, PerceiverAttentionCA
 
@@ -204,6 +204,9 @@ class PulidFluxModelLoader:
         logging.info("Loading PuLID-Flux model.")
         model.from_pretrained(path=model_path)
 
+        # 显式释放显存
+        torch.cuda.empty_cache()
+
         return (model,)
 
 class PulidFluxInsightFaceLoader:
@@ -223,6 +226,9 @@ class PulidFluxInsightFaceLoader:
         model = FaceAnalysis(name="antelopev2", root=INSIGHTFACE_DIR, providers=[provider + 'ExecutionProvider',]) # alternative to buffalo_l
         model.prepare(ctx_id=0, det_size=(640, 640))
 
+        # 显式释放显存
+        torch.cuda.empty_cache()
+
         return (model,)
 
 class PulidFluxEvaClipLoader:
@@ -240,16 +246,20 @@ class PulidFluxEvaClipLoader:
         #global CLIP_DIR
         from .eva_clip.factory import create_model_and_transforms
 
-        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
+        with torch.no_grad():
+            model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
 
-        model = model.visual
+            model = model.visual
 
-        eva_transform_mean = getattr(model, 'image_mean', OPENAI_DATASET_MEAN)
-        eva_transform_std = getattr(model, 'image_std', OPENAI_DATASET_STD)
-        if not isinstance(eva_transform_mean, (list, tuple)):
-            model["image_mean"] = (eva_transform_mean,) * 3
-        if not isinstance(eva_transform_std, (list, tuple)):
-            model["image_std"] = (eva_transform_std,) * 3
+            eva_transform_mean = getattr(model, 'image_mean', OPENAI_DATASET_MEAN)
+            eva_transform_std = getattr(model, 'image_std', OPENAI_DATASET_STD)
+            if not isinstance(eva_transform_mean, (list, tuple)):
+                model["image_mean"] = (eva_transform_mean,) * 3
+            if not isinstance(eva_transform_std, (list, tuple)):
+                model["image_std"] = (eva_transform_std,) * 3
+
+        # 显式释放显存
+        torch.cuda.empty_cache()
 
         return (model,)
 
@@ -286,153 +296,136 @@ class ApplyPulidFlux:
 
     def apply_pulid_flux(self, model, pulid_flux, eva_clip, face_analysis, image, weight, start_at, end_at, attn_mask=None, unique_id=None, source_face_selection="center_face"):
         device = comfy.model_management.get_torch_device()
-        # Why should I care what args say, when the unet model has a different dtype?!
-        # Am I missing something?!
-        #dtype = comfy.model_management.unet_dtype()
         dtype = model.model.diffusion_model.dtype
-        # Because of 8bit models we must check what cast type does the unet uses
-        # ZLUDA (Intel, AMD) & GPUs with compute capability < 8.0 don't support bfloat16 etc.
-        # Issue: https://github.com/balazik/ComfyUI-PuLID-Flux/issues/6
-        if model.model.manual_cast_dtype is not None:
-            dtype = model.model.manual_cast_dtype
 
-        eva_clip.to(device, dtype=dtype)
-        pulid_flux.to(device, dtype=dtype)
+        def send_to_cpu_and_cleanup(tensors):
+            for tensor in tensors:
+                if isinstance(tensor, torch.Tensor):
+                    tensor.cpu()
+            torch.cuda.empty_cache()
 
-        # TODO: Add masking support!
-        if attn_mask is not None:
-            if attn_mask.dim() > 3:
-                attn_mask = attn_mask.squeeze(-1)
-            elif attn_mask.dim() < 3:
-                attn_mask = attn_mask.unsqueeze(0)
-            attn_mask = attn_mask.to(device, dtype=dtype)
+        def send_to_gpu(tensors, device, dtype):
+            return [tensor.to(device, dtype=dtype) if isinstance(tensor, torch.Tensor) else tensor for tensor in tensors]
 
-        image = tensor_to_image(image)
+        with torch.no_grad():
+            if model.model.manual_cast_dtype is not None:
+                dtype = model.model.manual_cast_dtype
 
-        face_helper = FaceRestoreHelper(
-            upscale_factor=1,
-            face_size=512,
-            crop_ratio=(1, 1),
-            det_model='retinaface_resnet50',
-            save_ext='png',
-            device=device,
-            model_rootpath=CONTROLNET_DIR,
-        )
+            eva_clip.to(device, dtype=dtype)
+            pulid_flux.to(device, dtype=dtype)
 
-        face_helper.face_parse = None
-        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device, model_rootpath=CONTROLNET_DIR)
+            if attn_mask is not None:
+                if attn_mask.dim() > 3:
+                    attn_mask = attn_mask.squeeze(-1)
+                elif attn_mask.dim() < 3:
+                    attn_mask = attn_mask.unsqueeze(0)
+                attn_mask = attn_mask.to(device, dtype=dtype)
 
-        bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
-        cond = []
-        align_faces = []
+            image = tensor_to_image(image)
 
-        # Analyse multiple images at multiple sizes and combine largest area embeddings
-        for i in range(image.shape[0]):
-            # get insightface embeddings
-            iface_embeds = None
-            for size in [(size, size) for size in range(640, 256, -64)]:
-                face_analysis.det_model.input_size = size
-                face_info = face_analysis.get(image[i])
-                if face_info:
-                    # Only use the maximum face
-                    # Removed the reverse=True from original code because we need the largest area not the smallest one!
-                    # Sorts the list in ascending order (smallest to largest),
-                    # then selects the last element, which is the largest face
-                    face_info = sorted(face_info, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]))[-1]
-                    iface_embeds = torch.from_numpy(face_info.embedding).unsqueeze(0).to(device, dtype=dtype)
-                    break
-            else:
-                # No face detected, skip this image
-                logging.warning(f'Warning: No face detected in image {str(i)}')
-                continue
+            face_helper = FaceRestoreHelper(
+                upscale_factor=1,
+                face_size=512,
+                crop_ratio=(1, 1),
+                det_model='retinaface_resnet50',
+                save_ext='png',
+                device=device,
+                model_rootpath=CONTROLNET_DIR,
+            )
 
-            # get eva_clip embeddings
-            face_helper.clean_all()
-            face_helper.read_image(image[i])
-            if source_face_selection == "largest_face":
-                face_helper.get_face_landmarks_5(only_keep_largest=True)
-            else:
-                face_helper.get_face_landmarks_5(only_center_face=True)
-            face_helper.align_warp_face()
+            face_helper.face_parse = None
+            face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device, model_rootpath=CONTROLNET_DIR)
 
-            if len(face_helper.cropped_faces) == 0:
-                # No face detected, skip this image
-                continue
+            bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
+            cond = []
+            align_faces = []
 
-            # Get aligned face image
-            align_face = face_helper.cropped_faces[0]
-            # Convert bgr face image to tensor
-            align_face = image_to_tensor(align_face).unsqueeze(0).permute(0, 3, 1, 2).to(device)
-            parsing_out = face_helper.face_parse(functional.normalize(align_face, [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))[0]
-            parsing_out = parsing_out.argmax(dim=1, keepdim=True)
-            bg = sum(parsing_out == i for i in bg_label).bool()
-            white_image = torch.ones_like(align_face)
-            # Only keep the face features
-            face_features_image = torch.where(bg, white_image, to_gray(align_face))
+            for i in range(image.shape[0]):
+                iface_embeds = None
+                for size in [(size, size) for size in range(640, 256, -64)]:
+                    face_analysis.det_model.input_size = size
+                    face_info = face_analysis.get(image[i])
+                    if face_info:
+                        face_info = sorted(face_info, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]))[-1]
+                        iface_embeds = torch.from_numpy(face_info.embedding).unsqueeze(0).to(device, dtype=dtype)
+                        break
+                else:
+                    logging.warning(f'Warning: No face detected in image {str(i)}')
+                    continue
 
-            # Transform img before sending to eva_clip
-            # Apparently MPS only supports NEAREST interpolation?
-            face_features_image = functional.resize(face_features_image, eva_clip.image_size, transforms.InterpolationMode.BICUBIC if 'cuda' in device.type else transforms.InterpolationMode.NEAREST).to(device, dtype=dtype)
-            face_features_image = functional.normalize(face_features_image, eva_clip.image_mean, eva_clip.image_std)
+                face_helper.clean_all()
+                face_helper.read_image(image[i])
+                if source_face_selection == "largest_face":
+                    face_helper.get_face_landmarks_5(only_keep_largest=True)
+                else:
+                    face_helper.get_face_landmarks_5(only_center_face=True)
+                face_helper.align_warp_face()
 
-            # eva_clip
-            id_cond_vit, id_vit_hidden = eva_clip(face_features_image, return_all_features=False, return_hidden=True, shuffle=False)
-            id_cond_vit = id_cond_vit.to(device, dtype=dtype)
-            for idx in range(len(id_vit_hidden)):
-                id_vit_hidden[idx] = id_vit_hidden[idx].to(device, dtype=dtype)
+                if len(face_helper.cropped_faces) == 0:
+                    continue
 
-            id_cond_vit = torch.div(id_cond_vit, torch.norm(id_cond_vit, 2, 1, True))
+                align_face = face_helper.cropped_faces[0]
+                align_face = image_to_tensor(align_face).unsqueeze(0).permute(0, 3, 1, 2).to(device)
+                parsing_out = face_helper.face_parse(functional.normalize(align_face, [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))[0]
+                parsing_out = parsing_out.argmax(dim=1, keepdim=True)
+                bg = sum(parsing_out == i for i in bg_label).bool()
+                white_image = torch.ones_like(align_face)
+                face_features_image = torch.where(bg, white_image, to_gray(align_face))
 
-            # Combine embeddings
-            id_cond = torch.cat([iface_embeds, id_cond_vit], dim=-1)
+                face_features_image = functional.resize(face_features_image, eva_clip.image_size, transforms.InterpolationMode.BICUBIC if 'cuda' in device.type else transforms.InterpolationMode.NEAREST).to(device, dtype=dtype)
+                face_features_image = functional.normalize(face_features_image, eva_clip.image_mean, eva_clip.image_std)
 
-            # Pulid_encoder
-            cond.append(pulid_flux.get_embeds(id_cond, id_vit_hidden))
-            align_faces.append(align_face.permute(0, 2, 3, 1))
+                id_cond_vit, id_vit_hidden = eva_clip(face_features_image, return_all_features=False, return_hidden=True, shuffle=False)
+                id_cond_vit = id_cond_vit.to(device, dtype=dtype)
+                for idx in range(len(id_vit_hidden)):
+                    id_vit_hidden[idx] = id_vit_hidden[idx].to(device, dtype=dtype)
 
-        if not cond:
-            # No faces detected, return the original model
-            logging.warning("PuLID warning: No faces detected in any of the given images, returning unmodified model.")
-            return (model,)
+                id_cond_vit = torch.div(id_cond_vit, torch.norm(id_cond_vit, 2, 1, True))
 
-        # average embeddings
-        cond = torch.cat(cond).to(device, dtype=dtype)
-        if cond.shape[0] > 1:
-            cond = torch.mean(cond, dim=0, keepdim=True)
+                id_cond = torch.cat([iface_embeds, id_cond_vit], dim=-1)
 
-        sigma_start = model.get_model_object("model_sampling").percent_to_sigma(start_at)
-        sigma_end = model.get_model_object("model_sampling").percent_to_sigma(end_at)
+                cond.append(pulid_flux.get_embeds(id_cond, id_vit_hidden))
+                align_faces.append(align_face.permute(0, 2, 3, 1))
 
-        # Patch the Flux model (original diffusion_model)
-        # Nah, I don't care for the official ModelPatcher because it's undocumented!
-        # I want the end result now, and I don’t mind if I break other custom nodes in the process. 😄
-        flux_model = model.model.diffusion_model
-        # Let's see if we already patched the underlying flux model, if not apply patch
-        if not hasattr(flux_model, "pulid_ca"):
-            # Add perceiver attention, variables and current node data (weight, embedding, sigma_start, sigma_end)
-            # The pulid_data is stored in Dict by unique node index,
-            # so we can chain multiple ApplyPulidFlux nodes!
-            flux_model.pulid_ca = pulid_flux.pulid_ca
-            flux_model.pulid_double_interval = pulid_flux.double_interval
-            flux_model.pulid_single_interval = pulid_flux.single_interval
-            flux_model.pulid_data = {}
-            # Replace model forward_orig with our own
-            new_method = forward_orig.__get__(flux_model, flux_model.__class__)
-            setattr(flux_model, 'forward_orig', new_method)
+                # 将暂时不用的数据转移到内存
+                send_to_cpu_and_cleanup([iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden])
 
-        # Patch is already in place, add data (weight, embedding, sigma_start, sigma_end) under unique node index
-        flux_model.pulid_data[unique_id] = {
-            'weight': weight,
-            'embedding': cond,
-            'sigma_start': sigma_start,
-            'sigma_end': sigma_end,
-        }
+            if not cond:
+                logging.warning("PuLID warning: No faces detected in any of the given images, returning unmodified model.")
+                return (model,)
 
-        # Keep a reference for destructor (if node is deleted the data will be deleted as well)
-        self.pulid_data_dict = {'data': flux_model.pulid_data, 'unique_id': unique_id}
-        
-        align_faces = torch.cat(align_faces)
-        return (model, align_faces)
+            cond = torch.cat(cond).to(device, dtype=dtype)
+            if cond.shape[0] > 1:
+                cond = torch.mean(cond, dim=0, keepdim=True)
+
+            sigma_start = model.get_model_object("model_sampling").percent_to_sigma(start_at)
+            sigma_end = model.get_model_object("model_sampling").percent_to_sigma(end_at)
+
+            flux_model = model.model.diffusion_model
+            if not hasattr(flux_model, "pulid_ca"):
+                flux_model.pulid_ca = pulid_flux.pulid_ca
+                flux_model.pulid_double_interval = pulid_flux.double_interval
+                flux_model.pulid_single_interval = pulid_flux.single_interval
+                flux_model.pulid_data = {}
+                new_method = forward_orig.__get__(flux_model, flux_model.__class__)
+                setattr(flux_model, 'forward_orig', new_method)
+
+            flux_model.pulid_data[unique_id] = {
+                'weight': weight,
+                'embedding': cond,
+                'sigma_start': sigma_start,
+                'sigma_end': sigma_end,
+            }
+
+            self.pulid_data_dict = {'data': flux_model.pulid_data, 'unique_id': unique_id}
+
+            align_faces = torch.cat(align_faces)
+
+            # 将数据重新加载回显存
+            iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden = send_to_gpu([iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden], device, dtype)
+
+            return (model, align_faces)
+
 
     def __del__(self):
         # Destroy the data for this node
@@ -454,4 +447,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PulidFluxEvaClipLoader": "Load Eva Clip (PuLID Flux)",
     "ApplyPulidFlux": "Apply PuLID Flux",
 }
+
 

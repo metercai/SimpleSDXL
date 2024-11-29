@@ -45,7 +45,7 @@ def check_base_environment():
     ver_required = "0.3.21"
     REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
     base_file = {
-        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-none-win_amd64.whl',
+        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
         }
     #index_url = "https://pypi.org/simple"
@@ -253,8 +253,8 @@ def reset_env_args():
 #build_launcher()
 #os.environ["SIMPLEAI_VERBOSE"] = "on"
 shared.token, shared.sysinfo = check_base_environment()
-print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did()}')
-print(f'[SimpleAI] nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, guest_did/身份标识: {shared.token.get_guest_did()}')
+print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')
+print(f'[SimpleAI] nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
 
 prepare_environment()
 shared.args = ini_args()

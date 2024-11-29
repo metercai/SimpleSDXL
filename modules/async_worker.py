@@ -551,7 +551,7 @@ def worker():
                 cn_img = extras.face_crop.crop_image(cn_img)
 
             # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
-            cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
+            cn_img = resize_image(cn_img, width=224, height=224, resize_mode=1)
 
             if async_task.task_class in ['Fooocus']:
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_face_path)
@@ -1146,7 +1146,7 @@ def worker():
                     progressbar(async_task, current_progress, 'Checking for NSFW content ...')
                     img = default_censor(img)
                 progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{total_count} to system ...')
-                uov_image_path = log(img, d, output_format=async_task.output_format, persist_image=persist_image)
+                uov_image_path = log(img, d, output_format=async_task.output_format, persist_image=persist_image, user_did=async_task.user_did)
                 yield_result(async_task, uov_image_path, current_progress, async_task.black_out_nsfw, False,
                              do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
                 return current_progress, img, prompt, negative_prompt
@@ -1356,7 +1356,7 @@ def worker():
                     progressbar(async_task, 100, 'Checking for NSFW content ...')
                     async_task.uov_input_image = default_censor(async_task.uov_input_image)
                 progressbar(async_task, 100, 'Saving image to system ...')
-                uov_input_image_path = log(async_task.uov_input_image, d, output_format=async_task.output_format)
+                uov_input_image_path = log(async_task.uov_input_image, d, output_format=async_task.output_format, user_did=async_task.user_did)
                 yield_result(async_task, uov_input_image_path, 100, async_task.black_out_nsfw, False,
                              do_not_show_finished_images=True)
                 return
@@ -1571,6 +1571,7 @@ def worker():
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
+                        tasks = tasks[:1]
                     elif 'upscale' in async_task.uov_method and match:
                         async_task.params_backend['i2i_uov_fn'] = 4
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
@@ -1603,7 +1604,7 @@ def worker():
                         async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
                     else:
                         i2i_model_type = 2
-                        async_task.base_model_name = 'flux1-fill-dev-fp16-Q4_0-GGUF.gguf'
+                        async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
                         async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
@@ -1820,6 +1821,7 @@ def worker():
             task = async_tasks.pop(0)
             try:
                 handler(task)
+                #print(f'after handler, task:{task}')
                 if task.generate_image_grid:
                     build_image_wall(task)
                 task.yields.append(['finish', task.results])
