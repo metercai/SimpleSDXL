@@ -136,6 +136,7 @@ def trigger_input_identity(img):
 def bind_identity(nick, tele):
     if check_input(nick, tele):
         where = shared.token.check_local_user_token(nick, tele)
+        print(f'check_local_user_token:{where}')
         if where in ['local', 'recall']: # 本地或远程有身份, 输入身份口令
             result = [note1_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         elif where == 'create': # 新身份, 输入验证码
@@ -157,6 +158,7 @@ def verify_identity(input_id_info, state, vcode):
         inputs = input_id_info.split(',')
         nick, tele = inputs[0].strip(), inputs[1].strip()
         next_cmd = shared.token.check_user_verify_code(nick, tele, vcode)
+        print(f'check_user_verify_code:{next_cmd}')
         if next_cmd == 'create':  # 验证成功, 创建新身份, 开始设置口令
             result = [note2_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         elif next_cmd == 'recall': # 验证并找回身份, 要求直接输入口令
