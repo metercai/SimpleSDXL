@@ -433,7 +433,7 @@
       "height": 1280,
       "interpolation": "bicubic",
       "method": "keep proportion",
-      "condition": "always",
+      "condition": "downscale if bigger",
       "multiple_of": 0,
       "image": [
         "287",
@@ -515,7 +515,7 @@
   },
   "310": {
     "inputs": {
-      "value": 1024
+      "value": 512
     },
     "class_type": "easy int",
     "_meta": {
@@ -564,82 +564,6 @@
     "class_type": "easy imageSize",
     "_meta": {
       "title": "ImageSize"
-    }
-  },
-  "316": {
-    "inputs": {
-      "comparison": "a > b",
-      "a": [
-        "320",
-        0
-      ],
-      "b": [
-        "317",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "317": {
-    "inputs": {
-      "value": 1280
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "318": {
-    "inputs": {
-      "boolean": [
-        "316",
-        0
-      ],
-      "on_true": [
-        "319",
-        0
-      ],
-      "on_false": [
-        "287",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "319": {
-    "inputs": {
-      "width": 1280,
-      "height": 1280,
-      "upscale_method": "nearest-exact",
-      "keep_proportion": true,
-      "divisible_by": 2,
-      "crop": "disabled",
-      "image": [
-        "287",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJ",
-    "_meta": {
-      "title": "Resize Image"
-    }
-  },
-  "320": {
-    "inputs": {
-      "image": [
-        "287",
-        0
-      ]
-    },
-    "class_type": "easy imageSizeByLongerSide",
-    "_meta": {
-      "title": "ImageSize (LongerSide)"
     }
   },
   "328": {
@@ -1381,7 +1305,7 @@
         0
       ],
       "on_true": [
-        "1951",
+        "2383",
         0
       ],
       "on_false": [
@@ -1456,7 +1380,7 @@
         4
       ],
       "denoise": [
-        "1673",
+        "1676",
         0
       ],
       "model": [
@@ -1545,7 +1469,7 @@
   "994": {
     "inputs": {
       "pixels": [
-        "1870",
+        "2390",
         0
       ],
       "vae": [
@@ -1561,7 +1485,7 @@
   "995": {
     "inputs": {
       "pixels": [
-        "318",
+        "2387",
         0
       ],
       "vae": [
@@ -3255,55 +3179,9 @@
       "title": "Float"
     }
   },
-  "1673": {
-    "inputs": {
-      "boolean": [
-        "1674",
-        0
-      ],
-      "on_true": [
-        "1676",
-        0
-      ],
-      "on_false": [
-        "1890",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1674": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "1890",
-        9
-      ],
-      "b": [
-        "1675",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1675": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "1676": {
     "inputs": {
-      "value": 0.2
+      "value": 0.15
     },
     "class_type": "easy float",
     "_meta": {
@@ -3645,32 +3523,6 @@
       "title": "i2i_uov_hires_fix_s"
     }
   },
-  "1870": {
-    "inputs": {
-      "width": 1280,
-      "height": 1280,
-      "upscale_method": "bicubic",
-      "keep_proportion": true,
-      "divisible_by": 2,
-      "width_input": [
-        "307",
-        0
-      ],
-      "height_input": [
-        "308",
-        0
-      ],
-      "crop": "disabled",
-      "image": [
-        "287",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJ",
-    "_meta": {
-      "title": "Resize Image"
-    }
-  },
   "1872": {
     "inputs": {
       "width": 512,
@@ -3924,7 +3776,7 @@
       "width": 512,
       "height": 512,
       "upscale_method": "lanczos",
-      "keep_proportion": false,
+      "keep_proportion": true,
       "divisible_by": 2,
       "crop": "disabled",
       "image": [
@@ -3987,10 +3839,7 @@
       "width": 1024,
       "height": 1024,
       "upscale_method": "lanczos",
-      "keep_proportion": [
-        "2310",
-        0
-      ],
+      "keep_proportion": true,
       "divisible_by": 2,
       "width_input": [
         "2314",
@@ -4989,7 +4838,7 @@
         "1079",
         0
       ],
-      "start_percent": 0.004,
+      "start_percent": 0,
       "end_percent": [
         "1082",
         0
@@ -5703,6 +5552,64 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
+    }
+  },
+  "2383": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "upscale_method": "lanczos",
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "width_input": [
+        "1890",
+        1
+      ],
+      "height_input": [
+        "1890",
+        2
+      ],
+      "crop": "disabled",
+      "image": [
+        "1951",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "2387": {
+    "inputs": {
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "bicubic",
+      "method": "keep proportion",
+      "condition": "downscale if bigger",
+      "multiple_of": 0,
+      "image": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2390": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "scale_by": 2,
+      "image": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "ImageScaleBy",
+    "_meta": {
+      "title": "Upscale Image By"
     }
   }
 }

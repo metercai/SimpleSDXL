@@ -368,6 +368,8 @@ def worker():
                 user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
+                if async_task.disable_preview:
+                    callback = None
                 imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
                 if inpaint_worker.current_task is not None:
                     imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
@@ -534,10 +536,9 @@ def worker():
             cn_img, cn_stop, cn_weight = task
             cn_img = HWC3(cn_img)
 
-            # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
-            cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
-
             if async_task.task_class in ['Fooocus']:
+                # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
+                cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_path)
             else:
                 task[0] = cn_img
@@ -550,10 +551,9 @@ def worker():
             if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = extras.face_crop.crop_image(cn_img)
 
-            # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
-            cn_img = resize_image(cn_img, width=224, height=224, resize_mode=1)
-
             if async_task.task_class in ['Fooocus']:
+                # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
+                cn_img = resize_image(cn_img, width=224, height=224, resize_mode=1)
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_face_path)
             else:
                 task[0] = cn_img
@@ -611,7 +611,8 @@ def worker():
                       advance_progress=False):
         if not skip_apply_outpaint:
             inpaint_image, inpaint_mask = apply_outpaint(async_task, inpaint_image, inpaint_mask)
-            denoising_strength = 1.0
+            if len(async_task.outpaint_selections) > 0:
+                denoising_strength = 1.0
 
         inpaint_worker.current_task = inpaint_worker.InpaintWorker(
             image=inpaint_image,
@@ -627,8 +628,7 @@ def worker():
         if async_task.task_class in flags.comfy_classes:
             inpaint_mask = inpaint_worker.current_task.interested_mask
             inpaint_image = inpaint_worker.current_task.interested_image
-            height, width = inpaint_worker.current_task.image.shape[:2]  # inpaint_image.shape[:2]  ?
-            print(f'inpaint to comfy:(H, W)=({height}, {width}), inpaint_image(H, W)=({inpaint_image.shape[:2]}), inpaint_mask(H, W)=({inpaint_mask.shape[:2]})')
+            height, width = inpaint_worker.current_task.interested_image.shape[:2]  
             return denoising_strength, initial_latent, width, height, current_progress
 
         if advance_progress:
@@ -1234,6 +1234,8 @@ def worker():
         
         if async_task.task_class in flags.comfy_classes:
             print(f'[TaskEngine] Enable Comfyd backend.')
+            if "flux_aio" in async_task.task_method and len(async_task.cn_tasks[flags.cn_ip_face])==0:
+                comfyd.stop()
             comfyd.start()
         else:
             print(f'[TaskEngine] Enable Fooocus backend.')
@@ -1821,7 +1823,6 @@ def worker():
             task = async_tasks.pop(0)
             try:
                 handler(task)
-                #print(f'after handler, task:{task}')
                 if task.generate_image_grid:
                     build_image_wall(task)
                 task.yields.append(['finish', task.results])
