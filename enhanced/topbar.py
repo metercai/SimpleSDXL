@@ -327,6 +327,10 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         preset=state_params["__preset"]
         ))
 
+    if state_params["engine"] != 'Fooocus' and shared.token.is_guest(state_params["user_did"]):
+        gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first.')
+        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first / 该预置包需要绑定身份后才能正常运行, 请先完成身份绑定.')
+
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
     # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
@@ -344,8 +348,11 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
 
 
 def process_after_generation(state_params):
-    #if "__max_per_page" not in state_params.keys():
-    #    state_params.update({"__max_per_page": 18})
+    if "__max_per_page" not in state_params.keys():
+        state_params.update({"__max_per_page": 18})
+    if "__max_catalog" not in state_params.keys():
+        state_params.update({"__max_catalog": config.default_image_catalog_max_number })
+    
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
     user_did = state_params["user_did"]
@@ -375,13 +382,13 @@ def process_after_generation(state_params):
 
 def sync_message(state_params):
     state_params.update({"__message":system_message})
-    return state_params
+    return
 
 preset_down_note_info = 'The preset package being loaded has model files that need to be downloaded, and it will take some time to wait...'
 def check_absent_model(bar_button, state_params):
     #print(f'check_absent_model,state_params:{state_params}')
     state_params.update({'bar_button': bar_button})
-    return state_params
+    return 
 
 def down_absent_model(state_params):
     state_params.update({'bar_button': state_params["bar_button"].replace('\u2B07', '')})
@@ -590,7 +597,7 @@ identity_introduce = '''
 3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
 4，申请预置包发布和二次打包的授权标识(待上线)。<br>
 <br>
-系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权身份的使用；AI节点私有部署，被授权代理多用户隔离的数字空间；官方及社区节点存有身份加密副本用于追溯和自证。由多方协作保障隐私安全、身份可信及跨节点互认。以此构建和而不同的开源社区生态。规则说明>> <br>
+系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权身份的使用；AI节点私有部署，被授权代理多用户隔离的数字空间；社区节点存有身份加密副本用于追溯和自证。在多方协作下保障隐私安全、身份可信及跨节点互认。以此构建和而不同的开源社区生态。规则说明>> <br>
 '''
 
 def update_after_identity(state):

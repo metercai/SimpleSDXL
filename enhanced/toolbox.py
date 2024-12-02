@@ -100,7 +100,7 @@ def toggle_note_box(item, state_params):
     if item == 'preset':
         return gr.update(value=toolbox_note_preset_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'embed':
-        return gr.update(value=toolbox_note_embed_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
+        return gr.update(value=toolbox_note_embed_title + title_extra, visible=True), gr.update(visible=flag), gr.update(visible=flag)
 
 def toggle_note_box_delete(state_params):
     return toggle_note_box('delete', state_params)
@@ -221,7 +221,7 @@ def delete_image(state_params):
     state_params.update({"prompt_info":[choice, selected]})
     images_gallery = gallery.get_images_from_gallery_index(choice, max_per_page, user_did)
     state_params.update({"note_box_state": ['',0,0]})
-    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice, visible=True if choice else False), gr.update(visible=False), gr.update(visible=False), state_params, state_params['__finished_nums_pages']
+    return gr.update(value=images_gallery), gr.update(choices=state_params["__output_list"], value=choice, visible=True if choice else False), gr.update(visible=False), gr.update(visible=False), state_params['__finished_nums_pages']
 
 
 def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mode):
