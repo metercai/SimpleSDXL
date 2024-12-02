@@ -283,60 +283,35 @@ function refresh_topbar_status_js(system_params) {
     setLinkColor(theme);
     nickname = system_params["user_name"];
     task_class_name = system_params["task_class_name"];
-    if (nav_name_list_str) {
-    	let nav_name_list = new Array();
-    	nav_name_list = nav_name_list_str.split(",")
-    
-    	for (let i=0;i<nav_name_list.length;i++) {
-            let item_id = "bar"+i;
-            let item_name = nav_name_list[i];
-            let nav_item = gradioApp().getElementById(item_id);
-            if (nav_item!=null) {
-		nav_item.setAttribute('data-original-text', item_name);
-                if (item_name != preset) {
-                    if (theme == "light") {
-                        nav_item.style.color = 'var(--neutral-400)';
-                        nav_item.style.background= 'var(--neutral-100)';
-                    } else {
-                        nav_item.style.color = 'var(--neutral-400)';
-                        nav_item.style.background= 'var(--neutral-700)';
-                    }
+    let nav_name_list = new Array();
+    if (nav_name_list_str) { nav_name_list = nav_name_list_str.split(","); }
+    for (let i=0;i<nav_name_list.length;i++) {
+        let item_id = "bar"+i;
+        let item_name = nav_name_list[i];
+        let nav_item = gradioApp().getElementById(item_id);
+        if (nav_item!=null) {
+	    nav_item.setAttribute('data-original-text', item_name);
+            if (item_name != preset) {
+                if (theme == "light") {
+                    nav_item.style.color = 'var(--neutral-400)';
+                    nav_item.style.background= 'var(--neutral-100)';
                 } else {
-                    if (theme == 'light') {
-                        nav_item.style.color = 'var(--neutral-800)';
-                        nav_item.style.background= 'var(--secondary-200)';
-                    } else {
-                        nav_item.style.color = 'white';
-                        nav_item.style.background= 'var(--secondary-400)';
-                    }
+                    nav_item.style.color = 'var(--neutral-400)';
+                    nav_item.style.background= 'var(--neutral-700)';
+                }
+            } else {
+                if (theme == 'light') {
+                    nav_item.style.color = 'var(--neutral-800)';
+                    nav_item.style.background= 'var(--secondary-200)';
+                } else {
+                    nav_item.style.color = 'white';
+                    nav_item.style.background= 'var(--secondary-400)';
                 }
             }
         }
     }
-    const store_flag=system_params["preset_store"];
-    let nav_store = gradioApp().getElementById("bar_store");
-    if (store_flag) {
-	if (theme == "light") {
-            nav_store.style.background= 'lightcyan';
-    	} else {
-	    nav_store.style.background= 'darkslategray';
-    	}
-    } else {
-	nav_store.style.background= '';
-    }
-    if (system_params["user_role"]=="guest") {
-	nav_store.innerHTML = "Presets";
-    } else {
-	nav_store.innerHTML = "MyPresets";
-    }
-    const preset_store = gradioApp().querySelector('.preset_store');
-    if (preset_store) {
-	if (theme == "light") {
-	    preset_store.style.backgroundColor= 'lightcyan';
-	} else {
-	    preset_store.style.backgroundColor= 'darkslategray';
-	}
-    }
+    updatePresetStore(nav_name_list, system_params["user_role"], system_params["preset_store"], theme);
+    
     const message=system_params["__message"];
     if (message!=null && message.length>60) {
         showSysMsg(message, theme);
@@ -371,6 +346,53 @@ function refresh_topbar_status_js(system_params) {
         }
     })();
     return
+}
+
+function updatePresetStore(nav_name_list, role, expand_flag, theme) {
+    let nav_store = gradioApp().getElementById("bar_store");
+    if (expand_flag) {
+        if (theme == "light") {
+            nav_store.style.background= 'lightcyan';
+        } else {
+            nav_store.style.background= 'darkslategray';
+        }
+    } else {
+        nav_store.style.background= '';
+    }
+    if (role=="guest") {
+        nav_store.innerHTML = "Presets";
+    } else {
+        nav_store.innerHTML = "MyPresets";
+    }
+    const preset_store = gradioApp().querySelector('.preset_store');
+    if (!preset_store) return;    
+    
+    if (theme == "light") {
+        preset_store.style.backgroundColor= 'lightcyan';
+    } else {
+        preset_store.style.backgroundColor= 'darkslategray';
+    }
+    
+    const allButtons = preset_store.querySelectorAll('button');
+    allButtons.forEach(button => {
+	const div = button.querySelector('div.gallery');
+	const originalText = div.getAttribute("data-original-text");
+        let text = div.textContent.trim();
+        let item_name = originalText || text;
+        item_name = item_name.trim();
+	console.log("updatePresetStore: otext="+originalText+", text="+text+", name="+item_name);
+	if (item_name) {
+            if (nav_name_list.includes(item_name)) {
+                if (theme === 'light') {
+		    button.style.background= 'var(--neutral-50)';
+                } else {
+		    button.style.background= 'var(--neutral-600)';
+                }
+            } else {
+                button.style.background= '';
+            }
+	}
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
