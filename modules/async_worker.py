@@ -541,7 +541,7 @@ def worker():
                 cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_path)
             else:
-                task[0] = cn_img
+                task[0] = resize_image(cn_img, width=1024, height=1024, resize_mode=2)
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_ip_face]:
@@ -556,7 +556,7 @@ def worker():
                 cn_img = resize_image(cn_img, width=224, height=224, resize_mode=1)
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_face_path)
             else:
-                task[0] = cn_img
+                task[0] = resize_image(cn_img, width=1024, height=1024, resize_mode=2)
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         all_ip_tasks = async_task.cn_tasks[flags.cn_ip] + async_task.cn_tasks[flags.cn_ip_face]
@@ -1604,6 +1604,7 @@ def worker():
                         async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
                     if 'cn' in goals:
                         async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
+                        denoising_strength = denoising_strength*0.8
                     else:
                         i2i_model_type = 2
                         async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
