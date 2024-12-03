@@ -1234,7 +1234,9 @@ def worker():
         
         if async_task.task_class in flags.comfy_classes:
             print(f'[TaskEngine] Enable Comfyd backend.')
-            if "flux_aio" in async_task.task_method and len(async_task.cn_tasks[flags.cn_ip_face])==0:
+            if "flux_aio" in async_task.task_method and \
+                (async_task.current_tab == 'uov' and not async_task.mixing_image_prompt_and_vary_upscale) or \
+                (async_task.current_tab == 'inpaint' and not async_task.mixing_image_prompt_and_inpaint):
                 comfyd.stop()
             comfyd.start()
         else:
