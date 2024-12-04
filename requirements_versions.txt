@@ -24,8 +24,8 @@ opencv-python-headless==4.9.0.80
 open-clip-torch>=2.17.1
 omegaconf==2.3.0 #
 onnx==1.12.0
-onnxruntime==1.20.0 #
-onnxruntime-gpu==1.20.0
+onnxruntime==1.20.1 #
+onnxruntime-gpu==1.20.1
 onnx-graphsurgeon==0.3.27
 peft==0.10.0
 Pillow #==10.4.0 #
