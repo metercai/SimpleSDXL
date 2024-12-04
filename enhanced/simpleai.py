@@ -81,7 +81,9 @@ note1_1 = '未匹配到数字身份，请注意查收手机短信的身份验证
 note1_2 = f'已匹配到数字身份，{note1_0}'
 note1_3 = f'已匹配到身份在云端的加密副本, {note1_0}'
 note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
-note1_5 = '无法找回加密副本或验证身份。请检查软件环境，重新输入身份信息，再次绑定。'
+note1_5 = '该手机号绑定身份数量超过上限，无法绑定该身份，请更换身份信息，再次申请绑定。'
+note1_6 = '短时间内重复提交相同身份信息，请稍后再重新输入身份信息，再次申请绑定。'
+note1_7 = '无法找回加密副本或验证身份。请检查网络环境，重新输入身份信息，再次绑定。'
 
 note2_0 = lambda x: f'最少8位字符，必须包含大写字母、小写字母和数字，不能有特殊字符。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
 note2_1 = f'身份已验证，请按提示预设个人身份口令，{note2_0("lightseagreen")}'
@@ -143,8 +145,12 @@ def bind_identity(nick, tele):
             result = [note1_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*5
         elif where == 'immature': # 本地遗留密钥,重设身份口令
             result = [note2_8] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
-        else:  # 过程出错, 重新输入绑定信息,再来
+        elif where == 'unknown_exceeded': # 手机号绑定身份过多
             result = [note1_5] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
+        elif where == 'unknown_repeat': # 重复提交
+            result = [note1_6] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
+        else:  # 过程出错, 重新输入绑定信息,再来
+            result = [note1_7] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
     else: # 身份信息不合规, 重新输入
         result = [note1_4] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
     return result + [f'{nick}, {tele}']

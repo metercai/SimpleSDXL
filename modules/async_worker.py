@@ -1560,7 +1560,7 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_size = lambda x, p: (x+16) if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
+                    tiled_size = lambda x, p: int(x*p+16) if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
                     tiled_steps = [10, 6, 4]
                     print(f'aio parse, uov_method: {async_task.uov_method}')
                     match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
@@ -1582,7 +1582,9 @@ def worker():
                         async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
-                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(int(width*match_multiple)/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(int(height*match_multiple)/(async_task.params_backend['i2i_uov_tiled_height']-16))
+                        width = int(width * match_multiple)
+                        height = int(height * match_multiple)
+                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
