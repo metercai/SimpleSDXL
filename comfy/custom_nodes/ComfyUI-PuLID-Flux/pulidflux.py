@@ -298,19 +298,9 @@ class ApplyPulidFlux:
         device = comfy.model_management.get_torch_device()
         dtype = model.model.diffusion_model.dtype
 
-        def send_to_cpu_and_cleanup(tensors):
-            for tensor in tensors:
-                if isinstance(tensor, torch.Tensor):
-                    tensor.cpu()
-            torch.cuda.empty_cache()
-
-        def send_to_gpu(tensors, device, dtype):
-            return [tensor.to(device, dtype=dtype) if isinstance(tensor, torch.Tensor) else tensor for tensor in tensors]
-
         with torch.no_grad():
             if model.model.manual_cast_dtype is not None:
                 dtype = model.model.manual_cast_dtype
-
             eva_clip.to(device, dtype=dtype)
             pulid_flux.to(device, dtype=dtype)
 
@@ -387,9 +377,6 @@ class ApplyPulidFlux:
                 cond.append(pulid_flux.get_embeds(id_cond, id_vit_hidden))
                 align_faces.append(align_face.permute(0, 2, 3, 1))
 
-                # 将暂时不用的数据转移到内存
-                send_to_cpu_and_cleanup([iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden])
-
             if not cond:
                 logging.warning("PuLID warning: No faces detected in any of the given images, returning unmodified model.")
                 return (model,)
@@ -420,10 +407,13 @@ class ApplyPulidFlux:
             self.pulid_data_dict = {'data': flux_model.pulid_data, 'unique_id': unique_id}
 
             align_faces = torch.cat(align_faces)
-
-            # 将数据重新加载回显存
-            iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden = send_to_gpu([iface_embeds, align_face, face_features_image, id_cond_vit, id_vit_hidden], device, dtype)
-
+            
+            device = torch.device("cpu")
+            eva_clip.to(device, dtype=dtype)
+            pulid_flux.to(device, dtype=dtype)
+            torch.cuda.empty_cache()
+            del eva_clip
+            del pulid_flux
             return (model, align_faces)
 
 
@@ -447,5 +437,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PulidFluxEvaClipLoader": "Load Eva Clip (PuLID Flux)",
     "ApplyPulidFlux": "Apply PuLID Flux",
 }
+
 
 
