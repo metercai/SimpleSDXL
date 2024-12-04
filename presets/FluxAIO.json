@@ -67,6 +67,7 @@
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
         "vae,ae.safetensors,335304388,0,",
         "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
+	"loras,flux1-canny-dev-lora.safetensors,1244443944,0,",
 	"loras,flux1-depth-dev-lora.safetensors,1244440512,0,",
 	"style_models,flux1-redux-dev.safetensors,129063232,0,"
         ]
