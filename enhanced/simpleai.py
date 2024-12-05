@@ -55,6 +55,9 @@ def get_path_in_user_dir(user_did, filename, catalog=None):
         path = catalog if catalog else filename
         path_file = shared.token.get_path_in_user_dir(user_did, path)
         #print(f'get_path_in_user_dir: {path_file}')
+        if not os.path.exists(os.path.dirname(path_file)):
+            for cata in ["presets", "workflows", "styles", "wildwords"]:
+                os.makedirs(os.path.join(os.path.dirname(path_file), cata))
         if catalog: 
             path_file = os.path.join(path_file, filename)
         path_file = os.path.abspath(path_file)

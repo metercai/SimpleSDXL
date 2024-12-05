@@ -51,7 +51,7 @@ def get_welcome_image(is_mobile=False):
 def get_preset_name_list(user_did=None):
 
     if user_did and not shared.token.is_guest(user_did):
-        user_preset_file = get_path_in_user_dir(user_did, 'presets.txt')
+        user_preset_file = get_path_in_user_dir(user_did, 'presets.txt', 'presets')
         if not os.path.exists(user_preset_file):
             path_preset = os.path.abspath(f'./presets/')
             presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
@@ -524,7 +524,7 @@ def update_navbar_from_mystore(selected_preset, state):
         print(f'[PresetStore] Launch the preset/启用预置包: {selected_preset}.')
     state["__nav_name_list"] = ','.join(nav_array)
     if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
-        user_preset_file = get_path_in_user_dir(state["user_did"], 'presets.txt')
+        user_preset_file = get_path_in_user_dir(state["user_did"], 'presets.txt', 'presets')
         with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
             nav_preset_file.write(state["__nav_name_list"])
     #print(f'__nav_name_list:{state["__nav_name_list"]}')

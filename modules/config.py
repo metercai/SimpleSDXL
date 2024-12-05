@@ -266,7 +266,10 @@ if not os.path.exists(path_outputs):
 def get_user_path_outputs(user_did=None):
     if user_did is None:
         user_did = shared.token.get_guest_did()
-    return shared.token.get_path_in_user_dir(user_did, "outputs")
+    user_path_outputs = shared.token.get_path_in_user_dir(user_did, "outputs")
+    if not os.path.exists(user_path_outputs):
+        os.makedirs(user_path_outputs, exist_ok=True)
+    return user_path_outputs
 
 def get_config_item_or_set_default(key, default_value, validator, disable_empty_as_none=False, expected_type=None):
     global config_dict, visited_keys
