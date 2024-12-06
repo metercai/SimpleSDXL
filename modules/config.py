@@ -1036,7 +1036,7 @@ def get_model_filenames(folder_paths, extensions=None, name_filter=None):
 def get_base_model_list(engine='Fooocus', task_method=None):
     global modelsinfo
     file_filter = modules.flags.model_file_filter.get(engine, [])
-    if engine in ['Flux'] and 'aio' in task_method:
+    if engine in ['Flux'] and task_method and 'aio' in task_method:
         file_filter = [file_filter + ['!nf4']]
     base_model_list = modelsinfo.get_model_names('checkpoints', file_filter)
     if engine in ['Fooocus', 'Comfy']:
