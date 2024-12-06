@@ -3662,13 +3662,17 @@
       "upscale_method": "lanczos",
       "keep_proportion": true,
       "divisible_by": 2,
+      "width_input": [
+        "1890",
+        1
+      ],
+      "height_input": [
+        "1890",
+        2
+      ],
       "crop": "disabled",
       "image": [
         "2499",
-        0
-      ],
-      "get_image_size": [
-        "1911",
         0
       ]
     },
