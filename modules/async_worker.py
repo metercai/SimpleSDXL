@@ -626,9 +626,9 @@ def worker():
             raise EarlyReturnException
         
         if async_task.task_class in flags.comfy_classes:
+            height, width = inpaint_image.shape[:2]
             inpaint_mask = inpaint_worker.current_task.interested_mask
             inpaint_image = inpaint_worker.current_task.interested_image
-            height, width = inpaint_worker.current_task.interested_image.shape[:2]  
             return denoising_strength, initial_latent, width, height, current_progress
 
         if advance_progress:
