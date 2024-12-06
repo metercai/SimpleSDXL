@@ -3664,7 +3664,7 @@
       "divisible_by": 2,
       "crop": "disabled",
       "image": [
-        "2309",
+        "2499",
         0
       ],
       "get_image_size": [
@@ -3679,11 +3679,11 @@
   },
   "1989": {
     "inputs": {
-      "expand": 10,
+      "expand": 0,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 0,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -4886,7 +4886,7 @@
       ],
       "start_at_step": 0,
       "end_at_step": [
-        "2410",
+        "2394",
         0
       ],
       "return_with_leftover_noise": "disable",
@@ -4924,7 +4924,7 @@
   "2308": {
     "inputs": {
       "samples": [
-        "2398",
+        "2392",
         0
       ],
       "vae": [
@@ -5413,8 +5413,8 @@
         6
       ],
       "steps": [
-        "2399",
-        0
+        "1890",
+        7
       ],
       "cfg": 1,
       "sampler_name": [
@@ -5430,12 +5430,12 @@
         0
       ],
       "end_at_step": [
-        "2411",
-        0
+        "1890",
+        7
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "1314",
+        "2497",
         0
       ],
       "positive": [
@@ -5447,7 +5447,7 @@
         1
       ],
       "latent_image": [
-        "2405",
+        "2290",
         0
       ]
     },
@@ -5458,7 +5458,7 @@
   },
   "2394": {
     "inputs": {
-      "value": "a/4*2",
+      "value": "a/5*3",
       "a": [
         "1890",
         7
@@ -5467,143 +5467,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "2398": {
-    "inputs": {
-      "add_noise": "enable",
-      "noise_seed": [
-        "1890",
-        6
-      ],
-      "steps": [
-        "1890",
-        7
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "1609",
-        3
-      ],
-      "scheduler": [
-        "1609",
-        4
-      ],
-      "start_at_step": [
-        "2399",
-        0
-      ],
-      "end_at_step": [
-        "1890",
-        7
-      ],
-      "return_with_leftover_noise": "disable",
-      "model": [
-        "1314",
-        0
-      ],
-      "positive": [
-        "2008",
-        0
-      ],
-      "negative": [
-        "2008",
-        1
-      ],
-      "latent_image": [
-        "2408",
-        0
-      ]
-    },
-    "class_type": "KSamplerAdvanced",
-    "_meta": {
-      "title": "KSampler (Advanced)"
-    }
-  },
-  "2399": {
-    "inputs": {
-      "value": "a/4*3",
-      "a": [
-        "1890",
-        7
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2405": {
-    "inputs": {
-      "anything": [
-        "2290",
-        0
-      ]
-    },
-    "class_type": "easy cleanGpuUsed",
-    "_meta": {
-      "title": "Clean VRAM Used"
-    }
-  },
-  "2408": {
-    "inputs": {
-      "anything": [
-        "2392",
-        0
-      ]
-    },
-    "class_type": "easy cleanGpuUsed",
-    "_meta": {
-      "title": "Clean VRAM Used"
-    }
-  },
-  "2409": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2410": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2394",
-        0
-      ],
-      "on_false": [
-        "2409",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2411": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2399",
-        0
-      ],
-      "on_false": [
-        "2409",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "2421": {
@@ -6430,6 +6293,40 @@
     "class_type": "easy float",
     "_meta": {
       "title": "Float"
+    }
+  },
+  "2497": {
+    "inputs": {
+      "unet_name": "flux-hyp8-Q5_K_M.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "refiner"
+    }
+  },
+  "2498": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "2499": {
+    "inputs": {
+      "upscale_model": [
+        "2498",
+        0
+      ],
+      "image": [
+        "2309",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
     }
   }
 }

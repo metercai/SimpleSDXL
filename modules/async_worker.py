@@ -1615,9 +1615,11 @@ def worker():
                         i2i_model_type = 2
                         async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
                         async_task.params_backend['base_model_gguf'] = async_task.base_model_name
+                        async_task.cfg_scale = 30
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
                         async_task.steps = 20
+                        async_task.cfg_scale = 30
                         all_steps = async_task.steps * async_task.image_number
                     else:
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
