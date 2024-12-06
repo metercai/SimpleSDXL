@@ -79,6 +79,8 @@ wd-v1-4-moat-tagger-v2.csv
 /repos/
 /enhanced/api_token.json
 *.did
+!/enhanced/system_CyVsAk3QK3SCmiPJYioMHcyqbyrNF.did
+!/enhanced/user_7HU8TEXTFcc1vgoRi7PCdsJFBiBgN.did
 /models/hydit
 /client.toml
 /models
