@@ -26,7 +26,7 @@ import base64
 from enhanced.simpleai import comfyd, get_path_in_user_dir
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
-from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
+from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
 # app context
 nav_name_list = ''
@@ -215,6 +215,8 @@ function(system_params) {
 
 def init_nav_bars(state_params, request: gr.Request):
     #print(f'request.headers:{request.headers}')
+    #print(f'request.client:{request.client}')
+
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
@@ -225,8 +227,10 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__theme": args_manager.args.theme})
     if "__preset" not in state_params.keys():
         state_params.update({"__preset": config.preset})
-    ua_hash = hashlib.sha256(request.headers['user-agent'].encode('utf-8')).hexdigest()
+    ua_hash = hashlib.sha256(request.headers["user-agent"].encode('utf-8')).hexdigest()
+    ua_session = gen_ua_session(request.client["host"], str(request.client["port"]), request.headers["user-agent"])
     state_params.update({"ua_hash": ua_hash})
+    state_params.update({"ua_session": ua_session})
     if "__session" not in state_params.keys():
         sstoken = shared.token.get_guest_sstoken(ua_hash)
         state_params.update({"sstoken": sstoken})
@@ -611,7 +615,7 @@ def update_after_identity_sub(state):
     max_catalog = state["__max_catalog"]
     nickname = state["user_name"]
     user_did = state["user_did"]
-    print(f'[UserBase] Current identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}).')
+    print(f'[UserBase] Session identity/当前身份({state["ua_session"]}): {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}).')
     output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
@@ -630,6 +634,11 @@ def update_after_identity_sub(state):
     results += [gr.update(value=update_comfyd_url(user_did))]
     results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
+    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"]=='Fooocus' else modules.flags.ip_list[:-1]
+    for image_count in range(config.default_controlnet_image_count):
+        image_count += 1
+        results.append(gr.update(choices=ip_list, value=config.default_ip_types[image_count]))
+
     return results
 
 def update_upscale_size_of_image(image, uov_method):

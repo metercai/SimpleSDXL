@@ -1138,6 +1138,23 @@ def downloading_controlnet_cpds():
     )
     return os.path.join(paths_controlnet[0], 'fooocus_xl_cpds_128.safetensors')
 
+def downloading_controlnet_pose():
+    load_file_from_url(
+        url='https://huggingface.co/RedHash/DWPose/resolve/main/dw-ll_ucoco_384.onnx',
+        model_dir=paths_controlnet[0],
+        file_name='dw-ll_ucoco_384.onnx'
+    )
+    load_file_from_url(
+        url='https://huggingface.co/RedHash/DWPose/resolve/main/yolox_l.onnx',
+        model_dir=paths_controlnet[0],
+        file_name='yolox_l.onnx'
+    )
+    load_file_from_url(
+        url='https://huggingface.co/xinsir/controlnet-openpose-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors',
+        model_dir=paths_controlnet[0],
+        file_name='xinsir_cn_openpose_sdxl_1.0.safetensors'
+    )
+    return os.path.join(paths_controlnet[0], 'xinsir_cn_openpose_sdxl_1.0.safetensors')
 
 def downloading_ip_adapters(v):
     assert v in ['ip', 'face']

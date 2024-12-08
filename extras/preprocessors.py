@@ -80,5 +80,10 @@ def cpds(x):
 
     return norm255(result, low=4, high=96).clip(0, 255).astype(np.uint8)
 
+from extras.easy_dwpose import DWposeDetector
+def dwpose(x):
+    detector = DWposeDetector()
+    result = detector(x, output_type="np", include_hands=False, include_face=False)
 
+    return result
 
