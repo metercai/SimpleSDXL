@@ -10,7 +10,7 @@ import comfy.sd
 
 import folder_paths
 
-MAX_RESOLUTION=8192
+MAX_RESOLUTION=32768
 #------------------------------------------------------------------------------
 def load_checkpoint(ckpt_name,output_vae=True, output_clip=True):
 
