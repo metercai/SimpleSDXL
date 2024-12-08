@@ -4,7 +4,7 @@
 * SD3m预置包升级为SD3x，支持SD35模型。
 * 新增内嵌Comfyd界面入口。
 * 升级基础环境到Pytorch2.4.1。
-- 6gc0exFITy|9puib15frK 
+- 6gc0exFITy|9glL1TS6Xv 
 # 2024-09-16
 * 解锁Flux的lora和可图lora。
 * 自动修图开关移到增强修图标签内。修图更多情况是针对已有图片，而新生成图片往往并不知道是否需要修。
