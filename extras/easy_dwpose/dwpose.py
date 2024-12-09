@@ -5,7 +5,6 @@ import numpy as np
 import PIL
 import PIL.Image
 import torch
-from huggingface_hub import hf_hub_download
 
 from extras.easy_dwpose.body_estimation import Wholebody, resize_image
 from extras.easy_dwpose.draw import draw_openpose
