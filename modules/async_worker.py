@@ -514,7 +514,7 @@ def worker():
             else:
                 cn_img = preprocessors.normalizedBG(cn_img)
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img) # if async_task.task_class in ['Fooocus'] else cn_img
+            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_pose]:
@@ -526,7 +526,7 @@ def worker():
                 else:
                     cn_img = preprocessors.openpose(cn_img)
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img) # if async_task.task_class in ['Fooocus'] else cn_img
+            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_cpds]:
