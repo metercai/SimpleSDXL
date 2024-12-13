@@ -23,30 +23,6 @@
       "title": "CLIPTextEncodeFlux"
     }
   },
-  "48": {
-    "inputs": {
-      "low_threshold": [
-        "1711",
-        0
-      ],
-      "high_threshold": [
-        "1713",
-        0
-      ],
-      "resolution": [
-        "1791",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "CannyEdgePreprocessor",
-    "_meta": {
-      "title": "Canny Edge"
-    }
-  },
   "59": {
     "inputs": {
       "images": [
@@ -235,11 +211,11 @@
         0
       ],
       "positive": [
-        "1311",
+        "140",
         0
       ],
       "negative": [
-        "289",
+        "140",
         0
       ],
       "vae": [
@@ -429,11 +405,17 @@
   },
   "303": {
     "inputs": {
-      "width": 1280,
-      "height": 1280,
+      "width": [
+        "2695",
+        0
+      ],
+      "height": [
+        "2696",
+        0
+      ],
       "interpolation": "bicubic",
-      "method": "keep proportion",
-      "condition": "downscale if bigger",
+      "method": "fill / crop",
+      "condition": "always",
       "multiple_of": 0,
       "image": [
         "287",
@@ -610,7 +592,7 @@
         0
       ],
       "positive": [
-        "2008",
+        "1315",
         0
       ],
       "negative": [
@@ -655,7 +637,7 @@
         0
       ],
       "positive": [
-        "2277",
+        "2648",
         0
       ],
       "negative": [
@@ -686,298 +668,6 @@
     "class_type": "VAEDecode",
     "_meta": {
       "title": "VAE Decode"
-    }
-  },
-  "542": {
-    "inputs": {
-      "low_threshold": [
-        "1711",
-        0
-      ],
-      "high_threshold": [
-        "1713",
-        0
-      ],
-      "resolution": [
-        "1791",
-        0
-      ],
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "CannyEdgePreprocessor",
-    "_meta": {
-      "title": "Canny Edge"
-    }
-  },
-  "567": {
-    "inputs": {
-      "low_threshold": [
-        "1711",
-        0
-      ],
-      "high_threshold": [
-        "1713",
-        0
-      ],
-      "resolution": [
-        "1791",
-        0
-      ],
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "CannyEdgePreprocessor",
-    "_meta": {
-      "title": "Canny Edge"
-    }
-  },
-  "592": {
-    "inputs": {
-      "low_threshold": [
-        "1711",
-        0
-      ],
-      "high_threshold": [
-        "1713",
-        0
-      ],
-      "resolution": [
-        "1791",
-        0
-      ],
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "CannyEdgePreprocessor",
-    "_meta": {
-      "title": "Canny Edge"
-    }
-  },
-  "661": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "662": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "663": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1320",
-        0
-      ],
-      "b": [
-        "661",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "664": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "665": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "666": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "667": {
-    "inputs": {
-      "value": 4
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "668": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1320",
-        0
-      ],
-      "b": [
-        "662",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "669": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1320",
-        0
-      ],
-      "b": [
-        "674",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "670": {
-    "inputs": {
-      "boolean": [
-        "663",
-        0
-      ],
-      "on_true": [
-        "664",
-        0
-      ],
-      "on_false": [
-        "1226",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "672": {
-    "inputs": {
-      "boolean": [
-        "668",
-        0
-      ],
-      "on_true": [
-        "665",
-        0
-      ],
-      "on_false": [
-        "670",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "673": {
-    "inputs": {
-      "boolean": [
-        "669",
-        0
-      ],
-      "on_true": [
-        "666",
-        0
-      ],
-      "on_false": [
-        "672",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "674": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "682": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "683": {
-    "inputs": {
-      "comparison": "a > b",
-      "a": [
-        "673",
-        0
-      ],
-      "b": [
-        "666",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "684": {
-    "inputs": {
-      "boolean": [
-        "683",
-        0
-      ],
-      "on_true": [
-        "682",
-        0
-      ],
-      "on_false": [
-        "673",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "702": {
@@ -1571,7 +1261,7 @@
         0
       ],
       "on_true": [
-        "1977",
+        "2752",
         0
       ],
       "on_false": [
@@ -1702,7 +1392,7 @@
         0
       ],
       "on_false": [
-        "5",
+        "2506",
         0
       ]
     },
@@ -1778,7 +1468,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "673",
+        "2582",
         0
       ],
       "b": [
@@ -1804,7 +1494,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "673",
+        "2582",
         0
       ],
       "b": [
@@ -1819,7 +1509,7 @@
   },
   "1107": {
     "inputs": {
-      "value": 3
+      "value": 1
     },
     "class_type": "easy int",
     "_meta": {
@@ -1888,7 +1578,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1238",
+        "2599",
         0
       ],
       "b": [
@@ -1963,7 +1653,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1294",
+        "2612",
         0
       ],
       "b": [
@@ -1980,7 +1670,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1294",
+        "2612",
         0
       ],
       "b": [
@@ -2055,7 +1745,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1305",
+        "2625",
         0
       ],
       "b": [
@@ -2072,7 +1762,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1305",
+        "2625",
         0
       ],
       "b": [
@@ -2085,242 +1775,11 @@
       "title": "Compare"
     }
   },
-  "1223": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1224": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1320",
-        0
-      ],
-      "b": [
-        "1223",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1226": {
-    "inputs": {
-      "boolean": [
-        "1224",
-        0
-      ],
-      "on_true": [
-        "1223",
-        0
-      ],
-      "on_false": [
-        "667",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1229": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1319",
-        0
-      ],
-      "b": [
-        "661",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1234": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1319",
-        0
-      ],
-      "b": [
-        "662",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1235": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1319",
-        0
-      ],
-      "b": [
-        "674",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1236": {
-    "inputs": {
-      "boolean": [
-        "1229",
-        0
-      ],
-      "on_true": [
-        "664",
-        0
-      ],
-      "on_false": [
-        "1246",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1237": {
-    "inputs": {
-      "boolean": [
-        "1234",
-        0
-      ],
-      "on_true": [
-        "665",
-        0
-      ],
-      "on_false": [
-        "1236",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1238": {
-    "inputs": {
-      "boolean": [
-        "1235",
-        0
-      ],
-      "on_true": [
-        "666",
-        0
-      ],
-      "on_false": [
-        "1237",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1241": {
-    "inputs": {
-      "comparison": "a > b",
-      "a": [
-        "1238",
-        0
-      ],
-      "b": [
-        "666",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1242": {
-    "inputs": {
-      "boolean": [
-        "1241",
-        0
-      ],
-      "on_true": [
-        "682",
-        0
-      ],
-      "on_false": [
-        "1238",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1245": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1319",
-        0
-      ],
-      "b": [
-        "1223",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1246": {
-    "inputs": {
-      "boolean": [
-        "1245",
-        0
-      ],
-      "on_true": [
-        "1223",
-        0
-      ],
-      "on_false": [
-        "667",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "1288": {
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1238",
+        "2599",
         0
       ],
       "b": [
@@ -2333,376 +1792,6 @@
       "title": "Compare"
     }
   },
-  "1289": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1321",
-        0
-      ],
-      "b": [
-        "661",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1290": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1321",
-        0
-      ],
-      "b": [
-        "662",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1291": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1321",
-        0
-      ],
-      "b": [
-        "674",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1292": {
-    "inputs": {
-      "boolean": [
-        "1289",
-        0
-      ],
-      "on_true": [
-        "664",
-        0
-      ],
-      "on_false": [
-        "1299",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1293": {
-    "inputs": {
-      "boolean": [
-        "1290",
-        0
-      ],
-      "on_true": [
-        "665",
-        0
-      ],
-      "on_false": [
-        "1292",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1294": {
-    "inputs": {
-      "boolean": [
-        "1291",
-        0
-      ],
-      "on_true": [
-        "666",
-        0
-      ],
-      "on_false": [
-        "1293",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1295": {
-    "inputs": {
-      "comparison": "a > b",
-      "a": [
-        "1294",
-        0
-      ],
-      "b": [
-        "666",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1296": {
-    "inputs": {
-      "boolean": [
-        "1295",
-        0
-      ],
-      "on_true": [
-        "682",
-        0
-      ],
-      "on_false": [
-        "1294",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1298": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1321",
-        0
-      ],
-      "b": [
-        "1223",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1299": {
-    "inputs": {
-      "boolean": [
-        "1298",
-        0
-      ],
-      "on_true": [
-        "1223",
-        0
-      ],
-      "on_false": [
-        "667",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1300": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1322",
-        0
-      ],
-      "b": [
-        "661",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1301": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1322",
-        0
-      ],
-      "b": [
-        "662",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1302": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1322",
-        0
-      ],
-      "b": [
-        "674",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1303": {
-    "inputs": {
-      "boolean": [
-        "1300",
-        0
-      ],
-      "on_true": [
-        "664",
-        0
-      ],
-      "on_false": [
-        "1310",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1304": {
-    "inputs": {
-      "boolean": [
-        "1301",
-        0
-      ],
-      "on_true": [
-        "665",
-        0
-      ],
-      "on_false": [
-        "1303",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1305": {
-    "inputs": {
-      "boolean": [
-        "1302",
-        0
-      ],
-      "on_true": [
-        "666",
-        0
-      ],
-      "on_false": [
-        "1304",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1306": {
-    "inputs": {
-      "comparison": "a > b",
-      "a": [
-        "1305",
-        0
-      ],
-      "b": [
-        "666",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1307": {
-    "inputs": {
-      "boolean": [
-        "1306",
-        0
-      ],
-      "on_true": [
-        "682",
-        0
-      ],
-      "on_false": [
-        "1305",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1309": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "1322",
-        0
-      ],
-      "b": [
-        "1223",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1310": {
-    "inputs": {
-      "boolean": [
-        "1309",
-        0
-      ],
-      "on_true": [
-        "1223",
-        0
-      ],
-      "on_false": [
-        "667",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "1311": {
     "inputs": {
       "boolean": [
@@ -2710,11 +1799,11 @@
         0
       ],
       "on_true": [
-        "2277",
+        "2648",
         0
       ],
       "on_false": [
-        "5",
+        "2008",
         0
       ]
     },
@@ -2768,65 +1857,17 @@
         0
       ],
       "on_true": [
-        "2277",
+        "2648",
         0
       ],
       "on_false": [
-        "5",
+        "2008",
         0
       ]
     },
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "1319": {
-    "inputs": {
-      "value": [
-        "707",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1320": {
-    "inputs": {
-      "value": [
-        "706",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1321": {
-    "inputs": {
-      "value": [
-        "708",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1322": {
-    "inputs": {
-      "value": [
-        "709",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
     }
   },
   "1324": {
@@ -2865,15 +1906,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_inpaint_fn"
-    }
-  },
-  "1381": {
-    "inputs": {
-      "value": false
-    },
-    "class_type": "easy boolean",
-    "_meta": {
-      "title": "i2i_inpaint_is_invert_mask"
     }
   },
   "1609": {
@@ -3182,24 +2214,6 @@
       "title": "Float"
     }
   },
-  "1711": {
-    "inputs": {
-      "value": 64
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "i2i_canny_low"
-    }
-  },
-  "1713": {
-    "inputs": {
-      "value": 128
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "i2i_canny_high"
-    }
-  },
   "1741": {
     "inputs": {
       "boolean": [
@@ -3282,7 +2296,7 @@
   },
   "1792": {
     "inputs": {
-      "comparison": "a > b",
+      "comparison": "a <= b",
       "a": [
         "1890",
         1
@@ -3411,7 +2425,7 @@
     "inputs": {
       "width": 512,
       "height": 512,
-      "upscale_method": "nearest-exact",
+      "upscale_method": "bicubic",
       "keep_proportion": true,
       "divisible_by": 2,
       "width_input": [
@@ -3442,7 +2456,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 340704535170611,
+      "seed": 387183892636836,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -3483,7 +2497,7 @@
     "inputs": {
       "channel": "red",
       "image": [
-        "1910",
+        "1003",
         0
       ]
     },
@@ -3523,58 +2537,10 @@
       "title": "🔧 Simple Math"
     }
   },
-  "1910": {
-    "inputs": {
-      "width": [
-        "1890",
-        1
-      ],
-      "height": [
-        "1890",
-        2
-      ],
-      "interpolation": "lanczos",
-      "method": "stretch",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "1003",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "1911": {
-    "inputs": {
-      "width": [
-        "1890",
-        1
-      ],
-      "height": [
-        "1890",
-        2
-      ],
-      "interpolation": "lanczos",
-      "method": "stretch",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "1002",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "1943": {
     "inputs": {
       "resolution": [
-        "1791",
+        "2685",
         0
       ],
       "image": [
@@ -3590,7 +2556,7 @@
   "1946": {
     "inputs": {
       "resolution": [
-        "1791",
+        "2685",
         0
       ],
       "image": [
@@ -3606,7 +2572,7 @@
   "1947": {
     "inputs": {
       "resolution": [
-        "1791",
+        "2685",
         0
       ],
       "image": [
@@ -3622,7 +2588,7 @@
   "1948": {
     "inputs": {
       "resolution": [
-        "1791",
+        "2685",
         0
       ],
       "image": [
@@ -3655,97 +2621,24 @@
       "title": "🔧 Image Color Match"
     }
   },
-  "1977": {
-    "inputs": {
-      "width": 512,
-      "height": 512,
-      "upscale_method": "lanczos",
-      "keep_proportion": true,
-      "divisible_by": 2,
-      "width_input": [
-        "1890",
-        1
-      ],
-      "height_input": [
-        "1890",
-        2
-      ],
-      "crop": "disabled",
-      "image": [
-        "2499",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJ",
-    "_meta": {
-      "title": "Resize Image"
-    }
-  },
   "1989": {
     "inputs": {
-      "expand": 0,
+      "expand": 5,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 0,
+      "blur_radius": 1,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
       "mask": [
-        "1894",
+        "2751",
         0
       ]
     },
     "class_type": "GrowMaskWithBlur",
     "_meta": {
       "title": "Grow Mask With Blur"
-    }
-  },
-  "1991": {
-    "inputs": {
-      "width": [
-        "2314",
-        0
-      ],
-      "height": [
-        "2314",
-        0
-      ],
-      "keep_proportions": true,
-      "mask": [
-        "1989",
-        0
-      ]
-    },
-    "class_type": "ResizeMask",
-    "_meta": {
-      "title": "Resize Mask"
-    }
-  },
-  "1992": {
-    "inputs": {
-      "width": 1024,
-      "height": 1024,
-      "upscale_method": "lanczos",
-      "keep_proportion": true,
-      "divisible_by": 2,
-      "width_input": [
-        "2314",
-        0
-      ],
-      "height_input": [
-        "2314",
-        0
-      ],
-      "crop": "disabled",
-      "image": [
-        "1911",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJ",
-    "_meta": {
-      "title": "Resize Image"
     }
   },
   "2004": {
@@ -3770,7 +2663,7 @@
     "inputs": {
       "noise_mask": true,
       "positive": [
-        "1315",
+        "5",
         0
       ],
       "negative": [
@@ -3782,11 +2675,11 @@
         0
       ],
       "pixels": [
-        "1992",
+        "2747",
         0
       ],
       "mask": [
-        "1991",
+        "1989",
         0
       ]
     },
@@ -3833,7 +2726,7 @@
     "inputs": {
       "lora_name": "flux1-depth-dev-lora.safetensors",
       "strength_model": [
-        "2359",
+        "2664",
         0
       ],
       "model": [
@@ -3883,7 +2776,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "5",
+        "2506",
         0
       ]
     },
@@ -4125,7 +3018,7 @@
         0
       ],
       "pixels": [
-        "1943",
+        "2741",
         0
       ]
     },
@@ -4137,7 +3030,7 @@
   "2221": {
     "inputs": {
       "positive": [
-        "2264",
+        "2642",
         0
       ],
       "negative": [
@@ -4149,7 +3042,7 @@
         0
       ],
       "pixels": [
-        "1946",
+        "2742",
         0
       ]
     },
@@ -4161,7 +3054,7 @@
   "2224": {
     "inputs": {
       "positive": [
-        "2269",
+        "2644",
         0
       ],
       "negative": [
@@ -4173,7 +3066,7 @@
         0
       ],
       "pixels": [
-        "1947",
+        "2743",
         0
       ]
     },
@@ -4185,7 +3078,7 @@
   "2227": {
     "inputs": {
       "positive": [
-        "2273",
+        "2646",
         0
       ],
       "negative": [
@@ -4197,7 +3090,7 @@
         0
       ],
       "pixels": [
-        "1948",
+        "2744",
         0
       ]
     },
@@ -4265,7 +3158,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2264",
+        "2642",
         0
       ]
     },
@@ -4299,7 +3192,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2269",
+        "2644",
         0
       ]
     },
@@ -4333,7 +3226,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2273",
+        "2646",
         0
       ]
     },
@@ -4408,9 +3301,9 @@
   },
   "2260": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "684",
+        "2582",
         0
       ],
       "b": [
@@ -4425,7 +3318,7 @@
   },
   "2261": {
     "inputs": {
-      "value": 0
+      "value": 2
     },
     "class_type": "easy int",
     "_meta": {
@@ -4434,9 +3327,9 @@
   },
   "2262": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "684",
+        "2582",
         0
       ],
       "b": [
@@ -4476,11 +3369,11 @@
         0
       ],
       "on_true": [
-        "2242",
+        "2263",
         0
       ],
       "on_false": [
-        "2263",
+        "2242",
         0
       ]
     },
@@ -4491,7 +3384,7 @@
   },
   "2265": {
     "inputs": {
-      "value": 2
+      "value": 3
     },
     "class_type": "easy int",
     "_meta": {
@@ -4500,9 +3393,9 @@
   },
   "2266": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1242",
+        "2599",
         0
       ],
       "b": [
@@ -4517,9 +3410,9 @@
   },
   "2267": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1242",
+        "2599",
         0
       ],
       "b": [
@@ -4539,7 +3432,7 @@
         0
       ],
       "on_true": [
-        "2264",
+        "2642",
         0
       ],
       "on_false": [
@@ -4559,11 +3452,11 @@
         0
       ],
       "on_true": [
-        "2243",
+        "2268",
         0
       ],
       "on_false": [
-        "2268",
+        "2243",
         0
       ]
     },
@@ -4574,9 +3467,9 @@
   },
   "2270": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1296",
+        "2612",
         0
       ],
       "b": [
@@ -4591,9 +3484,9 @@
   },
   "2271": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1296",
+        "2612",
         0
       ],
       "b": [
@@ -4613,7 +3506,7 @@
         0
       ],
       "on_true": [
-        "2269",
+        "2644",
         0
       ],
       "on_false": [
@@ -4633,11 +3526,11 @@
         0
       ],
       "on_true": [
-        "2244",
+        "2272",
         0
       ],
       "on_false": [
-        "2272",
+        "2244",
         0
       ]
     },
@@ -4648,9 +3541,9 @@
   },
   "2274": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1307",
+        "2625",
         0
       ],
       "b": [
@@ -4665,9 +3558,9 @@
   },
   "2275": {
     "inputs": {
-      "comparison": "a == b",
+      "comparison": "a != b",
       "a": [
-        "1307",
+        "2625",
         0
       ],
       "b": [
@@ -4687,7 +3580,7 @@
         0
       ],
       "on_true": [
-        "2273",
+        "2646",
         0
       ],
       "on_false": [
@@ -4707,11 +3600,11 @@
         0
       ],
       "on_true": [
-        "2245",
+        "2276",
         0
       ],
       "on_false": [
-        "2276",
+        "2245",
         0
       ]
     },
@@ -4748,7 +3641,7 @@
         0
       ],
       "image": [
-        "48",
+        "2713",
         0
       ]
     },
@@ -4769,7 +3662,7 @@
         0
       ],
       "positive": [
-        "2269",
+        "2644",
         0
       ],
       "negative": [
@@ -4785,7 +3678,7 @@
         0
       ],
       "image": [
-        "567",
+        "2711",
         0
       ]
     },
@@ -4806,7 +3699,7 @@
         0
       ],
       "positive": [
-        "2264",
+        "2642",
         0
       ],
       "negative": [
@@ -4822,7 +3715,7 @@
         0
       ],
       "image": [
-        "542",
+        "2714",
         0
       ]
     },
@@ -4843,7 +3736,7 @@
         0
       ],
       "positive": [
-        "2273",
+        "2646",
         0
       ],
       "negative": [
@@ -4859,7 +3752,7 @@
         0
       ],
       "image": [
-        "592",
+        "2712",
         0
       ]
     },
@@ -4899,7 +3792,7 @@
         0
       ],
       "positive": [
-        "2008",
+        "1315",
         0
       ],
       "negative": [
@@ -4994,11 +3887,11 @@
         0
       ],
       "on_true": [
-        "2317",
+        "2544",
         0
       ],
       "on_false": [
-        "2316",
+        "2534",
         0
       ]
     },
@@ -5007,29 +3900,11 @@
       "title": "If else"
     }
   },
-  "2316": {
-    "inputs": {
-      "value": 1024
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2317": {
-    "inputs": {
-      "value": 1280
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "2354": {
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "684",
+        "2582",
         0
       ],
       "b": [
@@ -5044,7 +3919,7 @@
   },
   "2355": {
     "inputs": {
-      "value": 2
+      "value": 3
     },
     "class_type": "easy int",
     "_meta": {
@@ -5055,7 +3930,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1242",
+        "2599",
         0
       ],
       "b": [
@@ -5072,7 +3947,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1296",
+        "2612",
         0
       ],
       "b": [
@@ -5089,7 +3964,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1307",
+        "2625",
         0
       ],
       "b": [
@@ -5225,7 +4100,7 @@
       ],
       "autocrop_margin": 0.1,
       "conditioning": [
-        "5",
+        "2506",
         0
       ],
       "style_model": [
@@ -5379,11 +4254,17 @@
   },
   "2387": {
     "inputs": {
-      "width": 1280,
-      "height": 1280,
+      "width": [
+        "2695",
+        0
+      ],
+      "height": [
+        "2696",
+        0
+      ],
       "interpolation": "bicubic",
-      "method": "keep proportion",
-      "condition": "downscale if bigger",
+      "method": "fill / crop",
+      "condition": "always",
       "multiple_of": 0,
       "image": [
         "287",
@@ -5439,11 +4320,11 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "2497",
+        "2532",
         0
       ],
       "positive": [
-        "2008",
+        "1315",
         0
       ],
       "negative": [
@@ -5756,7 +4637,7 @@
         0
       ],
       "pixels": [
-        "48",
+        "2713",
         0
       ]
     },
@@ -5810,7 +4691,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2264",
+        "2642",
         0
       ]
     },
@@ -5838,7 +4719,7 @@
   "2457": {
     "inputs": {
       "positive": [
-        "2264",
+        "2642",
         0
       ],
       "negative": [
@@ -5850,7 +4731,7 @@
         0
       ],
       "pixels": [
-        "542",
+        "2714",
         0
       ]
     },
@@ -5904,7 +4785,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2269",
+        "2644",
         0
       ]
     },
@@ -5932,7 +4813,7 @@
   "2466": {
     "inputs": {
       "positive": [
-        "2269",
+        "2644",
         0
       ],
       "negative": [
@@ -5944,7 +4825,7 @@
         0
       ],
       "pixels": [
-        "567",
+        "2711",
         0
       ]
     },
@@ -5998,7 +4879,7 @@
       ],
       "end": 1,
       "conditioning": [
-        "2273",
+        "2646",
         0
       ]
     },
@@ -6026,7 +4907,7 @@
   "2475": {
     "inputs": {
       "positive": [
-        "2273",
+        "2646",
         0
       ],
       "negative": [
@@ -6038,7 +4919,7 @@
         0
       ],
       "pixels": [
-        "592",
+        "2712",
         0
       ]
     },
@@ -6088,7 +4969,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "684",
+        "2582",
         0
       ],
       "b": [
@@ -6103,7 +4984,7 @@
   },
   "2479": {
     "inputs": {
-      "value": 1
+      "value": 2
     },
     "class_type": "easy int",
     "_meta": {
@@ -6114,7 +4995,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1242",
+        "2599",
         0
       ],
       "b": [
@@ -6131,7 +5012,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1296",
+        "2612",
         0
       ],
       "b": [
@@ -6148,7 +5029,7 @@
     "inputs": {
       "comparison": "a == b",
       "a": [
-        "1307",
+        "2625",
         0
       ],
       "b": [
@@ -6308,29 +5189,1663 @@
       "title": "refiner"
     }
   },
-  "2498": {
+  "2506": {
     "inputs": {
-      "model_name": "4x-UltraSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
-  "2499": {
-    "inputs": {
-      "upscale_model": [
-        "2498",
+      "boolean": [
+        "2507",
         0
       ],
+      "on_true": [
+        "2008",
+        0
+      ],
+      "on_false": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2507": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2508",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2508": {
+    "inputs": {
+      "value": 3
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2515": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "i2i_skip_preprocessors"
+    }
+  },
+  "2521": {
+    "inputs": {
+      "boolean": [
+        "2515",
+        0
+      ],
+      "on_true": [
+        "702",
+        0
+      ],
+      "on_false": [
+        "1943",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2522": {
+    "inputs": {
+      "boolean": [
+        "2515",
+        0
+      ],
+      "on_true": [
+        "703",
+        0
+      ],
+      "on_false": [
+        "1946",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2523": {
+    "inputs": {
+      "boolean": [
+        "2515",
+        0
+      ],
+      "on_true": [
+        "704",
+        0
+      ],
+      "on_false": [
+        "1947",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2524": {
+    "inputs": {
+      "boolean": [
+        "2515",
+        0
+      ],
+      "on_true": [
+        "705",
+        0
+      ],
+      "on_false": [
+        "1948",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2529": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2497",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_1"
+    }
+  },
+  "2530": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2529",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_2"
+    }
+  },
+  "2531": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2530",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_3"
+    }
+  },
+  "2532": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2531",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_4"
+    }
+  },
+  "2533": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2538",
+        0
+      ],
+      "b": [
+        "2537",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2534": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2535",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2535": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2538",
+        1
+      ],
+      "b": [
+        "2537",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2536": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2533",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2537": {
+    "inputs": {
+      "value": "(1048576/a/b)**0.5",
+      "a": [
+        "2538",
+        0
+      ],
+      "b": [
+        "2538",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2538": {
+    "inputs": {
+      "image": [
+        "1002",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "2539": {
+    "inputs": {
+      "boolean": [
+        "2310",
+        0
+      ],
+      "on_true": [
+        "2543",
+        0
+      ],
+      "on_false": [
+        "2536",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2540": {
+    "inputs": {
+      "value": "(1638400/a/b)**0.5",
+      "a": [
+        "2542",
+        0
+      ],
+      "b": [
+        "2542",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2541": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2542",
+        0
+      ],
+      "b": [
+        "2540",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2542": {
+    "inputs": {
+      "image": [
+        "1002",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "2543": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2541",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2544": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2545",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2545": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2542",
+        1
+      ],
+      "b": [
+        "2540",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2547": {
+    "inputs": {
+      "control_net_name": "flux.1-dev_controlnet_openpose_raulc0399.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "2548": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "140",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2547",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2713",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2559": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "2642",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2547",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2714",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2566": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "2644",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2547",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2711",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2573": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "2646",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2547",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2712",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2582": {
+    "inputs": {
+      "value": [
+        "706",
+        0
+      ]
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2599": {
+    "inputs": {
+      "value": [
+        "707",
+        0
+      ]
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2612": {
+    "inputs": {
+      "value": [
+        "708",
+        0
+      ]
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2625": {
+    "inputs": {
+      "value": [
+        "709",
+        0
+      ]
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2639": {
+    "inputs": {
+      "value": 5
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2640": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "2582",
+        0
+      ],
+      "b": [
+        "2639",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2642": {
+    "inputs": {
+      "boolean": [
+        "2640",
+        0
+      ],
+      "on_true": [
+        "2264",
+        0
+      ],
+      "on_false": [
+        "2548",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2643": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "2599",
+        0
+      ],
+      "b": [
+        "2639",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2644": {
+    "inputs": {
+      "boolean": [
+        "2643",
+        0
+      ],
+      "on_true": [
+        "2269",
+        0
+      ],
+      "on_false": [
+        "2559",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2645": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "2612",
+        0
+      ],
+      "b": [
+        "2639",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2646": {
+    "inputs": {
+      "boolean": [
+        "2645",
+        0
+      ],
+      "on_true": [
+        "2273",
+        0
+      ],
+      "on_false": [
+        "2566",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2647": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "2625",
+        0
+      ],
+      "b": [
+        "2639",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2648": {
+    "inputs": {
+      "boolean": [
+        "2647",
+        0
+      ],
+      "on_true": [
+        "2277",
+        0
+      ],
+      "on_false": [
+        "2573",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2650": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "709",
+        0
+      ],
+      "b": [
+        "2661",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2651": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "707",
+        0
+      ],
+      "b": [
+        "2661",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2652": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "708",
+        0
+      ],
+      "b": [
+        "2661",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2653": {
+    "inputs": {
+      "boolean": [
+        "2662",
+        0
+      ],
+      "on_true": [
+        "2656",
+        0
+      ],
+      "on_false": [
+        "2662",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2654": {
+    "inputs": {
+      "boolean": [
+        "2651",
+        0
+      ],
+      "on_true": [
+        "2653",
+        0
+      ],
+      "on_false": [
+        "2651",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2655": {
+    "inputs": {
+      "boolean": [
+        "2652",
+        0
+      ],
+      "on_true": [
+        "2654",
+        0
+      ],
+      "on_false": [
+        "2652",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2656": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "2660": {
+    "inputs": {
+      "boolean": [
+        "2650",
+        0
+      ],
+      "on_true": [
+        "2655",
+        0
+      ],
+      "on_false": [
+        "2650",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2661": {
+    "inputs": {
+      "value": 5
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2662": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "706",
+        0
+      ],
+      "b": [
+        "2661",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2664": {
+    "inputs": {
+      "boolean": [
+        "2660",
+        0
+      ],
+      "on_true": [
+        "2359",
+        0
+      ],
+      "on_false": [
+        "2496",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2673": {
+    "inputs": {
+      "boolean": [
+        "2674",
+        0
+      ],
+      "on_true": [
+        "2702",
+        0
+      ],
+      "on_false": [
+        "1791",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2674": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2676",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2676": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2678": {
+    "inputs": {
+      "boolean": [
+        "2680",
+        0
+      ],
+      "on_true": [
+        "2690",
+        0
+      ],
+      "on_false": [
+        "2673",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2679": {
+    "inputs": {
+      "value": 3
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2680": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2679",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2685": {
+    "inputs": {
+      "boolean": [
+        "2686",
+        0
+      ],
+      "on_true": [
+        "2687",
+        0
+      ],
+      "on_false": [
+        "2678",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2686": {
+    "inputs": {
+      "comparison": "a < b",
+      "a": [
+        "2678",
+        0
+      ],
+      "b": [
+        "2687",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2687": {
+    "inputs": {
+      "value": 720
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2689": {
+    "inputs": {
+      "comparison": "a <= b",
+      "a": [
+        "2539",
+        0
+      ],
+      "b": [
+        "2314",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2690": {
+    "inputs": {
+      "boolean": [
+        "2689",
+        0
+      ],
+      "on_true": [
+        "2539",
+        0
+      ],
+      "on_false": [
+        "2314",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2693": {
+    "inputs": {
+      "value": "(1048576/a/b)**0.5",
+      "a": [
+        "2700",
+        0
+      ],
+      "b": [
+        "2700",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2694": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2700",
+        0
+      ],
+      "b": [
+        "2693",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2695": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2694",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2696": {
+    "inputs": {
+      "value": "a*16",
+      "a": [
+        "2697",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2697": {
+    "inputs": {
+      "value": "a*b/16",
+      "a": [
+        "2700",
+        1
+      ],
+      "b": [
+        "2693",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2700": {
+    "inputs": {
+      "image": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "2701": {
+    "inputs": {
+      "comparison": "a <= b",
+      "a": [
+        "2695",
+        0
+      ],
+      "b": [
+        "2696",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2702": {
+    "inputs": {
+      "boolean": [
+        "2701",
+        0
+      ],
+      "on_true": [
+        "2695",
+        0
+      ],
+      "on_false": [
+        "2696",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2711": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "704",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2712": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2713": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2714": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2723": {
+    "inputs": {
+      "boolean": [
+        "2674",
+        0
+      ],
+      "on_true": [
+        "2695",
+        0
+      ],
+      "on_false": [
+        "2539",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2724": {
+    "inputs": {
+      "boolean": [
+        "2674",
+        0
+      ],
+      "on_true": [
+        "2696",
+        0
+      ],
+      "on_false": [
+        "2314",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2734": {
+    "inputs": {
+      "boolean": [
+        "2736",
+        0
+      ],
+      "on_true": [
+        "1890",
+        2
+      ],
+      "on_false": [
+        "2724",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2736": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2737",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2737": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2738": {
+    "inputs": {
+      "boolean": [
+        "2740",
+        0
+      ],
+      "on_true": [
+        "1890",
+        1
+      ],
+      "on_false": [
+        "2723",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2739": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2740": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2739",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2741": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2521",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2742": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2522",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2743": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2523",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2744": {
+    "inputs": {
+      "width": [
+        "2738",
+        0
+      ],
+      "height": [
+        "2734",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2524",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2747": {
+    "inputs": {
+      "width": [
+        "2539",
+        0
+      ],
+      "height": [
+        "2314",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "1002",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2749": {
+    "inputs": {
+      "mask": [
+        "1894",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "2750": {
+    "inputs": {
+      "width": [
+        "2539",
+        0
+      ],
+      "height": [
+        "2314",
+        0
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2749",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2751": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "2750",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "2752": {
+    "inputs": {
+      "width": [
+        "1890",
+        1
+      ],
+      "height": [
+        "1890",
+        2
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
       "image": [
         "2309",
         0
       ]
     },
-    "class_type": "ImageUpscaleWithModel",
+    "class_type": "ImageResize+",
     "_meta": {
-      "title": "Upscale Image (using Model)"
+      "title": "🔧 Image Resize"
     }
   }
 }

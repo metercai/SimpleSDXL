@@ -35,7 +35,7 @@ DEPTH_ANYTHING_V2_MODEL_NAME_DICT = {
 }
 
 temp_dir = tempfile.gettempdir()
-annotator_ckpts_path = os.path.join(folder_paths.models_dir, "controlnet")
+annotator_ckpts_path = os.path.join(folder_paths.models_dir, "controlnet") #os.path.join(Path(__file__).parents[2], 'ckpts')
 USE_SYMLINKS = False
 
 try:
@@ -285,6 +285,7 @@ def custom_torch_download(filename, ckpts_dir=annotator_ckpts_path):
                 assert check_hash_from_torch_hub(model_path, filename), f"Hash check failed as file {filename} is corrupted"
                 print("Hash check passed")
     
+    print(f"model_path is {model_path}")
     return model_path
 
 def custom_hf_download(pretrained_model_or_path, filename, cache_dir=temp_dir, ckpts_dir=annotator_ckpts_path, subfolder='', use_symlinks=USE_SYMLINKS, repo_type="model"):
@@ -346,5 +347,6 @@ def custom_hf_download(pretrained_model_or_path, filename, cache_dir=temp_dir, c
             except Exception as e :
                 print(e)
 
+    print(f"model_path is {model_path}")
 
     return model_path

@@ -1,4 +1,5 @@
 import os
+import pathlib
 import zipfile
 import shutil
 import modules.config as config
@@ -259,37 +260,27 @@ def check_task_model():
 def check_download_kolors_model(path_root):
     check_model_file = [
             "diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin",
-            "diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors",
-            "diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors",
             ]
     path_temp = os.path.join(path_root, 'temp')
     if not os.path.exists(path_temp):
         os.makedirs(path_temp)
     if not modelsinfo.exists_model_key(check_model_file[0]):
         load_file_from_url(
-            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_0909.zip',
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_1210.zip',
             model_dir=path_temp,
-            file_name='models_kolors_fp16_simpleai_0909.zip'
+            file_name='models_kolors_fp16_simpleai_1210.zip'
         )
-        downfile = os.path.join(path_temp, 'models_kolors_fp16_simpleai_0909.zip')
+        downfile = os.path.join(path_temp, 'models_kolors_fp16_simpleai_1210.zip')
         with zipfile.ZipFile(downfile, 'r') as zipf:
             print(f'extractall: {downfile}')
             zipf.extractall(path_root)
         shutil.move(os.path.join(path_temp, 'SimpleModels/diffusers/Kolors'), config.paths_diffusers[0])
         os.remove(downfile)
         shutil.rmtree(path_temp)
-    
-    if not modelsinfo.exists_model_key(check_model_file[1]):
         path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/unet/diffusion_pytorch_model.fp16.safetensors')
-        path_org = os.path.join(config.path_unet, 'kolors_unet_fp16.safetensors')
-        print(f'model file copy: {path_org} to {path_dst}')
-        shutil.copy(path_org, path_dst)
-
-    if not modelsinfo.exists_model_key(check_model_file[2]):
+        pathlib.Path(path_dst).touch()
         path_dst = os.path.join(config.paths_diffusers[0], 'Kolors/vae/diffusion_pytorch_model.fp16.safetensors')
-        path_org = os.path.join(config.path_vae, 'sdxl_fp16.vae.safetensors')
-        print(f'model file copy: {path_org} to {path_dst}')
-        shutil.copy(path_org, path_dst)
+        pathlib.Path(path_dst).touch()
    
     modelsinfo.refresh_from_path()  
     return
@@ -346,7 +337,7 @@ def check_download_flux_model(base_model, clip_model=None):
                 )
         else:
             load_file_from_url(
-                url=f'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/{base_model}',
+                url=f'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/{base_model}',
                 model_dir=config.paths_checkpoints[0],
                 file_name=base_model
             )
@@ -365,7 +356,7 @@ def check_download_flux_model(base_model, clip_model=None):
             )
         if not modelsinfo.exists_model(catalog="vae", model_path='ae.safetensors'):
             load_file_from_url(
-                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/ae.safetensors',
+                url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/ae.safetensors',
                 model_dir=config.path_vae,
                 file_name='ae.safetensors'
             )

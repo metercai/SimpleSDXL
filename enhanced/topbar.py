@@ -235,6 +235,7 @@ def init_nav_bars(state_params, request: gr.Request):
         sstoken = shared.token.get_guest_sstoken(ua_hash)
         state_params.update({"sstoken": sstoken})
         user_did = shared.token.get_guest_did()
+        print(f'[UserBase] New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
     else:
         #print(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
         user_did = shared.token.check_sstoken_and_get_did(state_params["__session"], ua_hash)
@@ -242,8 +243,10 @@ def init_nav_bars(state_params, request: gr.Request):
             sstoken = shared.token.get_guest_sstoken(ua_hash)
             state_params.update({"sstoken": sstoken})
             user_did = shared.token.get_guest_did()
+            print(f'[UserBase] Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
         else:
             state_params.update({"sstoken": ''})
+            print(f'[UserBase] Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
     state_params.update({"user_did": user_did})
     state_params.update({"user_name":  shared.token.get_user_context(user_did).get_nickname()})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
@@ -595,13 +598,13 @@ identity_introduce = '''
 6，其他计划中的个性化服务、增强功能及互助服务。<br>
 如：我的通配符、大模型扩写、创意分享、预置包市场等<br>
 <br>
-系统将指定首个绑定的身份为管理员，赋予超级权限: <br>
-1，可一键进入内嵌Comfyd引擎的工作流操作界面；<br>
+系统将指定首个绑定身份为管理员，赋予超级管理权限: <br>
+1，可一键进入内嵌的Comfyd引擎工作流操作界面；<br>
 2，可管理内嵌Comfyd引擎的参数配置。<br>
 3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
 4，申请预置包发布和二次打包的授权标识(待上线)。<br>
 <br>
-系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权身份的使用；AI节点私有部署，被授权代理多用户隔离的数字空间；社区节点存有身份加密副本用于追溯和自证。在多方协作下保障隐私安全、身份可信及跨节点互认。以此构建和而不同的开源社区生态。规则说明>> <br>
+系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存身份加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。规则说明>> <br>
 '''
 
 def update_after_identity(state):
@@ -615,7 +618,7 @@ def update_after_identity_sub(state):
     max_catalog = state["__max_catalog"]
     nickname = state["user_name"]
     user_did = state["user_did"]
-    print(f'[UserBase] Session identity/当前身份({state["ua_session"]}): {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}).')
+    print(f'[UserBase] Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), ua_session({state["ua_session"]})')
     output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
@@ -634,8 +637,9 @@ def update_after_identity_sub(state):
     results += [gr.update(value=update_comfyd_url(user_did))]
     results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
-    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"]=='Fooocus' else modules.flags.ip_list[:-1]
-    for image_count in range(config.default_controlnet_image_count):
+    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"] in ['Fooocus', 'Flux']  else modules.flags.ip_list[:-1]
+    default_controlnet_image_count = config.default_controlnet_image_count if state["engine"]=='Fooocus' else 4
+    for image_count in range(default_controlnet_image_count):
         image_count += 1
         results.append(gr.update(choices=ip_list, value=config.default_ip_types[image_count]))
 
