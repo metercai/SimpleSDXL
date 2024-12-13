@@ -163,7 +163,7 @@ backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT', 'Hy
 
 model_file_filter = {
         'SD3x'   : ['sd3'],
-        'Flux'   : ['flux'],
+        'Flux'   : ['flux', 'f.1'],
         'HyDiT'  : ['hunyuan'],
         }
 model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
@@ -303,7 +303,7 @@ class PerformanceLoRA(Enum):
     SPEED = None
     EXTREME_SPEED = 'sdxl_lcm_lora.safetensors'
     LIGHTNING = 'sdxl_lightning_4step_lora.safetensors'
-    HYPER_SD = 'sdxl_hyper_sd_4step_lora.safetensors'
+    HYPER_SD = 'Hyper-SDXL-8steps-lora.safetensors' #'sdxl_hyper_sd_4step_lora.safetensors'
 
 
 class Steps(IntEnum):
@@ -311,7 +311,7 @@ class Steps(IntEnum):
     SPEED = 30
     EXTREME_SPEED = 8
     LIGHTNING = 4
-    HYPER_SD = 4
+    HYPER_SD = 8
 
     @classmethod
     def keys(cls) -> list:
@@ -323,15 +323,15 @@ class StepsUOV(IntEnum):
     SPEED = 18
     EXTREME_SPEED = 8
     LIGHTNING = 4
-    HYPER_SD = 4
+    HYPER_SD = 8
 
 
 class Performance(Enum):
     QUALITY = 'Quality'
     SPEED = 'Speed'
     EXTREME_SPEED = 'Extreme Speed'
-    LIGHTNING = 'Lightning'
     HYPER_SD = 'Hyper-SD'
+    LIGHTNING = 'Lightning'
 
     @classmethod
     def list(cls) -> list:

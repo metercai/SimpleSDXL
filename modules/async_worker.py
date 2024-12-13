@@ -121,6 +121,7 @@ class AsyncTask:
             args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
 
         self.cn_tasks = {x: [] for x in ip_list}
+        self.cn_task_num = 0
         for _ in range(modules.config.default_controlnet_image_count):
             cn_img = args.pop()
             cn_stop = args.pop()
@@ -128,6 +129,7 @@ class AsyncTask:
             cn_type = args.pop()
             if cn_img is not None:
                 self.cn_tasks[cn_type].append([cn_img, cn_stop, cn_weight])
+                self.cn_task_num += 1
 
         self.debugging_dino = args.pop()
         self.dino_erode_or_dilate = args.pop()
@@ -506,28 +508,30 @@ def worker():
         for task in async_task.cn_tasks[flags.cn_canny]:
             cn_img, cn_stop, cn_weight = task
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-
-            if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
+            if not async_task.skipping_cn_preprocessor:
                 cn_img = preprocessors.canny_pyramid(cn_img, async_task.canny_low_threshold,
                                                      async_task.canny_high_threshold)
-
+            else:
+                cn_img = preprocessors.normalizedBG(cn_img)
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
+            task[0] = core.numpy_to_pytorch(cn_img) # if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_pose]:
             cn_img, cn_stop, cn_weight = task
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-            if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
-                cn_img = preprocessors.dwpose(cn_img)
+            if not async_task.skipping_cn_preprocessor:
+                if async_task.task_class in ['Fooocus']:
+                    cn_img = preprocessors.openpose(cn_img, stick_scaling=True)
+                else:
+                    cn_img = preprocessors.openpose(cn_img)
             cn_img = HWC3(cn_img)
-            task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
+            task[0] = core.numpy_to_pytorch(cn_img) # if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_cpds]:
             cn_img, cn_stop, cn_weight = task
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-
             if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = preprocessors.cpds(cn_img)
 
@@ -946,11 +950,11 @@ def worker():
         return final_scheduler_name
 
     def set_hyper_sd_defaults(async_task, current_progress, advance_progress=False):
-        print('Enter Hyper-SD mode.')
+        print('Enter Hyper-SD 8 step mode.')
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, 'Downloading Hyper-SD components ...')
-        async_task.performance_loras += [(modules.config.downloading_sdxl_hyper_sd_lora(), 0.8)]
+        async_task.performance_loras += [(modules.config.downloading_sdxl_hyper_sd_lora(), 1.0)]
         if async_task.refiner_model_name != 'None':
             print(f'Refiner disabled in Hyper-SD mode.')
         async_task.refiner_model_name = 'None'
@@ -1522,48 +1526,41 @@ def worker():
                 else:
                     i2i_model_type = 1 # dev full-size
                     async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
-                if async_task.canny_low_threshold != default_params['canny_low_threshold']:
-                    async_task.params_backend['i2i_canny_low'] = async_task.canny_low_threshold
-                if async_task.canny_high_threshold != default_params['canny_high_threshold']:
-                    async_task.params_backend['i2i_canny_high'] = async_task.canny_high_threshold
                 if 'cn' in goals:
-                    async_task.params_backend['i2i_function'] = 1 # iamge prompt
+                    async_task.params_backend['i2i_function'] = 1 # image prompt
+                    def push_cn_task(i, task, cn_type):
+                        cn_img, cn_stop, cn_weight = task
+                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
+                        async_task.params_backend[f'i2i_ip_fn{i}'] = cn_type
+                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
+                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        return 
+
                     i = 1
                     for task in async_task.cn_tasks[flags.cn_ip]:
                         if i > 4:
                             break
-                        cn_img, cn_stop, cn_weight = task
-                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
-                        async_task.params_backend[f'i2i_ip_fn{i}'] = 1 # IPadapter
-                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
-                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        push_cn_task(i, task, 1)
                         i = i+1
                     for task in async_task.cn_tasks[flags.cn_canny]:
                         if i > 4:
                             break
-                        cn_img, cn_stop, cn_weight = task
-                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
-                        async_task.params_backend[f'i2i_ip_fn{i}'] = 2 # canny
-                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
-                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        push_cn_task(i, task, 2)
                         i = i+1
                     for task in async_task.cn_tasks[flags.cn_cpds]:
                         if i > 4:
                             break
-                        cn_img, cn_stop, cn_weight = task
-                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
-                        async_task.params_backend[f'i2i_ip_fn{i}'] = 3 # depty
-                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
-                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        push_cn_task(i, task, 3)
                         i = i+1
                     for task in async_task.cn_tasks[flags.cn_ip_face]:
                         if i > 4:
                             break
-                        cn_img, cn_stop, cn_weight = task
-                        input_images.set_image(f'i2i_ip_image{i}', cn_img)
-                        async_task.params_backend[f'i2i_ip_fn{i}'] = 4 # face
-                        async_task.params_backend[f'i2i_ip_fn{i}_w'] = cn_weight
-                        async_task.params_backend[f'i2i_ip_fn{i}_s'] = cn_stop
+                        push_cn_task(i, task, 4)
+                        i = i+1
+                    for task in async_task.cn_tasks[flags.cn_pose]:
+                        if i > 4:
+                            break
+                        push_cn_task(i, task, 5)
                         i = i+1
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary

@@ -41,12 +41,12 @@
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
     "default_overwrite_step": 12,
-    "checkpoint_downloads": {
-        "flux-hyp8-Q5_K_M.gguf": "https://huggingface.co/mhnakif/flux-hyp8-gguf-k/resolve/main/flux-hyp8-Q5_K_M.gguf"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
-    "vae_downloads": {
-        "ae.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/ae.safetensors"
-    }
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
+        "vae,ae.safetensors,335304388,0,"
+    ]
 }
