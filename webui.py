@@ -1091,7 +1091,7 @@ with shared.gradio_root:
             def toggle_image_tab(tab, styles):
                 result = []
                 if 'layer' in tab:
-                    result += [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion])]
+                    result += [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion and s!='Fooocus Sharp'])]
                     result += [gr.update(value=False, interactive=False)]
                     result += [gr.update(interactive=False)] * 17
                 else:

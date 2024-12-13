@@ -89,7 +89,7 @@ def dwpose(x):
 
 def openpose(x, stick_scaling=False):
     detector = OpenposeDetector.from_pretrained().to()
-    result = detector(x, output_type="np", include_hands=False, include_face=False, xinsr_stick_scaling=stick_scaling)
+    result = detector(x, output_type="np", include_hands=True, include_face=True, xinsr_stick_scaling=stick_scaling)
 
     return result
 

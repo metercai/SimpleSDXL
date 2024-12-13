@@ -1528,6 +1528,8 @@ def worker():
                     async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
+                    if async_task.skipping_cn_preprocessor:
+                        async_task.params_backend['i2i_skip_preprocessors'] = True
                     def push_cn_task(i, task, cn_type):
                         cn_img, cn_stop, cn_weight = task
                         input_images.set_image(f'i2i_ip_image{i}', cn_img)
