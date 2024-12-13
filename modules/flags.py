@@ -163,7 +163,7 @@ backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT', 'Hy
 
 model_file_filter = {
         'SD3x'   : ['sd3'],
-        'Flux'   : ['flux', 'f.1'],
+        'Flux'   : [['flux'], ['f.1']],
         'HyDiT'  : ['hunyuan'],
         }
 model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
