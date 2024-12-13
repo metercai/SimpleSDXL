@@ -1,7 +1,8 @@
+import warnings
 import cv2
 import numpy as np
-from extras.easy_dwpose.dwpose import DWposeDetector
-from extras.open_pose import OpenposeDetector
+from PIL import Image
+from custom_controlnet_aux.util import resize_image_with_pad, common_input_validate, HWC3
 
 def centered_canny(x: np.ndarray, canny_low_threshold, canny_high_threshold):
     assert isinstance(x, np.ndarray)
@@ -11,7 +12,6 @@ def centered_canny(x: np.ndarray, canny_low_threshold, canny_high_threshold):
     y = y.astype(np.float32) / 255.0
     return y
 
-
 def centered_canny_color(x: np.ndarray, canny_low_threshold, canny_high_threshold):
     assert isinstance(x, np.ndarray)
     assert x.ndim == 3 and x.shape[2] == 3
@@ -19,7 +19,6 @@ def centered_canny_color(x: np.ndarray, canny_low_threshold, canny_high_threshol
     result = [centered_canny(x[..., i], canny_low_threshold, canny_high_threshold) for i in range(3)]
     result = np.stack(result, axis=2)
     return result
-
 
 def pyramid_canny_color(x: np.ndarray, canny_low_threshold, canny_high_threshold):
     assert isinstance(x, np.ndarray)
@@ -40,7 +39,6 @@ def pyramid_canny_color(x: np.ndarray, canny_low_threshold, canny_high_threshold
 
     return acc_edge
 
-
 def norm255(x, low=4, high=96):
     assert isinstance(x, np.ndarray)
     assert x.ndim == 2 and x.dtype == np.float32
@@ -53,7 +51,6 @@ def norm255(x, low=4, high=96):
 
     return x * 255.0
 
-
 def canny_pyramid(x, canny_low_threshold, canny_high_threshold):
     # For some reasons, SAI's Control-lora Canny seems to be trained on canny maps with non-standard resolutions.
     # Then we use pyramid to use all resolutions to avoid missing any structure in specific resolutions.
@@ -62,45 +59,16 @@ def canny_pyramid(x, canny_low_threshold, canny_high_threshold):
     result = np.sum(color_canny, axis=2)
 
     return norm255(result, low=1, high=99).clip(0, 255).astype(np.uint8)
-
-
-def cpds(x):
-    # cv2.decolor is not "decolor", it is Cewu Lu's method
-    # See http://www.cse.cuhk.edu.hk/leojia/projects/color2gray/index.html
-    # See https://docs.opencv.org/3.0-beta/modules/photo/doc/decolor.html
-
-    raw = cv2.GaussianBlur(x, (0, 0), 0.8)
-    density, boost = cv2.decolor(raw)
-
-    raw = raw.astype(np.float32)
-    density = density.astype(np.float32)
-    boost = boost.astype(np.float32)
-
-    offset = np.sum((raw - boost) ** 2.0, axis=2) ** 0.5
-    result = density + offset
-
-    return norm255(result, low=4, high=96).clip(0, 255).astype(np.uint8)
-
-def dwpose(x):
-    detector = DWposeDetector()
-    result = detector(x, output_type="np", include_hands=False, include_face=False)
-
-    return result
-
-def openpose(x, stick_scaling=False):
-    detector = OpenposeDetector.from_pretrained().to()
-    result = detector(x, output_type="np", include_hands=False, include_face=False, xinsr_stick_scaling=stick_scaling)
-
-    return result
-
-def normalizedBG(image, threshold=200):
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray_image, 100, 200)
-    edge_pixels = image[edges == 255]
-    if len(edge_pixels) == 0:
-        return 255 - image
-    avg_brightness = np.mean(edge_pixels)
-    if avg_brightness > threshold:
-        return 255 - image
-    return image
-
+    
+class PyraCannyDetector:
+    def __call__(self, input_image=None, low_threshold=100, high_threshold=200, detect_resolution=512, output_type=None, upscale_method="INTER_CUBIC", **kwargs):
+        input_image, output_type = common_input_validate(input_image, output_type, **kwargs)
+        detected_map, remove_pad = resize_image_with_pad(input_image, detect_resolution, upscale_method)
+        detected_map = canny_pyramid(detected_map, low_threshold, high_threshold)
+        detected_map = HWC3(remove_pad(detected_map))
+        
+        if output_type == "pil":
+            detected_map = Image.fromarray(detected_map)
+            
+        return detected_map
+        

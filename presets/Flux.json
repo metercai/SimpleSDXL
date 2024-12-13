@@ -43,12 +43,12 @@
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
     "default_overwrite_step": 20,
-    "checkpoint_downloads": {
-        "flux1-dev.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/flux1-dev.safetensors"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
-    "vae_downloads": {
-        "ae.safetensors": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/flux1/ae.safetensors"
-    } 
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,flux1-dev.safetensors,23802932552,0,",
+        "vae,ae.safetensors,335304388,0,"
+    ]       
 }

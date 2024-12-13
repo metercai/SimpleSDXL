@@ -1114,7 +1114,7 @@ def downloading_sdxl_lightning_lora():
 
 def downloading_sdxl_hyper_sd_lora():
     load_file_from_url(
-        url='https://huggingface.co/mashb1t/misc/resolve/main/sdxl_hyper_sd_4step_lora.safetensors',
+        url='https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SDXL-8steps-lora.safetensors',
         model_dir=paths_loras[0],
         file_name=modules.flags.PerformanceLoRA.HYPER_SD.value
     )
@@ -1138,17 +1138,48 @@ def downloading_controlnet_cpds():
     )
     return os.path.join(paths_controlnet[0], 'fooocus_xl_cpds_128.safetensors')
 
+def downloading_controlnet_dwpose():
+    model_path = "yzd-v/DWPose"
+    model_root = os.path.join(paths_controlnet[0], model_path)
+    model_det = 'yolox_l.onnx'
+    model_pose = 'dw-ll_ucoco_384.onnx'
+    load_file_from_url(
+        url=f'https://huggingface.co/{model_path}/resolve/main/{model_pose}',
+        model_dir=model_root,
+        file_name=model_pose
+    )
+    load_file_from_url(
+        url=f'https://huggingface.co/{model_path}/resolve/main/{model_det}',
+        model_dir=model_root,
+        file_name=model_det
+    )
+    return os.path.join(model_root, model_det), os.path.join(model_root, model_pose)
+
+def downloading_controlnet_openpose():
+    model_path = 'lllyasviel/Annotators'
+    model_root = os.path.join(paths_controlnet[0], model_path)
+    body_filename = 'body_pose_model.pth'
+    hand_filename = 'hand_pose_model.pth'
+    face_filename = 'facenet.pth'
+    load_file_from_url(
+        url=f'https://huggingface.co/{model_path}/resolve/main/{body_filename}',
+        model_dir=model_root,
+        file_name=body_filename
+    )
+    load_file_from_url(
+        url=f'https://huggingface.co/{model_path}/resolve/main/{hand_filename}',
+        model_dir=model_root,
+        file_name=hand_filename
+    )
+    load_file_from_url(
+        url=f'https://huggingface.co/{model_path}/resolve/main/{face_filename}',
+        model_dir=model_root,
+        file_name=face_filename
+    )
+    return os.path.join(model_root, body_filename), os.path.join(model_root, hand_filename), os.path.join(model_root, face_filename)
+
+
 def downloading_controlnet_pose():
-    load_file_from_url(
-        url='https://huggingface.co/RedHash/DWPose/resolve/main/dw-ll_ucoco_384.onnx',
-        model_dir=paths_controlnet[0],
-        file_name='dw-ll_ucoco_384.onnx'
-    )
-    load_file_from_url(
-        url='https://huggingface.co/RedHash/DWPose/resolve/main/yolox_l.onnx',
-        model_dir=paths_controlnet[0],
-        file_name='yolox_l.onnx'
-    )
     load_file_from_url(
         url='https://huggingface.co/xinsir/controlnet-openpose-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors',
         model_dir=paths_controlnet[0],

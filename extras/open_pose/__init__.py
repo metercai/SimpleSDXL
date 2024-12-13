@@ -18,14 +18,16 @@ from typing import Callable, List, NamedTuple, Tuple, Union
 import cv2
 import numpy as np
 import torch
-from huggingface_hub import hf_hub_download
 from PIL import Image
 
-from custom_controlnet_aux.util import HWC3, common_input_validate, resize_image_with_pad, custom_hf_download, HF_MODEL_NAME
 from . import util
 from .body import Body, BodyResult, Keypoint
 from .face import Face
 from .hand import Hand
+
+import ldm_patched.modules.model_management as model_management
+from modules.util import HWC3
+from modules.config import downloading_controlnet_openpose
 
 HandResult = List[Keypoint]
 FaceResult = List[Keypoint]
@@ -52,7 +54,6 @@ def draw_poses(poses: List[PoseResult], H, W, draw_body=True, draw_hand=True, dr
         numpy.ndarray: A 3D numpy array representing the canvas with the drawn poses.
     """
     canvas = np.zeros(shape=(H, W, 3), dtype=np.uint8)
-
     for pose in poses:
         if draw_body:
             canvas = util.draw_bodypose(canvas, pose.body.keypoints, xinsr_stick_scaling)
@@ -111,18 +112,8 @@ class OpenposeDetector:
         self.face_estimation = face_estimation
 
     @classmethod
-    def from_pretrained(cls, pretrained_model_or_path=HF_MODEL_NAME, filename="body_pose_model.pth", hand_filename="hand_pose_model.pth", face_filename="facenet.pth"):
-        if pretrained_model_or_path == "lllyasviel/ControlNet":
-            subfolder = "annotator/ckpts"
-            face_pretrained_model_or_path = "lllyasviel/Annotators"
-            
-        else:
-            subfolder = ''
-            face_pretrained_model_or_path = pretrained_model_or_path
-
-        body_model_path = custom_hf_download(pretrained_model_or_path, filename, subfolder=subfolder)
-        hand_model_path = custom_hf_download(pretrained_model_or_path, hand_filename, subfolder=subfolder)
-        face_model_path = custom_hf_download(face_pretrained_model_or_path, face_filename, subfolder=subfolder)
+    def from_pretrained(cls):
+        body_model_path, hand_model_path, face_model_path = downloading_controlnet_openpose()
 
         body_estimation = Body(body_model_path)
         hand_estimation = Hand(hand_model_path)
@@ -130,7 +121,8 @@ class OpenposeDetector:
 
         return cls(body_estimation, hand_estimation, face_estimation)
 
-    def to(self, device):
+    def to(self):
+        device = model_management.get_torch_device()
         self.body_estimation.to(device)
         self.hand_estimation.to(device)
         self.face_estimation.to(device)
@@ -217,14 +209,9 @@ class OpenposeDetector:
             return results
         
     def __call__(self, input_image, detect_resolution=512, include_body=True, include_hand=False, include_face=False, hand_and_face=None, output_type="pil", image_and_json=False, upscale_method="INTER_CUBIC", xinsr_stick_scaling=False, **kwargs):
-        if hand_and_face is not None:
-            warnings.warn("hand_and_face is deprecated. Use include_hand and include_face instead.", DeprecationWarning)
-            include_hand = hand_and_face
-            include_face = hand_and_face
-
         input_image, output_type = common_input_validate(input_image, output_type, **kwargs)
         input_image, remove_pad = resize_image_with_pad(input_image, detect_resolution, upscale_method)
-        
+
         poses = self.detect_poses(input_image, include_hand=include_hand, include_face=include_face)
         canvas = draw_poses(poses, input_image.shape[0], input_image.shape[1], draw_body=include_body, draw_hand=include_hand, draw_face=include_face, xinsr_stick_scaling=xinsr_stick_scaling) 
         detected_map = HWC3(remove_pad(canvas))
@@ -234,5 +221,51 @@ class OpenposeDetector:
         
         if image_and_json:
             return (detected_map, encode_poses_as_dict(poses, detected_map.shape[0], detected_map.shape[1]))
-        
         return detected_map
+
+def safer_memory(x):
+    # Fix many MAC/AMD problems
+    return np.ascontiguousarray(x.copy()).copy()
+
+UPSCALE_METHODS = ["INTER_NEAREST", "INTER_LINEAR", "INTER_AREA", "INTER_CUBIC", "INTER_LANCZOS4"]
+def get_upscale_method(method_str):
+    assert method_str in UPSCALE_METHODS, f"Method {method_str} not found in {UPSCALE_METHODS}"
+    return getattr(cv2, method_str)
+
+def pad64(x):
+    return int(np.ceil(float(x) / 64.0) * 64 - x)
+
+#https://github.com/Mikubill/sd-webui-controlnet/blob/main/scripts/processor.py#L17
+#Added upscale_method, mode params
+def resize_image_with_pad(input_image, resolution, upscale_method = "", skip_hwc3=False, mode='edge'):
+    if skip_hwc3:
+        img = input_image
+    else:
+        img = HWC3(input_image)
+    H_raw, W_raw, _ = img.shape
+    if resolution == 0:
+        return img, lambda x: x
+    k = float(resolution) / float(min(H_raw, W_raw))
+    H_target = int(np.round(float(H_raw) * k))
+    W_target = int(np.round(float(W_raw) * k))
+    img = cv2.resize(img, (W_target, H_target), interpolation=get_upscale_method(upscale_method) if k > 1 else cv2.INTER_AREA)
+    H_pad, W_pad = pad64(H_target), pad64(W_target)
+    img_padded = np.pad(img, [[0, H_pad], [0, W_pad], [0, 0]], mode=mode)
+
+    def remove_pad(x):
+        return safer_memory(x[:H_target, :W_target, ...])
+
+    return safer_memory(img_padded), remove_pad
+
+def common_input_validate(input_image, output_type, **kwargs):
+    if input_image is None:
+        raise ValueError("input_image must be defined.")
+
+    if not isinstance(input_image, np.ndarray):
+        input_image = np.array(input_image, dtype=np.uint8)
+        output_type = output_type or "pil"
+    else:
+        output_type = output_type or "np"
+
+    return (input_image, output_type)
+

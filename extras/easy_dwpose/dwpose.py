@@ -5,17 +5,18 @@ import numpy as np
 import PIL
 import PIL.Image
 import torch
+import ldm_patched.modules.model_management as model_management
 
 from extras.easy_dwpose.body_estimation import Wholebody, resize_image
 from extras.easy_dwpose.draw import draw_openpose
-from modules.config import paths_controlnet, downloading_controlnet_pose
+from modules.config import paths_controlnet, downloading_controlnet_dwpose
 
 class DWposeDetector:
     def __init__(self, device: str = "сpu"):
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        downloading_controlnet_pose()
+        device = model_management.get_torch_device()
+        modir_path_det, modir_path_pose = downloading_controlnet_dwpose()
         self.pose_estimation = Wholebody(
-            device=device, model_det=f'{paths_controlnet[0]}/yolox_l.onnx', model_pose=f'{paths_controlnet[0]}/dw-ll_ucoco_384.onnx'
+            device=device, model_det=modir_path_det, model_pose=modir_path_pose
         )
 
     def _format_pose(self, candidates, scores, width, height):

@@ -77,33 +77,33 @@ def start_fast_comfyd(fast):
     else:
         comfyd.start(args_patch=[[]], force=True)
 
-identity_note = '使用绑定手机号的可信数字身份，可存储和管理个人配置数据，可参与创意分享等互助服务。首个绑定身份拥有超级管理权限。'
-identity_note_1 = '身份已绑定当前浏览器和应用节点。若要更换身份，需先"解除绑定"。同身份同一时刻最好只绑一处。导出身份二维码可适用离线和漫游场景，导出后请妥善保存。'
+identity_note = '用关联手机号的可信数字身份，存储和管理个人配置数据，参与创意分享等互助服务。首个绑定身份拥有超级管理权限。'
+identity_note_1 = '您的身份已绑定当前浏览器和系统节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可适用离线和漫游场景，导出后请妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
-note1_1 = '未匹配到数字身份，请注意查收手机短信的身份验证码，用其创建新身份。'
+note1_1 = '未匹配到数字身份，请注意查收手机短信验证码，用其创建新身份。若十分钟未收到短信验证码，请点击"更换身份信息"，重新输入，再次绑定。'
 note1_2 = f'已匹配到数字身份，{note1_0}'
-note1_3 = f'已匹配到身份在云端的加密副本, {note1_0}'
+note1_3 = f'已匹配到身份的云端加密副本, {note1_0}'
 note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国内手机号11位数字。请重新输入身份信息，再次绑定。'
 note1_5 = '该手机号绑定身份数量超过上限，无法绑定该身份，请更换身份信息，再次申请绑定。'
 note1_6 = '短时间内重复提交相同身份信息，请稍后再重新输入身份信息，再次申请绑定。'
-note1_7 = '之前已提交过但未经验证码验证身份，已清除遗留数据，需重新输入身份信息，再次绑定。'
+note1_7 = '已提交过但未验证通过的身份，已清除遗留数据，需重新输入身份信息，再次绑定。'
 note1_8 = '无法找回加密副本或验证身份。请检查网络环境，重新输入身份信息，再次绑定。'
 
-note2_0 = lambda x: f'最少8位字符，必须包含大写字母、小写字母和数字，不能有特殊字符。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
-note2_1 = f'身份已验证，请按提示预设个人身份口令，{note2_0("lightseagreen")}'
-note2_2 = f'身份口令遗失无法找回，请重复输入预设的身份口令，{note2_0("darkorange")}'
-note2_3 = '身份验码证格式不对，请正确输入短信里的身份验证码，重新进行"身份验证"。'
-note2_4 = '身份验码证未通过，请正确输入短信里的身份验证码，重新进行"身份验证"。'
-note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令，{note2_0("lightseagreen")}'
-note2_6 = f'身份口令设置异常，请重新输入身份信息进行身份绑定。'
-note2_7 = f'身份口令与上次不一致，请重新预设个人身份口令，{note2_0("lightseagreen")}'
-note2_8 = f'已匹配到本地的数字身份，请按提示预设个人身份口令，{note2_0("lightseagreen")}'
+note2_0 = lambda x: f'口令最少8位字符，必须包含大写、小写字母和数字，不能有特殊字符。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
+note2_1 = f'身份已验证，请按提示预设个人身份口令。{note2_0("lightseagreen")}'
+note2_2 = f'口令遗失无法找回，请再次输入身份口令，与前次保持一致。{note2_0("darkorange")}'
+note2_3 = '身份验证码格式不对，请正确输入短信里的身份验证码，重新进行"身份验证"。'
+note2_4 = '身份验证码不正确，请正确输入短信里的身份验证码，重新进行"身份验证"。'
+note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令。{note2_0("lightseagreen")}'
+note2_6 = f'身份口令设置异常，请重新输入身份信息进行绑定。'
+note2_7 = f'身份口令与上次不一致，请重新预设个人身份口令。{note2_0("lightseagreen")}'
+note2_8 = f'已匹配到本地数字身份，请按提示预设个人身份口令。{note2_0("lightseagreen")}'
 
 note3 = f'绑定成功! {identity_note_1}'
 note3_1 = '身份绑定不成功，请重新输入个人身份口令，再次确认身份。'
 note3_2 = '输入的身份口令格式不对，最少8位字符，必须包含大写字母、小写字母和数字，不能有特殊字符。请重新输入个人身份口令。'
 
-note4 = '身份已成功解绑，当前应用节点的服务已回退到游客模式。'
+note4 = '身份已成功解绑，当前系统节点的服务已回退到游客模式。'
 note4_1 = '身份解绑不成功，请重新输入个人身份口令，再次确认身份。'
 
 
@@ -114,7 +114,7 @@ theme_color = {
 
 id_info_css = lambda x: f'style="color: {theme_color[x]};"'
 #lambda x: f'style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px; color: {theme_color[x]};"'
-current_id_info = lambda x,y,z,t: f'<b>当前用户信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
+current_id_info = lambda x,y,z,t: f'<b>当前绑定的身份信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
 
 # [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
 # [identity_nick_input, identity_tele_input, identity_qr]

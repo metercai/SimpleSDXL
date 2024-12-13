@@ -79,7 +79,7 @@ def load_flux_lora(path):
     return checkpoint, 16
 
 def cleanprint(a):
-    print(a)
+    pass #print(a)
     return a
 
 def print_if_not_empty(a):
