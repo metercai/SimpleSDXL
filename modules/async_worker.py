@@ -958,8 +958,8 @@ def worker():
         if async_task.refiner_model_name != 'None':
             print(f'Refiner disabled in Hyper-SD mode.')
         async_task.refiner_model_name = 'None'
-        async_task.sampler_name = 'dpmpp_sde_gpu'
-        async_task.scheduler_name = 'karras'
+        async_task.sampler_name = 'euler'
+        async_task.scheduler_name = 'sgm_uniform'
         async_task.sharpness = 0.0
         async_task.cfg_scale = 1.0
         async_task.adaptive_cfg = 1.0
