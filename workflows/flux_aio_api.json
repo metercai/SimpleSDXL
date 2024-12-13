@@ -2456,7 +2456,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 387183892636836,
+      "seed": 344976539769609,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -3887,8 +3887,8 @@
         0
       ],
       "on_true": [
-        "2544",
-        0
+        "2542",
+        1
       ],
       "on_false": [
         "2534",
@@ -5476,7 +5476,7 @@
         0
       ],
       "on_true": [
-        "2543",
+        "2542",
         0
       ],
       "on_false": [
@@ -5489,40 +5489,6 @@
       "title": "If else"
     }
   },
-  "2540": {
-    "inputs": {
-      "value": "(1638400/a/b)**0.5",
-      "a": [
-        "2542",
-        0
-      ],
-      "b": [
-        "2542",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2541": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2542",
-        0
-      ],
-      "b": [
-        "2540",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
   "2542": {
     "inputs": {
       "image": [
@@ -5533,49 +5499,6 @@
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "2543": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2541",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2544": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2545",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2545": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2542",
-        1
-      ],
-      "b": [
-        "2540",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "2547": {
@@ -5599,7 +5522,7 @@
         0
       ],
       "positive": [
-        "140",
+        "1211",
         0
       ],
       "negative": [
@@ -6835,7 +6758,7 @@
         2
       ],
       "interpolation": "bicubic",
-      "method": "fill / crop",
+      "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
       "image": [

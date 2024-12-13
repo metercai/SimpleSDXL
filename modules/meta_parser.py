@@ -81,7 +81,11 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
-    results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
+    if task_method and '_aio' in task_method:
+        print(f'task_method:{task_method}')
+        results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
+    else:
+        results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_choices_visible_inter(base_model_list, 'base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
@@ -110,7 +114,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("mixing_image_prompt_and_inpaint"))
     results.append(update_value_if_existed("backfill_prompt"))
     results.append(update_value_if_existed("translation_methods"))
-    results.append(False if template_engine not in ['Fooocus', 'Comfy'] else update_value_if_existed("input_image_checkbox"))
+    results.append(False if template_engine not in ['Fooocus', 'Comfy'] and task_method and '_aio' not in task_method else update_value_if_existed("input_image_checkbox"))
 
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
