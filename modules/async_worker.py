@@ -1591,8 +1591,6 @@ def worker():
                         height = int(height * match_multiple)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
-                        width = int(width * match_multiple)
-                        height = int(height * match_multiple)
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
                         async_task.params_backend['i2i_uov_hires_fix_blurred'] = 0.0
