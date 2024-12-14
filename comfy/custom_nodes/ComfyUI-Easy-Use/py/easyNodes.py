@@ -2659,11 +2659,12 @@ class applyInpaint:
         powerpaint_clip = POWERPAINT_MODELS['v2.1']['clip_url']
 
         from urllib.parse import urlparse
-        get_local_filepath(powerpaint_model, os.path.join(INPAINT_DIR, 'powerpaint'))
+        get_local_filepath(powerpaint_model, INPAINT_DIR)
+        get_local_filepath(powerpaint_clip, INPAINT_DIR)
         model_parsed_url = urlparse(powerpaint_model)
         clip_parsed_url = urlparse(powerpaint_clip)
-        model_name = os.path.join("powerpaint",os.path.basename(model_parsed_url.path))
-        clip_name = os.path.join("powerpaint",os.path.basename(clip_parsed_url.path))
+        model_name = os.path.basename(model_parsed_url.path)
+        clip_name = os.path.basename(clip_parsed_url.path)
         return model_name, clip_name
 
     def apply(self, pipe, image, mask, inpaint_mode, encode, grow_mask_by, dtype, fitting, function, scale, start_at, end_at):
