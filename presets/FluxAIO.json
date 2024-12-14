@@ -40,6 +40,7 @@
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
+    "default_image_number": 1,
     "default_overwrite_step": 20,
     "checkpoint_downloads": {},
     "embeddings_downloads": {},

@@ -637,7 +637,7 @@ def update_after_identity_sub(state):
     results += [gr.update(value=update_comfyd_url(user_did))]
     results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
-    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"] in ['Fooocus', 'Flux']  else modules.flags.ip_list[:-1]
+    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"] in ['Fooocus', 'Flux', 'Kolors', 'Comfy']  else modules.flags.ip_list[:-1]
     default_controlnet_image_count = config.default_controlnet_image_count if state["engine"]=='Fooocus' else 4
     for image_count in range(default_controlnet_image_count):
         image_count += 1
