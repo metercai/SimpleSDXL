@@ -2803,7 +2803,7 @@
     },
     "class_type": "MZ_KolorsUNETLoaderV2",
     "_meta": {
-      "title": "MinusZone - KolorsUNETLoaderV2"
+      "title": "base_model"
     }
   },
   "2673": {
@@ -3027,7 +3027,7 @@
   },
   "2684": {
     "inputs": {
-      "clip_name": "Kolors\\pytorch_model.bin"
+      "clip_name": "kolors_clip_ipa_plus_vit_large_patch14_336.bin"
     },
     "class_type": "MZ_KolorsCLIPVisionLoader",
     "_meta": {
@@ -3072,7 +3072,7 @@
   },
   "2686": {
     "inputs": {
-      "ipadapter_file": "ip_adapter_plus_general.bin"
+      "ipadapter_file": "kolors_ip_adapter_plus_general.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
@@ -3346,7 +3346,7 @@
   },
   "2725": {
     "inputs": {
-      "control_net_name": "Kolors\\Kolors-ControlNet-Canny.safetensors"
+      "control_net_name": "kolors_controlnet_canny.safetensors"
     },
     "class_type": "MZ_KolorsControlNetLoader",
     "_meta": {
@@ -3355,7 +3355,7 @@
   },
   "2726": {
     "inputs": {
-      "control_net_name": "Kolors\\Kolors-ControlNet-Depth.safetensors"
+      "control_net_name": "kolors_controlnet_depth.safetensors"
     },
     "class_type": "MZ_KolorsControlNetLoader",
     "_meta": {
@@ -3364,7 +3364,7 @@
   },
   "2730": {
     "inputs": {
-      "control_net_name": "Kolors\\Kolors-ControlNet-Pose.safetensors"
+      "control_net_name": "kolors_controlnet_pose.safetensors"
     },
     "class_type": "MZ_KolorsControlNetLoader",
     "_meta": {

@@ -2946,8 +2946,8 @@
   },
   "2745": {
     "inputs": {
-      "powerpaint_model": "Powerpaint\\diffusion_pytorch_model.safetensors",
-      "powerpaint_clip": "Powerpaint\\pytorch_model.bin",
+      "powerpaint_model": "sd15_powerpaint_brushnet_v2_1.safetensors",
+      "powerpaint_clip": "sd15_powerpaint_brushnet_clip_v2_1.bin",
       "dtype": "float16",
       "fitting": 1,
       "function": "text guided",
@@ -3348,7 +3348,7 @@
   },
   "2764": {
     "inputs": {
-      "control_net_name": "control_v11f1p_sd15_depth.safetensors"
+      "control_net_name": "control_v11f1p_sd15_depth_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -3357,7 +3357,7 @@
   },
   "2765": {
     "inputs": {
-      "control_net_name": "control_v11p_sd15_canny.safetensors"
+      "control_net_name": "control_v11p_sd15_canny_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -3366,7 +3366,7 @@
   },
   "2766": {
     "inputs": {
-      "control_net_name": "control_v11p_sd15_openpose.safetensors"
+      "control_net_name": "control_v11p_sd15_openpose_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -4354,8 +4354,8 @@
   },
   "2863": {
     "inputs": {
-      "powerpaint_model": "Powerpaint\\diffusion_pytorch_model.safetensors",
-      "powerpaint_clip": "Powerpaint\\pytorch_model.bin",
+      "powerpaint_model": "sd15_powerpaint_brushnet_v2_1.safetensors",
+      "powerpaint_clip": "sd15_powerpaint_brushnet_clip_v2_1.bin",
       "dtype": "float16",
       "fitting": 1,
       "function": "image outpainting",
@@ -4771,7 +4771,7 @@
   },
   "2893": {
     "inputs": {
-      "control_net_name": "control_v11f1e_sd15_tile.safetensors"
+      "control_net_name": "control_v11f1e_sd15_tile_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -4811,7 +4811,7 @@
   },
   "2898": {
     "inputs": {
-      "control_net_name": "control_v11f1e_sd15_tile.safetensors"
+      "control_net_name": "control_v11f1e_sd15_tile_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -4927,7 +4927,7 @@
   },
   "2911": {
     "inputs": {
-      "control_net_name": "control_v11f1e_sd15_tile.safetensors"
+      "control_net_name": "control_v11f1e_sd15_tile_fp16.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {

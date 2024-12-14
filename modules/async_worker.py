@@ -1524,8 +1524,9 @@ def worker():
                     else:
                         i2i_model_type = 3 # hyp8 low
                 else:
-                    i2i_model_type = 1 # dev full-size
-                    async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
+                    if async_task.task_class == 'Flux':
+                        i2i_model_type = 1 # dev full-size
+                        async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
                     if async_task.skipping_cn_preprocessor:
@@ -1627,7 +1628,8 @@ def worker():
                         all_steps = async_task.steps * async_task.image_number
                     else:
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
-                async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
+                if async_task.task_class == 'Flux':
+                    async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
             async_task.params_backend['input_images'] = input_images
 
 
