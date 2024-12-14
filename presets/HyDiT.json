@@ -1,6 +1,6 @@
 { 
     "default_engine": {
-	"backend_engine": "HyDiT+",
+	"backend_engine": "HyDiT",
 	"disvisible": ["backend_selection", "performance_selection"],
 	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
 	"available_aspect_ratios_selection": "HyDiT",

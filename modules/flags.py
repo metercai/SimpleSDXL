@@ -159,12 +159,13 @@ available_aspect_ratios_list = {
 }
 
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT', 'HyDiT+', 'Flux']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux']
 
 model_file_filter = {
         'SD3x'   : ['sd3'],
         'Flux'   : [['flux'], ['f.1']],
         'HyDiT'  : ['hunyuan'],
+        'Kolors' : ['kolors'],
         }
 model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
 
@@ -174,10 +175,8 @@ task_class_mapping = {
             'Fooocus': 'SDXL-Fooocus',
             'Comfy'  : 'SDXL-Comfy',
             'Kolors' : 'Kwai-Kolors',
-            'Kolors+': 'Kwai-Kolors+',
             'SD3x'   : 'SD3m-SD3.5x',
             'HyDiT'  : 'Hunyuan-DiT',
-            'HyDiT+' : 'Hunyuan-DiT+',
             'Flux'   : 'Flux.1',
             }
 def get_taskclass_by_fullname(fullname):
@@ -186,7 +185,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'Kolors+', 'SD3x', 'HyDiT+', 'Flux']
+comfy_classes = ['Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux']
 
 default_class_params = {
     'Fooocus': {
@@ -213,17 +212,6 @@ default_class_params = {
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
-            "task_method": "kolors_text2image1",
-            "llms_model": "quant8",
-            },
-        },
-    'Kolors+': {
-        'disvisible': ["backend_selection", "performance_selection"],
-        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "overwrite_step", "refiner_model"],
-        'available_aspect_ratios_selection': 'Common',
-        'available_sampler_name': comfy_sampler_list,
-        'available_scheduler_name': comfy_scheduler_list,
-        'backend_params': {
             "task_method": "kolors_text2image2",
             "llms_model": "quant8",
             },
@@ -239,15 +227,6 @@ default_class_params = {
             },
         },
     'HyDiT': {
-        'disvisible': ["backend_selection", "performance_selection"],
-        'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
-        'available_aspect_ratios_selection': 'HyDiT',
-        'available_sampler_name': ["ddpm", "ddim", "dpmms"],
-        'backend_params': {
-            "task_method": "hydit_base",
-            },
-        },
-    'HyDiT+': {
         'disvisible': ["backend_selection", "performance_selection"],
         'disinteractive': ["input_image_checkbox", "enhance_checkbox", "performance_selection", "base_model", "loras", "refiner_model", "scheduler_name"],
         'available_aspect_ratios_selection': 'HyDiT',

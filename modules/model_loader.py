@@ -1,5 +1,6 @@
 import os
 import json
+import ast
 import shared
 from urllib.parse import urlparse
 from typing import Optional
@@ -66,7 +67,7 @@ def refresh_model_list(presets, user_did=None):
                 if 'model_list' in config_preset:
                     model_list = config_preset['model_list']
                     model_list = [tuple(p.split(',')) for p in model_list]
-                    model_list = [(cata, path_file, int(size), hash10, url) for (cata, path_file, size, hash10, url) in model_list]
+                    model_list = [(cata.strip(), path_file.strip(), int(size), hash10.strip(), url.strip()) for (cata, path_file, size, hash10, url) in model_list]
                     presets_model_list[preset] = model_list
     return
             
@@ -82,9 +83,10 @@ def check_models_exists(preset, user_did=None):
     model_list = [] if preset not in presets_model_list else presets_model_list[preset]
     if len(model_list)>0:
         for cata, path_file, size, hash10, url in model_list:
-            if isinstance(path_file, list):
-                result = shared.modelsinfo.get_model_names(cata, path_file)
-                if result is None or len(result)==0:
+            if path_file[0]=='[' and path_file[:-1]==']':
+                path_file = ast.literal_eval(path_file)
+                result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
+                if result is None or len(result)<size:
                     print(f'[ModelInfos] Missing a type of model file in preset({preset}): {cata}, filter={path_file}')
                     return False
             else:
@@ -108,12 +110,12 @@ def download_model_files(preset, user_did=None):
     model_list = [] if preset not in presets_model_list else presets_model_list[preset]
     if len(model_list)>0:
         for cata, path_file, size, hash10, url in model_list:
-            if isinstance(path_file, list):
+            if path_file[0]=='[' and path_file[:-1]==']':
                 if url:
                     parts = urlparse(url)
                     file_name = os.path.basename(parts.path)
                 else:
-                    return
+                    continue
             else:
                 file_name = path_file.replace('\\', '/').replace(os.sep, '/')
             if cata in model_cata_map:
@@ -125,10 +127,36 @@ def download_model_files(preset, user_did=None):
             file_name = os.path.basename(full_path_file)
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
-            load_file_from_url(
-                url=url,
-                model_dir=model_dir,
-                file_name=file_name
-            )
+            if path_file[0]=='[' and path_file[:-1]==']' and url.end_with('.zip'):
+                download_diffusers_model(path_models_root, cata, path_file[1:-1], size, url)
+            else:
+                load_file_from_url(
+                    url=url,
+                    model_dir=model_dir,
+                    file_name=file_name
+                )
+    return
+
+def download_diffusers_model(path_models_root, cata, model_name, num, url):
+    path_filter = [model_name]
+    result = shared.modelsinfo.get_model_names(cata, path_filter, casesensitive=True)
+    if result is None or len(result)<num:
+        path_temp = os.path.join(path_models_root, 'temp')
+        if not os.path.exists(path_temp):
+            os.makedirs(path_temp)
+        file_name = os.path.basename(urlparse(url).path)
+        load_file_from_url(
+            url=url,
+            model_dir=path_temp,
+            file_name=file_name
+        )
+        downfile = os.path.join(path_temp, file_name)
+        with zipfile.ZipFile(downfile, 'r') as zipf:
+            print(f'extractall: {downfile}')
+            zipf.extractall(path_temp)
+        shutil.move(os.path.join(path_temp, f'SimpleModels/{cata}/{model_name}'), os.path.join(os.path.join(path_models_root, cata), model_name))
+        os.remove(downfile)
+        shutil.rmtree(path_temp)
+    modelsinfo.refresh_from_path()
     return
 

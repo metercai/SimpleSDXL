@@ -193,15 +193,15 @@ class AsyncTask:
         if self.task_class not in ['Fooocus'] and shared.token.is_guest(self.user_did):
             print(f'[TaskEngine] This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运>行,请先完成身份绑定. ')
 
-        if self.task_class in ['Kolors+', 'Kolors', 'Flux', 'HyDiT+', 'SD3x'] and self.task_name not in ['Kolors+', 'Flux', 'HyDiT+', 'SD3x']:
+        if self.task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x'] and self.task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
-            if self.task_name in ['Kolors+', 'Flux']:
+            if self.task_name in ['Kolors', 'Flux']:
                 self.params_backend.update({
                     "lora_1": self.loras[0][0],
                     "lora_1_strength": self.loras[0][1],
                     })
-            if len(self.loras) > 1 and (self.task_name in ['Kolors+'] or 'base2_gguf' in self.task_method):
+            if len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method):
                 self.params_backend.update({
                     "lora_2": self.loras[1][0],
                     "lora_2_strength": self.loras[1][1],
@@ -480,7 +480,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Kolors+', 'Flux']:
+                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Flux']:
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None
@@ -1254,7 +1254,7 @@ def worker():
             print(f'[TaskEngine] Enable Fooocus backend.')
             comfyd.stop()
 
-        if async_task.task_class not in ['Kolors', 'Kolors+', 'HyDiT', 'HyDiT+'] and 'kolors' not in async_task.task_name.lower():
+        if async_task.task_class not in ['Kolors', 'HyDiT'] and 'kolors' not in async_task.task_name.lower():
             async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
             async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
             async_task.inpaint_additional_prompt = translator.convert(async_task.inpaint_additional_prompt, async_task.translation_methods)
