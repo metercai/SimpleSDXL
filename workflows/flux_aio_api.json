@@ -3811,7 +3811,7 @@
   },
   "2293": {
     "inputs": {
-      "control_net_name": "FLUX.1-dev-ControlNet-Union-Pro.safetensors"
+      "control_net_name": "flux.1-dev_controlnet_union_pro.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -5503,7 +5503,7 @@
   },
   "2547": {
     "inputs": {
-      "control_net_name": "FLUX.1-dev-ControlNet-Union-Pro.safetensors"
+      "control_net_name": "flux.1-dev_controlnet_union_pro.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {

@@ -83,16 +83,16 @@ def check_models_exists(preset, user_did=None):
     model_list = [] if preset not in presets_model_list else presets_model_list[preset]
     if len(model_list)>0:
         for cata, path_file, size, hash10, url in model_list:
-            if path_file[0]=='[' and path_file[:-1]==']':
-                path_file = ast.literal_eval(path_file)
+            if path_file[:1]=='[' and path_file[-1:]==']':
+                path_file = [path_file[1:-1]]
                 result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
                 if result is None or len(result)<size:
-                    print(f'[ModelInfos] Missing a type of model file in preset({preset}): {cata}, filter={path_file}')
+                    print(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
                     return False
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)
                 if file_path is None or file_path == '' or size != os.path.getsize(file_path):
-                    #print(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
+                    print(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
                     return False
         return True
     return False
@@ -110,7 +110,7 @@ def download_model_files(preset, user_did=None):
     model_list = [] if preset not in presets_model_list else presets_model_list[preset]
     if len(model_list)>0:
         for cata, path_file, size, hash10, url in model_list:
-            if path_file[0]=='[' and path_file[:-1]==']':
+            if path_file[:1]=='[' and path_file[-1:]==']':
                 if url:
                     parts = urlparse(url)
                     file_name = os.path.basename(parts.path)
@@ -127,7 +127,7 @@ def download_model_files(preset, user_did=None):
             file_name = os.path.basename(full_path_file)
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
-            if path_file[0]=='[' and path_file[:-1]==']' and url.end_with('.zip'):
+            if path_file[:1]=='[' and path_file[-1:]==']' and url.endswith('.zip'):
                 download_diffusers_model(path_models_root, cata, path_file[1:-1], size, url)
             else:
                 load_file_from_url(
@@ -152,7 +152,7 @@ def download_diffusers_model(path_models_root, cata, model_name, num, url):
         )
         downfile = os.path.join(path_temp, file_name)
         with zipfile.ZipFile(downfile, 'r') as zipf:
-            print(f'extractall: {downfile}')
+            print(f'extractall: {downfile} to {path_temp}')
             zipf.extractall(path_temp)
         shutil.move(os.path.join(path_temp, f'SimpleModels/{cata}/{model_name}'), os.path.join(os.path.join(path_models_root, cata), model_name))
         os.remove(downfile)
