@@ -138,6 +138,10 @@ def download_model_files(preset, user_did=None):
     return
 
 def download_diffusers_model(path_models_root, cata, model_name, num, url):
+    import zipfile
+    import shutil
+    from shared import modelsinfo
+
     path_filter = [model_name]
     result = shared.modelsinfo.get_model_names(cata, path_filter, casesensitive=True)
     if result is None or len(result)<num:

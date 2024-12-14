@@ -151,17 +151,15 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             comfy_params.delete_params(['base_model_dtype'])
         return ComfyTask(task_method, comfy_params)
     
-    elif task_name in ['Kolors+', 'Kolors']:
+    elif task_name in ['Kolors']:
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G else 'fp16'
                 })
         check_download_kolors_model(config.path_models_root)
-        if task_name == 'Kolors':
-            comfy_params.delete_params(['sampler'])
-        return ComfyTask(task_method, comfy_params)
+        return ComfyTask(task_method, comfy_params, input_images)
     
-    elif task_name in ['HyDiT+', 'HyDiT']:
+    elif task_name in ['HyDiT']:
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_hydit_model()
         return ComfyTask(task_method, comfy_params)
@@ -232,7 +230,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
         return ComfyTask(task_method, comfy_params, input_images)
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])
-        return ComfyTask(task_method, comfy_params)
+        return ComfyTask(task_method, comfy_params, input_images)
 
 
 
