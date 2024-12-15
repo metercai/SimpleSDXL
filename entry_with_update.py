@@ -22,7 +22,7 @@ try:
 
     origin_name = 'main'
     main_name = 'SimpleSDXL'
-    dev_name = 'identity_flux.i2i'
+    dev_name = 'SimpleSDXL_dev'
     local_branch_ref = f'refs/heads/{branch_name}'
     if '--dev' in (sys.argv):
         if branch_name != dev_name:
