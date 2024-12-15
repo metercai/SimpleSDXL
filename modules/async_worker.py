@@ -548,7 +548,7 @@ def worker():
                 cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
                 task[0] = ip_adapter.preprocess(cn_img, ip_adapter_path=ip_adapter_path)
             else:
-                task[0] = resize_image(cn_img, width=1024, height=1024, resize_mode=2)
+                task[0] = resize_image(cn_img, min_side=1024, resize_mode=3)
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_ip_face]:
