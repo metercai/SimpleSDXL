@@ -33,7 +33,7 @@ def get_branch():
         branch = repo.head.shorthand
         if branch=="main":
             branch = "Fooocus"
-        elif branch=="identity_flux.i2i":
+        elif branch=="SimpleSDXL_dev":
             branch = "SimplAI.FluxAIO"
         commit_id = f'{repo.head.target}'[:7]
     return branch
