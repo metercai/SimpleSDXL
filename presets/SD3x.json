@@ -5,7 +5,7 @@
 	"disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "loras", "refiner_model"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
-		"task_method": "sd3_base"
+		"task_method": "sd3x_base"
 		}
     	},
     "default_model": "sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors",

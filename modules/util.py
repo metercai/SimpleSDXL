@@ -43,7 +43,7 @@ def resample_image(im, width, height):
     return np.array(im)
 
 
-def resize_image(im, width, height, resize_mode=1):
+def resize_image(im, width=None, height=None, resize_mode=1, min_side=None):
     """
     Resizes an image with the specified resize_mode, width, and height.
 
@@ -52,9 +52,11 @@ def resize_image(im, width, height, resize_mode=1):
             0: Resize the image to the specified width and height.
             1: Resize the image to fill the specified width and height, maintaining the aspect ratio, and then center the image within the dimensions, cropping the excess.
             2: Resize the image to fit within the specified width and height, maintaining the aspect ratio, and then center the image within the dimensions, filling empty with data from image.
+            3: Resize the image to ensure the smallest side matches the specified min_side, maintaining the aspect ratio.
         im: The image to resize.
         width: The width to resize the image to.
         height: The height to resize the image to.
+        min_side: The minimum side size to resize the image to (used in mode 3).
     """
 
     im = Image.fromarray(im)
@@ -76,7 +78,7 @@ def resize_image(im, width, height, resize_mode=1):
         res = Image.new("RGB", (width, height))
         res.paste(resized, box=(width // 2 - src_w // 2, height // 2 - src_h // 2))
 
-    else:
+    elif resize_mode == 2:
         ratio = width / height
         src_ratio = im.width / im.height
 
@@ -97,7 +99,16 @@ def resize_image(im, width, height, resize_mode=1):
             if fill_width > 0:
                 res.paste(resized.resize((fill_width, height), box=(0, 0, 0, height)), box=(0, 0))
                 res.paste(resized.resize((fill_width, height), box=(resized.width, 0, resized.width, height)), box=(fill_width + src_w, 0))
+    elif resize_mode == 3 and min_side:
+        scale = min_side / min(im.width, im.height)
 
+        new_width = int(im.width * scale)
+        new_height = int(im.height * scale)
+
+        res = resize(im, new_width, new_height)
+    else:
+        pass
+    
     return np.array(res)
 
 
