@@ -608,6 +608,7 @@ identity_introduce = '''
 '''
 
 def update_after_identity(state):
+    state.update({"__nav_name_list": get_preset_name_list(state["user_did"])})
     results = refresh_nav_bars(state)
     results += update_after_identity_sub(state)
     return results

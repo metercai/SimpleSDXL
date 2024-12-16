@@ -1242,10 +1242,9 @@ def worker():
         print(f'[TaskEngine] Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
         
         if async_task.task_class in flags.comfy_classes:
-            print(f'[TaskEngine] Enable Comfyd backend.')
+            print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
             if "flux_aio" in async_task.task_method and \
-                ((async_task.current_tab == 'uov' and len(async_task.cn_tasks[flags.cn_ip_face])==0) or \
-                (async_task.current_tab == 'inpaint' and len(async_task.cn_tasks[flags.cn_ip_face])==0) or \
+                ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and len(async_task.cn_tasks[flags.cn_ip_face])==0) or \
                 not async_task.input_image_checkbox ):
                 print(f'[TaskEngine] Clean the model cache in comfyd.')
                 comfyd.stop()
@@ -1506,7 +1505,6 @@ def worker():
             async_task.refiner_switch = 1.0
             callback_function = callback_comfytask
             if async_task.task_class == 'HyDiT':
-                async_task.base_model_name = 'hydit_v1.1_fp16.safetensors'
                 callback_function = callback_hydittask
             elif async_task.task_class == 'Kolors':
                 async_task.base_model_name = default_kolors_base_model_name
@@ -1618,9 +1616,12 @@ def worker():
                             denoising_strength = denoising_strength*0.8
                     else:
                         i2i_model_type = 2
-                        async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
-                        async_task.params_backend['base_model_gguf'] = async_task.base_model_name
-                        async_task.cfg_scale = 30
+                        if async_task.task_class == 'Flux':
+                            async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
+                            async_task.params_backend['base_model_gguf'] = async_task.base_model_name
+                            async_task.cfg_scale = 30
+                        elif async_task.task_class == 'Kolors':
+                            async_task.base_model_name = 'kolors_inpainting.safetensors'
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
                         async_task.steps = 20

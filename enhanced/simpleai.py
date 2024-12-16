@@ -126,7 +126,6 @@ def trigger_input_identity(img):
         data, bbox, data_bytes = qr_code_detector.detectAndDecode(image)
         if bbox is not None:
             try:
-                import base64
                 user_did, nickname, telephone = import_identity_qrcode(data)
             except Exception as e:
                 print("qrcode parse error")
