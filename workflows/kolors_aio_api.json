@@ -1549,7 +1549,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "nsfw，脸部阴影，低分辨率，jpeg伪影、模糊、糟糕，黑脸，霓虹灯",
-      "seed": 244508266893854,
+      "seed": 661693379578840,
       "steps": 30,
       "cfg": 3,
       "denoise": 0
@@ -2201,8 +2201,8 @@
         0
       ],
       "on_true": [
-        "2544",
-        0
+        "2542",
+        1
       ],
       "on_false": [
         "2534",
@@ -2490,7 +2490,7 @@
         0
       ],
       "on_true": [
-        "2543",
+        "2542",
         0
       ],
       "on_false": [
@@ -2503,40 +2503,6 @@
       "title": "If else"
     }
   },
-  "2540": {
-    "inputs": {
-      "value": "(1638400/a/b)**0.5",
-      "a": [
-        "2542",
-        0
-      ],
-      "b": [
-        "2542",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2541": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2542",
-        0
-      ],
-      "b": [
-        "2540",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
   "2542": {
     "inputs": {
       "image": [
@@ -2547,49 +2513,6 @@
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "2543": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2541",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2544": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2545",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2545": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2542",
-        1
-      ],
-      "b": [
-        "2540",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "2582": {
@@ -2889,7 +2812,7 @@
         0
       ],
       "image": [
-        "702",
+        "2815",
         0
       ],
       "clip_vision": [
@@ -2930,7 +2853,7 @@
         0
       ],
       "image": [
-        "703",
+        "2816",
         0
       ],
       "clip_vision": [
@@ -2971,7 +2894,7 @@
         0
       ],
       "image": [
-        "704",
+        "2817",
         0
       ],
       "clip_vision": [
@@ -3012,7 +2935,7 @@
         0
       ],
       "image": [
-        "705",
+        "2818",
         0
       ],
       "clip_vision": [
@@ -3057,7 +2980,7 @@
         0
       ],
       "image": [
-        "702",
+        "2821",
         0
       ],
       "clip_vision": [
@@ -3102,7 +3025,7 @@
         0
       ],
       "image": [
-        "703",
+        "2822",
         0
       ],
       "clip_vision": [
@@ -3138,7 +3061,7 @@
         0
       ],
       "image": [
-        "704",
+        "2823",
         0
       ],
       "clip_vision": [
@@ -3174,7 +3097,7 @@
         0
       ],
       "image": [
-        "705",
+        "2824",
         0
       ],
       "clip_vision": [
@@ -4149,7 +4072,7 @@
         2
       ],
       "interpolation": "bicubic",
-      "method": "fill / crop",
+      "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
       "image": [
@@ -4313,8 +4236,8 @@
   "2807": {
     "inputs": {
       "strength": [
-        "1081",
-        0
+        "2828",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4350,8 +4273,8 @@
   "2808": {
     "inputs": {
       "strength": [
-        "1080",
-        0
+        "2827",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4387,8 +4310,8 @@
   "2809": {
     "inputs": {
       "strength": [
-        "1075",
-        0
+        "2826",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4424,8 +4347,8 @@
   "2810": {
     "inputs": {
       "strength": [
-        "1079",
-        0
+        "2825",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4461,8 +4384,8 @@
   "2811": {
     "inputs": {
       "strength": [
-        "1079",
-        0
+        "2829",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4498,8 +4421,8 @@
   "2812": {
     "inputs": {
       "strength": [
-        "1075",
-        0
+        "2830",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4535,8 +4458,8 @@
   "2813": {
     "inputs": {
       "strength": [
-        "1080",
-        0
+        "2831",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4572,8 +4495,8 @@
   "2814": {
     "inputs": {
       "strength": [
-        "1081",
-        0
+        "2832",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4604,6 +4527,230 @@
     "class_type": "ControlNetApplyAdvanced",
     "_meta": {
       "title": "Apply ControlNet"
+    }
+  },
+  "2815": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2816": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2817": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "704",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2818": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2821": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2822": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2823": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "704",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2824": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "pad",
+      "sharpening": 0,
+      "image": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "2825": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1079",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2826": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1075",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2827": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1080",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2828": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2829": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1079",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2830": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1075",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2831": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1080",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2832": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
