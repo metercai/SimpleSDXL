@@ -1504,10 +1504,6 @@ def worker():
             async_task.refiner_model_name = ''
             async_task.refiner_switch = 1.0
             callback_function = callback_comfytask
-            if async_task.task_class == 'HyDiT':
-                callback_function = callback_hydittask
-            elif async_task.task_class == 'Kolors':
-                async_task.base_model_name = default_kolors_base_model_name
             
             input_images = None
             if async_task.layer_input_image is not None:

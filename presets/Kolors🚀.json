@@ -9,7 +9,7 @@
 		"llms_model": "auto"
 		}
 	},
-    "default_model": "None",
+    "default_model": "kolors_unet_fp16.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
