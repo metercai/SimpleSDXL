@@ -36,11 +36,6 @@ def load_file_from_url(
 presets_model_list = {}
 presets_mtime = {}
 
-#    "flux_aio" : [
-#        ("controlnet", "flux.1-dev_canny_controlnet_v3.safetensors", 1487623552, 0, "controlnet/flux.1-dev_canny_controlnet_v3.safetensors"),
-#        ("checkpoints", [['flux','dev','safetensors'], ['flux', 'hyp', 'gguf']], 0, 0, ""),
-#        ];
-
 def refresh_model_list(presets, user_did=None):
     from enhanced.simpleai import get_path_in_user_dir
     global presets_model_list, presets_mtime
@@ -87,7 +82,7 @@ def check_models_exists(preset, user_did=None):
                 path_file = [path_file[1:-1]]
                 result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
                 if result is None or len(result)<size:
-                    print(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
+                    #print(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
                     return False
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)

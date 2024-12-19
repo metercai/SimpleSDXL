@@ -108,9 +108,9 @@ def get_preset_samples(user_did=None):
         preset_samples['guest'] = presets
     return presets
 
-def is_models_file_absent(preset_name):
+def is_models_file_absent(preset_name, user_did=None):
     if preset_name in presets_model_list:
-        if check_models_exists(preset_name):
+        if check_models_exists(preset_name, user_did):
             return False
         else:
             return True
@@ -243,6 +243,7 @@ def init_nav_bars(state_params, request: gr.Request):
             sstoken = shared.token.get_guest_sstoken(ua_hash)
             state_params.update({"sstoken": sstoken})
             user_did = shared.token.get_guest_did()
+            print(f'[UserBase] user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
             print(f'[UserBase] Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
         else:
             state_params.update({"sstoken": ''})
@@ -313,7 +314,7 @@ def refresh_nav_bars(state_params):
         results += [gr.update(visible=True)]
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
-        name += '\u2B07' if is_models_file_absent(name) else ''
+        name += '\u2B07' if is_models_file_absent(name, state_params["user_did"]) else ''
         visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, interactive=True, visible=visible_flag)]
@@ -336,7 +337,11 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
 
     if state_params["engine"] != 'Fooocus' and shared.token.is_guest(state_params["user_did"]):
         gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first.')
-        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first / 该预置包需要绑定身份后才能正常运行, 请先完成身份绑定.')
+        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first / 该预置包需要绑定身份后才能正常运行, 请在页面顶部右侧的"服务"标签内完成身份绑定.')
+
+    if is_models_file_absent(state_params["__preset"], state_params["user_did"]):
+        gr.Info(preset_downing_note_info)
+        download_model_files(state_params["__preset"], state_params["user_did"])
 
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
@@ -391,7 +396,9 @@ def sync_message(state_params):
     state_params.update({"__message":system_message})
     return
 
-preset_down_note_info = 'The preset package being loaded has model files that need to be downloaded, and it will take some time to wait...'
+preset_down_note_info = 'The preset package being loaded has model files that need to be downloaded.'
+preset_downing_note_info = 'Downloading the model file required for image generation, please wait for a moment...'
+
 def check_absent_model(bar_button, state_params):
     #print(f'check_absent_model,state_params:{state_params}')
     state_params.update({'bar_button': bar_button})
@@ -414,7 +421,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
-        download_model_files(preset, state_params["user_did"])
+        #download_model_files(preset, state_params["user_did"])
 
     state_params.update({"__preset": preset})
 
@@ -583,7 +590,7 @@ def update_history_link(user_did):
     return gr.update(value='' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>')
 
 def update_comfyd_url(user_did):
-    entry_point = shared.token.get_entry_point(user_did, comfyd.get_entry_point_id())
+    entry_point = '' if comfyd.get_entry_point_id() is None else shared.token.get_entry_point(user_did, comfyd.get_entry_point_id())
     entry_url = None if entry_point == '' else f'http://{args_manager.args.listen}:{shared.sysinfo["loopback_port"]}{args_manager.args.webroot}/'
     entry_point_url = '' if entry_url is None else f'<a href="{entry_url}?p={entry_point}" target="_blank">{entry_url}</a><div>Click and Entry embedded ComfyUI from here.</div>'
     return entry_point_url

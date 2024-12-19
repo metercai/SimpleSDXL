@@ -42,12 +42,12 @@
     ],
     "default_aspect_ratio": "896*1152",
     "default_overwrite_step": -1,
-    "checkpoint_downloads": {
-        "realisticStockPhoto_v20.safetensors": "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/realisticStockPhoto_v20.safetensors"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
-    "lora_downloads": {
-        "SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors": "https://huggingface.co/mashb1t/fav_models/resolve/main/fav/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors"
-    },
-    "previous_default_models": ["realisticStockPhoto_v10.safetensors"]
+    "lora_downloads": {},
+    "previous_default_models": ["realisticStockPhoto_v10.safetensors"],
+    "model_list": [
+        "checkpoints,realisticStockPhoto_v20.safetensors,6938054242,0,https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/realisticStockPhoto_v20.safetensors",
+        "loras,SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors,912593164,0,https://huggingface.co/mashb1t/fav_models/resolve/main/fav/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors"
+    ]
 } 

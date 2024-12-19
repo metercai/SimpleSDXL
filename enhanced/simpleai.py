@@ -30,9 +30,10 @@ def reset_simpleai_args():
         xformers_version=xformers_version,
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
+    reserve_vram = [] if shared.args.reserve_vram is None else [['--reserve-vram', f'{shared.args.reserve_vram}']] 
     smart_memory = [] if shared.sysinfo['gpu_memory']<8180 else [['--disable-smart-memory']]
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone + reserve_vram
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
     comfyd_images_path = os.path.join(shared.path_userhome, 'guest_user')
     comfyd_output = os.path.join(comfyd_images_path, 'comfyd_outputs')
@@ -91,7 +92,7 @@ note1_8 = '无法找回加密副本或验证身份。请检查网络环境，重
 
 note2_0 = lambda x: f'口令最少8位字符，必须包含大写、小写字母和数字，不能有特殊字符。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
 note2_1 = f'身份已验证，请按提示预设个人身份口令。{note2_0("lightseagreen")}'
-note2_2 = f'口令遗失无法找回，请再次输入身份口令，与前次保持一致。{note2_0("darkorange")}'
+note2_2 = f'口令遗失无法找回，请再次输入一致的口令。{note2_0("darkorange")}'
 note2_3 = '身份验证码格式不对，请正确输入短信里的身份验证码，重新进行"身份验证"。'
 note2_4 = '身份验证码不正确，请正确输入短信里的身份验证码，重新进行"身份验证"。'
 note2_5 = f'设置的身份口令格式不对，请重新预设个人身份口令。{note2_0("lightseagreen")}'
@@ -103,7 +104,7 @@ note3 = f'绑定成功! {identity_note_1}'
 note3_1 = '身份绑定不成功，请重新输入个人身份口令，再次确认身份。'
 note3_2 = '输入的身份口令格式不对，最少8位字符，必须包含大写字母、小写字母和数字，不能有特殊字符。请重新输入个人身份口令。'
 
-note4 = '身份已成功解绑，当前系统节点的服务已回退到游客模式。'
+note4 = '身份已成功解绑，当前节点的服务已回退到游客模式。'
 note4_1 = '身份解绑不成功，请重新输入个人身份口令，再次确认身份。'
 
 
@@ -134,11 +135,15 @@ def trigger_input_identity(img):
             user_did, nickname, telephone = '', '', ''
     except UnicodeDecodeError as e:
         print(f'bbox:{bbox}, data_bytes:{data_bytes}')
+    return  bind_identity_sub(nickname, telephone)
 
-    return  bind_identity(nickname, telephone)
+def bind_identity(nick, areacode, tele):
+    areacode = areacode.split('-')[0]
+    tele = f'{areacode}{tele}'
+    return bind_identity_sub(nick, tele)
 
-
-def bind_identity(nick, tele):
+def bind_identity_sub(nick, tele):
+    print(f'nickename={nick}, telephone={tele}')
     if check_input(nick, tele):
         where = shared.token.check_local_user_token(nick, tele)
         print(f'check_local_user_token:{where}')
@@ -161,7 +166,7 @@ def bind_identity(nick, tele):
     return result + [f'{nick}, {tele}']
 
 def change_identity():
-    return [identity_note] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7 + ['', '', None]
+    return [identity_note] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7 + ['', '86-CN-中国', '', None]
 
 
 def verify_identity(input_id_info, state, vcode):
@@ -202,7 +207,7 @@ def set_phrases(input_id_info, state, phrase, steps):
                 state["user_did"] = context.get_did()
                 state["sys_did"] = context.get_sys_did()
                 state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
-                note = f'身份口令设置成功，完成身份绑定。请牢记身份口令: `{phrase}` ，解除绑定或再次绑定都需要，建议抄写到私人笔记，仅限自己可见。'
+                note = f'身份口令设置成功，完成身份绑定。请牢记身份口令: `{phrase}` ，解除绑定或再次绑定都需要，建议抄写到私人笔记，仅限自己可见。及时导出身份二维码，方便再次绑定，导出后妥善保存。'
                 result = [note] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
             else: # 设置身份口令失败, 重新设置
                 result = [note2_6] + [gr.update(visible=True)] + [gr.update(visible=False)] + [gr.update(visible=False)]*7
@@ -239,11 +244,11 @@ def unbind_identity(input_id_info, state, phrase):
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
             state["preset_store"] = False
-            result = [note4, gr.update(visible=True)] + [gr.update(visible=False)]*8 + ['', '', None]
+            result = [note4, gr.update(visible=True)] + [gr.update(visible=False)]*8 + ['', '86-CN-中国', '', None]
         else: # 口令不对, 解绑失败, 重新输入口令, 再次解绑
-            result = [note4_1] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)] + ['', '', None]
+            result = [note4_1] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)] + ['', '86-CN-中国', '', None]
     else: # 口令格式不对, 重新输入口令, 再次解绑
-        result = [note3_2] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)] + ['', '', None]
+        result = [note3_2] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)] + ['', '86-CN-中国', '', None]
     id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
     return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
 
@@ -259,7 +264,7 @@ def toggle_identity_dialog(state):
         flag = False
     state['identity_dialog'] = not flag
     is_guest = shared.token.is_guest(state["user_did"])
-    result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '', None]
+    result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '86-CN-中国', '', None]
     result = [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)] + result
     return result
 
@@ -277,8 +282,8 @@ def check_input(nick, tele):
     if len(tele)<8 or len(tele)>15 or not tele.isdigit() or tele[0] == '0':
         return False
 
-    if shared.sysinfo["location"]=='CN':
-        if len(tele)>11 or not tele.isdigit() or tele[0] != '1':
+    if tele.startswith('86'):
+        if len(tele)!=13 or not tele.isdigit() or tele[2] != '1' or tele[3] in ['0', '1', '2']:
             return False
     
     return True

@@ -235,7 +235,11 @@ with shared.gradio_root:
                                 with gr.Column(scale=4, min_width=150):
                                     input_id_title = gr.Markdown(elem_classes='input_note_info', value='<b>Input identity to bind</b>')
                                     identity_nick_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type nickname here.", min_width=50, elem_classes='identity_input2')
-                                    identity_tele_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type telephone here.", min_width=50, elem_classes='identity_input2')
+                                    with gr.Row():
+                                        with gr.Column(scale=2, min_width=20):
+                                            identity_areacode = gr.Dropdown(choices=modules.flags.areacode, value='86-CN-中国', container=False, min_width=20, elem_id='areacode',elem_classes='identity_input3')
+                                        with gr.Column(scale=3, min_width=30):
+                                            identity_tele_input = gr.Textbox(show_label=False, max_lines=1, container=False, placeholder="Type telephone here.", min_width=30, elem_classes='identity_input2')
                                     identity_bind_button = gr.Button(value='Bind identity', min_width=40, visible=True)
                             with gr.Row(visible=False) as input_id_display:
                                 input_id_info = gr.Markdown(elem_classes='input_id_info', value='input identity', min_width=200, visible=True)
@@ -251,10 +255,10 @@ with shared.gradio_root:
                                 identity_unbind_button = gr.Button(value='Unbind identity', min_width=35, elem_classes='identity_button', visible=False)
                     identity_note_info = gr.Markdown(elem_classes='note_info', value=simpleai.identity_note)
                 
-                    identity_input = [identity_nick_input, identity_tele_input, identity_qr]
+                    identity_input = [identity_nick_input, identity_areacode, identity_tele_input, identity_qr]
                     identity_input_info = [input_id_info, state_topbar]
                     identity_crtl = [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
-                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_tele_input], outputs=identity_crtl + [input_id_info], show_progress=False)
+                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_areacode, identity_tele_input], outputs=identity_crtl + [input_id_info], show_progress=False)
                     identity_change_button.click(simpleai.change_identity,  outputs=identity_crtl + identity_input, show_progress=False)
                     identity_verify_button.click(simpleai.verify_identity, inputs=identity_input_info + [identity_vcode_input], outputs=identity_crtl, show_progress=False)
                     identity_phrases_set_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'set'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info], show_progress=False)

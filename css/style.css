@@ -649,8 +649,8 @@ div.prose.tokenCounter {
     height: auto;
     position: absolute;
     top: 90px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 27%;
+    /* transform: translateX(-50%); */
     width: 400px !important;
     z-index: 21;
     text-align: left;
@@ -719,6 +719,12 @@ div.prose.tokenCounter {
     min-width: min(40px, 100%) !important;
 }
 
+.identity_input3 {
+    padding: 0px 0px !important;
+    height: 42px;
+    min-width: min(20px, 100%) !important;
+}
+
 .identity_qr {
     align-content: flex-start;
 }
@@ -726,6 +732,11 @@ div.prose.tokenCounter {
 .identity_input textarea,
 .identity_input input {
     border-radius: 0 !important;
+}
+
+.identity_input3 input {
+    border-radius: 0 !important;
+    width: 35px !important;
 }
 
 .identity_button {

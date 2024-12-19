@@ -553,7 +553,7 @@
         0
       ],
       "on_true": [
-        "2880",
+        "2935",
         0
       ],
       "on_false": [
@@ -573,7 +573,7 @@
         0
       ],
       "on_true": [
-        "2880",
+        "2935",
         0
       ],
       "on_false": [
@@ -5411,6 +5411,30 @@
       "multiple_of": 0,
       "image": [
         "2309",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "2935": {
+    "inputs": {
+      "width": [
+        "1890",
+        1
+      ],
+      "height": [
+        "1890",
+        2
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "2880",
         0
       ]
     },

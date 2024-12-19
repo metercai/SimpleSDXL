@@ -139,7 +139,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     item += "</table>"
 
     js_txt = urllib.parse.quote(json.dumps({k: v for _, k, v, in metadata}, indent=0), safe='')
-    item += f"</br><button onclick=\"to_clipboard('{js_txt}')\">Copy to Clipboard</button>"
+    item += f"</br><button onclick=\"to_clipboard('{js_txt}')\" disabled>Copy to Clipboard</button>"
 
     item += "</td>"
     item += "</tr></table></div>\n\n"
