@@ -574,7 +574,7 @@
         0
       ],
       "on_true": [
-        "984",
+        "2837",
         0
       ],
       "on_false": [
@@ -594,7 +594,7 @@
         0
       ],
       "on_true": [
-        "984",
+        "2837",
         0
       ],
       "on_false": [
@@ -4088,8 +4088,8 @@
   "2803": {
     "inputs": {
       "strength": [
-        "1079",
-        0
+        "2833",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4125,8 +4125,8 @@
   "2804": {
     "inputs": {
       "strength": [
-        "1075",
-        0
+        "2834",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4162,8 +4162,8 @@
   "2805": {
     "inputs": {
       "strength": [
-        "1080",
-        0
+        "2835",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4199,8 +4199,8 @@
   "2806": {
     "inputs": {
       "strength": [
-        "1081",
-        0
+        "2836",
+        1
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4751,6 +4751,82 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "2833": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1079",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2834": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1075",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2835": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1080",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2836": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2837": {
+    "inputs": {
+      "width": [
+        "1890",
+        1
+      ],
+      "height": [
+        "1890",
+        2
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "984",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }

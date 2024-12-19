@@ -53,5 +53,9 @@
     },
     "previous_default_models": [
     ],
-    "default_save_metadata_to_images": true
+    "default_save_metadata_to_images": true,
+    "model_list": [
+        "checkpoints,kolors_unet_fp16.safetensors,5159140240,0,",
+        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,"
+    ]
 }
