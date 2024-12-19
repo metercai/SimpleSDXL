@@ -43,12 +43,12 @@
     "default_aspect_ratio": "896*1152",
     "default_overwrite_step": -1,
     "default_inpaint_engine_version": "None",
-    "checkpoint_downloads": {
-        "ponyDiffusionV6XL.safetensors": "https://huggingface.co/mashb1t/fav_models/resolve/main/fav/ponyDiffusionV6XL.safetensors"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
-    "vae_downloads": {
-        "ponyDiffusionV6XL_vae.safetensors": "https://huggingface.co/mashb1t/fav_models/resolve/main/fav/ponyDiffusionV6XL_vae.safetensors"
-    } 
+    "vae_downloads": {},
+    "model_lisr": [
+    	"checkpoints,ponyDiffusionV6XL.safetensors,6938041050,0,https://huggingface.co/mashb1t/fav_models/resolve/main/fav/ponyDiffusionV6XL.safetensors",
+	"vae,ponyDiffusionV6XL_vae.safetensors,334641162,0,"
+    ] 
 }

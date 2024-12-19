@@ -1479,24 +1479,6 @@ def worker():
                 int(current_progress + async_task.callback_steps),
                 f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
-        def callback_hydittask(pipe, step, time_steps, callback_kwargs):
-            from enhanced.latent_preview import get_previewer
-            from ldm_patched.modules.latent_formats import SDXL as SDXL_format
-
-            ldm_patched.modules.model_management.throw_exception_if_processing_interrupted()
-            latents = callback_kwargs["latents"]
-            preview_format = "JPEG"
-            latent_format = SDXL_format()
-            previewer = get_previewer(latent_format)
-            y=previewer.decode_latent_to_preview_image(preview_format, latents)
-            if step == 0:
-                async_task.callback_steps = 0
-            async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
-            async_task.yields.append(['preview', (
-                int(current_progress + async_task.callback_steps),
-                f'Sampling step {step + 1}/{steps}, image {current_task_id + 1}/{total_count} ...', y)])
-            return callback_kwargs
-
         callback_function = callback
         if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
@@ -1552,6 +1534,9 @@ def worker():
                     for task in async_task.cn_tasks[flags.cn_ip_face]:
                         if i > 4:
                             break
+                        if 'inpaint' in goals:
+                            cn_img, cn_stop, cn_weight = task
+                            task = cn_img, cn_stop, cn_weight*2
                         push_cn_task(i, task, 4)
                         i = i+1
                     for task in async_task.cn_tasks[flags.cn_pose]:
@@ -1562,7 +1547,8 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_size = lambda x, p: int(x*p+16) if int(x*p) < 2048 else int(int(x*p)/math.ceil(int(x*p)/2048))+16
+                    tiled_block = 1024 if async_task.task_class == 'Comfy' else 2048
+                    tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
                     tiled_steps = [10, 6, 4]
                     print(f'aio parse, uov_method: {async_task.uov_method}')
                     match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
@@ -1583,9 +1569,12 @@ def worker():
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
                         async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
                         async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
-                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
+                        if async_task.task_class == 'Flux':
+                            async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
+                        else:
+                            async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
@@ -1596,14 +1585,12 @@ def worker():
                     else:
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
-                    #if 'upscale' in goals:
-                    #    async_task.params_backend['i2i_uov_upscale_denoise'] = denoising_strength #async_task.overwrite_upscale_strength
-                    #if 'vary' in goals:
-                    #    async_task.params_backend['i2i_uov_vary_denoise'] = denoising_strength #async_task.overwrite_vary_strength
                 if 'inpaint' in goals:
                     async_task.params_backend['i2i_function'] = 3 # iamge inpaint
                     input_images.set_image(f'i2i_inpaint_image', inpaint_worker.current_task.interested_image)
                     input_images.set_image(f'i2i_inpaint_mask', inpaint_worker.current_task.interested_mask)
+                    if async_task.task_class == 'Kolors':
+                        async_task.base_model_name = 'kolors_inpainting.safetensors'
                     if async_task.invert_mask_checkbox:
                         async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
                     if 'cn' in goals:
@@ -1616,17 +1603,17 @@ def worker():
                             async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
                             async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                             async_task.cfg_scale = 30
-                        elif async_task.task_class == 'Kolors':
-                            async_task.base_model_name = 'kolors_inpainting.safetensors'
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
-                        async_task.steps = 20
-                        async_task.cfg_scale = 30
-                        all_steps = async_task.steps * async_task.image_number
+                        if async_task.task_class == 'Flux':
+                            async_task.cfg_scale = 30
                     else:
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
                 if async_task.task_class == 'Flux':
                     async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
+                if async_task.task_class == 'Comfy' and 'i2i_uov_tiled_steps' not in async_task.params_backend:
+                    async_task.steps = int(async_task.steps * 1.6)
+                    all_steps = async_task.steps * async_task.image_number
             async_task.params_backend['input_images'] = input_images
 
 

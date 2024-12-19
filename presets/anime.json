@@ -43,9 +43,7 @@
     ],
     "default_aspect_ratio": "896*1152",
     "default_overwrite_step": -1,
-    "checkpoint_downloads": {
-        "animaPencilXL_v500.safetensors": "https://huggingface.co/mashb1t/fav_models/resolve/main/fav/animaPencilXL_v500.safetensors"
-    },
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
     "previous_default_models": [
@@ -56,5 +54,8 @@
         "animaPencilXL_v210.safetensors",
         "animaPencilXL_v200.safetensors",
         "animaPencilXL_v100.safetensors"
+    ],
+    "model_list": [
+        "checkpoints,animaPencilXL_v500.safetensors,6938041144,0,https://huggingface.co/mashb1t/fav_models/resolve/main/fav/animaPencilXL_v500.safetensors"
     ]
 }
