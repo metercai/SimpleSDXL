@@ -114,6 +114,7 @@ class ComfyTask:
 def get_comfy_task(user_did, task_name, task_method, default_params, input_images, options={}):
     global defaul_method_names, default_method_list
 
+    #print(f'task_name:{task_name}, task_method:{task_method}')
     comfy_params = ComfyTaskParams(default_params, user_did)
     if task_name == 'default':
         if task_method == default_method_names[1]:
@@ -156,8 +157,9 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G else 'fp16'
                 })
+        total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
         check_download_kolors_model(config.path_models_root)
-        return ComfyTask(task_method, comfy_params, input_images)
+        return ComfyTask(task_method, comfy_params, input_images, total_steps)
     
     elif task_name in ['HyDiT']:
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
@@ -167,7 +169,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     elif task_name == 'Flux':
         base_model = default_params['base_model']
         clip_model = '' if 'clip_model' not in default_params else default_params['clip_model']
-        if 'aio' in task_method:
+        if '_aio' in task_method:
             total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
             if 'base_model_gguf' in default_params:
@@ -228,6 +230,11 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                     comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
         return ComfyTask(task_method, comfy_params, input_images)
+    elif task_name == 'SD15AIO' and '_aio' in task_method:
+        total_steps = default_params["steps"] if 'display_steps' not in default_params else default_params["display_steps"]
+        if 'display_steps' in default_params:
+            comfy_params.delete_params(["display_steps"])
+        return ComfyTask(task_method, comfy_params, input_images, total_steps)
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])
         return ComfyTask(task_method, comfy_params, input_images)

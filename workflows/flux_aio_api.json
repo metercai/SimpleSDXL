@@ -628,10 +628,7 @@
         "1609",
         4
       ],
-      "denoise": [
-        "1693",
-        0
-      ],
+      "denoise": 1,
       "model": [
         "2037",
         0
@@ -2159,61 +2156,6 @@
       "title": "Float"
     }
   },
-  "1693": {
-    "inputs": {
-      "boolean": [
-        "1694",
-        0
-      ],
-      "on_true": [
-        "1696",
-        0
-      ],
-      "on_false": [
-        "1890",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1694": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "1890",
-        9
-      ],
-      "b": [
-        "1695",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1695": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "1696": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "1741": {
     "inputs": {
       "boolean": [
@@ -3641,7 +3583,7 @@
         0
       ],
       "image": [
-        "2713",
+        "2762",
         0
       ]
     },
@@ -3678,7 +3620,7 @@
         0
       ],
       "image": [
-        "2711",
+        "2764",
         0
       ]
     },
@@ -3715,7 +3657,7 @@
         0
       ],
       "image": [
-        "2714",
+        "2763",
         0
       ]
     },
@@ -3752,7 +3694,7 @@
         0
       ],
       "image": [
-        "2712",
+        "2765",
         0
       ]
     },
@@ -4637,7 +4579,7 @@
         0
       ],
       "pixels": [
-        "2713",
+        "2762",
         0
       ]
     },
@@ -4731,7 +4673,7 @@
         0
       ],
       "pixels": [
-        "2714",
+        "2763",
         0
       ]
     },
@@ -4825,7 +4767,7 @@
         0
       ],
       "pixels": [
-        "2711",
+        "2764",
         0
       ]
     },
@@ -4919,7 +4861,7 @@
         0
       ],
       "pixels": [
-        "2712",
+        "2765",
         0
       ]
     },
@@ -6845,6 +6787,58 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
+    }
+  },
+  "2762": {
+    "inputs": {
+      "gamma": 10,
+      "image": [
+        "2713",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2763": {
+    "inputs": {
+      "gamma": 10,
+      "image": [
+        "2714",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2764": {
+    "inputs": {
+      "gamma": 10,
+      "image": [
+        "2711",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2765": {
+    "inputs": {
+      "gamma": 10,
+      "image": [
+        "2712",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
     }
   }
 }
