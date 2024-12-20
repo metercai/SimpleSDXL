@@ -1574,6 +1574,7 @@ def worker():
                         if async_task.task_class == 'Flux':
                             async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         else:
+                            print(f'async_task.steps:{async_task.steps}')
                             async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number
@@ -1611,9 +1612,12 @@ def worker():
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
                 if async_task.task_class == 'Flux':
                     async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
-                if async_task.task_class == 'Comfy' and 'i2i_uov_tiled_steps' not in async_task.params_backend:
-                    async_task.steps = int(async_task.steps * 1.6)
-                    all_steps = async_task.steps * async_task.image_number
+                if async_task.task_class == 'Comfy':
+                    if 'i2i_uov_tiled_steps' not in async_task.params_backend:
+                        async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
+                        all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+                    else:
+                        async_task.params_backend['display_steps'] = async_task.steps
             async_task.params_backend['input_images'] = input_images
 
 
