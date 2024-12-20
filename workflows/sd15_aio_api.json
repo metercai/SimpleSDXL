@@ -319,10 +319,7 @@
         "1609",
         4
       ],
-      "denoise": [
-        "1693",
-        0
-      ],
+      "denoise": 1,
       "model": [
         "2696",
         0
@@ -332,7 +329,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2955",
         0
       ],
       "latent_image": [
@@ -714,7 +711,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2960",
         0
       ],
       "latent_image": [
@@ -1326,61 +1323,6 @@
   "1681": {
     "inputs": {
       "value": 0.3
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "1693": {
-    "inputs": {
-      "boolean": [
-        "1694",
-        0
-      ],
-      "on_true": [
-        "1696",
-        0
-      ],
-      "on_false": [
-        "1890",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1694": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "1890",
-        9
-      ],
-      "b": [
-        "1695",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1695": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "1696": {
-    "inputs": {
-      "value": 1
     },
     "class_type": "easy float",
     "_meta": {
@@ -2881,7 +2823,7 @@
         0
       ],
       "neg": [
-        "2763",
+        "2961",
         0
       ],
       "vae": [
@@ -3306,7 +3248,7 @@
         1
       ],
       "latent_image": [
-        "2779",
+        "2945",
         0
       ]
     },
@@ -3329,46 +3271,6 @@
     "class_type": "VAEDecode",
     "_meta": {
       "title": "VAE Decode"
-    }
-  },
-  "2776": {
-    "inputs": {
-      "width": [
-        "1890",
-        1
-      ],
-      "height": [
-        "1890",
-        2
-      ],
-      "interpolation": "bicubic",
-      "method": "keep proportion",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2852",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2779": {
-    "inputs": {
-      "pixels": [
-        "2776",
-        0
-      ],
-      "vae": [
-        "2759",
-        2
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
     }
   },
   "2781": {
@@ -4153,31 +4055,6 @@
       "title": "Upscale Latent By"
     }
   },
-  "2852": {
-    "inputs": {
-      "upscale_model": [
-        "2853",
-        0
-      ],
-      "image": [
-        "2774",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
-  "2853": {
-    "inputs": {
-      "model_name": "4x-UltraSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
   "2857": {
     "inputs": {
       "upscale_model": [
@@ -4645,7 +4522,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2960",
         0
       ],
       "control_net": [
@@ -4677,7 +4554,7 @@
   },
   "2897": {
     "inputs": {
-      "strength": 1,
+      "strength": 0.8,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
@@ -4685,7 +4562,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2955",
         0
       ],
       "control_net": [
@@ -4693,7 +4570,7 @@
         0
       ],
       "image": [
-        "2776",
+        "2774",
         0
       ],
       "vae": [
@@ -4770,12 +4647,12 @@
   "2907": {
     "inputs": {
       "width": [
-        "1890",
-        1
+        "2938",
+        0
       ],
       "height": [
-        "1890",
-        2
+        "2939",
+        0
       ],
       "interpolation": "bicubic",
       "method": "fill / crop",
@@ -4793,7 +4670,7 @@
   },
   "2910": {
     "inputs": {
-      "strength": 1,
+      "strength": 0.8,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
@@ -4801,7 +4678,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2960",
         0
       ],
       "control_net": [
@@ -4884,7 +4761,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2947",
         0
       ],
       "control_net": [
@@ -4921,7 +4798,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2950",
         0
       ],
       "control_net": [
@@ -4958,7 +4835,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2953",
         0
       ],
       "control_net": [
@@ -4995,7 +4872,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2953",
         0
       ],
       "control_net": [
@@ -5003,7 +4880,7 @@
         0
       ],
       "image": [
-        "2846",
+        "2943",
         0
       ],
       "vae": [
@@ -5032,7 +4909,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2950",
         0
       ],
       "control_net": [
@@ -5040,7 +4917,7 @@
         0
       ],
       "image": [
-        "2845",
+        "2942",
         0
       ],
       "vae": [
@@ -5069,7 +4946,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2947",
         0
       ],
       "control_net": [
@@ -5077,7 +4954,7 @@
         0
       ],
       "image": [
-        "2844",
+        "2941",
         0
       ],
       "vae": [
@@ -5114,7 +4991,7 @@
         0
       ],
       "image": [
-        "2841",
+        "2940",
         0
       ],
       "vae": [
@@ -5180,7 +5057,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2947",
         0
       ],
       "control_net": [
@@ -5217,7 +5094,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2950",
         0
       ],
       "control_net": [
@@ -5254,7 +5131,7 @@
         0
       ],
       "negative": [
-        "2763",
+        "2953",
         0
       ],
       "control_net": [
@@ -5441,6 +5318,378 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
+    }
+  },
+  "2938": {
+    "inputs": {
+      "value": "a*2",
+      "a": [
+        "2794",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2939": {
+    "inputs": {
+      "value": "a*2",
+      "a": [
+        "2797",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2940": {
+    "inputs": {
+      "gamma": 5,
+      "image": [
+        "2841",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2941": {
+    "inputs": {
+      "gamma": 5,
+      "image": [
+        "2844",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2942": {
+    "inputs": {
+      "gamma": 5,
+      "image": [
+        "2845",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2943": {
+    "inputs": {
+      "gamma": 5,
+      "image": [
+        "2846",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Gamma",
+    "_meta": {
+      "title": "LayerColor: Gamma"
+    }
+  },
+  "2945": {
+    "inputs": {
+      "upscale_method": "bicubic",
+      "scale_by": 2,
+      "samples": [
+        "421",
+        0
+      ]
+    },
+    "class_type": "LatentUpscaleBy",
+    "_meta": {
+      "title": "Upscale Latent By"
+    }
+  },
+  "2946": {
+    "inputs": {
+      "boolean": [
+        "2262",
+        0
+      ],
+      "on_true": [
+        "2948",
+        0
+      ],
+      "on_false": [
+        "2920",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2947": {
+    "inputs": {
+      "boolean": [
+        "2640",
+        0
+      ],
+      "on_true": [
+        "2946",
+        0
+      ],
+      "on_false": [
+        "2912",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2948": {
+    "inputs": {
+      "boolean": [
+        "2260",
+        0
+      ],
+      "on_true": [
+        "2763",
+        0
+      ],
+      "on_false": [
+        "2919",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2949": {
+    "inputs": {
+      "boolean": [
+        "2266",
+        0
+      ],
+      "on_true": [
+        "2947",
+        0
+      ],
+      "on_false": [
+        "2918",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2950": {
+    "inputs": {
+      "boolean": [
+        "2643",
+        0
+      ],
+      "on_true": [
+        "2951",
+        0
+      ],
+      "on_false": [
+        "2913",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2951": {
+    "inputs": {
+      "boolean": [
+        "2267",
+        0
+      ],
+      "on_true": [
+        "2949",
+        0
+      ],
+      "on_false": [
+        "2921",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2952": {
+    "inputs": {
+      "boolean": [
+        "2270",
+        0
+      ],
+      "on_true": [
+        "2950",
+        0
+      ],
+      "on_false": [
+        "2917",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2953": {
+    "inputs": {
+      "boolean": [
+        "2645",
+        0
+      ],
+      "on_true": [
+        "2954",
+        0
+      ],
+      "on_false": [
+        "2914",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2954": {
+    "inputs": {
+      "boolean": [
+        "2271",
+        0
+      ],
+      "on_true": [
+        "2952",
+        0
+      ],
+      "on_false": [
+        "2922",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2955": {
+    "inputs": {
+      "boolean": [
+        "2647",
+        0
+      ],
+      "on_true": [
+        "2957",
+        0
+      ],
+      "on_false": [
+        "2915",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2956": {
+    "inputs": {
+      "boolean": [
+        "2274",
+        0
+      ],
+      "on_true": [
+        "2953",
+        0
+      ],
+      "on_false": [
+        "2916",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2957": {
+    "inputs": {
+      "boolean": [
+        "2275",
+        0
+      ],
+      "on_true": [
+        "2956",
+        0
+      ],
+      "on_false": [
+        "2923",
+        1
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2960": {
+    "inputs": {
+      "boolean": [
+        "1312",
+        0
+      ],
+      "on_true": [
+        "2955",
+        0
+      ],
+      "on_false": [
+        "2763",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2961": {
+    "inputs": {
+      "boolean": [
+        "1313",
+        0
+      ],
+      "on_true": [
+        "2955",
+        0
+      ],
+      "on_false": [
+        "2763",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }
