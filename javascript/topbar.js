@@ -350,19 +350,22 @@ function refresh_topbar_status_js(system_params) {
 
 function updatePresetStore(nav_name_list, role, expand_flag, theme) {
     let nav_store = gradioApp().getElementById("bar_store");
+    let mypresets_text = "MyPresets"
     if (expand_flag) {
         if (theme == "light") {
             nav_store.style.background= 'lightcyan';
         } else {
             nav_store.style.background= 'darkslategray';
         }
+	mypresets_text = mypresets_text + "▶";
     } else {
         nav_store.style.background= '';
+	mypresets_text = mypresets_text + "▼";
     }
     if (role=="guest") {
         nav_store.innerHTML = "Presets";
     } else {
-        nav_store.innerHTML = "MyPresets";
+        nav_store.innerHTML = mypresets_text;
     }
     const preset_store = gradioApp().querySelector('.preset_store');
     if (!preset_store) return;    

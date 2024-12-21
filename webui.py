@@ -197,7 +197,7 @@ with shared.gradio_root:
         with gr.Column(scale=2):
             with gr.Group():
                 with gr.Row():
-                    bar_store_button = gr.Button(value='PresetStore', size='sm', min_width=40, elem_id='bar_store', elem_classes='bar_store')
+                    bar_store_button = gr.Button(value='PresetStore', size='sm', min_width=50, elem_id='bar_store', elem_classes='bar_store')
                     bar_buttons = []
                     for i in range(shared.BUTTON_NUM):
                         bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=40, elem_id=f'bar{i}', elem_classes='bar_button'))
