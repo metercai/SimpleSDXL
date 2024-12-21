@@ -13,7 +13,7 @@ import enhanced.version as version
 
 from pathlib import Path
 from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
-from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, target_path_install, met_diff
+from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, extra_index_url, target_path_install, met_diff
 
 #print('[System PATH] ' + str(sys.path))
 print('[System ARGV] ' + str(sys.argv))
@@ -48,7 +48,6 @@ def check_base_environment():
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
         }
-    #index_url = "https://pypi.org/simple"
     if not is_installed(base_pkg):
         run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
     else:
@@ -60,7 +59,7 @@ def check_base_environment():
     extra_pkg = 'pynvml'
     extra_pkg_name = 'nvidia-ml-py'
     if not is_installed(extra_pkg):
-        pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
+        pkg_command = f'pip install {extra_pkg_name} -i {index_url} --extra-index-url {extra_index_url}'
         run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
