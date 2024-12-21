@@ -1,7 +1,7 @@
 {
   "3": {
     "inputs": {
-      "seed": 939237989953623,
+      "seed": 297491696968509,
       "steps": 28,
       "cfg": 4.5,
       "sampler_name": "dpmpp_2m",
@@ -45,7 +45,7 @@
         0
       ],
       "vae": [
-        "64",
+        "61",
         0
       ]
     },
@@ -58,7 +58,7 @@
     "inputs": {
       "text": "a bottle with a pink and red galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
       "clip": [
-        "62",
+        "60",
         0
       ]
     },
@@ -71,7 +71,7 @@
     "inputs": {
       "text": "",
       "clip": [
-        "62",
+        "60",
         0
       ]
     },
@@ -107,7 +107,7 @@
     "inputs": {
       "shift": 3,
       "model": [
-        "63",
+        "4",
         0
       ]
     },
@@ -174,156 +174,22 @@
   },
   "60": {
     "inputs": {
-      "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
-      "weight_dtype": "default"
-    },
-    "class_type": "UNETLoader",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
-  "61": {
-    "inputs": {
-      "clip_name1": "clip_l.safetensors",
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "clip_name3": "clip_l.safetensors"
+      "type": "sd3"
     },
-    "class_type": "TripleCLIPLoader",
+    "class_type": "DualCLIPLoader",
     "_meta": {
       "title": "clip_model"
     }
   },
-  "62": {
+  "61": {
     "inputs": {
-      "boolean": [
-        "69",
-        0
-      ],
-      "on_true": [
-        "4",
-        1
-      ],
-      "on_false": [
-        "61",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "63": {
-    "inputs": {
-      "boolean": [
-        "69",
-        0
-      ],
-      "on_true": [
-        "4",
-        0
-      ],
-      "on_false": [
-        "60",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "64": {
-    "inputs": {
-      "boolean": [
-        "69",
-        0
-      ],
-      "on_true": [
-        "4",
-        2
-      ],
-      "on_false": [
-        "66",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "66": {
-    "inputs": {
-      "vae_name": "ponyDiffusionV6XL_vae.safetensors"
+      "vae_name": "sd3x_fp16.vae.safetensors"
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "vae_model"
-    }
-  },
-  "68": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "i2i_model_type"
-    }
-  },
-  "69": {
-    "inputs": {
-      "boolean": [
-        "70",
-        0
-      ],
-      "on_true": [
-        "70",
-        0
-      ],
-      "on_false": [
-        "74",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "70": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "68",
-        0
-      ],
-      "b": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "71": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "int"
-    }
-  },
-  "74": {
-    "inputs": {
-      "value": false
-    },
-    "class_type": "easy boolean",
-    "_meta": {
-      "title": "Boolean"
+      "title": "Load VAE"
     }
   }
 }
