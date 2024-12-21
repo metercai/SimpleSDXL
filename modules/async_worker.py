@@ -842,6 +842,12 @@ def worker():
             task_negative_prompt = wildcards.apply_wildcards(negative_prompt, task_rng)
             task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
             task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
+            
+            if async_task.task_class not in ['Kolors', 'HyDiT']: # and 'kolors' not in async_task.task_name.lower():
+                task_prompt = translator.convert(task_prompt, async_task.translation_methods)
+                task_negative_prompt = translator.convert(task_negative_prompt, async_task.translation_methods)
+                task_extra_positive_prompts = [translator.convert(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
+                task_extra_negative_prompts = [translator.convert(pmt, async_task.translation_methods) for pmt in extra_negative_prompts]
 
             positive_basic_workloads = []
             negative_basic_workloads = []
@@ -1105,8 +1111,9 @@ def worker():
                 skip_prompt_processing = True
                 steps = 0
             else:
-                steps = performance.steps_uov()
-
+                if async_task.task_class in ['Fooocus']:
+                    steps = performance.steps_uov()
+            
             if advance_progress:
                 current_progress += 1
             progressbar(async_task, current_progress, 'Downloading upscale models ...')
@@ -1252,11 +1259,6 @@ def worker():
         else:
             print(f'[TaskEngine] Enable Fooocus backend.')
             comfyd.stop()
-
-        if async_task.task_class not in ['Kolors', 'HyDiT'] and 'kolors' not in async_task.task_name.lower():
-            async_task.prompt = translator.convert(async_task.prompt, async_task.translation_methods)
-            async_task.negative_prompt = translator.convert(async_task.negative_prompt, async_task.translation_methods)
-            async_task.inpaint_additional_prompt = translator.convert(async_task.inpaint_additional_prompt, async_task.translation_methods)
 
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
@@ -1550,7 +1552,6 @@ def worker():
                     tiled_block = 1024 if async_task.task_class == 'Comfy' else 2048
                     tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
                     tiled_steps = [10, 6, 4]
-                    print(f'aio parse, uov_method: {async_task.uov_method}')
                     match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
                     match_multiple = 1.0 if not match else float(match.group(1))
                     match_multiple = match_multiple if match_multiple<4.0 else 4.0
@@ -1574,7 +1575,6 @@ def worker():
                         if async_task.task_class == 'Flux':
                             async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         else:
-                            print(f'async_task.steps:{async_task.steps}')
                             async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
                         all_steps = async_task.steps * async_task.image_number

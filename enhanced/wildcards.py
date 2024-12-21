@@ -19,7 +19,7 @@ wildcards_template = {}
 wildcards_weight_range = {}
 
 array_regex = re.compile(r'\[([\w\(\)\.\s,;:-]+)\]')
-array_regex1 = re.compile(r'\[([\w\(\)\s,;.:\"-]+)\]')
+array_regex1 = re.compile(r'\[([\w\(\)\s\u4e00-\u9fa5\u3000-\u303F\uFF00-\uFFEF,;.:\"\'-]+)\]')
 tag_regex0 = re.compile(r'([\s\w\(\);-]+)')
 tag_regex1 = re.compile(r'([\s\w\(\),-]+)')
 tag_regex2 = re.compile(r'__([\w-]+)__')
@@ -264,9 +264,10 @@ def apply_arrays(text, index, arrays, mult):
         return text
     
     tags = array_regex1.findall(text)
-    
+
     index %= mult
     chosen_words = get_words(arrays, mult, index)
+    #print(f'index:{index}, chosen_words:{chosen_words}')
 
     i = 0
     for arr in arrays:
@@ -276,6 +277,7 @@ def apply_arrays(text, index, arrays, mult):
             else:
                 text = text.replace(f'[{tags[i]}]', tags[i], 1)
         i = i+1
+       # print(f'text:{text}')
 
     return text
 
