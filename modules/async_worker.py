@@ -507,35 +507,35 @@ def worker():
     def apply_control_nets(async_task, height, ip_adapter_face_path, ip_adapter_path, width, current_progress):
         for task in async_task.cn_tasks[flags.cn_canny]:
             cn_img, cn_stop, cn_weight = task
-            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
+            cn_img = HWC3(cn_img)
             if not async_task.skipping_cn_preprocessor:
                 cn_img = preprocessors.canny_pyramid(cn_img, async_task.canny_low_threshold,
                                                      async_task.canny_high_threshold)
             else:
                 cn_img = preprocessors.normalizedBG(cn_img)
-            cn_img = HWC3(cn_img)
+            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
             task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_pose]:
             cn_img, cn_stop, cn_weight = task
-            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
+            cn_img = HWC3(cn_img)
             if not async_task.skipping_cn_preprocessor:
                 if async_task.task_class in ['Fooocus']:
                     cn_img = preprocessors.openpose(cn_img, stick_scaling=True)
                 else:
                     cn_img = preprocessors.openpose(cn_img)
-            cn_img = HWC3(cn_img)
+            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
             task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
         for task in async_task.cn_tasks[flags.cn_cpds]:
             cn_img, cn_stop, cn_weight = task
-            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
+            cn_img = HWC3(cn_img)
             if not async_task.skipping_cn_preprocessor and async_task.task_class in ['Fooocus']:
                 cn_img = preprocessors.cpds(cn_img)
 
-            cn_img = HWC3(cn_img)
+            cn_img = resize_image(HWC3(cn_img), width=width, height=height)
             task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
                 yield_result(async_task, cn_img, current_progress, async_task.black_out_nsfw, do_not_show_finished_images=True)
@@ -1576,7 +1576,7 @@ def worker():
                             async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
                         else:
                             async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
-                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width']-16)) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']-16))
+                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width'])) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']))
                         all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5

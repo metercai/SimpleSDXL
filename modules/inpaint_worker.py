@@ -247,6 +247,7 @@ class InpaintWorker:
     def color_correction(self, img):
         fg = img.astype(np.float32)
         bg = self.image.copy().astype(np.float32)
+        w = cv2.GaussianBlur(self.mask, (99, 99), 0)  # Enhance fusion in the feedback image of flux outpaint
         w = self.mask[:, :, None].astype(np.float32) / 255.0
         y = fg * w + bg * (1 - w)
         return y.clip(0, 255).astype(np.uint8)
