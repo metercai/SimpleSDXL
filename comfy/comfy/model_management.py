@@ -911,7 +911,8 @@ def get_free_memory(dev=None, torch_free_too=False):
             mem_reserved = stats['reserved_bytes.all.current']
             mem_free_cuda, _ = torch.cuda.mem_get_info(dev)
             mem_free_torch = mem_reserved - mem_active
-            mem_free_total = mem_free_cuda + mem_free_torch
+            mem_free_total = get_free_memory_by_nvml_for_nvidia() #mem_free_cuda + mem_free_torch
+            #print(f'Comfyd VRAM mem_free_total:{mem_free_total}, old:{mem_free_cuda + mem_free_torch}')
 
     if torch_free_too:
         return (mem_free_total, mem_free_torch)
@@ -1136,3 +1137,29 @@ def print_memory_info():
         logging.info(f'GPU memory: max_reserved={max_reserved}, max_allocated={max_allocated}, reserved={reserved}, free={free_cuda}, free_torch={free_torch}, free_total={free_total}, gpu_total={gpu_total}, torch_total={torch_total}')
         torch.cuda.reset_peak_memory_stats()
 
+def get_free_memory_by_nvml_for_nvidia():
+    from pynvml import (
+        nvmlInit,
+        nvmlDeviceGetHandleByIndex,
+        nvmlDeviceGetMemoryInfo,
+        nvmlShutdown,
+        NVMLError
+    )
+
+    try:
+        nvmlInit()
+        if torch.cuda.is_available():
+            current_device_index = torch.cuda.current_device()
+        else:
+            raise RuntimeError("The current system has not detected any available GPU devices.")
+        handle = nvmlDeviceGetHandleByIndex(current_device_index)
+        memory_info = nvmlDeviceGetMemoryInfo(handle)
+        free_memory = memory_info.free
+        nvmlShutdown()
+        return free_memory
+    except NVMLError as error:
+        print(f"NVML error: {error}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None

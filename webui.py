@@ -1095,14 +1095,14 @@ with shared.gradio_root:
             def toggle_image_tab(tab, styles):
                 result = []
                 if 'layer' in tab:
-                    result += [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion and s!='Fooocus Sharp']), modules.config.default_image_number]
+                    result += [gr.update(choices=flags.Performance.list()[:2]), gr.update(value=[s for s in styles if s!=fooocus_expansion and s!='Fooocus Sharp']), gr.update()]
                     result += [gr.update(value=False, interactive=False)]
                     result += [gr.update(interactive=False)] * 17
                 elif 'uov' in tab:
                     result += [gr.update(choices=flags.Performance.list()), gr.update(), 1]
                     result += [gr.update(interactive=True)] * 18
                 else:
-                    result += [gr.update(choices=flags.Performance.list()), gr.update(), modules.config.default_image_number]
+                    result += [gr.update(choices=flags.Performance.list()), gr.update(), gr.update()]
                     result += [gr.update(interactive=True)] * 18
                 return result
             
