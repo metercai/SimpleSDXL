@@ -59,7 +59,7 @@ def check_base_environment():
     extra_pkg = 'pynvml'
     extra_pkg_name = 'nvidia-ml-py'
     if not is_installed(extra_pkg):
-        pkg_command = f'pip install {extra_pkg_name} -i {index_url} --extra-index-url {extra_index_url}'
+        pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
         run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
