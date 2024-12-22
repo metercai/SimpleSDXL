@@ -653,6 +653,16 @@ def update_after_identity_sub(state):
 
     return results
 
+def update_size_and_hires_fix(image, uov_method, params_backend, hires_fix_stop, hires_fix_weight, hires_fix_blurred):
+    size_image = update_upscale_size_of_image(image, uov_method)
+    params_backend.update({'i2i_uov_hires_fix_s': hires_fix_stop})
+    params_backend.update({'i2i_uov_hires_fix_w': hires_fix_weight})
+    params_backend.update({'i2i_uov_hires_fix_blurred': hires_fix_blurred})
+    if 'Hires.fix' in uov_method:
+        return gr.update(visible=False, value=size_image), gr.update(visible=True)
+    else:
+        return gr.update(visible=True, value=size_image), gr.update(visible=False)
+
 def update_upscale_size_of_image(image, uov_method):
     if image is not None:
         H, W, C = util.HWC3(image).shape

@@ -9,7 +9,7 @@
 		"clip_model": "t5xxl_fp8_e4m3fn.safetensors"
 		}
     	},
-    "default_model": "sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors",
+    "default_model": "sd3.5_large.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -46,6 +46,6 @@
     "embeddings_downloads": {},
     "lora_downloads": {},
     "model_list": [
-        "checkpoints,sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors,11638004202,0,"
+        "checkpoints,sd3.5_large.safetensors,16460379262,0,"
 	]	
 }
