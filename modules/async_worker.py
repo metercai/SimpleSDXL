@@ -212,6 +212,7 @@ class AsyncTask:
             }
         if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
+
         
 
 async_tasks = []
@@ -1580,9 +1581,9 @@ def worker():
                         all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
-                        async_task.params_backend['i2i_uov_hires_fix_blurred'] = 0.0
-                        async_task.params_backend['i2i_uov_hires_fix_w'] = 0.5
-                        async_task.params_backend['i2i_uov_hires_fix_s'] = 0.8
+                        async_task.params_backend['i2i_uov_hires_fix_blurred'] = async_task.params_backend.get('i2i_uov_hires_fix_blurred', 0.0)
+                        async_task.params_backend['i2i_uov_hires_fix_w'] = async_task.params_backend.get('i2i_uov_hires_fix_w', 0.5)
+                        async_task.params_backend['i2i_uov_hires_fix_s'] = async_task.params_backend.get('i2i_uov_hires_fix_s', 0.8)
                     else:
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False

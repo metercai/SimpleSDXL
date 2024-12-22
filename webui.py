@@ -402,11 +402,20 @@ with shared.gradio_root:
                             with gr.Column():
                                 uov_input_image = grh.Image(label='Image', source='upload', type='numpy', height=300, show_label=False)
                             with gr.Column():
-                                mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale', value=False)
-                                uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=modules.config.default_uov_method)
-                                uov_image_size = gr.Textbox(label='OriginalSize | FinalSize', elem_classes='uov_image_size')
+                                with gr.Group():
+                                    mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale', value=False)
+                                    uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=modules.config.default_uov_method)
+                                    uov_image_size = gr.Textbox(label='OriginalSize | FinalSize', elem_classes='uov_image_size')
+                                    with gr.Row(visible=False) as uov_hires_fix:
+                                        hires_fix_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.8, min_width=20)
+                                        hires_fix_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=0.5, min_width=20)
+                                        hires_fix_blurred = gr.Slider(label='Blurred', minimum=0.0, maximum=1.0, step=0.001, value=0.0, min_width=20)
+
                                 uov_input_image.upload(topbar.update_upscale_size_of_image, inputs=[uov_input_image, uov_method], outputs=uov_image_size, show_progress=False, queue=False)
-                                uov_method.change(topbar.update_upscale_size_of_image, inputs=[uov_input_image, uov_method], outputs=uov_image_size, show_progress=False, queue=False)
+                                uov_method.change(topbar.update_size_and_hires_fix, inputs=[uov_input_image, uov_method, params_backend, hires_fix_stop, hires_fix_weight, hires_fix_blurred], outputs=[uov_image_size, uov_hires_fix], show_progress=False, queue=False)
+                                hires_fix_stop.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_s',x,y), inputs=[hires_fix_stop, params_backend])
+                                hires_fix_weight.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_w',x,y), inputs=[hires_fix_weight, params_backend])
+                                hires_fix_blurred.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_blurred',x,y), inputs=[hires_fix_blurred, params_backend])
                         with gr.Row():
                             overwrite_upscale_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Upscale"',
                                                                minimum=-1, maximum=1.0, step=0.001,

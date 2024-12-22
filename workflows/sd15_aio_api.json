@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 32144147473588,
+      "seed": 770373338639277,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -2081,8 +2081,8 @@
         0
       ],
       "on_true": [
-        "2542",
-        1
+        "2968",
+        0
       ],
       "on_false": [
         "2534",
@@ -2126,8 +2126,8 @@
         6
       ],
       "steps": [
-        "1890",
-        7
+        "2966",
+        0
       ],
       "cfg": [
         "1890",
@@ -2146,8 +2146,8 @@
         0
       ],
       "end_at_step": [
-        "1890",
-        7
+        "2966",
+        0
       ],
       "return_with_leftover_noise": "disable",
       "model": [
@@ -2174,7 +2174,7 @@
   },
   "2394": {
     "inputs": {
-      "value": "a/5*4",
+      "value": "a/5*6",
       "a": [
         "1890",
         7
@@ -2370,7 +2370,7 @@
         0
       ],
       "on_true": [
-        "2542",
+        "2967",
         0
       ],
       "on_false": [
@@ -5690,6 +5690,45 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
+    }
+  },
+  "2966": {
+    "inputs": {
+      "value": "a*1.6",
+      "a": [
+        "1890",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2967": {
+    "inputs": {
+      "value": "a/2",
+      "a": [
+        "2542",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2968": {
+    "inputs": {
+      "value": "a/2",
+      "a": [
+        "2542",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
