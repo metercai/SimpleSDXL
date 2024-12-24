@@ -63,7 +63,7 @@
         "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
         "ipadapter,kolors_ip_adapter_plus_general.bin,1013163359,0,",
         "ipadapter,kolors_ipa_faceid_plus.bin,2385842603,0,",
-        "diffusers,[Kolors/],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
+        "diffusers,[Kolors],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,"
         ] 
 }

@@ -27,6 +27,7 @@ from enhanced.simpleai import comfyd, get_path_in_user_dir
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
+from enhanced.minicpm import minicpm
 
 # app context
 nav_name_list = ''
@@ -323,16 +324,21 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram):
     superprompter.remove_superprompt()
     remove_tokenizer()
+    minicpm.free_model()
     backend_params.update(dict(
         nickname=state_params["user_name"],
         user_did=state_params["user_did"],
         translation_methods=translation_methods,
         backfill_prompt=backfill_prompt,
         comfyd_active_checkbox=comfyd_active_checkbox,
-        preset=state_params["__preset"]
+        preset=state_params["__preset"],
+        hires_fix_stop=hires_fix_stop,
+        hires_fix_weight=hires_fix_weight,
+        hires_fix_blurred=hires_fix_blurred,
+        reserved_vram=reserved_vram
         ))
 
     if state_params["engine"] != 'Fooocus' and shared.token.is_guest(state_params["user_did"]):
@@ -349,8 +355,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
     preset_nums = len(state_params["__nav_name_list"].split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 7)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
-    # params_backend, preset_store, identity_dialog
-    results += [backend_params]
+    # preset_store, identity_dialog
     results += [gr.update(visible=False)]*2
 
     state_params["gallery_state"]='preview'
@@ -388,7 +393,9 @@ def process_after_generation(state_params):
         output_index = state_params["__output_list"][0].split('/')[0]
         gallery_util.refresh_images_catalog(output_index, True, user_did)
         gallery_util.parse_html_log(output_index, True, user_did)
-    
+   
+    #minicpm.load_model()
+
     return results
 
 
@@ -667,7 +674,7 @@ def update_size_and_hires_fix(image, uov_method, params_backend, hires_fix_stop,
     #if 'Strong' in uov_method:
     #    vary_strength = 0.85
     if 'Hires.fix' in uov_method:
-        vary_strength = 1
+        vary_strength = 0.85
         return gr.update(visible=False, value=size_image), gr.update(visible=True), vary_strength, upscale_strength
     else:
         return gr.update(visible=True, value=size_image), gr.update(visible=False), vary_strength, upscale_strength
@@ -709,51 +716,6 @@ def prompt_token_prediction(text, style_selections):
     if tokenizer is None:
         tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
     return len(tokenizer.tokenize(text))
-
-    from extras.expansion import safe_str
-    from modules.util import remove_empty_str
-    import enhanced.translator as translator
-    import enhanced.enhanced_parameters as enhanced_parameters
-    import enhanced.wildcards as wildcards
-    from modules.sdxl_styles import apply_style, fooocus_expansion
-
-    prompt = translator.convert(text, enhanced_parameters.translation_methods)
-    return len(tokenizer.tokenize(prompt))
-    
-    if fooocus_expansion in style_selections:
-        use_expansion = True
-        style_selections.remove(fooocus_expansion)
-    else:
-        use_expansion = False
-
-    use_style = len(style_selections) > 0
-    prompts = remove_empty_str([safe_str(p) for p in prompt.splitlines()], default='')
-
-    prompt = prompts[0]
-
-    if prompt == '':
-        # disable expansion when empty since it is not meaningful and influences image prompt
-        use_expansion = False
-
-    extra_positive_prompts = prompts[1:] if len(prompts) > 1 else []
-    task_rng = random.Random(random.randint(constants.MIN_SEED, constants.MAX_SEED))
-    prompt, wildcards_arrays, arrays_mult, seed_fixed = wildcards.compile_arrays(prompt, task_rng)
-    task_prompt = wildcards.apply_arrays(prompt, 0, wildcards_arrays, arrays_mult)
-    task_prompt = wildcards.replace_wildcard(task_prompt, task_rng)
-    task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
-    positive_basic_workloads = []
-    use_style = False
-    if use_style:
-        for s in style_selections:
-            p, n = apply_style(s, positive=task_prompt)
-            positive_basic_workloads = positive_basic_workloads + p
-    else:
-        positive_basic_workloads.append(task_prompt)
-    positive_basic_workloads = positive_basic_workloads + task_extra_positive_prompts
-    positive_basic_workloads = remove_empty_str(positive_basic_workloads, default=task_prompt)
-    #print(f'positive_basic_workloads:{positive_basic_workloads}')
-    return len(tokenizer.tokenize(positive_basic_workloads[0]))
-
 
 nav_name_list = get_preset_name_list()
 system_message = get_system_message()

@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-kolors-mz"
 description = "Implementation of Kolors on ComfyUI\nReference from [a/https://github.com/kijai/ComfyUI-KwaiKolorsWrapper](https://github.com/kijai/ComfyUI-KwaiKolorsWrapper)\nUsing ComfyUI Native Sampling"
-version = "1.0.0"
+version = "2.0.0"
 license = { file = "GPL-3.0 license" }
 
 [project.urls]
