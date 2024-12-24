@@ -68,6 +68,8 @@ https://huggingface.co/MonsterMMORPG/tools/resolve/main/antelopev2.zip 下载并
 
 模型主页(Canny): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Canny
 
+模型主页(Pose): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Pose
+
 ### Kolors-Inpainting模型下载地址
 模型主页: https://huggingface.co/Kwai-Kolors/Kolors-Inpainting
 
@@ -133,6 +135,8 @@ https://huggingface.co/MonsterMMORPG/tools/resolve/main/antelopev2.zip Download 
 Model homepage(Depth): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Depth
 
 Model homepage(Canny): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Canny
+
+Model homepage(Pose): https://huggingface.co/Kwai-Kolors/Kolors-ControlNet-Pose
 
 ### Kolors-Inpainting model download link
 Model homepage: https://huggingface.co/Kwai-Kolors/Kolors-Inpainting

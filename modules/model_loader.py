@@ -123,7 +123,7 @@ def download_model_files(preset, user_did=None):
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
             if path_file[:1]=='[' and path_file[-1:]==']' and url.endswith('.zip'):
-                download_diffusers_model(path_models_root, cata, path_file[1:-1], size, url)
+                download_diffusers_model(cata, path_file[1:-1], size, url)
             else:
                 load_file_from_url(
                     url=url,
@@ -132,12 +132,12 @@ def download_model_files(preset, user_did=None):
                 )
     return
 
-def download_diffusers_model(path_models_root, cata, model_name, num, url):
+def download_diffusers_model(cata, model_name, num, url):
     import zipfile
     import shutil
-    from shared import modelsinfo
+    from modules.config import path_models_root, model_cata_map
 
-    path_filter = [model_name]
+    path_filter = [f'{model_name}/']
     result = shared.modelsinfo.get_model_names(cata, path_filter, casesensitive=True)
     if result is None or len(result)<num:
         path_temp = os.path.join(path_models_root, 'temp')
@@ -153,9 +153,9 @@ def download_diffusers_model(path_models_root, cata, model_name, num, url):
         with zipfile.ZipFile(downfile, 'r') as zipf:
             print(f'extractall: {downfile} to {path_temp}')
             zipf.extractall(path_temp)
-        shutil.move(os.path.join(path_temp, f'SimpleModels/{cata}/{model_name}'), os.path.join(os.path.join(path_models_root, cata), model_name))
+        shutil.move(os.path.join(path_temp, f'SimpleModels/{cata}/{model_name}'), os.path.join(model_cata_map[cata][0], model_name))
         os.remove(downfile)
         shutil.rmtree(path_temp)
-    modelsinfo.refresh_from_path()
+    shared.modelsinfo.refresh_from_path()
     return
 

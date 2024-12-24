@@ -4,7 +4,6 @@ import modules.config
 import json
 import urllib.parse
 import enhanced.all_parameters as ads
-import enhanced.enhanced_parameters as ehs
 import shared
 
 from PIL import Image

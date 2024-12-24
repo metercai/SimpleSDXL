@@ -4,7 +4,6 @@ import torch
 import tarfile
 import time
 import translators as ts
-import enhanced.enhanced_parameters as ehps
 
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 from modules.config import paths_llms

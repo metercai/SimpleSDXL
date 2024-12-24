@@ -227,6 +227,8 @@ class PromptServer():
             #logging.info(f"got variable: {json_data}")
             if "outputs" in json_data:
                 folder_paths.set_output_directory(json_data['outputs'])
+            if "reserved_vram" in json_data:
+                comfy.model_management.set_extra_reserved_vram(json_data['reserved_vram'])
             return web.json_response({'feedback': 'ok'})
 
 

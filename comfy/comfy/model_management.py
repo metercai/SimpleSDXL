@@ -1163,3 +1163,13 @@ def get_free_memory_by_nvml_for_nvidia():
     except Exception as e:
         print(f"Error: {e}")
         return None
+
+def set_extra_reserved_vram(reserved):
+    global EXTRA_RESERVED_VRAM, WINDOWS
+
+    reserved_vram = reserved * 1024 * 1024 * 1024
+    default_reserved = (600 if WINDOWS else 400) * 1024 * 1024
+    if reserved_vram > default_reserved:
+        print(f'set EXTRA_RESERVED_VRAM={reserved_vram / (1024 * 1024)}MB')
+        EXTRA_RESERVED_VRAM = reserved_vram
+    return

@@ -196,10 +196,11 @@
   "\ud83d\udd04 Sync All Info": "\ud83d\udd04 全部同步",
   "Describe Image": "图像内容反推",
   "Image to be described": "要反推的图片",
-  "Content Type": "内容类型",
+  "Content Type": "类型选择",
   "Photograph": "写实照片",
   "Art/Anime": "艺术/动漫",
   "Apply Styles": "设置对应风格",
+  "Output in Chinese": "输出中文",
   "Describe this Image into Prompt": "反推图片提示词",
   "Set this Image as the cover image": "设为封面图",
   "Extract the parameters of the embedded parameter image and then reset the working environment.": "从左侧图片提取嵌参图片的参数，然后重置出图环境。",
@@ -403,9 +404,11 @@
 
   "Enable Comfyd always active": "启用Comfyd服务常驻",
   "Enabling will improve execution speed but occupy some memory.": "启用服务常驻会提高执行速度，但会多占用一些GPU内存。",
-  "Enable some untested speed up optimizations for Comfyd": "启用Comfyd激进加速策略。",
-  "Effective for some Nvidia cards, not rigorously tested, use as appropriate.": "针对部分Nvidia显卡有效(40系为主)，未经严格测试，酌情使用。",
-
+  "Enable optimizations for Comfyd": "启用Comfyd激进加速",
+  "Effective for some Nvidia cards.": "英伟达40系卡有效，酌情使用",
+  "Reserved VRAM(GB)": "预留显存(GB)",
+  "Enable MiniCPMv26": "启用MiniCPMv26",
+  "Activate MiniCPMv26 to describe image, translate and expand prompt.": "启用MiniCPMv26做反推图片内容, 提示词翻译和提示词扩展",
   "This preset requires identity binding before it will run. Please complete the identity binding first.": "需要拥有绑定的身份才能运行,请先在右侧顶部\"服务\"标签栏内完成身份绑定.",
 
   "SuperPrompter": "超级提示词扩展",

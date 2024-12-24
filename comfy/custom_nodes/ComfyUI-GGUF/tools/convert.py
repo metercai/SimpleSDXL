@@ -33,6 +33,24 @@ class ModelSD3(ModelTemplate):
     ]
     keys_banned = ["transformer_blocks.0.attn.add_q_proj.weight",]
 
+class ModelAura(ModelTemplate):
+    arch = "aura"
+    keys_detect = [
+        ("double_layers.3.modX.1.weight",),
+        ("joint_transformer_blocks.3.ff_context.out_projection.weight",),
+    ]
+    keys_banned = ["joint_transformer_blocks.3.ff_context.out_projection.weight",]
+
+class ModelLTXV(ModelTemplate):
+    arch = "ltxv"
+    keys_detect = [
+        (
+            "adaln_single.emb.timestep_embedder.linear_2.weight",
+            "transformer_blocks.27.scale_shift_table",
+            "caption_projection.linear_2.weight",
+        )
+    ]
+
 class ModelSDXL(ModelTemplate):
     arch = "sdxl"
     shape_fix = True
@@ -47,7 +65,7 @@ class ModelSDXL(ModelTemplate):
 
 class ModelSD1(ModelTemplate):
     arch = "sd1"
-    shape_fix = False
+    shape_fix = True
     keys_detect = [
         ("down_blocks.0.downsamplers.0.conv.weight",),
         (
@@ -57,7 +75,7 @@ class ModelSD1(ModelTemplate):
     ]
 
 # The architectures are checked in order and the first successful match terminates the search.
-arch_list = [ModelFlux, ModelSD3, ModelSDXL, ModelSD1]
+arch_list = [ModelFlux, ModelSD3, ModelAura, ModelLTXV,  ModelSDXL, ModelSD1]
 
 def is_model_arch(model, state_dict):
     # check if model is correct
@@ -99,13 +117,18 @@ def load_state_dict(path):
         state_dict = load_file(path)
 
     # only keep unet with no prefix!
+    prefix = None
+    for pfx in ["model.diffusion_model.", "model."]:
+        if any([x.startswith(pfx) for x in state_dict.keys()]):
+            prefix = pfx
+            break
+
     sd = {}
-    has_prefix = any(["model.diffusion_model." in x for x in state_dict.keys()])
     for k, v in state_dict.items():
-        if has_prefix and "model.diffusion_model." not in k:
+        if prefix and prefix not in k:
             continue
-        if has_prefix:
-            k = k.replace("model.diffusion_model.", "")
+        if prefix:
+            k = k.replace(prefix, "")
         sd[k] = v
 
     return sd
