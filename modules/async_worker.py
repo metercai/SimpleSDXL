@@ -212,9 +212,7 @@ class AsyncTask:
             }
         if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
-
         
-
 async_tasks = []
 
 
@@ -250,7 +248,7 @@ def worker():
     import enhanced.wildcards as wildcards
     import enhanced.version as version
     import enhanced.translator as translator
-
+    
     from extras.censor import default_censor
     from modules.sdxl_styles import apply_style, get_random_style, fooocus_expansion, apply_arrays, random_style_name
     from modules.private_logger import log
@@ -264,6 +262,7 @@ def worker():
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
     from enhanced.all_parameters import default as default_params
+    #from echanced.minicpm import minicpm
 
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
@@ -364,8 +363,11 @@ def worker():
                 seed=task['task_seed'],
                 )
             params_backend = async_task.params_backend.copy()
-            input_images = params_backend.pop('input_images') if 'input_images' in async_task.params_backend else None
-            options = params_backend.pop('ui_options') if 'ui_options' in async_task.params_backend else {}
+            input_images = params_backend.pop('input_images', None)
+            options = params_backend.pop('ui_options', {})
+            reserved_vram = params_backend.pop('reserved_vram', 0)
+            if reserved_vram > 0:
+                comfyd.modify_variable({"reserved_vram": reserved_vram})
             default_params.update(params_backend)
             try:
                 user_cert = shared.token.get_register_cert(async_task.user_did)
@@ -895,6 +897,7 @@ def worker():
                 log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 styles=task_styles
             ))
+        #minicpm.free_model()
         if use_expansion:
             if advance_progress:
                 current_progress += 1
@@ -1252,7 +1255,8 @@ def worker():
         if async_task.task_class in flags.comfy_classes:
             print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
             if "flux_aio" in async_task.task_method and \
-                ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and len(async_task.cn_tasks[flags.cn_ip_face])==0) or \
+                ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and \
+                    (len(async_task.cn_tasks[flags.cn_ip_face])==0 or not self.mixing_image_prompt_and_vary_upscale or not self.mixing_image_prompt_and_inpaint)) or \
                 not async_task.input_image_checkbox ):
                 print(f'[TaskEngine] Clean the model cache in comfyd.')
                 comfyd.stop()
@@ -1483,6 +1487,9 @@ def worker():
                 f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         callback_function = callback
+        i2i_uov_hires_fix_blurred = async_task.params_backend.pop('i2i_uov_hires_fix_blurred', 0.0)
+        i2i_uov_hires_fix_w = async_task.params_backend.pop('i2i_uov_hires_fix_w', 0.5)
+        i2i_uov_hires_fix_s = async_task.params_backend.pop('i2i_uov_hires_fix_s', 0.8)
         if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
             #ldm_patched.modules.model_management.unload_and_free_everything()
@@ -1581,9 +1588,9 @@ def worker():
                         all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
-                        async_task.params_backend['i2i_uov_hires_fix_blurred'] = async_task.params_backend.get('i2i_uov_hires_fix_blurred', 0.0)
-                        async_task.params_backend['i2i_uov_hires_fix_w'] = async_task.params_backend.get('i2i_uov_hires_fix_w', 0.5)
-                        async_task.params_backend['i2i_uov_hires_fix_s'] = async_task.params_backend.get('i2i_uov_hires_fix_s', 0.8)
+                        async_task.params_backend['i2i_uov_hires_fix_blurred'] = i2i_uov_hires_fix_blurred
+                        async_task.params_backend['i2i_uov_hires_fix_w'] = i2i_uov_hires_fix_w
+                        async_task.params_backend['i2i_uov_hires_fix_s'] = i2i_uov_hires_fix_s
                     else:
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
@@ -1620,8 +1627,6 @@ def worker():
                     else:
                         async_task.params_backend['display_steps'] = async_task.steps
             async_task.params_backend['input_images'] = input_images
-
-
 
         ldm_patched.modules.model_management.print_memory_info()
 
@@ -1824,6 +1829,7 @@ def worker():
     while True:
         time.sleep(0.01)
         if len(async_tasks) > 0:
+            print(f'[TaskEngine] Got async_tasks')
             task = async_tasks.pop(0)
             try:
                 handler(task)

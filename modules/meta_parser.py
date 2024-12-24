@@ -26,6 +26,7 @@ get_layout_visible = lambda x,y:gr.update(visible=x not in y)
 get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
 get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
+get_layout_setting_choices_visible_inter = lambda l,v,x,y,z:gr.update(choices=l, value=v, visible=x not in y, interactive=x not in z)
 get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=None, visible=x not in y, interactive=x not in z)
 
 def get_layout_visible_inter_loras(y,z,max_number):
@@ -82,7 +83,6 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
     if task_method and '_aio' in task_method:
-        print(f'task_method:{task_method}')
         results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
     else:
         results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
@@ -98,7 +98,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 
     # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
     results.append(engine_class_display)
-    results.append(get_layout_choices_visible_inter(uov_method_list, 'uov_method', visible, inter))
+    results.append(get_layout_setting_choices_visible_inter(uov_method_list, modules.flags.disabled, 'uov_method', visible, inter))
     results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
     results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))

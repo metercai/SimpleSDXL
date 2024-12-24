@@ -78,10 +78,11 @@ class DownloadAndLoadKolorsModel:
         ram_rss_start = psutil.Process().memory_info().rss
         scheduler = EulerDiscreteScheduler.from_pretrained(model_path, subfolder= 'scheduler')
         
-        print(f'Load UNET...')
+        print("Load UNET...")
         unet = UNet2DConditionModel.from_pretrained(model_path, subfolder= 'unet', variant="fp16", revision=None, low_cpu_mem_usage=True).to(dtype).eval()      
         ram_rss_end = psutil.Process().memory_info().rss
         print(f'Kolors-unet: RAM allocated = {(ram_rss_end-ram_rss_start)/(1024*1024*1024):.3f}GB')
+
         pipeline = StableDiffusionXLPipeline(
                 unet=unet,
                 scheduler=scheduler,
@@ -169,7 +170,7 @@ class DownloadAndLoadChatGLM3:
         model_name = model.rsplit('/', 1)[-1]
         model_path = os.path.join(folder_paths.models_dir, "diffusers", model_name)
         text_encoder_path = os.path.join(model_path, "text_encoder")
-        
+      
         if not os.path.exists(text_encoder_path):
             print(f"Downloading ChatGLM3 to: {text_encoder_path}")
             from huggingface_hub import snapshot_download
@@ -184,6 +185,7 @@ class DownloadAndLoadChatGLM3:
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
         print(f"Load TEXT_ENCODER..., {precision}, {offload_device}")
+
         text_encoder = ChatGLMModel.from_pretrained(
             text_encoder_path,
             torch_dtype=torch.float16
@@ -192,9 +194,7 @@ class DownloadAndLoadChatGLM3:
             text_encoder.quantize(8)
         elif precision == 'quant4':
             text_encoder.quantize(4)
-        #device_text = next(text_encoder.parameters()).device
-        #print(f'chatglm3: device={device_text}, torch_device={device}, offload_device={offload_device}')
-
+       
         tokenizer = ChatGLMTokenizer.from_pretrained(text_encoder_path)
         pbar.update(1)
     
@@ -204,6 +204,7 @@ class DownloadAndLoadChatGLM3:
             }
         ram_rss_end = psutil.Process().memory_info().rss
         print(f'chatglm3: RAM allocated = {(ram_rss_end-ram_rss_start)/(1024*1024*1024):.3f}GB')
+
         return (chatglm3_model,)
         
 class KolorsTextEncode:
