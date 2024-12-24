@@ -262,8 +262,9 @@ def worker():
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
     from enhanced.all_parameters import default as default_params
-    #from echanced.minicpm import minicpm
+    from enhanced.minicpm import MiniCPM
 
+    minicpm = MiniCPM()
     pid = os.getpid()
     print(f'Started worker with PID {pid}')
 
@@ -847,10 +848,10 @@ def worker():
             task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
             
             if async_task.task_class not in ['Kolors', 'HyDiT']: # and 'kolors' not in async_task.task_name.lower():
-                task_prompt = translator.convert(task_prompt, async_task.translation_methods)
-                task_negative_prompt = translator.convert(task_negative_prompt, async_task.translation_methods)
-                task_extra_positive_prompts = [translator.convert(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
-                task_extra_negative_prompts = [translator.convert(pmt, async_task.translation_methods) for pmt in extra_negative_prompts]
+                task_prompt = minicpm.translate(task_prompt, async_task.translation_methods)
+                task_negative_prompt = minicpm.translate(task_negative_prompt, async_task.translation_methods)
+                task_extra_positive_prompts = [minicpm.translate(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
+                task_extra_negative_prompts = [minicpm.translate(pmt, async_task.translation_methods) for pmt in extra_negative_prompts]
 
             positive_basic_workloads = []
             negative_basic_workloads = []
@@ -897,7 +898,7 @@ def worker():
                 log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 styles=task_styles
             ))
-        #minicpm.free_model()
+        minicpm.free_model()
         if use_expansion:
             if advance_progress:
                 current_progress += 1
@@ -1723,9 +1724,10 @@ def worker():
                 is_last_enhance_for_image = (current_task_id + 1) % active_enhance_tabs == 0 and not enhance_uov_after
                 persist_image = not async_task.save_final_enhanced_image_only or is_last_enhance_for_image
 
-                enhance_mask_dino_prompt_text = translator.convert(enhance_mask_dino_prompt_text, async_task.translation_methods)
-                enhance_prompt = translator.convert(enhance_prompt, async_task.translation_methods)
-                enhance_negative_prompt = translator.convert(enhance_negative_prompt, async_task.translation_methods)
+                enhance_mask_dino_prompt_text = minicpm.translate(enhance_mask_dino_prompt_text, async_task.translation_methods)
+                enhance_prompt = minicpm.translate(enhance_prompt, async_task.translation_methods)
+                enhance_negative_prompt = minicpm.translate(enhance_negative_prompt, async_task.translation_methods)
+                minicpm.free_model()
 
                 extras = {}
                 if enhance_mask_model == 'sam':
