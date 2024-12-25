@@ -1257,7 +1257,7 @@ def worker():
             print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
             if "flux_aio" in async_task.task_method and \
                 ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and \
-                    (len(async_task.cn_tasks[flags.cn_ip_face])==0 or not self.mixing_image_prompt_and_vary_upscale or not self.mixing_image_prompt_and_inpaint)) or \
+                    (len(async_task.cn_tasks[flags.cn_ip_face])==0 or not async_task.mixing_image_prompt_and_vary_upscale or not async_task.mixing_image_prompt_and_inpaint)) or \
                 not async_task.input_image_checkbox ):
                 print(f'[TaskEngine] Clean the model cache in comfyd.')
                 comfyd.stop()
