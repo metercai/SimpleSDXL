@@ -1137,7 +1137,19 @@ def print_memory_info():
         logging.info(f'GPU memory: max_reserved={max_reserved}, max_allocated={max_allocated}, reserved={reserved}, free={free_cuda}, free_torch={free_torch}, free_total={free_total}, gpu_total={gpu_total}, torch_total={torch_total}')
         torch.cuda.reset_peak_memory_stats()
 
+def print_vram_info_by_nvml():
+    if is_nvidia():
+        memory_info = get_vram_info_by_nvml_for_nvidia()
+        used = f'{memory_info.used/1024/1024/1024:.3f}GB'
+        used = f'{memory_info.free/1024/1024/1024:.3f}GB'
+        logging.info(f'GPU memory: used={used}, free={free}')
+
+
 def get_free_memory_by_nvml_for_nvidia():
+    memory_info = get_vram_info_by_nvml_for_nvidia()
+    return memory_info.free
+
+def get_vram_info_by_nvml_for_nvidia():
     from pynvml import (
         nvmlInit,
         nvmlDeviceGetHandleByIndex,
@@ -1154,9 +1166,8 @@ def get_free_memory_by_nvml_for_nvidia():
             raise RuntimeError("The current system has not detected any available GPU devices.")
         handle = nvmlDeviceGetHandleByIndex(current_device_index)
         memory_info = nvmlDeviceGetMemoryInfo(handle)
-        free_memory = memory_info.free
         nvmlShutdown()
-        return free_memory
+        return memory_info
     except NVMLError as error:
         print(f"NVML error: {error}")
         return None

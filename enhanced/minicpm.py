@@ -1,16 +1,19 @@
 import os
+import gc
 import torch
 import shared
 import threading
 import modules.config as config
 import enhanced.translator as translator
 import enhanced.superprompter as superprompter
+import ldm_patched.modules.model_management
+import modules.default_pipeline as pipeline
 
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel
 from modules.model_loader import download_diffusers_model
 
-class MiniCPM:
+class MiniCPM:  
     model = "MiniCPMv2_6-prompt-generator" # "MiniCPM-V-2_6-int4"
     prompt_i2t = "A descriptive caption for this image"
     prompt_i2t_chinese = "A descriptive caption for this image, and output it in Chinese"
@@ -23,12 +26,10 @@ class MiniCPM:
     model_v26 = None
     tokenizer = None
     enable = False
+    bf16_support = ( torch.cuda.is_available() and torch.cuda.get_device_capability(torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))[0] >= 8 )
 
     def __init__(self):
-        with MiniCPM.lock:
-            MiniCPM.model_v26 = None
-            MiniCPM.tokenizer = None
-            MiniCPM.enable = False
+        pass
 
     @classmethod
     def set_enable(cls, flag):
@@ -46,8 +47,11 @@ class MiniCPM:
             else:
                 return
         MODEL_PATH = os.path.join(config.paths_llms[0], MiniCPM.model)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
-        text_model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(
+                MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True)
+        text_model = AutoModel.from_pretrained(
+                MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True,
+                attn_implementation="sdpa", torch_dtype=torch.bfloat16 if MiniCPM.bf16_support else torch.float16)
         text_model.eval()
         with MiniCPM.lock:
             MiniCPM.model_v26 = text_model
@@ -56,34 +60,42 @@ class MiniCPM:
 
     def free_model(self):
         with MiniCPM.lock:
+            if MiniCPM.model_v26 is not None:
+                del MiniCPM.model_v26
+            if MiniCPM.tokenizer is not None:
+                del MiniCPM.tokenizer
             MiniCPM.model_v26 = None
             MiniCPM.tokenizer = None
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+            gc.collect()
+            print("free vram of minicpm model")
+            ldm_patched.modules.model_management.print_memory_info()
     
     @torch.no_grad()
     @torch.inference_mode()
-    def inference(self, image, prompt, max_tokens=2048, temperature=0.7):
+    def inference(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
+        pipeline.free_everything()
         if MiniCPM.model_v26 is None or MiniCPM.tokenizer is None:
             self.load_model(download=True)
         image = image if image is None else Image.fromarray(image)
         msgs = [{'role': 'user', 'content': [image, prompt]}]
+        
         res = MiniCPM.model_v26.chat(
             image=None,
             msgs=msgs,
-            tokenizer=self.tokenizer
-        )
-        res = MiniCPM.model_v26.chat(
-            image=None,
-            msgs=msgs,
-            tokenizer=self.tokenizer,
-            sampling=False,
-            stream=False,
+            tokenizer=MiniCPM.tokenizer,
+            sampling=True,
+            top_k=top_k,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        generated_text = ""
-        for new_text in res:
-            generated_text += new_text
+        
+        generated_text = res
         print(f'MiniCPMv26 generated_text:{generated_text}')
+        ldm_patched.modules.model_management.print_memory_info()
         return generated_text
 
     def interrogate(self, image, output_chinese=False):
