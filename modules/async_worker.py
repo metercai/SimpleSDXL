@@ -817,17 +817,6 @@ def worker():
                                                           modules.config.default_max_lora_number,
                                                           lora_filenames=lora_filenames)
         loras += async_task.performance_loras
-        if async_task.task_class in ['Fooocus']:
-            if advance_progress:
-                current_progress += 1
-            progressbar(async_task, current_progress, 'Loading models ...')
-            pipeline.refresh_everything(refiner_model_name=async_task.refiner_model_name,
-                                    base_model_name=async_task.base_model_name,
-                                    loras=loras, base_model_additional_loras=base_model_additional_loras,
-                                    use_synthetic_refiner=use_synthetic_refiner, vae_name=async_task.vae_name)
-            pipeline.set_clip_skip(async_task.clip_skip)
-        else:
-            pipeline.reload_expansion()
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, 'Processing prompts ...')
@@ -898,7 +887,20 @@ def worker():
                 log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
                 styles=task_styles
             ))
+        
         minicpm.free_model()
+        if async_task.task_class in ['Fooocus']:
+            if advance_progress:
+                current_progress += 1
+            progressbar(async_task, current_progress, 'Loading models ...')
+            pipeline.refresh_everything(refiner_model_name=async_task.refiner_model_name,
+                                    base_model_name=async_task.base_model_name,
+                                    loras=loras, base_model_additional_loras=base_model_additional_loras,
+                                    use_synthetic_refiner=use_synthetic_refiner, vae_name=async_task.vae_name)
+            pipeline.set_clip_skip(async_task.clip_skip)
+        else:
+            pipeline.reload_expansion()
+
         if use_expansion:
             if advance_progress:
                 current_progress += 1
