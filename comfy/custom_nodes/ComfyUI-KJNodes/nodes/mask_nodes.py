@@ -7,7 +7,7 @@ import numpy as np
 from contextlib import nullcontext
 import os
 
-import model_management
+import comfy.model_management as model_management
 from comfy.utils import ProgressBar
 from nodes import MAX_RESOLUTION
 

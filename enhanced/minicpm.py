@@ -12,6 +12,8 @@ import modules.default_pipeline as pipeline
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel
 from modules.model_loader import download_diffusers_model
+from modules.util import HWC3, resize_image
+from enhanced.simpleai import comfyd
 
 class MiniCPM:  
     model = "MiniCPMv2_6-prompt-generator" # "MiniCPM-V-2_6-int4"
@@ -56,29 +58,31 @@ class MiniCPM:
         with MiniCPM.lock:
             MiniCPM.model_v26 = text_model
             MiniCPM.tokenizer = tokenizer
+        ldm_patched.modules.model_management.print_memory_info("after load minicpm model")
         return
 
     def free_model(self):
+        if MiniCPM.model_v26 is None and MiniCPM.tokenizer is None:
+            return
         with MiniCPM.lock:
-            if MiniCPM.model_v26 is not None:
-                del MiniCPM.model_v26
-            if MiniCPM.tokenizer is not None:
-                del MiniCPM.tokenizer
+            del MiniCPM.model_v26
+            del MiniCPM.tokenizer
             MiniCPM.model_v26 = None
             MiniCPM.tokenizer = None
             torch.cuda.empty_cache()
             torch.cuda.ipc_collect()
             gc.collect()
-            print("free vram of minicpm model")
-            ldm_patched.modules.model_management.print_memory_info()
+            ldm_patched.modules.model_management.print_memory_info("after free minicpm model")
     
     @torch.no_grad()
     @torch.inference_mode()
     def inference(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
+        comfyd.stop()
         pipeline.free_everything()
+        ldm_patched.modules.model_management.print_vram_info_by_nvml("before minicpm inference")
         if MiniCPM.model_v26 is None or MiniCPM.tokenizer is None:
             self.load_model(download=True)
-        image = image if image is None else Image.fromarray(image)
+        image = image if image is None else Image.fromarray(resize_image(image, min_side=768, resize_mode=3))
         msgs = [{'role': 'user', 'content': [image, prompt]}]
         
         res = MiniCPM.model_v26.chat(
@@ -91,11 +95,12 @@ class MiniCPM:
             repetition_penalty=repetition_penalty,
             max_tokens=max_tokens,
             temperature=temperature,
+            seed=seed
         )
         
         generated_text = res
         print(f'MiniCPMv26 generated_text:{generated_text}')
-        ldm_patched.modules.model_management.print_memory_info()
+        ldm_patched.modules.model_management.print_memory_info("after minicpm inference")
         return generated_text
 
     def interrogate(self, image, output_chinese=False):

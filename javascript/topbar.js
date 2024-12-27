@@ -363,7 +363,7 @@ function updatePresetStore(nav_name_list, role, expand_flag, theme) {
 	mypresets_text = mypresets_text + "▼";
     }
     if (role=="guest") {
-        nav_store.innerHTML = "Presets";
+        nav_store.innerHTML = "Presets▼";
     } else {
         nav_store.innerHTML = mypresets_text;
     }

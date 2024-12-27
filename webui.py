@@ -269,7 +269,7 @@ with shared.gradio_root:
                     identity_qr.upload(simpleai.trigger_input_identity, inputs=identity_qr, outputs=identity_crtl + [input_id_info], show_progress=False, queue=False)
                 
                 nav_bars = [bar_store_button] + bar_buttons
-                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
+                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 preset_store_list.click(topbar.update_navbar_from_mystore, inputs=[preset_store_list, state_topbar], outputs=nav_bars + [system_params], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 
                 with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
@@ -278,21 +278,23 @@ with shared.gradio_root:
             with gr.Group():
                 with gr.Row():
                     with gr.Column(scale=12):
-                        prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
-                                        container=False, autofocus=False, lines=4)
+                        with gr.Group(elem_classes="prompt-container"):
+                            prompt = gr.Textbox(
+                                show_label=False, placeholder="Type prompt here or paste parameters.",
+                                elem_id="positive_prompt", container=False, autofocus=False, lines=4
+                            )
+                            clear_prompt_btn = gr.Button(value="X", elem_classes=["clear-prompt-btn"], visible=True)
+                            prompt_token_counter = gr.HTML(
+                                visible=True, value=0, elem_classes=["tokenCounter"], elem_id="token_counter"
+                            )
 
                         def calculateTokenCounter(text, style_selections):
                             if len(text) < 1:
                                 return 0
                             num=topbar.prompt_token_prediction(text, style_selections)
                             return str(num)
-                        prompt_token_counter = gr.HTML(
-                            visible=True,
-                            value=0,
-                            elem_classes=["tokenCounter"],
-                            elem_id='token_counter',
-                        )
 
+                        clear_prompt_btn.click(fn=lambda: "", outputs=prompt, queue=False, show_progress=False)
                         default_prompt = modules.config.default_prompt
                         if isinstance(default_prompt, str) and default_prompt != '':
                             shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
@@ -1481,13 +1483,6 @@ import logging
 import httpx
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)
-
-import logging
-import httpx
-httpx_logger = logging.getLogger("httpx")
-httpx_logger.setLevel(logging.WARNING)
-hydit_logger = logging.getLogger("hydit")
-hydit_logger.setLevel(logging.WARNING)
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
