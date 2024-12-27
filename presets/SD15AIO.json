@@ -1,0 +1,73 @@
+{ 
+    "default_engine": {
+	"backend_engine": "Comfy",
+	"disvisible": ["backend_selection", "performance_selection"],
+	"disinteractive": ["enhance_checkbox", "performance_selection", "loras-2", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
+	"available_aspect_ratios_selection": "Common",
+	"backend_params": {
+		"task_method": "sd15_aio"
+		}
+	},
+    "default_model": "realisticVisionV60B1_v51VAE.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 7,
+    "default_sample_sharpness": 2,
+    "default_sampler": "dpmpp_2m_sde_gpu",
+    "default_scheduler": "karras",
+    "default_performance": "Speed",
+    "default_styles": [
+        "Fooocus Negative"
+    ],
+    "default_styles": [],
+    "default_aspect_ratio": "1280*960",
+    "default_overwrite_step": 30,
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "model_list": [
+        "checkpoints,realisticVisionV60B1_v51VAE.safetensors,2132625894,0,",
+        "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
+        "loras,ip-adapter-faceid-plusv2_sd15_lora.safetensors,51059544,0,",
+        "upscale_models,4x-UltraSharp.pth,66961958,0,",
+        "inpaint,sd15_powerpaint_brushnet_v2_1.safetensors,3544366408,0,",
+        "inpaint,sd15_powerpaint_brushnet_clip_v2_1.bin,492401329,0,",
+        "clip,sd15_clip_model.fp16.safetensors,246144864,0,",
+        "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
+        "controlnet,control_v11p_sd15_canny_fp16.safetensors,722601100,0,",
+        "controlnet,control_v11f1p_sd15_depth_fp16.safetensors,722601100,0,",
+        "controlnet,control_v11p_sd15_openpose_fp16.safetensors,722601100,0,",
+        "controlnet,control_v11f1e_sd15_tile_fp16.safetensors,722601104,0,",
+        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "ipadapter,ip-adapter_sd15.safetensors,44642768,0,",
+        "ipadapter,ip-adapter-faceid-plusv2_sd15.bin,156558509,0,",
+        "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
+        "insightface,models/buffalo_l/2d106det.onnx,5030888,0,",
+        "insightface,models/buffalo_l/det_10g.onnx,16923827,0,",
+        "insightface,models/buffalo_l/genderage.onnx,1322532,0,",
+        "insightface,models/buffalo_l/w600k_r50.onnx,174383860,0,"
+    ]
+}
+
