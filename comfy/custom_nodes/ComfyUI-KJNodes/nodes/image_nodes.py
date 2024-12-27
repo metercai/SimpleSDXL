@@ -21,7 +21,7 @@ from comfy_extras.nodes_mask import ImageCompositeMasked
 from comfy.cli_args import args
 from comfy.utils import ProgressBar, common_upscale
 import folder_paths
-import model_management
+import comfy.model_management as model_management
 
 script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

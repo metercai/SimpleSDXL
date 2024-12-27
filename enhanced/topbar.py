@@ -23,7 +23,9 @@ import shared
 import cv2
 import numpy as np
 import base64
-from enhanced.simpleai import comfyd, get_path_in_user_dir
+import ldm_patched.modules.model_management
+
+from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
@@ -324,7 +326,7 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, request: gr.Request):
     superprompter.remove_superprompt()
     remove_tokenizer()
     minicpm.free_model()
@@ -340,10 +342,6 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         hires_fix_blurred=hires_fix_blurred,
         reserved_vram=reserved_vram
         ))
-
-    if state_params["engine"] != 'Fooocus' and shared.token.is_guest(state_params["user_did"]):
-        gr.Info('This preset requires identity binding before it will run. Please complete the identity binding first.')
-        print(f'[Topbar] This preset requires identity binding before it will run. Please complete the identity binding first / 该预置包需要绑定身份后才能正常运行, 请在页面顶部右侧的"服务"标签内完成身份绑定.')
 
     if is_models_file_absent(state_params["__preset"], state_params["user_did"]):
         gr.Info(preset_downing_note_info)
@@ -478,6 +476,8 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     results += meta_parser.switch_layout_template(preset_prepared, state_params, preset_url)
     results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
     results += update_after_identity_sub(state_params)
+
+    ldm_patched.modules.model_management.print_memory_info("after switched preset")
     return results
 
 
@@ -521,10 +521,10 @@ def toggle_preset_store(state):
             flag = False
         state['preset_store'] = not flag
         state['identity_dialog'] = False
-        return [gr.update(visible=not flag)] + update_topbar_js_params(state) + [gr.update(visible=False)]
+        return [gr.update(visible=not flag)] + update_topbar_js_params(state) + [gr.update(visible=False)] + [gr.update()]*16
     else:
-        state['identity_dialog'] = False
-        return [gr.update()] + update_topbar_js_params(state) + [gr.update(visible=False)]
+        #state['identity_dialog'] = False
+        return [gr.update()] + update_topbar_js_params(state) + toggle_identity_dialog(state)
 
 def update_navbar_from_mystore(selected_preset, state):
     global preset_samples
@@ -607,18 +607,19 @@ identity_introduce = '''
 1，解锁“我的预置”功能，支持个性化的预置导航。<br>
 2，独立的出图存储空间和日志历史页，保障隐私安全。<br>
 3，可将当前环境参数保存为个人定制的预置包。<br>
-4，解锁内嵌Comfyd引擎，支持Flux/Kolors/SD3等新模型。<br>
-5，解锁更多配置，包括参数工具/翻译器/定制OBP等。<br>
-6，其他计划中的个性化服务、增强功能及互助服务。<br>
-如：我的通配符、大模型扩写、创意分享、预置包市场等<br>
+4，解锁更多功能的配置管理，包括翻译器/定制OBP等。<br>
+5，其他计划中的个性化服务、增强功能及互助服务。<br>
+如：提示词库、创意分享、共享预置包、共享算力等<br>
 <br>
 系统将指定首个绑定身份为管理员，赋予超级管理权限: <br>
-1，可一键进入内嵌的Comfyd引擎工作流操作界面；<br>
-2，可管理内嵌Comfyd引擎的参数配置。<br>
-3，对本节点的其他身份进行审核与屏蔽(待上线)。<br>
-4，申请预置包发布和二次打包的授权标识(待上线)。<br>
+1，可一键进入内嵌的Comfyd引擎工作流操作界面。<br>
+2，可管理内嵌Comfyd引擎的更多性能参数和配置。<br>
+3，解锁MiniCPM，升级更高级的反推/翻译/扩写服务。<br>
+4，对本节点的其他身份进行管理(计划)。<br>
+5，申请预置包发布和二次打包的授权标识(计划)。<br>
+对4和5有需求的可以入QQ群:938075852 进行交流。
 <br>
-系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存身份加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。规则说明>> <br>
+系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
 '''
 
 def update_after_identity(state):
@@ -652,7 +653,7 @@ def update_after_identity_sub(state):
     results += [gr.update(value=update_comfyd_url(user_did))]
     results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
-    ip_list = modules.flags.ip_list if not shared.token.is_guest(user_did) and state["engine"] in ['Fooocus', 'Flux', 'Kolors', 'Comfy']  else modules.flags.ip_list[:-1]
+    ip_list = modules.flags.ip_list if state["engine"] in ['Fooocus', 'Flux', 'Kolors', 'Comfy']  else modules.flags.ip_list[:-1]
     default_controlnet_image_count = config.default_controlnet_image_count if state["engine"]=='Fooocus' else 4
     for image_count in range(default_controlnet_image_count):
         image_count += 1

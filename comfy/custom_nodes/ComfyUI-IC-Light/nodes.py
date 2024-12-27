@@ -12,7 +12,7 @@ from .utils.image import generate_gradient_image, LightPosition
 from nodes import MAX_RESOLUTION
 from comfy.model_patcher import ModelPatcher
 from comfy import lora
-import model_management
+import comfy.model_management as model_management
 import logging
 
 from load_file_from_url import load_file_from_url, load_model_for_iclight

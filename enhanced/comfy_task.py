@@ -231,6 +231,9 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
         return ComfyTask(task_method, comfy_params, input_images)
     elif task_name == 'SD15AIO' and '_aio' in task_method:
+        result = modelsinfo.get_model_names('inpaint')
+        print(f'get_model_name_from_inpaint:{result}')
+
         total_steps = default_params["steps"] if 'display_steps' not in default_params else default_params["display_steps"]
         if 'display_steps' in default_params:
             comfy_params.delete_params(["display_steps"])

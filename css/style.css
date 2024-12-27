@@ -808,3 +808,31 @@ div.prose.tokenCounter {
 #scrollable-box-hidden::-webkit-scrollbar-track {
     background-color: transparent;
 }
+
+.prompt-container {
+  position: relative;
+  width: 100%;
+}
+
+.clear-prompt-btn {
+  width: 20px;
+  height: 24px;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  opacity: 0.1;
+  visibility: visible;
+  z-index: 10;
+}
+
+.prompt-container:hover .clear-prompt-btn,
+.clear-prompt-btn:hover {
+  opacity: 1;
+  visibility: visible;
+}
+
+.clear-prompt-btn:hover {
+  background: var(--button-secondary-background-fill, lightgray);
+  color: var(--button-hover-text-color, #000);
+}
+
