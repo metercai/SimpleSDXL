@@ -162,7 +162,10 @@ def print_vram_info_by_nvml(pos=None):
     position = f'({pos})' if pos else ''
     if is_nvidia():
         memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
-        pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        if pid_used_vram:
+            pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        else:
+            pid_used = '-unknown-GB'
         used = f'{memory_info.used/1024/1024/1024:.3f}GB'
         free = f'{memory_info.free/1024/1024/1024:.3f}GB'
         print(f'[Fooocus] GPU memory{position}: pid_used={pid_used}, used={used}, free={free}')
@@ -875,7 +878,10 @@ def print_memory_info(pos=None):
         free_cuda = f'{free_cuda/1024/1024/1024:.3f}GB'
         cuda_total = f'{cuda_total/1024/1024/1024:.3f}GB'
         memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
-        pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        if pid_used_vram:
+            pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        else:
+            pid_used = '-unknown-GB'
         used = f'{memory_info.used/1024/1024/1024:.3f}GB'
         pid_and_all_used = f'pid_used={pid_used}, used={used}, '
 
