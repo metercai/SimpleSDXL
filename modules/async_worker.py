@@ -270,13 +270,20 @@ def worker():
 
     try:
         async_gradio_app = shared.gradio_root
-        flag = f'''App started successful. Use the app with {str(async_gradio_app.local_url)} or {str(async_gradio_app.server_name)}:{str(async_gradio_app.server_port)}'''
-        if async_gradio_app.share:
+        flag = 'App started successful.'
+        if hasattr(async_gradio_app, 'local_url') and async_gradio_app.local_url:
+            flag += f' Use the app with {str(async_gradio_app.local_url)}'
+        if hasattr(async_gradio_app, 'server_name') and hasattr(async_gradio_app, 'server_port') and async_gradio_app.server_name and async_gradio_app.server_port:
+            if 'Use the app with' in flag:
+                flag += f' or {str(async_gradio_app.server_name)}:{str(async_gradio_app.server_port)}'
+            else:
+                flag += f'Use the app with {str(async_gradio_app.server_name)}:{str(async_gradio_app.server_port)}'
+        if hasattr(async_gradio_app, 'share') and async_gradio_app.share_url:
             flag += f''' or {async_gradio_app.share_url}'''
         print(flag)
     except Exception as e:
         print(e)
-    ldm_patched.modules.model_management.print_memory_info()
+    ldm_patched.modules.model_management.print_memory_info("worker init")
 
     def progressbar(async_task, number, text):
         print(f'[Fooocus] {text}')
@@ -1252,22 +1259,9 @@ def worker():
     def handler(async_task: AsyncTask):
         preparation_start_time = time.perf_counter()
         async_task.processing = True
-        ldm_patched.modules.model_management.print_memory_info()
+        ldm_patched.modules.model_management.print_memory_info("begin at handler")
         print(f'[TaskEngine] Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
         
-        if async_task.task_class in flags.comfy_classes:
-            print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
-            if "flux_aio" in async_task.task_method and \
-                ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and \
-                    (len(async_task.cn_tasks[flags.cn_ip_face])==0 or not async_task.mixing_image_prompt_and_vary_upscale or not async_task.mixing_image_prompt_and_inpaint)) or \
-                not async_task.input_image_checkbox ):
-                print(f'[TaskEngine] Clean the model cache in comfyd.')
-                comfyd.stop()
-            comfyd.start()
-        else:
-            print(f'[TaskEngine] Enable Fooocus backend.')
-            comfyd.stop()
-
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
         async_task.uov_method = async_task.uov_method.casefold()
@@ -1293,19 +1287,21 @@ def worker():
         elif async_task.performance_selection == Performance.HYPER_SD:
             set_hyper_sd_defaults(async_task, current_progress, advance_progress=True)
 
-        print(f'[Parameters] Adaptive CFG = {async_task.adaptive_cfg}')
-        print(f'[Parameters] CLIP Skip = {async_task.clip_skip}')
-        print(f'[Parameters] Sharpness = {async_task.sharpness}')
-        print(f'[Parameters] ControlNet Softness = {async_task.controlnet_softness}')
-        print(f'[Parameters] ADM Scale = '
-              f'{async_task.adm_scaler_positive} : '
-              f'{async_task.adm_scaler_negative} : '
-              f'{async_task.adm_scaler_end}')
-        print(f'[Parameters] Seed = {async_task.seed}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Adaptive CFG = {async_task.adaptive_cfg}')
+            print(f'[Parameters] CLIP Skip = {async_task.clip_skip}')
+            print(f'[Parameters] Sharpness = {async_task.sharpness}')
+            print(f'[Parameters] ControlNet Softness = {async_task.controlnet_softness}')
+            print(f'[Parameters] ADM Scale = '
+                  f'{async_task.adm_scaler_positive} : '
+                  f'{async_task.adm_scaler_negative} : '
+                  f'{async_task.adm_scaler_end}')
+            print(f'[Parameters] Seed = {async_task.seed}')
 
         apply_patch_settings(async_task)
 
-        print(f'[Parameters] CFG = {async_task.cfg_scale}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] CFG = {async_task.cfg_scale}')
 
         initial_latent = None
         denoising_strength = 1.0
@@ -1348,8 +1344,9 @@ def worker():
 
         async_task.steps, switch, width, height = apply_overrides(async_task, async_task.steps, height, width)
 
-        print(f'[Parameters] Sampler = {async_task.sampler_name} - {async_task.scheduler_name}')
-        print(f'[Parameters] Steps = {async_task.steps} - {switch}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Sampler = {async_task.sampler_name} - {async_task.scheduler_name}')
+            print(f'[Parameters] Steps = {async_task.steps} - {switch}')
 
         progressbar(async_task, current_progress, 'Initializing ...')
 
@@ -1359,6 +1356,20 @@ def worker():
                                                          base_model_additional_loras, async_task.image_number,
                                                          async_task.disable_seed_increment, use_expansion, use_style,
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
+
+        if async_task.task_class in flags.comfy_classes:
+            print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
+            if "flux_aio" in async_task.task_method and \
+                ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and len(async_task.cn_tasks[flags.cn_ip_face])==0) \
+                    or (async_task.current_tab in ['uov'] and not async_task.mixing_image_prompt_and_vary_upscale) \
+                    or (async_task.current_tab in ['inpaint'] and not async_task.mixing_image_prompt_and_inpaint) \
+                    or not async_task.input_image_checkbox ):
+                print(f'[TaskEngine] Clean the model cache in comfyd.')
+                comfyd.stop()
+            comfyd.start()
+        else:
+            print(f'[TaskEngine] Enable Fooocus backend.')
+            comfyd.stop()
 
         if len(goals) > 0:
             current_progress += 1
@@ -1607,14 +1618,11 @@ def worker():
                         async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
                     if 'cn' in goals:
                         async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
-                        if len(async_task.cn_tasks[flags.cn_ip_face])>0:
-                            denoising_strength = denoising_strength*0.8
-                    else:
+                    if async_task.task_class == 'Flux':
                         i2i_model_type = 2
-                        if async_task.task_class == 'Flux':
-                            async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
-                            async_task.params_backend['base_model_gguf'] = async_task.base_model_name
-                            async_task.cfg_scale = 30
+                        async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
+                        async_task.params_backend['base_model_gguf'] = async_task.base_model_name
+                        async_task.cfg_scale = 30
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
                         if async_task.task_class == 'Flux':
@@ -1631,7 +1639,7 @@ def worker():
                         async_task.params_backend['display_steps'] = async_task.steps
             async_task.params_backend['input_images'] = input_images
 
-        ldm_patched.modules.model_management.print_memory_info()
+        ldm_patched.modules.model_management.print_memory_info("begin to process_task")
 
         show_intermediate_results = len(tasks) > 1 or async_task.should_enhance
         persist_image = not async_task.should_enhance or not async_task.save_final_enhanced_image_only
@@ -1668,7 +1676,7 @@ def worker():
                 del task['c'], task['uc']  # Save memory
             execution_time = time.perf_counter() - execution_start_time
             print(f'Generating and saving time: {execution_time:.2f} seconds')
-            ldm_patched.modules.model_management.print_memory_info()
+            ldm_patched.modules.model_management.print_memory_info("process_task finished")
 
 
         if not async_task.should_enhance:

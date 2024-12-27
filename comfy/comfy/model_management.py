@@ -25,6 +25,7 @@ import sys
 import platform
 import weakref
 import gc
+import os
 
 class VRAMState(Enum):
     DISABLED = 0    #No vram present: no need to move models to vram
@@ -38,6 +39,7 @@ class CPUState(Enum):
     GPU = 0
     CPU = 1
     MPS = 2
+
 
 # Determine VRAM State
 vram_state = VRAMState.NORMAL_VRAM
@@ -97,6 +99,13 @@ def is_intel_xpu():
             return True
     return False
 
+def is_nvidia():
+    global cpu_state
+    if cpu_state == CPUState.GPU:
+        if torch.version.cuda:
+            return True
+    return False
+
 def get_torch_device():
     global directml_enabled
     global cpu_state
@@ -142,9 +151,50 @@ def get_total_memory(dev=None, torch_total_too=False):
     else:
         return mem_total
 
+def get_vram_info_by_nvml_for_nvidia():
+    from pynvml import (
+        nvmlInit,
+        nvmlDeviceGetHandleByIndex,
+        nvmlDeviceGetMemoryInfo,
+        nvmlDeviceGetComputeRunningProcesses,
+        nvmlShutdown,
+        NVMLError,
+    )
+
+    try:
+        nvmlInit()
+        if torch.cuda.is_available():
+            current_device_index = torch.cuda.current_device()
+        else:
+            raise RuntimeError("The current system has not detected any available GPU devices.")
+        handle = nvmlDeviceGetHandleByIndex(current_device_index)
+        memory_info = nvmlDeviceGetMemoryInfo(handle)
+        processes = nvmlDeviceGetComputeRunningProcesses(handle)
+        for proc in processes:
+            if proc.pid == os.getpid():
+                pid_used_vram = proc.usedGpuMemory
+        nvmlShutdown()
+        return memory_info, pid_used_vram
+    except NVMLError as error:
+        print(f"NVML error: {error}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+def print_vram_info_by_nvml(pos=None):
+    position = f'({pos})' if pos else ''
+    if is_nvidia():
+        memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
+        pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        used = f'{memory_info.used/1024/1024/1024:.3f}GB'
+        free = f'{memory_info.free/1024/1024/1024:.3f}GB'
+        logging.info(f'GPU memory{position}: pid_used={pid_used}, used={used}, free={free}')
+
 total_vram = get_total_memory(get_torch_device()) / (1024 * 1024)
 total_ram = psutil.virtual_memory().total / (1024 * 1024)
 #logging.info("Total VRAM {:0.0f} MB, total RAM {:0.0f} MB".format(total_vram, total_ram))
+print_vram_info_by_nvml()
 
 try:
     #logging.info("pytorch version: {}".format(torch_version))
@@ -181,13 +231,6 @@ else:
             pass
     except:
         XFORMERS_IS_AVAILABLE = False
-
-def is_nvidia():
-    global cpu_state
-    if cpu_state == CPUState.GPU:
-        if torch.version.cuda:
-            return True
-    return False
 
 ENABLE_PYTORCH_ATTENTION = False
 if args.use_pytorch_cross_attention:
@@ -273,7 +316,7 @@ def get_torch_device_name(device):
         return "CUDA {}: {}".format(device, torch.cuda.get_device_name(device))
 
 try:
-    logging.info("Device: {}".format(get_torch_device_name(get_torch_device())))
+    pass #logging.info("Device: {}".format(get_torch_device_name(get_torch_device())))
 except:
     logging.warning("Could not pick default device.")
 
@@ -1119,13 +1162,14 @@ def unload_and_free_everything():
     gc.collect()
     return
 
-def print_memory_info():
+def print_memory_info(pos=None):
     gpu_total, torch_total = get_total_memory(torch_total_too=True)
     free_total, free_torch = get_free_memory(torch_free_too=True)
     gpu_total = f'{gpu_total/1024/1024/1024:.3f}GB'
     torch_total = f'{torch_total/1024/1024/1024:.3f}GB'
     free_total = f'{free_total/1024/1024/1024:.3f}GB'
     free_torch = f'{free_torch/1024/1024/1024:.3f}GB'
+    position = f'({pos})' if pos else ''
     if is_nvidia():
         free_cuda, cuda_total = torch.cuda.mem_get_info()
         max_reserved = f'{torch.cuda.max_memory_reserved()/1024/1024/1024:.3f}GB'
@@ -1133,47 +1177,17 @@ def print_memory_info():
         reserved = f'{torch.cuda.memory_reserved()/1024/1024/1024:.3f}GB'
         free_cuda = f'{free_cuda/1024/1024/1024:.3f}GB'
         cuda_total = f'{cuda_total/1024/1024/1024:.3f}GB'
+        memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
+        pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
+        used = f'{memory_info.used/1024/1024/1024:.3f}GB'
+        pid_and_all_used = f'pid_used={pid_used}, used={used}, '
 
-        logging.info(f'GPU memory: max_reserved={max_reserved}, max_allocated={max_allocated}, reserved={reserved}, free={free_cuda}, free_torch={free_torch}, free_total={free_total}, gpu_total={gpu_total}, torch_total={torch_total}')
+        logging.info(f'GPU memory{position}: {pid_and_all_used if pid_and_all_used else ""}max_reserved={max_reserved}, max_allocated={max_allocated}, reserved={reserved}, free={free_cuda}, free_torch={free_torch}, free_total={free_total}, gpu_total={gpu_total}, torch_total={torch_total}')
         torch.cuda.reset_peak_memory_stats()
 
-def print_vram_info_by_nvml():
-    if is_nvidia():
-        memory_info = get_vram_info_by_nvml_for_nvidia()
-        used = f'{memory_info.used/1024/1024/1024:.3f}GB'
-        used = f'{memory_info.free/1024/1024/1024:.3f}GB'
-        logging.info(f'GPU memory: used={used}, free={free}')
-
-
 def get_free_memory_by_nvml_for_nvidia():
-    memory_info = get_vram_info_by_nvml_for_nvidia()
+    memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
     return memory_info.free
-
-def get_vram_info_by_nvml_for_nvidia():
-    from pynvml import (
-        nvmlInit,
-        nvmlDeviceGetHandleByIndex,
-        nvmlDeviceGetMemoryInfo,
-        nvmlShutdown,
-        NVMLError
-    )
-
-    try:
-        nvmlInit()
-        if torch.cuda.is_available():
-            current_device_index = torch.cuda.current_device()
-        else:
-            raise RuntimeError("The current system has not detected any available GPU devices.")
-        handle = nvmlDeviceGetHandleByIndex(current_device_index)
-        memory_info = nvmlDeviceGetMemoryInfo(handle)
-        nvmlShutdown()
-        return memory_info
-    except NVMLError as error:
-        print(f"NVML error: {error}")
-        return None
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
 
 def set_extra_reserved_vram(reserved):
     global EXTRA_RESERVED_VRAM, WINDOWS
@@ -1183,4 +1197,3 @@ def set_extra_reserved_vram(reserved):
     if reserved_vram > default_reserved:
         print(f'set EXTRA_RESERVED_VRAM={reserved_vram / (1024 * 1024)}MB')
         EXTRA_RESERVED_VRAM = reserved_vram
-    return

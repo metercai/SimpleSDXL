@@ -4,7 +4,7 @@ from PIL import Image
 
 import json, re, os, io, time
 
-import model_management
+import comfy.model_management as model_management
 import folder_paths
 from nodes import MAX_RESOLUTION
 from comfy.utils import common_upscale, ProgressBar

@@ -38,6 +38,7 @@ import folder_paths
 import latent_preview
 import node_helpers
 
+
 def before_node_execution():
     comfy.model_management.throw_exception_if_processing_interrupted()
 
@@ -2019,6 +2020,7 @@ def get_module_name(module_path: str) -> str:
 
 
 def load_custom_node(module_path: str, ignore=set(), module_parent="custom_nodes") -> bool:
+    #logging.info(f'load_custom_node:{module_path}')
     module_name = os.path.basename(module_path)
     if os.path.isfile(module_path):
         sp = os.path.splitext(module_path)
