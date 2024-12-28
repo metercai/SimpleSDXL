@@ -283,7 +283,7 @@ with shared.gradio_root:
                                 show_label=False, placeholder="Type prompt here or paste parameters.",
                                 elem_id="positive_prompt", container=False, autofocus=False, lines=4
                             )
-                            clear_prompt_btn = gr.Button(value="X", elem_classes=["clear-prompt-btn"], visible=True)
+                            clear_prompt_btn = gr.Button(value="x", elem_classes=["clear-prompt-btn"], visible=True)
                             prompt_token_counter = gr.HTML(
                                 visible=True, value=0, elem_classes=["tokenCounter"], elem_id="token_counter"
                             )
