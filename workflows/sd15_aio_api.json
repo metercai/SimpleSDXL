@@ -288,8 +288,8 @@
         3
       ],
       "latent_image": [
-        "2747",
-        4
+        "2969",
+        0
       ]
     },
     "class_type": "KSampler",
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 770373338639277,
+      "seed": 183955445533783,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -4221,7 +4221,10 @@
         "1609",
         4
       ],
-      "denoise": 0.4,
+      "denoise": [
+        "2970",
+        1
+      ],
       "model": [
         "1314",
         0
@@ -4295,7 +4298,10 @@
         "1609",
         4
       ],
-      "denoise": 0.5,
+      "denoise": [
+        "1663",
+        0
+      ],
       "model": [
         "936",
         0
@@ -5724,6 +5730,35 @@
       "a": [
         "2542",
         1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2969": {
+    "inputs": {
+      "pixels": [
+        "2802",
+        0
+      ],
+      "vae": [
+        "2759",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "2970": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "1648",
+        0
       ]
     },
     "class_type": "SimpleMath+",
