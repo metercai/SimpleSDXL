@@ -213,6 +213,13 @@ class AsyncTask:
         if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
         
+        if 'scene_frontend' in self.params_backend:
+            self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
+            self.image_number = self.params_backend.pop('scene_image_number')
+            self.scene_input_image1 = self.params_backend.pop('scene_input_image1')
+            self.scene_theme = self.params_backend.pop('scene_theme')
+            self.scene_frontend = self.params_backend.pop('scene_frontend')
+
 async_tasks = []
 
 
@@ -1515,6 +1522,9 @@ def worker():
             if async_task.layer_input_image is not None:
                 input_images = comfypipeline.ComfyInputImage([])
                 input_images.set_image('input_image', HWC3(async_task.layer_input_image))
+            if "scene_" in async_task.task_method:
+                input_images = comfypipeline.ComfyInputImage([])
+                input_images.set_image('i2i_ip_image1', HWC3(async_task.scene_input_image1))
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:
@@ -1558,7 +1568,7 @@ def worker():
                     for task in async_task.cn_tasks[flags.cn_ip_face]:
                         if i > 4:
                             break
-                        if 'inpaint' in goals:
+                        if 'inpaint' in goals and async_task.task_class == 'Flux':
                             cn_img, cn_stop, cn_weight = task
                             task = cn_img, cn_stop, cn_weight*2
                         push_cn_task(i, task, 4)

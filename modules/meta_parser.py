@@ -24,6 +24,7 @@ re_imagesize = re.compile(r"^(\d+)x(\d+)$")
 
 get_layout_visible = lambda x,y:gr.update(visible=x not in y)
 get_layout_visible_inter = lambda x,y,z:gr.update(visible=x not in y, interactive=x not in z)
+get_layout_invert_visible_inter = lambda x,y,z:gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=x not in z, visible=x not in y, interactive=x not in z)
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
 get_layout_setting_choices_visible_inter = lambda l,v,x,y,z:gr.update(choices=l, value=v, visible=x not in y, interactive=x not in z)
@@ -52,6 +53,10 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
         presetdata_dict = json.loads(presetdata)
     assert isinstance(presetdata_dict, dict)
     enginedata_dict = presetdata_dict.get('engine', {})
+    is_scene_frontend = 'scene_frontend' in enginedata_dict
+    if is_scene_frontend:
+        state_params.update({'scene_frontend': enginedata_dict['scene_frontend']})
+
     template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', 
         task_class_mapping[enginedata_dict.get('backend_engine', 'Fooocus')])))
     default_params = default_class_params[template_engine]
@@ -76,6 +81,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     engine_class_display = template_engine if template_engine in ['Flux', 'Kolors'] else 'SD15' if template_engine=='Comfy' else 'SDXL'
 
     results = [params_backend]
+    results.append(get_layout_invert_visible_inter('advanced_checkbox', visible, inter))
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
@@ -83,6 +89,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
         results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
     else:
         results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
+    results.append(get_layout_toggle_visible_inter('prompt_panel_checkbox', visible, inter))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_choices_visible_inter(base_model_list, 'base_model', visible, inter))
     results.append(get_layout_visible_inter('refiner_model', visible, inter))
@@ -113,6 +120,18 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("translation_methods"))
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] and task_method and '_aio' not in task_method else update_value_if_existed("input_image_checkbox"))
 
+    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, advanced_checkbox, scene_panel]
+    if is_scene_frontend:
+        results.append(gr.update(visible=False))
+        results.append(gr.update(value=True))
+        results.append(gr.update(value=False))
+        results.append(gr.update(visible=True))
+    else:
+        results.append(gr.update(visible=True))
+        results.append(gr.update(value=False))
+        results.append(gr.update(value=True))
+        results.append(gr.update(visible=False))
+
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
 
@@ -126,7 +145,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
    
-    results = [True] if len(loaded_parameter_dict) > 0 else [gr.update()]
+    results = [gr.update()] #[True] if len(loaded_parameter_dict) > 0 else [gr.update()]
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
@@ -156,8 +175,6 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
         results.append(gr.update())
     else:
         results.append(gr.update(visible=True))
-
-    results.append(gr.update(visible=False))
 
     get_freeu('freeu', 'FreeU', loaded_parameter_dict, results)
 

@@ -103,6 +103,21 @@ describe_type_photo = 'Photograph'
 describe_type_anime = 'Art/Anime'
 describe_types = [describe_type_photo, describe_type_anime]
 
+scene_themes = ["New Year's graffiti"] #, "Fireworks", "Year of the Snake Blessings"]
+scene_prompts = {
+    "New Year's graffiti": "Text titled \"Happy New Year\",\nDoodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moon, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, ",
+    } #"Fireworks": "",
+    #"Year of the Snake Blessings": "" }
+
+scene_aspect_ratios = ["Vertical|9:16", "Portrait|4:5", "Photo|4:3", "Landscape|3:2", "Widescreen|16:9", "Cinematic|21:9"]
+scene_aspect_ratios_size = {
+    "Vertical|9:16": '720×1280',
+    "Portrait|4:5": '1024×1280', 
+    "Photo|4:3": '1280×960', 
+    "Landscape|3:2": '1152×768', 
+    "Widescreen|16:9": '1280×720', 
+    "Cinematic|21:9": '1344×576' }
+
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
 COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ancestral_cfg_pp", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
