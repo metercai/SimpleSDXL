@@ -189,7 +189,7 @@ def print_vram_info_by_nvml(pos=None):
         if pid_used_vram:
             pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
         else:
-            pid_used = '-unknown-GB'
+            pid_used = '-unknown-'
         used = f'{memory_info.used/1024/1024/1024:.3f}GB'
         free = f'{memory_info.free/1024/1024/1024:.3f}GB'
         logging.info(f'GPU memory{position}: pid_used={pid_used}, used={used}, free={free}')
@@ -1184,7 +1184,7 @@ def print_memory_info(pos=None):
         if pid_used_vram:
             pid_used = f'{pid_used_vram/1024/1024/1024:.3f}GB'
         else:
-            pid_used = '-unknown-GB'
+            pid_used = '-unknown-'
         used = f'{memory_info.used/1024/1024/1024:.3f}GB'
         pid_and_all_used = f'pid_used={pid_used}, used={used}, '
 
