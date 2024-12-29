@@ -326,7 +326,7 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, request: gr.Request):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_aspect_ratio, scene_image_number):
     superprompter.remove_superprompt()
     remove_tokenizer()
     minicpm.free_model()
@@ -342,6 +342,15 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         hires_fix_blurred=hires_fix_blurred,
         reserved_vram=reserved_vram
         ))
+    
+    if 'scene_frontend' in state_params:
+        backend_params.update(dict(
+            scene_frontend=state_params['scene_frontend'],
+            scene_input_image1=scene_input_image1,
+            scene_theme=scene_theme,
+            scene_aspect_ratio=modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
+            scene_image_number=scene_image_number
+            ))
 
     if is_models_file_absent(state_params["__preset"], state_params["user_did"]):
         gr.Info(preset_downing_note_info)
@@ -349,9 +358,9 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
 
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=False)] * (preset_nums + 7)
+    results += [gr.update(interactive=False)] * (preset_nums + 6)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     # preset_store, identity_dialog
     results += [gr.update(visible=False)]*2
@@ -378,9 +387,9 @@ def process_after_generation(state_params):
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
-    # prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
+    # random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(state_params["__nav_name_list"].split(','))
-    results += [gr.update(interactive=True)] * (preset_nums + 7)
+    results += [gr.update(interactive=True)] * (preset_nums + 6)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     # [history_link, gallery_index_stat]
     results += [state_params['__finished_nums_pages']]

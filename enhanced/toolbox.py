@@ -273,7 +273,6 @@ def save_preset(*args):
     translation_methods = args.pop()
     input_image_checkbox = args.pop()
 
-    advanced_checkbox = args.pop()
     image_number = int(args.pop())
     prompt = args.pop()
     negative_prompt = args.pop()

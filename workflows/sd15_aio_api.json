@@ -100,8 +100,8 @@
         1
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ],
       "upscale_model": [
         "288",
@@ -240,8 +240,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -349,8 +349,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -445,7 +445,7 @@
         0
       ],
       "on_false": [
-        "2696",
+        "2678",
         0
       ]
     },
@@ -731,8 +731,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -747,8 +747,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -1075,7 +1075,7 @@
         0
       ],
       "on_false": [
-        "2696",
+        "2678",
         0
       ]
     },
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 183955445533783,
+      "seed": 729195309123522,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -2019,8 +2019,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -2827,8 +2827,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "easy pipeIn",
@@ -3264,8 +3264,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -4087,8 +4087,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -4103,8 +4103,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -4190,8 +4190,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -4267,8 +4267,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -4356,8 +4356,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -4385,8 +4385,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -4540,8 +4540,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4580,8 +4580,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4696,8 +4696,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4742,8 +4742,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4779,8 +4779,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4816,8 +4816,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4853,8 +4853,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4886,12 +4886,12 @@
         0
       ],
       "image": [
-        "2943",
+        "2979",
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4923,12 +4923,12 @@
         0
       ],
       "image": [
-        "2942",
+        "2978",
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4960,12 +4960,12 @@
         0
       ],
       "image": [
-        "2941",
+        "2977",
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4997,12 +4997,12 @@
         0
       ],
       "image": [
-        "2940",
+        "2976",
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -5038,8 +5038,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -5075,8 +5075,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -5112,8 +5112,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -5149,8 +5149,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -5350,58 +5350,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "2940": {
-    "inputs": {
-      "gamma": 5,
-      "image": [
-        "2841",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2941": {
-    "inputs": {
-      "gamma": 5,
-      "image": [
-        "2844",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2942": {
-    "inputs": {
-      "gamma": 5,
-      "image": [
-        "2845",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2943": {
-    "inputs": {
-      "gamma": 5,
-      "image": [
-        "2846",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
     }
   },
   "2945": {
@@ -5744,8 +5692,8 @@
         0
       ],
       "vae": [
-        "2759",
-        2
+        "2972",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -5764,6 +5712,104 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "2972": {
+    "inputs": {
+      "boolean": false,
+      "on_true": [
+        "2975",
+        0
+      ],
+      "on_false": [
+        "2759",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "is_custom_vae"
+    }
+  },
+  "2975": {
+    "inputs": {
+      "vae_name": "ponyDiffusionV6XL_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "vae_model"
+    }
+  },
+  "2976": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2841",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2977": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2844",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2978": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2845",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2979": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2846",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
     }
   }
 }

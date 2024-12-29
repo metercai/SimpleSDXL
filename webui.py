@@ -204,15 +204,22 @@ with shared.gradio_root:
                 with gr.Row(visible=False, elem_classes='preset_store') as preset_store:
                     preset_store_list = gr.Dataset(label="My candidate preset: Click on the candidate preset to append it to the navigation. If it is already on, it will be automatically removed.", components=[gallery_index_stat], samples=topbar.get_preset_samples(), visible=True, samples_per_page=48, type='index')
                 with gr.Row():
-                    progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
+                    with gr.Column(scale=2, visible=True):
+                        progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
                                             elem_classes=['main_view'], value="enhanced/attached/welcome.png")
-                    progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
+                        progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
-                progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
-                                    elem_id='progress-bar', elem_classes='progress-bar')
-                gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
+                        gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True )
+                    with gr.Column(scale=1, visible=False) as scene_panel:
+                        scene_input_image1 = grh.Image(label='Upload prompt image', source='upload', type='numpy', show_label=True, height=296)
+                        scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
+                        scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios, label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0])
+                        scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
+
+                progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
+                                    elem_id='progress-bar', elem_classes='progress-bar')
                 prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None, args_manager.args.theme), visible=False, elem_id='infobox', elem_classes='infobox')
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
@@ -298,7 +305,7 @@ with shared.gradio_root:
                         default_prompt = modules.config.default_prompt
                         if isinstance(default_prompt, str) and default_prompt != '':
                             shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
-                    with gr.Column(scale=2, min_width=0):
+                    with gr.Column(scale=2, min_width=0) as prompt_internal_panel:
                         random_button = gr.Button(value="RandomPrompt", elem_classes='type_row_third', size="sm", min_width = 70)
                         translator_button = gr.Button(value="Translator", elem_classes='type_row_third', size='sm', min_width = 70)
                         super_prompter = gr.Button(value="SuperPrompt", elem_classes='type_row_third', size="sm", min_width = 70)
@@ -1146,6 +1153,7 @@ with shared.gradio_root:
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
+            scene_params = [scene_input_image1, scene_theme, scene_aspect_ratio, scene_image_number]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram]
             
             language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1159,35 +1167,13 @@ with shared.gradio_root:
             #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
 
-        load_data_outputs = [advanced_checkbox, image_number, prompt, negative_prompt, style_selections,
+        load_data_outputs = [progress_window, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
                              overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
                              base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, vae_name,
                              seed_random, image_seed, inpaint_engine, inpaint_engine_state,
-                             inpaint_mode] + enhance_inpaint_mode_ctrls + [generate_button,
-                             load_parameter_button] + freeu_ctrls + lora_ctrls
-
-        if not args_manager.args.disable_preset_selection:
-            def preset_selection_change(preset, is_generating, inpaint_mode):
-                preset_content = modules.config.try_get_preset_content(preset) if preset != 'initial' else {}
-                preset_prepared = modules.meta_parser.parse_meta_from_preset(preset_content)
-
-                default_model = preset_prepared.get('base_model')
-                previous_default_models = preset_prepared.get('previous_default_models', [])
-                checkpoint_downloads = preset_prepared.get('checkpoint_downloads', {})
-                embeddings_downloads = preset_prepared.get('embeddings_downloads', {})
-                lora_downloads = preset_prepared.get('lora_downloads', {})
-                vae_downloads = preset_prepared.get('vae_downloads', {})
-
-                preset_prepared['base_model'], preset_prepared['checkpoint_downloads'] = topbar.download_models(
-                    default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads,
-                    vae_downloads)
-
-                if 'prompt' in preset_prepared and preset_prepared.get('prompt') == '':
-                    del preset_prepared['prompt']
-
-                return modules.meta_parser.load_parameter_button_click(json.dumps(preset_prepared), is_generating, inpaint_mode)
+                             inpaint_mode] + enhance_inpaint_mode_ctrls + [generate_button] + freeu_ctrls + lora_ctrls
 
 
         def inpaint_engine_state_change(inpaint_engine_version, *args):
@@ -1202,12 +1188,6 @@ with shared.gradio_root:
                     result.append(gr.update())
 
             return result
-
-        if not args_manager.args.disable_preset_selection:
-            preset_selection.change(preset_selection_change, inputs=[preset_selection, state_is_generating, inpaint_mode], outputs=load_data_outputs, queue=False, show_progress=True) \
-                .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
-                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
-                .then(inpaint_engine_state_change, inputs=[inpaint_engine_state] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
 
         performance_selection.change(lambda x: [gr.update(interactive=not flags.Performance.has_restricted_features(x))] * 11 +
                                                [gr.update(visible=not flags.Performance.has_restricted_features(x))] * 1 +
@@ -1330,8 +1310,6 @@ with shared.gradio_root:
         
         translator_button.click(lambda x, y: minicpm.translate(x, y), inputs=[prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
 
-        load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating, inpaint_mode], outputs=load_data_outputs, queue=False, show_progress=False)
-
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
@@ -1339,15 +1317,15 @@ with shared.gradio_root:
             return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
 
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
-        reset_preset_layout = [params_backend, performance_selection, scheduler_name, sampler_name, input_image_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
+        reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
-        protections = [prompt, random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
-        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [preset_store, identity_dialog], show_progress=False) \
+        protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
+        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps + scene_params, outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [preset_store, identity_dialog], show_progress=False) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
@@ -1403,6 +1381,18 @@ with shared.gradio_root:
             .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
             .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
+
+        def trigger_auto_describe_for_scene(img, scene_theme): 
+            styles = set()
+            describe_prompt = modules.flags.scene_prompts[scene_theme]
+            if MiniCPM.get_enable():
+                describe_prompt += minicpm.interrogate(img, False)
+                styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp", "Fooocus Masterpiece"])
+            return describe_prompt, list(styles)
+
+        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[scene_input_image1, scene_theme],
+                                   outputs=[prompt, style_selections], show_progress=True, queue=True)
+
         if args_manager.args.enable_auto_describe_image:
             def trigger_auto_describe(mode, img, prompt, apply_styles, output_chinese):
                 # keep prompt if not empty
@@ -1450,7 +1440,9 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
 
-    reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + load_data_outputs + after_identity
+    scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel]
+
+    reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
     reset_preset_inputs = [prompt, negative_prompt, state_topbar, state_is_generating, inpaint_mode, comfyd_active_checkbox]
 
