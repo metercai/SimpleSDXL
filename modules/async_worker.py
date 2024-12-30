@@ -1512,9 +1512,10 @@ def worker():
                 f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         callback_function = callback
-        i2i_uov_hires_fix_blurred = async_task.params_backend.pop('i2i_uov_hires_fix_blurred', 0.0)
-        i2i_uov_hires_fix_w = async_task.params_backend.pop('i2i_uov_hires_fix_w', 0.5)
-        i2i_uov_hires_fix_s = async_task.params_backend.pop('i2i_uov_hires_fix_s', 0.8)
+        i2i_uov_hires_fix_blurred = async_task.params_backend.pop('hires_fix_blurred', 0.0)
+        i2i_uov_hires_fix_w = async_task.params_backend.pop('hires_fix_weight', 0.5)
+        i2i_uov_hires_fix_s = async_task.params_backend.pop('hires_fix_stop', 0.8)
+
         if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
             #ldm_patched.modules.model_management.unload_and_free_everything()

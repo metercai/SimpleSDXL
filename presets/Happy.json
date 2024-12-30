@@ -53,7 +53,7 @@
         "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
 	"pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,clip_l.safetensors,246144152,0,",
-	"clip,clip_g.safetensors,1389382176,0,",
+	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
         "vae,ae.safetensors,335304388,0,",
 	"loras,flux_graffiti_v1.safetensors,612893792,0,",
