@@ -3,6 +3,7 @@ import json
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+import random
 
 import gradio as gr
 from PIL import Image
@@ -14,7 +15,7 @@ import shared
 
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
-from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256
+from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 
@@ -54,9 +55,6 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     assert isinstance(presetdata_dict, dict)
     enginedata_dict = presetdata_dict.get('engine', {})
     is_scene_frontend = 'scene_frontend' in enginedata_dict
-    if is_scene_frontend:
-        state_params.update({'scene_frontend': enginedata_dict['scene_frontend']})
-
     template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', 
         task_class_mapping[enginedata_dict.get('backend_engine', 'Fooocus')])))
     default_params = default_class_params[template_engine]
@@ -137,6 +135,18 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 
     return results
 
+def get_welcome_image(preset=None, is_mobile=False):
+    path_welcome = os.path.abspath(f'./enhanced/attached/')
+    if preset:
+        file_welcome = os.path.join(path_welcome, f'welcome_{preset}.jpg')
+        if os.path.exists(file_welcome):
+            return file_welcome
+    file_welcome = os.path.join(path_welcome, 'welcome.png')
+    file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
+    welcomes = [p for p in get_files_from_folder(path_welcome, ['.jpg', '.jpeg', 'png'], file_suffix, None) if not p.startswith('.')]
+    if len(welcomes)>0:
+        file_welcome = os.path.join(path_welcome, random.choice(welcomes))
+    return file_welcome
 
 
 def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, inpaint_mode: str):
@@ -145,7 +155,9 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
         loaded_parameter_dict = json.loads(raw_metadata)
     assert isinstance(loaded_parameter_dict, dict)
    
-    results = [gr.update()] #[True] if len(loaded_parameter_dict) > 0 else [gr.update()]
+    preset = loaded_parameter_dict.get("preset", None)
+    is_mobile = loaded_parameter_dict.get("is_mobile", False)
+    results = [gr.update(value=f'{get_welcome_image(preset, is_mobile)}', visible=True), gr.update(visible=False), gr.update(visible=False)] 
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)

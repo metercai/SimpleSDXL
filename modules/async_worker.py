@@ -902,7 +902,8 @@ def worker():
                 styles=task_styles
             ))
         
-        minicpm.free_model()
+        if async_task.task_class not in ['Kolors', 'HyDiT']:
+            minicpm.free_model()
         if async_task.task_class in ['Fooocus']:
             if advance_progress:
                 current_progress += 1
@@ -1316,6 +1317,8 @@ def worker():
 
         width, height = async_task.aspect_ratios_selection.replace('×', ' ').split(' ')[:2]
         width, height = int(width), int(height)
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Aspect Ratios = {width}×{height}')
 
         skip_prompt_processing = False
 
@@ -1744,10 +1747,11 @@ def worker():
                 is_last_enhance_for_image = (current_task_id + 1) % active_enhance_tabs == 0 and not enhance_uov_after
                 persist_image = not async_task.save_final_enhanced_image_only or is_last_enhance_for_image
 
-                enhance_mask_dino_prompt_text = minicpm.translate(enhance_mask_dino_prompt_text, async_task.translation_methods)
-                enhance_prompt = minicpm.translate(enhance_prompt, async_task.translation_methods)
-                enhance_negative_prompt = minicpm.translate(enhance_negative_prompt, async_task.translation_methods)
-                minicpm.free_model()
+                if async_task.task_class not in ['Kolors', 'HyDiT']:
+                    enhance_mask_dino_prompt_text = minicpm.translate(enhance_mask_dino_prompt_text, async_task.translation_methods)
+                    enhance_prompt = minicpm.translate(enhance_prompt, async_task.translation_methods)
+                    enhance_negative_prompt = minicpm.translate(enhance_negative_prompt, async_task.translation_methods)
+                    minicpm.free_model()
 
                 extras = {}
                 if enhance_mask_model == 'sam':

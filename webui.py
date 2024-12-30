@@ -205,15 +205,16 @@ with shared.gradio_root:
                     preset_store_list = gr.Dataset(label="My candidate preset: Click on the candidate preset to append it to the navigation. If it is already on, it will be automatically removed.", components=[gallery_index_stat], samples=topbar.get_preset_samples(), visible=True, samples_per_page=48, type='index')
                 with gr.Row():
                     with gr.Column(scale=2, visible=True):
-                        progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
+                        with gr.Row():
+                            progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
                                             elem_classes=['main_view'], value="enhanced/attached/welcome.png")
-                        progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
+                            progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
-                        gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
+                            gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True )
                     with gr.Column(scale=1, visible=False) as scene_panel:
-                        scene_input_image1 = grh.Image(label='Upload prompt image', source='upload', type='numpy', show_label=True, height=296)
+                        scene_input_image1 = grh.Image(label='Upload prompt image', source='upload', type='numpy', show_label=True, height=294)
                         scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios, label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
@@ -1167,7 +1168,7 @@ with shared.gradio_root:
             #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
 
-        load_data_outputs = [progress_window, image_number, prompt, negative_prompt, style_selections,
+        load_data_outputs = [progress_window, progress_gallery, gallery, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
                              overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
@@ -1386,8 +1387,8 @@ with shared.gradio_root:
             styles = set()
             describe_prompt = modules.flags.scene_prompts[scene_theme]
             if MiniCPM.get_enable():
-                describe_prompt += minicpm.interrogate(img, False)
-                styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp", "Fooocus Masterpiece"])
+                describe_prompt += minicpm.interrogate(img, '(中)' in scene_theme)
+                styles.update([])
             return describe_prompt, list(styles)
 
         scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[scene_input_image1, scene_theme],
