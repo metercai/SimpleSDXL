@@ -39,9 +39,8 @@
     "default_scheduler": "karras",
     "default_performance": "Speed",
     "default_styles": [
-        "Fooocus Negative"
+        "SAI Sd15"
     ],
-    "default_styles": [],
     "default_aspect_ratio": "1280*960",
     "default_overwrite_step": 30,
     "checkpoint_downloads": {},

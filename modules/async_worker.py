@@ -920,7 +920,6 @@ def worker():
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):
-
                 progressbar(async_task, current_progress, f'Preparing Fooocus text #{i + 1} ...')
                 expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
                 print(f'[Prompt Expansion] {expansion}')
@@ -1469,14 +1468,16 @@ def worker():
 
         all_steps = max(all_steps, 1)
 
-        print(f'[Parameters] Denoising Strength = {denoising_strength}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Denoising Strength = {denoising_strength}')
 
         if isinstance(initial_latent, dict) and 'samples' in initial_latent:
             log_shape = initial_latent['samples'].shape
         else:
             log_shape = f'Image Space {(height, width)}'
 
-        print(f'[Parameters] Initial Latent shape: {log_shape}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Initial Latent shape: {log_shape}')
 
         preparation_time = time.perf_counter() - preparation_start_time
         print(f'Preparation time: {preparation_time:.2f} seconds')
