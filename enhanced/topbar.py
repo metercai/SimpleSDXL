@@ -30,6 +30,7 @@ from modules.model_loader import load_file_from_url, presets_model_list, refresh
 from modules.private_logger import get_current_html_path
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 from enhanced.minicpm import minicpm
+from modules.meta_parser import get_welcome_image
 
 # app context
 nav_name_list = ''
@@ -42,14 +43,6 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
-def get_welcome_image(is_mobile=False):
-    path_welcome = os.path.abspath(f'./enhanced/attached/')
-    file_welcome = os.path.join(path_welcome, 'welcome.png')
-    file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
-    welcomes = [p for p in util.get_files_from_folder(path_welcome, ['.jpg', '.jpeg', 'png'], file_suffix, None) if not p.startswith('.')]
-    if len(welcomes)>0:
-        file_welcome = random.choice(welcomes)
-    return file_welcome
 
 def get_preset_name_list(user_did=None):
 
@@ -281,7 +274,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"__nav_name_list": get_preset_name_list(user_did)})
     state_params.update({"preset_store": False})
     state_params.update({"engine": 'Fooocus'})
-    results = [gr.update(value=f'enhanced/attached/{get_welcome_image(state_params["__is_mobile"])}')]
+    results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_advanced_masking_checkbox)]
     preset = 'default'
@@ -441,10 +434,20 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
 
     config_preset = config.try_get_preset_content(preset)
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    preset_prepared.update({
+        'preset': preset,
+        'is_mobile': state_params["__is_mobile"] })
+    
     #print(f'preset_prepared:{preset_prepared}')
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
+    scene_frontend = preset_prepared.get('engine', {}).get('scene_frontend', None)
+    if scene_frontend:
+        state_params.update({"scene_frontend": scene_frontend})
+    else:
+        if 'scene_frontend' in state_params:
+            del state_params["scene_frontend"]
 
     task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
     state_params.update({"task_method": task_method})
