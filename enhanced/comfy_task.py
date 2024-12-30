@@ -169,6 +169,9 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     elif task_name == 'Flux':
         base_model = default_params['base_model']
         clip_model = '' if 'clip_model' not in default_params else default_params['clip_model']
+        if 'scene_' in task_method:
+            return ComfyTask(task_method, comfy_params, input_images)
+
         if '_aio' in task_method:
             total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
