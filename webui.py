@@ -55,7 +55,7 @@ def generate_clicked(task: worker.AsyncTask):
     finished = False
 
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
-        gr.update(visible=True, value=None), \
+        gr.update(visible=True, value="enhanced/attached/welcome.png"), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
 
@@ -214,7 +214,7 @@ with shared.gradio_root:
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True )
                     with gr.Column(scale=1, visible=False) as scene_panel:
-                        scene_input_image1 = grh.Image(label='Upload prompt image', source='upload', type='numpy', show_label=True, height=294)
+                        scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=294)
                         scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios, label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)

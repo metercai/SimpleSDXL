@@ -112,12 +112,12 @@ scene_prompts = {
 
 scene_aspect_ratios = ["Vertical|9:16", "Portrait|4:5", "Photo|4:3", "Landscape|3:2", "Widescreen|16:9", "Cinematic|21:9"]
 scene_aspect_ratios_size = {
-    "Vertical|9:16": '720×1280',
-    "Portrait|4:5": '1024×1280', 
-    "Photo|4:3": '1280×960', 
-    "Landscape|3:2": '1152×768', 
-    "Widescreen|16:9": '1280×720', 
-    "Cinematic|21:9": '1344×576' }
+    "Vertical|9:16": '576×1024',
+    "Portrait|4:5": '864×1080', 
+    "Photo|4:3": '1024×768', 
+    "Landscape|3:2": '1080×720', 
+    "Widescreen|16:9": '1024×576', 
+    "Cinematic|21:9": '1260×540' }
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 

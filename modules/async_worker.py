@@ -920,7 +920,6 @@ def worker():
             if advance_progress:
                 current_progress += 1
             for i, t in enumerate(tasks):
-
                 progressbar(async_task, current_progress, f'Preparing Fooocus text #{i + 1} ...')
                 expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
                 print(f'[Prompt Expansion] {expansion}')
@@ -1469,14 +1468,16 @@ def worker():
 
         all_steps = max(all_steps, 1)
 
-        print(f'[Parameters] Denoising Strength = {denoising_strength}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Denoising Strength = {denoising_strength}')
 
         if isinstance(initial_latent, dict) and 'samples' in initial_latent:
             log_shape = initial_latent['samples'].shape
         else:
             log_shape = f'Image Space {(height, width)}'
 
-        print(f'[Parameters] Initial Latent shape: {log_shape}')
+        if async_task.task_class in ['Fooocus']:
+            print(f'[Parameters] Initial Latent shape: {log_shape}')
 
         preparation_time = time.perf_counter() - preparation_start_time
         print(f'Preparation time: {preparation_time:.2f} seconds')
@@ -1511,9 +1512,10 @@ def worker():
                 f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         callback_function = callback
-        i2i_uov_hires_fix_blurred = async_task.params_backend.pop('i2i_uov_hires_fix_blurred', 0.0)
-        i2i_uov_hires_fix_w = async_task.params_backend.pop('i2i_uov_hires_fix_w', 0.5)
-        i2i_uov_hires_fix_s = async_task.params_backend.pop('i2i_uov_hires_fix_s', 0.8)
+        i2i_uov_hires_fix_blurred = async_task.params_backend.pop('hires_fix_blurred', 0.0)
+        i2i_uov_hires_fix_w = async_task.params_backend.pop('hires_fix_weight', 0.5)
+        i2i_uov_hires_fix_s = async_task.params_backend.pop('hires_fix_stop', 0.8)
+
         if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
             #ldm_patched.modules.model_management.unload_and_free_everything()
