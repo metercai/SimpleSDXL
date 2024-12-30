@@ -6,7 +6,7 @@
 	"disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
 	"available_aspect_ratios_selection": "Flux",
 	"backend_params": {
-	    "task_method": "flux_aio"
+	    "task_method": "scene_happy"
 	    }
     	},
     "default_model": "flux-hyp8-Q5_K_M.gguf",
