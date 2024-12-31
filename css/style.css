@@ -447,6 +447,10 @@ div:has(> #positive_prompt) {
   background: none;
 }
 
+.download-button {
+    display: none !important;
+}
+
 .systemMsg {
     position: absolute;
     z-index: 1002;
@@ -827,7 +831,7 @@ div.prose.tokenCounter {
 
 .prompt-container:hover .clear-prompt-btn,
 .clear-prompt-btn:hover {
-  opacity: 0.8;
+  opacity: 0.6;
   visibility: visible;
 }
 

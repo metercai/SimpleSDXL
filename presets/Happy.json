@@ -42,7 +42,7 @@
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
     "default_image_number": 1,
-    "default_overwrite_step": 20,
+    "default_overwrite_step": 10,
     "default_prompt": "",
     "default_prompt_negative": "",
     "checkpoint_downloads": {},

@@ -271,7 +271,7 @@
         9
       ],
       "model": [
-        "63",
+        "97",
         0
       ],
       "positive": [
@@ -343,6 +343,61 @@
     "class_type": "PulidFluxInsightFaceLoader",
     "_meta": {
       "title": "Load InsightFace (PuLID Flux)"
+    }
+  },
+  "97": {
+    "inputs": {
+      "boolean": [
+        "100",
+        0
+      ],
+      "on_true": [
+        "63",
+        0
+      ],
+      "on_false": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "98": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "i2i_ip_fn1"
+    }
+  },
+  "100": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "98",
+        0
+      ],
+      "b": [
+        "101",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "101": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
     }
   }
 }

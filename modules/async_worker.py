@@ -190,22 +190,28 @@ class AsyncTask:
             self.task_name = 'default'
             self.task_method = self.layer_method
         self.task_class_full = task_class_mapping[self.task_class]
-        if self.task_class not in ['Fooocus'] and shared.token.is_guest(self.user_did):
-            print(f'[TaskEngine] This preset requires identity binding before it will run. Please complete the identity binding first./这个预置包需要绑定身份后才能正常运>行,请先完成身份绑定. ')
 
         if self.task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x'] and self.task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
-            if self.task_name in ['Kolors', 'Flux']:
-                self.params_backend.update({
-                    "lora_1": self.loras[0][0],
-                    "lora_1_strength": self.loras[0][1],
-                    })
-            if len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method):
-                self.params_backend.update({
-                    "lora_2": self.loras[1][0],
-                    "lora_2_strength": self.loras[1][1],
-                    })
+            if '_aio' in self.task_method:
+                for i, (lora_name, lora_strength) in enumerate(self.loras):
+                    self.params_backend.update({
+                        f"lora_{i}": lora_name,
+                        f"lora_{i}_strength": lora_strength,
+                        })
+            else:
+                if self.task_name in ['Kolors', 'Flux']:
+                    self.params_backend.update({
+                        "lora_1": self.loras[0][0],
+                        "lora_1_strength": self.loras[0][1],
+                        })
+                if len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method):
+                    self.params_backend.update({
+                        "lora_2": self.loras[1][0],
+                        "lora_2_strength": self.loras[1][1],
+                        })
+
         ui_options = {
             'iclight_enable': self.iclight_enable,
             'iclight_source_radio': self.iclight_source_radio,
@@ -1367,7 +1373,7 @@ def worker():
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
 
         if async_task.task_class in flags.comfy_classes:
-            print(f'[TaskEngine] Enable Comfyd backend. current_tab={async_task.current_tab}')
+            print(f'[TaskEngine] Enable Comfyd backend.')
             if "flux_aio" in async_task.task_method and \
                 ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and len(async_task.cn_tasks[flags.cn_ip_face])==0) \
                     or (async_task.current_tab in ['uov'] and not async_task.mixing_image_prompt_and_vary_upscale) \
