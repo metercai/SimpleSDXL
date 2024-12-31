@@ -103,7 +103,9 @@ class MiniCPM:
         ldm_patched.modules.model_management.print_memory_info("after minicpm inference")
         return generated_text
 
-    def interrogate(self, image, output_chinese=False):
+    def interrogate(self, image, output_chinese=False, prompt=None):
+        if prompt is not None:
+            return self.inference(image, prompt)
         if output_chinese:
             return self.inference(image, MiniCPM.prompt_i2t_chinese)
         else:
