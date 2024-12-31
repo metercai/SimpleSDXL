@@ -103,7 +103,7 @@ describe_type_photo = 'Photograph'
 describe_type_anime = 'Art/Anime'
 describe_types = [describe_type_photo, describe_type_anime]
 
-scene_themes = ["New Year's graffiti", "新年涂鸦(中)"] #, "Fireworks", "Year of the Snake Blessings"]
+scene_themes = ["New Year's graffiti"] #, "Fireworks", "Year of the Snake Blessings"]
 scene_prompts = {
     "New Year's graffiti": "Text titled \"Happy New Year\",\nDoodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moon, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, ",
     "新年涂鸦(中)": "标题文本为\"Happy New Year\",\nKeith Haring的涂鸦风格，可爱，马克笔插图，MBE插图，星星，月亮，粗线条，垃圾美学风格，混合的图案，包含文字和表情符,",

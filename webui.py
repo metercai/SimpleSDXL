@@ -207,7 +207,7 @@ with shared.gradio_root:
                     with gr.Column(scale=2, visible=True):
                         with gr.Row():
                             progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
-                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png")
+                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png", interactive=False)
                             progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                             gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
@@ -1387,7 +1387,14 @@ with shared.gradio_root:
             styles = set()
             describe_prompt = modules.flags.scene_prompts[scene_theme]
             if MiniCPM.get_enable():
-                describe_prompt += minicpm.interrogate(img, '(中)' in scene_theme)
+                happ_new_year_prompt = "The title is \"Happy New Year\". Please provide a detailed description of this picture, but do not describe the style of the picture. Please add some New Year elements, such as red, fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words."
+                describe_prompt += minicpm.interrogate(img, prompt=happ_new_year_prompt)
+                styles.update([])
+            else:
+                from extras.interrogate import default_interrogator as default_interrogator_photo
+                describe_prompt += default_interrogator_photo(img)
+                from extras.wd14tagger import default_interrogator as default_interrogator_anime
+                describe_prompt += default_interrogator_anime(img)
                 styles.update([])
             return describe_prompt, list(styles)
 
