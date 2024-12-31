@@ -197,8 +197,8 @@ class AsyncTask:
             if '_aio' in self.task_method:
                 for i, (lora_name, lora_strength) in enumerate(self.loras):
                     self.params_backend.update({
-                        f"lora_{i}": lora_name,
-                        f"lora_{i}_strength": lora_strength,
+                        f"lora_{i+1}": lora_name,
+                        f"lora_{i+1}_strength": lora_strength,
                         })
             else:
                 if self.task_name in ['Kolors', 'Flux']:
