@@ -1084,18 +1084,23 @@ with shared.gradio_root:
                     binding_id_button = gr.Button(value='IdentityCenter', visible=True, elem_id="identity_center")
                     identity_introduce = gr.HTML(visible=True, value=topbar.identity_introduce, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
                     with gr.Group(visible=False) as admin_panel:
-                        admin_link = gr.HTML(elem_classes=["identityIntroduce"])
-                        comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=not args_manager.args.disable_comfyd, info='Enabling will improve execution speed but occupy some memory.')
                         with gr.Row():
-                            fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=False, info='Effective for some Nvidia cards.')
-                            reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=0)
-                        minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=False, info='Activate MiniCPMv26 to describe image, translate and expand prompt.')
+                            admin_link = gr.HTML(elem_classes=["htmlcontent"])
+                            admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
+                        with gr.Row():
+                            comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
+                            fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=modules.config.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
+                        with gr.Row():
+                            reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=modules.config.get_admin_default('reserved_vram'))
+                            minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=modules.config.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
+                        with gr.Row():
+                            advanced_logs = gr.Checkbox(label='Enable advanced logs', value=modules.config.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
                     with gr.Group(visible=False) as user_panel:
                         prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
+                        mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
                         image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
                         backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
                         translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
-                        mobile_link = gr.HTML(elem_classes=["identityIntroduce"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
 
                         def sync_params_backend(key, v, params):
                             params.update({key:v})
@@ -1110,6 +1115,10 @@ with shared.gradio_root:
                         fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=fast_comfyd_checkbox)
                         minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=describe_output_chinese, queue=False, show_progress=False)
                         reserved_vram.change(lambda x,y: sync_params_backend('reserved_vram',x,y), inputs=[reserved_vram, params_backend])
+                        advanced_logs.change(simpleai.change_advanced_logs, inputs=advanced_logs)
+
+                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
+                        admin_save_button.click(topbar.admin_save_to_default, inputs=[state_topbar] + admin_ctrls, outputs=admin_save_button, queue=False, show_progress=False)
 
                         # custom plugin "OneButtonPrompt"
                         import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
@@ -1168,7 +1177,7 @@ with shared.gradio_root:
             #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
 
-        load_data_outputs = [progress_window, progress_gallery, gallery, image_number, prompt, negative_prompt, style_selections,
+        load_data_outputs = [progress_window, progress_gallery, gallery, gallery_index, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
                              overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
@@ -1320,8 +1329,9 @@ with shared.gradio_root:
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
+        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel]
 
-        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + load_data_outputs, queue=False, show_progress=True) \
+        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
@@ -1429,7 +1439,7 @@ with shared.gradio_root:
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}')
     
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
-    params_note_regen_button.click(toolbox.reset_image_params, inputs=[state_topbar, state_is_generating, inpaint_mode], outputs=reset_preset_layout + reset_preset_func + load_data_outputs + [params_note_regen_button, params_note_box], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_image_params, inputs=[state_topbar, state_is_generating, inpaint_mode], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + [params_note_regen_button, params_note_box], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box], show_progress=False)
     params_note_preset_button.click(toolbox.save_preset, inputs=[params_note_input_name, params_backend, state_topbar] + reset_preset_func + load_data_outputs, outputs=[params_note_input_name, params_note_preset_button, params_note_box, preset_store_list] + nav_bars + [system_params], show_progress=False) \
@@ -1448,8 +1458,6 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
 
-    scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel]
-
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
     reset_preset_inputs = [prompt, negative_prompt, state_topbar, state_is_generating, inpaint_mode, comfyd_active_checkbox]
@@ -1464,7 +1472,7 @@ with shared.gradio_root:
 
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=state_topbar, outputs=[progress_window, language_ui, background_theme, inpaint_advanced_masking_checkbox, preset_instruction, params_backend], show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction] + admin_ctrls, show_progress=False) \
                       .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
                       .then(topbar.sync_message, inputs=state_topbar) \

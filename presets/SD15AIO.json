@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Comfy",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["enhance_checkbox", "performance_selection", "loras-2", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
+	"disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "sd15_aio"
