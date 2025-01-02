@@ -273,6 +273,11 @@ def save_preset(*args):
     translation_methods = args.pop()
     input_image_checkbox = args.pop()
 
+    progress_window = args.pop()
+    progress_gallery = args.pop()
+    gallery = args.pop()
+    gallery_index = args.pop()
+
     image_number = int(args.pop())
     prompt = args.pop()
     negative_prompt = args.pop()
@@ -304,10 +309,9 @@ def save_preset(*args):
     inpaint_mode = args.pop()
     enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
     generate_button = args.pop()
-    load_parameter_button = args.pop()
     freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
     loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
-    
+    loras = [[n, w] for (f, n, w) in loras]
 
     if name:
         preset = {}

@@ -78,6 +78,13 @@ def start_fast_comfyd(fast):
     else:
         comfyd.start(args_patch=[[]], force=True)
 
+def change_advanced_logs(advanced_logs):
+    if advanced_logs:
+        utils.echo_off = False
+    else:
+        utils.echo_off = True
+
+
 identity_note = '用昵称+手机号组成的可信数字身份绑定本机节点，即可享有个性化及高级服务，首个绑定身份还将拥有超级管理权限。若已有身份二维码，可用其快速安全地导入身份。'
 identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，以及离线和漫游场景，导出后请妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'

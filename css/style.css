@@ -572,12 +572,15 @@ div.prose.tokenCounter {
   width: auto;
   padding: 8px 8px;
   opacity: 1;
-  /*color: var(--neutral-100);
-  background-color: var(--secondary-400);*/
   border-radius: var(--radius-md);
-  /*font-size: 1.6em !important; */
 }
 
+.htmlcontent {
+  width: auto;
+  padding: 4px 8px;
+  opacity: 1;
+  border-radius: var(--radius-md);
+}
 
 .toolbox {
     height: auto;

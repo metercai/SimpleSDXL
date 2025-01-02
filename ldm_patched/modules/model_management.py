@@ -146,6 +146,7 @@ def get_vram_info_by_nvml_for_nvidia():
         handle = nvmlDeviceGetHandleByIndex(current_device_index)
         memory_info = nvmlDeviceGetMemoryInfo(handle)
         processes = nvmlDeviceGetComputeRunningProcesses(handle)
+        pid_used_vram = None
         for proc in processes:
             if proc.pid == os.getpid():
                 pid_used_vram = proc.usedGpuMemory
@@ -153,10 +154,10 @@ def get_vram_info_by_nvml_for_nvidia():
         return memory_info, pid_used_vram
     except NVMLError as error:
         print(f"NVML error: {error}")
-        return None
+        return None, None
     except Exception as e:
         print(f"Error: {e}")
-        return None
+        return None, None
 
 def print_vram_info_by_nvml(pos=None):
     position = f'({pos})' if pos else ''

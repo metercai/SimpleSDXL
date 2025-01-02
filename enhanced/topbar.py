@@ -2,35 +2,36 @@ import os
 import json
 import hashlib
 import gradio as gr
-import modules.util as util
-import modules.config as config
-import modules.flags
-import modules.sdxl_styles
 import numbers
 import copy
 import re
 import args_manager
 import random
-import modules.constants as constants
-import modules.meta_parser as meta_parser
-import enhanced.all_parameters as ads
-import modules.sdxl_styles as sdxl_styles
-import modules.style_sorter as style_sorter
-import enhanced.gallery as gallery_util
-import enhanced.superprompter as superprompter
-import enhanced.comfy_task as comfy_task
-import shared
 import cv2
 import numpy as np
 import base64
+import shared
+import modules.util as util
+import modules.config as config
+import modules.flags
+import modules.sdxl_styles
+import modules.constants as constants
+import modules.meta_parser as meta_parser
+import modules.sdxl_styles as sdxl_styles
+import modules.style_sorter as style_sorter
+import enhanced.all_parameters as ads
+import enhanced.gallery as gallery_util
+import enhanced.superprompter as superprompter
+import enhanced.comfy_task as comfy_task
 import ldm_patched.modules.model_management
 
-from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
+from datetime import datetime
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
-from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
-from enhanced.minicpm import minicpm
 from modules.meta_parser import get_welcome_image
+from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
+from enhanced.minicpm import minicpm
+from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
 # app context
 nav_name_list = ''
@@ -209,10 +210,11 @@ function(system_params) {
 }
 '''
 
-def init_nav_bars(state_params, request: gr.Request):
+def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, request: gr.Request):
     #print(f'request.headers:{request.headers}')
     #print(f'request.client:{request.client}')
-
+    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
+    
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
@@ -223,7 +225,8 @@ def init_nav_bars(state_params, request: gr.Request):
         state_params.update({"__theme": args_manager.args.theme})
     if "__preset" not in state_params.keys():
         state_params.update({"__preset": config.preset})
-    ua_hash = hashlib.sha256(request.headers["user-agent"].encode('utf-8')).hexdigest()
+    user_agent = request.headers["user-agent"]
+    ua_hash = hashlib.sha256(user_agent.encode('utf-8')).hexdigest()
     ua_session = gen_ua_session(request.client["host"], str(request.client["port"]), request.headers["user-agent"])
     state_params.update({"ua_hash": ua_hash})
     state_params.update({"ua_session": ua_session})
@@ -247,9 +250,7 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"user_did": user_did})
     state_params.update({"user_name":  shared.token.get_user_context(user_did).get_nickname()})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
-    #state_params.update({"user_qr":  "" if shared.token.is_guest(user_did) else export_user_qrcode_svg(user_did)})
 
-    user_agent = request.headers["user-agent"]
     if "__is_mobile" not in state_params.keys():
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
     if "__webpath" not in state_params.keys():
@@ -261,11 +262,6 @@ def init_nav_bars(state_params, request: gr.Request):
             state_params.update({"__max_per_page": 18})
     if "__max_catalog" not in state_params.keys():
         state_params.update({"__max_catalog": config.default_image_catalog_max_number })
-    #max_per_page = state_params["__max_per_page"]
-    #max_catalog = state_params["__max_catalog"]
-    #output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
-    #state_params.update({"__output_list": output_list})
-    #state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     state_params.update({"infobox_state": 0})
     state_params.update({"note_box_state": ['',0,0]})
     state_params.update({"array_wildcards_mode": '['})
@@ -276,18 +272,12 @@ def init_nav_bars(state_params, request: gr.Request):
     state_params.update({"engine": 'Fooocus'})
     results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
-    results += [gr.update(value=False if state_params["__is_mobile"] else config.default_inpaint_advanced_masking_checkbox)]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
     results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
-    params_backend = dict(
-            nickname=state_params["user_name"],
-            user_did=user_did,
-            translation_methods=config.default_translation_methods,
-            backfill_prompt=config.default_backfill_prompt,
-            comfyd_active_checkbox=config.default_comfyd_active_checkbox)
-    results += [params_backend] 
+    results += get_all_admin_default(admin_currunt_value)
+
     return results
 
 def get_preset_inc_url(preset_name='blank'):
@@ -432,7 +422,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
 
     state_params.update({"__preset": preset})
 
-    config_preset = config.try_get_preset_content(preset)
+    config_preset = config.try_get_preset_content(preset, state_params["user_did"])
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
     preset_prepared.update({
         'preset': preset,
@@ -629,7 +619,7 @@ identity_introduce = '''
 3，解锁MiniCPM，升级更高级的反推/翻译/扩写服务。<br>
 4，对本节点的其他身份进行管理(计划)。<br>
 5，申请预置包发布和二次打包的授权标识(计划)。<br>
-对4和5有需求的可以入QQ群:938075852 进行交流。<br>
+关注计划中需求的可以入QQ群:938075852 进行交流。<br>
 <br>
 系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
 '''
@@ -705,6 +695,36 @@ def update_upscale_size_of_image(image, uov_method):
 
     return f'{W} x {H} | {width} x {height}'
 
+
+def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs):
+    set_admin_default_value = lambda x,y,s: shared.token.set_local_vars(f'admin_{x}', str(y), s["__session"], s["ua_hash"])
+    
+    set_admin_default_value('comfyd_active_checkbox', comfyd_active_checkbox, state)
+    set_admin_default_value('fast_comfyd_checkbox', fast_comfyd_checkbox, state)
+    set_admin_default_value('reserved_vram', reserved_vram, state)
+    set_admin_default_value('minicpm_checkbox', minicpm_checkbox, state)
+    set_admin_default_value('advanced_logs', advanced_logs, state)
+
+    current_time = datetime.now().strftime("%H:%M:%S")
+    admin_save_title = 'Save default of system' if state["__lang"]!='cn' else '保存系统默认值'
+    print(f'[Topbar] Save admin config to default: {current_time}')
+    return f'{admin_save_title}({current_time})'
+
+
+def get_all_admin_default(currunt_value):
+    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs']
+    result = []
+    for i, admin_key in enumerate(admin_keys): 
+        admin_value = config.get_admin_default(admin_key)
+        if admin_value == 'None':
+            result.append(gr.update(interactive=False))
+            continue
+        if admin_value == currunt_value[i]:
+            result.append(gr.update())
+        else:
+            result.append(gr.update(interactive=True, value=admin_value))
+
+    return result
 
 from transformers import CLIPTokenizer
 import shutil

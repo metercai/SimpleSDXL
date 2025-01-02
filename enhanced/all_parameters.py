@@ -99,7 +99,11 @@ default = {
     'image_catalog_max_number': 65,
     'clip_skip': 2,
     'vae': 'Default (model)',
-    'developer_debug_mode_checkbox': True
+    'developer_debug_mode_checkbox': True,
+    'fast_comfyd_checkbox': False,
+    'reserved_vram': 0,
+    'minicpm_checkbox': False,
+    'advanced_logs': False
     }
 
 
