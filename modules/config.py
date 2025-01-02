@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import math
 import numbers
@@ -118,10 +119,15 @@ def update_presets():
     global available_presets
     available_presets = get_presets()
 
-def try_get_preset_content(preset):
+def try_get_preset_content(preset, user_did=None):
     if isinstance(preset, str):
-        preset_path = os.path.abspath(f'./presets/{preset}.json')
         try:
+            if preset.endswith('.'):
+                if user_did is None:
+                    user_did=shared.token.get_guest_did()
+                preset_path = os.path.join(get_path_in_user_dir(user_did, 'presets'), f'{preset}json')
+            else:
+                preset_path = os.path.join(os.path.abspath(f'./presets/'), f'{preset}.json')
             if os.path.exists(preset_path):
                 with open(preset_path, "r", encoding="utf-8") as json_file:
                     json_content = json.load(json_file)
@@ -252,7 +258,7 @@ model_cata_map = {
     'style_models': [path_style_models]
     }
 
-from enhanced.simpleai import init_modelsinfo
+from enhanced.simpleai import init_modelsinfo, get_path_in_user_dir
 modelsinfo = init_modelsinfo(path_models_root, model_cata_map)
 
 shared.path_userhome = path_userhome
@@ -954,6 +960,25 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
                       'and there is no "," before the last "}". \n\n\n')
     json.dump({k: config_dict[k] for k in visited_keys}, json_file, indent=4)
 
+
+
+def get_admin_default(admin_key):
+    bool_map = {
+        "true": True,
+        "false": False
+    }
+    int_pattern = r"^[+-]?\d+$"
+    admin_value = shared.token.get_local_admin_vars(admin_key).strip()
+    if admin_value.lower() in bool_map:
+        admin_value = bool_map[admin_value.lower()]
+    elif re.match(int_pattern, admin_value):
+        admin_value = int(admin_value)
+    elif admin_value == 'None':
+        admin_value = None
+    return admin_value
+
+
+# config model path for comfyd
 config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
 config_comfy_formatted_text = '''
 comfyui:
@@ -1001,17 +1026,6 @@ config_comfy_text = config_comfy_formatted_text.format(
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
 
-
-#config_controlnet_aux_path = os.path.join(shared.root, 'comfy/custom_nodes/comfyui_controlnet_aux/config.yaml')
-#config_controlnet_aux_formatted_text = '''
-#annotator_ckpts_path: {controlnets}
-#custom_temp_path:
-#USE_SYMLINKS: False
-#EP_list: ["CUDAExecutionProvider", "DirectMLExecutionProvider", "OpenVINOExecutionProvider", "ROCMExecutionProvider", "CPUExecutionProvider"]
-#'''
-#config_controlnet_aux_text = config_controlnet_aux_formatted_text.format(controlnets=paths_controlnet[0])
-#with open(config_controlnet_aux_path, "w", encoding="utf-8") as controlnet_file:
-#    controlnet_file.write(config_controlnet_aux_text)
 
 
 model_filenames = []

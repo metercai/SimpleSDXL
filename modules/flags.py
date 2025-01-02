@@ -82,6 +82,12 @@ cn_pose = "OpenPose"
 
 ip_list = [cn_ip, cn_canny, cn_cpds, cn_ip_face, cn_pose]
 default_ip = cn_ip
+cn_name_map = {
+    "ImagePrompt": "ip",
+    "FaceSwap": "face",
+    "PyraCanny": "canny",
+    "CPDS": "depth",
+    "OpenPose": "pose" }
 
 default_parameters = {
     cn_ip: (0.5, 0.6), cn_ip_face: (0.9, 0.75), cn_canny: (0.5, 1.0), cn_cpds: (0.5, 1.0), cn_pose: (0.5, 1.0)

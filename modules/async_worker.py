@@ -446,7 +446,7 @@ def worker():
             progressbar(async_task, current_progress, 'Checking for NSFW content ...')
             imgs = default_censor(imgs)
         progressbar(async_task, current_progress, f'Saving image {current_task_id + 1}/{total_count} to system ...')
-        img_paths = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, persist_image)
+        img_paths = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
         yield_result(async_task, img_paths, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
 
@@ -462,9 +462,18 @@ def worker():
             async_task.adaptive_cfg
         )
 
-    def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, persist_image=True) -> list:
+    def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image=True) -> list:
         img_paths = []
         for x in imgs:
+            scene_task = None
+            if hasattr(async_task, 'scene_frontend'):
+                scene_task = async_task.task_method
+            cn_tasks = [ f'{flags.cn_name_map[n]}-{len(v)}' for n, v in async_task.cn_tasks.items() if len(v)>0]
+            cn_tasks = '|'.join(cn_tasks)
+            if 'vary' in goals and 'hires.fix' in async_task.uov_method:
+                goals = [v if v!='vary' else 'hires.fix' for v in goals]
+            goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
+            print(f'save_and_log: goals={",".join(goals)}, scene_task={scene_task}')
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
@@ -482,6 +491,10 @@ def worker():
                  ('Base Model', 'base_model', async_task.base_model_name),
                  ('Refiner Model', 'refiner_model', async_task.refiner_model_name),
                  ('Refiner Switch', 'refiner_switch', async_task.refiner_switch)]
+            if goals:
+                d.append(('Image2Image', 'image2image', ",".join(goals)))
+            if scene_task:
+                d.append(('Scene Task', 'scene_task', scene_task))
 
             if async_task.refiner_model_name != 'None':
                 if async_task.overwrite_switch > 0:
@@ -1389,6 +1402,7 @@ def worker():
         if len(goals) > 0:
             current_progress += 1
             progressbar(async_task, current_progress, 'Image processing ...')
+            print(f'[TaskEngine] Preprocess the image for {",".join(goals)}.')
 
         should_enhance = async_task.enhance_checkbox and (async_task.enhance_uov_method != flags.disabled.casefold() or len(async_task.enhance_ctrls) > 0)
         

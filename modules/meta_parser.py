@@ -118,7 +118,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("translation_methods"))
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] and task_method and '_aio' not in task_method else update_value_if_existed("input_image_checkbox"))
 
-    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, advanced_checkbox, scene_panel]
+    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel]
     if is_scene_frontend:
         results.append(gr.update(visible=False))
         results.append(gr.update(value=True))
@@ -157,7 +157,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
    
     preset = loaded_parameter_dict.get("preset", None)
     is_mobile = loaded_parameter_dict.get("is_mobile", False)
-    results = [gr.update(value=f'{get_welcome_image(preset, is_mobile)}', visible=True), gr.update(visible=False), gr.update(visible=False)] 
+    results = [gr.update(value=f'{get_welcome_image(preset, is_mobile)}', visible=True), gr.update(visible=False), gr.update(visible=False), None] 
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
@@ -414,9 +414,9 @@ def parse_meta_from_preset(preset_content):
                 loras = items[settings_key]
             for index, lora in enumerate(loras[:modules.config.default_max_lora_number]):
                 if len(lora) == 2:
-                    lora[0] = lora[0].replace('\\', os.sep).replace('/', os.sep)
+                    lora = (lora[0].replace('\\', os.sep).replace('/', os.sep), *lora[1:])
                 elif  len(lora) == 3:
-                    lora[1] = lora[1].replace('\\', os.sep).replace('/', os.sep)
+                    lora = (lora[0], lora[1].replace('\\', os.sep).replace('/', os.sep), *lora[2:])
                 preset_prepared[f'lora_combined_{index + 1}'] = ' : '.join(map(str, lora))
         elif settings_key == "default_aspect_ratio":
             if settings_key in items and items[settings_key] is not None:
