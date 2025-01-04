@@ -1,4 +1,6 @@
 import os
+import shutil
+import shared
 
 win32_root = os.path.dirname(os.path.dirname(__file__))
 python_embeded_path = os.path.join(win32_root, 'python_embeded')
@@ -26,3 +28,14 @@ def build_launcher():
             with open(bat_path, "w", encoding="utf-8") as f:
                 f.write(win32_cmd_preset)
     return
+
+def ready_checker():
+    if not is_win32_standalone_build:
+        pass #return
+    
+    for filename in os.listdir(shared.root):
+        if 'checker' in filename and filename.endswith(".bat"):
+            source_file = os.path.join(shared.root, filename)
+            target_file = os.path.join(win32_root, filename)
+
+            shutil.copy2(source_file, target_file)

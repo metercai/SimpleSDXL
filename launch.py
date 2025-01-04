@@ -12,7 +12,7 @@ import comfy.comfy_version as comfy_version
 import enhanced.version as version
 
 from pathlib import Path
-from build_launcher import build_launcher, is_win32_standalone_build, python_embeded_path
+from build_launcher import build_launcher, ready_checker, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, extra_index_url, target_path_install, met_diff
 
 #print('[System PATH] ' + str(sys.path))
@@ -251,6 +251,7 @@ def reset_env_args():
 
 
 #build_launcher()
+ready_checker()
 #os.environ["SIMPLEAI_VERBOSE"] = "on"
 shared.token, shared.sysinfo = check_base_environment()
 print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')
