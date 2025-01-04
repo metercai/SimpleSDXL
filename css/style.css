@@ -714,6 +714,18 @@ div.prose.tokenCounter {
     padding: 2px !important;
 }
 
+.scene_input {
+    padding: 8px 8px !important;
+    width: 50px !important;
+}
+
+.scene_input input {
+    width: 180px !important;  
+}
+
+.scene_aspect_ratio_selections {
+}
+
 .identity_input {
     padding: 0px 0px !important;
     height: 42px;

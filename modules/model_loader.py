@@ -42,7 +42,7 @@ def refresh_model_list(presets, user_did=None):
 
     path_preset = os.path.abspath(f'./presets/')
     if user_did:
-        user_path_preset = get_path_in_user_dir(user_did, 'presets')
+        user_path_preset = get_path_in_user_dir('presets', user_did)
     if len(presets)>0:
         for preset in presets:
             if preset.endswith('.'):

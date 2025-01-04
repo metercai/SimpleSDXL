@@ -125,7 +125,7 @@ def try_get_preset_content(preset, user_did=None):
             if preset.endswith('.'):
                 if user_did is None:
                     user_did=shared.token.get_guest_did()
-                preset_path = os.path.join(get_path_in_user_dir(user_did, 'presets'), f'{preset}json')
+                preset_path = os.path.join(get_path_in_user_dir('presets', user_did), f'{preset}json')
             else:
                 preset_path = os.path.join(os.path.abspath(f'./presets/'), f'{preset}.json')
             if os.path.exists(preset_path):
@@ -962,28 +962,13 @@ with open(config_example_path, "w", encoding="utf-8") as json_file:
 
 
 
-def get_admin_default(admin_key):
-    bool_map = {
-        "true": True,
-        "false": False
-    }
-    int_pattern = r"^[+-]?\d+$"
-    admin_value = shared.token.get_local_admin_vars(admin_key).strip()
-    if admin_value.lower() in bool_map:
-        admin_value = bool_map[admin_value.lower()]
-    elif re.match(int_pattern, admin_value):
-        admin_value = int(admin_value)
-    elif admin_value == 'None':
-        admin_value = None
-    return admin_value
-
 
 # config model path for comfyd
 config_comfy_path = os.path.join(shared.root, 'comfy/extra_model_paths.yaml')
 config_comfy_formatted_text = '''
 comfyui:
      models_root: {models_root}
-     checkpoints: {checkpoints} 
+     checkpoints: {checkpoints}
      clip_vision: {clip_vision}
      clip: {clip}
      controlnet: {controlnets}
@@ -1002,26 +987,25 @@ comfyui:
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
-comfyd_paths_fix = lambda p: p #[p1 if os.path.isabs(p1) else os.path.relpath(p1, os.path.join(shared.root, 'comfy')) for p1 in p] if isinstance(p, list) else p if os.path.isabs(p) else os.path.relpath(p, os.path.join(shared.root, 'comfy'))
 
 config_comfy_text = config_comfy_formatted_text.format(
-        models_root=comfyd_paths_fix(path_models_root), 
-        checkpoints=paths2str(comfyd_paths_fix(paths_checkpoints),'checkpoints'), 
-        clip_vision=comfyd_paths_fix(path_clip_vision), 
-        clip=comfyd_paths_fix(path_clip), 
-        controlnets=paths2str(comfyd_paths_fix(paths_controlnet),'controlnet'), 
-        diffusers=paths2str(comfyd_paths_fix(paths_diffusers),'diffusers'), 
-        embeddings=comfyd_paths_fix(path_embeddings), 
-        loras=paths2str(comfyd_paths_fix(paths_loras), 'loras'), 
-        upscale_models=comfyd_paths_fix(path_upscale_models), 
-        unet=paths2str(comfyd_paths_fix([path_unet]+paths_checkpoints), 'unet'), 
-        rembg=comfyd_paths_fix(path_rembg), 
-        layer_model=comfyd_paths_fix(path_layer_model), 
-        vae=comfyd_paths_fix(path_vae), 
-        ipadapter=comfyd_paths_fix(path_ipadapter), 
-        inpaint=paths2str(comfyd_paths_fix(paths_inpaint),'inpaint'), 
-        pulid=comfyd_paths_fix(path_pulid), 
-        insightface=comfyd_paths_fix(path_insightface))
+        models_root=path_models_root, 
+        checkpoints=paths2str(paths_checkpoints,'checkpoints'), 
+        clip_vision=path_clip_vision, 
+        clip=path_clip, 
+        controlnets=paths2str(paths_controlnet,'controlnet'), 
+        diffusers=paths2str(paths_diffusers,'diffusers'), 
+        embeddings=path_embeddings, 
+        loras=paths2str(paths_loras, 'loras'), 
+        upscale_models=path_upscale_models, 
+        unet=paths2str([path_unet]+paths_checkpoints, 'unet'), 
+        rembg=path_rembg, 
+        layer_model=path_layer_model, 
+        vae=path_vae, 
+        ipadapter=path_ipadapter, 
+        inpaint=paths2str(paths_inpaint,'inpaint'), 
+        pulid=path_pulid, 
+        insightface=path_insightface)
 
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
