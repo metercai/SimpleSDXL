@@ -8,6 +8,7 @@ import enhanced.translator as translator
 import enhanced.superprompter as superprompter
 import ldm_patched.modules.model_management
 import modules.default_pipeline as pipeline
+import enhanced.all_parameters as ads
 
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel
@@ -27,7 +28,7 @@ class MiniCPM:
     lock = threading.Lock()
     model_v26 = None
     tokenizer = None
-    enable = False
+    enable = ads.get_admin_default('minicpm_checkbox')
     bf16_support = ( torch.cuda.is_available() and torch.cuda.get_device_capability(torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))[0] >= 8 )
 
     def __init__(self):

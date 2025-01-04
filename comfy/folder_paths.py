@@ -209,10 +209,12 @@ def add_model_folder_path(folder_name: str, full_folder_path: str, is_default: b
     global folder_names_and_paths
     folder_name = map_legacy(folder_name)
     if folder_name in folder_names_and_paths:
-        if is_default:
-            folder_names_and_paths[folder_name][0].insert(0, full_folder_path)
-        else:
-            folder_names_and_paths[folder_name][0].append(full_folder_path)
+        paths, tags = folder_names_and_paths[folder_name]
+        if full_folder_path not in paths:
+            if is_default:
+                folder_names_and_paths[folder_name][0].insert(0, full_folder_path)
+            else:
+                folder_names_and_paths[folder_name][0].append(full_folder_path)
     else:
         folder_names_and_paths[folder_name] = ([full_folder_path], set())
 

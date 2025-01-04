@@ -6,13 +6,14 @@ import gradio as gr
 import shared
 import cv2
 import modules.util as util
+import enhanced.all_parameters as ads
 from simpleai_base import simpleai_base, utils, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 from build_launcher import is_win32_standalone_build
 
-#utils.echo_off = False
+utils.echo_off = not ads.get_admin_default('advanced_logs')
 args_comfyd = [[]]
 modelsinfo_filename = 'models_info.json'
 
@@ -30,10 +31,12 @@ def reset_simpleai_args():
         xformers_version=xformers_version,
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
-    reserve_vram = [] if shared.args.reserve_vram is None else [['--reserve-vram', f'{shared.args.reserve_vram}']] 
+    reserve_vram_value = ads.get_admin_default('reserved_vram')
+    reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value>0 else [] 
     smart_memory = [] if shared.sysinfo['gpu_memory']<8180 else [['--disable-smart-memory']]
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
-    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone + reserve_vram
+    fast_mode = [["--fast"]] if ads.get_admin_default('fast_comfyd_checkbox') else []
+    args_comfyd = comfyd.args_mapping(sys.argv) + [["--listen"], ["--port", f'{shared.sysinfo["loopback_port"]}']] + smart_memory + windows_standalone + reserve_vram + fast_mode
     args_comfyd += [["--cuda-malloc"]] if not shared.args.disable_async_cuda_allocation and not shared.args.async_cuda_allocation else []
     comfyd_images_path = os.path.join(shared.path_userhome, 'guest_user')
     comfyd_output = os.path.join(comfyd_images_path, 'comfyd_outputs')
@@ -51,13 +54,16 @@ def reset_simpleai_args():
     comfyd.comfyd_args = args_comfyd
     return
 
-def get_path_in_user_dir(user_did, filename, catalog=None):
-    if user_did and filename:
+
+def get_path_in_user_dir(filename, user_did=None, catalog=None):
+    if user_did is None:
+        user_did = shared.token.get_guest_did()
+    if filename:
         path = catalog if catalog else filename
         path_file = shared.token.get_path_in_user_dir(user_did, path)
         #print(f'get_path_in_user_dir: {path_file}')
         if not os.path.exists(os.path.dirname(path_file)):
-            for cata in ["presets", "workflows", "styles", "wildwords"]:
+            for cata in ["presets", "workflows", "styles", "wildcards"]:
                 os.makedirs(os.path.join(os.path.dirname(path_file), cata))
         if catalog: 
             path_file = os.path.join(path_file, filename)
@@ -85,7 +91,7 @@ def change_advanced_logs(advanced_logs):
         utils.echo_off = True
 
 
-identity_note = '用昵称+手机号组成的可信数字身份绑定本机节点，即可享有个性化及高级服务，首个绑定身份还将拥有超级管理权限。若已有身份二维码，可用其快速安全地导入身份。'
+identity_note = '用昵称+手机号组成的可信数字身份绑定本机节点，激活"我的预置"及个性导航等高级服务。若已有身份二维码，可用其快速安全地导入已有身份。节点的首绑身份拥有超级管理权限。'
 identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，以及离线和漫游场景，导出后请妥善保存。'
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
 note1_1 = '未匹配到数字身份，请注意查收手机短信验证码，用其认证新身份。若十分钟未收到短信验证码，请点击"更换身份信息"，重新输入，再次绑定。'
@@ -210,6 +216,7 @@ def set_phrases(input_id_info, state, phrase, steps):
             nick, tele = inputs[0].strip(), inputs[1].strip()
             context = shared.token.set_phrase_and_get_context(nick, tele, phrase)
             if not shared.token.is_guest(context.get_did()):
+                state["user"] = context
                 state["user_name"] = context.get_nickname()
                 state["user_did"] = context.get_did()
                 state["sys_did"] = context.get_sys_did()
@@ -232,6 +239,7 @@ def confirm_identity(input_id_info, state, phrase):
         if shared.token.is_guest(context.get_did()): # 口令不对, 绑定失败, 重新输入口令, 再次绑定
             result = [note3_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         else: # 绑定成功, 转解绑输入
+            state["user"] = context
             state["user_name"] = context.get_nickname()
             state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()
@@ -246,6 +254,7 @@ def unbind_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
         context = shared.token.unbind_and_return_guest(state["user_did"], phrase)
         if shared.token.is_guest(context.get_did()):
+            state["user"] = context
             state["user_name"] = context.get_nickname()
             state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()

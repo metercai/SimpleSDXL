@@ -80,6 +80,10 @@ function refresh_style_localization() {
     processNode(document.querySelector('.style_selections'));
 }
 
+function refresh_scene_localization() {
+    processNode(document.querySelector('.scene_aspect_ratio_selections'));
+}
+
 function refresh_aspect_ratios_label(value) {
     var label = document.querySelector('#aspect_ratios_accordion div span');
     var translation = getTranslation("Aspect Ratios");

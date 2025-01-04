@@ -1,0 +1,632 @@
+{
+  "8": {
+    "inputs": {
+      "samples": [
+        "91",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "10": {
+    "inputs": {
+      "vae_name": "sdxl_fp16.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "40": {
+    "inputs": {
+      "image": "upload_image_480ff6bcdfc8b0c6e6942fddd66d8506.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "89": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 1024,
+      "height": 1024,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "新年贺卡，简笔画风格,蜡笔风格，粗线条，红色中文艺术字标题，中国风边框，春节，烟花，爆竹，春联，福字，饺子，灯笼，",
+      "negative": "写实照片，坏照片",
+      "seed": 458865403361952,
+      "steps": 30,
+      "cfg": 3.5,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "91": {
+    "inputs": {
+      "seed": [
+        "89",
+        6
+      ],
+      "steps": [
+        "89",
+        7
+      ],
+      "cfg": [
+        "89",
+        8
+      ],
+      "sampler_name": [
+        "93",
+        3
+      ],
+      "scheduler": [
+        "93",
+        4
+      ],
+      "denoise": [
+        "89",
+        9
+      ],
+      "model": [
+        "166",
+        0
+      ],
+      "positive": [
+        "155",
+        0
+      ],
+      "negative": [
+        "155",
+        1
+      ],
+      "latent_image": [
+        "162",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "93": {
+    "inputs": {
+      "steps_total": 30,
+      "refiner_step": 24,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "ddim_uniform"
+    },
+    "class_type": "KSampler Config (rgthree)",
+    "_meta": {
+      "title": "i2i_KSampler"
+    }
+  },
+  "94": {
+    "inputs": {
+      "precision": "quant8"
+    },
+    "class_type": "DownloadAndLoadChatGLM3",
+    "_meta": {
+      "title": "(Down)load ChatGLM3 Model"
+    }
+  },
+  "95": {
+    "inputs": {
+      "text": [
+        "89",
+        4
+      ],
+      "chatglm3_model": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "MinusZone - ChatGLM3TextEncodeV2"
+    }
+  },
+  "97": {
+    "inputs": {
+      "unet_name": "kolors_unet_fp16.safetensors"
+    },
+    "class_type": "MZ_KolorsUNETLoaderV2",
+    "_meta": {
+      "title": "MinusZone - KolorsUNETLoaderV2"
+    }
+  },
+  "98": {
+    "inputs": {
+      "clip_name": "kolors_clip_ipa_plus_vit_large_patch14_336.bin"
+    },
+    "class_type": "MZ_KolorsCLIPVisionLoader",
+    "_meta": {
+      "title": "MinusZone - KolorsCLIPVisionLoader - Legacy"
+    }
+  },
+  "100": {
+    "inputs": {
+      "weight": 1,
+      "weight_type": "ease in",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 0.5,
+      "embeds_scaling": "V only",
+      "model": [
+        "104",
+        0
+      ],
+      "ipadapter": [
+        "101",
+        0
+      ],
+      "image": [
+        "132",
+        0
+      ],
+      "clip_vision": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "MZ_IPAdapterAdvancedKolors",
+    "_meta": {
+      "title": "IPAdapterAdvanced(kolors) - Legacy"
+    }
+  },
+  "101": {
+    "inputs": {
+      "ipadapter_file": "kolors_ip_adapter_plus_general.bin"
+    },
+    "class_type": "MZ_IPAdapterModelLoaderKolors",
+    "_meta": {
+      "title": "IPAdapterModelLoader(kolors) - Legacy"
+    }
+  },
+  "102": {
+    "inputs": {
+      "preset": "FACEID PLUS KOLORS",
+      "lora_strength": 0.6,
+      "provider": "CPU",
+      "weight": 0.8,
+      "weight_faceidv2": 1,
+      "weight_kolors": 0.8,
+      "weight_type": "strong middle",
+      "combine_embeds": "concat",
+      "start_at": 0.35000000000000003,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "cache_mode": "all",
+      "use_tiled": false,
+      "use_batch": false,
+      "sharpening": 0,
+      "model": [
+        "100",
+        0
+      ],
+      "image": [
+        "132",
+        0
+      ],
+      "clip_vision": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "easy ipadapterApplyFaceIDKolors",
+    "_meta": {
+      "title": "Easy Apply IPAdapter (FaceID Kolors)"
+    }
+  },
+  "103": {
+    "inputs": {
+      "clip_name": "kolors_clip_ipa_plus_vit_large_patch14_336.bin"
+    },
+    "class_type": "MZ_KolorsCLIPVisionLoader",
+    "_meta": {
+      "title": "MinusZone - KolorsCLIPVisionLoader - Legacy"
+    }
+  },
+  "104": {
+    "inputs": {
+      "lora_name": "kolors_crayonsketch_e10.safetensors",
+      "strength_model": 1,
+      "model": [
+        "97",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "105": {
+    "inputs": {
+      "text": [
+        "89",
+        5
+      ],
+      "chatglm3_model": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "MZ_ChatGLM3_V2",
+    "_meta": {
+      "title": "MinusZone - ChatGLM3TextEncodeV2"
+    }
+  },
+  "112": {
+    "inputs": {
+      "text": [
+        "178",
+        0
+      ],
+      "font_file": "Alibaba-PuHuiTi-Heavy.ttf",
+      "align": "left",
+      "char_per_line": 4,
+      "leading": 0,
+      "font_size": [
+        "118",
+        0
+      ],
+      "text_color": "#000000",
+      "stroke_width": 1,
+      "stroke_color": "#FFFFFF",
+      "x_offset": [
+        "119",
+        0
+      ],
+      "y_offset": [
+        "120",
+        0
+      ],
+      "width": [
+        "89",
+        1
+      ],
+      "height": [
+        "89",
+        2
+      ]
+    },
+    "class_type": "LayerUtility: SimpleTextImage",
+    "_meta": {
+      "title": "LayerUtility: SimpleTextImage"
+    }
+  },
+  "118": {
+    "inputs": {
+      "min_value": 60,
+      "max_value": 100,
+      "least": 0,
+      "float_decimal_places": 1,
+      "seed": 36915783692740
+    },
+    "class_type": "LayerUtility: RandomGeneratorV2",
+    "_meta": {
+      "title": "LayerUtility: Random Generator V2"
+    }
+  },
+  "119": {
+    "inputs": {
+      "min_value": 150,
+      "max_value": [
+        "123",
+        1
+      ],
+      "least": 0,
+      "float_decimal_places": 1,
+      "seed": 12482704647284
+    },
+    "class_type": "LayerUtility: RandomGeneratorV2",
+    "_meta": {
+      "title": "LayerUtility: Random Generator V2"
+    }
+  },
+  "120": {
+    "inputs": {
+      "min_value": 150,
+      "max_value": [
+        "124",
+        1
+      ],
+      "least": 0,
+      "float_decimal_places": 1,
+      "seed": 66714416323543
+    },
+    "class_type": "LayerUtility: RandomGeneratorV2",
+    "_meta": {
+      "title": "LayerUtility: Random Generator V2"
+    }
+  },
+  "123": {
+    "inputs": {
+      "value": "a-400",
+      "a": [
+        "89",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "124": {
+    "inputs": {
+      "value": "a-150",
+      "a": [
+        "89",
+        2
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "132": {
+    "inputs": {
+      "invert_mask": false,
+      "blend_mode": "normal",
+      "opacity": 100,
+      "background_image": [
+        "142",
+        0
+      ],
+      "layer_image": [
+        "137",
+        0
+      ],
+      "layer_mask": [
+        "161",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageBlend",
+    "_meta": {
+      "title": "LayerUtility: ImageBlend"
+    }
+  },
+  "137": {
+    "inputs": {
+      "width": [
+        "89",
+        1
+      ],
+      "height": [
+        "89",
+        2
+      ],
+      "interpolation": "bicubic",
+      "method": "pad",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "142": {
+    "inputs": {
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#ffffff",
+      "size_as": [
+        "137",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "154": {
+    "inputs": {
+      "invert": true,
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "threshold": 0,
+      "per_batch": 16,
+      "images": [
+        "137",
+        0
+      ]
+    },
+    "class_type": "ColorToMask",
+    "_meta": {
+      "title": "Color To Mask"
+    }
+  },
+  "155": {
+    "inputs": {
+      "strength": 1.5,
+      "start_percent": 0,
+      "end_percent": 0.75,
+      "positive": [
+        "95",
+        0
+      ],
+      "negative": [
+        "105",
+        0
+      ],
+      "control_net": [
+        "156",
+        0
+      ],
+      "image": [
+        "182",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "156": {
+    "inputs": {
+      "control_net_name": "kolors_controlnet_canny.safetensors"
+    },
+    "class_type": "MZ_KolorsControlNetLoader",
+    "_meta": {
+      "title": "MinusZone - KolorsControlNetLoader"
+    }
+  },
+  "161": {
+    "inputs": {
+      "expand": -50,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 25,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "162": {
+    "inputs": {
+      "width": [
+        "89",
+        1
+      ],
+      "height": [
+        "89",
+        2
+      ],
+      "batch_size": [
+        "89",
+        3
+      ]
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "166": {
+    "inputs": {
+      "boolean": [
+        "167",
+        0
+      ],
+      "on_true": [
+        "102",
+        0
+      ],
+      "on_false": [
+        "100",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "167": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "169",
+        0
+      ],
+      "b": [
+        "168",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "168": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "169": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "i2i_ip_fn1"
+    }
+  },
+  "173": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  },
+  "178": {
+    "inputs": {
+      "value": "新年快乐"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "additional_prompt"
+    }
+  },
+  "182": {
+    "inputs": {
+      "image": [
+        "112",
+        0
+      ]
+    },
+    "class_type": "ImageRemoveAlpha+",
+    "_meta": {
+      "title": "🔧 Image Remove Alpha"
+    }
+  }
+}
