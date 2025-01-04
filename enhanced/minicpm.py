@@ -100,16 +100,19 @@ class MiniCPM:
         )
         
         generated_text = res
-        print(f'MiniCPMv26 generated_text:{generated_text}')
+        print(f'[MiniCPM] The generated text:{generated_text}')
         ldm_patched.modules.model_management.print_memory_info("after minicpm inference")
         return generated_text
 
     def interrogate(self, image, output_chinese=False, prompt=None):
         if prompt is not None:
+            print(f'[MiniCPM] The prompt of image: {prompt}')
             return self.inference(image, prompt)
         if output_chinese:
+            print(f'[MiniCPM] The prompt of image: {MiniCPM.prompt_i2t_chinese}')
             return self.inference(image, MiniCPM.prompt_i2t_chinese)
         else:
+            print(f'[MiniCPM] The prompt of image: {MiniCPM.prompt_i2t}')
             return self.inference(image, MiniCPM.prompt_i2t)
 
     def extended_prompt(self, input_text, prompt, translation_methods='Third APIs'):

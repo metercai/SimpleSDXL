@@ -43,7 +43,7 @@
       "batch_size": 1,
       "positive": "新年贺卡，简笔画风格,蜡笔风格，粗线条，红色中文艺术字标题，中国风边框，春节，烟花，爆竹，春联，福字，饺子，灯笼，",
       "negative": "写实照片，坏照片",
-      "seed": 928947714031686,
+      "seed": 1079495790473243,
       "steps": 30,
       "cfg": 3.5,
       "denoise": 1
@@ -243,7 +243,7 @@
   "104": {
     "inputs": {
       "lora_name": "kolors_crayonsketch_e10.safetensors",
-      "strength_model": 1.0,
+      "strength_model": 1,
       "model": [
         "97",
         0
@@ -278,7 +278,7 @@
       ],
       "font_file": "Alibaba-PuHuiTi-Heavy.ttf",
       "align": "left",
-      "char_per_line": 4,
+      "char_per_line": 6,
       "leading": 0,
       "font_size": [
         "118",
@@ -316,8 +316,8 @@
       "least": 0,
       "float_decimal_places": 1,
       "seed": [
-        "89",
-        6
+        "187",
+        0
       ]
     },
     "class_type": "LayerUtility: RandomGeneratorV2",
@@ -354,8 +354,8 @@
       "least": 0,
       "float_decimal_places": 1,
       "seed": [
-        "89",
-        6
+        "186",
+        0
       ]
     },
     "class_type": "LayerUtility: RandomGeneratorV2",
@@ -365,7 +365,7 @@
   },
   "123": {
     "inputs": {
-      "value": "a-400",
+      "value": "a-500",
       "a": [
         "89",
         1
@@ -378,7 +378,7 @@
   },
   "124": {
     "inputs": {
-      "value": "a-150",
+      "value": "a-100",
       "a": [
         "89",
         2
@@ -473,8 +473,8 @@
   "155": {
     "inputs": {
       "strength": 1.5,
-      "start_percent": 0,
-      "end_percent": 0.9,
+      "start_percent": 0.1,
+      "end_percent": 1,
       "positive": [
         "95",
         0
@@ -619,7 +619,7 @@
   },
   "178": {
     "inputs": {
-      "value": "新年快乐"
+      "value": "新年快乐啊！"
     },
     "class_type": "easy string",
     "_meta": {
@@ -651,6 +651,32 @@
     "class_type": "PrepImageForClipVision",
     "_meta": {
       "title": "Prep Image For ClipVision"
+    }
+  },
+  "186": {
+    "inputs": {
+      "value": "a*0.5",
+      "a": [
+        "89",
+        6
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "187": {
+    "inputs": {
+      "value": "a*0.3",
+      "a": [
+        "89",
+        6
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
