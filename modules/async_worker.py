@@ -868,8 +868,8 @@ def worker():
             task_negative_prompt = wildcards.apply_wildcards(negative_prompt, task_rng)
             task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
             task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
-            
-            if async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT']: 
+           
+            if not async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT']: 
                 task_prompt = minicpm.translate(task_prompt, async_task.translation_methods)
                 task_negative_prompt = minicpm.translate(task_negative_prompt, async_task.translation_methods)
                 task_extra_positive_prompts = [minicpm.translate(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
@@ -1550,7 +1550,10 @@ def worker():
             if "scene_" in async_task.task_method:
                 if async_task.scene_input_image1 is not None:
                     input_images = comfypipeline.ComfyInputImage([])
-                    input_images.set_image('i2i_ip_image1', HWC3(async_task.scene_input_image1))
+                    input_images.set_image('i2i_ip_image1', resize_image(HWC3(async_task.scene_input_image1), max_side=1280, resize_mode=4))
+                if async_task.task_method.lower().endswith('_cn'):
+                    async_task.steps = async_task.steps * 3
+                    all_steps = async_task.steps * async_task.image_number
                 async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])

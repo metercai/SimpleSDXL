@@ -115,12 +115,12 @@ def get_admin_default(admin_key):
         "true": True,
         "false": False
     }
-    int_pattern = r"^[+-]?\d+$"
+    float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
     admin_value = shared.token.get_local_admin_vars(admin_key).strip()
     if admin_value.lower() in bool_map:
         admin_value = bool_map[admin_value.lower()]
-    elif re.match(int_pattern, admin_value):
-        admin_value = int(admin_value)
+    elif re.match(float_pattern, admin_value):
+        admin_value = float(admin_value)
     elif admin_value == 'None':
         admin_value = None
     return admin_value
