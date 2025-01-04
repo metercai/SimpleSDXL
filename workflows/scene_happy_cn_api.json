@@ -26,7 +26,7 @@
   },
   "40": {
     "inputs": {
-      "image": "upload_image_480ff6bcdfc8b0c6e6942fddd66d8506.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -111,7 +111,7 @@
     },
     "class_type": "KSampler Config (rgthree)",
     "_meta": {
-      "title": "i2i_KSampler"
+      "title": "KSamplerConfig"
     }
   },
   "94": {
@@ -503,11 +503,11 @@
   },
   "161": {
     "inputs": {
-      "expand": -50,
+      "expand": -10,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 25,
+      "blur_radius": 10,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
