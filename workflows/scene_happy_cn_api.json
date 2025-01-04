@@ -43,7 +43,7 @@
       "batch_size": 1,
       "positive": "新年贺卡，简笔画风格,蜡笔风格，粗线条，红色中文艺术字标题，中国风边框，春节，烟花，爆竹，春联，福字，饺子，灯笼，",
       "negative": "写实照片，坏照片",
-      "seed": 458865403361952,
+      "seed": 928947714031686,
       "steps": 30,
       "cfg": 3.5,
       "denoise": 1
@@ -159,11 +159,11 @@
   },
   "100": {
     "inputs": {
-      "weight": 1,
-      "weight_type": "ease in",
+      "weight": 0.8,
+      "weight_type": "ease in-out",
       "combine_embeds": "concat",
       "start_at": 0,
-      "end_at": 0.5,
+      "end_at": 0.85,
       "embeds_scaling": "V only",
       "model": [
         "104",
@@ -218,7 +218,7 @@
         0
       ],
       "image": [
-        "132",
+        "184",
         0
       ],
       "clip_vision": [
@@ -243,7 +243,7 @@
   "104": {
     "inputs": {
       "lora_name": "kolors_crayonsketch_e10.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0,
       "model": [
         "97",
         0
@@ -315,7 +315,10 @@
       "max_value": 100,
       "least": 0,
       "float_decimal_places": 1,
-      "seed": 36915783692740
+      "seed": [
+        "89",
+        6
+      ]
     },
     "class_type": "LayerUtility: RandomGeneratorV2",
     "_meta": {
@@ -331,7 +334,10 @@
       ],
       "least": 0,
       "float_decimal_places": 1,
-      "seed": 12482704647284
+      "seed": [
+        "89",
+        6
+      ]
     },
     "class_type": "LayerUtility: RandomGeneratorV2",
     "_meta": {
@@ -347,7 +353,10 @@
       ],
       "least": 0,
       "float_decimal_places": 1,
-      "seed": 66714416323543
+      "seed": [
+        "89",
+        6
+      ]
     },
     "class_type": "LayerUtility: RandomGeneratorV2",
     "_meta": {
@@ -465,7 +474,7 @@
     "inputs": {
       "strength": 1.5,
       "start_percent": 0,
-      "end_percent": 0.75,
+      "end_percent": 0.9,
       "positive": [
         "95",
         0
@@ -627,6 +636,21 @@
     "class_type": "ImageRemoveAlpha+",
     "_meta": {
       "title": "🔧 Image Remove Alpha"
+    }
+  },
+  "184": {
+    "inputs": {
+      "interpolation": "BICUBIC",
+      "crop_position": "center",
+      "sharpening": 0,
+      "image": [
+        "132",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
     }
   }
 }
