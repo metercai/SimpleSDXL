@@ -43,7 +43,7 @@ def resample_image(im, width, height):
     return np.array(im)
 
 
-def resize_image(im, width=None, height=None, resize_mode=1, min_side=None):
+def resize_image(im, width=None, height=None, resize_mode=1, min_side=None, max_side=None):
     """
     Resizes an image with the specified resize_mode, width, and height.
 
@@ -101,6 +101,13 @@ def resize_image(im, width=None, height=None, resize_mode=1, min_side=None):
                 res.paste(resized.resize((fill_width, height), box=(resized.width, 0, resized.width, height)), box=(fill_width + src_w, 0))
     elif resize_mode == 3 and min_side:
         scale = min_side / min(im.width, im.height)
+
+        new_width = int(im.width * scale)
+        new_height = int(im.height * scale)
+
+        res = resize(im, new_width, new_height)
+    elif resize_mode == 4 and max_side:
+        scale = max_side / max(im.width, im.height)
 
         new_width = int(im.width * scale)
         new_height = int(im.height * scale)

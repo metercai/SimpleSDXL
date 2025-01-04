@@ -30,7 +30,7 @@ from modules.model_loader import load_file_from_url, presets_model_list, refresh
 from modules.private_logger import get_current_html_path
 from modules.meta_parser import get_welcome_image
 from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
-from enhanced.minicpm import minicpm
+from enhanced.minicpm import minicpm, MiniCPM
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
 # app context
@@ -46,14 +46,13 @@ else:
 
 
 def get_preset_name_list(user_did=None):
-
     if user_did and not shared.token.is_guest(user_did):
-        user_preset_file = get_path_in_user_dir(user_did, 'presets.txt', 'presets')
+        user_preset_file = get_path_in_user_dir('presets.txt', user_did, 'presets')
         if not os.path.exists(user_preset_file):
             path_preset = os.path.abspath(f'./presets/')
             presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
             file_times = [(f[:-5], os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
-            user_path_preset = get_path_in_user_dir(user_did, 'presets')
+            user_path_preset = get_path_in_user_dir('presets', user_did)
             if os.path.exists(user_path_preset):
                 presets2 = [p for p in util.get_files_from_folder(user_path_preset, ['.json'], None) if not p.startswith('.')]
                 file_times2 = [(f'{f[:-5]}.', os.path.getmtime(os.path.join(user_path_preset, f))) for f in presets2]
@@ -71,16 +70,21 @@ def get_preset_name_list(user_did=None):
             with open(user_preset_file, 'r', encoding="utf-8") as nav_preset_file:
                 presets_list = nav_preset_file.read()
     else:
-        path_preset = os.path.abspath(f'./presets/')
-        presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
-        file_times = [(f[:-5], os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
-        presets = sorted(file_times, key=lambda x: x[1], reverse=True)
-        presets = [f[0] for f in presets]
-        if config.preset in presets:
-            presets.remove(config.preset)
-        presets.insert(0, config.preset)
-        presets = presets[:shared.BUTTON_NUM]
-        presets_list = ','.join(presets)
+        guest_preset_file = get_path_in_user_dir('presets.txt', catalog='presets')
+        if os.path.exists(guest_preset_file):
+            with open(guest_preset_file, 'r', encoding="utf-8") as nav_preset_file:
+                presets_list = nav_preset_file.read()
+        else:
+            path_preset = os.path.abspath(f'./presets/')
+            presets = [p for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
+            file_times = [(f[:-5], os.path.getmtime(os.path.join(path_preset, f))) for f in presets]
+            presets = sorted(file_times, key=lambda x: x[1], reverse=True)
+            presets = [f[0] for f in presets]
+            if config.preset in presets:
+                presets.remove(config.preset)
+            presets.insert(0, config.preset)
+            presets = presets[:shared.BUTTON_NUM]
+            presets_list = ','.join(presets)
     return presets_list
 
 
@@ -90,7 +94,7 @@ def get_preset_samples(user_did=None):
     path_preset = os.path.abspath(f'./presets/')
     presets = [p[:-5] for p in util.get_files_from_folder(path_preset, ['.json'], None) if not p.startswith('.')]
     if user_did and not shared.token.is_guest(user_did):
-        user_path_preset = get_path_in_user_dir(user_did, 'presets')
+        user_path_preset = get_path_in_user_dir('presets', user_did)
         if os.path.exists(user_path_preset):
             presets2 = [p for p in util.get_files_from_folder(user_path_preset, ['.json'], None) if not p.startswith('.')]
             presets2 = [f'{p[:-5]}.' for p in presets2]
@@ -214,7 +218,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     #print(f'request.headers:{request.headers}')
     #print(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
-    
+
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
@@ -247,6 +251,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
         else:
             state_params.update({"sstoken": ''})
             print(f'[UserBase] Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+    state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"user_did": user_did})
     state_params.update({"user_name":  shared.token.get_user_context(user_did).get_nickname()})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
@@ -309,7 +314,26 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_aspect_ratio, scene_image_number):
+def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt):
+    describe_prompt = describe_prompt_for_scene(state, img, scene_theme, additional_prompt) if not prompt and 'scene_frontend' in state else None
+    return gr.update() if describe_prompt is None else describe_prompt
+
+def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
+    img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
+    s_prompts = state['scene_frontend'].get('prompts', {})
+    describe_prompt = f'Text titled "{additional_prompt}", ' + s_prompts[scene_theme]
+    if MiniCPM.get_enable():
+        prompt_prompt = f'The title is "{additional_prompt}". Please provide a detailed description of this picture, but do not describe the style of the picture. Please add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words.'
+        describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
+    elif img is not None:
+        from extras.interrogate import default_interrogator as default_interrogator_photo
+        describe_prompt += default_interrogator_photo(img)
+        from extras.wd14tagger import default_interrogator as default_interrogator_anime
+        describe_prompt += default_interrogator_anime(img)
+    return describe_prompt
+
+
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
     superprompter.remove_superprompt()
     remove_tokenizer()
     minicpm.free_model()
@@ -328,9 +352,11 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
     
     if 'scene_frontend' in state_params:
         backend_params.update(dict(
-            scene_frontend=state_params['scene_frontend'],
+            task_method=state_params['scene_frontend']['task_method'][scene_theme],
+            scene_frontend=state_params['scene_frontend']['version'],
             scene_input_image1=scene_input_image1,
             scene_theme=scene_theme,
+            scene_additional_prompt=scene_additional_prompt,
             scene_aspect_ratio=modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
             scene_image_number=scene_image_number
             ))
@@ -384,7 +410,6 @@ def process_after_generation(state_params):
         gallery_util.refresh_images_catalog(output_index, True, user_did)
         gallery_util.parse_html_log(output_index, True, user_did)
    
-    #minicpm.load_model()
 
     return results
 
@@ -435,11 +460,17 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     scene_frontend = preset_prepared.get('engine', {}).get('scene_frontend', None)
     if scene_frontend:
         state_params.update({"scene_frontend": scene_frontend})
+        task_method = scene_frontend['task_method']
+        if isinstance(task_method, list):
+            task_method = task_method[0]
+        elif isinstance(task_method, dict):
+            if task_method:
+                task_method = task_method[next(iter(task_method))]
     else:
         if 'scene_frontend' in state_params:
             del state_params["scene_frontend"]
 
-    task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
+        task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
     state_params.update({"task_method": task_method})
     
     if comfyd_active_checkbox:
@@ -547,11 +578,24 @@ def update_navbar_from_mystore(selected_preset, state):
         print(f'[PresetStore] Launch the preset/启用预置包: {selected_preset}.')
     state["__nav_name_list"] = ','.join(nav_array)
     if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
-        user_preset_file = get_path_in_user_dir(state["user_did"], 'presets.txt', 'presets')
+        user_preset_file = get_path_in_user_dir('presets.txt', state["user_did"], 'presets')
         with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
             nav_preset_file.write(state["__nav_name_list"])
     #print(f'__nav_name_list:{state["__nav_name_list"]}')
     return refresh_nav_bars(state) + update_topbar_js_params(state)
+
+def admin_sync_to_guest(state, catalog='presets'):
+    user_did = state["user"].get_did()
+    if shared.token.is_admin(user_did):
+        if catalog == 'presets':
+            user_preset_file = get_path_in_user_dir('presets.txt', user_did, 'presets')
+            guest_preset_file = get_path_in_user_dir('presets.txt', shared.token.get_guest_did(), 'presets')
+            shutil.copy(user_preset_file, guest_preset_file)
+    current_time = datetime.now().strftime("%H:%M:%S")
+    admin_sync_title = 'Sync presets nav to guest' if state["__lang"]!='cn' else '同步预置导航给游客'
+    print(f'[Topbar] Sync presets nav to guest: {current_time}')
+    return f'{admin_sync_title}({current_time})'
+
 
 
 def update_topbar_js_params(state):
@@ -642,7 +686,10 @@ def update_after_identity_sub(state):
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
 
     if shared.token.is_admin(user_did):
-        comfyd.modify_variable({"outputs": shared.token.get_path_in_user_dir(user_did, "outputs")})
+        admin_outputs = os.path.join(shared.token.get_path_in_user_dir(user_did, "outputs"), 'ComfyUI')
+        if not os.path.exists(admin_outputs):
+            os.makedirs(admin_outputs)
+        comfyd.modify_variable({"outputs": admin_outputs})
 
     results = [gr.update(choices=output_list, value=None), gr.update(visible=len(output_list)>0, open=False)]
     results += [state['__finished_nums_pages']]
@@ -715,7 +762,7 @@ def get_all_admin_default(currunt_value):
     admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs']
     result = []
     for i, admin_key in enumerate(admin_keys): 
-        admin_value = config.get_admin_default(admin_key)
+        admin_value = ads.get_admin_default(admin_key)
         if admin_value == 'None':
             result.append(gr.update(interactive=False))
             continue
@@ -725,6 +772,21 @@ def get_all_admin_default(currunt_value):
             result.append(gr.update(interactive=True, value=admin_value))
 
     return result
+
+
+def get_auto_candidate(img, selections, mode):
+    H, W, C = img.shape
+    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections ]
+    selection = float(W)/float(H)
+    selections2 = np.array(selections2)
+    index = np.argmin(np.abs(selections2 - selection))
+    index_value = selections[index]
+    if '_candidate' in mode:
+        start_index = max(index - 1, 0)
+        end_index = min(index + 2, len(selections2))
+        selections = selections[start_index:end_index]
+    return selections, index_value
+
 
 from transformers import CLIPTokenizer
 import shutil

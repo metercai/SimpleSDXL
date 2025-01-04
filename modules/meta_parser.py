@@ -30,6 +30,8 @@ get_layout_toggle_visible_inter = lambda x,y,z: gr.update(visible=x not in y, in
 get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x not in y, interactive=x not in z)
 get_layout_setting_choices_visible_inter = lambda l,v,x,y,z:gr.update(choices=l, value=v, visible=x not in y, interactive=x not in z)
 get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=None, visible=x not in y, interactive=x not in z)
+get_layout_update_label_visible_inter = lambda t,v,x,y,z:gr.update(label=t, value=v, visible=x not in y, interactive=x not in z) if t else gr.update(value=v, visible=x not in y, interactive=x not in z)
+get_layout_update_and_visible_inter = lambda v,x,y,z:gr.update(value=v, visible=x not in y, interactive=x not in z)
 
 def get_layout_visible_inter_loras(y,z,max_number):
     x = 'loras'
@@ -47,6 +49,35 @@ def get_layout_visible_inter_loras(y,z,max_number):
     for i in range(max_number):
         results += [gr.update(visible= i+y1<max_number or y1<0, interactive= i+z1<max_number or z1<0)] * 3
     return results
+
+def switch_scene_theme(state, image_number, theme=None):
+    scenes = state.get("scene_frontend",{})
+    visible = []
+    inter = []
+    results = [None]
+    themes = scenes.get('themes', [])
+    index = themes.index(theme) if theme and themes and theme in themes else 0
+    results.append(get_layout_setting_choices_visible_inter(themes, themes[index], 'scene_theme', visible, inter))
+    title = scenes.get('additional_prompt_title', '')
+    additional_prompt = scenes.get('additional_prompts', [])
+    if isinstance(additional_prompt, dict):
+        if index==0:
+            additional_prompt = additional_prompt[next(iter(additional_prompt))] if additional_prompt else ''
+        else:
+            additional_prompt = additional_prompt[theme]
+    results.append(get_layout_update_label_visible_inter(title, additional_prompt, 'scene_additional_prompt', visible, inter))
+    aspect_ratio = scenes.get('aspect_ratio', [])
+    if isinstance(aspect_ratio, dict):
+        if index==0:
+            aspect_ratio = aspect_ratio[next(iter(aspect_ratio))] if aspect_ratio else []
+        else:
+            aspect_ratio = aspect_ratio[theme]
+    aspect_ratio = [modules.flags.scene_aspect_ratios_map[x] for x in aspect_ratio]
+    aspect_ratio_default = '' if len(aspect_ratio)==0 else aspect_ratio[0]
+    results.append(get_layout_setting_choices_visible_inter(aspect_ratio, aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
+    results.append(get_layout_update_and_visible_inter(image_number, 'scene_image_number', visible, inter))
+    return results
+
 
 def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     presetdata_dict = presetdata
@@ -118,17 +149,21 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("translation_methods"))
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] and task_method and '_aio' not in task_method else update_value_if_existed("input_image_checkbox"))
 
-    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel]
+    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme]
     if is_scene_frontend:
         results.append(gr.update(visible=False))
         results.append(gr.update(value=True))
         results.append(gr.update(value=False))
         results.append(gr.update(visible=True))
+        themes = enginedata_dict.get('scene_frontend', {}).get('themes', [])
+        theme_default = themes[0] if themes else None
+        results.append(get_layout_setting_choices_visible_inter(themes, None, 'scene_theme', visible, inter))
     else:
         results.append(gr.update(visible=True))
         results.append(gr.update(value=False))
         results.append(gr.update(value=True))
         results.append(gr.update(visible=False))
+        results.append(gr.update(visible=True, interactive=True))
 
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
@@ -138,7 +173,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 def get_welcome_image(preset=None, is_mobile=False):
     path_welcome = os.path.abspath(f'./enhanced/attached/')
     if preset:
-        file_welcome = os.path.join(path_welcome, f'welcome_{preset}.jpg')
+        suffix = 'w' if not is_mobile else 'm'
+        file_welcome = os.path.join(path_welcome, f'welcome_{preset}_{suffix}.jpg')
         if os.path.exists(file_welcome):
             return file_welcome
     file_welcome = os.path.join(path_welcome, 'welcome.png')
@@ -187,6 +223,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
         results.append(gr.update())
     else:
         results.append(gr.update(visible=True))
+    results.append(gr.update(visible=False))
 
     get_freeu('freeu', 'FreeU', loaded_parameter_dict, results)
 

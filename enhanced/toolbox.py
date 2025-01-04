@@ -309,6 +309,7 @@ def save_preset(*args):
     inpaint_mode = args.pop()
     enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
     generate_button = args.pop()
+    load_parameter_button = args.pop()
     freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
     loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
     loras = [[n, w] for (f, n, w) in loras]
@@ -378,7 +379,7 @@ def save_preset(*args):
             preset["styles_definition"] = m_dict
 
         #print(f'preset:{preset}')
-        save_path = get_path_in_user_dir(state_params['user_did'], name + '.json', catalog='presets')
+        save_path = get_path_in_user_dir(name + '.json', state_params['user_did'], catalog='presets')
         with open(save_path, "w", encoding="utf-8") as json_file:
             json.dump(preset, json_file, indent=4)
 

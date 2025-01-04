@@ -224,6 +224,7 @@ class AsyncTask:
             self.image_number = self.params_backend.pop('scene_image_number')
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1')
             self.scene_theme = self.params_backend.pop('scene_theme')
+            self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt')
             self.scene_frontend = self.params_backend.pop('scene_frontend')
 
 async_tasks = []
@@ -473,7 +474,6 @@ def worker():
             if 'vary' in goals and 'hires.fix' in async_task.uov_method:
                 goals = [v if v!='vary' else 'hires.fix' for v in goals]
             goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
-            print(f'save_and_log: goals={",".join(goals)}, scene_task={scene_task}')
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
@@ -869,7 +869,7 @@ def worker():
             task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
             task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
             
-            if async_task.task_class not in ['Kolors', 'HyDiT']: # and 'kolors' not in async_task.task_name.lower():
+            if async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT']: 
                 task_prompt = minicpm.translate(task_prompt, async_task.translation_methods)
                 task_negative_prompt = minicpm.translate(task_negative_prompt, async_task.translation_methods)
                 task_extra_positive_prompts = [minicpm.translate(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
@@ -1548,8 +1548,10 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 input_images.set_image('input_image', HWC3(async_task.layer_input_image))
             if "scene_" in async_task.task_method:
-                input_images = comfypipeline.ComfyInputImage([])
-                input_images.set_image('i2i_ip_image1', HWC3(async_task.scene_input_image1))
+                if async_task.scene_input_image1 is not None:
+                    input_images = comfypipeline.ComfyInputImage([])
+                    input_images.set_image('i2i_ip_image1', HWC3(async_task.scene_input_image1))
+                async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:
