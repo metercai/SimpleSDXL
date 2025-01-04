@@ -16,6 +16,10 @@
 		"crayon": "新年快乐"
 	    },
 	    "additional_prompt_title": "祝福语",
+	    "multimodal_prompts": {
+		"graffiti": "Please provide a detailed description of image, but do not describe the style. Please add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words,",
+		"crayon": "请提供一份对该图片内容的详细描述,不需要风格方面的用词,可以添加节日元素,比如礼品,红包,烟火,灯笼之类的. 描述文字尽量简洁, 总字数不超过50个汉字, 要用中文回复."
+	    },
 	    "aspect_ratio" : {
 		"graffiti": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 		"crayon": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"]

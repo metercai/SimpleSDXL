@@ -322,15 +322,17 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
     s_prompts = state['scene_frontend'].get('prompts', {})
     if is_chinese(s_prompts[scene_theme]):
-        describe_prompt = f'内容标题为"{additional_prompt}",'
+        describe_prompt = f'文字标题为"{additional_prompt}",'
     else:
         describe_prompt = f'Text titled "{additional_prompt}", '
     describe_prompt += s_prompts[scene_theme]
     if MiniCPM.get_enable():
-        if is_chinese(s_prompts[scene_theme]):
-            prompt_prompt = f'这张图片的标题为"{additional_prompt}", 请提供一份对该图片更详细的内容描述,不需要风格方面的用词,可以添加更多祝福和节日的元素,比如烟火或灯笼之类的.描述尽量简短, 总字数不要超过30个汉字, 要用中文回复.'
+        m_prompts = state['scene_frontend'].get('multimodal_prompts', {})
+        if is_chinese(m_prompts[scene_theme]):
+            prompt_prompt = f'图片标题为"{additional_prompt}",'
         else: 
-            prompt_prompt = f'The title of the image is "{additional_prompt}". Please provide a detailed description of image, but do not describe the style. Please add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words,'
+            prompt_prompt = f'The title of the image is "{additional_prompt}", '
+        prompt_prompt += m_prompts[scene_theme]
         describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
     elif img is not None:
         from extras.interrogate import default_interrogator as default_interrogator_photo
