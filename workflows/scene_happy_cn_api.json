@@ -37,13 +37,13 @@
   "89": {
     "inputs": {
       "clip_skip": -1,
-      "width": 1024,
-      "height": 1024,
+      "width": 720,
+      "height": 1280,
       "swap": false,
       "batch_size": 1,
-      "positive": "新年贺卡，简笔画风格,蜡笔风格，粗线条，红色中文艺术字标题，中国风边框，春节，烟花，爆竹，春联，福字，饺子，灯笼，",
+      "positive": "",
       "negative": "写实照片，坏照片",
-      "seed": 1079495790473243,
+      "seed": 506230436088858,
       "steps": 30,
       "cfg": 3.5,
       "denoise": 1
@@ -84,12 +84,12 @@
         0
       ],
       "positive": [
-        "155",
+        "222",
         0
       ],
       "negative": [
-        "155",
-        1
+        "223",
+        0
       ],
       "latent_image": [
         "162",
@@ -159,11 +159,11 @@
   },
   "100": {
     "inputs": {
-      "weight": 0.8,
+      "weight": 0.5,
       "weight_type": "ease in-out",
       "combine_embeds": "concat",
       "start_at": 0,
-      "end_at": 0.85,
+      "end_at": 1,
       "embeds_scaling": "V only",
       "model": [
         "104",
@@ -292,7 +292,7 @@
         0
       ],
       "y_offset": [
-        "120",
+        "194",
         0
       ],
       "width": [
@@ -327,7 +327,7 @@
   },
   "119": {
     "inputs": {
-      "min_value": 150,
+      "min_value": 5,
       "max_value": [
         "123",
         1
@@ -346,7 +346,10 @@
   },
   "120": {
     "inputs": {
-      "min_value": 150,
+      "min_value": [
+        "193",
+        1
+      ],
       "max_value": [
         "124",
         1
@@ -365,7 +368,7 @@
   },
   "123": {
     "inputs": {
-      "value": "a-500",
+      "value": "a*0.4",
       "a": [
         "89",
         1
@@ -378,7 +381,7 @@
   },
   "124": {
     "inputs": {
-      "value": "a-100",
+      "value": "a*0.2",
       "a": [
         "89",
         2
@@ -468,37 +471,6 @@
     "class_type": "ColorToMask",
     "_meta": {
       "title": "Color To Mask"
-    }
-  },
-  "155": {
-    "inputs": {
-      "strength": 1.5,
-      "start_percent": 0.1,
-      "end_percent": 1,
-      "positive": [
-        "95",
-        0
-      ],
-      "negative": [
-        "105",
-        0
-      ],
-      "control_net": [
-        "156",
-        0
-      ],
-      "image": [
-        "182",
-        0
-      ],
-      "vae": [
-        "10",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
     }
   },
   "156": {
@@ -619,7 +591,7 @@
   },
   "178": {
     "inputs": {
-      "value": "新年快乐啊！"
+      "value": "新年快乐"
     },
     "class_type": "easy string",
     "_meta": {
@@ -677,6 +649,341 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "188": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 0.7,
+      "positive": [
+        "224",
+        0
+      ],
+      "negative": [
+        "227",
+        0
+      ],
+      "control_net": [
+        "156",
+        0
+      ],
+      "image": [
+        "202",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "190": {
+    "inputs": {
+      "min_value": [
+        "192",
+        1
+      ],
+      "max_value": [
+        "191",
+        1
+      ],
+      "least": 0,
+      "float_decimal_places": 1,
+      "seed": [
+        "186",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: RandomGeneratorV2",
+    "_meta": {
+      "title": "LayerUtility: Random Generator V2"
+    }
+  },
+  "191": {
+    "inputs": {
+      "value": "a*0.85",
+      "a": [
+        "89",
+        2
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "192": {
+    "inputs": {
+      "value": "a*0.7",
+      "a": [
+        "89",
+        2
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "193": {
+    "inputs": {
+      "value": "a*0",
+      "a": [
+        "89",
+        2
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "194": {
+    "inputs": {
+      "boolean": [
+        "198",
+        2
+      ],
+      "on_true": [
+        "120",
+        0
+      ],
+      "on_false": [
+        "190",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "198": {
+    "inputs": {
+      "min_value": 0,
+      "max_value": 5,
+      "least": 0,
+      "float_decimal_places": 1,
+      "seed": [
+        "201",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: RandomGeneratorV2",
+    "_meta": {
+      "title": "LayerUtility: Random Generator V2"
+    }
+  },
+  "201": {
+    "inputs": {
+      "value": "a*0.1",
+      "a": [
+        "89",
+        6
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "202": {
+    "inputs": {
+      "low_threshold": 100,
+      "high_threshold": 200,
+      "resolution": [
+        "203",
+        0
+      ],
+      "image": [
+        "132",
+        0
+      ]
+    },
+    "class_type": "CannyEdgePreprocessor",
+    "_meta": {
+      "title": "Canny Edge"
+    }
+  },
+  "203": {
+    "inputs": {
+      "image_gen_width": 512,
+      "image_gen_height": 512,
+      "resize_mode": "Just Resize",
+      "original_image": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "PixelPerfectResolution",
+    "_meta": {
+      "title": "Pixel Perfect Resolution"
+    }
+  },
+  "219": {
+    "inputs": {
+      "strength": 0.8,
+      "start_percent": 0,
+      "end_percent": 0.9,
+      "positive": [
+        "220",
+        0
+      ],
+      "negative": [
+        "221",
+        0
+      ],
+      "control_net": [
+        "156",
+        0
+      ],
+      "image": [
+        "182",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "220": {
+    "inputs": {
+      "strength": 1,
+      "set_cond_area": "default",
+      "conditioning": [
+        "95",
+        0
+      ],
+      "mask": [
+        "228",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetMask",
+    "_meta": {
+      "title": "Conditioning (Set Mask)"
+    }
+  },
+  "221": {
+    "inputs": {
+      "strength": 1,
+      "set_cond_area": "default",
+      "conditioning": [
+        "105",
+        0
+      ],
+      "mask": [
+        "228",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetMask",
+    "_meta": {
+      "title": "Conditioning (Set Mask)"
+    }
+  },
+  "222": {
+    "inputs": {
+      "conditioning_1": [
+        "188",
+        0
+      ],
+      "conditioning_2": [
+        "219",
+        0
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "223": {
+    "inputs": {
+      "conditioning_1": [
+        "188",
+        1
+      ],
+      "conditioning_2": [
+        "219",
+        1
+      ]
+    },
+    "class_type": "ConditioningCombine",
+    "_meta": {
+      "title": "Conditioning (Combine)"
+    }
+  },
+  "224": {
+    "inputs": {
+      "strength": 1,
+      "set_cond_area": "default",
+      "conditioning": [
+        "95",
+        0
+      ],
+      "mask": [
+        "225",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetMask",
+    "_meta": {
+      "title": "Conditioning (Set Mask)"
+    }
+  },
+  "225": {
+    "inputs": {
+      "mask": [
+        "228",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "227": {
+    "inputs": {
+      "strength": 1,
+      "set_cond_area": "default",
+      "conditioning": [
+        "105",
+        0
+      ],
+      "mask": [
+        "225",
+        0
+      ]
+    },
+    "class_type": "ConditioningSetMask",
+    "_meta": {
+      "title": "Conditioning (Set Mask)"
+    }
+  },
+  "228": {
+    "inputs": {
+      "expand": 20,
+      "tapered_corners": true,
+      "mask": [
+        "112",
+        1
+      ]
+    },
+    "class_type": "GrowMask",
+    "_meta": {
+      "title": "GrowMask"
     }
   }
 }

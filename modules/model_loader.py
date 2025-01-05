@@ -92,11 +92,13 @@ def check_models_exists(preset, user_did=None):
         return True
     return False
 
-
+download_async = False
 default_download_url_prefix = 'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels'
 def download_model_files(preset, user_did=None):
     from modules.config import path_models_root, model_cata_map
-    global presets_model_list, default_download_url_prefix
+    global presets_model_list, default_download_url_prefix, download_async
+    
+    from others.model_async_downloader import ready_to_download_url, download_it_from_ready_list
 
     if preset.endswith('.'):
         if user_did is None:
@@ -123,13 +125,21 @@ def download_model_files(preset, user_did=None):
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
             if path_file[:1]=='[' and path_file[-1:]==']' and url.endswith('.zip'):
-                download_diffusers_model(cata, path_file[1:-1], size, url)
+                if not download_async:
+                    download_diffusers_model(cata, path_file[1:-1], size, url)
+                else:
+                    ready_to_download_url(preset, user_did, cata, path_file[1:-1], size, url, model_dir)
             else:
-                load_file_from_url(
-                    url=url,
-                    model_dir=model_dir,
-                    file_name=file_name
-                )
+                if not download_async:
+                    load_file_from_url(
+                        url=url,
+                        model_dir=model_dir,
+                        file_name=file_name
+                    )
+                else:
+                    ready_to_download_url(preset, user_did, cata, file_name, size, url, model_dir)
+        if download_async:
+            download_it_from_ready_list(preset, user_did)
     return
 
 def download_diffusers_model(cata, model_name, num, url):

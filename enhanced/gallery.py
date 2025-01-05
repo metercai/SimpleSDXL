@@ -208,12 +208,26 @@ def get_images_prompt(choice, selected, max_per_page, display_index=False, user_
             selected = nums-max_per_page + selected
     images_prompt_keys[user_did].remove(choice)
     images_prompt_keys[user_did].append(choice)
-    filename = images_list[user_did][choice][selected]
-    metainfo = {"Filename": filename} if filename not in images_prompt[user_did][choice].keys() else images_prompt[user_did][choice][filename]
-    if display_index:
-        print(f'[Gallery] The image selected: catalog={choice}, page={page_choice}, in_page={page_index}, in_catalog={selected}, filename={filename}')
-    if choice in images_ads[user_did].keys() and filename in images_ads[user_did][choice].keys():
-        metainfo.update({"Advanced_parameters": images_ads[user_did][choice][metainfo['Filename']]})
+    filename = ''
+    if user_did in images_list:
+        if choice in images_list[user_did]:
+            if selected >= len(images_list[user_did][choice]):
+                print(f'Selected:{selected} is not in images_list["{user_did}"]["{choice}"], len()={len(images_list[user_did][choice])}')
+                selected = len(images_list[user_did][choice])-1
+            filename = images_list[user_did][choice][selected]
+        else:
+            print(f'Choice:{choice} is not in images_list["{user_did}"]')
+    else:
+        print(f"UserID:{user_did} not found in images_list")
+
+    if filename:
+        metainfo = {"Filename": filename} if filename not in images_prompt[user_did][choice].keys() else images_prompt[user_did][choice][filename]
+        if display_index:
+            print(f'[Gallery] The image selected: catalog={choice}, page={page_choice}, in_page={page_index}, in_catalog={selected}, filename={filename}')
+        if choice in images_ads[user_did].keys() and filename in images_ads[user_did][choice].keys():
+            metainfo.update({"Advanced_parameters": images_ads[user_did][choice][metainfo['Filename']]})
+    else:
+        metainfo = {}
     return metainfo
 
 
