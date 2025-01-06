@@ -321,24 +321,21 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
     s_prompts = state['scene_frontend'].get('prompts', {})
-    if is_chinese(s_prompts[scene_theme]):
-        describe_prompt = f'文字标题为"{additional_prompt}"，'
-    else:
-        describe_prompt = f'Text titled "{additional_prompt}", '
-    describe_prompt += s_prompts[scene_theme]
-    if MiniCPM.get_enable():
-        m_prompts = state['scene_frontend'].get('multimodal_prompts', {})
-        if is_chinese(m_prompts[scene_theme]):
-            prompt_prompt = f'图片标题为"{additional_prompt}"，'
-        else: 
-            prompt_prompt = f'The title of the image is "{additional_prompt}", '
-        prompt_prompt += m_prompts[scene_theme]
-        describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
-    elif img is not None:
-        from extras.interrogate import default_interrogator as default_interrogator_photo
-        describe_prompt += default_interrogator_photo(img)
-        from extras.wd14tagger import default_interrogator as default_interrogator_anime
-        describe_prompt += default_interrogator_anime(img)
+    describe_prompt = s_prompts.get(scene_theme, '')
+    if not describe_prompt:
+        return ''
+    describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
+    m_prompts = state['scene_frontend'].get('multimodal_prompts', {})
+    prompt_prompt = m_prompts.get(scene_theme, '')
+    if prompt_prompt and img is not None:
+        prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
+        if MiniCPM.get_enable():
+            describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
+        else:
+            from extras.interrogate import default_interrogator as default_interrogator_photo
+            describe_prompt += default_interrogator_photo(img)
+            from extras.wd14tagger import default_interrogator as default_interrogator_anime
+            describe_prompt += default_interrogator_anime(img)
     return describe_prompt
 
 
