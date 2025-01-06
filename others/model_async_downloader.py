@@ -132,7 +132,8 @@ models_to_download = []
 
 def ready_to_download_url(preset, user_did, cata, file_name, size, url, model_dir):
     global models_to_download
-
+    
+    print(f'get ready to download: {file_name}, url={url}')
     if not os.path.exists(model_dir):
         os.makedirs(model_dir, exist_ok=True)
     if not file_name:
@@ -141,7 +142,11 @@ def ready_to_download_url(preset, user_did, cata, file_name, size, url, model_di
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
         models_to_download.append(dict(
-            a=a
+            cata=cata,
+            size=size,
+            url=url,
+            file_name=file_name,
+            model_dir=model_dir
             ))
         return ''
     else:
@@ -152,142 +157,88 @@ def download_it_from_ready_list(preset, user_did=None):
     from modules.config import path_models_root, model_cata_map
     from modules.model_loader import presets_model_list, default_download_url_prefix
 
-    # 准备要下载的模型列表
-    models_to_download = []
+    global models_to_download
 
-    # 处理特殊的预设名称（可能包含用户ID）
-    if preset.endswith('.'):
-        if user_did is None:
-            return False
-        preset = f'{preset}{user_did[:7]}'
-
-    # 获取预设对应的模型列表
-    model_list = [] if preset not in presets_model_list else presets_model_list[preset]
-
-    if len(model_list) > 0:
-        # 首先检查哪些模型需要下载
-        for cata, path_file, size, hash10, url in model_list:
-            # 确定文件名
-            if path_file[:1] == '[' and path_file[-1:] == ']':
-                if url:
-                    parts = urlparse(url)
-                    file_name = os.path.basename(parts.path)
-                else:
-                    continue
-            else:
-                file_name = path_file.replace('\\', '/').replace(os.sep, '/')
-
-            # 检查模型是否已存在
-            if cata in model_cata_map:
-                model_dir = model_cata_map[cata][0]
-            else:
-                model_dir = os.path.join(path_models_root, cata)
-
-            full_path_file = os.path.abspath(os.path.join(model_dir, file_name))
-
-            # 如果文件不存在，加入待下载列表
-            if not os.path.exists(full_path_file):
-                models_to_download.append({
-                    'cata': cata,
-                    'path_file': path_file,
-                    'size': size,
-                    'url': url,
-                    'file_name': file_name,
-                    'model_dir': model_dir
-                })
-
-        # 如果有需要下载的模型，创建下载确认界面
-        if models_to_download:
-            download_info = "#### The following model needs to be downloaded\n\n"
-            for model in models_to_download:
-                size_gb = round(model['size'] / (1024 * 1024 * 1024), 2)
-                download_info += f"- {model['file_name']} (Type: {model['cata']}, Size: {size_gb}GB)\n"
-                gr.Markdown("<br>")  # 添加空行
+    print("downloader is start...")
+    download_info = "#### The following model needs to be downloaded\n\n"
+    for model in models_to_download:
+        size_gb = round(model['size'] / (1024 * 1024 * 1024), 2)
+        download_info += f"- {model['file_name']} (Type: {model['cata']}, Size: {size_gb}GB)\n"
+        gr.Markdown("<br>")  # 添加空行
             
 
-            # 使用threading.Event来控制下载取消
-            cancel_event = threading.Event()
+    # 使用threading.Event来控制下载取消
+    cancel_event = threading.Event()
 
-            def confirm_download(confirm):
-                if not confirm:
-                    cancel_event.set()
-                    return "已取消下载。"
+    def confirm_download(confirm):
+        if not confirm:
+            cancel_event.set()
+            return "已取消下载。"
                 
-                download_results = []
-                for model in models_to_download:
-                    if cancel_event.is_set():
-                        return "下载已取消。"
+        download_results = []
+        for model in models_to_download:
+            if cancel_event.is_set():
+                return "下载已取消。"
 
-                    try:
-                        url = model['url']
-                        if url is None or url == '':
-                            url = f'{default_download_url_prefix}/{model["cata"]}/{model["path_file"]}'
-            
-                        if model['path_file'][:1] == '[' and model['path_file'][-1:] == ']' and url.endswith('.zip'):
-                            result = download_diffusers_model(path_models_root, model['cata'], 
-                                                            model['path_file'][1:-1], model['size'], 
-                                                            url, cancel_event)
-                            if result is None:
-                                return "下载已取消。"
-                            download_results.append(f"成功下载: {model['file_name']}")
-                        else:
-                            result = load_file_from_url(
-                                url=url,
-                                model_dir=model['model_dir'],
-                                file_name=model['file_name'],
-                                cancel_event=cancel_event
-                            )
-                            if result is None:
-                                return "下载已取消。"
-                            download_results.append(f"成功下载: {model['file_name']}")
-                    except Exception as e:
-                        download_results.append(f"下载失败: {model['file_name']} - {str(e)}")
-                        if not cancel_event.is_set():
-                            cancel_event.set()
-                            return f"下载过程中出错: {str(e)}"
-            
-                return "\n".join(download_results)
-
-            def cancel_download():
-                cancel_event.set()
-                return "正在取消下载..."
-
-            # 创建一个新的Blocks实例来处理下载确认
-            with gr.Blocks(title="模型下载", css="style.css") as download_interface:
-                with gr.Box(elem_classes="download-box"):
-                    gr.Markdown(download_info, elem_classes=["download-status"])
-                    with gr.Row(elem_classes=["button-row"]):
-                        confirm_btn = gr.Button("Download", variant="primary")
-                        cancel_btn = gr.Button("Cancel", variant="secondary")
-                    output = gr.Textbox(label="Start with the default model while you wait. Sketch as you go along.", interactive=False, elem_classes=["download-time-estimate"])
-
-                    # 在Blocks上下文中绑定事件
-                    confirm_btn.click(
-                        fn=confirm_download,
-                        inputs=[gr.State(True)],
-                        outputs=output,
-                    ).then(
-                        fn=lambda: gr.update(interactive=False),
-                        outputs=[confirm_btn]
-                    )
-
-                    cancel_btn.click(
-                        fn=cancel_download,
-                        outputs=output,
-                    ).then(
-                        fn=lambda: gr.update(interactive=False),
-                        outputs=[cancel_btn]
-                    )
-
-                # 启动下载界面
-                download_interface.launch(
-                    prevent_thread_lock=True,
-                    share=False,
-                    inbrowser=True,
-                    show_api=False,
-                    width=500,
-                    height=300
+            try:
+                url = model['url']
+                result = load_file_from_url(
+                    url=url,
+                    model_dir=model['model_dir'],
+                    file_name=model['file_name'],
+                    cancel_event=cancel_event
                 )
+                if result is None:
+                    return "下载已取消。"
+                download_results.append(f"成功下载: {model['file_name']}")
+            except Exception as e:
+                download_results.append(f"下载失败: {model['file_name']} - {str(e)}")
+                if not cancel_event.is_set():
+                    cancel_event.set()
+                    return f"下载过程中出错: {str(e)}"
+            
+        return "\n".join(download_results)
+
+    def cancel_download():
+        cancel_event.set()
+        return "正在取消下载..."
+
+    # 创建一个新的Blocks实例来处理下载确认
+    with gr.Blocks(title="模型下载", css="style.css") as download_interface:
+        with gr.Box(elem_classes="download-box"):
+            gr.Markdown(download_info, elem_classes=["download-status"])
+            with gr.Row(elem_classes=["button-row"]):
+                confirm_btn = gr.Button("Download", variant="primary")
+                cancel_btn = gr.Button("Cancel", variant="secondary")
+            output = gr.Textbox(label="Start with the default model while you wait. Sketch as you go along.", interactive=False, elem_classes=["download-time-estimate"])
+
+            # 在Blocks上下文中绑定事件
+            confirm_btn.click(
+                fn=confirm_download,
+                inputs=[gr.State(True)],
+                outputs=output,
+            ).then(
+                fn=lambda: gr.update(interactive=False),
+                outputs=[confirm_btn]
+            )
+
+            cancel_btn.click(
+                fn=cancel_download,
+                outputs=output,
+            ).then(
+                fn=lambda: gr.update(interactive=False),
+                outputs=[cancel_btn]
+            )
+
+        # 启动下载界面
+        download_interface.launch(
+            prevent_thread_lock=True,
+            share=False,
+            inbrowser=True,
+            show_api=False,
+            width=500,
+            height=300
+        )
 
     return
 
