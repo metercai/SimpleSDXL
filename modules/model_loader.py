@@ -99,7 +99,7 @@ def download_model_files(preset, user_did=None):
     global presets_model_list, default_download_url_prefix, download_async
     
     from others.model_async_downloader import ready_to_download_url, download_it_from_ready_list
-
+    
     if preset.endswith('.'):
         if user_did is None:
             return False
@@ -120,6 +120,9 @@ def download_model_files(preset, user_did=None):
             else:
                 model_dir=os.path.join(path_models_root, cata)
             full_path_file = os.path.abspath(os.path.join(model_dir, file_name))
+            if os.path.exists(full_path_file):
+                continue
+            print(f'[Download] The model file is not exists, ready to download: {file_name}')
             model_dir = os.path.dirname(full_path_file)
             file_name = os.path.basename(full_path_file)
             if url is None or url == '':

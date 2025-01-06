@@ -1394,7 +1394,7 @@ with shared.gradio_root:
             describe_prompt = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
             styles = set()
             styles.update([])
-            return describe_prompt, list(styles)
+            return describe_prompt if describe_prompt else gr.update(), list(styles)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):
             img = resize_image(img, max_side=1280, resize_mode=4)
