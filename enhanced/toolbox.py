@@ -308,8 +308,8 @@ def save_preset(*args):
     inpaint_engine_state = args.pop()
     inpaint_mode = args.pop()
     enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
-    generate_button = args.pop()
-    load_parameter_button = args.pop()
+    #generate_button = args.pop()
+    #load_parameter_button = args.pop()
     freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
     loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
     loras = [[n, w] for (f, n, w) in loras]
