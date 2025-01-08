@@ -24,6 +24,7 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import ldm_patched.modules.model_management
+import extras.preprocessors as preprocessors
 
 from datetime import datetime
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
@@ -315,17 +316,19 @@ def refresh_nav_bars(state_params):
 
 
 def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt):
-    describe_prompt = describe_prompt_for_scene(state, img, scene_theme, additional_prompt) if not prompt and 'scene_frontend' in state else None
+    describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, additional_prompt) if not prompt and 'scene_frontend' in state else None
     return gr.update() if describe_prompt is None else describe_prompt
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
-    s_prompts = state['scene_frontend'].get('prompts', {})
+    image_preprocessor_method = state['scene_frontend'].get('image_preprocessor_method', [])
+    img_is_ok = preprocessors.openpose_have(img, image_preprocessor_method[0]) if len(image_preprocessor_method)>0 and img is not None else True
+    s_prompts = state['scene_frontend'].get('prompt', {})
     describe_prompt = s_prompts.get(scene_theme, '')
     if not describe_prompt:
-        return ''
+        return '', img_is_ok
     describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
-    m_prompts = state['scene_frontend'].get('multimodal_prompts', {})
+    m_prompts = state['scene_frontend'].get('multimodal_prompt', {})
     prompt_prompt = m_prompts.get(scene_theme, '')
     if prompt_prompt and img is not None:
         prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
@@ -336,7 +339,7 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
             describe_prompt += default_interrogator_photo(img)
             from extras.wd14tagger import default_interrogator as default_interrogator_anime
             describe_prompt += default_interrogator_anime(img)
-    return describe_prompt
+    return describe_prompt, img_is_ok
 
 
 def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
@@ -363,7 +366,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
             scene_input_image1=scene_input_image1,
             scene_theme=scene_theme,
             scene_additional_prompt=scene_additional_prompt,
-            scene_aspect_ratio=modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
+            scene_aspect_ratio=scene_aspect_ratio.split('|')[0] if '×' in scene_aspect_ratio else modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
             scene_image_number=scene_image_number
             ))
 
@@ -782,7 +785,8 @@ def get_all_admin_default(currunt_value):
 
 def get_auto_candidate(img, selections, mode):
     H, W, C = img.shape
-    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections ]
+    selections2 = [ x.split('|')[1] if '|' in x else x for x in selections ]
+    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections2 ]
     selection = float(W)/float(H)
     selections2 = np.array(selections2)
     index = np.argmin(np.abs(selections2 - selection))

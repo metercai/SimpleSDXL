@@ -1189,7 +1189,7 @@ with shared.gradio_root:
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
                              base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, vae_name,
                              seed_random, image_seed, inpaint_engine, inpaint_engine_state,
-                             inpaint_mode] + enhance_inpaint_mode_ctrls + [generate_button, load_parameter_button] + freeu_ctrls + lora_ctrls
+                             inpaint_mode] + enhance_inpaint_mode_ctrls + freeu_ctrls + lora_ctrls
 
 
         def inpaint_engine_state_change(inpaint_engine_version, *args):
@@ -1324,7 +1324,7 @@ with shared.gradio_root:
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
-        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme]
+        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme] + [generate_button, load_parameter_button]
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
@@ -1391,10 +1391,10 @@ with shared.gradio_root:
 
 
         def trigger_auto_describe_for_scene(state, img, scene_theme, additional_prompt): 
-            describe_prompt = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
+            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
             styles = set()
             styles.update([])
-            return describe_prompt if describe_prompt else gr.update(), list(styles)
+            return describe_prompt if describe_prompt else gr.update(), list(styles), gr.update(interactive=img_is_ok)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):
             img = resize_image(img, max_side=1280, resize_mode=4)
@@ -1404,28 +1404,28 @@ with shared.gradio_root:
                     aspect_ratios = aspect_ratios[scene_theme]
                 else:
                     aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
-            aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', 'auto_match')
-            if 'auto_' in aspect_ratio_select_mode:
+            aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
+            if aspect_ratio_select_mode:
                 aspect_ratios, aspect_ratio = topbar.get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
-            else:
-                aspect_ratio = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
-            aspect_ratios = [modules.flags.scene_aspect_ratios_map[x] for x in aspect_ratios]
-            aspect_ratio = modules.flags.scene_aspect_ratios_map[aspect_ratio]
+                if 'auto_match' in aspect_ratio_select_mode:
+                    aspect_ratios = [aspect_ratio]
+            aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)
+            aspect_ratio = modules.flags.scene_aspect_ratios_mapping(aspect_ratio)
             return gr.update(choices=aspect_ratios, value=aspect_ratio)
 
         scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme, scene_additional_prompt],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True) \
+                                   outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
-        scene_input_image1.clear(lambda: '', outputs=prompt, show_progress=True, queue=True)
+        scene_input_image1.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
         load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme, scene_additional_prompt],
                                    outputs=[prompt, style_selections], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
 
-        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_theme], outputs=scene_params, queue=False, show_progress=False)
+        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_theme], outputs=scene_params + [generate_button], queue=False, show_progress=False)
 
         if args_manager.args.enable_auto_describe_image:
             def trigger_auto_describe(mode, img, prompt, apply_styles, output_chinese):

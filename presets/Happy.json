@@ -6,23 +6,25 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "themes": ["graffiti", "crayon"],
-	    "prompts": {
+	    "theme": ["graffiti", "crayon"],
+	    "theme_title": "主题",
+	    "prompt": {
     		"graffiti": "Text titled \"{additional_prompt}\", Doodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moon, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, ",
 	    	"crayon": "文字标题为\"{additional_prompt}\"，新年贺卡，蜡笔风格，粗线条描边，红色中文艺术字标题，"
 	    },
-	    "additional_prompts": {
+	    "additional_prompt": {
 		"graffiti": "Happy New Year",
 		"crayon": "新年快乐"
 	    },
 	    "additional_prompt_title": "祝福语",
-	    "multimodal_prompts": {
+	    "multimodal_prompt": {
 		"graffiti": "The title of the image is \"{additional_prompt}\", Please provide a detailed description of image, but do not describe the style. Please add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words,",
 		"crayon": "图片标题为\"{additional_prompt}\"，把图片内容与中国春节的庆祝活动相结合，替换成节日喜庆的背景，加入春联，福字，蒸笼等元素。综合这些内容元素，发挥想象力，编写一段生成图片的新提示词。内容描述要精细，总字数不超过50个汉字, 要用中文回复。"
 	    },
+	    "image_preprocessor_method": [["face"]],
 	    "aspect_ratio" : {
-		"graffiti": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
-		"crayon": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"]
+		"graffiti": ["9:16", "4:5", "4:3", "1024|1:1", "3:2", "16:9", "21:9"],
+		"crayon": ["9:16", "4:5", "4:3", "1024|1:1", "3:2", "16:9", "21:9"]
 	    },
 	    "aspect_ratio_select_mode": "auto_candidate",
 	    "task_method": {
