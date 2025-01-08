@@ -137,7 +137,7 @@
   "Canny High Threshold": "Canny强边缘阈值",
   "Inpaint": "重绘设置",
   "Debug Inpaint Preprocessing": "重绘预处理调试",
-  "Disable initial latent in inpaint": "重绘中不重置潜空间",
+  "Disable initial latent in inpaint": "重置潜空间噪声",
   "Inpaint Denoising Strength": "重绘强度",
   "Same as the denoising strength in A1111 inpaint. Only used in inpaint, not used in outpaint. (Outpaint always use 1.0)": "仅在内部重绘有效，外部重绘保持为1。",
   "Inpaint Respective Field": "重绘羽化系数",
