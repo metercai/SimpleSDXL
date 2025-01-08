@@ -6,7 +6,7 @@
   "Generate forever": "无限循环生成",
   "Skip": "跳过",
   "Stop": "停止",
-  "Load Parameters": "生成参数",
+  "Load Parameters": "生成提示词",
   "Translator": "中译英",
   "Type prompt here or paste parameters.": "输入文生图提示词，支持中英文混合编辑，自动适配翻译。右下角为Token计数。",
   "Finished Images Catalog": "出图历史索引",

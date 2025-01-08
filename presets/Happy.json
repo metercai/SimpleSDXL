@@ -21,7 +21,6 @@
 		"graffiti": "The title of the image is \"{additional_prompt}\", Please provide a detailed description of image, but do not describe the style. Please add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words,",
 		"crayon": "图片标题为\"{additional_prompt}\"，把图片内容与中国春节的庆祝活动相结合，替换成节日喜庆的背景，加入春联，福字，蒸笼等元素。综合这些内容元素，发挥想象力，编写一段生成图片的新提示词。内容描述要精细，总字数不超过50个汉字, 要用中文回复。"
 	    },
-	    "image_preprocessor_method": [["face"]],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
 	    "task_method": {

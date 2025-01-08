@@ -80,7 +80,7 @@
             "theme": ["graffiti", "crayon"],  # 在一个预置包内的多主题切换, 是必要配置项, 单主题配一项即可。
             "theme_title": "主题",            # 主题切换栏的显示标题, 默认显示"内容主题"。
             # "disvisible": ["scene_theme", "scene_additional_prompt"],  如果不显示主题切换栏或附加提示词栏，可设置这两栏不显示。
-            "prompt": {  # 回填到提示词框的提示词, 基于主题进行配置。不配置则不回填。可以做变量替换, 这里示范的变量是additional_prompt。
+            "prompt": {  # 回填到提示词框的提示词, 基于主题进行配置。不配置则不回填。回填时可以做变量替换, 这里示范的变量是additional_prompt。
                 "graffiti": "Text titled \"{additional_prompt}\", Doodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moo
 n, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, ",
                 "crayon": "文字标题为\"{additional_prompt}\"，新年贺卡，蜡笔风格，粗线条描边，红色中文艺术字标题，"
@@ -90,7 +90,7 @@ n, bold lines, grunge aesthetic style, mixed pattern, text and emoji installatio
                 "crayon": "新年快乐"
             },
             "additional_prompt_title": "祝福语",   # 额外提示词栏的显示标题。
-            "multimodal_prompt": {  # 多模态反推图片内容的提示词，基于主题进行配置。不配置则不反推。
+            "multimodal_prompt": {  # 多模态反推图片内容的提示词，基于主题进行配置。不配置则不反推。如果反推提示词含中文，则反推结果也会是中文的。
                 "graffiti": "The title of the image is \"{additional_prompt}\", Please provide a detailed description of image, but do not describe the style. Ple
 ase add some blessing and holiday elements, such as fireworks, red envelopes, etc. The description should be as detailed as possible, but not more than 70 words,"
 ,
