@@ -316,7 +316,9 @@ def refresh_nav_bars(state_params):
 
 
 def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt):
-    describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, additional_prompt) if not prompt and 'scene_frontend' in state else None
+    describe_prompt = None
+    if not prompt and 'scene_frontend' in state:
+        describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
     return gr.update() if describe_prompt is None else describe_prompt
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
