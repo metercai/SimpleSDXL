@@ -55,7 +55,10 @@ def switch_scene_theme(state, image_number, theme=None):
     scenes = state.get("scene_frontend",{})
     visible = scenes.get('disvisible', [])
     inter = scenes.get('disinteractive', [])
-    results = [None]
+    input_image_number = 1 if 'scene_canvas_image' in visible or 'scene_input_image1' in visible else 0
+    input_image_number = 2 if 'scene_canvas_image' in visible and 'scene_input_image1' in visible else input_image_number
+    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 250)]
+    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 170))
     themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
     results.append(get_layout_setting_choices_visible_inter(themes, themes[index], 'scene_theme', visible, inter))
@@ -75,7 +78,7 @@ def switch_scene_theme(state, image_number, theme=None):
             aspect_ratio = aspect_ratio[theme]
     aspect_ratio = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratio)
     aspect_ratio_default = '' if len(aspect_ratio)==0 else aspect_ratio[0]
-    results.append(get_layout_setting_choices_visible_inter(aspect_ratio, aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
+    results.append(get_layout_setting_choices_visible_inter(aspect_ratio[0:3], aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
     results.append(get_layout_update_and_visible_inter(image_number, 'scene_image_number', visible, inter))
     results.append(gr.update(interactive=False))   #generate_button
     return results

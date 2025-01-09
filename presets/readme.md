@@ -79,7 +79,7 @@
             "version": "m1.1",
             "theme": ["graffiti", "crayon"],  # 在一个预置包内的多主题切换, 是必要配置项, 单主题配一项即可。
             "theme_title": "主题",            # 主题切换栏的显示标题, 默认显示"内容主题"。
-            # "disvisible": ["scene_theme", "scene_additional_prompt"],  如果不显示主题切换栏或附加提示词栏，可设置这两栏不显示。
+            "disvisible": ["scene_canvas_image"],  不显示的UI组件, 可能的值: "scene_canvas_image", "scene_theme", "scene_additional_prompt"。
             "prompt": {  # 回填到提示词框的提示词, 基于主题进行配置。不配置则不回填。回填时可以做变量替换, 这里示范的变量是additional_prompt。
                 "graffiti": "Text titled \"{additional_prompt}\", Doodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moo
 n, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, ",
@@ -104,8 +104,8 @@ ase add some blessing and holiday elements, such as fireworks, red envelopes, et
             },
             "aspect_ratio_select_mode": "auto_candidate",   # 出图尺寸选择模式，auto_candidate 是根据输入图片的尺寸自动匹配最佳，并包含临近两个一起作为候选集。auto_match 是根据输入图片的尺寸自动匹配最佳，只保留匹配的尺寸作为候选集。当不设置选择模式，默认为自动匹配最佳宽高比，但仍保留所有候选集，最终交用户选择确认。
             "task_method": {   # 调用的工作流，基于主题进行配置。
-                "graffiti": "scene_happy",
-                "crayon": "scene_happy_cn"
+                "graffiti": "happy",  # 对应实际的工作流文件名:  scene_happy_api.json
+                "crayon": "happy_cn"  # 对应实际的工作流文件名:  scene_happy_cn_api.json    scene_开头表示场景工作流, _cn_api结尾支持中文的流,即prompt不用提前翻译. 
             }
         }
     },
