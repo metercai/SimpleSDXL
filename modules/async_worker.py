@@ -222,6 +222,7 @@ class AsyncTask:
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
+            self.scene_canvas_image = self.params_backend.pop('scene_canvas_image')
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1')
             self.scene_theme = self.params_backend.pop('scene_theme')
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt')
@@ -1548,9 +1549,14 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 input_images.set_image('input_image', HWC3(async_task.layer_input_image))
             if "scene_" in async_task.task_method:
+                input_images = comfypipeline.ComfyInputImage([])
                 if async_task.scene_input_image1 is not None:
-                    input_images = comfypipeline.ComfyInputImage([])
                     input_images.set_image('i2i_ip_image1', resize_image(HWC3(async_task.scene_input_image1), max_side=1280, resize_mode=4))
+                if async_task.scene_canvas_image is not None:
+                    canvas_image = async_task.scene_canvas_image['image']
+                    canvas_mask = async_task.scene_canvas_image['mask'][:, :, 0]
+                    input_images.set_image('i2i_inpaint_image', resize_image(HWC3(canvas_image), max_side=1280, resize_mode=4))
+                    input_images.set_image('i2i_inpaint_mask', resize_image(HWC3(canvas_mask), max_side=1280, resize_mode=4))
                 if async_task.task_method.lower().endswith('_cn'):
                     async_task.steps = async_task.steps * 3
                     all_steps = async_task.steps * async_task.image_number

@@ -344,7 +344,7 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     return describe_prompt, img_is_ok
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
     superprompter.remove_superprompt()
     remove_tokenizer()
     minicpm.free_model()
@@ -363,8 +363,9 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
     
     if 'scene_frontend' in state_params:
         backend_params.update(dict(
-            task_method=state_params['scene_frontend']['task_method'][scene_theme],
+            task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],
+            scene_canvas_image=scene_canvas_image,
             scene_input_image1=scene_input_image1,
             scene_theme=scene_theme,
             scene_additional_prompt=scene_additional_prompt,
