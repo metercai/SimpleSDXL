@@ -1308,6 +1308,8 @@ with shared.gradio_root:
             if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
                 return [gr.update()] * 3 + [True]
             if 'scene_frontend' in state_params and len(raw_prompt_txt)==0 and scene_input_image1 is not None:
+                is_canvas_image = 'scene_canvas_image' not in state_params["scene_frontend"].get('disvisible', [])
+                if not is_canvas_image:
                     return [gr.update(), gr.update(visible=False), gr.update(visible=True), gr.update()]
             
             return [gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update()]
