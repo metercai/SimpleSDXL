@@ -32,7 +32,7 @@ def reset_simpleai_args():
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
     reserve_vram_value = ads.get_admin_default('reserved_vram')
-    reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value>0 else [] 
+    reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value and reserve_vram_value>0 else [] 
     smart_memory = [] if shared.sysinfo['gpu_memory']<8180 else [['--disable-smart-memory']]
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
     fast_mode = [["--fast"]] if ads.get_admin_default('fast_comfyd_checkbox') else []

@@ -297,7 +297,6 @@ def get_preset_inc_url(preset_name='blank'):
 
 def refresh_nav_bars(state_params):
     preset_name_list = state_params["__nav_name_list"].split(',')
-    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
     user_did = state_params["user_did"]
     path_preset = os.path.abspath(f'./presets/')
     user_path_preset = get_path_in_user_dir('presets', user_did)
@@ -315,10 +314,8 @@ def refresh_nav_bars(state_params):
         with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
             nav_preset_file.write(state_params["__nav_name_list"])
 
-    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
     for i in range(shared.BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
-    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
     results = []
     if state_params["__is_mobile"]:
         results += [gr.update(visible=False)]
