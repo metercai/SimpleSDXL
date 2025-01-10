@@ -8,14 +8,14 @@
 	    "version": "m1.1",
 	    "theme": ["clothing"],
 	    "disvisible": ["scene_theme", "scene_additional_prompt"],
-	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
+	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
 	    "task_method": {
 		"clothing": "clothing"
 	    }
     	}
     },
-    "default_model": "flux-hyp8-Q5_K_M.gguf",
+    "default_model": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -40,7 +40,7 @@
             1.0
         ]
     ],
-    "default_cfg_scale": 3.5,
+    "default_cfg_scale": 30,
     "default_sample_sharpness": 2,
     "default_sampler": "euler",
     "default_scheduler": "simple",
@@ -56,19 +56,14 @@
     "lora_downloads": {},
     "vae_downloads": {},
     "model_list": [
-        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
-	"checkpoints,kolors_unet_fp16.safetensors,5159140240,0,",
-	"controlnet,kolors_controlnet_canny.safetensors,2526129624,0,",
+        "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
 	"pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,clip_l.safetensors,246144152,0,",
 	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
-	"clip_vision,kolors_clip_ipa_plus_vit_large_patch14_336.bin,1711974081,0,",
         "vae,ae.safetensors,335304388,0,",
-	"vae,sdxl_fp16.vae.safetensors,167335342,0,",
-	"loras,flux_graffiti_v1.safetensors,612893792,0,",
-	"loras,kolors_crayonsketch_e10.safetensors,170566628,0,",
+	"loras,flux1-turbo.safetensors,694082424,0,",
 	"style_models,flux1-redux-dev.safetensors,129063232,0,"
-        ]
+    	]
 }
 

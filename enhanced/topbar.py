@@ -297,8 +297,28 @@ def get_preset_inc_url(preset_name='blank'):
 
 def refresh_nav_bars(state_params):
     preset_name_list = state_params["__nav_name_list"].split(',')
+    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
+    user_did = state_params["user_did"]
+    path_preset = os.path.abspath(f'./presets/')
+    user_path_preset = get_path_in_user_dir('presets', user_did)
+    num = len(preset_name_list)
+    for preset in preset_name_list:
+        if preset.endswith('.'):
+            preset_file = os.path.join(user_path_preset, f'{preset}json')
+        else:
+            preset_file = os.path.join(path_preset, f'{preset}.json')
+        if not os.path.exists(preset_file):
+            preset_name_list.remove(preset)
+    if num!=len(preset_name_list):
+        state_params["__nav_name_list"]=','.join(preset_name_list)
+        user_preset_file = get_path_in_user_dir('presets.txt', user_did, 'presets')
+        with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
+            nav_preset_file.write(state_params["__nav_name_list"])
+
+    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
     for i in range(shared.BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
+    print(f'preset_name_list({len(preset_name_list)}):{preset_name_list}')
     results = []
     if state_params["__is_mobile"]:
         results += [gr.update(visible=False)]
@@ -306,7 +326,7 @@ def refresh_nav_bars(state_params):
         results += [gr.update(visible=True)]
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
-        name += '\u2B07' if is_models_file_absent(name, state_params["user_did"]) else ''
+        name += '\u2B07' if is_models_file_absent(name, user_did) else ''
         visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, interactive=True, visible=visible_flag)]
