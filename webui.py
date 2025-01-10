@@ -1417,8 +1417,9 @@ with shared.gradio_root:
                 else:
                     aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
             aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
+            aspect_ratios_new, aspect_ratio = topbar.get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
             if aspect_ratio_select_mode:
-                aspect_ratios, aspect_ratio = topbar.get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
+                aspect_ratios = aspect_ratios_new
                 if 'auto_match' in aspect_ratio_select_mode:
                     aspect_ratios = [aspect_ratio]
             aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)

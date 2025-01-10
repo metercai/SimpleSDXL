@@ -121,7 +121,7 @@ def get_admin_default(admin_key):
         admin_value = bool_map[admin_value.lower()]
     elif re.match(float_pattern, admin_value):
         admin_value = float(admin_value)
-    elif admin_value == 'None':
+    elif admin_value == 'None' or admin_value == 'Unknown':
         admin_value = None
     return admin_value
 
