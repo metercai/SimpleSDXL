@@ -234,7 +234,8 @@ def replace_wildcard(text, rng):
     i = 1
     while parts:
         for wildcard in parts:
-            text = text.replace(f'__{wildcard}__', rng.choice(wildcards[wildcard]), 1)
+            if wildcard in wildcards:
+                text = text.replace(f'__{wildcard}__', rng.choice(wildcards[wildcard]), 1)
         parts = tag_regex2.findall(text)
         i += 1
         if i > wildcards_max_bfs_depth:

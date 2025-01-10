@@ -150,11 +150,11 @@
   "Enhance": "启用自动修图(若没有上传图片则对接图片生成)",
   "Enhance+": "增强修图",
   "Advanced+": "高级选项",
-  "Advanced Control": "高级提示：风格迁移-ImagePrompt，边缘检测-PyraCanny，结构深度-CPDS，脸部交换-FaceSwap，身体姿态-OpenPose",
+  "Advanced Control": "高级提示：风格迁移-ImagePrompt，边缘检测-PyraCanny，结构深度-CPDS，脸部迁移-FaceSwap，身体姿态-OpenPose",
   "ImagePrompt": "风格迁移",
   "PyraCanny": "边缘检测",
   "CPDS": "结构深度",
-  "FaceSwap": "脸部交换",
+  "FaceSwap": "脸部迁移",
   "OpenPose": "身体姿态",
   "Presets▼": "预置包▼",
   "MyPresets▼": "我的预置▼",
@@ -424,7 +424,7 @@
   "Blessing words": "祝福语",
   "Type blessing words.": "输入您的祝福之语",
   "Upload and canvas": "上传主体图片",
-  "ClothingSwap": "换衣",
+  "ClothingSwap": "换装",
 
 
   "Vertical|9:16": "竖屏|9:16",
