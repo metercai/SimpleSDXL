@@ -4,6 +4,7 @@ import io
 import logging
 import sys
 import threading
+from enhanced.logger import get_log_file, MilliSecondsFormatter
 
 logs = None
 stdout_interceptor = None
@@ -18,6 +19,7 @@ class LogInterceptor(io.TextIOWrapper):
         self._lock = threading.Lock()
         self._flush_callbacks = []
         self._logs_since_flush = []
+        self.log_file = get_log_file()
 
     def write(self, data):
         entry = {"t": datetime.now().isoformat(), "m": data}
@@ -29,6 +31,10 @@ class LogInterceptor(io.TextIOWrapper):
             if isinstance(data, str) and data.startswith("\r") and not logs[-1]["m"].endswith("\n"):
                 logs.pop()
             logs.append(entry)
+
+            with open(self.log_file, "a", encoding='utf-8') as f:
+                f.write(f"{entry['m']}")
+
         super().write(data)
 
     def flush(self):
@@ -69,5 +75,5 @@ def setup_logger(log_level: str = 'INFO', capacity: int = 300):
     logger.setLevel(log_level)
 
     stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(logging.Formatter("[Comfyd] %(message)s"))
+    stream_handler.setFormatter(MilliSecondsFormatter("%(asctime)s [Comfyd] %(message)s"))
     logger.addHandler(stream_handler)

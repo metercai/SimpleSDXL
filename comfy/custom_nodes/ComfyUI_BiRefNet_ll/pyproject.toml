@@ -1,0 +1,15 @@
+[project]
+name = "comfyui_birefnet_ll"
+description = "Sync with version of BiRefNet. NODES:AutoDownloadBiRefNetModel, LoadRembgByBiRefNetModel, RembgByBiRefNet, RembgByBiRefNetAdvanced, GetMaskByBiRefNet, BlurFusionForegroundEstimation."
+version = "1.1.0"
+license = {file = "LICENSE"}
+dependencies = ["numpy", "opencv-python", "timm"]
+
+[project.urls]
+Repository = "https://github.com/lldacing/ComfyUI_BiRefNet_ll"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "lldacing"
+DisplayName = "ComfyUI_BiRefNet_ll"
+Icon = ""

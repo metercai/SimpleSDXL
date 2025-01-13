@@ -4,6 +4,9 @@ import ast
 import shared
 from urllib.parse import urlparse
 from typing import Optional
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 def load_file_from_url(
         url: str,
@@ -25,8 +28,8 @@ def load_file_from_url(
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
-        print(f'Downloading: "{url}" to {cached_file}')
-        print(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，然后重启应用。\n')
+        logger.info(f'Downloading: "{url}" to {cached_file}')
+        logger.info(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，然后重启应用。\n')
         from torch.hub import download_url_to_file
         download_url_to_file(url, cached_file, progress=progress)
         shared.modelsinfo.refresh_file('add', cached_file, url)
@@ -82,12 +85,12 @@ def check_models_exists(preset, user_did=None):
                 path_file = [path_file[1:-1]]
                 result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
                 if result is None or len(result)<size:
-                    #print(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
+                    #logger.info(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
                     return False
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)
                 if file_path is None or file_path == '' or size != os.path.getsize(file_path):
-                    print(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
+                    logger.info(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
                     return False
         return True
     return False
@@ -122,7 +125,7 @@ def download_model_files(preset, user_did=None):
             full_path_file = os.path.abspath(os.path.join(model_dir, file_name))
             if os.path.exists(full_path_file):
                 continue
-            print(f'[Download] The model file is not exists, ready to download: {file_name}')
+            logger.info(f'[Download] The model file is not exists, ready to download: {file_name}')
             model_dir = os.path.dirname(full_path_file)
             file_name = os.path.basename(full_path_file)
             if url is None or url == '':
@@ -164,7 +167,7 @@ def download_diffusers_model(cata, model_name, num, url):
         )
         downfile = os.path.join(path_temp, file_name)
         with zipfile.ZipFile(downfile, 'r') as zipf:
-            print(f'extractall: {downfile} to {path_temp}')
+            logger.info(f'extractall: {downfile} to {path_temp}')
             zipf.extractall(path_temp)
         shutil.move(os.path.join(path_temp, f'SimpleModels/{cata}/{model_name}'), os.path.join(model_cata_map[cata][0], model_name))
         os.remove(downfile)

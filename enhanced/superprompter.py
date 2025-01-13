@@ -5,6 +5,9 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 import modules.config as config
 import shared
 import shutil
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 tokenizer = None
 model = None
@@ -23,7 +26,7 @@ def answer(input_text="", max_new_tokens=256, repetition_penalty=1.2, temperatur
             shutil.copytree(org_modelDir, modelDir)
         if not os.path.exists(os.path.join(modelDir, "model.safetensors")):
             config.downloading_superprompter_model()
-            print("[SuperPrompt] Downloaded the model file for superprompter. \n")
+            logger.info("Downloaded the model file for superprompter. \n")
 
         tokenizer = T5Tokenizer.from_pretrained(modelDir)
         model = T5ForConditionalGeneration.from_pretrained(modelDir, torch_dtype=torch.float16).to(shared.torch_device)

@@ -7,6 +7,9 @@ import ldm_patched.modules.conds
 import ldm_patched.modules.ops
 from enum import Enum
 from . import utils
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 class ModelType(Enum):
     EPS = 1
@@ -56,8 +59,8 @@ class BaseModel(torch.nn.Module):
         if self.adm_channels is None:
             self.adm_channels = 0
         self.inpaint_model = False
-        print("model_type", model_type.name)
-        print("UNet ADM Dimension", self.adm_channels)
+        logger.info(f"model_type {model_type.name}")
+        logger.info(f"UNet ADM Dimension {self.adm_channels}")
 
     def apply_model(self, x, t, c_concat=None, c_crossattn=None, control=None, transformer_options={}, **kwargs):
         sigma = t
@@ -165,10 +168,10 @@ class BaseModel(torch.nn.Module):
         to_load = self.model_config.process_unet_state_dict(to_load)
         m, u = self.diffusion_model.load_state_dict(to_load, strict=False)
         if len(m) > 0:
-            print("unet missing:", m)
+            logger.info(f"unet missing: {m}")
 
         if len(u) > 0:
-            print("unet unexpected:", u)
+            logger.info(f"unet unexpected: {u}")
         del to_load
         return self
 
