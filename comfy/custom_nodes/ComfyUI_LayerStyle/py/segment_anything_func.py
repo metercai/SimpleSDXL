@@ -21,7 +21,7 @@ import folder_paths
 
 logger = logging.getLogger('comfyui_segment_anything')
 
-sam_model_dir_name = "sams"
+sam_model_dir_name = "inpaint"
 sam_model_list = {
     "sam_vit_h (2.56GB)": {
         "model_url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
@@ -46,7 +46,7 @@ sam_model_list = {
     }
 }
 
-groundingdino_model_dir_name = "grounding-dino"
+groundingdino_model_dir_name = "inpaint"
 groundingdino_model_list = {
     "GroundingDINO_SwinT_OGC (694MB)": {
         "config_url": "https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py",
@@ -229,3 +229,4 @@ def sam_segment(
         multimask_output=False)
     masks = masks.permute(1, 0, 2, 3).cpu().numpy()
     return create_tensor_output(image_np, masks, boxes)
+

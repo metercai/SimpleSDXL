@@ -115,45 +115,13 @@
       "title": "LoraLoaderModelOnly"
     }
   },
-  "63": {
-    "inputs": {
-      "weight": 1,
-      "start_at": 0,
-      "end_at": 0.9,
-      "source_face_selection": "center_face",
-      "model": [
-        "56",
-        0
-      ],
-      "pulid_flux": [
-        "66",
-        0
-      ],
-      "eva_clip": [
-        "95",
-        0
-      ],
-      "face_analysis": [
-        "96",
-        0
-      ],
-      "image": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
-    }
-  },
   "66": {
     "inputs": {
       "pulid_file": "pulid_flux_v0.9.1.safetensors"
     },
-    "class_type": "PulidFluxModelLoader",
+    "class_type": "GRPulidFluxModelLoader",
     "_meta": {
-      "title": "Load PuLID Flux Model"
+      "title": "GR Load PuLID Flux Model"
     }
   },
   "71": {
@@ -329,22 +297,6 @@
       "title": "SaveImageWebsocket"
     }
   },
-  "95": {
-    "inputs": {},
-    "class_type": "PulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "Load Eva Clip (PuLID Flux)"
-    }
-  },
-  "96": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "PulidFluxInsightFaceLoader",
-    "_meta": {
-      "title": "Load InsightFace (PuLID Flux)"
-    }
-  },
   "97": {
     "inputs": {
       "boolean": [
@@ -352,7 +304,7 @@
         0
       ],
       "on_true": [
-        "63",
+        "102",
         0
       ],
       "on_false": [
@@ -398,6 +350,71 @@
     "class_type": "easy int",
     "_meta": {
       "title": "Int"
+    }
+  },
+  "102": {
+    "inputs": {
+      "weight": 1,
+      "start_at": 0,
+      "end_at": 0.9,
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "mean",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "56",
+        0
+      ],
+      "pulid_flux": [
+        "104",
+        0
+      ],
+      "eva_clip": [
+        "105",
+        0
+      ],
+      "face_analysis": [
+        "106",
+        0
+      ],
+      "image": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
+    }
+  },
+  "104": {
+    "inputs": {
+      "pulid_file": "pulid_flux_v0.9.1.safetensors"
+    },
+    "class_type": "GRPulidFluxModelLoader",
+    "_meta": {
+      "title": "GR Load PuLID Flux Model"
+    }
+  },
+  "105": {
+    "inputs": {},
+    "class_type": "GRPulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "GR Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "106": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "GRPulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "GR Load InsightFace (PuLID Flux)"
     }
   }
 }
