@@ -12,7 +12,9 @@ from ldm_patched.modules.conds import CONDRegular
 from ldm_patched.modules.sample import get_additional_models, get_models_from_cond, cleanup_additional_models
 from ldm_patched.modules.samplers import resolve_areas_and_cond_masks, wrap_model, calculate_start_end_timesteps, \
     create_cond_with_same_area_if_none, pre_run_control, apply_empty_x_to_equal_area, encode_model_conds
-
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 current_refiner = None
 refiner_switch_step = -1
@@ -143,7 +145,7 @@ def sample_hacked(model, noise, positive, negative, cfg, device, sampler, sigmas
             model.memory_required([noise.shape[0] * 2] + list(noise.shape[1:])) + inference_memory)
 
         model_wrap.inner_model = current_refiner.model
-        print('Refiner Swapped')
+        logger.info('Refiner Swapped')
         return
 
     def callback_wrap(step, x0, x, total_steps):

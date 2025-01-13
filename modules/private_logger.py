@@ -11,6 +11,9 @@ from PIL.PngImagePlugin import PngInfo
 from modules.flags import OutputFormat
 from modules.meta_parser import MetadataParser, get_exif
 from modules.util import generate_temp_filename
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 log_cache = {}
 
@@ -148,7 +151,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     with open(html_name, 'w', encoding='utf-8') as f:
         f.write(begin_part + middle_part + end_part)
 
-    print(f'Image generated with private log at: {html_name}')
+    logger.info(f'Image generated with private log at: {html_name}')
 
     log_cache[html_name] = middle_part
     
@@ -175,5 +178,5 @@ def log_ext(file_name):
     with open(log_name, 'w', encoding='utf-8') as log_file:
         json.dump(log_ext, log_file)
 
-    print(f'Image generated with advanced params log at: {log_name}')
+    logger.info(f'Image generated with advanced params log at: {log_name}')
     return 

@@ -9,11 +9,14 @@ import enhanced.superprompter as superprompter
 import ldm_patched.modules.model_management
 import modules.default_pipeline as pipeline
 import enhanced.all_parameters as ads
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 from PIL import Image
 from transformers import AutoTokenizer, AutoModel
 from modules.model_loader import download_diffusers_model
-from modules.util import HWC3, resize_image
+from modules.util import HWC3, resize_image, is_chinese
 from enhanced.simpleai import comfyd
 
 class MiniCPM:  
@@ -70,10 +73,11 @@ class MiniCPM:
             del MiniCPM.tokenizer
             MiniCPM.model_v26 = None
             MiniCPM.tokenizer = None
-            torch.cuda.empty_cache()
-            torch.cuda.ipc_collect()
-            gc.collect()
-            ldm_patched.modules.model_management.print_memory_info("after free minicpm model")
+        translator.free_translator_model()
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+        gc.collect()
+        ldm_patched.modules.model_management.print_memory_info("after free minicpm model")
     
     @torch.no_grad()
     @torch.inference_mode()
@@ -100,19 +104,19 @@ class MiniCPM:
         )
         
         generated_text = res
-        print(f'[MiniCPM] The generated text:{generated_text}')
+        logger.info(f'The generated text:{generated_text}')
         ldm_patched.modules.model_management.print_memory_info("after minicpm inference")
         return generated_text
 
     def interrogate(self, image, output_chinese=False, prompt=None):
         if prompt is not None:
-            print(f'[MiniCPM] The prompt of image: {prompt}')
+            logger.info(f'The prompt of image: {prompt}')
             return self.inference(image, prompt)
         if output_chinese:
-            print(f'[MiniCPM] The prompt of image: {MiniCPM.prompt_i2t_chinese}')
+            logger.info(f'The prompt of image: {MiniCPM.prompt_i2t_chinese}')
             return self.inference(image, MiniCPM.prompt_i2t_chinese)
         else:
-            print(f'[MiniCPM] The prompt of image: {MiniCPM.prompt_i2t}')
+            logger.info(f'The prompt of image: {MiniCPM.prompt_i2t}')
             return self.inference(image, MiniCPM.prompt_i2t)
 
     def extended_prompt(self, input_text, prompt, translation_methods='Third APIs'):
@@ -121,15 +125,13 @@ class MiniCPM:
         else:
             return self.inference(None, prompt=f'{MiniCPM.prompt_extend}{input_text}')
 
-    def translate(self, input_text, translation_methods='Third APIs'):
+    def translate(self, input_text, method=None):
         if not is_chinese(input_text):
             return input_text
-        if not MiniCPM.get_enable() or not shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file):
-            return translator.convert(input_text, translation_methods)
+        if not MiniCPM.get_enable() or not shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file) or method in ['Slim Model', 'Third APIs']:
+            return translator.convert(input_text, method)
         else:
             return self.inference(None, prompt=f'{MiniCPM.prompt_translator}{input_text}')
-
-is_chinese = lambda x: sum([1 if (u'\u4e00' <= i <= u'\u9fa5') or (u'\u3000' <= i <= u'\u303F') or (u'\uFF00' <= i <= u'\uFFEF') else 0 for i in x]) > 0
 
 minicpm = MiniCPM()
 default_interrogator = minicpm.interrogate

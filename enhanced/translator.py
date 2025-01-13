@@ -10,7 +10,10 @@ from modules.config import paths_llms
 from modules.model_loader import load_file_from_url
 from download import download
 from functools import lru_cache
-
+from modules.util import is_chinese
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 Q_punct = '｀～！＠＃＄％＾＆＊（）＿＋＝－｛｝［］：＂；｜＜＞？，．／。　１２３４５６７８９０'
 B_punct = '`~!@#$%^&*()_+=-{}[]:";|<>?,./. 1234567890'
@@ -21,7 +24,6 @@ translator_org = ['baidu', 'alibaba', 'sogou', 'caiyun']
 translator_default = translator_org[random.randint(1,2)]
 translator_path = os.path.join(paths_llms[0], 'nllb-200-distilled-600M')
 translator_slim_path = os.path.join(paths_llms[0], 'Helsinki-NLP/opus-mt-zh-en')
-is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
 
 translator_path_old = os.path.join(paths_llms[0], '../translator')
 if os.path.exists(translator_path_old) and not os.path.exists(paths_llms[0]):
@@ -79,17 +81,17 @@ def translate2en_apis(text):
         return ts.translate_text(text, translator=translator_default, to_language='en')
     except Exception as e:
         try:
-            print(f'[Translator] Change another translator because of {e}')
+            logger.info(f'Change another translator because of {e}')
             translator_default = translator_org[random.randint(1,2)]
             return ts.translate_text(text, translator=translator_default, to_language='en')
         except Exception as e:
-            print(f'[Translator] Error during translation of APIs methods: {e}')
+            logger.info(f'Error during translation of APIs methods: {e}')
             return text
 
 def init_or_load_translator_model(method='Slim Model'):
     global g_tokenizer, g_model, g_model_type
 
-    print(f'init_or_load_translator_model: {method}')
+    logger.info(f'init_or_load_translator_model: {method}')
     if method != g_model_type or g_tokenizer is None or g_model is None:
         if method == "Big Model":
             if not os.path.exists(translator_path):
@@ -105,7 +107,7 @@ def init_or_load_translator_model(method='Slim Model'):
                     url='https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/pytorch_model.bin',
                     model_dir=translator_path,
                     file_name='pytorch_model.bin')
-            print(f'[Translator] load model form : {translator_path}')
+            logger.info(f'load model form : {translator_path}')
             g_tokenizer = AutoTokenizer.from_pretrained(translator_path, src_lang="zho_Hans")
             g_model = AutoModelForSeq2SeqLM.from_pretrained(translator_path)
         else:
@@ -122,7 +124,7 @@ def init_or_load_translator_model(method='Slim Model'):
                     url='https://huggingface.co/Helsinki-NLP/opus-mt-zh-en/resolve/main/pytorch_model.bin',
                     model_dir=translator_slim_path,
                     file_name='pytorch_model.bin')
-            print(f'[Translator] load slim model form : {translator_slim_path}')
+            logger.info(f'load slim model form : {translator_slim_path}')
             g_tokenizer = AutoTokenizer.from_pretrained(translator_slim_path)
             g_model = AutoModelForSeq2SeqLM.from_pretrained(translator_slim_path).eval()
         g_model_type = method
@@ -143,7 +145,7 @@ def toggle(text: str, method: str = 'Slim Model') -> str:
 
 
 def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
-    global Q_alphabet, B_puncti, is_chinese
+    global Q_alphabet, B_puncti
 
     start = time.perf_counter()
 
@@ -151,13 +153,13 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
         tokenizer, model = init_or_load_translator_model('Big Model')
         text_zh = translate2zh_model(model, tokenizer, text)
         stop = time.perf_counter()
-        print(f'[Translator] Translate by "Big Model" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
+        logger.info(f'Translate by "Big Model" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
         return text_zh
     is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
     #text = Q2B_number_punctuation(text)
     if is_chinese(text):
         if method == 'Third APIs':
-            print(f'[Translator] Using an online translation APIs.')
+            logger.info(f'Using an online translation APIs.')
         else:
             tokenizer, model = init_or_load_translator_model(method)
 
@@ -188,7 +190,6 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
                     else:
                         #text_zh = Q2B_alphabet(text_zh)
                         ts_methods, text_en=T_ZH2EN(text_zh)
-                        #print(f'translate: {text_zh} -> {text_en}')
                         text_eng += text_en  
                         text_zh = ""
                 text_eng += _char
@@ -198,7 +199,7 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
         text_eng = Q2B_number_punctuation(text_eng)
         text_eng = Q2B_alphabet(text_eng)
         stop = time.perf_counter()
-        print(f'[Translator] Translate by "{ts_methods}" in {(stop-start):.2f}s: "{text}" to "{text_eng}"')
+        logger.info(f'Translate by "{ts_methods}" in {(stop-start):.2f}s: "{text}" to "{text_eng}"')
         return text_eng
     return text
 

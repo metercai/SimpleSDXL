@@ -1,0 +1,345 @@
+{
+  "551": {
+    "inputs": {
+      "samples": [
+        "886",
+        0
+      ],
+      "vae": [
+        "751",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "751": {
+    "inputs": {
+      "ckpt_name": "SDXL_Yamers_Cartoon_Arcadia.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "755": {
+    "inputs": {
+      "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "756": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapterModelLoader"
+    }
+  },
+  "776": {
+    "inputs": {
+      "interpolation": "BICUBIC",
+      "crop_position": "top",
+      "sharpening": 0,
+      "image": [
+        "891",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "PrepImageForClipVision"
+    }
+  },
+  "845": {
+    "inputs": {
+      "image": "welcome.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "862": {
+    "inputs": {
+      "weight": 1.1500000000000001,
+      "weight_faceidv2": 1.35,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "884",
+        0
+      ],
+      "ipadapter": [
+        "756",
+        0
+      ],
+      "image": [
+        "776",
+        0
+      ],
+      "image_negative": [
+        "871",
+        0
+      ],
+      "clip_vision": [
+        "755",
+        0
+      ],
+      "insightface": [
+        "873",
+        0
+      ]
+    },
+    "class_type": "IPAdapterFaceID",
+    "_meta": {
+      "title": "IPAdapterFaceID"
+    }
+  },
+  "871": {
+    "inputs": {
+      "type": "shuffle",
+      "strength": 0.7000000000000001,
+      "blur": 0,
+      "image_optional": [
+        "776",
+        0
+      ]
+    },
+    "class_type": "IPAdapterNoise",
+    "_meta": {
+      "title": "IPAdapterNoise"
+    }
+  },
+  "873": {
+    "inputs": {
+      "provider": "CPU",
+      "model_name": "buffalo_l"
+    },
+    "class_type": "IPAdapterInsightFaceLoader",
+    "_meta": {
+      "title": "IPAdapterInsightFaceLoader"
+    }
+  },
+  "884": {
+    "inputs": {
+      "lora_name": "StickersRedmond.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "751",
+        0
+      ],
+      "clip": [
+        "751",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "lora_1"
+    }
+  },
+  "886": {
+    "inputs": {
+      "seed": 656214812089748,
+      "steps": 20,
+      "cfg": 3.5,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "862",
+        0
+      ],
+      "positive": [
+        "896",
+        0
+      ],
+      "negative": [
+        "895",
+        0
+      ],
+      "latent_image": [
+        "887",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "887": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "aspect_ratios_size"
+    }
+  },
+  "891": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "nearest-exact",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "845",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "ImageResize+"
+    }
+  },
+  "895": {
+    "inputs": {
+      "text": "nsfw, nude, ugly，shiny, soft, broken, oversaturated，watermark",
+      "clip": [
+        "884",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "896": {
+    "inputs": {
+      "text": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render, portrait, close shot,smiling",
+      "clip": [
+        "884",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "903": {
+    "inputs": {
+      "upscale_by": 1.5,
+      "seed": 667125225068510,
+      "steps": 8,
+      "cfg": 7,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 0.2,
+      "mode_type": "Chess",
+      "tile_width": 512,
+      "tile_height": 512,
+      "mask_blur": 8,
+      "tile_padding": 32,
+      "seam_fix_mode": "Half Tile + Intersections",
+      "seam_fix_denoise": 1,
+      "seam_fix_width": 64,
+      "seam_fix_mask_blur": 8,
+      "seam_fix_padding": 16,
+      "force_uniform_tiles": true,
+      "tiled_decode": false,
+      "image": [
+        "551",
+        0
+      ],
+      "model": [
+        "908",
+        0
+      ],
+      "positive": [
+        "907",
+        0
+      ],
+      "negative": [
+        "905",
+        0
+      ],
+      "vae": [
+        "908",
+        2
+      ],
+      "upscale_model": [
+        "904",
+        0
+      ]
+    },
+    "class_type": "UltimateSDUpscale",
+    "_meta": {
+      "title": "UltimateSDUpscale"
+    }
+  },
+  "904": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "UpscaleModelLoader"
+    }
+  },
+  "905": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "908",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt2"
+    }
+  },
+  "907": {
+    "inputs": {
+      "text": "best quality, masterpiece",
+      "clip": [
+        "908",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt2"
+    }
+  },
+  "908": {
+    "inputs": {
+      "ckpt_name": "SDXL_Yamers_Cartoon_Arcadia.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "911": {
+    "inputs": {
+      "images": [
+        "903",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  }
+}

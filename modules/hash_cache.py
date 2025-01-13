@@ -6,6 +6,9 @@ from multiprocessing import cpu_count
 import args_manager
 from modules.util import sha256, HASH_SHA256_LENGTH, get_file_from_folder_list
 from shared import modelsinfo 
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 hash_cache_filename = 'hash_cache.txt'
 hash_cache = {}
@@ -14,7 +17,7 @@ def sha256_filename(filepath):
     import hashlib
     import os
     filename = os.path.basename(filepath)
-    print(f'sha256_filename: {filename}')
+    logger.info(f'sha256_filename: {filename}')
     sha256_hash = hashlib.sha256()
     sha256_hash.update(filename.encode('utf-8'))
     return sha256_hash.hexdigest()[:10]
@@ -27,9 +30,9 @@ def sha256_from_cache(filepath):
         else:
             hash_value = modelsinfo.get_file_muid(filepath)
             if not hash_value:
-                print(f"[Cache] Calculating sha256 for {filepath}")
+                logger.info(f"[Cache] Calculating sha256 for {filepath}")
                 hash_value = sha256(filepath)
-        print(f"[Cache] sha256 for {filepath}: {hash_value}")
+        logger.info(f"[Cache] sha256 for {filepath}: {hash_value}")
         hash_cache[filepath] = hash_value
         save_cache_to_file(filepath, hash_value)
 
@@ -46,11 +49,11 @@ def load_cache_from_file():
                     entry = json.loads(line)
                     for filepath, hash_value in entry.items():
                         if not os.path.exists(filepath) or not isinstance(hash_value, str) and len(hash_value) != HASH_SHA256_LENGTH:
-                            print(f'[Cache] Skipping invalid cache entry: {filepath}')
+                            logger.info(f'[Cache] Skipping invalid cache entry: {filepath}')
                             continue
                         hash_cache[filepath] = hash_value
     except Exception as e:
-        print(f'[Cache] Loading failed: {e}')
+        logger.info(f'[Cache] Loading failed: {e}')
 
 
 def save_cache_to_file(filename=None, hash_value=None):
@@ -69,7 +72,7 @@ def save_cache_to_file(filename=None, hash_value=None):
                 json.dump({filepath: hash_value}, fp)
                 fp.write('\n')
     except Exception as e:
-        print(f'[Cache] Saving failed: {e}')
+        logger.info(f'[Cache] Saving failed: {e}')
 
 
 def init_cache(model_filenames, paths_checkpoints, lora_filenames, paths_loras):
@@ -88,10 +91,10 @@ def rebuild_cache(lora_filenames, model_filenames, paths_checkpoints, paths_lora
         filepath = get_file_from_folder_list(filename, paths)
         sha256_from_cache(filepath)
 
-    print('[Cache] Rebuilding hash cache')
+    logger.info('[Cache] Rebuilding hash cache')
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for model_filename in model_filenames:
             executor.submit(thread, model_filename, paths_checkpoints)
         for lora_filename in lora_filenames:
             executor.submit(thread, lora_filename, paths_loras)
-    print('[Cache] Done')
+    logger.info('[Cache] Done')
