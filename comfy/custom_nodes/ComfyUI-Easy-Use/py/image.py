@@ -1,5 +1,6 @@
 import os
 import json
+import copy
 import hashlib
 import folder_paths
 import torch
@@ -17,7 +18,7 @@ from torchvision.transforms.functional import to_pil_image
 from .libs.log import log_node_info
 from .libs.utils import AlwaysEqualProxy, ByPassTypeTuple
 from .libs.cache import cache, update_cache, remove_cache
-from .libs.image import pil2tensor, tensor2pil, ResizeMode, get_new_bounds, RGB2RGBA, image2mask
+from .libs.image import pil2tensor, tensor2pil, ResizeMode, get_new_bounds, RGB2RGBA, image2mask, empty_image
 from .libs.colorfix import adain_color_fix, wavelet_color_fix
 from .libs.chooser import ChooserMessage, ChooserCancelled
 from .config import REMBG_DIR, REMBG_MODELS, HUMANPARSING_MODELS, MEDIAPIPE_MODELS, MEDIAPIPE_DIR
@@ -798,13 +799,13 @@ class imageRemBg:
     return {
       "required": {
         "images": ("IMAGE",),
-        "rem_mode": (("RMBG-1.4","Inspyrenet"),),
+        "rem_mode": (("RMBG-2.0", "RMBG-1.4","Inspyrenet"), {"default": "RMBG-1.4"}),
         "image_output": (["Hide", "Preview", "Save", "Hide/Save"], {"default": "Preview"}),
         "save_prefix": ("STRING", {"default": "ComfyUI"}),
-
       },
       "optional":{
         "torchscript_jit": ("BOOLEAN", {"default": False}),
+        "add_background": (["none", "white", "black"], {"default": "none"})
       },
       "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
     }
@@ -816,10 +817,54 @@ class imageRemBg:
 
   CATEGORY = "EasyUse/Image"
 
-  def remove(self, rem_mode, images, image_output, save_prefix, torchscript_jit=False, prompt=None, extra_pnginfo=None):
+
+  def remove(self, rem_mode, images, image_output, save_prefix, torchscript_jit=False, add_background='none',prompt=None, extra_pnginfo=None):
     new_images = list()
     masks = list()
-    if rem_mode == "RMBG-1.4":
+    if rem_mode == "RMBG-2.0":
+      repo_id = REMBG_MODELS[rem_mode]['model_url']
+      model_path = os.path.join(REMBG_DIR, 'RMBG-2.0')
+      if not os.path.exists(model_path):
+        from huggingface_hub import snapshot_download
+        snapshot_download(repo_id=repo_id, local_dir=model_path, ignore_patterns=["*.md", "*.txt"])
+      from transformers import AutoModelForImageSegmentation
+      model = AutoModelForImageSegmentation.from_pretrained(model_path, trust_remote_code=True)
+      torch.set_float32_matmul_precision('high')
+      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+      model.to(device)
+      model.eval()
+
+      from torchvision import transforms
+      transform_image = transforms.Compose([
+        transforms.Resize((1024, 1024)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+      ])
+      for image in images:
+        orig_im = tensor2pil(image)
+        input_tensor = transform_image(orig_im).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+          preds = model(input_tensor)[-1].sigmoid().cpu()
+          pred = preds[0].squeeze()
+
+          mask = transforms.ToPILImage()(pred)
+          mask = mask.resize(orig_im.size)
+
+          new_im = orig_im.copy()
+          new_im.putalpha(mask)
+
+          new_im_tensor = pil2tensor(new_im)
+          mask_tensor = pil2tensor(mask)
+
+          new_images.append(new_im_tensor)
+          masks.append(mask_tensor)
+
+      torch.cuda.empty_cache()
+      new_images = torch.cat(new_images, dim=0)
+      masks = torch.cat(masks, dim=0)
+
+    elif rem_mode == "RMBG-1.4":
       # load model
       model_url = REMBG_MODELS[rem_mode]['model_url']
       suffix = model_url.split(".")[-1]
@@ -868,6 +913,13 @@ class imageRemBg:
       new_images = torch.cat(new_images, dim=0)
       masks = torch.cat(masks, dim=0)
 
+    if add_background != 'none':
+
+      _layer = tensor2pil(new_images)
+      _canvas = Image.new('RGB', _layer.size, (255,255,255) if add_background == 'white' else (0, 0, 0))
+      _canvas.paste(_layer, mask=_layer)
+      new_images = pil2tensor(_canvas)
+
     results = easySave(new_images, save_prefix, image_output, prompt, extra_pnginfo)
 
     if image_output in ("Hide", "Hide/Save"):
@@ -913,6 +965,7 @@ class imageChooser(PreviewImage):
 
   def chooser(self, prompt=None, my_unique_id=None, extra_pnginfo=None, **kwargs):
     id = my_unique_id[0]
+    id = id.split('.')[len(id.split('.')) - 1] if "." in id else id
     if id not in ChooserMessage.stash:
       ChooserMessage.stash[id] = {}
     my_stash = ChooserMessage.stash[id]
@@ -1191,10 +1244,14 @@ class humanSegmentation:
 
         from functools import reduce
 
-        model_path = get_local_filepath(MEDIAPIPE_MODELS['selfie_multiclass_256x256']['model_url'], MEDIAPIPE_DIR)
-        model_asset_buffer = None
-        with open(model_path, "rb") as f:
-            model_asset_buffer = f.read()
+        if method in cache:
+          _, model_asset_buffer = cache["selfie_multiclass_256x256"][1]
+        else:
+          model_path = get_local_filepath(MEDIAPIPE_MODELS['selfie_multiclass_256x256']['model_url'], MEDIAPIPE_DIR)
+          model_asset_buffer = None
+          with open(model_path, "rb") as f:
+              model_asset_buffer = f.read()
+          update_cache(method, 'human_segmentation', (False, model_asset_buffer))
         image_segmenter_base_options = mp.tasks.BaseOptions(model_asset_buffer=model_asset_buffer)
         options = mp.tasks.vision.ImageSegmenterOptions(
           base_options=image_segmenter_base_options,
@@ -1260,10 +1317,15 @@ class humanSegmentation:
             mask = torch.cat(ret_masks, dim=0)
 
       elif method == "human_parsing_lip":
-        from .human_parsing.run_parsing import HumanParsing
-        onnx_path = os.path.join(folder_paths.models_dir, 'onnx')
-        model_path = get_local_filepath(HUMANPARSING_MODELS['parsing_lip']['model_url'], onnx_path)
-        parsing = HumanParsing(model_path=model_path)
+        if method in cache:
+          _, parsing = cache[method][1]
+        else:
+          from .human_parsing.run_parsing import HumanParsing
+          onnx_path = os.path.join(folder_paths.models_dir, 'onnx')
+          model_path = get_local_filepath(HUMANPARSING_MODELS['parsing_lip']['model_url'], onnx_path)
+          parsing = HumanParsing(model_path=model_path)
+          update_cache(method, 'human_segmentation', (False, parsing))
+
         model_image = image.squeeze(0)
         model_image = model_image.permute((2, 0, 1))
         model_image = to_pil_image(model_image)
@@ -1277,18 +1339,28 @@ class humanSegmentation:
         output_image, = JoinImageWithAlpha().join_image_with_alpha(image, alpha)
 
       elif method == "human_parts (deeplabv3p)":
-        from .human_parsing.run_parsing import HumanParts
-        onnx_path = os.path.join(folder_paths.models_dir, 'onnx')
-        human_parts_path = os.path.join(onnx_path, 'human-parts')
-        model_path = get_local_filepath(HUMANPARSING_MODELS['human-parts']['model_url'], human_parts_path)
-        parsing = HumanParts(model_path=model_path)
+        if method in cache:
+          _, parsing = cache[method][1]
+        else:
+          from .human_parsing.run_parsing import HumanParts
+          onnx_path = os.path.join(folder_paths.models_dir, 'onnx')
+          human_parts_path = os.path.join(onnx_path, 'human-parts')
+          model_path = get_local_filepath(HUMANPARSING_MODELS['human-parts']['model_url'], human_parts_path)
+          parsing = HumanParts(model_path=model_path)
+          update_cache(method, 'human_segmentation', (False, parsing))
 
-        mask, = parsing(image, mask_components)
+        ret_images = []
+        ret_masks = []
+        for img in image:
+          mask, = parsing(img, mask_components)
+          _mask = tensor2pil(mask).convert('L')
 
-        alpha = 1.0 - mask
+          ret_image = RGB2RGBA(tensor2pil(img).convert('RGB'), _mask.convert('L'))
+          ret_images.append(pil2tensor(ret_image))
+          ret_masks.append(image2mask(_mask))
 
-        output_image, = JoinImageWithAlpha().join_image_with_alpha(image, alpha)
-
+        output_image = torch.cat(ret_images, dim=0)
+        mask = torch.cat(ret_masks, dim=0)
 
       # use crop
       bbox = [[0, 0, 0, 0]]
@@ -1710,13 +1782,8 @@ class loadImagesForLoop:
 
     graph = GraphBuilder()
     index = 0
-    if limit == -1:
-      files_length = len(dir_files)
-      total = files_length - start_index if start_index > 0 else files_length
-    else:
-      total = limit
-    unique_id = unique_id.split('.')[len(unique_id.split('.')) - 1] if "." in unique_id else unique_id
-    update_cache('forloop' + str(unique_id), 'forloop', total)
+    # unique_id = unique_id.split('.')[len(unique_id.split('.')) - 1] if "." in unique_id else unique_id
+    # update_cache('forloop' + str(unique_id), 'forloop', total)
     if "initial_value0" in kwargs:
       index = kwargs["initial_value0"]
     # start at start_index
@@ -1736,7 +1803,7 @@ class loadImagesForLoop:
     else:
       mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
 
-    while_open = graph.node("easy whileLoopStart", condition=total, initial_value0=index, initial_value1=kwargs.get('initial_value1',None), initial_value2=kwargs.get('initial_value2',None))
+    while_open = graph.node("easy whileLoopStart", condition=True, initial_value0=index, initial_value1=kwargs.get('initial_value1',None), initial_value2=kwargs.get('initial_value2',None))
     outputs = [kwargs.get('initial_value1',None), kwargs.get('initial_value2',None)]
 
     return {
@@ -1863,6 +1930,107 @@ class saveImageLazy():
 
     return {"ui": {"images": results} , "result": (images,)}
 
+
+class makeImageForICRepaint:
+  @classmethod
+  def INPUT_TYPES(s):
+    return {
+      "required": {
+        "image_1": ("IMAGE",),
+        "direction": (["top-bottom", "left-right"], {"default": "left-right"}),
+        "pixels": ("INT", {"default": 0, "max": MAX_RESOLUTION, "min": 0, "step": 8, "tooltip": "The pixel of the output image is not set when it is 0"}),
+      },
+      "optional": {
+        "image_2": ("IMAGE",),
+        "mask_1": ("MASK",),
+        "mask_2": ("MASK",),
+      },
+    }
+
+  DESCRIPTION = "make Image for ICLora to Re-paint"
+  CATEGORY = "EasyUse/Image"
+  FUNCTION = "make"
+
+  RETURN_TYPES = ("IMAGE", "MASK", "MASK", "INT", "INT", "INT", "INT")
+  RETURN_NAMES = ("image", "mask", "context_mask", "width", "height", "x", "y")
+
+  def fillMask(self, width, height, mask, box=(0, 0), color=0):
+    bg = Image.new("L", (width, height), color)
+    bg.paste(mask, box, mask)
+    return bg
+
+  def emptyImage(self, width, height, batch_size=1, color=0):
+    r = torch.full([batch_size, height, width, 1], ((color >> 16) & 0xFF) / 0xFF)
+    g = torch.full([batch_size, height, width, 1], ((color >> 8) & 0xFF) / 0xFF)
+    b = torch.full([batch_size, height, width, 1], ((color) & 0xFF) / 0xFF)
+    return torch.cat((r, g, b), dim=-1)
+
+  def make(self, image_1, direction, pixels=0, image_2=None, mask_1=None, mask_2=None):
+    if image_2 is None:
+      image_2 = self.emptyImage(image_1.shape[2], image_1.shape[1])
+      mask_2 = torch.full((1, image_1.shape[1], image_1.shape[2]), 1, dtype=torch.float32, device="cpu")
+
+    elif image_2 is not None and mask_2 is None:
+      raise ValueError("mask_2 is required when image_2 is provided")
+    if pixels > 0:
+      _, img2_h, img2_w, _ = image_2.shape
+      h = pixels if direction == 'left-right' else int(img2_h * (pixels / img2_w))
+      w = pixels if direction == 'top-bottom' else int(img2_w * (pixels / img2_h))
+
+      image_2 = image_2.movedim(-1, 1)
+      image_2 = comfy.utils.common_upscale(image_2, w, h, 'bicubic', 'disabled')
+      image_2 = image_2.movedim(1, -1)
+
+      orig_image_2 = tensor2pil(image_2)
+      orig_mask_2 = tensor2pil(mask_2).convert('L')
+      orig_mask_2 = orig_mask_2.resize(orig_image_2.size)
+      mask_2 = pil2tensor(orig_mask_2)
+
+    _, img1_h, img1_w, _ = image_1.shape
+    _, img2_h, img2_w, _ = image_2.shape
+
+    image, mask, context_mask = None, None, None
+
+    # resize
+    if img1_h != img2_h and img1_w != img2_w:
+      width, height = img2_w, img2_h
+      if direction == 'left-right' and img1_h != img2_h:
+        scale_factor = img2_h / img1_h
+        width = round(img1_w * scale_factor)
+      elif direction == 'top-bottom' and img1_w != img2_w:
+        scale_factor = img2_w / img1_w
+        height = round(img1_h * scale_factor)
+
+      image_1 = image_1.movedim(-1, 1)
+      image_1 = comfy.utils.common_upscale(image_1, width, height, 'bicubic', 'disabled')
+      image_1 = image_1.movedim(1, -1)
+
+    if mask_1 is None:
+      mask_1 = torch.full((1, image_1.shape[1], image_1.shape[2]), 0, dtype=torch.float32, device="cpu")
+
+    orig_image_1 = tensor2pil(image_1)
+    orig_mask_1 = tensor2pil(mask_1).convert('L')
+
+    if orig_mask_1.size != orig_image_1.size:
+      orig_mask_1 = orig_mask_1.resize(orig_image_1.size)
+
+    img1_w, img1_h = orig_image_1.size
+    image_1 = pil2tensor(orig_image_1)
+    image = torch.cat((image_1, image_2), dim=2) if direction == 'left-right' else torch.cat((image_1, image_2),
+                                                                                             dim=1)
+
+    context_mask = self.fillMask(image.shape[2], image.shape[1], orig_mask_1)
+    context_mask = pil2tensor(context_mask)
+
+    orig_mask_2 = tensor2pil(mask_2).convert('L')
+    x = img1_w if direction == 'left-right' else 0
+    y = img1_h if direction == 'top-bottom' else 0
+    mask = self.fillMask(image.shape[2], image.shape[1], orig_mask_2, (x, y))
+    mask = pil2tensor(mask)
+
+    return (image, mask, context_mask, img2_w, img2_h, x, y)
+
+
 NODE_CLASS_MAPPINGS = {
   "easy imageInsetCrop": imageInsetCrop,
   "easy imageCount": imageCount,
@@ -1898,6 +2066,7 @@ NODE_CLASS_MAPPINGS = {
   "easy humanSegmentation": humanSegmentation,
   "easy removeLocalImage": removeLocalImage,
   "easy saveImageLazy": saveImageLazy,
+  "easy makeImageForICLora": makeImageForICRepaint
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -1936,4 +2105,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   "easy humanSegmentation": "Human Segmentation",
   "easy removeLocalImage": "Remove Local Image",
   "easy saveImageLazy": "Save Image (Lazy)",
+  "easy makeImageForICLora": "Make Image For ICLora"
 }

@@ -13,6 +13,9 @@ import enhanced.gallery as gallery
 import enhanced.version as version
 import modules.flags as flags
 import modules.meta_parser as meta_parser
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -54,9 +57,9 @@ def toggle_prompt_info(state_params):
     infobox_state = state_params["infobox_state"]
     infobox_state = not infobox_state
     state_params.update({"infobox_state": infobox_state})
-    #print(f'[ToolBox] Toggle_image_info: {infobox_state}')
+    #logger.info(f'[ToolBox] Toggle_image_info: {infobox_state}')
     [choice, selected] = state_params["prompt_info"]
-    prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
+    prompt_info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user"].get_did())
     return gr.update(value=make_infobox_markdown(prompt_info, state_params['__theme']), visible=infobox_state), state_params
 
 
@@ -93,7 +96,7 @@ def toggle_note_box(item, state_params):
         title_extra = '\n' # + toolbox_note_missing_muid
     if item == 'delete':
         [choice, selected] = state_params["prompt_info"]
-        info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
+        info = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user"].get_did())
         return gr.update(value=f'DELETE the image from output directory and logs!', visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
     if item == 'regen':
         return gr.update(value=toolbox_note_regenerate_title, visible=True), gr.update(visible=flag), gr.update(visible=flag), state_params
@@ -133,7 +136,7 @@ def delete_image(state_params):
     [choice, selected] = state_params["prompt_info"]
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
-    user_did = state_params["user_did"]
+    user_did = state_params["user"].get_did()
     info = gallery.get_images_prompt(choice, selected, max_per_page, user_did=user_did)
     file_name = info["Filename"]
     output_index = choice.split('/')
@@ -162,7 +165,7 @@ def delete_image(state_params):
                 line = log_file.readline()
         with open(log_path, "w", encoding="utf-8") as log_file:
             log_file.write(file_text)
-        print(f'[ToolBox] Delete item from log.html: {file_name}')
+        logger.info(f'Delete item from log.html: {file_name}')
 
     log_name = os.path.join(dir_path, "log_ads.json")
     log_ext = {}
@@ -178,7 +181,7 @@ def delete_image(state_params):
     file_path = os.path.join(dir_path, file_name)
     if os.path.exists(file_path):
         os.remove(file_path)
-    print(f'[ToolBox] Delete image file: {file_path}')
+    logger.info(f'Delete image file: {file_path}')
 
     image_list_nums = len(gallery.refresh_images_catalog(output_index[0], True, user_did))
     if image_list_nums<=0:
@@ -235,12 +238,12 @@ def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mo
     results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
 
     engine_name = parsed_parameters.get("Backend Engine", parsed_parameters.get("backend_engine", "SDXL-Fooocus"))
-    print(f'[ToolBox] Reset_params_from_image: -->{engine_name} params from the image with embedded parameters.')
+    logger.info(f'Reset_params_from_image: -->{engine_name} params from the image with embedded parameters.')
     return results
 
 def reset_image_params(state_params, is_generating, inpaint_mode):
     [choice, selected] = state_params["prompt_info"]
-    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user_did"])
+    metainfo = gallery.get_images_prompt(choice, selected, state_params["__max_per_page"], user_did=state_params["user"].get_did())
     metadata = copy.deepcopy(metainfo)
     metadata['Refiner Model'] = metainfo.get('Refiner Model', 'None')
     state_params.update({"note_box_state": ['',0,0]})
@@ -308,8 +311,8 @@ def save_preset(*args):
     inpaint_engine_state = args.pop()
     inpaint_mode = args.pop()
     enhance_inpaint_mode_ctrls = [args.pop() for _ in range(config.default_enhance_tabs)]
-    generate_button = args.pop()
-    load_parameter_button = args.pop()
+    #generate_button = args.pop()
+    #load_parameter_button = args.pop()
     freeu_ctrls = [bool(args.pop()), float(args.pop()), float(args.pop()), float(args.pop()), float(args.pop())]
     loras = [(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in range(config.default_max_lora_number)]
     loras = [[n, w] for (f, n, w) in loras]
@@ -378,16 +381,16 @@ def save_preset(*args):
         if len(m_dict.keys())>0:
             preset["styles_definition"] = m_dict
 
-        #print(f'preset:{preset}')
-        save_path = get_path_in_user_dir(name + '.json', state_params['user_did'], catalog='presets')
+        #logger.info(f'preset:{preset}')
+        save_path = get_path_in_user_dir(name + '.json', state_params['user'].get_did(), catalog='presets')
         with open(save_path, "w", encoding="utf-8") as json_file:
             json.dump(preset, json_file, indent=4)
 
         state_params.update({"__preset": name})
-        print(f'[ToolBox] Saved the current params and reset to {save_path}.')
+        logger.info(f'Saved the current params and reset to {save_path}.')
     state_params.update({"note_box_state": ['',0,0]})
     results = [gr.update(visible=False)] * 3
-    results += [gr.Dataset.update(samples=topbar.get_preset_samples(state_params['user_did']))]
+    results += [gr.Dataset.update(samples=topbar.get_preset_samples(state_params['user'].get_did()))]
     results += topbar.refresh_nav_bars(state_params)
     results += topbar.update_topbar_js_params(state_params)
     return results
@@ -396,7 +399,7 @@ def save_preset(*args):
 def sync_model_info_click(*args):
 
     downurls = list(args)
-    #print(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
+    #logger.info(f'downurls:{downurls} \nargs:{args}, len={len(downurls)}')
     keylist = sync_model_info(downurls)
     results = []
     nums = 0
@@ -406,6 +409,6 @@ def sync_model_info_click(*args):
         nums += 1 
         results += [gr.update(info=f'MUID={muid}', value=durl)]
     if nums:
-        print(f'[ModelInfo] There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
+        logger.info(f'There are {nums} model files missing MUIDs, which need to be added with download URLs before synchronizing.')
     return results
 

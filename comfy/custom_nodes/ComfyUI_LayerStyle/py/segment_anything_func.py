@@ -21,7 +21,7 @@ import folder_paths
 
 logger = logging.getLogger('comfyui_segment_anything')
 
-sam_model_dir_name = "sams"
+sam_model_dir_name = "inpaint"
 sam_model_list = {
     "sam_vit_h (2.56GB)": {
         "model_url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
@@ -46,7 +46,7 @@ sam_model_list = {
     }
 }
 
-groundingdino_model_dir_name = "grounding-dino"
+groundingdino_model_dir_name = "inpaint"
 groundingdino_model_list = {
     "GroundingDINO_SwinT_OGC (694MB)": {
         "config_url": "https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py",
@@ -59,7 +59,7 @@ groundingdino_model_list = {
 }
 
 def get_bert_base_uncased_model_path():
-    comfy_bert_model_base = os.path.join(folder_paths.models_dir, 'bert-base-uncased')
+    comfy_bert_model_base = os.path.join(folder_paths.models_dir, 'llms', 'bert-base-uncased')
     if glob.glob(os.path.join(comfy_bert_model_base, '**/model.safetensors'), recursive=True):
         print('grounding-dino is using models/bert-base-uncased')
         return comfy_bert_model_base
@@ -229,3 +229,4 @@ def sam_segment(
         multimask_output=False)
     masks = masks.permute(1, 0, 2, 3).cpu().numpy()
     return create_tensor_output(image_np, masks, boxes)
+

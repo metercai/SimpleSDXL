@@ -40,8 +40,8 @@ class ComfyClient:
     def __init__(self):
         self.test_name = ""
 
-    def connect(self, 
-                    listen:str = '127.0.0.1', 
+    def connect(self,
+                    listen:str = '127.0.0.1',
                     port:Union[str,int] = 8188,
                     client_id: str = str(uuid.uuid4())
                     ):
@@ -125,7 +125,7 @@ class TestExecution:
     def _server(self, args_pytest, request):
         # Start server
         pargs = [
-            'python','main.py', 
+            'python','main.py',
             '--output-directory', args_pytest["output_dir"],
             '--listen', args_pytest["listen"],
             '--port', str(args_pytest["port"]),
@@ -134,7 +134,7 @@ class TestExecution:
         use_lru, lru_size = request.param
         if use_lru:
             pargs += ['--cache-lru', str(lru_size)]
-        print("Running server with args:", pargs)
+        print("Running server with args:", pargs)  # noqa: T201
         p = subprocess.Popen(pargs)
         yield
         p.kill()
@@ -150,8 +150,8 @@ class TestExecution:
             try:
                 comfy_client.connect(listen=listen, port=port)
             except ConnectionRefusedError as e:
-                print(e)
-                print(f"({i+1}/{n_tries}) Retrying...")
+                print(e)  # noqa: T201
+                print(f"({i+1}/{n_tries}) Retrying...")  # noqa: T201
             else:
                 break
         return comfy_client
@@ -368,7 +368,7 @@ class TestExecution:
         g.node("SaveImage", images=mix1.out(0))
         g.node("SaveImage", images=mix2.out(0))
         g.remove_node("removeme")
-        
+
         client.run(g)
 
         # Add back in the missing node to make sure the error doesn't break the server
@@ -512,7 +512,7 @@ class TestExecution:
         int_list = g.node("TestMakeListNode", value1=int1.out(0), value2=int2.out(0), value3=int3.out(0))
         compare = g.node("TestIntConditions", a=int_list.out(0), b=2, operation="==")
         blocker = g.node("TestExecutionBlocker", input=image_list.out(0), block=compare.out(0), verbose=False)
-        
+
         list_output = g.node("TestMakeListNode", value1=blocker.out(0))
         output = g.node("PreviewImage", images=list_output.out(0))
 

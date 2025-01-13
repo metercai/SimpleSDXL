@@ -6,6 +6,9 @@ import modules.config as config
 from shared import sysinfo, modelsinfo
 from enhanced.simpleai import ComfyTaskParams
 from modules.model_loader import load_file_from_url
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 default_method_names = ['Blending given FG and IC-light', 'Generate foreground with Conv Injection']
 default_method_list = {
@@ -280,7 +283,7 @@ def check_download_kolors_model(path_root):
         )
         downfile = os.path.join(path_temp, 'models_kolors_fp16_simpleai_1210.zip')
         with zipfile.ZipFile(downfile, 'r') as zipf:
-            print(f'extractall: {downfile}')
+            logger.info(f'extractall: {downfile}')
             zipf.extractall(path_root)
         shutil.move(os.path.join(path_temp, 'SimpleModels/diffusers/Kolors'), config.paths_diffusers[0])
         os.remove(downfile)

@@ -21,6 +21,9 @@ import ldm_patched.modules.lora
 import ldm_patched.t2ia.adapter
 import ldm_patched.modules.supported_models_base
 import ldm_patched.taesd.taesd
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 def load_model_weights(model, sd):
     m, u = model.load_state_dict(sd, strict=False)
@@ -33,7 +36,7 @@ def load_model_weights(model, sd):
             w = sd.pop(x)
             del w
     if len(m) > 0:
-        print("extra", m)
+        logger.info(f"extra {m}")
     return model
 
 def load_clip_weights(model, sd):
@@ -77,7 +80,7 @@ def load_lora_for_models(model, clip, lora, strength_model, strength_clip):
     k1 = set(k1)
     for x in loaded:
         if (x not in k) and (x not in k1):
-            print("NOT LOADED", x)
+            logger.info(f"NOT LOADED {x}")
 
     return (new_modelpatcher, new_clip)
 
@@ -183,10 +186,10 @@ class VAE:
 
         m, u = self.first_stage_model.load_state_dict(sd, strict=False)
         if len(m) > 0:
-            print("Missing VAE keys", m)
+            logger.info(f"Missing VAE keys {m}")
 
         if len(u) > 0:
-            print("Leftover VAE keys", u)
+            logger.info(f"Leftover VAE keys {u}")
 
         if device is None:
             device = model_management.vae_device()
@@ -240,7 +243,7 @@ class VAE:
                 samples = samples_in[x:x+batch_number].to(self.vae_dtype).to(self.device)
                 pixel_samples[x:x+batch_number] = torch.clamp((self.first_stage_model.decode(samples).to(self.output_device).float() + 1.0) / 2.0, min=0.0, max=1.0)
         except model_management.OOM_EXCEPTION as e:
-            print("Warning: Ran out of memory when regular VAE decoding, retrying with tiled VAE decoding.")
+            logger.info("Warning: Ran out of memory when regular VAE decoding, retrying with tiled VAE decoding.")
             pixel_samples = self.decode_tiled_(samples_in)
 
         pixel_samples = pixel_samples.to(self.output_device).movedim(1,-1)
@@ -265,7 +268,7 @@ class VAE:
                 samples[x:x+batch_number] = self.first_stage_model.encode(pixels_in).to(self.output_device).float()
 
         except model_management.OOM_EXCEPTION as e:
-            print("Warning: Ran out of memory when regular VAE encoding, retrying with tiled VAE encoding.")
+            logger.info("Warning: Ran out of memory when regular VAE encoding, retrying with tiled VAE encoding.")
             samples = self.encode_tiled_(pixel_samples)
 
         return samples
@@ -330,10 +333,10 @@ def load_clip(ckpt_paths, embedding_directory=None):
     for c in clip_data:
         m, u = clip.load_sd(c)
         if len(m) > 0:
-            print("clip missing:", m)
+            logger.info(f"clip missing: {m}")
 
         if len(u) > 0:
-            print("clip unexpected:", u)
+            logger.info(f"clip unexpected: {u}")
     return clip
 
 def load_gligen(ckpt_path):
@@ -482,12 +485,12 @@ def load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, o
 
     left_over = sd.keys()
     if len(left_over) > 0:
-        print("left over keys:", left_over)
+        logger.info(f"left over keys: {left_over}")
 
     if output_model:
         model_patcher = ldm_patched.modules.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=model_management.unet_offload_device(), current_device=inital_load_device)
         if inital_load_device != torch.device("cpu"):
-            print("loaded straight to GPU")
+            logger.info("loaded straight to GPU")
             model_management.load_model_gpu(model_patcher)
 
     return model_patcher, clip, vae, vae_filename, clipvision
@@ -517,7 +520,7 @@ def load_unet_state_dict(sd): #load unet in diffusers format
             if k in sd:
                 new_sd[diffusers_keys[k]] = sd.pop(k)
             else:
-                print(diffusers_keys[k], k)
+                logger.info(f"{diffusers_keys[k]} {k}")
     offload_device = model_management.unet_offload_device()
     model_config.set_manual_cast(manual_cast_dtype)
     model = model_config.get_model(new_sd, "")
@@ -525,14 +528,14 @@ def load_unet_state_dict(sd): #load unet in diffusers format
     model.load_model_weights(new_sd, "")
     left_over = sd.keys()
     if len(left_over) > 0:
-        print("left over keys in unet:", left_over)
+        logger.info(f"left over keys in unet: {left_over}")
     return ldm_patched.modules.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=offload_device)
 
 def load_unet(unet_path):
     sd = ldm_patched.modules.utils.load_torch_file(unet_path)
     model = load_unet_state_dict(sd)
     if model is None:
-        print("ERROR UNSUPPORTED UNET", unet_path)
+        logger.info(f"ERROR UNSUPPORTED UNET {unet_path}")
         raise RuntimeError("ERROR: Could not detect model type of: {}".format(unet_path))
     return model
 

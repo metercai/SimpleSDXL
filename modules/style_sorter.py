@@ -2,7 +2,9 @@ import os
 import gradio as gr
 import modules.localization as localization
 import json
-
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 all_styles = []
 
@@ -24,8 +26,8 @@ def try_load_sorted_styles(style_names, default_selected):
                         sorted_styles.append(x)
                 all_styles = sorted_styles
     except Exception as e:
-        print('Load style sorting failed.')
-        print(e)
+        logger.info('Load style sorting failed.')
+        logger.info(e)
 
     unselected = [y for y in all_styles if y not in default_selected]
     all_styles = default_selected + unselected
@@ -41,8 +43,8 @@ def sort_styles(selected):
         with open('sorted_styles.json', 'wt', encoding='utf-8') as fp:
             json.dump(sorted_styles, fp, indent=4)
     except Exception as e:
-        print('Write style sorting failed.')
-        print(e)
+        logger.info('Write style sorting failed.')
+        logger.info(e)
     all_styles = sorted_styles
     return gr.CheckboxGroup.update(choices=sorted_styles)
 

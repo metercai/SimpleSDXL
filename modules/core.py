@@ -22,6 +22,9 @@ from modules.util import get_file_from_folder_list
 from ldm_patched.modules.lora import model_lora_keys_unet, model_lora_keys_clip
 from modules.config import path_embeddings
 from ldm_patched.contrib.external_model_advanced import ModelSamplingDiscrete, ModelSamplingContinuousEDM
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 opEmptyLatentImage = EmptyLatentImage()
 opVAEDecode = VAEDecode()
@@ -70,7 +73,7 @@ class StableDiffusionModel:
         if self.unet is None:
             return
 
-        print(f'Request to load LoRAs {str(loras)} for model [{self.filename}].')
+        logger.info(f'Request to load LoRAs {str(loras)} for model [{self.filename}].')
 
         loras_to_load = []
 
@@ -84,7 +87,7 @@ class StableDiffusionModel:
                 lora_filename = get_file_from_folder_list(filename, modules.config.paths_loras)
 
             if not os.path.exists(lora_filename):
-                print(f'Lora file not found: {lora_filename}')
+                logger.info(f'Lora file not found: {lora_filename}')
                 continue
 
             loras_to_load.append((lora_filename, weight))
@@ -102,24 +105,24 @@ class StableDiffusionModel:
                 continue
 
             if len(lora_unmatch) > 0:
-                print(f'Loaded LoRA [{lora_filename}] for model [{self.filename}] '
+                logger.info(f'Loaded LoRA [{lora_filename}] for model [{self.filename}] '
                       f'with unmatched keys {list(lora_unmatch.keys())}')
 
             if self.unet_with_lora is not None and len(lora_unet) > 0:
                 loaded_keys = self.unet_with_lora.add_patches(lora_unet, weight)
-                print(f'Loaded LoRA [{lora_filename}] for UNet [{self.filename}] '
+                logger.info(f'Loaded LoRA [{lora_filename}] for UNet [{self.filename}] '
                       f'with {len(loaded_keys)} keys at weight {weight}.')
                 for item in lora_unet:
                     if item not in loaded_keys:
-                        print("UNet LoRA key skipped: ", item)
+                        logger.info("UNet LoRA key skipped: ", item)
 
             if self.clip_with_lora is not None and len(lora_clip) > 0:
                 loaded_keys = self.clip_with_lora.add_patches(lora_clip, weight)
-                print(f'Loaded LoRA [{lora_filename}] for CLIP [{self.filename}] '
+                logger.info(f'Loaded LoRA [{lora_filename}] for CLIP [{self.filename}] '
                       f'with {len(loaded_keys)} keys at weight {weight}.')
                 for item in lora_clip:
                     if item not in loaded_keys:
-                        print("CLIP LoRA key skipped: ", item)
+                        logger.info("CLIP LoRA key skipped: ", item)
 
 
 @torch.no_grad()

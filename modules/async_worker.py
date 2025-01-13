@@ -180,11 +180,9 @@ class AsyncTask:
         self.images_to_enhance_count = 0
         self.enhance_stats = {}
 
-        #print(f'params_backend:{self.params_backend}')
         self.task_class = self.params_backend.pop('backend_engine', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
-        #print(f'task_class={self.task_class}, task_name={self.task_name}, task_method={self.task_method}')
         if 'layer' in self.current_tab and self.task_class == 'Fooocus' and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
@@ -222,10 +220,13 @@ class AsyncTask:
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
+            self.scene_canvas_image = self.params_backend.pop('scene_canvas_image')
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1')
             self.scene_theme = self.params_backend.pop('scene_theme')
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt')
+            self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
+
 
 async_tasks = []
 
@@ -277,10 +278,13 @@ def worker():
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
     from enhanced.all_parameters import default as default_params
     from enhanced.minicpm import MiniCPM
+    import logging
+    from enhanced.logger import format_name
+    logger = logging.getLogger(format_name(__name__))
 
     minicpm = MiniCPM()
     pid = os.getpid()
-    print(f'Started worker with PID {pid}')
+    logger.info(f'Started worker with PID {pid}')
 
     try:
         async_gradio_app = shared.gradio_root
@@ -294,13 +298,13 @@ def worker():
                 flag += f'Use the app with {str(async_gradio_app.server_name)}:{str(async_gradio_app.server_port)}'
         if hasattr(async_gradio_app, 'share') and async_gradio_app.share_url:
             flag += f''' or {async_gradio_app.share_url}'''
-        print(flag)
+        logger.info(flag)
     except Exception as e:
-        print(e)
+        logger.info(e)
     ldm_patched.modules.model_management.print_memory_info("worker init")
 
     def progressbar(async_task, number, text):
-        print(f'[Fooocus] {text}')
+        logger.info(f'{text}')
         async_task.yields.append(['preview', (number, text, None)])
 
     def yield_result(async_task, imgs, progressbar_index, black_out_nsfw, censor=True, do_not_show_finished_images=False):
@@ -401,7 +405,7 @@ def worker():
                 if inpaint_worker.current_task is not None:
                     imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
             except ValueError as e:
-                print(f"comfy_task_error: {e}")
+                logger.info(f"comfy_task_error: {e}")
                 empty_path = [np.zeros((width, height), dtype=np.uint8)]
                 imgs = empty_path
                 current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
@@ -618,10 +622,10 @@ def worker():
             denoising_strength = async_task.overwrite_vary_strength
         shape_ceil = get_image_shape_ceil(uov_input_image)
         if shape_ceil < 1024:
-            print(f'[Vary] Image is resized because it is too small.')
+            logger.info(f'[Vary] Image is resized because it is too small.')
             shape_ceil = 1024
         elif shape_ceil > 2048:
-            print(f'[Vary] Image is resized because it is too big.')
+            logger.info(f'[Vary] Image is resized because it is too big.')
             shape_ceil = 2048
         
         if async_task.task_class in flags.comfy_classes:
@@ -646,7 +650,7 @@ def worker():
         B, C, H, W = initial_latent['samples'].shape
         width = W * 8
         height = H * 8
-        print(f'Final resolution is {str((width, height))}.')
+        logger.info(f'Final resolution is {str((width, height))}.')
         return uov_input_image, denoising_strength, initial_latent, width, height, current_progress
 
     def apply_inpaint(async_task, initial_latent, inpaint_head_model_path, inpaint_image,
@@ -719,7 +723,7 @@ def worker():
         B, C, H, W = latent_fill.shape
         height, width = H * 8, W * 8
         final_height, final_width = inpaint_worker.current_task.image.shape[:2]
-        print(f'Final resolution is {str((final_width, final_height))}, latent is {str((width, height))}.')
+        logger.info(f'Final resolution is {str((final_width, final_height))}, latent is {str((width, height))}.')
 
         return denoising_strength, initial_latent, width, height, current_progress
 
@@ -749,7 +753,7 @@ def worker():
             inpaint_mask = np.ascontiguousarray(inpaint_mask.copy())
             async_task.inpaint_strength = 1.0
             async_task.inpaint_respective_field = 1.0
-            print(f'in apply_outpaint: (H, W)=({H}, {W}) -> ({inpaint_image.shape[0]}, {inpaint_image.shape[1]})')
+            logger.info(f'in apply_outpaint: (H, W)=({H}, {W}) -> ({inpaint_image.shape[0]}, {inpaint_image.shape[1]})')
         return inpaint_image, inpaint_mask
 
     def apply_upscale(async_task, uov_input_image, uov_method, switch, current_progress, advance_progress=False):
@@ -769,7 +773,7 @@ def worker():
             current_progress += 1
         progressbar(async_task, current_progress, f'Upscaling image from {str((W, H))} ...')
         uov_input_image = perform_upscale(uov_input_image)
-        print(f'Image upscaled.')
+        logger.info(f'Image upscaled.')
         if '1.5x' in uov_method:
             f = 1.5
         elif '2x' in uov_method:
@@ -778,7 +782,7 @@ def worker():
             f = 1.0
         shape_ceil = get_shape_ceil(H * f, W * f)
         if shape_ceil < 1024:
-            print(f'[Upscale] Image is resized because it is too small.')
+            logger.info(f'[Upscale] Image is resized because it is too small.')
             uov_input_image = set_image_shape_ceil(uov_input_image, 1024)
             shape_ceil = 1024
         else:
@@ -787,7 +791,7 @@ def worker():
         if 'fast' in uov_method:
             direct_return = True
         elif image_is_super_large:
-            print('Image is too large. Directly returned the SR image. '
+            logger.info('Image is too large. Directly returned the SR image. '
                   'Usually directly return SR image at 4K resolution '
                   'yields better results than SDXL diffusion.')
             direct_return = True
@@ -817,7 +821,7 @@ def worker():
         B, C, H, W = initial_latent['samples'].shape
         width = W * 8
         height = H * 8
-        print(f'Final resolution is {str((width, height))}.')
+        logger.info(f'Final resolution is {str((width, height))}.')
         return direct_return, uov_input_image, denoising_strength, initial_latent, tiled, width, height, current_progress
 
     def apply_overrides(async_task, steps, height, width):
@@ -941,7 +945,7 @@ def worker():
             for i, t in enumerate(tasks):
                 progressbar(async_task, current_progress, f'Preparing Fooocus text #{i + 1} ...')
                 expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
-                print(f'[Prompt Expansion] {expansion}')
+                logger.info(f'[Prompt Expansion] {expansion}')
                 t['expansion'] = expansion
                 t['positive'] = copy.deepcopy(t['positive']) + [expansion]  # Deep copy.
         if async_task.task_class in ['Fooocus']:
@@ -961,7 +965,7 @@ def worker():
         return tasks, use_expansion, loras, current_progress
 
     def apply_freeu(async_task):
-        print(f'FreeU is enabled!')
+        logger.info(f'FreeU is enabled!')
         pipeline.final_unet = core.apply_freeu(
             pipeline.final_unet,
             async_task.freeu_b1,
@@ -996,13 +1000,13 @@ def worker():
         return final_scheduler_name
 
     def set_hyper_sd_defaults(async_task, current_progress, advance_progress=False):
-        print('Enter Hyper-SD 8 step mode.')
+        logger.info('Enter Hyper-SD 8 step mode.')
         if advance_progress:
             current_progress += 1
         progressbar(async_task, current_progress, 'Downloading Hyper-SD components ...')
         async_task.performance_loras += [(modules.config.downloading_sdxl_hyper_sd_lora(), 1.0)]
         if async_task.refiner_model_name != 'None':
-            print(f'Refiner disabled in Hyper-SD mode.')
+            logger.info(f'Refiner disabled in Hyper-SD mode.')
         async_task.refiner_model_name = 'None'
         async_task.sampler_name = 'euler'
         async_task.scheduler_name = 'sgm_uniform'
@@ -1016,13 +1020,13 @@ def worker():
         return current_progress
 
     def set_lightning_defaults(async_task, current_progress, advance_progress=False):
-        print('Enter Lightning mode.')
+        logger.info('Enter Lightning mode.')
         if advance_progress:
             current_progress += 1
         progressbar(async_task, 1, 'Downloading Lightning components ...')
         async_task.performance_loras += [(modules.config.downloading_sdxl_lightning_lora(), 1.0)]
         if async_task.refiner_model_name != 'None':
-            print(f'Refiner disabled in Lightning mode.')
+            logger.info(f'Refiner disabled in Lightning mode.')
         async_task.refiner_model_name = 'None'
         async_task.sampler_name = 'euler'
         async_task.scheduler_name = 'sgm_uniform'
@@ -1036,13 +1040,13 @@ def worker():
         return current_progress
 
     def set_lcm_defaults(async_task, current_progress, advance_progress=False):
-        print('Enter LCM mode.')
+        logger.info('Enter LCM mode.')
         if advance_progress:
             current_progress += 1
         progressbar(async_task, 1, 'Downloading LCM components ...')
         async_task.performance_loras += [(modules.config.downloading_sdxl_lcm_lora(), 1.0)]
         if async_task.refiner_model_name != 'None':
-            print(f'Refiner disabled in LCM mode.')
+            logger.info(f'Refiner disabled in LCM mode.')
         async_task.refiner_model_name = 'None'
         async_task.sampler_name = 'lcm'
         async_task.scheduler_name = 'lcm'
@@ -1105,13 +1109,13 @@ def worker():
                     inpaint_head_model_path, inpaint_patch_model_path = modules.config.downloading_inpaint_models(
                         async_task.inpaint_engine)
                     base_model_additional_loras += [(inpaint_patch_model_path, 1.0)]
-                    print(f'[Inpaint] Current inpaint model is {inpaint_patch_model_path}')
+                    logger.info(f'[Inpaint] Current inpaint model is {inpaint_patch_model_path}')
                     if async_task.refiner_model_name == 'None':
                         use_synthetic_refiner = True
                         async_task.refiner_switch = 0.8
                 else:
                     inpaint_head_model_path, inpaint_patch_model_path = None, None
-                    print(f'[Inpaint] Parameterized inpaint is disabled.')
+                    logger.info(f'[Inpaint] Parameterized inpaint is disabled.')
                 if async_task.inpaint_additional_prompt != '':
                     if async_task.prompt == '':
                         async_task.prompt = async_task.inpaint_additional_prompt
@@ -1169,7 +1173,7 @@ def worker():
     def stop_processing(async_task, processing_start_time):
         async_task.processing = False
         processing_time = time.perf_counter() - processing_start_time
-        print(f'Processing time (total): {processing_time:.2f} seconds')
+        logger.info(f'Processing time (total): {processing_time:.2f} seconds')
         if async_task.task_class in flags.comfy_classes:
             if async_task.comfyd_active_checkbox:
                 comfyd.finished()
@@ -1267,14 +1271,14 @@ def worker():
 
             except ldm_patched.modules.model_management.InterruptProcessingException:
                 if async_task.last_stop == 'skip':
-                    print('User skipped')
+                    logger.info('User skipped')
                     async_task.last_stop = False
                     # also skip all enhance steps for this image, but add the steps to the progress bar
                     if async_task.enhance_uov_processing_order == flags.enhancement_uov_before:
                         done_steps_inpainting += len(async_task.enhance_ctrls) * enhance_steps
                     exception_result = 'continue'
                 else:
-                    print('User stopped')
+                    logger.info('User stopped')
                     exception_result = 'break'
             finally:
                 done_steps_upscaling += steps
@@ -1286,7 +1290,7 @@ def worker():
         preparation_start_time = time.perf_counter()
         async_task.processing = True
         ldm_patched.modules.model_management.print_memory_info("begin at handler")
-        print(f'[TaskEngine] Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
+        logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
         
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
@@ -1302,7 +1306,7 @@ def worker():
         use_style = len(async_task.style_selections) > 0
 
         if async_task.base_model_name == async_task.refiner_model_name:
-            print(f'Refiner disabled because base model and refiner are same.')
+            logger.info(f'Refiner disabled because base model and refiner are same.')
             async_task.refiner_model_name = 'None'
 
         current_progress = 0
@@ -1314,20 +1318,20 @@ def worker():
             set_hyper_sd_defaults(async_task, current_progress, advance_progress=True)
 
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] Adaptive CFG = {async_task.adaptive_cfg}')
-            print(f'[Parameters] CLIP Skip = {async_task.clip_skip}')
-            print(f'[Parameters] Sharpness = {async_task.sharpness}')
-            print(f'[Parameters] ControlNet Softness = {async_task.controlnet_softness}')
-            print(f'[Parameters] ADM Scale = '
+            logger.info(f'[Parameters] Adaptive CFG = {async_task.adaptive_cfg}')
+            logger.info(f'[Parameters] CLIP Skip = {async_task.clip_skip}')
+            logger.info(f'[Parameters] Sharpness = {async_task.sharpness}')
+            logger.info(f'[Parameters] ControlNet Softness = {async_task.controlnet_softness}')
+            logger.info(f'[Parameters] ADM Scale = '
                   f'{async_task.adm_scaler_positive} : '
                   f'{async_task.adm_scaler_negative} : '
                   f'{async_task.adm_scaler_end}')
-            print(f'[Parameters] Seed = {async_task.seed}')
+            logger.info(f'[Parameters] Seed = {async_task.seed}')
 
         apply_patch_settings(async_task)
 
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] CFG = {async_task.cfg_scale}')
+            logger.info(f'[Parameters] CFG = {async_task.cfg_scale}')
 
         initial_latent = None
         denoising_strength = 1.0
@@ -1336,7 +1340,7 @@ def worker():
         width, height = async_task.aspect_ratios_selection.replace('×', ' ').split(' ')[:2]
         width, height = int(width), int(height)
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] Aspect Ratios = {width}×{height}')
+            logger.info(f'[Parameters] Aspect Ratios = {width}×{height}')
 
         skip_prompt_processing = False
 
@@ -1373,8 +1377,8 @@ def worker():
         async_task.steps, switch, width, height = apply_overrides(async_task, async_task.steps, height, width)
 
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] Sampler = {async_task.sampler_name} - {async_task.scheduler_name}')
-            print(f'[Parameters] Steps = {async_task.steps} - {switch}')
+            logger.info(f'[Parameters] Sampler = {async_task.sampler_name} - {async_task.scheduler_name}')
+            logger.info(f'[Parameters] Steps = {async_task.steps} - {switch}')
 
         progressbar(async_task, current_progress, 'Initializing ...')
 
@@ -1386,23 +1390,23 @@ def worker():
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
 
         if async_task.task_class in flags.comfy_classes:
-            print(f'[TaskEngine] Enable Comfyd backend.')
+            logger.info(f'[TaskEngine] Enable Comfyd backend.')
             if "flux_aio" in async_task.task_method and \
                 ((async_task.current_tab in ['uov', 'inpaint', 'ip'] and len(async_task.cn_tasks[flags.cn_ip_face])==0) \
                     or (async_task.current_tab in ['uov'] and not async_task.mixing_image_prompt_and_vary_upscale) \
                     or (async_task.current_tab in ['inpaint'] and not async_task.mixing_image_prompt_and_inpaint) \
                     or not async_task.input_image_checkbox ):
-                print(f'[TaskEngine] Clean the model cache in comfyd.')
+                logger.info(f'Clean the model cache in comfyd.')
                 comfyd.stop()
             comfyd.start()
         else:
-            print(f'[TaskEngine] Enable Fooocus backend.')
+            logger.info(f'Enable Fooocus backend.')
             comfyd.stop()
 
         if len(goals) > 0:
             current_progress += 1
             progressbar(async_task, current_progress, 'Image processing ...')
-            print(f'[TaskEngine] Preprocess the image for {",".join(goals)}.')
+            logger.info(f'Preprocess the image for {",".join(goals)}.')
 
         should_enhance = async_task.enhance_checkbox and (async_task.enhance_uov_method != flags.disabled.casefold() or len(async_task.enhance_ctrls) > 0)
         
@@ -1443,10 +1447,6 @@ def worker():
             except EarlyReturnException:
                 return
         
-        #if inpaint_image is not None:
-        #    print(f'after apply_inpaint: width={width}, height={height}, denoising_strength={denoising_strength}, inpaint_image(H,W)={inpaint_image.shape[:2]}')
-        #else:
-        #    print(f'after apply_inpaint: width={width}, height={height}, denoising_strength={denoising_strength}')
         
         if 'cn' in goals:
             apply_control_nets(async_task, height, ip_adapter_face_path, ip_adapter_path, width, current_progress)
@@ -1489,7 +1489,7 @@ def worker():
         all_steps = max(all_steps, 1)
 
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] Denoising Strength = {denoising_strength}')
+            logger.info(f'[Parameters] Denoising Strength = {denoising_strength}')
 
         if isinstance(initial_latent, dict) and 'samples' in initial_latent:
             log_shape = initial_latent['samples'].shape
@@ -1497,13 +1497,13 @@ def worker():
             log_shape = f'Image Space {(height, width)}'
 
         if async_task.task_class in ['Fooocus']:
-            print(f'[Parameters] Initial Latent shape: {log_shape}')
+            logger.info(f'[Parameters] Initial Latent shape: {log_shape}')
 
         preparation_time = time.perf_counter() - preparation_start_time
-        print(f'Preparation time: {preparation_time:.2f} seconds')
+        logger.info(f'Preparation time: {preparation_time:.2f} seconds')
 
         final_scheduler_name = patch_samplers(async_task)
-        print(f'Using {final_scheduler_name} scheduler.')
+        logger.info(f'Using {final_scheduler_name} scheduler.')
 
         if async_task.task_class in ['Fooocus']:
             async_task.yields.append(['preview', (current_progress, 'Moving model to GPU ...', None)])
@@ -1548,9 +1548,18 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 input_images.set_image('input_image', HWC3(async_task.layer_input_image))
             if "scene_" in async_task.task_method:
+                input_images = comfypipeline.ComfyInputImage([])
                 if async_task.scene_input_image1 is not None:
-                    input_images = comfypipeline.ComfyInputImage([])
                     input_images.set_image('i2i_ip_image1', resize_image(HWC3(async_task.scene_input_image1), max_side=1280, resize_mode=4))
+                if async_task.scene_canvas_image is not None:
+                    canvas_image = async_task.scene_canvas_image['image']
+                    canvas_mask = async_task.scene_canvas_image['mask'][:, :, 0]
+                    input_images.set_image('i2i_inpaint_image', resize_image(HWC3(canvas_image), max_side=1280, resize_mode=4))
+                    input_images.set_image('i2i_inpaint_mask', resize_image(HWC3(canvas_mask), max_side=1280, resize_mode=4))
+                if async_task.scene_steps is not None:
+                    async_task.steps = async_task.scene_steps
+                    all_steps = async_task.steps * async_task.image_number
+                    async_task.params_backend['display_steps'] = async_task.steps
                 if async_task.task_method.lower().endswith('_cn'):
                     async_task.steps = async_task.steps * 3
                     all_steps = async_task.steps * async_task.image_number
@@ -1705,22 +1714,22 @@ def worker():
                 if async_task.last_stop == 'skip':
                     if async_task.task_class in ['Fooocus']:
                         del task['c'], task['uc']  # Save memory
-                    print(f'User skipped')
+                    logger.info(f'User skipped')
                     async_task.last_stop = False
                     continue
                 else:
-                    print('User stopped')
+                    logger.info('User stopped')
                     break
 
             if async_task.task_class in ['Fooocus']:
                 del task['c'], task['uc']  # Save memory
             execution_time = time.perf_counter() - execution_start_time
-            print(f'Generating and saving time: {execution_time:.2f} seconds')
+            logger.info(f'Generating and saving time: {execution_time:.2f} seconds')
             ldm_patched.modules.model_management.print_memory_info("process_task finished")
 
 
         if not async_task.should_enhance:
-            print(f'[Enhance] Skipping, preconditions aren\'t met')
+            logger.info(f'[Enhance] Skipping, preconditions aren\'t met')
             stop_processing(async_task, processing_start_time)
             return
 
@@ -1782,7 +1791,7 @@ def worker():
 
                 extras = {}
                 if enhance_mask_model == 'sam':
-                    print(f'[Enhance] Searching for "{enhance_mask_dino_prompt_text}"')
+                    logger.info(f'[Enhance] Searching for "{enhance_mask_dino_prompt_text}"')
                 elif enhance_mask_model == 'u2net_cloth_seg':
                     extras['cloth_category'] = enhance_mask_cloth_category
 
@@ -1811,12 +1820,12 @@ def worker():
                                  async_task.disable_intermediate_results)
                     async_task.enhance_stats[index] += 1
 
-                print(f'[Enhance] {dino_detection_count} boxes detected')
-                print(f'[Enhance] {sam_detection_count} segments detected in boxes')
-                print(f'[Enhance] {sam_detection_on_mask_count} segments applied to mask')
+                logger.info(f'[Enhance] {dino_detection_count} boxes detected')
+                logger.info(f'[Enhance] {sam_detection_count} segments detected in boxes')
+                logger.info(f'[Enhance] {sam_detection_on_mask_count} segments applied to mask')
 
                 if enhance_mask_model == 'sam' and (dino_detection_count == 0 or not async_task.debugging_dino and sam_detection_on_mask_count == 0):
-                    print(f'[Enhance] No "{enhance_mask_dino_prompt_text}" detected, skipping')
+                    logger.info(f'[Enhance] No "{enhance_mask_dino_prompt_text}" detected, skipping')
                     continue
 
                 goals_enhance = ['inpaint']
@@ -1840,18 +1849,18 @@ def worker():
 
                 except ldm_patched.modules.model_management.InterruptProcessingException:
                     if async_task.last_stop == 'skip':
-                        print('User skipped')
+                        logger.info('User skipped')
                         async_task.last_stop = False
                         continue
                     else:
-                        print('User stopped')
+                        logger.info('User stopped')
                         exception_result = 'break'
                         break
                 finally:
                     done_steps_inpainting += enhance_steps
 
                 enhancement_task_time = time.perf_counter() - enhancement_task_start_time
-                print(f'Enhancement time: {enhancement_task_time:.2f} seconds')
+                logger.info(f'Enhancement time: {enhancement_task_time:.2f} seconds')
 
             if exception_result == 'break':
                 break
@@ -1874,7 +1883,7 @@ def worker():
                     break
 
             enhancement_image_time = time.perf_counter() - enhancement_image_start_time
-            print(f'Enhancement image time: {enhancement_image_time:.2f} seconds')
+            logger.info(f'Enhancement image time: {enhancement_image_time:.2f} seconds')
 
         stop_processing(async_task, processing_start_time)
         return
@@ -1882,7 +1891,7 @@ def worker():
     while True:
         time.sleep(0.01)
         if len(async_tasks) > 0:
-            print(f'[TaskEngine] Got async_tasks')
+            logger.info(f'Got async_tasks')
             task = async_tasks.pop(0)
             try:
                 handler(task)
