@@ -707,12 +707,12 @@
         0
       ],
       "positive": [
-        "1311",
+        "2983",
         0
       ],
       "negative": [
-        "2960",
-        0
+        "2983",
+        1
       ],
       "latent_image": [
         "995",
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 729195309123522,
+      "seed": 809746598211317,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -2074,34 +2074,14 @@
       "title": "Int"
     }
   },
-  "2314": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2968",
-        0
-      ],
-      "on_false": [
-        "2534",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "2387": {
     "inputs": {
       "width": [
-        "2794",
+        "2938",
         0
       ],
       "height": [
-        "2797",
+        "2939",
         0
       ],
       "interpolation": "bicubic",
@@ -2155,11 +2135,11 @@
         0
       ],
       "positive": [
-        "2747",
+        "2864",
         2
       ],
       "negative": [
-        "2747",
+        "2864",
         3
       ],
       "latent_image": [
@@ -2266,115 +2246,6 @@
       ],
       "on_false": [
         "1948",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2533": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2538",
-        0
-      ],
-      "b": [
-        "2537",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2534": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2535",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2535": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2538",
-        1
-      ],
-      "b": [
-        "2537",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2536": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2533",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2537": {
-    "inputs": {
-      "value": "(262144/a/b)**0.5",
-      "a": [
-        "2538",
-        0
-      ],
-      "b": [
-        "2538",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2538": {
-    "inputs": {
-      "image": [
-        "1002",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "🔧 Get Image Size"
-    }
-  },
-  "2539": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2967",
-        0
-      ],
-      "on_false": [
-        "2536",
         0
       ]
     },
@@ -2799,7 +2670,7 @@
         0
       ],
       "image": [
-        "2802",
+        "1002",
         0
       ],
       "mask": [
@@ -3293,12 +3164,12 @@
         0
       ],
       "on_true": [
-        "2539",
+        "2542",
         0
       ],
       "on_false": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy ifElse",
@@ -3310,12 +3181,12 @@
     "inputs": {
       "comparison": "a <= b",
       "a": [
-        "2539",
+        "2542",
         0
       ],
       "b": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy compare",
@@ -3325,7 +3196,7 @@
   },
   "2791": {
     "inputs": {
-      "value": "(262144/a/b)**0.5",
+      "value": "(1048576/a/b)**0.5",
       "a": [
         "2801",
         0
@@ -3449,30 +3320,6 @@
       "title": "🔧 Get Image Size"
     }
   },
-  "2802": {
-    "inputs": {
-      "width": [
-        "2539",
-        0
-      ],
-      "height": [
-        "2314",
-        0
-      ],
-      "interpolation": "bicubic",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "1002",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "2803": {
     "inputs": {
       "mask": [
@@ -3485,35 +3332,11 @@
       "title": "Convert Mask to Image"
     }
   },
-  "2804": {
-    "inputs": {
-      "width": [
-        "2539",
-        0
-      ],
-      "height": [
-        "2314",
-        0
-      ],
-      "interpolation": "bicubic",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2803",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "2805": {
     "inputs": {
       "channel": "red",
       "image": [
-        "2804",
+        "2803",
         0
       ]
     },
@@ -3734,7 +3557,7 @@
         0
       ],
       "on_false": [
-        "2539",
+        "2542",
         0
       ]
     },
@@ -3754,8 +3577,8 @@
         0
       ],
       "on_false": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy ifElse",
@@ -4055,31 +3878,6 @@
       "title": "Upscale Latent By"
     }
   },
-  "2857": {
-    "inputs": {
-      "upscale_model": [
-        "2858",
-        0
-      ],
-      "image": [
-        "2860",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
-  "2858": {
-    "inputs": {
-      "model_name": "4x-UltraSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
   "2860": {
     "inputs": {
       "samples": [
@@ -4099,7 +3897,7 @@
   "2861": {
     "inputs": {
       "pixels": [
-        "2862",
+        "2860",
         0
       ],
       "vae": [
@@ -4110,20 +3908,6 @@
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE Encode"
-    }
-  },
-  "2862": {
-    "inputs": {
-      "upscale_method": "bicubic",
-      "scale_by": 0.5,
-      "image": [
-        "2857",
-        0
-      ]
-    },
-    "class_type": "ImageScaleBy",
-    "_meta": {
-      "title": "Upscale Image By"
     }
   },
   "2863": {
@@ -4142,7 +3926,7 @@
         0
       ],
       "image": [
-        "2802",
+        "1002",
         0
       ],
       "mask": [
@@ -4167,26 +3951,10 @@
       "title": "Pipe Out"
     }
   },
-  "2865": {
-    "inputs": {
-      "upscale_model": [
-        "2858",
-        0
-      ],
-      "image": [
-        "328",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
   "2868": {
     "inputs": {
       "pixels": [
-        "2882",
+        "328",
         0
       ],
       "vae": [
@@ -4324,31 +4092,6 @@
       "title": "KSampler"
     }
   },
-  "2875": {
-    "inputs": {
-      "upscale_model": [
-        "2876",
-        0
-      ],
-      "image": [
-        "984",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
-  "2876": {
-    "inputs": {
-      "model_name": "4x-UltraSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
   "2878": {
     "inputs": {
       "pixels": [
@@ -4394,30 +4137,6 @@
       "title": "VAE Decode"
     }
   },
-  "2882": {
-    "inputs": {
-      "width": [
-        "1890",
-        1
-      ],
-      "height": [
-        "1890",
-        2
-      ],
-      "interpolation": "bicubic",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2865",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "2883": {
     "inputs": {
       "samples": [
@@ -4425,60 +4144,13 @@
         0
       ],
       "mask": [
-        "2884",
+        "1989",
         0
       ]
     },
     "class_type": "SetLatentNoiseMask",
     "_meta": {
       "title": "Set Latent Noise Mask"
-    }
-  },
-  "2884": {
-    "inputs": {
-      "width": [
-        "2888",
-        0
-      ],
-      "height": [
-        "2889",
-        0
-      ],
-      "keep_proportions": false,
-      "mask": [
-        "1989",
-        0
-      ]
-    },
-    "class_type": "ResizeMask",
-    "_meta": {
-      "title": "Resize Mask"
-    }
-  },
-  "2888": {
-    "inputs": {
-      "value": "a*2",
-      "a": [
-        "2802",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2889": {
-    "inputs": {
-      "value": "a*2",
-      "a": [
-        "2802",
-        2
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "2890": {
@@ -4653,11 +4325,11 @@
   "2907": {
     "inputs": {
       "width": [
-        "2938",
+        "2981",
         0
       ],
       "height": [
-        "2939",
+        "2982",
         0
       ],
       "interpolation": "bicubic",
@@ -4665,7 +4337,7 @@
       "condition": "always",
       "multiple_of": 0,
       "image": [
-        "2875",
+        "984",
         0
       ]
     },
@@ -5328,7 +5000,7 @@
   },
   "2938": {
     "inputs": {
-      "value": "a*2",
+      "value": "a",
       "a": [
         "2794",
         0
@@ -5341,7 +5013,7 @@
   },
   "2939": {
     "inputs": {
-      "value": "a*2",
+      "value": "a",
       "a": [
         "2797",
         0
@@ -5659,36 +5331,10 @@
       "title": "🔧 Simple Math"
     }
   },
-  "2967": {
-    "inputs": {
-      "value": "a/2",
-      "a": [
-        "2542",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2968": {
-    "inputs": {
-      "value": "a/2",
-      "a": [
-        "2542",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
   "2969": {
     "inputs": {
       "pixels": [
-        "2802",
+        "1002",
         0
       ],
       "vae": [
@@ -5810,6 +5456,79 @@
     "class_type": "LayerColor: Levels",
     "_meta": {
       "title": "LayerColor: Levels"
+    }
+  },
+  "2981": {
+    "inputs": {
+      "value": "a*1.25",
+      "a": [
+        "2794",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2982": {
+    "inputs": {
+      "value": "a*1.25",
+      "a": [
+        "2797",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2983": {
+    "inputs": {
+      "strength": [
+        "2984",
+        1
+      ],
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "1311",
+        0
+      ],
+      "negative": [
+        "2960",
+        0
+      ],
+      "control_net": [
+        "2911",
+        0
+      ],
+      "image": [
+        "2387",
+        0
+      ],
+      "vae": [
+        "2972",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "2984": {
+    "inputs": {
+      "value": "1-a",
+      "a": [
+        "1663",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

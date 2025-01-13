@@ -10,13 +10,18 @@ import shared
 import fooocus_version
 import comfy.comfy_version as comfy_version
 import enhanced.version as version
+import logging
 
 from pathlib import Path
 from build_launcher import build_launcher, ready_checker, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, extra_index_url, target_path_install, met_diff
+from enhanced.logger import setup_logger, now_string
+
+setup_logger(log_level='INFO')
+logger = logging.getLogger(__name__)
 
 #print('[System PATH] ' + str(sys.path))
-print('[System ARGV] ' + str(sys.argv))
+logger.debug('[System ARGV] ' + str(sys.argv))
 
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
@@ -32,14 +37,10 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 def check_base_environment():
-    #import fooocus_version
-    #import comfy.comfy_version as comfy_version
-    #import enhanced.version as version
-
-    print(f"Python {sys.version}")
-    print(f"Fooocus version: {fooocus_version.version}")
-    print(f"Comfy version: {comfy_version.version}")
-    print(f'{version.get_branch()} version: {version.get_simplesdxl_ver()}')
+    print(f"{now_string()} Python {sys.version}")
+    print(f"{now_string()} Fooocus version: {fooocus_version.version}")
+    print(f"{now_string()} Comfy version: {comfy_version.version}")
+    print(f'{now_string()} {version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.21"
@@ -63,30 +64,30 @@ def check_base_environment():
         run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
-        print(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
-        print(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
-        print(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
-        print(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
-        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+        logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
+        logger.info(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
+        logger.info(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
+        logger.info(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
+        logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
     if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and (not is_installed("cpm_kernels") or not is_installed_version("bitsandbytes", "0.43.3")):
-        print(f'运行环境中缺乏必要组件或组件版本不匹配, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
-        print(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
-        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+        logger.info(f'运行环境中缺乏必要组件或组件版本不匹配, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
+        logger.info(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
+        logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
 
     from simpleai_base import simpleai_base
-    print("Checking ...")
+    logger.info("Checking ...")
     token = simpleai_base.init_local('SimpleSDXL')
     sysinfo = json.loads(token.get_sysinfo().to_json())
     sysinfo.update(dict(did=token.get_sys_did()))
-    print(f'[SimpleAI] GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
+    logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
     #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, exe_dir: {sysinfo["exe_dir"]}, exe_name:{sysinfo["exe_name"]}')
 
     if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
-        print(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
-        print(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量(RAM+SWAP)大于40G。')
-        print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+        logger.info(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
+        logger.info(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量(RAM+SWAP)大于40G。')
+        logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
         sys.exit(0)
 
     return token, sysinfo
@@ -156,7 +157,7 @@ def prepare_environment():
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
             for p in met_diff.keys():
-                print(f'Uninstall {p}.{met_diff[p]} ...')
+                logger.info(f'Uninstall {p}.{met_diff[p]} ...')
                 run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
         if is_win32_standalone_build:
             run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
@@ -253,21 +254,22 @@ def reset_env_args():
 #build_launcher()
 ready_checker()
 #os.environ["SIMPLEAI_VERBOSE"] = "on"
+
 shared.token, shared.sysinfo = check_base_environment()
-print(f'[SimpleAI] local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')
-print(f'[SimpleAI] nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
+logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')
+logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
 
 prepare_environment()
 shared.args = ini_args()
 
 if shared.args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(shared.args.gpu_device_id)
-    print("Set device to:", shared.args.gpu_device_id)
+    logger.info("Set device to:", shared.args.gpu_device_id)
 
 if shared.sysinfo["gpu_memory"]<4000:
-    print(f'The GPU memory capacity of the system is too small to run the latest models such as Flux, SD3m, Kolors, and HyDiT properly, and the Comfyd engine will be automatically disabled.')
-    print(f'系统GPU显存容量太小，无法正常运行Flux, SD3m, Kolors和HyDiT等最新模型，将自动禁用Comfyd引擎。请知晓，尽早升级硬件。')
-    print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+    logger.info(f'The GPU memory capacity of the system is too small to run the latest models such as Flux, SD3m, Kolors, and HyDiT properly, and the Comfyd engine will be automatically disabled.')
+    logger.info(f'系统GPU显存容量太小，无法正常运行Flux, SD3m, Kolors和HyDiT等最新模型，将自动禁用Comfyd引擎。请知晓，尽早升级硬件。')
+    logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
     shared.args.async_cuda_allocation = False
     shared.args.disable_async_cuda_allocation = True
     shared.args.disable_comfyd = True
@@ -281,11 +283,6 @@ if shared.args.async_cuda_allocation:
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
 
 
-import warnings
-import logging
-logging.basicConfig(level=logging.ERROR)
-warnings.filterwarnings("ignore", category=UserWarning, module="comfy.custom_nodes, torch.utils")
-
 from modules import config
 from modules.hash_cache import init_cache
 os.environ["U2NET_HOME"] = config.paths_inpaint[0]
@@ -294,20 +291,20 @@ os.environ['GRADIO_TEMP_DIR'] = config.temp_path
 
 if shared.args.hf_mirror is not None :
     os.environ['HF_MIRROR'] = str(shared.args.hf_mirror)
-    print("Set hf_mirror to:", shared.args.hf_mirror)
+    logger.info(f"Set hf_mirror to:{shared.args.hf_mirror}")
 
 if config.temp_path_cleanup_on_launch:
-    print(f'[Cleanup] Attempting to delete content of temp dir {config.temp_path}')
+    logger.info(f'Attempting to delete content of temp dir {config.temp_path}')
     result = delete_folder_content(config.temp_path, '[Cleanup] ')
     if result:
-        print("[Cleanup] Cleanup successful")
+        logger.info("[Cleanup] Cleanup successful")
     else:
-        print(f"[Cleanup] Failed to delete content of temp dir.")
+        logger.info(f"[Cleanup] Failed to delete content of temp dir.")
 
 pyhash_key = shared.token.get_pyhash_key(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver())
 reset_env_args()
 env_ready_code = shared.token.check_ready(fooocus_version.version, comfy_version.version, version.get_simplesdxl_ver(), config.path_models_root)
-print(f'Env_ready_code: {env_ready_code}')
+logger.info(f'Env_ready_code: {env_ready_code}')
 #if env_ready_code!=0 and env_ready_code!=4:
 #    print("系统环境检测不达标。请根据前面提示信息，重新检查并更新后再启动!")
 #    print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')

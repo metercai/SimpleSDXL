@@ -1,0 +1,8 @@
+[
+    {
+        "name": "Example Style",
+        "name_cn": "示例样式",
+        "prompt": "(masterpiece), (best quality), (ultra-detailed), {prompt} ",
+        "negative_prompt": "text, watermark, logo"
+    }
+]

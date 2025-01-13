@@ -5,6 +5,9 @@ import torch
 from ldm_patched.contrib.external_upscale_model import ImageUpscaleWithModel
 from ldm_patched.pfn.architecture.RRDB import RRDBNet as ESRGAN
 from modules.config import downloading_upscale_model
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 opImageUpscaleWithModel = ImageUpscaleWithModel()
 model = None
@@ -13,7 +16,7 @@ model = None
 def perform_upscale(img):
     global model
 
-    print(f'Upscaling image with shape {str(img.shape)} ...')
+    logger.info(f'Upscaling image with shape {str(img.shape)} ...')
 
     if model is None:
         model_filename = downloading_upscale_model()

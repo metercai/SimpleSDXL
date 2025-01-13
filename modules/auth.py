@@ -3,6 +3,9 @@ import hashlib
 import modules.constants as constants
 
 from os.path import exists
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 
 def auth_list_to_dict(auth_list):
@@ -25,7 +28,7 @@ def load_auth_data(filename=None):
                 if isinstance(auth_obj, list) and len(auth_obj) > 0:
                     auth_dict = auth_list_to_dict(auth_obj)
             except Exception as e:
-                print('load_auth_data, e: ' + str(e))
+                logger.info('load_auth_data, e: ' + str(e))
     return auth_dict
 
 
@@ -35,8 +38,8 @@ auth_enabled = auth_dict != None
 
 
 def check_auth(user, password):
-    print(f'user:{user},password:{password}\nauth_dict:{auth_dict}')
-    print(f'auth_dict[user]:{auth_dict[user]}\n cp:{hashlib.sha256(bytes(password, encoding="utf-8")).hexdigest()}')
+    logger.info(f'user:{user},password:{password}\nauth_dict:{auth_dict}')
+    logger.info(f'auth_dict[user]:{auth_dict[user]}\n cp:{hashlib.sha256(bytes(password, encoding="utf-8")).hexdigest()}')
     if user not in auth_dict:
         return False
     else:   

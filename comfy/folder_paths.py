@@ -4,7 +4,7 @@ import os
 import time
 import mimetypes
 import logging
-from typing import Set, List, Dict, Tuple, Literal
+from typing import Literal
 from collections.abc import Collection
 
 supported_pt_extensions: set[str] = {'.ckpt', '.pt', '.bin', '.pth', '.safetensors', '.pkl', '.sft'}
@@ -65,7 +65,7 @@ class CacheHelper:
         if not self.active:
             return default
         return self.cache.get(key, default)
-    
+
     def set(self, key: str, value: tuple[list[str], dict[str, float], float]) -> None:
         if self.active:
             self.cache[key] = value
@@ -142,7 +142,7 @@ def get_directory_by_type(type_name: str) -> str | None:
         return get_input_directory()
     return None
 
-def filter_files_content_types(files: List[str], content_types: Literal["image", "video", "audio"]) -> List[str]:
+def filter_files_content_types(files: list[str], content_types: Literal["image", "video", "audio"]) -> list[str]:
     """
     Example:
         files = os.listdir(folder_paths.get_input_directory())
@@ -209,12 +209,17 @@ def add_model_folder_path(folder_name: str, full_folder_path: str, is_default: b
     global folder_names_and_paths
     folder_name = map_legacy(folder_name)
     if folder_name in folder_names_and_paths:
-        paths, tags = folder_names_and_paths[folder_name]
-        if full_folder_path not in paths:
+        paths, _exts = folder_names_and_paths[folder_name]
+        if full_folder_path in paths:
+            if is_default and paths[0] != full_folder_path:
+                # If the path to the folder is not the first in the list, move it to the beginning.
+                paths.remove(full_folder_path)
+                paths.insert(0, full_folder_path)
+        else:
             if is_default:
-                folder_names_and_paths[folder_name][0].insert(0, full_folder_path)
+                paths.insert(0, full_folder_path)
             else:
-                folder_names_and_paths[folder_name][0].append(full_folder_path)
+                paths.append(full_folder_path)
     else:
         folder_names_and_paths[folder_name] = ([full_folder_path], set())
 
@@ -309,7 +314,7 @@ def cached_filename_list_(folder_name: str) -> tuple[list[str], dict[str, float]
     strong_cache = cache_helper.get(folder_name)
     if strong_cache is not None:
         return strong_cache
-    
+
     global filename_list_cache
     global folder_names_and_paths
     folder_name = map_legacy(folder_name)
