@@ -1,15 +1,36 @@
 from collections import deque
 from datetime import datetime
 import io
+import os
 import logging
 import sys
 import threading
-from enhanced.logger import get_log_file, MilliSecondsFormatter
 
 logs = None
 stdout_interceptor = None
 stderr_interceptor = None
 
+log_file = None
+
+class MilliSecondsFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        ct = datetime.fromtimestamp(record.created)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            t = ct.strftime("%H:%M:%S")  # 分钟和秒
+            s = f"{t}.{int(record.msecs):03d}"  # 添加毫秒
+        return s
+
+def get_log_file():
+    global log_file
+    if log_file is None:
+        now_string = datetime.now().strftime("%Y%m%d%H%M%S")
+        log_file = os.path.join("logs", f'app_simpleai_{now_string}.log')
+        dirs_log = os.path.dirname(log_file)
+        if not os.path.exists(dirs_log):
+            os.makedirs(dirs_log)
+    return log_file
 
 class LogInterceptor(io.TextIOWrapper):
     def __init__(self, stream,  *args, **kwargs):
