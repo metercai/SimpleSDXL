@@ -221,7 +221,7 @@ with shared.gradio_root:
                                  elem_id='final_gallery', preview=True )
                     with gr.Column(scale=1, visible=False) as scene_panel:
                         with gr.Row():
-                            scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, placeholder="Type blessing words.", elem_classes='scene_input')
+                            scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, elem_classes='scene_input')
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
