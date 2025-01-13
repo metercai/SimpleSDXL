@@ -40,9 +40,12 @@ def check_script_file():
         print_colored("√主程序目录层级验证通过", Fore.GREEN)
 
 def get_total_virtual_memory():
+    import psutil
     try:
-        import psutil
-        return psutil.virtual_memory().total
+        virtual_mem = psutil.virtual_memory().total  # 物理内存
+        swap_mem = psutil.swap_memory().total        # 交换分区
+        total_virtual_memory = virtual_mem + swap_mem
+        return total_virtual_memory
     except ImportError:
         print_colored("无法导入 psutil 模块，跳过内存检查", Fore.YELLOW)
         return None
@@ -90,7 +93,9 @@ def validate_files(packages):
         files_and_sizes = package_info["files"]
         download_links = package_info["download_links"]
         print(f"－－－－－－－", end='')  # 不换行
-        typewriter_effect(f"校验{package_name}文件－－－－－－－")  # 打字动态效果
+        time.sleep(0.1)
+        print(f"校验{package_name}文件－－－－－－－")  # 打字动态效果
+        time.sleep(0.1)
         missing_files = []
         size_mismatch_files = []
         case_mismatch_files = []
@@ -551,7 +556,7 @@ packages = {
             ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
             ("SimpleModels/loras/flux1-turbo.safetensors", 694082424)
         ],
         "download_links": [
