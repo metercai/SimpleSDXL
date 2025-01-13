@@ -12,6 +12,9 @@ from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 from build_launcher import is_win32_standalone_build
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 utils.echo_off = not ads.get_admin_default('advanced_logs')
 args_comfyd = [[]]
@@ -32,7 +35,7 @@ def reset_simpleai_args():
         cuda_version=cuda_version))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
     reserve_vram_value = ads.get_admin_default('reserved_vram')
-    reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value>0 else [] 
+    reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value and reserve_vram_value>0 else [] 
     smart_memory = [] if shared.sysinfo['gpu_memory']<8180 else [['--disable-smart-memory']]
     windows_standalone = [["--windows-standalone-build"]] if is_win32_standalone_build else []
     fast_mode = [["--fast"]] if ads.get_admin_default('fast_comfyd_checkbox') else []
@@ -47,7 +50,7 @@ def reset_simpleai_args():
         os.makedirs(comfyd_intput)
     comfyd_intput_default_image = os.path.join(comfyd_intput, 'welcome.png')
     if not os.path.exists(comfyd_intput_default_image):
-        default_image_path = os.path.join(shared.root, 'enhanced/attached/welcome.png')
+        default_image_path = os.path.join(shared.root, 'presets/welcome/welcome.png')
         shutil.copy(default_image_path, comfyd_intput)
     args_comfyd += [["--output-directory", comfyd_output], ["--temp-directory", shared.temp_path], ["--input-directory", comfyd_intput]]
     #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
@@ -61,7 +64,6 @@ def get_path_in_user_dir(filename, user_did=None, catalog=None):
     if filename:
         path = catalog if catalog else filename
         path_file = shared.token.get_path_in_user_dir(user_did, path)
-        #print(f'get_path_in_user_dir: {path_file}')
         if not os.path.exists(os.path.dirname(path_file)):
             for cata in ["presets", "workflows", "styles", "wildcards"]:
                 os.makedirs(os.path.join(os.path.dirname(path_file), cata))
@@ -128,7 +130,7 @@ theme_color = {
 
 id_info_css = lambda x: f'style="color: {theme_color[x]};"'
 #lambda x: f'style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px; color: {theme_color[x]};"'
-current_id_info = lambda x,y,z,t: f'<b>当前绑定的身份信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
+current_id_info = lambda x,y,z,t: f'<b>当前身份信息</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
 
 # [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
 # [identity_nick_input, identity_tele_input, identity_qr]
@@ -142,12 +144,12 @@ def trigger_input_identity(img):
             try:
                 user_did, nickname, telephone = import_identity_qrcode(data)
             except Exception as e:
-                print("qrcode parse error")
+                logger.debug("qrcode parse error")
                 user_did, nickname, telephone = '', '', ''
         else:
             user_did, nickname, telephone = '', '', ''
     except UnicodeDecodeError as e:
-        print(f'bbox:{bbox}, data_bytes:{data_bytes}')
+        logger.debug(f'bbox:{bbox}, data_bytes:{data_bytes}')
     return  bind_identity_sub(nickname, telephone)
 
 def bind_identity(nick, areacode, tele):
@@ -156,10 +158,10 @@ def bind_identity(nick, areacode, tele):
     return bind_identity_sub(nick, tele)
 
 def bind_identity_sub(nick, tele):
-    print(f'nickename={nick}, telephone={tele}')
+    logger.debug(f'nickename={nick}, telephone={tele}')
     if check_input(nick, tele):
         where = shared.token.check_local_user_token(nick, tele)
-        print(f'check_local_user_token:{where}')
+        logger.info(f'check_local_user_token:{where}')
         if where in ['local', 'recall']: # 本地或远程有身份, 输入身份口令
             result = [note1_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         elif where == 'create': # 新身份, 输入验证码
@@ -187,7 +189,7 @@ def verify_identity(input_id_info, state, vcode):
         inputs = input_id_info.split(',')
         nick, tele = inputs[0].strip(), inputs[1].strip()
         next_cmd = shared.token.check_user_verify_code(nick, tele, vcode)
-        print(f'check_user_verify_code:{next_cmd}')
+        logger.debug(f'check_user_verify_code:{next_cmd}')
         if next_cmd == 'create':  # 验证成功, 创建新身份, 开始设置口令
             result = [note2_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=True)] + [gr.update(visible=False)]*3
         elif next_cmd == 'recall': # 验证并找回身份, 要求直接输入口令
@@ -217,10 +219,9 @@ def set_phrases(input_id_info, state, phrase, steps):
             context = shared.token.set_phrase_and_get_context(nick, tele, phrase)
             if not shared.token.is_guest(context.get_did()):
                 state["user"] = context
-                state["user_name"] = context.get_nickname()
-                state["user_did"] = context.get_did()
                 state["sys_did"] = context.get_sys_did()
                 state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
+                state["__session"] = state["sstoken"]
                 note = f'身份口令设置成功，完成身份绑定。请牢记身份口令: `{phrase}` ，解除绑定或再次绑定都需要，建议抄写到私人笔记，仅限自己可见。及时导出身份二维码，方便再次绑定，导出后妥善保存。'
                 result = [note] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
             else: # 设置身份口令失败, 重新设置
@@ -228,8 +229,8 @@ def set_phrases(input_id_info, state, phrase, steps):
         else: # 口令两次不一致, 重新设置
             result = [note2_7] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')]+ [gr.update(visible=True)] + [gr.update(visible=False)]*3
         state["user_phrase"] = ''
-    id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
-    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
+    id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
+    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user"].get_did()))]
 
 def confirm_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
@@ -240,33 +241,31 @@ def confirm_identity(input_id_info, state, phrase):
             result = [note3_1] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
         else: # 绑定成功, 转解绑输入
             state["user"] = context
-            state["user_name"] = context.get_nickname()
-            state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
+            state["__session"] = state["sstoken"]
             result = [note3] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)]
     else: # 口令格式不对, 重新输入口令, 再次绑定
         result = [note3_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
-    id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
-    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
+    id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
+    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user"].get_did()))]
 
 def unbind_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
-        context = shared.token.unbind_and_return_guest(state["user_did"], phrase)
+        context = shared.token.unbind_and_return_guest(state["user"].get_did(), phrase)
         if shared.token.is_guest(context.get_did()):
             state["user"] = context
-            state["user_name"] = context.get_nickname()
-            state["user_did"] = context.get_did()
             state["sys_did"] = context.get_sys_did()
             state["sstoken"] = shared.token.get_user_sstoken(context.get_did(), state["ua_hash"])
+            state["__session"] = state["sstoken"]
             state["preset_store"] = False
             result = [note4, gr.update(visible=True)] + [gr.update(visible=False)]*8 + ['', '86-CN-中国', '', None]
         else: # 口令不对, 解绑失败, 重新输入口令, 再次解绑
             result = [note4_1] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 + [gr.update(visible=True)] + ['', '86-CN-中国', '', None]
     else: # 口令格式不对, 重新输入口令, 再次解绑
         result = [note3_2] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)] + ['', '86-CN-中国', '', None]
-    id_info = current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"])
-    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user_did"]))]
+    id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
+    return result + [id_info, gr.update(visible=not shared.token.is_guest(state["user"].get_did()))]
 
 
 # [identity_dialog, current_id_info, identity_export_btn]
@@ -279,18 +278,16 @@ def toggle_identity_dialog(state):
         state['identity_dialog'] = False
         flag = False
     state['identity_dialog'] = not flag
-    is_guest = shared.token.is_guest(state["user_did"])
+    is_guest = shared.token.is_guest(state["user"].get_did())
     result = [identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '86-CN-中国', '', None]
-    result = [gr.update(visible=not flag), current_id_info(state["user_name"], state["user_did"], state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)] + result
+    result = [gr.update(visible=not flag), current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"]), gr.update(visible=not is_guest)] + result
     return result
 
-
-is_chinese = lambda x: sum([1 if u'\u4e00' <= i <= u'\u9fa5' else 0 for i in x]) > 0
 def check_input(nick, tele):
     length = 0
     for n in nick:
         length += 1
-        if is_chinese(n):
+        if util.is_chinese(n):
             length += 1
     if length < 4 or length > 24:
         return False

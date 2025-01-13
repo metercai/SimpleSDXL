@@ -1,6 +1,8 @@
 import json
 import os
-
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 current_translation = {}
 localization_root = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'language')
@@ -20,8 +22,8 @@ def localization_js(filename):
                         assert isinstance(k, str)
                         assert isinstance(v, str)
             except Exception as e:
-                print(str(e))
-                print(f'Failed to load localization file {full_name}')
+                logger.info(str(e))
+                logger.info(f'Failed to load localization file {full_name}')
 
     # current_translation = {k: 'XXX' for k in current_translation.keys()}  # use this to see if all texts are covered
     

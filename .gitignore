@@ -9,6 +9,7 @@ __pycache__
 *.corrupted
 *.partial
 *.onnx
+*.swp
 sorted_styles.json
 /hash_cache.txt
 /input
@@ -90,3 +91,4 @@ wd-v1-4-moat-tagger-v2.csv
 comfy/user/
 /comfy/custom_nodes/comfyui_controlnet_aux/config.yaml
 /patch_pyhash.py*
+/logs/

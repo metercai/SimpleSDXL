@@ -14,7 +14,9 @@ from transformers.generation.logits_process import LogitsProcessorList
 from transformers import AutoTokenizer, AutoModelForCausalLM, set_seed
 from modules.config import path_fooocus_expansion
 from ldm_patched.modules.model_patcher import ModelPatcher
-
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 # limitation of np.random.seed(), called from transformers.set_seed()
 SEED_LIMIT_NUMPY = 2**32
@@ -50,7 +52,7 @@ class FooocusExpansion:
                 self.logits_bias[0, v] = 0
                 debug_list.append(k[1:])
 
-        print(f'Fooocus V2 Expansion: Vocab with {len(debug_list)} words.')
+        logger.info(f'Fooocus V2 Expansion: Vocab with {len(debug_list)} words.')
 
         # debug_list = '\n'.join(sorted(debug_list))
         # print(debug_list)
@@ -76,7 +78,7 @@ class FooocusExpansion:
             self.model.half()
 
         self.patcher = ModelPatcher(self.model, load_device=load_device, offload_device=offload_device)
-        print(f'Fooocus Expansion engine loaded for {load_device}, use_fp16 = {use_fp16}.')
+        logger.info(f'Fooocus Expansion engine loaded for {load_device}, use_fp16 = {use_fp16}.')
 
     @torch.no_grad()
     @torch.inference_mode()
@@ -97,7 +99,7 @@ class FooocusExpansion:
             return ''
 
         if self.patcher.current_device != self.patcher.load_device:
-            print('Fooocus Expansion loaded by itself.')
+            logger.info('Fooocus Expansion loaded by itself.')
             model_management.load_model_gpu(self.patcher)
 
         seed = int(seed) % SEED_LIMIT_NUMPY

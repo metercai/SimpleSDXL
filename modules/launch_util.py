@@ -11,6 +11,9 @@ import packaging.version
 import pygit2
 from pathlib import Path
 from build_launcher import python_embeded_path
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
 
@@ -70,9 +73,9 @@ def git_clone(url, dir, name=None, hash=None):
         repo_name = remote_url.split('/')[-1].split('.git')[0]
 
         repo.checkout_tree(commit, strategy=pygit2.GIT_CHECKOUT_FORCE)
-        print(f"{repo_name} {str(commit.id)[:7]} update check complete.")
+        logger.info(f"{repo_name} {str(commit.id)[:7]} update check complete.")
     except Exception as e:
-        print(f"Git clone failed for {url}: {str(e)}")
+        logger.info(f"Git clone failed for {url}: {str(e)}")
 
 
 def repo_dir(name):
@@ -90,7 +93,7 @@ def is_installed(package):
 
 def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_command_live) -> str:
     if desc is not None:
-        print(desc)
+        logger.info(desc)
 
     run_kwargs = {
         "args": command,
@@ -127,8 +130,8 @@ def run_pip(command, desc=None, live=default_command_live):
         return run(f'"{python}" -m pip {command} {target_path_install} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
                    errdesc=f"Couldn't install {desc}", live=live)
     except Exception as e:
-        print(e)
-        print(f'CMD Failed {desc}: {command}')
+        logger.info(e)
+        logger.info(f'CMD Failed {desc}: {command}')
         return None
 
 
@@ -166,13 +169,12 @@ def requirements_met(requirements_file):
                 result = False
                 continue
            
-            #print(f'requirement:{package}, required:{version_required}, installed:{version_installed}')
             if version_required=='' and version_installed:
                 continue
             
             if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
                 met_diff.update({package:version_installed})
-                print(f"Version mismatch for {package}: Installed version {version_installed} does not meet requirement {version_required}")
+                logger.info(f"Version mismatch for {package}: Installed version {version_installed} does not meet requirement {version_required}")
                 result = False
 
     return result
@@ -183,7 +185,6 @@ def is_installed_version(package, version_required):
     except Exception:
         return False
 
-    #print(f'requirement:{package}, required:{version_required}, installed:{version_installed}')
     if packaging.version.parse(version_required) != packaging.version.parse(version_installed):
         return False
     return True
@@ -200,7 +201,7 @@ def delete_folder_content(folder, prefix=None):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
-            print(f'{prefix}Failed to delete {file_path}. Reason: {e}')
+            logger.info(f'{prefix}Failed to delete {file_path}. Reason: {e}')
             result = False
 
     return result

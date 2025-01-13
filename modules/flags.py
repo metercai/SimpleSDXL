@@ -126,6 +126,17 @@ scene_aspect_ratios_map = {
     "16:9": "Widescreen|16:9",
     "21:9": "Cinematic|21:9" }
 
+def scene_aspect_ratios_derive(ar):
+    if '|' in ar:
+        width = int(ar.split('|')[0])
+        height = int(width * float(ar.split('|')[1].split(':')[1])/float(ar.split('|')[1].split(':')[0]))
+        return f'{width}×{height}|{ar.split("|")[1]}'
+    return ar
+
+scene_aspect_ratios_mapping = lambda x: scene_aspect_ratios_map[x] if '|' not in x else scene_aspect_ratios_derive(x)
+scene_aspect_ratios_mapping_list = lambda m: [scene_aspect_ratios_mapping(x) for x in m]
+
+
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
 COMFY_KSAMPLER_NAMES = ["euler", "euler_cfg_pp", "euler_ancestral", "euler_ancestral_cfg_pp", "heun", "heunpp2","dpm_2", "dpm_2_ancestral",
