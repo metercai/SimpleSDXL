@@ -4,6 +4,9 @@ import json
 import math
 import gradio as gr
 import enhanced.translator as translator
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 from modules.util import get_files_from_folder
 from args_manager import args
@@ -43,7 +46,6 @@ def get_wildcards_samples(path="root"):
 
     wildcards_list_all = sorted([f[:-4] for f in get_files_from_folder(wildcards_path, ['.txt'], None, variation=True)])
     wildcards_list_all = [x for x in wildcards_list_all if '_' not in x]
-    #print(f'wildcards_list:{wildcards_list_all}')
     for wildcard in wildcards_list_all:
         words = open(os.path.join(wildcards_path, f'{wildcard}.txt'), encoding='utf-8').read().splitlines()
         words = [x.split('?')[0] for x in words if x != '' and not wildcard_regex.findall(x)]
@@ -78,11 +80,10 @@ def get_wildcards_samples(path="root"):
             set_wildcard_path_list(wildcard_path[0], wildcard_path[1])
             #set_wildcard_path_list("root", wildcard_path[0])
         else:
-            print(f'[Wildcards] The level of wildcards is too depth: {wildcards_path}.')
-    #print(f'wildcards_list:{wildcards_list}')
+            logger.info(f'The level of wildcards is too depth: {wildcards_path}.')
     if wildcards_list_all:
         load_words_translation(True)
-        print(f'[Wildcards] Refresh and Load {len(wildcards_list_all)}/{len(wildcards.keys())} wildcards: {", ".join(wildcards_list_all)}.')
+        logger.info(f'Refresh and Load {len(wildcards_list_all)}/{len(wildcards.keys())} wildcards: {", ".join(wildcards_list_all)}.')
     if args.language=='cn':
         if len(wildcards_translation.keys())==0:
             wildcards_translation_file = os.path.join(wildcards_path, 'cn_list.json')
@@ -146,7 +147,7 @@ def get_words_with_wildcard(wildcard, rng, method='R', number=1, start_at=1):
             words_each = rng.sample(words, nums)
             words_result.append(words_each[0] if nums==1 else f'({" ".join(words_each)})')
     words_result = [replace_wildcard(txt, rng) for txt in words_result]
-    print(f'[Wildcards] Get words from wildcard:__{wildcard}__, method:{method}, number:{number}, start_at:{start_at}, result:{words_result}')
+    logger.info(f'Get words from wildcard:__{wildcard}__, method:{method}, number:{number}, start_at:{start_at}, result:{words_result}')
     return words_result
 
 
@@ -225,7 +226,7 @@ def compile_arrays(text, rng):
         mult = 0
     
 
-    print(f'[Wildcards] Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
+    logger.info(f'Copmile text in prompt to arrays: {text} -> arrays:{arrays}, mult:{mult}')
     return text, arrays, mult, seed_fixed
 
 def replace_wildcard(text, rng):
@@ -268,7 +269,6 @@ def apply_arrays(text, index, arrays, mult):
 
     index %= mult
     chosen_words = get_words(arrays, mult, index)
-    #print(f'index:{index}, chosen_words:{chosen_words}')
 
     i = 0
     for arr in arrays:
@@ -278,7 +278,6 @@ def apply_arrays(text, index, arrays, mult):
             else:
                 text = text.replace(f'[{tags[i]}]', tags[i], 1)
         i = i+1
-       # print(f'text:{text}')
 
     return text
 
@@ -291,19 +290,19 @@ def apply_wildcards(wildcard_text, rng, directory=wildcards_path):
         if len(placeholders) == 0:
             return wildcard_text
 
-        print(f'[Wildcards] processing: {wildcard_text}')
+        logger.info(f'[Wildcards] processing: {wildcard_text}')
         for placeholder in placeholders:
             try:
                 words = wildcards[placeholder]
                 assert len(words) > 0
                 wildcard_text = wildcard_text.replace(f'__{placeholder}__', rng.choice(words), 1)
             except:
-                print(f'[Wildcards] Warning: {placeholder}.txt missing or empty. '
+                logger.info(f'[Wildcards] Warning: {placeholder}.txt missing or empty. '
                       f'Using "{placeholder}" as a normal word.')
                 wildcard_text = wildcard_text.replace(f'__{placeholder}__', placeholder)
-            print(f'[Wildcards] {wildcard_text}')
+            logger.info(f'[Wildcards] {wildcard_text}')
 
-    print(f'[Wildcards] BFS stack overflow. Current text: {wildcard_text}')
+    logger.info(f'[Wildcards] BFS stack overflow. Current text: {wildcard_text}')
     return wildcard_text
 
 

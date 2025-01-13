@@ -37,6 +37,9 @@ import enhanced.all_parameters as ads
 from enhanced.simpleai import comfyd 
 from enhanced.minicpm import MiniCPM, minicpm
 
+import logging
+logger = logging.getLogger(__name__)
+
 def get_task(*args):
     args = list(args)
     args.pop(0)
@@ -57,7 +60,7 @@ def generate_clicked(task: worker.AsyncTask):
     finished = False
 
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
-        gr.update(visible=True, value="enhanced/attached/welcome.png"), \
+        gr.update(visible=True, value="presets/welcome/welcome.png"), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
 
@@ -103,7 +106,7 @@ def generate_clicked(task: worker.AsyncTask):
                             os.remove(filepath)
 
     execution_time = time.perf_counter() - execution_start_time
-    print(f'Total time: {execution_time:.2f} seconds')
+    logger.info(f'Total time: {execution_time:.2f} seconds')
     return
 
 
@@ -209,7 +212,7 @@ with shared.gradio_root:
                     with gr.Column(scale=2, visible=True):
                         with gr.Row():
                             progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
-                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png", interactive=False, show_download_button=False)
+                                            elem_classes=['main_view'], value="presets/welcome/welcome.png", interactive=False, show_download_button=False)
                             progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                             gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
@@ -1110,7 +1113,7 @@ with shared.gradio_root:
 
                         def sync_params_backend(key, v, params):
                             params.update({key:v})
-                            print(f'sync_params_backend: {key}:{v}')
+                            logger.debug(f'sync_params_backend: {key}:{v}')
                             return params
 
                         def toggle_minicpm(x):
@@ -1321,7 +1324,7 @@ with shared.gradio_root:
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
-                print('Could not find metadata in the image!')
+                logger.info('Could not find metadata in the image!')
             return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
 
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]

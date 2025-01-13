@@ -5,6 +5,9 @@ import math
 
 from modules.extra_utils import get_files_from_folder
 from random import Random
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 # cannot use modules.config - validators causing circular imports
 styles_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../sdxl_styles/'))
@@ -44,8 +47,8 @@ for styles_file in styles_files:
                 negative_prompt = entry['negative_prompt'] if 'negative_prompt' in entry else ''
                 styles[name] = (prompt, negative_prompt)
     except Exception as e:
-        print(str(e))
-        print(f'Failed to load style file {styles_file}')
+        logger.info(str(e))
+        logger.info(f'Failed to load style file {styles_file}')
 
 style_keys = list(styles.keys())
 fooocus_expansion = 'Fooocus V2'
@@ -79,7 +82,7 @@ def apply_arrays(text, index):
     if len(arrays) == 0:
         return text
 
-    print(f'[Arrays] processing: {text}')
+    logger.info(f'[Arrays] processing: {text}')
     mult = 1
     for arr in arrays:
         words = arr.split(',')

@@ -18,6 +18,9 @@ from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
@@ -102,8 +105,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 
     params_backend  = enginedata_dict.get('backend_params', modules.flags.get_engine_default_backend_params(template_engine))
     params_backend.update(dict(
-            nickname=state_params["user_name"],
-            user_did=state_params["user_did"],
+            nickname=state_params["user"].get_nickname(),
+            user_did=state_params["user"].get_did(),
             translation_methods=modules.config.default_translation_methods,
             backfill_prompt=modules.config.default_backfill_prompt,
             comfyd_active_checkbox=modules.config.default_comfyd_active_checkbox,
@@ -137,8 +140,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
     results.append(engine_class_display)
     results.append(get_layout_setting_choices_visible_inter(uov_method_list, modules.flags.disabled, 'uov_method', visible, inter))
-    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
-    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_empty_visible_inter('enhance_input_image', visible, inter))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
@@ -186,7 +189,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     return results
 
 def get_welcome_image(preset=None, is_mobile=False):
-    path_welcome = os.path.abspath(f'./enhanced/attached/')
+    path_welcome = os.path.abspath(f'./presets/welcome/')
     if preset:
         suffix = 'w' if not is_mobile else 'm'
         file_welcome = os.path.join(path_welcome, f'welcome_{preset}_{suffix}.jpg')
@@ -208,7 +211,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
    
     preset = loaded_parameter_dict.get("preset", None)
     is_mobile = loaded_parameter_dict.get("is_mobile", False)
-    results = [gr.update(value=f'{get_welcome_image(preset, is_mobile)}', visible=True), gr.update(visible=False), gr.update(visible=False), None] 
+    results = [gr.update(value=get_welcome_image(preset, is_mobile), visible=True), gr.update(visible=False), gr.update(visible=False), None] 
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
@@ -338,7 +341,7 @@ def get_resolution(key: str, fallback: str | None, source_dict: dict, results: l
             results.append(int(width))
             results.append(int(height))
     except e:
-        print(f'in except:{e}')
+        logger.info(f'in except:{e}')
         results.append(gr.update())
         results.append(gr.update())
         results.append(gr.update())
@@ -622,7 +625,7 @@ class A1111MetadataParser(MetadataParser):
                 else:
                     data[list(self.fooocus_to_a1111.keys())[list(self.fooocus_to_a1111.values()).index(k)]] = v
             except Exception:
-                print(f"Error parsing \"{k}: {v}\"")
+                logger.info(f"Error parsing \"{k}: {v}\"")
 
         # workaround for multiline prompts
         if 'raw_prompt' in data:
@@ -831,7 +834,7 @@ class SIMPLEMetadataParser(MetadataParser):
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
                 metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
                 if metadata[key]=='None':
-                    print(f'[MetaParser] ⚠️  WARNING! The model is not available in the local: {value}.')
+                    logger.info(f' ⚠️  WARNING! The model is not available in the local: {value}.')
             elif key.startswith('LoRA '):
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
             elif key in ['vae', 'VAE']:

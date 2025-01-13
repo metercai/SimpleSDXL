@@ -12,8 +12,8 @@ from .utils import install_package
 try:
     from lark import Lark, Transformer, v_args
 except:
-    print('install lark-parser...')
-    install_package('lark-parser')
+    print('install lark...')
+    install_package('lark')
     from lark import Lark, Transformer, v_args
 
 model_path = os.path.join(folder_paths.models_dir, 'prompt_generator')
@@ -185,7 +185,7 @@ class ChinesePromptTranslate(Transformer):
 
 
 #定义Prompt文法
-grammar = """
+grammar = r"""
 start: sentence
 sentence: phrase ("," phrase)*
 phrase: emphasis | weight | word | lora | embedding | schedule 
