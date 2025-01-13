@@ -197,9 +197,9 @@ def get_welcome_image(preset=None, is_mobile=False, is_change=False):
             return file_welcome
     if is_change:
         if is_mobile:
-            file_welcome = os.path.join(path_welcome, 'welcome_m.jpg')
+            file_welcome = os.path.join(path_welcome, 'welcome_0_m.jpg')
         else:
-            file_welcome = os.path.join(path_welcome, 'welcome_w.jpg')
+            file_welcome = os.path.join(path_welcome, 'welcome_0_w.jpg')
         return file_welcome
     file_welcome = os.path.join(path_welcome, 'welcome.png')
     file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
