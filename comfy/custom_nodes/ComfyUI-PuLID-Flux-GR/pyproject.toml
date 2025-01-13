@@ -1,0 +1,15 @@
+[project]
+name = "pulid-flux-gr"
+description = "This is a PuLID node that has been extended with new features."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["facexlib", "insightface", "onnxruntime", "onnxruntime-gpu", "ftfy", "timm", "torch"]
+
+[project.urls]
+Repository = "https://github.com/GraftingRayman/ComfyUI-PuLID-Flux-GR"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-PuLID-Flux-GR"
+Icon = ""

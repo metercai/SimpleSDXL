@@ -23,7 +23,7 @@ from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 from modules.util import is_json, HWC3, resize_image
-from modules.meta_parser import switch_scene_theme
+from modules.meta_parser import switch_scene_theme, get_welcome_image
 
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
@@ -46,7 +46,7 @@ def get_task(*args):
 
     return worker.AsyncTask(args=args)
 
-def generate_clicked(task: worker.AsyncTask):
+def generate_clicked(task: worker.AsyncTask, state):
     import ldm_patched.modules.model_management as model_management
 
     with model_management.interrupt_processing_mutex:
@@ -56,11 +56,12 @@ def generate_clicked(task: worker.AsyncTask):
     if len(task.args) == 0:
         return
 
+    is_mobile = state["__is_mobile"]
     execution_start_time = time.perf_counter()
     finished = False
 
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
-        gr.update(visible=True, value="presets/welcome/welcome.png"), \
+        gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
 
@@ -94,7 +95,7 @@ def generate_clicked(task: worker.AsyncTask):
                     product = sort_enhance_images(product, task)
 
                 yield gr.update(visible=False), \
-                    gr.update(visible=False), \
+                    gr.update(visible=False, value=get_welcome_image(is_mobile=is_mobile)), \
                     gr.update(visible=True, value=product), \
                     gr.update(visible=False)
                 finished = True
@@ -1342,7 +1343,7 @@ with shared.gradio_root:
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt], outputs=prompt, show_progress=True) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
-            .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
+            .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')

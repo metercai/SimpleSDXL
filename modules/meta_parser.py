@@ -188,13 +188,19 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 
     return results
 
-def get_welcome_image(preset=None, is_mobile=False):
+def get_welcome_image(preset=None, is_mobile=False, is_change=False):
     path_welcome = os.path.abspath(f'./presets/welcome/')
     if preset:
         suffix = 'w' if not is_mobile else 'm'
         file_welcome = os.path.join(path_welcome, f'welcome_{preset}_{suffix}.jpg')
         if os.path.exists(file_welcome):
             return file_welcome
+    if is_change:
+        if is_mobile:
+            file_welcome = os.path.join(path_welcome, 'welcome_m.jpg')
+        else:
+            file_welcome = os.path.join(path_welcome, 'welcome_w.jpg')
+        return file_welcome
     file_welcome = os.path.join(path_welcome, 'welcome.png')
     file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
     welcomes = [p for p in get_files_from_folder(path_welcome, ['.jpg', '.jpeg', 'png'], file_suffix, None) if not p.startswith('.')]
