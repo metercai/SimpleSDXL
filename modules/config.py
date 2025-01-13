@@ -11,16 +11,18 @@ import shared
 import modules.flags
 import modules.sdxl_styles
 import enhanced.all_parameters as ads
+import logging
 
 from modules.model_loader import load_file_from_url
 from modules.extra_utils import makedirs_with_log, get_files_from_folder, try_eval_env_var
 from modules.flags import OutputFormat, Performance, MetadataScheme
-
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 def get_config_path(key, default_value):
     env = os.getenv(key)
     if env is not None and isinstance(env, str):
-        print(f"Environment: {key} = {env}")
+        logger.info(f"Environment: {key} = {env}")
         return env
     else:
         return os.path.abspath(default_value)
@@ -36,8 +38,8 @@ try:
     with open(os.path.abspath(f'./presets/default.json'), "r", encoding="utf-8") as json_file:
         config_dict.update(json.load(json_file))
 except Exception as e:
-    print(f'Load default preset failed.')
-    print(e)
+    logger.info(f'Load default preset failed.')
+    logger.info(e)
 
 try:
     if os.path.exists(config_path):
@@ -47,14 +49,14 @@ try:
         for key in always_save_keys:
             if key.startswith('default_') and key[8:] in ads.default:
                 ads.default[key[8:]] = config_dict[key]
-        print(f'Load config data from {config_path}.')
+        logger.info(f'Load config data from {config_path}.')
 except Exception as e:
-    print(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
-    print('Please make sure that:')
-    print(f'1. The file "{config_path}" is a valid text file, and you have access to read it.')
-    print('2. Use "\\\\" instead of "\\" when describing paths.')
-    print('3. There is no "," before the last "}".')
-    print('4. All key/value formats are correct.')
+    logger.info(f'Failed to load config file "{config_path}" . The reason is: {str(e)}')
+    logger.info('Please make sure that:')
+    logger.info(f'1. The file "{config_path}" is a valid text file, and you have access to read it.')
+    logger.info('2. Use "\\\\" instead of "\\" when describing paths.')
+    logger.info('3. There is no "," before the last "}".')
+    logger.info('4. All key/value formats are correct.')
 
 
 def try_load_deprecated_user_path_config():
@@ -84,23 +86,23 @@ def try_load_deprecated_user_path_config():
 
         if deprecated_config_dict.get("default_model", None) == 'juggernautXL_version6Rundiffusion.safetensors':
             os.replace('user_path_config.txt', 'user_path_config-deprecated.txt')
-            print('Config updated successfully in silence. '
+            logger.info('Config updated successfully in silence. '
                   'A backup of previous config is written to "user_path_config-deprecated.txt".')
             return
 
         if input("Newer models and configs are available. "
                  "Download and update files? [Y/n]:") in ['n', 'N', 'No', 'no', 'NO']:
             config_dict.update(deprecated_config_dict)
-            print('Loading using deprecated old models and deprecated old configs.')
+            logger.info('Loading using deprecated old models and deprecated old configs.')
             return
         else:
             os.replace('user_path_config.txt', 'user_path_config-deprecated.txt')
-            print('Config updated successfully by user. '
+            logger.info('Config updated successfully by user. '
                   'A backup of previous config is written to "user_path_config-deprecated.txt".')
             return
     except Exception as e:
-        print('Processing deprecated config failed')
-        print(e)
+        logger.info('Processing deprecated config failed')
+        logger.info(e)
     return
 
 
@@ -110,7 +112,7 @@ def get_presets():
     preset_folder = 'presets'
     presets = ['initial']
     if not os.path.exists(preset_folder):
-        print('No presets found.')
+        logger.info('No presets found.')
         return presets
 
     return presets + [f[:f.index(".json")] for f in os.listdir(preset_folder) if f.endswith('.json')]
@@ -131,13 +133,13 @@ def try_get_preset_content(preset, user_did=None):
             if os.path.exists(preset_path):
                 with open(preset_path, "r", encoding="utf-8") as json_file:
                     json_content = json.load(json_file)
-                    print(f'Loaded preset: {preset_path}')
+                    logger.info(f'Loaded preset: {preset_path}')
                     return json_content
             else:
                 raise FileNotFoundError
         except Exception as e:
-            print(f'Load preset [{preset_path}] failed')
-            print(e)
+            logger.info(f'Load preset [{preset_path}] failed')
+            logger.info(e)
     return {}
 
 available_presets = get_presets()
@@ -152,14 +154,14 @@ def get_path_userhome() -> str:
     global config_dict
     path_userhome = 'users' if not args_manager.args.userhome_path else args_manager.args.userhome_path
     path_userhome = get_dir_or_set_default('path_userhome', path_userhome)
-    print(f'The path_userhome: {os.path.abspath(path_userhome)}')
+    logger.info(f'The path_userhome: {os.path.abspath(path_userhome)}')
     return path_userhome
 
 def get_path_models_root() -> str:
     global config_dict
     models_root = 'models' if not args_manager.args.models_root else args_manager.args.models_root
     path_models_root = get_dir_or_set_default('path_models_root', models_root)
-    print(f'The path_models_root: {os.path.abspath(path_models_root)}')
+    logger.info(f'The path_models_root: {os.path.abspath(path_models_root)}')
     return path_models_root
 
 def get_dir_or_set_default(key, default_value, as_array=False, make_directory=False):
@@ -173,7 +175,7 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
 
     v = os.getenv(key)
     if v is not None:
-        print(f"Environment: {key} = {v}")
+        logger.info(f"Environment: {key} = {v}")
         config_dict[key] = v
     else:
         v = config_dict.get(key, None)
@@ -191,7 +193,7 @@ def get_dir_or_set_default(key, default_value, as_array=False, make_directory=Fa
             return v
 
     if v is not None:
-        print(f'Failed to load config key: {json.dumps({key:v})} is invalid or does not exist; will use {json.dumps({key:default_value})} instead.')
+        logger.info(f'Failed to load config key: {json.dumps({key:v})} is invalid or does not exist; will use {json.dumps({key:default_value})} instead.')
     if isinstance(default_value, list):
         dp = []
         for path in default_value:
@@ -286,7 +288,7 @@ def get_config_item_or_set_default(key, default_value, validator, disable_empty_
     v = os.getenv(key)
     if v is not None:
         v = try_eval_env_var(v, expected_type)
-        print(f"Environment: {key} = {v}")
+        logger.info(f"Environment: {key} = {v}")
         config_dict[key] = v
 
     if key not in config_dict:
@@ -301,7 +303,7 @@ def get_config_item_or_set_default(key, default_value, validator, disable_empty_
         return v
     else:
         if v is not None:
-            print(f'Failed to load config key: {json.dumps({key:v})} is invalid; will use {json.dumps({key:default_value})} instead.')
+            logger.info(f'Failed to load config key: {json.dumps({key:v})} is invalid; will use {json.dumps({key:default_value})} instead.')
         config_dict[key] = default_value
         return default_value
 
@@ -314,11 +316,11 @@ def init_temp_path(path: str | None, default_path: str) -> str:
             if not os.path.isabs(path):
                 path = os.path.abspath(path)
             os.makedirs(path, exist_ok=True)
-            print(f'Using temp path {path}')
+            logging.info(f'Using temp path {path}')
             return path
         except Exception as e:
-            print(f'Could not create temp path {path}. Reason: {e}')
-            print(f'Using default temp path {default_path} instead.')
+            logger.info(f'Could not create temp path {path}. Reason: {e}')
+            logger.info(f'Using default temp path {default_path} instead.')
 
     os.makedirs(default_path, exist_ok=True)
     return default_path
@@ -936,7 +938,7 @@ if REWRITE_PRESET and isinstance(args_manager.args.preset, str):
     save_path = 'presets/' + args_manager.args.preset + '.json'
     with open(save_path, "w", encoding="utf-8") as json_file:
         json.dump({k: config_dict[k] for k in possible_preset_keys}, json_file, indent=4)
-    print(f'Preset saved to {save_path}. Exiting ...')
+    logger.info(f'Preset saved to {save_path}. Exiting ...')
     exit(0)
 
 
@@ -991,7 +993,7 @@ paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+'
 config_comfy_text = config_comfy_formatted_text.format(
         models_root=path_models_root, 
         checkpoints=paths2str(paths_checkpoints,'checkpoints'), 
-        clip_vision=path_clip_vision, 
+        clip_vision=paths2str([path_clip_vision,path_ipadapter],'clip_vision'), 
         clip=path_clip, 
         controlnets=paths2str(paths_controlnet,'controlnet'), 
         diffusers=paths2str(paths_diffusers,'diffusers'), 

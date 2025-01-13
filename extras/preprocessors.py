@@ -93,6 +93,32 @@ def openpose(x, stick_scaling=False):
 
     return result
 
+def openpose_have(x, parts=[]):
+    detector = OpenposeDetector.from_pretrained().to()
+    image, poses = detector(x, output_type="np", include_hand=True, include_face=True, detect_resolution=1024, image_and_json=True)
+    people = poses['people'][0] if len(poses['people'])>0 else None
+    if not people:
+        return False
+    have_face = ('face_keypoints_2d' in people) if 'face' in parts else None
+    have_body = ('pose_keypoints_2d' in people) if 'body' in parts else None
+    have_hand = ('hand_left_keypoints_2d' in people or 'hand_right_keypoints_2d' in people) if 'hand' in parts else None
+    have_flag = None
+    if have_face:
+        have_flag = have_face
+    if have_body:
+        if have_flag:
+            have_flag = have_flag and have_body
+        else:
+            have_flag = have_body
+    if have_hand:
+        if have_flag:
+            have_flag = have_flag and have_hand
+        else:
+            have_flag = have_hand
+    print(f'openpose_have is True: {parts}')
+    return have_flag
+
+
 def normalizedBG(image, threshold=200):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray_image, 100, 200)

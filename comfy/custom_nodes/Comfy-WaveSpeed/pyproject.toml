@@ -1,0 +1,14 @@
+[project]
+name = "wavespeed"
+description = "The all in one inference optimization solution for ComfyUI, universal, flexible, and fast."
+version = "1.1.1"
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/chengzeyi/Comfy-WaveSpeed"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "chengzeyi"
+DisplayName = "Comfy-WaveSpeed"
+Icon = ""

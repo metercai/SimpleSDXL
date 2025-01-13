@@ -23,7 +23,7 @@ from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 from modules.util import is_json, HWC3, resize_image
-from modules.meta_parser import switch_scene_theme
+from modules.meta_parser import switch_scene_theme, get_welcome_image
 
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
@@ -37,13 +37,16 @@ import enhanced.all_parameters as ads
 from enhanced.simpleai import comfyd 
 from enhanced.minicpm import MiniCPM, minicpm
 
+import logging
+logger = logging.getLogger(__name__)
+
 def get_task(*args):
     args = list(args)
     args.pop(0)
 
     return worker.AsyncTask(args=args)
 
-def generate_clicked(task: worker.AsyncTask):
+def generate_clicked(task: worker.AsyncTask, state):
     import ldm_patched.modules.model_management as model_management
 
     with model_management.interrupt_processing_mutex:
@@ -53,11 +56,12 @@ def generate_clicked(task: worker.AsyncTask):
     if len(task.args) == 0:
         return
 
+    is_mobile = state["__is_mobile"]
     execution_start_time = time.perf_counter()
     finished = False
 
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
-        gr.update(visible=True, value="enhanced/attached/welcome.png"), \
+        gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
 
@@ -91,7 +95,7 @@ def generate_clicked(task: worker.AsyncTask):
                     product = sort_enhance_images(product, task)
 
                 yield gr.update(visible=False), \
-                    gr.update(visible=False), \
+                    gr.update(visible=False, value=get_welcome_image(is_mobile=is_mobile)), \
                     gr.update(visible=True, value=product), \
                     gr.update(visible=False)
                 finished = True
@@ -103,7 +107,7 @@ def generate_clicked(task: worker.AsyncTask):
                             os.remove(filepath)
 
     execution_time = time.perf_counter() - execution_start_time
-    print(f'Total time: {execution_time:.2f} seconds')
+    logger.info(f'Total time: {execution_time:.2f} seconds')
     return
 
 
@@ -209,7 +213,7 @@ with shared.gradio_root:
                     with gr.Column(scale=2, visible=True):
                         with gr.Row():
                             progress_window = grh.Image(label='Preview', show_label=False, visible=True, height=768, elem_id='preview_generating',
-                                            elem_classes=['main_view'], value="enhanced/attached/welcome.png", interactive=False)
+                                            elem_classes=['main_view'], value="presets/welcome/welcome.png", interactive=False, show_download_button=False)
                             progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
                             gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
@@ -219,8 +223,9 @@ with shared.gradio_root:
                         with gr.Row():
                             scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, placeholder="Type blessing words.", elem_classes='scene_input')
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
-                        scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=294)
-                        scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios, label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
+                        scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
+                        scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
+                        scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios[:3], label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
 
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
@@ -1109,7 +1114,7 @@ with shared.gradio_root:
 
                         def sync_params_backend(key, v, params):
                             params.update({key:v})
-                            print(f'sync_params_backend: {key}:{v}')
+                            logger.debug(f'sync_params_backend: {key}:{v}')
                             return params
 
                         def toggle_minicpm(x):
@@ -1169,7 +1174,7 @@ with shared.gradio_root:
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            scene_params = [scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number]
+            scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram]
             
             language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1189,7 +1194,7 @@ with shared.gradio_root:
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
                              base_model, refiner_model, refiner_switch, sampler_name, scheduler_name, vae_name,
                              seed_random, image_seed, inpaint_engine, inpaint_engine_state,
-                             inpaint_mode] + enhance_inpaint_mode_ctrls + [generate_button, load_parameter_button] + freeu_ctrls + lora_ctrls
+                             inpaint_mode] + enhance_inpaint_mode_ctrls + freeu_ctrls + lora_ctrls
 
 
         def inpaint_engine_state_change(inpaint_engine_version, *args):
@@ -1307,6 +1312,8 @@ with shared.gradio_root:
             if len(raw_prompt_txt)>=1 and (raw_prompt_txt[-1]=='[' or raw_prompt_txt[-1]=='_'):
                 return [gr.update()] * 3 + [True]
             if 'scene_frontend' in state_params and len(raw_prompt_txt)==0 and scene_input_image1 is not None:
+                is_canvas_image = 'scene_canvas_image' not in state_params["scene_frontend"].get('disvisible', [])
+                if not is_canvas_image:
                     return [gr.update(), gr.update(visible=False), gr.update(visible=True), gr.update()]
             
             return [gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update()]
@@ -1318,13 +1325,13 @@ with shared.gradio_root:
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
-                print('Could not find metadata in the image!')
+                logger.info('Could not find metadata in the image!')
             return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
 
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
-        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme]
+        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme] + [generate_button, load_parameter_button]
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
@@ -1336,7 +1343,7 @@ with shared.gradio_root:
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt], outputs=prompt, show_progress=True) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
-            .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
+            .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
@@ -1390,11 +1397,22 @@ with shared.gradio_root:
             .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
 
-        def trigger_auto_describe_for_scene(state, img, scene_theme, additional_prompt): 
-            describe_prompt = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
+        def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt): 
+            is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
+            ready_to_gen = True if (canvas_image is not None and is_canvas_image) or (canvas_image is None and not is_canvas_image) else False
+            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
             styles = set()
             styles.update([])
-            return describe_prompt if describe_prompt else gr.update(), list(styles)
+            return describe_prompt if describe_prompt else gr.update(), list(styles), gr.update(interactive=ready_to_gen and img_is_ok)
+
+        def trigger_auto_aspect_ratio_for_scene_from_canvas_image(state, canvas_image, scene_theme):
+            return trigger_auto_aspect_ratio_for_scene(state, canvas_image['image'], scene_theme)
+
+        def trigger_auto_aspect_ratio_for_scene_from_input_image(state, input_image1, scene_theme):
+            is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
+            if is_canvas_image:
+                 return gr.update()
+            return trigger_auto_aspect_ratio_for_scene(state, input_image1, scene_theme)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):
             img = resize_image(img, max_side=1280, resize_mode=4)
@@ -1404,28 +1422,30 @@ with shared.gradio_root:
                     aspect_ratios = aspect_ratios[scene_theme]
                 else:
                     aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
-            aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', 'auto_match')
-            if 'auto_' in aspect_ratio_select_mode:
-                aspect_ratios, aspect_ratio = topbar.get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
-            else:
-                aspect_ratio = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
-            aspect_ratios = [modules.flags.scene_aspect_ratios_map[x] for x in aspect_ratios]
-            aspect_ratio = modules.flags.scene_aspect_ratios_map[aspect_ratio]
+            aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
+            aspect_ratios_new, aspect_ratio = topbar.get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
+            if aspect_ratio_select_mode:
+                aspect_ratios = aspect_ratios_new
+                if 'auto_match' in aspect_ratio_select_mode:
+                    aspect_ratios = [aspect_ratio]
+            aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)
+            aspect_ratio = modules.flags.scene_aspect_ratios_mapping(aspect_ratio)
             return gr.update(choices=aspect_ratios, value=aspect_ratio)
 
-        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme, scene_additional_prompt],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True) \
-                        .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
+        scene_canvas_image.upload(trigger_auto_aspect_ratio_for_scene_from_canvas_image, inputs=[state_topbar, scene_canvas_image, scene_theme],
+                        outputs=scene_aspect_ratio, show_progress=False, queue=False).then(lambda: None, _js='()=>{refresh_scene_localization();}')
+        scene_canvas_image.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
+        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
+                        .then(trigger_auto_aspect_ratio_for_scene_from_input_image, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
-        scene_input_image1.clear(lambda: '', outputs=prompt, show_progress=True, queue=True)
-        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme, scene_additional_prompt],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True) \
+        scene_input_image1.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
+        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
 
-        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_theme], outputs=scene_params, queue=False, show_progress=False)
+        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_theme], outputs=scene_params + [generate_button], queue=False, show_progress=False)
 
         if args_manager.args.enable_auto_describe_image:
             def trigger_auto_describe(mode, img, prompt, apply_styles, output_chinese):

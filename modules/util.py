@@ -17,6 +17,9 @@ from PIL import Image
 import modules.config
 import modules.sdxl_styles
 from modules.flags import Performance
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 LANCZOS = (Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.LANCZOS)
 
@@ -297,8 +300,8 @@ def unwrap_style_text_from_prompt(style_text, prompt):
         except ValueError as e:
             # If the style text has multple "{prompt}"s, we can't split it into
             # two parts. This is an error, but we can't do anything about it.
-            print(f"Unable to compare style text to prompt:\n{style_text}")
-            print(f"Error: {e}")
+            logger.info(f"Unable to compare style text to prompt:\n{style_text}")
+            logger.info(f"Error: {e}")
             return False, prompt, ''
 
         left_pos = stripped_prompt.find(left)
@@ -519,7 +522,7 @@ def apply_wildcards(wildcard_text, rng, i, read_wildcards_in_order) -> str:
         if len(placeholders) == 0:
             return wildcard_text
 
-        print(f'[Wildcards] processing: {wildcard_text}')
+        logger.info(f'[Wildcards] processing: {wildcard_text}')
         for placeholder in placeholders:
             try:
                 matches = [x for x in modules.config.wildcard_filenames if os.path.splitext(os.path.basename(x))[0] == placeholder]
@@ -531,12 +534,12 @@ def apply_wildcards(wildcard_text, rng, i, read_wildcards_in_order) -> str:
                 else:
                     wildcard_text = wildcard_text.replace(f'__{placeholder}__', rng.choice(words), 1)
             except:
-                print(f'[Wildcards] Warning: {placeholder}.txt missing or empty. '
+                logger.info(f'[Wildcards] Warning: {placeholder}.txt missing or empty. '
                       f'Using "{placeholder}" as a normal word.')
                 wildcard_text = wildcard_text.replace(f'__{placeholder}__', placeholder)
-            print(f'[Wildcards] {wildcard_text}')
+            logger.info(f'[Wildcards] {wildcard_text}')
 
-    print(f'[Wildcards] BFS stack overflow. Current text: {wildcard_text}')
+    logger.info(f'[Wildcards] BFS stack overflow. Current text: {wildcard_text}')
     return wildcard_text
 
 
@@ -561,4 +564,6 @@ def get_image_size_info(image: np.ndarray, aspect_ratios: list) -> str:
         return size_info
     except Exception as e:
         return f'Error reading image: {e}'
+
+is_chinese = lambda x: sum([1 if (u'\u4e00' <= i <= u'\u9fa5') or (u'\u3000' <= i <= u'\u303F') or (u'\uFF00' <= i <= u'\uFFEF') else 0 for i in x]) > 0
 

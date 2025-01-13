@@ -347,6 +347,11 @@ packages = {
             ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
             ("SimpleModels/loras/flux1-canny-dev-lora.safetensors", 1244443944),
             ("SimpleModels/loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Flux_AIO_simpleai_1214.zip"
@@ -533,6 +538,24 @@ packages = {
         ],
         "download_links": [
         "贺年卡基于FluxAIO、可图AIO扩展，请检查所需包体。Lora点击生成会自动下载。"
+        ]
+    },
+            "clothing_package": {
+        "name": "换装包",
+        "files": [
+            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152), 
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("SimpleModels/loras/flux1-turbo.safetensors", 694082424)
+        ],
+        "download_links": [
+        "换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
         ]
     },
 }

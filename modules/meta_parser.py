@@ -18,6 +18,9 @@ from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
 from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 re_param_code = r'\s*(\w[\w \-/]+):\s*("(?:\\.|[^\\"])+"|[^,]*)(?:,|$)'
 re_param = re.compile(re_param_code)
@@ -31,6 +34,7 @@ get_layout_choices_visible_inter = lambda l,x,y,z:gr.update(choices=l, visible=x
 get_layout_setting_choices_visible_inter = lambda l,v,x,y,z:gr.update(choices=l, value=v, visible=x not in y, interactive=x not in z)
 get_layout_empty_visible_inter = lambda x,y,z: gr.update(visible=x not in y, interactive=x not in z) if x not in z else gr.update(value=None, visible=x not in y, interactive=x not in z)
 get_layout_update_label_visible_inter = lambda t,v,x,y,z:gr.update(label=t, value=v, visible=x not in y, interactive=x not in z) if t else gr.update(value=v, visible=x not in y, interactive=x not in z)
+get_layout_update_label_and_choice_visible_inter = lambda t,l,v,x,y,z:gr.update(label=t, choices=l, value=v, visible=x not in y, interactive=x not in z) if t else gr.update(choices=l, value=v, visible=x not in y, interactive=x not in z)
 get_layout_update_and_visible_inter = lambda v,x,y,z:gr.update(value=v, visible=x not in y, interactive=x not in z)
 
 def get_layout_visible_inter_loras(y,z,max_number):
@@ -52,14 +56,17 @@ def get_layout_visible_inter_loras(y,z,max_number):
 
 def switch_scene_theme(state, image_number, theme=None):
     scenes = state.get("scene_frontend",{})
-    visible = []
-    inter = []
-    results = [None]
-    themes = scenes.get('themes', [])
+    visible = scenes.get('disvisible', [])
+    inter = scenes.get('disinteractive', [])
+    input_image_number = 1 if 'scene_canvas_image' in visible or 'scene_input_image1' in visible else 0
+    input_image_number = 2 if 'scene_canvas_image' in visible and 'scene_input_image1' in visible else input_image_number
+    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 250)]
+    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 170))
+    themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
     results.append(get_layout_setting_choices_visible_inter(themes, themes[index], 'scene_theme', visible, inter))
     title = scenes.get('additional_prompt_title', '')
-    additional_prompt = scenes.get('additional_prompts', [])
+    additional_prompt = scenes.get('additional_prompt', [])
     if isinstance(additional_prompt, dict):
         if index==0:
             additional_prompt = additional_prompt[next(iter(additional_prompt))] if additional_prompt else ''
@@ -72,10 +79,11 @@ def switch_scene_theme(state, image_number, theme=None):
             aspect_ratio = aspect_ratio[next(iter(aspect_ratio))] if aspect_ratio else []
         else:
             aspect_ratio = aspect_ratio[theme]
-    aspect_ratio = [modules.flags.scene_aspect_ratios_map[x] for x in aspect_ratio]
+    aspect_ratio = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratio)
     aspect_ratio_default = '' if len(aspect_ratio)==0 else aspect_ratio[0]
-    results.append(get_layout_setting_choices_visible_inter(aspect_ratio, aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
+    results.append(get_layout_setting_choices_visible_inter(aspect_ratio[0:3], aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
     results.append(get_layout_update_and_visible_inter(image_number, 'scene_image_number', visible, inter))
+    results.append(gr.update(interactive=False))   #generate_button
     return results
 
 
@@ -97,8 +105,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
 
     params_backend  = enginedata_dict.get('backend_params', modules.flags.get_engine_default_backend_params(template_engine))
     params_backend.update(dict(
-            nickname=state_params["user_name"],
-            user_did=state_params["user_did"],
+            nickname=state_params["user"].get_nickname(),
+            user_did=state_params["user"].get_did(),
             translation_methods=modules.config.default_translation_methods,
             backfill_prompt=modules.config.default_backfill_prompt,
             comfyd_active_checkbox=modules.config.default_comfyd_active_checkbox,
@@ -132,8 +140,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
     results.append(engine_class_display)
     results.append(get_layout_setting_choices_visible_inter(uov_method_list, modules.flags.disabled, 'uov_method', visible, inter))
-    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
-    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user_did"]) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_empty_visible_inter('enhance_input_image', visible, inter))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
@@ -149,34 +157,50 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(update_value_if_existed("translation_methods"))
     results.append(False if template_engine not in ['Fooocus', 'Comfy'] and task_method and '_aio' not in task_method else update_value_if_existed("input_image_checkbox"))
 
-    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme]
+    # [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme], [generate_button, load_parameter_button]
     if is_scene_frontend:
+        scenes = enginedata_dict.get("scene_frontend",{})
+        scenes_visible = scenes.get('disvisible', [])
+        visible.extend(scenes_visible)
+        scenes_inter = scenes.get('disinteractive', [])
+        inter.extend(scenes_inter)
         results.append(gr.update(visible=False))
         results.append(gr.update(value=True))
         results.append(gr.update(value=False))
         results.append(gr.update(visible=True))
-        themes = enginedata_dict.get('scene_frontend', {}).get('themes', [])
+        themes = scenes.get('theme', [])
         theme_default = themes[0] if themes else None
-        results.append(get_layout_setting_choices_visible_inter(themes, None, 'scene_theme', visible, inter))
+        themes_title = scenes.get('theme_title', '')
+        results.append(get_layout_update_label_and_choice_visible_inter(themes_title, themes, None, 'scene_theme', visible, inter))
+        results.append(gr.update(visible=True, interactive=False)) #generate_button
+        results.append(gr.update(visible=False))                   #load_parameter_button
     else:
         results.append(gr.update(visible=True))
         results.append(gr.update(value=False))
         results.append(gr.update(value=True))
         results.append(gr.update(visible=False))
         results.append(gr.update(visible=True, interactive=True))
+        results.append(gr.update(visible=True, interactive=True))  #generate_button
+        results.append(gr.update(visible=False))                   #load_parameter_button
 
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
 
     return results
 
-def get_welcome_image(preset=None, is_mobile=False):
-    path_welcome = os.path.abspath(f'./enhanced/attached/')
+def get_welcome_image(preset=None, is_mobile=False, is_change=False):
+    path_welcome = os.path.abspath(f'./presets/welcome/')
     if preset:
         suffix = 'w' if not is_mobile else 'm'
         file_welcome = os.path.join(path_welcome, f'welcome_{preset}_{suffix}.jpg')
         if os.path.exists(file_welcome):
             return file_welcome
+    if is_change:
+        if is_mobile:
+            file_welcome = os.path.join(path_welcome, 'welcome_m.jpg')
+        else:
+            file_welcome = os.path.join(path_welcome, 'welcome_w.jpg')
+        return file_welcome
     file_welcome = os.path.join(path_welcome, 'welcome.png')
     file_suffix = 'welcome_w' if not is_mobile else 'welcome_m'
     welcomes = [p for p in get_files_from_folder(path_welcome, ['.jpg', '.jpeg', 'png'], file_suffix, None) if not p.startswith('.')]
@@ -193,7 +217,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
    
     preset = loaded_parameter_dict.get("preset", None)
     is_mobile = loaded_parameter_dict.get("is_mobile", False)
-    results = [gr.update(value=f'{get_welcome_image(preset, is_mobile)}', visible=True), gr.update(visible=False), gr.update(visible=False), None] 
+    results = [gr.update(value=get_welcome_image(preset, is_mobile), visible=True), gr.update(visible=False), gr.update(visible=False), None] 
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)
@@ -219,11 +243,11 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
     get_inpaint_engine_version('inpaint_engine_version', 'Inpaint Engine Version', loaded_parameter_dict, results, inpaint_mode)
     get_inpaint_method('inpaint_method', 'Inpaint Mode', loaded_parameter_dict, results)
 
-    if is_generating:
-        results.append(gr.update())
-    else:
-        results.append(gr.update(visible=True))
-    results.append(gr.update(visible=False))
+    #if is_generating:
+    #    results.append(gr.update())
+    #else:
+    #    results.append(gr.update(visible=True))
+    #results.append(gr.update(visible=False))
 
     get_freeu('freeu', 'FreeU', loaded_parameter_dict, results)
 
@@ -323,7 +347,7 @@ def get_resolution(key: str, fallback: str | None, source_dict: dict, results: l
             results.append(int(width))
             results.append(int(height))
     except e:
-        print(f'in except:{e}')
+        logger.info(f'in except:{e}')
         results.append(gr.update())
         results.append(gr.update())
         results.append(gr.update())
@@ -607,7 +631,7 @@ class A1111MetadataParser(MetadataParser):
                 else:
                     data[list(self.fooocus_to_a1111.keys())[list(self.fooocus_to_a1111.values()).index(k)]] = v
             except Exception:
-                print(f"Error parsing \"{k}: {v}\"")
+                logger.info(f"Error parsing \"{k}: {v}\"")
 
         # workaround for multiline prompts
         if 'raw_prompt' in data:
@@ -816,7 +840,7 @@ class SIMPLEMetadataParser(MetadataParser):
             if key in ['base_model', 'refiner_model', 'Base Model', 'Refiner Model']:
                 metadata[key] = self.replace_value_with_filename(key, value, model_filenames)
                 if metadata[key]=='None':
-                    print(f'[MetaParser] ⚠️  WARNING! The model is not available in the local: {value}.')
+                    logger.info(f' ⚠️  WARNING! The model is not available in the local: {value}.')
             elif key.startswith('LoRA '):
                 metadata[key] = self.replace_value_with_filename(key, value, modules.config.lora_filenames)
             elif key in ['vae', 'VAE']:

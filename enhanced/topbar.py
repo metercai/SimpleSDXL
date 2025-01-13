@@ -24,17 +24,20 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import ldm_patched.modules.model_management
+import extras.preprocessors as preprocessors
+import logging
+from enhanced.logger import format_name
+logger = logging.getLogger(format_name(__name__))
 
 from datetime import datetime
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
 from modules.meta_parser import get_welcome_image
 from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
-from enhanced.minicpm import minicpm, MiniCPM, is_chinese
+from enhanced.minicpm import minicpm, MiniCPM
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
 # app context
-nav_name_list = ''
 system_message = ''
 config_ext = {}
 enhanced_config = os.path.abspath(f'./enhanced/config.json')
@@ -45,7 +48,11 @@ else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
 
-def get_preset_name_list(user_did=None):
+def get_preset_name_list(user_session, ua_hash):
+    presets_list = shared.token.get_local_vars("user_presets", "", user_session, ua_hash)
+    if presets_list and presets_list not in ["Unknown", "None", "Default"]:
+        return presets_list
+    user_did = shared.token.check_sstoken_and_get_did(user_session, ua_hash)
     if user_did and not shared.token.is_guest(user_did):
         user_preset_file = get_path_in_user_dir('presets.txt', user_did, 'presets')
         if not os.path.exists(user_preset_file):
@@ -64,8 +71,6 @@ def get_preset_name_list(user_did=None):
             presets.insert(0, config.preset)
             presets = presets[:shared.BUTTON_NUM]
             presets_list = ','.join(presets)
-            with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
-                nav_preset_file.write(presets_list)
         else:
             with open(user_preset_file, 'r', encoding="utf-8") as nav_preset_file:
                 presets_list = nav_preset_file.read()
@@ -85,6 +90,7 @@ def get_preset_name_list(user_did=None):
             presets.insert(0, config.preset)
             presets = presets[:shared.BUTTON_NUM]
             presets_list = ','.join(presets)
+    shared.token.set_local_vars("user_presets", presets_list, user_session, ua_hash)
     return presets_list
 
 
@@ -215,15 +221,15 @@ function(system_params) {
 '''
 
 def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, request: gr.Request):
-    #print(f'request.headers:{request.headers}')
-    #print(f'request.client:{request.client}')
+    #logger.info(f'request.headers:{request.headers}')
+    #logger.info(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
 
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
         else:
-            print(f'no accept-language in request.headers:{request.headers}')
+            logger.info(f'no accept-language in request.headers:{request.headers}')
         state_params.update({"__lang": args_manager.args.language}) 
     if "__theme" not in state_params.keys():
         state_params.update({"__theme": args_manager.args.theme})
@@ -238,22 +244,25 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
         sstoken = shared.token.get_guest_sstoken(ua_hash)
         state_params.update({"sstoken": sstoken})
         user_did = shared.token.get_guest_did()
-        print(f'[UserBase] New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+        user_session = sstoken
+        state_params.update({"__session": user_session})
+        logger.info(f'New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
     else:
-        #print(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
-        user_did = shared.token.check_sstoken_and_get_did(state_params["__session"], ua_hash)
+        #logger.info(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
+        user_session = state_params["__session"]
+        user_did = shared.token.check_sstoken_and_get_did(user_session, ua_hash)
         if user_did == "Unknown":
             sstoken = shared.token.get_guest_sstoken(ua_hash)
             state_params.update({"sstoken": sstoken})
             user_did = shared.token.get_guest_did()
-            print(f'[UserBase] user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
-            print(f'[UserBase] Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+            user_session = sstoken
+            state_params.update({"__session": user_session})
+            logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
+            logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
         else:
             state_params.update({"sstoken": ''})
-            print(f'[UserBase] Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+            logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
     state_params.update({"user": shared.token.get_user_context(user_did)})
-    state_params.update({"user_did": user_did})
-    state_params.update({"user_name":  shared.token.get_user_context(user_did).get_nickname()})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
 
     if "__is_mobile" not in state_params.keys():
@@ -272,7 +281,6 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     state_params.update({"array_wildcards_mode": '['})
     state_params.update({"wildcard_in_wildcards": 'root'})
     state_params.update({"bar_button": config.preset})
-    state_params.update({"__nav_name_list": get_preset_name_list(user_did)})
     state_params.update({"preset_store": False})
     state_params.update({"engine": 'Fooocus'})
     results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
@@ -295,7 +303,22 @@ def get_preset_inc_url(preset_name='blank'):
         return f'{args_manager.args.webroot}/file={blank_inc_path}'
 
 def refresh_nav_bars(state_params):
-    preset_name_list = state_params["__nav_name_list"].split(',')
+    preset_name_list = get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(',')
+    user_did = state_params["user"].get_did()
+    path_preset = os.path.abspath(f'./presets/')
+    user_path_preset = get_path_in_user_dir('presets', user_did)
+    num = len(preset_name_list)
+    for preset in preset_name_list:
+        if preset.endswith('.'):
+            preset_file = os.path.join(user_path_preset, f'{preset}json')
+        else:
+            preset_file = os.path.join(path_preset, f'{preset}.json')
+        if not os.path.exists(preset_file):
+            preset_name_list.remove(preset)
+    if num!=len(preset_name_list):
+        nav_name_list = ','.join(preset_name_list)
+        shared.token.set_local_vars("user_presets", nav_name_list, state_params["__session"], state_params["ua_hash"])
+
     for i in range(shared.BUTTON_NUM-len(preset_name_list)):
         preset_name_list.append('')
     results = []
@@ -305,7 +328,7 @@ def refresh_nav_bars(state_params):
         results += [gr.update(visible=True)]
     for i in range(len(preset_name_list)):
         name = preset_name_list[i]
-        name += '\u2B07' if is_models_file_absent(name, state_params["user_did"]) else ''
+        name += '\u2B07' if is_models_file_absent(name, user_did) else ''
         visible_flag = i<(7 if state_params["__is_mobile"] else shared.BUTTON_NUM)
         if name:
             results += [gr.update(value=name, interactive=True, visible=visible_flag)]
@@ -315,17 +338,23 @@ def refresh_nav_bars(state_params):
 
 
 def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt):
-    describe_prompt = describe_prompt_for_scene(state, img, scene_theme, additional_prompt) if not prompt and 'scene_frontend' in state else None
+    describe_prompt = None
+    if not prompt and 'scene_frontend' in state:
+        describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
     return gr.update() if describe_prompt is None else describe_prompt
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
-    s_prompts = state['scene_frontend'].get('prompts', {})
+    image_preprocessor_method = state['scene_frontend'].get('image_preprocessor_method', [])
+    img_is_ok = preprocessors.openpose_have(img, image_preprocessor_method[0]) if len(image_preprocessor_method)>0 and img is not None else True
+    s_prompts = state['scene_frontend'].get('prompt', {})
     describe_prompt = s_prompts.get(scene_theme, '')
     if not describe_prompt:
-        return ''
+        return '', img_is_ok
+    if util.is_chinese(additional_prompt) and not state['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
+        additional_prompt = minicpm.translate(additional_prompt, 'Slim Model')
     describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
-    m_prompts = state['scene_frontend'].get('multimodal_prompts', {})
+    m_prompts = state['scene_frontend'].get('multimodal_prompt', {})
     prompt_prompt = m_prompts.get(scene_theme, '')
     if prompt_prompt and img is not None:
         prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
@@ -336,16 +365,13 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
             describe_prompt += default_interrogator_photo(img)
             from extras.wd14tagger import default_interrogator as default_interrogator_anime
             describe_prompt += default_interrogator_anime(img)
-    return describe_prompt
+    return describe_prompt, img_is_ok
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
-    superprompter.remove_superprompt()
-    remove_tokenizer()
-    minicpm.free_model()
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
-        nickname=state_params["user_name"],
-        user_did=state_params["user_did"],
+        nickname=state_params["user"].get_nickname(),
+        user_did=state_params["user"].get_did(),
         translation_methods=translation_methods,
         backfill_prompt=backfill_prompt,
         comfyd_active_checkbox=comfyd_active_checkbox,
@@ -357,24 +383,32 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         ))
     
     if 'scene_frontend' in state_params:
+        if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
+            scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         backend_params.update(dict(
-            task_method=state_params['scene_frontend']['task_method'][scene_theme],
+            task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],
+            scene_canvas_image=scene_canvas_image,
             scene_input_image1=scene_input_image1,
             scene_theme=scene_theme,
             scene_additional_prompt=scene_additional_prompt,
-            scene_aspect_ratio=modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
-            scene_image_number=scene_image_number
+            scene_aspect_ratio=scene_aspect_ratio.split('|')[0] if '×' in scene_aspect_ratio else modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
+            scene_image_number=scene_image_number,
+            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"][scene_theme] if scene_theme in state_params["scene_frontend"] else None
             ))
 
-    if is_models_file_absent(state_params["__preset"], state_params["user_did"]):
+    if is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
         gr.Info(preset_downing_note_info)
-        download_model_files(state_params["__preset"], state_params["user_did"])
+        download_model_files(state_params["__preset"], state_params["user"].get_did())
+
+    superprompter.remove_superprompt()
+    remove_tokenizer()
+    minicpm.free_model()
 
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
     # random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
-    preset_nums = len(state_params["__nav_name_list"].split(','))
+    preset_nums = len(get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     # preset_store, identity_dialog
@@ -394,7 +428,7 @@ def process_after_generation(state_params):
     
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
-    user_did = state_params["user_did"]
+    user_did = state_params["user"].get_did()
     output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state_params.update({"__output_list": output_list})
     state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
@@ -403,7 +437,7 @@ def process_after_generation(state_params):
     # gallery_index, index_radio
     results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     # random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
-    preset_nums = len(state_params["__nav_name_list"].split(','))
+    preset_nums = len(get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 6)
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     # [history_link, gallery_index_stat]
@@ -428,7 +462,7 @@ preset_down_note_info = 'The preset package being loaded has model files that ne
 preset_downing_note_info = 'Downloading the model file required for image generation, please wait for a moment...'
 
 def check_absent_model(bar_button, state_params):
-    #print(f'check_absent_model,state_params:{state_params}')
+    #logger.info(f'check_absent_model,state_params:{state_params}')
     state_params.update({'bar_button': bar_button})
     return 
 
@@ -446,20 +480,20 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     if '__preset' not in state_params.keys() or 'bar_button' not in state_params.keys() or state_params["__preset"]==state_params['bar_button']:
         return refresh_nav_bars(state_params) + [gr.update()] * reset_layout_num + update_after_identity_sub(state_params)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
-    print(f'[Topbar] Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
+    logger.info(f'Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
-        #download_model_files(preset, state_params["user_did"])
+        #download_model_files(preset, state_params["user"].get_did())
 
     state_params.update({"__preset": preset})
 
-    config_preset = config.try_get_preset_content(preset, state_params["user_did"])
+    config_preset = config.try_get_preset_content(preset, state_params["user"].get_did())
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
     preset_prepared.update({
         'preset': preset,
         'is_mobile': state_params["__is_mobile"] })
     
-    #print(f'preset_prepared:{preset_prepared}')
+    #logger.info(f'preset_prepared:{preset_prepared}')
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
@@ -510,6 +544,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
 
     preset_url = preset_prepared.get('reference', get_preset_inc_url(preset))
     state_params.update({"__preset_url":preset_url})
+    state_params.update({'preset_store': False})
 
     results = refresh_nav_bars(state_params)
     results += meta_parser.switch_layout_template(preset_prepared, state_params, preset_url)
@@ -523,17 +558,17 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
 def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads, vae_downloads):
 
     if shared.args.disable_preset_download:
-        print('Skipped model download.')
+        logger.info('Skipped model download.')
         return default_model, checkpoint_downloads
 
     if not shared.args.always_download_new_model:
         if not os.path.isfile(shared.modelsinfo.get_file_path_by_name('checkpoints', default_model)):
             for alternative_model_name in previous_default_models:
                 if os.path.isfile(shared.modelsinfo.get_file_path_by_name('checkpoints', alternative_model_name)):
-                    print(f'You do not have [{default_model}] but you have [{alternative_model_name}].')
-                    print(f'Fooocus will use [{alternative_model_name}] to avoid downloading new models, '
+                    logger.info(f'You do not have [{default_model}] but you have [{alternative_model_name}].')
+                    logger.info(f'Fooocus will use [{alternative_model_name}] to avoid downloading new models, '
                           f'but you are not using the latest models.')
-                    print('Use --always-download-new-model to avoid fallback and always get new models.')
+                    logger.info('Use --always-download-new-model to avoid fallback and always get new models.')
                     checkpoint_downloads = {}
                     default_model = alternative_model_name
                     break
@@ -552,7 +587,7 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
     return default_model, checkpoint_downloads
 
 def toggle_preset_store(state):
-    if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
+    if 'user' in state and not shared.token.is_guest(state["user"].get_did()):
         if 'preset_store' in state:
             flag = state['preset_store']
         else:
@@ -567,39 +602,37 @@ def toggle_preset_store(state):
 
 def update_navbar_from_mystore(selected_preset, state):
     global preset_samples
-    selected_preset = preset_samples[state['user_did'] if not shared.token.is_guest(state["user_did"]) else 'guest'][selected_preset][0]
+    selected_preset = preset_samples[state["user"].get_did() if not shared.token.is_guest(state["user"].get_did()) else 'guest'][selected_preset][0]
     results = refresh_nav_bars(state)
     results2 = update_topbar_js_params(state)
-    nav_list_str = state["__nav_name_list"]
-    nav_array = nav_list_str.split(',')
+    nav_name_list = get_preset_name_list(state["__session"], state["ua_hash"])
+    nav_array = nav_name_list.split(',')
     if selected_preset in ["default", state["__preset"]]:
         return results + results2
     if selected_preset in nav_array:
         nav_array.remove(selected_preset)
-        print(f'[PresetStore] Withdraw the preset/回撤预置包: {selected_preset}.')
+        logger.info(f'Withdraw the preset/回撤预置包: {selected_preset}.')
     else:
         if len(nav_array) >= shared.BUTTON_NUM:
             return results + results2
         nav_array.append(selected_preset)
-        print(f'[PresetStore] Launch the preset/启用预置包: {selected_preset}.')
-    state["__nav_name_list"] = ','.join(nav_array)
-    if 'user_did' in state and not shared.token.is_guest(state["user_did"]):
-        user_preset_file = get_path_in_user_dir('presets.txt', state["user_did"], 'presets')
-        with open(user_preset_file, 'w', encoding="utf-8") as nav_preset_file:
-            nav_preset_file.write(state["__nav_name_list"])
-    #print(f'__nav_name_list:{state["__nav_name_list"]}')
+        logger.info(f'Launch the preset/启用预置包: {selected_preset}.')
+    nav_name_list = ','.join(nav_array)
+    if 'user' in state and not shared.token.is_guest(state["user"].get_did()):
+        logger.info(f"save mypreset: {nav_name_list}")
+        shared.token.set_local_vars("user_presets", nav_name_list, state["__session"], state["ua_hash"])
+    #logger.info(f'__nav_name_list:{nav_name_list}')
     return refresh_nav_bars(state) + update_topbar_js_params(state)
 
 def admin_sync_to_guest(state, catalog='presets'):
     user_did = state["user"].get_did()
     if shared.token.is_admin(user_did):
         if catalog == 'presets':
-            user_preset_file = get_path_in_user_dir('presets.txt', user_did, 'presets')
-            guest_preset_file = get_path_in_user_dir('presets.txt', shared.token.get_guest_did(), 'presets')
-            shutil.copy(user_preset_file, guest_preset_file)
+            nav_name_list = get_preset_name_list(state["__session"], state["ua_hash"])
+            shared.token.set_local_vars_for_guest("user_presets", nav_name_list, state["__session"], state["ua_hash"])
     current_time = datetime.now().strftime("%H:%M:%S")
     admin_sync_title = 'Sync presets nav to guest' if state["__lang"]!='cn' else '同步预置导航给游客'
-    print(f'[Topbar] Sync presets nav to guest: {current_time}')
+    logger.info(f'Sync presets nav to guest: {current_time}')
     return f'{admin_sync_title}({current_time})'
 
 
@@ -608,11 +641,11 @@ def update_topbar_js_params(state):
     system_params= dict(
         __preset=state["__preset"],
         __theme=state["__theme"],
-        __nav_name_list=state["__nav_name_list"],
+        __nav_name_list=get_preset_name_list(state["__session"], state["ua_hash"]),
         sstoken=state["sstoken"],
-        user_name=state["user_name"],
-        user_did=state["user_did"],
-        user_role='guest' if shared.token.is_guest(state["user_did"]) else 'admin' if shared.token.is_admin(state["user_did"]) else 'member',
+        user_name=state["user"].get_nickname(),
+        user_did=state["user"].get_did(),
+        user_role='guest' if shared.token.is_guest(state["user"].get_did()) else 'admin' if shared.token.is_admin(state["user"].get_did()) else 'member',
         task_class_name=state["engine"],
         preset_store=state["preset_store"],
         __message=state["__message"],
@@ -626,9 +659,9 @@ def update_topbar_js_params(state):
 
 
 def export_identity(state):
-    if not shared.token.is_guest(state["user_did"]):
-        state["user_qr"] = export_identity_qrcode_svg(state["user_did"])
-        #print(f'user_qrcode_svg: {state["user_qr"]}')
+    if not shared.token.is_guest(state["user"].get_did()):
+        state["user_qr"] = export_identity_qrcode_svg(state["user"].get_did())
+        #logger.info(f'user_qrcode_svg: {state["user_qr"]}')
     return update_topbar_js_params(state)[0]
 
 def trigger_input_identity(img):
@@ -639,7 +672,7 @@ def trigger_input_identity(img):
         try:
             user_did, nickname, telephone = import_identity_qrcode(data)
         except Exception as e:
-            print("qrcode parse error")
+            logger.info("qrcode parse error")
             user_did, nickname, telephone = '', '', ''
     else:
         user_did, nickname, telephone = '', '', ''
@@ -675,7 +708,6 @@ identity_introduce = '''
 '''
 
 def update_after_identity(state):
-    state.update({"__nav_name_list": get_preset_name_list(state["user_did"])})
     results = refresh_nav_bars(state)
     results += update_after_identity_sub(state)
     return results
@@ -684,9 +716,9 @@ def update_after_identity_sub(state):
     #[gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
     max_per_page = state["__max_per_page"]
     max_catalog = state["__max_catalog"]
-    nickname = state["user_name"]
-    user_did = state["user_did"]
-    print(f'[UserBase] Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), ua_session({state["ua_session"]})')
+    nickname = state["user"].get_nickname()
+    user_did = state["user"].get_did()
+    logger.info(f'Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), ua_session({state["ua_session"]})')
     output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
@@ -760,7 +792,7 @@ def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, r
 
     current_time = datetime.now().strftime("%H:%M:%S")
     admin_save_title = 'Save default of system' if state["__lang"]!='cn' else '保存系统默认值'
-    print(f'[Topbar] Save admin config to default: {current_time}')
+    logger.info(f'Save admin config to default: {current_time}')
     return f'{admin_save_title}({current_time})'
 
 
@@ -782,7 +814,8 @@ def get_all_admin_default(currunt_value):
 
 def get_auto_candidate(img, selections, mode):
     H, W, C = img.shape
-    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections ]
+    selections2 = [ x.split('|')[1] if '|' in x else x for x in selections ]
+    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections2 ]
     selection = float(W)/float(H)
     selections2 = np.array(selections2)
     index = np.argmin(np.abs(selections2 - selection))
@@ -818,5 +851,4 @@ def prompt_token_prediction(text, style_selections):
         tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
     return len(tokenizer.tokenize(text))
 
-nav_name_list = get_preset_name_list()
 system_message = get_system_message()
