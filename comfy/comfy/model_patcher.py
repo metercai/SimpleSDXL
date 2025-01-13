@@ -83,7 +83,7 @@ def set_model_options_pre_cfg_function(model_options, pre_cfg_function, disable_
 
 def create_model_options_clone(orig_model_options: dict):
     return comfy.patcher_extension.copy_nested_dicts(orig_model_options)
-        
+
 def create_hook_patches_clone(orig_hook_patches):
     new_hook_patches = {}
     for hook_ref in orig_hook_patches:
@@ -141,7 +141,7 @@ class AutoPatcherEjector:
         self.was_injected = False
         self.prev_skip_injection = False
         self.skip_and_inject_on_exit_only = skip_and_inject_on_exit_only
-    
+
     def __enter__(self):
         self.was_injected = False
         self.prev_skip_injection = self.model.skip_injection
@@ -164,7 +164,7 @@ class MemoryCounter:
         self.value = initial
         self.minimum = minimum
         # TODO: add a safe limit besides 0
-    
+
     def use(self, weight: torch.Tensor):
         weight_size = weight.nelement() * weight.element_size()
         if self.is_useable(weight_size):
@@ -210,7 +210,7 @@ class ModelPatcher:
         self.injections: dict[str, list[PatcherInjection]] = {}
 
         self.hook_patches: dict[comfy.hooks._HookRef] = {}
-        self.hook_patches_backup: dict[comfy.hooks._HookRef] = {}
+        self.hook_patches_backup: dict[comfy.hooks._HookRef] = None
         self.hook_backup: dict[str, tuple[torch.Tensor, torch.device]] = {}
         self.cached_hook_patches: dict[comfy.hooks.HookGroup, dict[str, torch.Tensor]] = {}
         self.current_hooks: Optional[comfy.hooks.HookGroup] = None
@@ -282,7 +282,7 @@ class ModelPatcher:
             n.injections[k] = i.copy()
         # hooks
         n.hook_patches = create_hook_patches_clone(self.hook_patches)
-        n.hook_patches_backup = create_hook_patches_clone(self.hook_patches_backup)
+        n.hook_patches_backup = create_hook_patches_clone(self.hook_patches_backup) if self.hook_patches_backup else self.hook_patches_backup
         for group in self.cached_hook_patches:
             n.cached_hook_patches[group] = {}
             for k in self.cached_hook_patches[group]:
@@ -402,7 +402,20 @@ class ModelPatcher:
     def add_object_patch(self, name, obj):
         self.object_patches[name] = obj
 
-    def get_model_object(self, name):
+    def get_model_object(self, name: str) -> torch.nn.Module:
+        """Retrieves a nested attribute from an object using dot notation considering
+        object patches.
+
+        Args:
+            name (str): The attribute path using dot notation (e.g. "model.layer.weight")
+
+        Returns:
+            The value of the requested attribute
+
+        Example:
+            patcher = ModelPatcher()
+            weight = patcher.get_model_object("layer1.conv.weight")
+        """
         if name in self.object_patches:
             return self.object_patches[name]
         else:
@@ -711,7 +724,7 @@ class ModelPatcher:
                             else:
                                 comfy.utils.set_attr_param(self.model, key, bk.weight)
                             self.backup.pop(key)
-                    
+
                     weight_key = "{}.weight".format(n)
                     bias_key = "{}.bias".format(n)
                     if move_weight:
@@ -773,7 +786,7 @@ class ModelPatcher:
         return self.model.device
 
     def calculate_weight(self, patches, weight, key, intermediate_dtype=torch.float32):
-        print("WARNING the ModelPatcher.calculate_weight function is deprecated, please use: comfy.lora.calculate_weight instead")
+        logging.warning("The ModelPatcher.calculate_weight function is deprecated, please use: comfy.lora.calculate_weight instead")
         return comfy.lora.calculate_weight(patches, weight, key, intermediate_dtype=intermediate_dtype)
 
     def cleanup(self):
@@ -789,7 +802,7 @@ class ModelPatcher:
     def add_callback_with_key(self, call_type: str, key: str, callback: Callable):
         c = self.callbacks.setdefault(call_type, {}).setdefault(key, [])
         c.append(callback)
-    
+
     def remove_callbacks_with_key(self, call_type: str, key: str):
         c = self.callbacks.get(call_type, {})
         if key in c:
@@ -797,7 +810,7 @@ class ModelPatcher:
 
     def get_callbacks(self, call_type: str, key: str):
         return self.callbacks.get(call_type, {}).get(key, [])
-    
+
     def get_all_callbacks(self, call_type: str):
         c_list = []
         for c in self.callbacks.get(call_type, {}).values():
@@ -810,7 +823,7 @@ class ModelPatcher:
     def add_wrapper_with_key(self, wrapper_type: str, key: str, wrapper: Callable):
         w = self.wrappers.setdefault(wrapper_type, {}).setdefault(key, [])
         w.append(wrapper)
-    
+
     def remove_wrappers_with_key(self, wrapper_type: str, key: str):
         w = self.wrappers.get(wrapper_type, {})
         if key in w:
@@ -831,7 +844,7 @@ class ModelPatcher:
     def remove_attachments(self, key: str):
         if key in self.attachments:
             self.attachments.pop(key)
-    
+
     def get_attachment(self, key: str):
         return self.attachments.get(key, None)
 
@@ -842,6 +855,9 @@ class ModelPatcher:
         if key in self.injections:
             self.injections.pop(key)
 
+    def get_injections(self, key: str):
+        return self.injections.get(key, None)
+
     def set_additional_models(self, key: str, models: list['ModelPatcher']):
         self.additional_models[key] = models
 
@@ -851,7 +867,7 @@ class ModelPatcher:
 
     def get_additional_models_with_key(self, key: str):
         return self.additional_models.get(key, [])
-    
+
     def get_additional_models(self):
         all_models = []
         for models in self.additional_models.values():
@@ -906,24 +922,25 @@ class ModelPatcher:
             self.model.current_patcher = self
         for callback in self.get_all_callbacks(CallbacksMP.ON_PRE_RUN):
             callback(self)
-    
+
     def prepare_state(self, timestep):
         for callback in self.get_all_callbacks(CallbacksMP.ON_PREPARE_STATE):
             callback(self, timestep)
 
     def restore_hook_patches(self):
-        if len(self.hook_patches_backup) > 0:
+        if self.hook_patches_backup is not None:
             self.hook_patches = self.hook_patches_backup
-            self.hook_patches_backup = {}
+            self.hook_patches_backup = None
 
     def set_hook_mode(self, hook_mode: comfy.hooks.EnumHookMode):
         self.hook_mode = hook_mode
-    
-    def prepare_hook_patches_current_keyframe(self, t: torch.Tensor, hook_group: comfy.hooks.HookGroup):
+
+    def prepare_hook_patches_current_keyframe(self, t: torch.Tensor, hook_group: comfy.hooks.HookGroup, model_options: dict[str]):
         curr_t = t[0]
         reset_current_hooks = False
+        transformer_options = model_options.get("transformer_options", {})
         for hook in hook_group.hooks:
-            changed = hook.hook_keyframe.prepare_current_keyframe(curr_t=curr_t)
+            changed = hook.hook_keyframe.prepare_current_keyframe(curr_t=curr_t, transformer_options=transformer_options)
             # if keyframe changed, remove any cached HookGroups that contain hook with the same hook_ref;
             # this will cause the weights to be recalculated when sampling
             if changed:
@@ -939,25 +956,26 @@ class ModelPatcher:
         if reset_current_hooks:
             self.patch_hooks(None)
 
-    def register_all_hook_patches(self, hooks_dict: dict[comfy.hooks.EnumHookType, dict[comfy.hooks.Hook, None]], target: comfy.hooks.EnumWeightTarget, model_options: dict=None):
+    def register_all_hook_patches(self, hooks: comfy.hooks.HookGroup, target_dict: dict[str], model_options: dict=None,
+                                  registered: comfy.hooks.HookGroup = None):
         self.restore_hook_patches()
-        registered_hooks: list[comfy.hooks.Hook] = []
-        # handle WrapperHooks, if model_options provided
-        if model_options is not None:
-            for hook in hooks_dict.get(comfy.hooks.EnumHookType.Wrappers, {}):
-                hook.add_hook_patches(self, model_options, target, registered_hooks)
+        if registered is None:
+            registered = comfy.hooks.HookGroup()
         # handle WeightHooks
         weight_hooks_to_register: list[comfy.hooks.WeightHook] = []
-        for hook in hooks_dict.get(comfy.hooks.EnumHookType.Weight, {}):
+        for hook in hooks.get_type(comfy.hooks.EnumHookType.Weight):
             if hook.hook_ref not in self.hook_patches:
                 weight_hooks_to_register.append(hook)
+            else:
+                registered.add(hook)
         if len(weight_hooks_to_register) > 0:
             # clone hook_patches to become backup so that any non-dynamic hooks will return to their original state
             self.hook_patches_backup = create_hook_patches_clone(self.hook_patches)
             for hook in weight_hooks_to_register:
-                hook.add_hook_patches(self, model_options, target, registered_hooks)
+                hook.add_hook_patches(self, model_options, target_dict, registered)
         for callback in self.get_all_callbacks(CallbacksMP.ON_REGISTER_ALL_HOOK_PATCHES):
-            callback(self, hooks_dict, target)
+            callback(self, hooks, target_dict, model_options, registered)
+        return registered
 
     def add_hook_patches(self, hook: comfy.hooks.WeightHook, patches, strength_patch=1.0, strength_model=1.0):
         with self.use_ejected():
@@ -975,7 +993,7 @@ class ModelPatcher:
                     key = k[0]
                     if len(k) > 2:
                         function = k[2]
-                
+
                 if key in model_sd:
                     p.add(k)
                     current_patches: list[tuple] = current_hook_patches.get(key, [])
@@ -1008,11 +1026,11 @@ class ModelPatcher:
     def apply_hooks(self, hooks: comfy.hooks.HookGroup, transformer_options: dict=None, force_apply=False):
         # TODO: return transformer_options dict with any additions from hooks
         if self.current_hooks == hooks and (not force_apply or (not self.is_clip and hooks is None)):
-            return {}
+            return comfy.hooks.create_transformer_options_from_hooks(self, hooks, transformer_options)
         self.patch_hooks(hooks=hooks)
         for callback in self.get_all_callbacks(CallbacksMP.ON_APPLY_HOOKS):
             callback(self, hooks)
-        return {}
+        return comfy.hooks.create_transformer_options_from_hooks(self, hooks, transformer_options)
 
     def patch_hooks(self, hooks: comfy.hooks.HookGroup):
         with self.use_ejected():
@@ -1029,7 +1047,7 @@ class ModelPatcher:
                 if cached_weights is not None:
                     for key in cached_weights:
                         if key not in model_sd_keys:
-                            print(f"WARNING cached hook could not patch. key does not exist in model: {key}")
+                            logging.warning(f"Cached hook could not patch. Key does not exist in model: {key}")
                             continue
                         self.patch_cached_hook_weights(cached_weights=cached_weights, key=key, memory_counter=memory_counter)
                 else:
@@ -1039,7 +1057,7 @@ class ModelPatcher:
                         original_weights = self.get_key_patches()
                     for key in relevant_patches:
                         if key not in model_sd_keys:
-                            print(f"WARNING cached hook would not patch. key does not exist in model: {key}")
+                            logging.warning(f"Cached hook would not patch. Key does not exist in model: {key}")
                             continue
                         self.patch_hook_weight_to_device(hooks=hooks, combined_patches=relevant_patches, key=key, original_weights=original_weights,
                                                             memory_counter=memory_counter)
@@ -1063,7 +1081,7 @@ class ModelPatcher:
     def patch_hook_weight_to_device(self, hooks: comfy.hooks.HookGroup, combined_patches: dict, key: str, original_weights: dict, memory_counter: MemoryCounter):
         if key not in combined_patches:
             return
-        
+
         weight, set_func, convert_func = get_key_weight(self.model, key)
         weight: torch.Tensor
         if key not in self.hook_backup:
@@ -1098,7 +1116,7 @@ class ModelPatcher:
         del temp_weight
         del out_weight
         del weight
-    
+
     def unpatch_hooks(self) -> None:
         with self.use_ejected():
             if len(self.hook_backup) == 0:
@@ -1107,7 +1125,7 @@ class ModelPatcher:
             keys = list(self.hook_backup.keys())
             for k in keys:
                 comfy.utils.copy_to_param(self.model, k, self.hook_backup[k][0].to(device=self.hook_backup[k][1]))
-                    
+
             self.hook_backup.clear()
             self.current_hooks = None
 

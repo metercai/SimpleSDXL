@@ -132,8 +132,10 @@ def init_or_load_translator_model(method='Slim Model'):
 
 def free_translator_model():
     global g_tokenizer, g_model
-    del g_tokenizer
-    del g_model
+    if 'g_tokenizer' in globals():
+        del g_tokenizer
+    if 'g_model' in globals():
+        del g_model
     return
 
 def toggle(text: str, method: str = 'Slim Model') -> str:

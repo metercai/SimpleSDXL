@@ -8,7 +8,7 @@
         0
       ],
       "image2": [
-        "89",
+        "187",
         0
       ]
     },
@@ -82,7 +82,7 @@
     "inputs": {
       "noise_mask": true,
       "positive": [
-        "118",
+        "200",
         0
       ],
       "negative": [
@@ -110,7 +110,7 @@
   "35": {
     "inputs": {
       "model": [
-        "92",
+        "178",
         0
       ]
     },
@@ -143,7 +143,7 @@
         9
       ],
       "model": [
-        "169",
+        "35",
         0
       ],
       "positive": [
@@ -280,7 +280,7 @@
         0
       ],
       "image2": [
-        "110",
+        "188",
         0
       ]
     },
@@ -322,12 +322,12 @@
         0
       ],
       "image": [
-        "154",
+        "195",
         0
       ],
       "mask": [
-        "144",
-        0
+        "191",
+        2
       ]
     },
     "class_type": "ReduxAdvanced",
@@ -344,8 +344,8 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 1098787606409701,
-      "steps": 20,
+      "seed": 24428517572721,
+      "steps": 10,
       "cfg": 30,
       "denoise": 1
     },
@@ -382,43 +382,13 @@
   "131": {
     "inputs": {
       "images": [
-        "65",
+        "184",
         0
       ]
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "SaveImageWebsocket"
-    }
-  },
-  "141": {
-    "inputs": {
-      "segments": 2,
-      "remove_isolated_pixels": 0,
-      "remove_small_masks": 0,
-      "fill_holes": true,
-      "image": [
-        "154",
-        0
-      ]
-    },
-    "class_type": "MaskFromSegmentation+",
-    "_meta": {
-      "title": "🔧 Mask From Segmentation"
-    }
-  },
-  "144": {
-    "inputs": {
-      "start": 0,
-      "length": 1,
-      "mask": [
-        "141",
-        0
-      ]
-    },
-    "class_type": "MaskFromBatch+",
-    "_meta": {
-      "title": "🔧 Mask From Batch"
     }
   },
   "152": {
@@ -441,18 +411,6 @@
       "title": "Grow Mask With Blur"
     }
   },
-  "153": {
-    "inputs": {
-      "images": [
-        "5",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "154": {
     "inputs": {
       "width": [
@@ -468,7 +426,7 @@
       "condition": "always",
       "multiple_of": 0,
       "image": [
-        "88",
+        "195",
         0
       ]
     },
@@ -480,37 +438,13 @@
   "155": {
     "inputs": {
       "image": [
-        "89",
+        "187",
         0
       ]
     },
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "156": {
-    "inputs": {
-      "mask": [
-        "117",
-        0
-      ]
-    },
-    "class_type": "MaskToImage",
-    "_meta": {
-      "title": "Convert Mask to Image"
-    }
-  },
-  "157": {
-    "inputs": {
-      "images": [
-        "156",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   },
   "169": {
@@ -525,6 +459,298 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "LoraLoaderModelOnly"
+    }
+  },
+  "170": {
+    "inputs": {
+      "value": ""
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "additional_prompt"
+    }
+  },
+  "178": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 0.1,
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "169",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "180": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "110",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "183": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "mask_area",
+      "top_reserve": 150,
+      "bottom_reserve": 150,
+      "left_reserve": 150,
+      "right_reserve": 150,
+      "round_to_multiple": "8",
+      "image": [
+        "89",
+        0
+      ],
+      "mask": [
+        "180",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "184": {
+    "inputs": {
+      "invert_mask": false,
+      "background_image": [
+        "89",
+        0
+      ],
+      "croped_image": [
+        "189",
+        0
+      ],
+      "crop_box": [
+        "183",
+        2
+      ]
+    },
+    "class_type": "LayerUtility: RestoreCropBox",
+    "_meta": {
+      "title": "LayerUtility: RestoreCropBox"
+    }
+  },
+  "185": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "mask_area",
+      "top_reserve": 150,
+      "bottom_reserve": 150,
+      "left_reserve": 150,
+      "right_reserve": 150,
+      "round_to_multiple": "8",
+      "image": [
+        "110",
+        0
+      ],
+      "mask": [
+        "180",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "187": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "bicubic",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "183",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "188": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "bicubic",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "185",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "189": {
+    "inputs": {
+      "width": [
+        "190",
+        0
+      ],
+      "height": [
+        "190",
+        1
+      ],
+      "interpolation": "bicubic",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "190": {
+    "inputs": {
+      "image": [
+        "183",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "191": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "aspect_ratio": "detect_mask",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "scale_to_side": "longest",
+      "scale_to_length": 1024,
+      "detect": "mask_area",
+      "border_reserve": 50,
+      "ultra_detail_range": 3,
+      "matting_method": "SegmentAnything",
+      "sam_model": "sam_vit_h (2.56GB)",
+      "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
+      "sam_threshold": 0.3,
+      "sam_prompt": [
+        "170",
+        0
+      ],
+      "image": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageAutoCrop V2",
+    "_meta": {
+      "title": "LayerUtility: ImageAutoCrop V2"
+    }
+  },
+  "195": {
+    "inputs": {
+      "boolean": [
+        "199",
+        0
+      ],
+      "on_true": [
+        "88",
+        0
+      ],
+      "on_false": [
+        "191",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "197": {
+    "inputs": {
+      "downsampling_factor": 1,
+      "downsampling_function": "bicubic",
+      "mode": "keep aspect ratio",
+      "weight": 1,
+      "autocrop_margin": 0.05,
+      "conditioning": [
+        "33",
+        0
+      ],
+      "style_model": [
+        "30",
+        0
+      ],
+      "clip_vision": [
+        "27",
+        0
+      ],
+      "image": [
+        "195",
+        0
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
+    }
+  },
+  "199": {
+    "inputs": {
+      "a": [
+        "170",
+        0
+      ],
+      "b": "",
+      "operation": "a == b",
+      "case_sensitive": true
+    },
+    "class_type": "easy mathString",
+    "_meta": {
+      "title": "Math String"
+    }
+  },
+  "200": {
+    "inputs": {
+      "boolean": [
+        "199",
+        0
+      ],
+      "on_true": [
+        "197",
+        0
+      ],
+      "on_false": [
+        "118",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

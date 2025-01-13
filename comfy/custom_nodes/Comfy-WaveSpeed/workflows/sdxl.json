@@ -1,0 +1,706 @@
+{
+  "last_node_id": 36,
+  "last_link_id": 55,
+  "nodes": [
+    {
+      "id": 33,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        860,
+        160
+      ],
+      "size": [
+        220,
+        220
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 50
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 47,
+          "slot_index": 1,
+          "widget": {
+            "name": "text_g"
+          }
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 48,
+          "widget": {
+            "name": "text_l"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            51
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        4096,
+        4096,
+        0,
+        0,
+        4096,
+        4096,
+        "blurry, animation, 3d render, illustration, toy, puppet, claymation, low quality, flag, nasa, mission patch",
+        "blurry, animation, 3d render, illustration, toy, puppet, claymation, low quality, flag, nasa, mission patch"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 5,
+      "type": "EmptyLatentImage",
+      "pos": [
+        860,
+        440
+      ],
+      "size": [
+        220,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 11,
+      "type": "Note",
+      "pos": [
+        80,
+        -200
+      ],
+      "size": [
+        282.48541259765625,
+        197.0584259033203
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "BASIC SDXL WORKFLOW WITH BASE MODEL ONLY\n========================================\n\nThis basic workflow only uses the BASE SDXL model. This can be useful for systems with limited resources as the REFINER takes another 6GB or ram.\n\nIf you use the embedded VAE be sure to download the \"0.9vae\" version because the 1.0 vae is considered defective."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 29,
+      "type": "Note",
+      "pos": [
+        620,
+        440
+      ],
+      "size": [
+        210,
+        477.3874816894531
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "SUPPORTED RESOLUTIONS\n=====================\n\nratio  resolution\n-----------------\n0.5:   704×1408\n0.52:  704×1344\n0.57:  768×1344\n0.6:   768×1280\n0.68:  832×1216\n0.72:  832×1152\n0.78:  896×1152\n0.82:  896×1088\n0.88:  960×1088\n0.94:  960×1024\n1.0:  1024×1024\n1.07:  1024×960\n1.13:  1088×960\n1.21:  1088×896\n1.29:  1152×896\n1.38:  1152×832\n1.46:  1216×832\n1.67:  1280×768\n1.75:  1344×768\n1.91:  1344×704\n2.0:   1408×704\n2.09:  1472×704\n2.4:   1536×640\n2.5:   1600×640\n2.89:  1664×576\n3.0:   1728×576"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 28,
+      "type": "SaveImage",
+      "pos": [
+        1730,
+        50
+      ],
+      "size": [
+        688.129150390625,
+        728.7603759765625
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 41
+        }
+      ],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 32,
+      "type": "PrimitiveNode",
+      "pos": [
+        460,
+        180
+      ],
+      "size": [
+        338.24078369140625,
+        179.58128356933594
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            47,
+            48
+          ],
+          "slot_index": 0,
+          "widget": {
+            "name": "text_g"
+          }
+        }
+      ],
+      "title": "negative",
+      "properties": {
+        "Run widget replace on values": false
+      },
+      "widgets_values": [
+        "blurry, animation, 3d render, illustration, toy, puppet, claymation, low quality, flag, nasa, mission patch"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 34,
+      "type": "Note",
+      "pos": [
+        870,
+        -300
+      ],
+      "size": [
+        210,
+        130
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "WIDTH/HEIGHT and TARGET_WIDTH/HEIGHT are both 4 times the latent size.\n\nThis generally grants a higher definition image."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 31,
+      "type": "PrimitiveNode",
+      "pos": [
+        460,
+        -90
+      ],
+      "size": [
+        338.24078369140625,
+        179.58128356933594
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            45,
+            46
+          ],
+          "slot_index": 0,
+          "widget": {
+            "name": "text_g"
+          }
+        }
+      ],
+      "title": "positive",
+      "properties": {
+        "Run widget replace on values": false
+      },
+      "widgets_values": [
+        "a photo of an anthropomorphic fox wearing a spacesuit inside a sci-fi spaceship\n\ncinematic, dramatic lighting, high resolution, detailed, 4k"
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 35,
+      "type": "Note",
+      "pos": [
+        464,
+        -235
+      ],
+      "size": [
+        330.7162780761719,
+        95.14419555664062
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "Note that we send the same prompt to both TEXT_G and TEXT_L, you can experiment with different prompts but using the same seems to lead to more predictable results."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 30,
+      "type": "CLIPTextEncodeSDXL",
+      "pos": [
+        860,
+        -120
+      ],
+      "size": [
+        220,
+        220
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 49
+        },
+        {
+          "name": "text_g",
+          "type": "STRING",
+          "link": 45,
+          "slot_index": 1,
+          "widget": {
+            "name": "text_g"
+          }
+        },
+        {
+          "name": "text_l",
+          "type": "STRING",
+          "link": 46,
+          "widget": {
+            "name": "text_l"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            52
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeSDXL"
+      },
+      "widgets_values": [
+        4096,
+        4096,
+        0,
+        0,
+        4096,
+        4096,
+        "a photo of an anthropomorphic fox wearing a spacesuit inside a sci-fi spaceship\n\ncinematic, dramatic lighting, high resolution, detailed, 4k",
+        "a photo of an anthropomorphic fox wearing a spacesuit inside a sci-fi spaceship\n\ncinematic, dramatic lighting, high resolution, detailed, 4k"
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -27,
+        62
+      ],
+      "size": [
+        398.7421875,
+        98
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            54
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            49,
+            50
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            43
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "sd_xl_base_1.0.safetensors"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        1540,
+        40
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 53
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 43
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            41
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 3,
+      "type": "KSampler",
+      "pos": [
+        1190,
+        30
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 55
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 52
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 51
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            53
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        25,
+        6.5,
+        "dpmpp_2m_sde",
+        "exponential",
+        1
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 36,
+      "type": "ApplyFBCacheOnModel",
+      "pos": [
+        1180,
+        -250
+      ],
+      "size": [
+        315,
+        154
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 54
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            55
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ApplyFBCacheOnModel"
+      },
+      "widgets_values": [
+        "diffusion_model",
+        0.2,
+        0,
+        1,
+        -1
+      ]
+    }
+  ],
+  "links": [
+    [
+      2,
+      5,
+      0,
+      3,
+      3,
+      "LATENT"
+    ],
+    [
+      41,
+      8,
+      0,
+      28,
+      0,
+      "IMAGE"
+    ],
+    [
+      43,
+      4,
+      2,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      45,
+      31,
+      0,
+      30,
+      1,
+      "STRING"
+    ],
+    [
+      46,
+      31,
+      0,
+      30,
+      2,
+      "STRING"
+    ],
+    [
+      47,
+      32,
+      0,
+      33,
+      1,
+      "STRING"
+    ],
+    [
+      48,
+      32,
+      0,
+      33,
+      2,
+      "STRING"
+    ],
+    [
+      49,
+      4,
+      1,
+      30,
+      0,
+      "CLIP"
+    ],
+    [
+      50,
+      4,
+      1,
+      33,
+      0,
+      "CLIP"
+    ],
+    [
+      51,
+      33,
+      0,
+      3,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      52,
+      30,
+      0,
+      3,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      53,
+      3,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      54,
+      4,
+      0,
+      36,
+      0,
+      "MODEL"
+    ],
+    [
+      55,
+      36,
+      0,
+      3,
+      0,
+      "MODEL"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6993286095567135,
+      "offset": [
+        370.5282918698711,
+        500.1938384498709
+      ]
+    },
+    "node_versions": {
+      "comfy-core": "v0.3.10-44-g2ff3104f",
+      "Comfy-WaveSpeed": "805b67c2900f885bbc89de97d143e1a55a5881e9"
+    },
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0
+  },
+  "version": 0.4
+}

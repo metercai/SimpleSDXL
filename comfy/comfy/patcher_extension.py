@@ -96,12 +96,12 @@ class WrapperExecutor:
         self.wrappers = wrappers.copy()
         self.idx = idx
         self.is_last = idx == len(wrappers)
-    
+
     def __call__(self, *args, **kwargs):
         """Calls the next wrapper or original function, whichever is appropriate."""
         new_executor = self._create_next_executor()
         return new_executor.execute(*args, **kwargs)
-    
+
     def execute(self, *args, **kwargs):
         """Used to initiate executor internally - DO NOT use this if you received executor in wrapper."""
         args = list(args)
@@ -113,7 +113,7 @@ class WrapperExecutor:
     def _create_next_executor(self) -> 'WrapperExecutor':
         new_idx = self.idx + 1
         if new_idx > len(self.wrappers):
-            raise Exception(f"Wrapper idx exceeded available wrappers; something went very wrong.")
+            raise Exception("Wrapper idx exceeded available wrappers; something went very wrong.")
         if self.class_obj is None:
             return WrapperExecutor.new_executor(self.original, self.wrappers, new_idx)
         return WrapperExecutor.new_class_executor(self.original, self.class_obj, self.wrappers, new_idx)
@@ -121,7 +121,7 @@ class WrapperExecutor:
     @classmethod
     def new_executor(cls, original: Callable, wrappers: list[Callable], idx=0):
         return cls(original, class_obj=None, wrappers=wrappers, idx=idx)
-    
+
     @classmethod
     def new_class_executor(cls, original: Callable, class_obj: object, wrappers: list[Callable], idx=0):
         return cls(original, class_obj, wrappers, idx=idx)

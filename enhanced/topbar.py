@@ -383,8 +383,8 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         ))
     
     if 'scene_frontend' in state_params:
-        if util.is_chinese(additional_prompt) and not state['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
-            additional_prompt = minicpm.translate(additional_prompt, 'Slim Model')
+        if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
+            scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         backend_params.update(dict(
             task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],

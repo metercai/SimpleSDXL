@@ -11,7 +11,7 @@ import time
 import random
 import logging
 
-from PIL import Image, ImageOps, ImageSequence, ImageFile
+from PIL import Image, ImageOps, ImageSequence
 from PIL.PngImagePlugin import PngInfo
 
 import numpy as np
@@ -52,7 +52,7 @@ class CLIPTextEncode(ComfyNodeABC):
     def INPUT_TYPES(s) -> InputTypeDict:
         return {
             "required": {
-                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "The text to be encoded."}), 
+                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "The text to be encoded."}),
                 "clip": (IO.CLIP, {"tooltip": "The CLIP model used for encoding the text."})
             }
         }
@@ -66,7 +66,7 @@ class CLIPTextEncode(ComfyNodeABC):
     def encode(self, clip, text):
         tokens = clip.tokenize(text)
         return (clip.encode_from_tokens_scheduled(tokens), )
-        
+
 
 class ConditioningCombine:
     @classmethod
@@ -270,8 +270,8 @@ class VAEDecode:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": { 
-                "samples": ("LATENT", {"tooltip": "The latent to be decoded."}), 
+            "required": {
+                "samples": ("LATENT", {"tooltip": "The latent to be decoded."}),
                 "vae": ("VAE", {"tooltip": "The VAE model used for decoding the latent."})
             }
         }
@@ -292,19 +292,31 @@ class VAEDecodeTiled:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {"samples": ("LATENT", ), "vae": ("VAE", ),
-                             "tile_size": ("INT", {"default": 512, "min": 128, "max": 4096, "step": 32}),
+                             "tile_size": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 32}),
                              "overlap": ("INT", {"default": 64, "min": 0, "max": 4096, "step": 32}),
+                             "temporal_size": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to decode at a time."}),
+                             "temporal_overlap": ("INT", {"default": 8, "min": 4, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to overlap."}),
                             }}
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "decode"
 
     CATEGORY = "_for_testing"
 
-    def decode(self, vae, samples, tile_size, overlap=64):
+    def decode(self, vae, samples, tile_size, overlap=64, temporal_size=64, temporal_overlap=8):
         if tile_size < overlap * 4:
             overlap = tile_size // 4
+        if temporal_size < temporal_overlap * 2:
+            temporal_overlap = temporal_overlap // 2
+        temporal_compression = vae.temporal_compression_decode()
+        if temporal_compression is not None:
+            temporal_size = max(2, temporal_size // temporal_compression)
+            temporal_overlap = max(1, min(temporal_size // 2, temporal_overlap // temporal_compression))
+        else:
+            temporal_size = None
+            temporal_overlap = None
+
         compression = vae.spacial_compression_decode()
-        images = vae.decode_tiled(samples["samples"], tile_x=tile_size // compression, tile_y=tile_size // compression, overlap=overlap // compression)
+        images = vae.decode_tiled(samples["samples"], tile_x=tile_size // compression, tile_y=tile_size // compression, overlap=overlap // compression, tile_t=temporal_size, overlap_t=temporal_overlap)
         if len(images.shape) == 5: #Combine batches
             images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
         return (images, )
@@ -326,16 +338,19 @@ class VAEEncodeTiled:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {"pixels": ("IMAGE", ), "vae": ("VAE", ),
-                             "tile_size": ("INT", {"default": 512, "min": 320, "max": 4096, "step": 64})
+                             "tile_size": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 64}),
+                             "overlap": ("INT", {"default": 64, "min": 0, "max": 4096, "step": 32}),
+                             "temporal_size": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to encode at a time."}),
+                             "temporal_overlap": ("INT", {"default": 8, "min": 4, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to overlap."}),
                             }}
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "encode"
 
     CATEGORY = "_for_testing"
 
-    def encode(self, vae, pixels, tile_size):
-        t = vae.encode_tiled(pixels[:,:,:,:3], tile_x=tile_size, tile_y=tile_size, )
-        return ({"samples":t}, )
+    def encode(self, vae, pixels, tile_size, overlap, temporal_size=64, temporal_overlap=8):
+        t = vae.encode_tiled(pixels[:,:,:,:3], tile_x=tile_size, tile_y=tile_size, overlap=overlap, tile_t=temporal_size, overlap_t=temporal_overlap)
+        return ({"samples": t}, )
 
 class VAEEncodeForInpaint:
     @classmethod
@@ -536,13 +551,13 @@ class CheckpointLoaderSimple:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": { 
+            "required": {
                 "ckpt_name": (folder_paths.get_filename_list("checkpoints"), {"tooltip": "The name of the checkpoint (model) to load."}),
             }
         }
     RETURN_TYPES = ("MODEL", "CLIP", "VAE")
-    OUTPUT_TOOLTIPS = ("The model used for denoising latents.", 
-                       "The CLIP model used for encoding text prompts.", 
+    OUTPUT_TOOLTIPS = ("The model used for denoising latents.",
+                       "The CLIP model used for encoding text prompts.",
                        "The VAE model used for encoding and decoding images to and from latent space.")
     FUNCTION = "load_checkpoint"
 
@@ -619,7 +634,7 @@ class LoraLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": { 
+            "required": {
                 "model": ("MODEL", {"tooltip": "The diffusion model the LoRA will be applied to."}),
                 "clip": ("CLIP", {"tooltip": "The CLIP model the LoRA will be applied to."}),
                 "lora_name": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
@@ -627,7 +642,7 @@ class LoraLoader:
                 "strength_clip": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the CLIP model. This value can be negative."}),
             }
         }
-    
+
     RETURN_TYPES = ("MODEL", "CLIP")
     OUTPUT_TOOLTIPS = ("The modified diffusion model.", "The modified CLIP model.")
     FUNCTION = "load_lora"
@@ -645,9 +660,7 @@ class LoraLoader:
             if self.loaded_lora[0] == lora_path:
                 lora = self.loaded_lora[1]
             else:
-                temp = self.loaded_lora
                 self.loaded_lora = None
-                del temp
 
         if lora is None:
             lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
@@ -900,16 +913,19 @@ class CLIPLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "clip_name": (folder_paths.get_filename_list("text_encoders"), ),
-                              "type": (["stable_diffusion", "stable_cascade", "sd3", "stable_audio", "mochi", "ltxv"], ),
+                              "type": (["stable_diffusion", "stable_cascade", "sd3", "stable_audio", "mochi", "ltxv", "pixart", "cosmos"], ),
+                              },
+                "optional": {
+                              "device": (["default", "cpu"], {"advanced": True}),
                              }}
     RETURN_TYPES = ("CLIP",)
     FUNCTION = "load_clip"
 
     CATEGORY = "advanced/loaders"
 
-    DESCRIPTION = "[Recipes]\n\nstable_diffusion: clip-l\nstable_cascade: clip-g\nsd3: t5 / clip-g / clip-l\nstable_audio: t5\nmochi: t5"
+    DESCRIPTION = "[Recipes]\n\nstable_diffusion: clip-l\nstable_cascade: clip-g\nsd3: t5 / clip-g / clip-l\nstable_audio: t5\nmochi: t5\ncosmos: old t5 xxl"
 
-    def load_clip(self, clip_name, type="stable_diffusion"):
+    def load_clip(self, clip_name, type="stable_diffusion", device="default"):
         if type == "stable_cascade":
             clip_type = comfy.sd.CLIPType.STABLE_CASCADE
         elif type == "sd3":
@@ -920,11 +936,17 @@ class CLIPLoader:
             clip_type = comfy.sd.CLIPType.MOCHI
         elif type == "ltxv":
             clip_type = comfy.sd.CLIPType.LTXV
+        elif type == "pixart":
+            clip_type = comfy.sd.CLIPType.PIXART
         else:
             clip_type = comfy.sd.CLIPType.STABLE_DIFFUSION
 
+        model_options = {}
+        if device == "cpu":
+            model_options["load_device"] = model_options["offload_device"] = torch.device("cpu")
+
         clip_path = folder_paths.get_full_path_or_raise("text_encoders", clip_name)
-        clip = comfy.sd.load_clip(ckpt_paths=[clip_path], embedding_directory=folder_paths.get_folder_paths("embeddings"), clip_type=clip_type)
+        clip = comfy.sd.load_clip(ckpt_paths=[clip_path], embedding_directory=folder_paths.get_folder_paths("embeddings"), clip_type=clip_type, model_options=model_options)
         return (clip,)
 
 class DualCLIPLoader:
@@ -932,7 +954,10 @@ class DualCLIPLoader:
     def INPUT_TYPES(s):
         return {"required": { "clip_name1": (folder_paths.get_filename_list("text_encoders"), ),
                               "clip_name2": (folder_paths.get_filename_list("text_encoders"), ),
-                              "type": (["sdxl", "sd3", "flux"], ),
+                              "type": (["sdxl", "sd3", "flux", "hunyuan_video"], ),
+                              },
+                "optional": {
+                              "device": (["default", "cpu"], {"advanced": True}),
                              }}
     RETURN_TYPES = ("CLIP",)
     FUNCTION = "load_clip"
@@ -941,7 +966,7 @@ class DualCLIPLoader:
 
     DESCRIPTION = "[Recipes]\n\nsdxl: clip-l, clip-g\nsd3: clip-l, clip-g / clip-l, t5 / clip-g, t5\nflux: clip-l, t5"
 
-    def load_clip(self, clip_name1, clip_name2, type):
+    def load_clip(self, clip_name1, clip_name2, type, device="default"):
         clip_path1 = folder_paths.get_full_path_or_raise("text_encoders", clip_name1)
         clip_path2 = folder_paths.get_full_path_or_raise("text_encoders", clip_name2)
         if type == "sdxl":
@@ -950,8 +975,14 @@ class DualCLIPLoader:
             clip_type = comfy.sd.CLIPType.SD3
         elif type == "flux":
             clip_type = comfy.sd.CLIPType.FLUX
+        elif type == "hunyuan_video":
+            clip_type = comfy.sd.CLIPType.HUNYUAN_VIDEO
 
-        clip = comfy.sd.load_clip(ckpt_paths=[clip_path1, clip_path2], embedding_directory=folder_paths.get_folder_paths("embeddings"), clip_type=clip_type)
+        model_options = {}
+        if device == "cpu":
+            model_options["load_device"] = model_options["offload_device"] = torch.device("cpu")
+
+        clip = comfy.sd.load_clip(ckpt_paths=[clip_path1, clip_path2], embedding_directory=folder_paths.get_folder_paths("embeddings"), clip_type=clip_type, model_options=model_options)
         return (clip,)
 
 class CLIPVisionLoader:
@@ -1011,23 +1042,58 @@ class StyleModelApply:
                              "style_model": ("STYLE_MODEL", ),
                              "clip_vision_output": ("CLIP_VISION_OUTPUT", ),
                              "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
-                             "strength_type": (["multiply"], ),
+                             "strength_type": (["multiply", "attn_bias"], ),
                              }}
     RETURN_TYPES = ("CONDITIONING",)
     FUNCTION = "apply_stylemodel"
 
     CATEGORY = "conditioning/style_model"
 
-    def apply_stylemodel(self, clip_vision_output, style_model, conditioning, strength, strength_type):
+    def apply_stylemodel(self, conditioning, style_model, clip_vision_output, strength, strength_type):
         cond = style_model.get_cond(clip_vision_output).flatten(start_dim=0, end_dim=1).unsqueeze(dim=0)
         if strength_type == "multiply":
             cond *= strength
 
-        c = []
+        n = cond.shape[1]
+        c_out = []
         for t in conditioning:
-            n = [torch.cat((t[0], cond), dim=1), t[1].copy()]
-            c.append(n)
-        return (c, )
+            (txt, keys) = t
+            keys = keys.copy()
+            if strength_type == "attn_bias" and strength != 1.0:
+                # math.log raises an error if the argument is zero
+                # torch.log returns -inf, which is what we want
+                attn_bias = torch.log(torch.Tensor([strength]))
+                # get the size of the mask image
+                mask_ref_size = keys.get("attention_mask_img_shape", (1, 1))
+                n_ref = mask_ref_size[0] * mask_ref_size[1]
+                n_txt = txt.shape[1]
+                # grab the existing mask
+                mask = keys.get("attention_mask", None)
+                # create a default mask if it doesn't exist
+                if mask is None:
+                    mask = torch.zeros((txt.shape[0], n_txt + n_ref, n_txt + n_ref), dtype=torch.float16)
+                # convert the mask dtype, because it might be boolean
+                # we want it to be interpreted as a bias
+                if mask.dtype == torch.bool:
+                    # log(True) = log(1) = 0
+                    # log(False) = log(0) = -inf
+                    mask = torch.log(mask.to(dtype=torch.float16))
+                # now we make the mask bigger to add space for our new tokens
+                new_mask = torch.zeros((txt.shape[0], n_txt + n + n_ref, n_txt + n + n_ref), dtype=torch.float16)
+                # copy over the old mask, in quandrants
+                new_mask[:, :n_txt, :n_txt] = mask[:, :n_txt, :n_txt]
+                new_mask[:, :n_txt, n_txt+n:] = mask[:, :n_txt, n_txt:]
+                new_mask[:, n_txt+n:, :n_txt] = mask[:, n_txt:, :n_txt]
+                new_mask[:, n_txt+n:, n_txt+n:] = mask[:, n_txt:, n_txt:]
+                # now fill in the attention bias to our redux tokens
+                new_mask[:, :n_txt, n_txt:n_txt+n] = attn_bias
+                new_mask[:, n_txt+n:, n_txt:n_txt+n] = attn_bias
+                keys["attention_mask"] = new_mask.to(txt.device)
+                keys["attention_mask_img_shape"] = mask_ref_size
+
+            c_out.append([torch.cat((txt, cond), dim=1), keys])
+
+        return (c_out,)
 
 class unCLIPConditioning:
     @classmethod
@@ -1111,7 +1177,7 @@ class EmptyLatentImage:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": { 
+            "required": {
                 "width": ("INT", {"default": 512, "min": 16, "max": MAX_RESOLUTION, "step": 8, "tooltip": "The width of the latent images in pixels."}),
                 "height": ("INT", {"default": 512, "min": 16, "max": MAX_RESOLUTION, "step": 8, "tooltip": "The height of the latent images in pixels."}),
                 "batch_size": ("INT", {"default": 1, "min": 1, "max": 4096, "tooltip": "The number of latent images in the batch."})
@@ -1160,7 +1226,7 @@ class LatentFromBatch:
         else:
             s["batch_index"] = samples["batch_index"][batch_index:batch_index + length]
         return (s,)
-    
+
 class RepeatLatentBatch:
     @classmethod
     def INPUT_TYPES(s):
@@ -1175,7 +1241,7 @@ class RepeatLatentBatch:
     def repeat(self, samples, amount):
         s = samples.copy()
         s_in = samples["samples"]
-        
+
         s["samples"] = s_in.repeat((amount, 1,1,1))
         if "noise_mask" in samples and samples["noise_mask"].shape[0] > 1:
             masks = samples["noise_mask"]
@@ -1585,15 +1651,15 @@ class LoadImage:
     FUNCTION = "load_image"
     def load_image(self, image):
         image_path = folder_paths.get_annotated_filepath(image)
-        
+
         img = node_helpers.pillow(Image.open, image_path)
-        
+
         output_images = []
         output_masks = []
         w, h = None, None
 
         excluded_formats = ['MPO']
-        
+
         for i in ImageSequence.Iterator(img):
             i = node_helpers.pillow(ImageOps.exif_transpose, i)
 
@@ -1604,10 +1670,10 @@ class LoadImage:
             if len(output_images) == 0:
                 w = image.size[0]
                 h = image.size[1]
-            
+
             if image.size[0] != w or image.size[1] != h:
                 continue
-            
+
             image = np.array(image).astype(np.float32) / 255.0
             image = torch.from_numpy(image)[None,]
             if 'A' in i.getbands():
@@ -1996,6 +2062,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
 EXTENSION_WEB_DIRS = {}
 
+# Dictionary of successfully loaded module names and associated directories.
+LOADED_MODULE_DIRS = {}
+
 
 def get_module_name(module_path: str) -> str:
     """
@@ -2037,6 +2106,8 @@ def load_custom_node(module_path: str, ignore=set(), module_parent="custom_nodes
         module = importlib.util.module_from_spec(module_spec)
         sys.modules[module_name] = module
         module_spec.loader.exec_module(module)
+
+        LOADED_MODULE_DIRS[module_name] = os.path.abspath(module_dir)
 
         if hasattr(module, "WEB_DIRECTORY") and getattr(module, "WEB_DIRECTORY") is not None:
             web_dir = os.path.abspath(os.path.join(module_dir, getattr(module, "WEB_DIRECTORY")))
@@ -2130,6 +2201,7 @@ def init_builtin_extra_nodes():
         "nodes_stable3d.py",
         "nodes_sdupscale.py",
         "nodes_photomaker.py",
+        "nodes_pixart.py",
         "nodes_cond.py",
         "nodes_morphology.py",
         "nodes_stable_cascade.py",
@@ -2151,8 +2223,11 @@ def init_builtin_extra_nodes():
         "nodes_torch_compile.py",
         "nodes_mochi.py",
         "nodes_slg.py",
+        "nodes_mahiro.py",
         "nodes_lt.py",
         "nodes_hooks.py",
+        "nodes_load_3d.py",
+        "nodes_cosmos.py",
     ]
 
     import_failed = []
@@ -2181,5 +2256,5 @@ def init_extra_nodes(init_custom_nodes=True):
         else:
             logging.warning("Please do a: pip install -r requirements.txt")
         logging.warning("")
-    
+
     return import_failed

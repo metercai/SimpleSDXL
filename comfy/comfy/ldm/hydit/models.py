@@ -1,8 +1,6 @@
-from typing import Any
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 import comfy.ops
 from comfy.ldm.modules.diffusionmodules.mmdit import Mlp, TimestepEmbedder, PatchEmbed, RMSNorm
@@ -249,9 +247,6 @@ class HunYuanDiT(nn.Module):
             nn.SiLU(),
             operations.Linear(hidden_size * 4, hidden_size, bias=True, dtype=dtype, device=device),
         )
-
-        # Image embedding
-        num_patches = self.x_embedder.num_patches
 
         # HUnYuanDiT Blocks
         self.blocks = nn.ModuleList([

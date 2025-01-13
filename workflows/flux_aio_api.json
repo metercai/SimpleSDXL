@@ -315,7 +315,7 @@
         "1907",
         0
       ],
-      "sigma": 1,
+      "sigma": 0.5,
       "image": [
         "303",
         0
@@ -1398,69 +1398,6 @@
       "title": "If else"
     }
   },
-  "1093": {
-    "inputs": {
-      "pulid_file": "pulid_flux_v0.9.1.safetensors"
-    },
-    "class_type": "PulidFluxModelLoader",
-    "_meta": {
-      "title": "Load PuLID Flux Model"
-    }
-  },
-  "1094": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "PulidFluxInsightFaceLoader",
-    "_meta": {
-      "title": "Load InsightFace (PuLID Flux)"
-    }
-  },
-  "1095": {
-    "inputs": {
-      "weight": [
-        "1079",
-        0
-      ],
-      "start_at": 0,
-      "end_at": [
-        "1082",
-        0
-      ],
-      "source_face_selection": "center_face",
-      "model": [
-        "2477",
-        0
-      ],
-      "pulid_flux": [
-        "1093",
-        0
-      ],
-      "eva_clip": [
-        "1096",
-        0
-      ],
-      "face_analysis": [
-        "1094",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
-    }
-  },
-  "1096": {
-    "inputs": {},
-    "class_type": "PulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "Load Eva Clip (PuLID Flux)"
-    }
-  },
   "1100": {
     "inputs": {
       "comparison": "a == b",
@@ -1533,44 +1470,6 @@
       "title": "If else"
     }
   },
-  "1163": {
-    "inputs": {
-      "weight": [
-        "1075",
-        0
-      ],
-      "start_at": 0,
-      "end_at": [
-        "1083",
-        0
-      ],
-      "source_face_selection": "center_face",
-      "model": [
-        "1741",
-        0
-      ],
-      "pulid_flux": [
-        "1093",
-        0
-      ],
-      "eva_clip": [
-        "1096",
-        0
-      ],
-      "face_analysis": [
-        "1094",
-        0
-      ],
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
-    }
-  },
   "1170": {
     "inputs": {
       "comparison": "a == b",
@@ -1606,44 +1505,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "1176": {
-    "inputs": {
-      "weight": [
-        "1080",
-        0
-      ],
-      "start_at": 0,
-      "end_at": [
-        "1084",
-        0
-      ],
-      "source_face_selection": "center_face",
-      "model": [
-        "1743",
-        0
-      ],
-      "pulid_flux": [
-        "1093",
-        0
-      ],
-      "eva_clip": [
-        "1096",
-        0
-      ],
-      "face_analysis": [
-        "1094",
-        0
-      ],
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
     }
   },
   "1181": {
@@ -1698,44 +1559,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "1214": {
-    "inputs": {
-      "weight": [
-        "1081",
-        0
-      ],
-      "start_at": 0,
-      "end_at": [
-        "1085",
-        0
-      ],
-      "source_face_selection": "center_face",
-      "model": [
-        "1745",
-        0
-      ],
-      "pulid_flux": [
-        "1093",
-        0
-      ],
-      "eva_clip": [
-        "1096",
-        0
-      ],
-      "face_analysis": [
-        "1094",
-        0
-      ],
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
     }
   },
   "1219": {
@@ -2163,7 +1986,7 @@
         0
       ],
       "on_true": [
-        "1095",
+        "2777",
         0
       ],
       "on_false": [
@@ -2183,7 +2006,7 @@
         0
       ],
       "on_true": [
-        "1163",
+        "2780",
         0
       ],
       "on_false": [
@@ -2203,7 +2026,7 @@
         0
       ],
       "on_true": [
-        "1176",
+        "2781",
         0
       ],
       "on_false": [
@@ -2398,7 +2221,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 73935525768283,
+      "seed": 507795070480937,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -2637,7 +2460,7 @@
         0
       ],
       "on_true": [
-        "1214",
+        "2782",
         0
       ],
       "on_false": [
@@ -3583,7 +3406,7 @@
         0
       ],
       "image": [
-        "2762",
+        "2772",
         0
       ]
     },
@@ -3620,7 +3443,7 @@
         0
       ],
       "image": [
-        "2764",
+        "2774",
         0
       ]
     },
@@ -3657,7 +3480,7 @@
         0
       ],
       "image": [
-        "2763",
+        "2773",
         0
       ]
     },
@@ -3694,7 +3517,7 @@
         0
       ],
       "image": [
-        "2765",
+        "2775",
         0
       ]
     },
@@ -4579,7 +4402,7 @@
         0
       ],
       "pixels": [
-        "2762",
+        "2772",
         0
       ]
     },
@@ -4673,7 +4496,7 @@
         0
       ],
       "pixels": [
-        "2763",
+        "2773",
         0
       ]
     },
@@ -4767,7 +4590,7 @@
         0
       ],
       "pixels": [
-        "2764",
+        "2774",
         0
       ]
     },
@@ -4861,7 +4684,7 @@
         0
       ],
       "pixels": [
-        "2765",
+        "2775",
         0
       ]
     },
@@ -6789,58 +6612,6 @@
       "title": "🔧 Image Resize"
     }
   },
-  "2762": {
-    "inputs": {
-      "gamma": 10,
-      "image": [
-        "2713",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2763": {
-    "inputs": {
-      "gamma": 10,
-      "image": [
-        "2714",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2764": {
-    "inputs": {
-      "gamma": 10,
-      "image": [
-        "2711",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
-  "2765": {
-    "inputs": {
-      "gamma": 10,
-      "image": [
-        "2712",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Gamma",
-    "_meta": {
-      "title": "LayerColor: Gamma"
-    }
-  },
   "2766": {
     "inputs": {
       "samples": [
@@ -6867,6 +6638,287 @@
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
+    }
+  },
+  "2772": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2713",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2773": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2714",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2774": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2711",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2775": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "2712",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "2776": {
+    "inputs": {},
+    "class_type": "GRPulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "GR Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "2777": {
+    "inputs": {
+      "weight": [
+        "1079",
+        0
+      ],
+      "start_at": 0,
+      "end_at": [
+        "1082",
+        0
+      ],
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "mean",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "2477",
+        0
+      ],
+      "pulid_flux": [
+        "2779",
+        0
+      ],
+      "eva_clip": [
+        "2776",
+        0
+      ],
+      "face_analysis": [
+        "2778",
+        0
+      ],
+      "image": [
+        "702",
+        0
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
+    }
+  },
+  "2778": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "GRPulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "GR Load InsightFace (PuLID Flux)"
+    }
+  },
+  "2779": {
+    "inputs": {
+      "pulid_file": "pulid_flux_v0.9.1.safetensors"
+    },
+    "class_type": "GRPulidFluxModelLoader",
+    "_meta": {
+      "title": "GR Load PuLID Flux Model"
+    }
+  },
+  "2780": {
+    "inputs": {
+      "weight": [
+        "1075",
+        0
+      ],
+      "start_at": 0,
+      "end_at": [
+        "1083",
+        0
+      ],
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "mean",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "1741",
+        0
+      ],
+      "pulid_flux": [
+        "2779",
+        0
+      ],
+      "eva_clip": [
+        "2776",
+        0
+      ],
+      "face_analysis": [
+        "2778",
+        0
+      ],
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
+    }
+  },
+  "2781": {
+    "inputs": {
+      "weight": [
+        "1080",
+        0
+      ],
+      "start_at": 0,
+      "end_at": [
+        "1084",
+        0
+      ],
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "mean",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "1743",
+        0
+      ],
+      "pulid_flux": [
+        "2779",
+        0
+      ],
+      "eva_clip": [
+        "2776",
+        0
+      ],
+      "face_analysis": [
+        "2778",
+        0
+      ],
+      "image": [
+        "704",
+        0
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
+    }
+  },
+  "2782": {
+    "inputs": {
+      "weight": [
+        "1081",
+        0
+      ],
+      "start_at": 0,
+      "end_at": [
+        "1085",
+        0
+      ],
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "mean",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "1745",
+        0
+      ],
+      "pulid_flux": [
+        "2779",
+        0
+      ],
+      "eva_clip": [
+        "2776",
+        0
+      ],
+      "face_analysis": [
+        "2778",
+        0
+      ],
+      "image": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
     }
   }
 }
