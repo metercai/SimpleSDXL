@@ -396,7 +396,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
             scene_additional_prompt=scene_additional_prompt,
             scene_aspect_ratio=scene_aspect_ratio.split('|')[0] if '×' in scene_aspect_ratio else modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
             scene_image_number=scene_image_number,
-            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"][scene_theme] if scene_theme in state_params["scene_frontend"] else None
+            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"]['scene_steps'][scene_theme] if scene_theme in state_params["scene_frontend"]['scene_steps'] else None
             ))
 
     if is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
