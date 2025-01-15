@@ -21,7 +21,8 @@
     "inputs": {
       "clip_name1": "clip_l.safetensors",
       "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
-      "type": "flux"
+      "type": "flux",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
@@ -82,7 +83,7 @@
     "inputs": {
       "noise_mask": true,
       "positive": [
-        "200",
+        "206",
         0
       ],
       "negative": [
@@ -322,7 +323,7 @@
         0
       ],
       "image": [
-        "195",
+        "204",
         0
       ],
       "mask": [
@@ -344,7 +345,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 24428517572721,
+      "seed": 244950111499620,
       "steps": 10,
       "cfg": 30,
       "denoise": 1
@@ -426,7 +427,7 @@
       "condition": "always",
       "multiple_of": 0,
       "image": [
-        "195",
+        "204",
         0
       ]
     },
@@ -463,7 +464,7 @@
   },
   "170": {
     "inputs": {
-      "value": ""
+      "value": "subject"
     },
     "class_type": "easy string",
     "_meta": {
@@ -709,7 +710,7 @@
         0
       ],
       "image": [
-        "195",
+        "204",
         0
       ]
     },
@@ -751,6 +752,135 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
+    }
+  },
+  "201": {
+    "inputs": {
+      "a": [
+        "170",
+        0
+      ],
+      "b": "subject",
+      "operation": "a == b",
+      "case_sensitive": true
+    },
+    "class_type": "easy mathString",
+    "_meta": {
+      "title": "Math String"
+    }
+  },
+  "202": {
+    "inputs": {
+      "model": [
+        "203",
+        0
+      ],
+      "images": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "RembgByBiRefNet",
+    "_meta": {
+      "title": "RembgByBiRefNet"
+    }
+  },
+  "203": {
+    "inputs": {
+      "model": "General.safetensors",
+      "device": "AUTO",
+      "use_weight": false
+    },
+    "class_type": "LoadRembgByBiRefNetModel",
+    "_meta": {
+      "title": "LoadRembgByBiRefNetModel"
+    }
+  },
+  "204": {
+    "inputs": {
+      "boolean": [
+        "201",
+        0
+      ],
+      "on_true": [
+        "205",
+        0
+      ],
+      "on_false": [
+        "195",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "205": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "202",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "206": {
+    "inputs": {
+      "boolean": [
+        "201",
+        0
+      ],
+      "on_true": [
+        "207",
+        0
+      ],
+      "on_false": [
+        "200",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "207": {
+    "inputs": {
+      "downsampling_factor": 1,
+      "downsampling_function": "bicubic",
+      "mode": "keep aspect ratio",
+      "weight": 1,
+      "autocrop_margin": 0.05,
+      "conditioning": [
+        "33",
+        0
+      ],
+      "style_model": [
+        "30",
+        0
+      ],
+      "clip_vision": [
+        "27",
+        0
+      ],
+      "image": [
+        "204",
+        0
+      ],
+      "mask": [
+        "202",
+        1
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
     }
   }
 }

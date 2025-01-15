@@ -1,0 +1,796 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 45648032025460,
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": [
+        "422",
+        0
+      ],
+      "model": [
+        "405:3",
+        0
+      ],
+      "positive": [
+        "38",
+        0
+      ],
+      "negative": [
+        "38",
+        1
+      ],
+      "latent_image": [
+        "38",
+        2
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "32",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "17": {
+    "inputs": {
+      "image": "无间道2.jfif",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_image"
+    }
+  },
+  "23": {
+    "inputs": {
+      "text": [
+        "139",
+        0
+      ],
+      "clip": [
+        "34",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "26": {
+    "inputs": {
+      "guidance": 30,
+      "conditioning": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "32": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "34": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "38": {
+    "inputs": {
+      "noise_mask": false,
+      "positive": [
+        "403:2",
+        0
+      ],
+      "negative": [
+        "49",
+        0
+      ],
+      "vae": [
+        "32",
+        0
+      ],
+      "pixels": [
+        "458",
+        0
+      ],
+      "mask": [
+        "457",
+        0
+      ]
+    },
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "InpaintModelConditioning"
+    }
+  },
+  "39": {
+    "inputs": {
+      "model": [
+        "48",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "45": {
+    "inputs": {
+      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "48": {
+    "inputs": {
+      "lora_name": "flux1-turbo.safetensors",
+      "strength_model": 1,
+      "model": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "49": {
+    "inputs": {
+      "clip_l": "",
+      "t5xxl": [
+        "140",
+        0
+      ],
+      "guidance": 3.5,
+      "clip": [
+        "34",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncodeFlux",
+    "_meta": {
+      "title": "CLIPTextEncodeFlux"
+    }
+  },
+  "56": {
+    "inputs": {
+      "image": "QQ截图20240109101039.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "57": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "mask_area",
+      "top_reserve": 60,
+      "bottom_reserve": 180,
+      "left_reserve": 120,
+      "right_reserve": 120,
+      "round_to_multiple": "8",
+      "image": [
+        "17",
+        0
+      ],
+      "mask": [
+        "142",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "59": {
+    "inputs": {
+      "scale": 1,
+      "method": "lanczos",
+      "scale_by": "longest",
+      "scale_by_length": [
+        "471",
+        0
+      ],
+      "image": [
+        "57",
+        0
+      ],
+      "mask": [
+        "57",
+        1
+      ]
+    },
+    "class_type": "LayerUtility: ImageScaleRestore V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleRestore V2"
+    }
+  },
+  "61": {
+    "inputs": {
+      "scale": 1,
+      "method": "lanczos",
+      "scale_by": "by_scale",
+      "scale_by_length": 1024,
+      "image": [
+        "464",
+        0
+      ],
+      "original_size": [
+        "468",
+        2
+      ]
+    },
+    "class_type": "LayerUtility: ImageScaleRestore V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleRestore V2"
+    }
+  },
+  "65": {
+    "inputs": {
+      "invert_mask": false,
+      "background_image": [
+        "17",
+        0
+      ],
+      "croped_image": [
+        "61",
+        0
+      ],
+      "crop_box": [
+        "57",
+        2
+      ],
+      "croped_mask": [
+        "469",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: RestoreCropBox",
+    "_meta": {
+      "title": "LayerUtility: RestoreCropBox"
+    }
+  },
+  "68": {
+    "inputs": {
+      "image": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: GetImageSize",
+    "_meta": {
+      "title": "LayerUtility: GetImageSize"
+    }
+  },
+  "85": {
+    "inputs": {
+      "images": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  },
+  "88": {
+    "inputs": {
+      "image": "无间道2.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_mask"
+    }
+  },
+  "139": {
+    "inputs": {
+      "positive": "closeup portrait , Ultra-realistic oil painting style face close-up, dreamy soft light, exquisite facial features, perfect skin, professional lighting (warm tone, three-dimensional), expressive look, high artistic appeal, blurred background."
+    },
+    "class_type": "easy positive",
+    "_meta": {
+      "title": "prompt_0"
+    }
+  },
+  "140": {
+    "inputs": {
+      "negative": "logo,Backlight,nsfw,(worst quality,low resolution),distorted,twisted,watermark,,Noise, spots, cracks"
+    },
+    "class_type": "easy negative",
+    "_meta": {
+      "title": "negative_prompt_0"
+    }
+  },
+  "142": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "256": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#000000",
+      "aspect_ratio": "1:1",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "scale_to_side": "longest",
+      "scale_to_length": 1024,
+      "detect": "mask_area",
+      "border_reserve": 50,
+      "ultra_detail_range": 3,
+      "matting_method": "SegmentAnything",
+      "sam_model": "sam_vit_h (2.56GB)",
+      "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
+      "sam_threshold": 0.3,
+      "sam_prompt": [
+        "415",
+        0
+      ],
+      "image": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageAutoCrop V2",
+    "_meta": {
+      "title": "LayerUtility: ImageAutoCrop V2"
+    }
+  },
+  "415": {
+    "inputs": {
+      "positive": "head and face"
+    },
+    "class_type": "easy positive",
+    "_meta": {
+      "title": "additional_prompt"
+    }
+  },
+  "422": {
+    "inputs": {
+      "value": 0.8
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "Float"
+    }
+  },
+  "426": {
+    "inputs": {
+      "purge_cache": true,
+      "purge_models": true,
+      "anything": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "427": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "428": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "403:2",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "429": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "256",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "453": {
+    "inputs": {
+      "width": [
+        "68",
+        0
+      ],
+      "height": [
+        "68",
+        1
+      ],
+      "interpolation": "nearest",
+      "method": "pad",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "256",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "454": {
+    "inputs": {
+      "direction": "right",
+      "match_image_size": true,
+      "image1": [
+        "456",
+        0
+      ],
+      "image2": [
+        "462",
+        0
+      ]
+    },
+    "class_type": "ImageConcanate",
+    "_meta": {
+      "title": "Image Concatenate"
+    }
+  },
+  "455": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "454",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "456": {
+    "inputs": {
+      "width": [
+        "68",
+        0
+      ],
+      "height": [
+        "68",
+        1
+      ],
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "457": {
+    "inputs": {
+      "expand": 15,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 10,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "455",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "458": {
+    "inputs": {
+      "direction": "right",
+      "match_image_size": true,
+      "image1": [
+        "453",
+        0
+      ],
+      "image2": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "ImageConcanate",
+    "_meta": {
+      "title": "Image Concatenate"
+    }
+  },
+  "462": {
+    "inputs": {
+      "mask": [
+        "59",
+        1
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "464": {
+    "inputs": {
+      "width": [
+        "68",
+        0
+      ],
+      "height": [
+        "68",
+        1
+      ],
+      "x": [
+        "68",
+        0
+      ],
+      "y": 0,
+      "image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "Image Crop"
+    }
+  },
+  "466": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "458",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "467": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "457",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "468": {
+    "inputs": {
+      "image": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: GetImageSize",
+    "_meta": {
+      "title": "LayerUtility: GetImageSize"
+    }
+  },
+  "469": {
+    "inputs": {
+      "expand": 15,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 10,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "57",
+        1
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "471": {
+    "inputs": {
+      "value": 768
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_width"
+    }
+  },
+  "403:0": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "403:1": {
+    "inputs": {
+      "style_model_name": "flux1-redux-dev.safetensors"
+    },
+    "class_type": "StyleModelLoader",
+    "_meta": {
+      "title": "Load Style Model"
+    }
+  },
+  "403:2": {
+    "inputs": {
+      "downsampling_factor": 1,
+      "downsampling_function": "area",
+      "mode": "autocrop with mask",
+      "weight": 1,
+      "autocrop_margin": 0.05,
+      "conditioning": [
+        "26",
+        0
+      ],
+      "style_model": [
+        "403:1",
+        0
+      ],
+      "clip_vision": [
+        "403:0",
+        0
+      ],
+      "image": [
+        "256",
+        0
+      ],
+      "mask": [
+        "256",
+        2
+      ]
+    },
+    "class_type": "ReduxAdvanced",
+    "_meta": {
+      "title": "ReduxAdvanced"
+    }
+  },
+  "405:0": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "GRPulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "GR Load InsightFace (PuLID Flux)"
+    }
+  },
+  "405:1": {
+    "inputs": {},
+    "class_type": "GRPulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "GR Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "405:2": {
+    "inputs": {
+      "pulid_file": "pulid_flux_v0.9.1.safetensors"
+    },
+    "class_type": "GRPulidFluxModelLoader",
+    "_meta": {
+      "title": "GR Load PuLID Flux Model"
+    }
+  },
+  "405:3": {
+    "inputs": {
+      "weight": 1,
+      "start_at": 0,
+      "end_at": 1,
+      "use_face_number": false,
+      "face_number": 0,
+      "blur": 0.01,
+      "face_select": "center_face",
+      "fusion": "norm_id",
+      "fusion_weight_max": 1,
+      "fusion_weight_min": 0,
+      "train_step": 1000,
+      "use_gray": true,
+      "model": [
+        "39",
+        0
+      ],
+      "pulid_flux": [
+        "405:2",
+        0
+      ],
+      "eva_clip": [
+        "405:1",
+        0
+      ],
+      "face_analysis": [
+        "405:0",
+        0
+      ],
+      "image": [
+        "403:2",
+        1
+      ]
+    },
+    "class_type": "GRApplyPulidFlux",
+    "_meta": {
+      "title": "GR Apply PuLID Flux"
+    }
+  }
+}

@@ -98,9 +98,9 @@ def get_local_filepath(url, dirname, local_file_name=None):
 
     destination = os.path.join(folder, local_file_name)
     if not os.path.exists(destination):
-        logger.warn(f'downloading {url} to {destination}')
         if 'HF_ENDPOINT' in os.environ:
             logger.warn(f'HF endpoint: {os.environ["HF_ENDPOINT"]}')
+        logger.warn(f'downloading {url} to {destination}')
         download_url_to_file(url, destination)
     return destination
 
