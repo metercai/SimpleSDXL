@@ -1402,7 +1402,9 @@ with shared.gradio_root:
 
         def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt): 
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
-            ready_to_gen = True if (canvas_image is not None and is_canvas_image) or (canvas_image is None and not is_canvas_image) else False
+            ready_to_gen = True 
+            if canvas_image is None and is_canvas_image:
+                ready_to_gen = False
             describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
             styles = set()
             styles.update([])
@@ -1414,7 +1416,7 @@ with shared.gradio_root:
         def trigger_auto_aspect_ratio_for_scene_from_input_image(state, input_image1, scene_theme):
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
             if is_canvas_image:
-                 return gr.update()
+                return gr.update()
             return trigger_auto_aspect_ratio_for_scene(state, input_image1, scene_theme)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):
