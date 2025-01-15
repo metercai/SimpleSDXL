@@ -7,7 +7,7 @@ import shared
 import cv2
 import modules.util as util
 import enhanced.all_parameters as ads
-from simpleai_base import simpleai_base, utils, comfyd, models_hub_host, torch_version, xformers_version, cuda_version, comfyclient_pipeline
+from simpleai_base import simpleai_base, utils, comfyd, torch_version, xformers_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
@@ -31,8 +31,7 @@ def reset_simpleai_args():
     global args_comfyd
     shared.sysinfo.update(dict(
         torch_version=torch_version,
-        xformers_version=xformers_version,
-        cuda_version=cuda_version))
+        xformers_version=xformers_version ))
     comfyclient_pipeline.COMFYUI_ENDPOINT_PORT = shared.sysinfo["loopback_port"]
     reserve_vram_value = ads.get_admin_default('reserved_vram')
     reserve_vram = [['--reserve-vram', f'{reserve_vram_value}']] if reserve_vram_value and reserve_vram_value>0 else [] 

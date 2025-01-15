@@ -4,7 +4,7 @@ NODE_NAME = 'TransparentBackgroundUltra'
 
 mode_dict = {"ckpt_base.pth": "base", "ckpt_base_nightly.pth": "base-nightly", "ckpt_fast.pth": "fast"}
 def scan_model():
-    model_file_list = glob.glob(os.path.join(folder_paths.models_dir, "transparent-background") + '/*.pth')
+    model_file_list = glob.glob(os.path.join(folder_paths.models_dir, "rembg") + '/*.pth')
     model_dict = {}
     for i in range(len(model_file_list)):
         _, __filename = os.path.split(model_file_list[i])

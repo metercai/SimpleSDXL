@@ -106,7 +106,8 @@ default = {
     'fast_comfyd_checkbox': False,
     'reserved_vram': 0,
     'minicpm_checkbox': False,
-    'advanced_logs': False
+    'advanced_logs': False,
+    'wavespeed_strength': 0.12
     }
 
 

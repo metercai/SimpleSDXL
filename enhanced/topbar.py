@@ -220,10 +220,10 @@ function(system_params) {
 }
 '''
 
-def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, request: gr.Request):
+def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, request: gr.Request):
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
-    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
+    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
 
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
@@ -368,7 +368,7 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     return describe_prompt, img_is_ok
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -379,8 +379,10 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         hires_fix_stop=hires_fix_stop,
         hires_fix_weight=hires_fix_weight,
         hires_fix_blurred=hires_fix_blurred,
-        reserved_vram=reserved_vram
+        reserved_vram=reserved_vram,
         ))
+    if wavespeed_strength>0:
+        backend_params.update(dict(wavespeed_strength=wavespeed_strength))
     
     if 'scene_frontend' in state_params:
         if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
@@ -394,7 +396,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
             scene_additional_prompt=scene_additional_prompt,
             scene_aspect_ratio=scene_aspect_ratio.split('|')[0] if '×' in scene_aspect_ratio else modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
             scene_image_number=scene_image_number,
-            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"][scene_theme] if scene_theme in state_params["scene_frontend"] else None
+            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"]['scene_steps'][scene_theme] if scene_theme in state_params["scene_frontend"]['scene_steps'] else None
             ))
 
     if is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
@@ -781,7 +783,7 @@ def update_upscale_size_of_image(image, uov_method):
     return f'{W} x {H} | {width} x {height}'
 
 
-def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs):
+def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength):
     set_admin_default_value = lambda x,y,s: shared.token.set_local_vars(f'admin_{x}', str(y), s["__session"], s["ua_hash"])
     
     set_admin_default_value('comfyd_active_checkbox', comfyd_active_checkbox, state)
@@ -789,6 +791,7 @@ def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, r
     set_admin_default_value('reserved_vram', reserved_vram, state)
     set_admin_default_value('minicpm_checkbox', minicpm_checkbox, state)
     set_admin_default_value('advanced_logs', advanced_logs, state)
+    set_admin_default_value('wavespeed_strength', wavespeed_strength, state)
 
     current_time = datetime.now().strftime("%H:%M:%S")
     admin_save_title = 'Save default of system' if state["__lang"]!='cn' else '保存系统默认值'
@@ -797,7 +800,7 @@ def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, r
 
 
 def get_all_admin_default(currunt_value):
-    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs']
+    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength']
     result = []
     for i, admin_key in enumerate(admin_keys): 
         admin_value = ads.get_admin_default(admin_key)

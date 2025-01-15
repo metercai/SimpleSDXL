@@ -435,8 +435,10 @@ class GRApplyPulidFlux:
         #dtype = comfy.model_management.unet_dtype()
         dtype = model.model.diffusion_model.dtype
         # For 8bit use bfloat16 (because ufunc_add_CUDA is not implemented)
-        if dtype in [torch.float8_e4m3fn, torch.float8_e5m2]:
-            dtype = torch.bfloat16
+        #if dtype in [torch.float8_e4m3fn, torch.float8_e5m2]:
+        #    dtype = torch.bfloat16
+        if model.model.manual_cast_dtype is not None:
+            dtype = model.model.manual_cast_dtype
 
         eva_clip.to(device, dtype=dtype)
         pulid_flux.to(device, dtype=dtype)

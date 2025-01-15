@@ -128,10 +128,10 @@ class MiniCPM:
     def translate(self, input_text, method=None):
         if not is_chinese(input_text):
             return input_text
-        if not MiniCPM.get_enable() or not shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file) or method in ['Slim Model', 'Third APIs']:
-            return translator.convert(input_text, method)
-        else:
+        if MiniCPM.get_enable() and shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file) and method in [None, 'Big Model']:
             return self.inference(None, prompt=f'{MiniCPM.prompt_translator}{input_text}')
+        else:
+            return translator.convert(input_text, method)
 
 minicpm = MiniCPM()
 default_interrogator = minicpm.interrogate

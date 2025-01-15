@@ -221,7 +221,7 @@ with shared.gradio_root:
                                  elem_id='final_gallery', preview=True )
                     with gr.Column(scale=1, visible=False) as scene_panel:
                         with gr.Row():
-                            scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, placeholder="Type blessing words.", elem_classes='scene_input')
+                            scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, elem_classes='scene_input')
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
@@ -1105,6 +1105,8 @@ with shared.gradio_root:
                         with gr.Row():
                             reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
                             minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
+                        with gr.Row():
+                            wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
                     with gr.Group(visible=False) as user_panel:
                         prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
                         mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
@@ -1126,8 +1128,9 @@ with shared.gradio_root:
                         minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=describe_output_chinese, queue=False, show_progress=False)
                         reserved_vram.change(lambda x,y: sync_params_backend('reserved_vram',x,y), inputs=[reserved_vram, params_backend])
                         advanced_logs.change(simpleai.change_advanced_logs, inputs=advanced_logs)
+                        wavespeed_strength.change(lambda x,y: sync_params_backend('wavespeed_strength',x,y), inputs=[wavespeed_strength, params_backend])
 
-                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs]
+                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
                         admin_save_button.click(topbar.admin_save_to_default, inputs=[state_topbar] + admin_ctrls, outputs=admin_save_button, queue=False, show_progress=False)
                         admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
 
@@ -1139,7 +1142,7 @@ with shared.gradio_root:
                             #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                             super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
                 with gr.Row():
-                    gr.Markdown(value=f'OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda_version"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+                    gr.Markdown(value=f'OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
 
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
@@ -1175,7 +1178,7 @@ with shared.gradio_root:
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
             scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number]
-            ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram]
+            ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
             language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(lambda x,y: y.update({'__theme': x}), inputs=[background_theme, state_topbar]).then(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
@@ -1399,7 +1402,9 @@ with shared.gradio_root:
 
         def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt): 
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
-            ready_to_gen = True if (canvas_image is not None and is_canvas_image) or (canvas_image is None and not is_canvas_image) else False
+            ready_to_gen = True 
+            if canvas_image is None and is_canvas_image:
+                ready_to_gen = False
             describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
             styles = set()
             styles.update([])
@@ -1411,7 +1416,7 @@ with shared.gradio_root:
         def trigger_auto_aspect_ratio_for_scene_from_input_image(state, input_image1, scene_theme):
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
             if is_canvas_image:
-                 return gr.update()
+                return gr.update()
             return trigger_auto_aspect_ratio_for_scene(state, input_image1, scene_theme)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):

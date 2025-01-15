@@ -236,6 +236,7 @@ def reset_env_args():
 
     if shared.sysinfo["location"] == 'CN':
         os.environ['HF_MIRROR'] = 'hf-mirror.com'
+        os.environ['HF_ENDPOINT'] = 'hf-mirror.com'
         if '--language' not in sys.argv:
             shared.args.language='cn'
 

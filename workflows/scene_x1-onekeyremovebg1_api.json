@@ -1,28 +1,12 @@
 {
   "30": {
     "inputs": {
-      "image": "welcome.png",
+      "image": "2024-04-12_22-25-30_2071.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_ip_image1"
-    }
-  },
-  "37": {
-    "inputs": {
-      "rem_mode": "Inspyrenet",
-      "image_output": "Hide",
-      "save_prefix": "ComfyUI",
-      "torchscript_jit": false,
-      "images": [
-        "30",
-        0
-      ]
-    },
-    "class_type": "easy imageRemBg",
-    "_meta": {
-      "title": "Image Remove Bg"
     }
   },
   "43": {
@@ -34,7 +18,7 @@
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": "遮罩到图像"
+      "title": ""
     }
   },
   "44": {
@@ -52,19 +36,19 @@
   "45": {
     "inputs": {
       "mask": [
-        "37",
+        "52",
         1
       ]
     },
     "class_type": "InvertMask",
     "_meta": {
-      "title": "遮罩反转"
+      "title": ""
     }
   },
   "47": {
     "inputs": {
       "images": [
-        "37",
+        "52",
         0
       ]
     },
@@ -76,13 +60,13 @@
   "48": {
     "inputs": {
       "mask": [
-        "37",
+        "52",
         1
       ]
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": "遮罩到图像"
+      "title": ""
     }
   },
   "49": {
@@ -95,6 +79,27 @@
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "mask_image2"
+    }
+  },
+  "52": {
+    "inputs": {
+      "model": "ckpt_base.pth",
+      "detail_method": "GuidedFilter",
+      "detail_erode": 6,
+      "detail_dilate": 6,
+      "black_point": 0.01,
+      "white_point": 0.99,
+      "process_detail": true,
+      "device": "cuda",
+      "max_megapixels": 2,
+      "image": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "LayerMask: TransparentBackgroundUltra",
+    "_meta": {
+      "title": "LayerMask: Transparent Background Ultra"
     }
   }
 }
