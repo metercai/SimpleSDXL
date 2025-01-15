@@ -20,7 +20,7 @@
     },
     "class_type": "CLIPTextEncodeFlux",
     "_meta": {
-      "title": "CLIPTextEncodeFlux"
+      "title": "CLIP文本编码Flux"
     }
   },
   "59": {
@@ -32,7 +32,7 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "SaveImageWebsocket"
+      "title": "保存图像（网络接口）"
     }
   },
   "131": {
@@ -52,7 +52,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "Empty Latent Image"
+      "title": "空Latent图像"
     }
   },
   "140": {
@@ -64,7 +64,7 @@
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "ConditioningZeroOut"
+      "title": "条件零化"
     }
   },
   "256": {
@@ -73,14 +73,15 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "加载VAE"
     }
   },
   "257": {
     "inputs": {
       "clip_name1": "clip_l.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "type": "flux"
+      "type": "flux",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
@@ -207,7 +208,7 @@
         0
       ],
       "model": [
-        "936",
+        "2792",
         0
       ],
       "positive": [
@@ -248,7 +249,7 @@
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
-      "title": "Load Upscale Model"
+      "title": "加载放大模型"
     }
   },
   "289": {
@@ -260,7 +261,7 @@
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "ConditioningZeroOut"
+      "title": "条件零化"
     }
   },
   "296": {
@@ -297,7 +298,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "297": {
@@ -306,7 +307,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "加载ControlNet模型"
     }
   },
   "298": {
@@ -323,7 +324,7 @@
     },
     "class_type": "ImageBlur",
     "_meta": {
-      "title": "Image Blur"
+      "title": "模糊图像"
     }
   },
   "299": {
@@ -368,7 +369,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "300": {
@@ -384,7 +385,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE Encode"
+      "title": "VAE编码"
     }
   },
   "301": {
@@ -400,7 +401,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "303": {
@@ -433,7 +434,7 @@
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
-      "title": "Load Upscale Model"
+      "title": "加载放大模型"
     }
   },
   "305": {
@@ -449,7 +450,7 @@
     },
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
-      "title": "Upscale Image (using Model)"
+      "title": "使用模型放大图像"
     }
   },
   "307": {
@@ -561,7 +562,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "332": {
@@ -588,7 +589,7 @@
         0
       ],
       "model": [
-        "2096",
+        "2790",
         0
       ],
       "positive": [
@@ -606,7 +607,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "421": {
@@ -630,7 +631,7 @@
       ],
       "denoise": 1,
       "model": [
-        "2037",
+        "2793",
         0
       ],
       "positive": [
@@ -648,7 +649,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "422": {
@@ -664,7 +665,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "702": {
@@ -1044,7 +1045,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "982": {
@@ -1089,7 +1090,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "983": {
@@ -1116,7 +1117,7 @@
         0
       ],
       "model": [
-        "936",
+        "2791",
         0
       ],
       "positive": [
@@ -1134,7 +1135,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "984": {
@@ -1150,7 +1151,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "994": {
@@ -1166,7 +1167,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE Encode"
+      "title": "VAE编码"
     }
   },
   "995": {
@@ -1182,7 +1183,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE Encode"
+      "title": "VAE编码"
     }
   },
   "999": {
@@ -1385,7 +1386,7 @@
         0
       ],
       "on_true": [
-        "2117",
+        "2378",
         0
       ],
       "on_false": [
@@ -1457,7 +1458,7 @@
         0
       ],
       "on_true": [
-        "2118",
+        "2379",
         0
       ],
       "on_false": [
@@ -1494,7 +1495,7 @@
         0
       ],
       "on_true": [
-        "2119",
+        "2380",
         0
       ],
       "on_false": [
@@ -1548,7 +1549,7 @@
         0
       ],
       "on_true": [
-        "2120",
+        "2381",
         0
       ],
       "on_false": [
@@ -2221,7 +2222,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 507795070480937,
+      "seed": 378814479711834,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -2268,7 +2269,7 @@
     },
     "class_type": "ImageToMask",
     "_meta": {
-      "title": "Convert Image to Mask"
+      "title": "图像转换为遮罩"
     }
   },
   "1899": {
@@ -2291,7 +2292,7 @@
   },
   "1907": {
     "inputs": {
-      "value": "a*20",
+      "value": "a*5",
       "a": [
         "1906",
         0
@@ -2412,7 +2413,7 @@
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {
-      "title": "Load CLIP Vision"
+      "title": "加载CLIP视觉"
     }
   },
   "2007": {
@@ -2421,7 +2422,7 @@
     },
     "class_type": "StyleModelLoader",
     "_meta": {
-      "title": "Load Style Model"
+      "title": "加载风格模型"
     }
   },
   "2008": {
@@ -2444,13 +2445,13 @@
         0
       ],
       "mask": [
-        "2751",
+        "1989",
         0
       ]
     },
     "class_type": "InpaintModelConditioning",
     "_meta": {
-      "title": "InpaintModelConditioning"
+      "title": "内补模型条件"
     }
   },
   "2037": {
@@ -2495,13 +2496,13 @@
         0
       ],
       "model": [
-        "2091",
+        "2848",
         0
       ]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "lora_5"
+      "title": "flux_depthlora"
     }
   },
   "2096": {
@@ -2513,207 +2514,7 @@
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
-      "title": "Differential Diffusion"
-    }
-  },
-  "2105": {
-    "inputs": {
-      "start": 0,
-      "end": [
-        "1082",
-        0
-      ],
-      "conditioning": [
-        "2378",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2106": {
-    "inputs": {
-      "start": [
-        "1082",
-        0
-      ],
-      "end": 1,
-      "conditioning": [
-        "2506",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2108": {
-    "inputs": {
-      "start": 0,
-      "end": [
-        "1083",
-        0
-      ],
-      "conditioning": [
-        "2379",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2109": {
-    "inputs": {
-      "start": [
-        "1083",
-        0
-      ],
-      "end": 1,
-      "conditioning": [
-        "1092",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2111": {
-    "inputs": {
-      "start": 0,
-      "end": [
-        "1084",
-        0
-      ],
-      "conditioning": [
-        "2380",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2112": {
-    "inputs": {
-      "start": [
-        "1084",
-        0
-      ],
-      "end": 1,
-      "conditioning": [
-        "1160",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2114": {
-    "inputs": {
-      "start": 0,
-      "end": [
-        "1085",
-        0
-      ],
-      "conditioning": [
-        "2381",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2115": {
-    "inputs": {
-      "start": [
-        "1085",
-        0
-      ],
-      "end": 1,
-      "conditioning": [
-        "1173",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "2117": {
-    "inputs": {
-      "conditioning_1": [
-        "2106",
-        0
-      ],
-      "conditioning_2": [
-        "2105",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "2118": {
-    "inputs": {
-      "conditioning_1": [
-        "2109",
-        0
-      ],
-      "conditioning_2": [
-        "2108",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "2119": {
-    "inputs": {
-      "conditioning_1": [
-        "2112",
-        0
-      ],
-      "conditioning_2": [
-        "2111",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "2120": {
-    "inputs": {
-      "conditioning_1": [
-        "2115",
-        0
-      ],
-      "conditioning_2": [
-        "2114",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "差异扩散DifferentialDiffusion"
     }
   },
   "2122": {
@@ -2789,7 +2590,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2221": {
@@ -2813,7 +2614,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2224": {
@@ -2837,7 +2638,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2227": {
@@ -2861,7 +2662,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2230": {
@@ -2878,7 +2679,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2231": {
@@ -2895,7 +2696,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2233": {
@@ -2912,7 +2713,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2234": {
@@ -2929,7 +2730,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2236": {
@@ -2946,7 +2747,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2237": {
@@ -2963,7 +2764,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2239": {
@@ -2980,7 +2781,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2240": {
@@ -2997,7 +2798,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2242": {
@@ -3013,7 +2814,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2243": {
@@ -3029,7 +2830,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2244": {
@@ -3045,7 +2846,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2245": {
@@ -3061,7 +2862,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2260": {
@@ -3412,7 +3213,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2279": {
@@ -3449,7 +3250,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2280": {
@@ -3486,7 +3287,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2281": {
@@ -3523,7 +3324,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2290": {
@@ -3553,7 +3354,7 @@
       ],
       "return_with_leftover_noise": "enable",
       "model": [
-        "2096",
+        "2783",
         0
       ],
       "positive": [
@@ -3571,7 +3372,7 @@
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
-      "title": "KSampler (Advanced)"
+      "title": "K采样器（高级）"
     }
   },
   "2293": {
@@ -3580,7 +3381,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "加载ControlNet模型"
     }
   },
   "2308": {
@@ -3596,7 +3397,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "2309": {
@@ -3652,8 +3453,8 @@
         0
       ],
       "on_true": [
-        "2542",
-        1
+        "2786",
+        0
       ],
       "on_false": [
         "2534",
@@ -4052,7 +3853,7 @@
     },
     "class_type": "ImageScaleBy",
     "_meta": {
-      "title": "Upscale Image By"
+      "title": "缩放图像（比例）"
     }
   },
   "2392": {
@@ -4085,7 +3886,7 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "2532",
+        "2789",
         0
       ],
       "positive": [
@@ -4103,12 +3904,12 @@
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
-      "title": "KSampler (Advanced)"
+      "title": "K采样器（高级）"
     }
   },
   "2394": {
     "inputs": {
-      "value": "a/5*4",
+      "value": "a/4*3",
       "a": [
         "1890",
         7
@@ -4350,7 +4151,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2443": {
@@ -4367,7 +4168,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2444": {
@@ -4384,7 +4185,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2445": {
@@ -4408,7 +4209,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2449": {
@@ -4445,7 +4246,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2452": {
@@ -4462,7 +4263,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2456": {
@@ -4478,7 +4279,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2457": {
@@ -4502,7 +4303,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2458": {
@@ -4539,7 +4340,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2461": {
@@ -4556,7 +4357,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2465": {
@@ -4572,7 +4373,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2466": {
@@ -4596,7 +4397,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2467": {
@@ -4633,7 +4434,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2470": {
@@ -4650,7 +4451,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "设置条件时间"
     }
   },
   "2474": {
@@ -4666,7 +4467,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "Conditioning (Combine)"
+      "title": "条件合并"
     }
   },
   "2475": {
@@ -4690,7 +4491,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPixConditioning"
+      "title": "InstructPixToPix条件"
     }
   },
   "2476": {
@@ -4727,7 +4528,7 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "lora_6"
+      "title": "flux_cannylora"
     }
   },
   "2478": {
@@ -5241,7 +5042,7 @@
         0
       ],
       "on_true": [
-        "2542",
+        "2785",
         0
       ],
       "on_false": [
@@ -5272,7 +5073,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "加载ControlNet模型"
     }
   },
   "2548": {
@@ -5309,7 +5110,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2559": {
@@ -5346,7 +5147,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2566": {
@@ -5383,7 +5184,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2573": {
@@ -5420,7 +5221,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "Apply Controlnet with VAE"
+      "title": "应用ControlNet"
     }
   },
   "2582": {
@@ -6472,7 +6273,7 @@
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": "Convert Mask to Image"
+      "title": "遮罩转换为图像"
     }
   },
   "2750": {
@@ -6509,7 +6310,7 @@
     },
     "class_type": "ImageToMask",
     "_meta": {
-      "title": "Convert Image to Mask"
+      "title": "图像转换为遮罩"
     }
   },
   "2752": {
@@ -6625,19 +6426,7 @@
     },
     "class_type": "SetLatentNoiseMask",
     "_meta": {
-      "title": "Set Latent Noise Mask"
-    }
-  },
-  "2768": {
-    "inputs": {
-      "model": [
-        "2532",
-        0
-      ]
-    },
-    "class_type": "DifferentialDiffusion",
-    "_meta": {
-      "title": "Differential Diffusion"
+      "title": "设置Latent噪波遮罩"
     }
   },
   "2772": {
@@ -6919,6 +6708,613 @@
     "class_type": "GRApplyPulidFlux",
     "_meta": {
       "title": "GR Apply PuLID Flux"
+    }
+  },
+  "2783": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 1,
+      "start": 0.8,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "2096",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2785": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "2542",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2786": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "2542",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "2789": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2844",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "2532",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2790": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2844",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "2096",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2791": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2844",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2792": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2844",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2793": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2844",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "2037",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2795": {
+    "inputs": {
+      "value": 0.12
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "2803": {
+    "inputs": {
+      "boolean": [
+        "2814",
+        0
+      ],
+      "on_true": [
+        "2805",
+        0
+      ],
+      "on_false": [
+        "2814",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2804": {
+    "inputs": {
+      "boolean": [
+        "2812",
+        0
+      ],
+      "on_true": [
+        "2810",
+        0
+      ],
+      "on_false": [
+        "2812",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2805": {
+    "inputs": {
+      "boolean": [
+        "2813",
+        0
+      ],
+      "on_true": [
+        "2804",
+        0
+      ],
+      "on_false": [
+        "2813",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2810": {
+    "inputs": {
+      "boolean": [
+        "2811",
+        0
+      ],
+      "on_true": [
+        "2816",
+        0
+      ],
+      "on_false": [
+        "2811",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2811": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "706",
+        0
+      ],
+      "b": [
+        "2815",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2812": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "707",
+        0
+      ],
+      "b": [
+        "2815",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2813": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "708",
+        0
+      ],
+      "b": [
+        "2815",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2814": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "709",
+        0
+      ],
+      "b": [
+        "2815",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2815": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2816": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "2819": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "Float"
+    }
+  },
+  "2820": {
+    "inputs": {
+      "boolean": [
+        "2803",
+        0
+      ],
+      "on_true": [
+        "2821",
+        0
+      ],
+      "on_false": [
+        "2819",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2821": {
+    "inputs": {
+      "boolean": [
+        "2660",
+        0
+      ],
+      "on_true": [
+        "2795",
+        0
+      ],
+      "on_false": [
+        "2819",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2827": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "2839",
+        0
+      ],
+      "b": [
+        "2439",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2828": {
+    "inputs": {
+      "boolean": [
+        "2833",
+        0
+      ],
+      "on_true": [
+        "2837",
+        0
+      ],
+      "on_false": [
+        "2833",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2833": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "707",
+        0
+      ],
+      "b": [
+        "2840",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2834": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "708",
+        0
+      ],
+      "b": [
+        "2840",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2835": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "709",
+        0
+      ],
+      "b": [
+        "2840",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2836": {
+    "inputs": {
+      "comparison": "a != b",
+      "a": [
+        "706",
+        0
+      ],
+      "b": [
+        "2840",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2837": {
+    "inputs": {
+      "boolean": [
+        "2836",
+        0
+      ],
+      "on_true": [
+        "2838",
+        0
+      ],
+      "on_false": [
+        "2836",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2838": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "2839": {
+    "inputs": {
+      "boolean": [
+        "2834",
+        0
+      ],
+      "on_true": [
+        "2828",
+        0
+      ],
+      "on_false": [
+        "2834",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2840": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2841": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "2839",
+        0
+      ],
+      "b": [
+        "2846",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2844": {
+    "inputs": {
+      "boolean": [
+        "2847",
+        0
+      ],
+      "on_true": [
+        "2819",
+        0
+      ],
+      "on_false": [
+        "2820",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2846": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "2847": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "2827",
+        0
+      ],
+      "b": [
+        "2841",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2848": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2091",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_5"
     }
   }
 }
