@@ -236,7 +236,22 @@ class ImageAutoCropV2:
             ret_box_previews.append(pil2tensor(preview_image))
             ret_masks.append(image2mask(ret_mask))
 
+
         log(f"{NODE_NAME} Processed {len(ret_images)} image(s).", message_type='finish')
+        if SAM_MODEL is not None:
+            del SAM_MODEL
+            SAM_MODEL = None
+
+        if DINO_MODEL is not None:
+            del DINO_MODEL
+            DINO_MODEL = None
+
+        previous_sam_model = ""
+        previous_dino_model = ""
+
+        # 清理未使用的显存
+        torch.cuda.empty_cache()
+
         return (torch.cat(ret_images, dim=0),
                 torch.cat(ret_box_previews, dim=0),
                 torch.cat(ret_masks, dim=0),

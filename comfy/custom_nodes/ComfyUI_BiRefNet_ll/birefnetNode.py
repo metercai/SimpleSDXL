@@ -244,6 +244,7 @@ class GetMaskByBiRefNet:
         return mask.squeeze(1),
 
 
+
 class BlurFusionForegroundEstimation:
 
     @classmethod
@@ -299,7 +300,7 @@ class BlurFusionForegroundEstimation:
             out_images = add_mask_as_alpha(_image_masked.cpu(), out_masks.cpu())
 
         del _image_masked
-
+    
         return out_images, out_masks
 
 
@@ -344,12 +345,23 @@ class RembgByBiRefNetAdvanced(GetMaskByBiRefNet, BlurFusionForegroundEstimation)
     CATEGORY = "rembg/BiRefNet"
 
     def rem_bg(self, model, images, upscale_method='bilinear', width=1024, height=1024, blur_size=91, blur_size_two=7, fill_color=False, color=None, mask_threshold=0.000):
+        model, version = model
 
-        masks = super().get_mask(model, images, width, height, upscale_method, mask_threshold)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        current_device = next(model.parameters()).device
+        if current_device != device:
+            model.to(device)
 
+        masks = super().get_mask((model, version), images, width, height, upscale_method, mask_threshold)
         out_images, out_masks = super().get_foreground(images, masks=masks[0], blur_size=blur_size, blur_size_two=blur_size_two, fill_color=fill_color, color=color)
 
+        if device.type == "cuda":
+            model.to("cpu")
+            torch.cuda.empty_cache()
+
         return out_images, out_masks
+
+
 
 
 class RembgByBiRefNet(RembgByBiRefNetAdvanced):
@@ -369,7 +381,19 @@ class RembgByBiRefNet(RembgByBiRefNetAdvanced):
     CATEGORY = "rembg/BiRefNet"
 
     def rem_bg(self, model, images):
-        return super().rem_bg(model, images)
+        model, version = model
+
+        device_type = next(model.parameters()).device.type
+        if device_type != "cpu":
+            model.to(device_type)
+
+        out_images, out_masks = super().rem_bg((model, version), images)
+
+        model.to("cpu")
+        torch.cuda.empty_cache()
+
+        return out_images, out_masks
+
 
 
 NODE_CLASS_MAPPINGS = {
@@ -389,3 +413,4 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "GetMaskByBiRefNet": "GetMaskByBiRefNet",
     "BlurFusionForegroundEstimation": "BlurFusionForegroundEstimation",
 }
+
