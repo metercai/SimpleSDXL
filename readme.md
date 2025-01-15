@@ -5,9 +5,25 @@
 
 ### 🚀 B站视频推荐：[6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU 
 
+### SimpleAI.FluxAIO 公测版预览
+preset store:
+<img width="833"  src="https://github.com/user-attachments/assets/973eb424-83b3-4462-93ee-615f41f36fba" /><br>
+admin panel:
+<img width="390"  src="https://github.com/user-attachments/assets/7ed70f4a-febd-4856-af37-53d5a835032a" /><br>
+Flux i2i:
+<img width="832"  src="https://github.com/user-attachments/assets/c8ea27c1-0d99-454b-b350-fc2189b67db5" /><br>
+
+Demonstration of Minimalist Mode:<br>
+The preset for greeting card
+<img width="1256"  src="https://github.com/user-attachments/assets/6e8850e9-b984-4038-8878-4d1d50576eae" />
+The preset for change clothes
+<img width="1255"  src="https://github.com/user-attachments/assets/eea0ae0b-4cf1-4e3d-9657-fe885dab8452" />
+
 
 ## 🔔 最新更新 / Update
+- [2025-01-15] <b>彻底清除simpleai_base包内的测试残留代码，确保无风险运行。</b>
 - [2024-09-16] <b>解锁Flux的lora和可图lora。自动修图开关移到增强修图标签内。添加提示面板开关，可点击触发批量通配符面板。反推提示词和图片参数提取两个标签移入参数设置栏。添加基于预置包的基础模型过滤功能。修复Comfyd引擎的跳过和中断逻辑bug。优化预置包参数和预置包导航。Flux模型自动适配硬件环境。优选Hyp8Q5KM模型，支持Flux Lora，兼具速度与质量的平衡。新增两个无缝贴图的预置包。升级comfyd到最新版。优化下载安装和启动流程，强制基础包检测，并提供模型包安装脚本。</b>
+
 - [2024.08.20] 新架构进一步优化，提升在Windows环境的兼容性，压缩Fooocus和Comfy后端切换的资源消耗。优化支持最低6G显存的Flux模型出图，提供质量优先的Fluxdev和速度优先的Flux+两个预置包，并可根据系统资源自动适配。同步升级主线v2.5.5，优化增强修图UI，更符合Fooocus交互习惯。
 - [2024.07.31] 优化了新架构，更稳定，更快速。新增对快手可图模型的支持，使SimpleSDXL2除SDXL外，以6G显卡显存同时支持: 小马v6/Playground-v2.5/SD3m/混元/可图等多种模型出图，适用更多场景。同步主线v2.5.2，并对修图界面进行优化和适配，使之更容易被中文用户理解和使用。
 - [2024.06.30] 扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。
