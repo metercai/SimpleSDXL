@@ -542,10 +542,10 @@ packages = {
             ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
         "download_links": [
-        "贺年卡基于FluxAIO、可图AIO扩展，请检查所需包体。Lora点击生成会自动下载。"
+        "【选配】贺年卡基于FluxAIO、可图AIO扩展，请检查所需包体。Lora点击生成会自动下载。"
         ]
     },
-            "clothing_package": {
+        "clothing_package": {
         "name": "换装包",
         "files": [
             ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
@@ -557,10 +557,77 @@ packages = {
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
+            ("SimpleModels/rembg/General.safetensors", 884878856),
             ("SimpleModels/loras/flux1-turbo.safetensors", 694082424)
         ],
         "download_links": [
-        "换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
+        "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "3DPurikura_package": {
+        "name": "3D大头贴",
+        "files": [
+            ("SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
+            ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("SimpleModels/rembg/Portrait.safetensors", 884878856),
+            ("SimpleModels/ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
+            ("SimpleModels/ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("SimpleModels/insightface/models/buffalo_l/1k3d68.onnx", 143607619),
+            ("SimpleModels/insightface/models/buffalo_l/2d106det.onnx", 5030888),
+            ("SimpleModels/insightface/models/buffalo_l/det_10g.onnx", 16923827),
+            ("SimpleModels/insightface/models/buffalo_l/genderage.onnx", 1322532),
+            ("SimpleModels/insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
+            ("SimpleModels/loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
+            ("SimpleModels/loras/StickersRedmond.safetensors", 170540036)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "x1-okremovebg_package": {
+        "name": "一键抠图",
+        "files": [
+            ("SimpleModels/rembg/ckpt_base.pth", 367520613),
+            ("SimpleModels/rembg/RMBG-1.4.pth", 176718373)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "x2-okimagerepair_package": {
+        "name": "一键修复",
+        "files": [
+            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("SimpleModels/checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152),
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "x3-swapface_package": {
+        "name": "一键换脸",
+        "files": [
+            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152),
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/loras/flux1-turbo.safetensors", 694082424),
+            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
+            ("SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
 }
