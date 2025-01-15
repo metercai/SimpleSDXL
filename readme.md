@@ -6,18 +6,18 @@
 ### 🚀 B站视频推荐：[6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU 
 
 ### SimpleAI.FluxAIO 公测版预览
-preset store:
-<img width="833"  src="https://github.com/user-attachments/assets/973eb424-83b3-4462-93ee-615f41f36fba" /><br>
-admin panel:
-<img width="390"  src="https://github.com/user-attachments/assets/7ed70f4a-febd-4856-af37-53d5a835032a" /><br>
-Flux i2i:
-<img width="832"  src="https://github.com/user-attachments/assets/c8ea27c1-0d99-454b-b350-fc2189b67db5" /><br>
+preset store:<br>
+<img width="600"  src="https://github.com/user-attachments/assets/973eb424-83b3-4462-93ee-615f41f36fba" /><br>
+admin panel:<br>
+<img width="300"  src="https://github.com/user-attachments/assets/7ed70f4a-febd-4856-af37-53d5a835032a" /><br>
+Flux i2i:<br>
+<img width="600"  src="https://github.com/user-attachments/assets/c8ea27c1-0d99-454b-b350-fc2189b67db5" /><br>
 
 Demonstration of Minimalist Mode:<br>
-The preset for greeting card
-<img width="1256"  src="https://github.com/user-attachments/assets/6e8850e9-b984-4038-8878-4d1d50576eae" />
-The preset for change clothes
-<img width="1255"  src="https://github.com/user-attachments/assets/eea0ae0b-4cf1-4e3d-9657-fe885dab8452" />
+The preset for greeting card<br>
+<img width="800"  src="https://github.com/user-attachments/assets/6e8850e9-b984-4038-8878-4d1d50576eae" /><br>
+The preset for change clothes<br>
+<img width="800"  src="https://github.com/user-attachments/assets/eea0ae0b-4cf1-4e3d-9657-fe885dab8452" />
 
 
 ## 🔔 最新更新 / Update
