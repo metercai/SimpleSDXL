@@ -8,7 +8,7 @@
 	    "version": "m1.1",
 	    "theme": ["SDXL加速", "Flux慢速"],
 	    "theme_title": "不同的引擎，耗时有极大差距，修复的效果也不相同",
-            "disvisible": ["scene_additional_prompt", "scene_canvas_image"],  
+            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_canvas_image"],  
 	    "prompt": {
     		"SDXL加速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n",
 	    	"Flux慢速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n"

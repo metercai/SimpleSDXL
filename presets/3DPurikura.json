@@ -8,7 +8,7 @@
                 "version": "m1.1",
                 "theme": ["快速普通画质", "慢速精细画质"],
                 "theme_title": "出图速度与画质选择",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt"],
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_additional_prompt_2"],
                 "prompt": {
                      "快速普通画质": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render,  portrait, close shot, smiling ",
                      "慢速精细画质": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render,  portrait, close shot, smiling "
