@@ -81,8 +81,8 @@
         "vae,ae.safetensors,335304388,0,",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,",
+        "controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",
         "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,"
         ]
 }
-
 

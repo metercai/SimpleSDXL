@@ -64,16 +64,15 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
-    	"checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
 	"pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,clip_l.safetensors,246144152,0,",
 	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
         "vae,ae.safetensors,335304388,0,",
 	"loras,flux1-turbo.safetensors,694082424,0,",
-        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
 	"style_models,flux1-redux-dev.safetensors,129063232,0,",
-        "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,"
+	"inpaint,groundingdino_swint_ogc.pth,693997677,0,",
+	"inpaint,sam_vit_h_4b8939.pth,2564550879,0,"
     	]
 }
 
