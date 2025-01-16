@@ -33,13 +33,14 @@ git clone https://github.com/chengzeyi/Comfy-WaveSpeed.git
 
 You can find demo workflows in the `workflows` folder.
 
-[FLUX.1-dev with First Block Cache and Compilation](./workflows/flux.json)
-
-[LTXV with First Block Cache and Compilation](./workflows/ltxv.json)
-
-[HunyuanVideo with First Block Cache](./workflows/hunyuan_video.json)
-
-[SDXL with First Block Cache](./workflows/sdxl.json)
+| Workflow | Path |
+| - | - |
+| FLUX.1-dev with First Block Cache and Compilation | [workflows/flux.json](./workflows/flux.json)
+| FLUX.1-dev ControlNet with First Block Cache and Compilation | [workflows/flux_controlnet.json](./workflows/flux_controlnet.json)
+| LTXV with First Block Cache and Compilation | [workflows/ltxv.json](./workflows/ltxv.json)
+| HunyuanVideo with First Block Cache | [workflows/hunyuan_video.json](./workflows/hunyuan_video.json)
+| SD3.5 with First Block Cache and Compilation | [workflows/sd3.5.json](./workflows/sd3.5.json)
+| SDXL with First Block Cache | [workflows/sdxl.json](./workflows/sdxl.json)
 
 **NOTE**: The `Compile Model+` node requires your computation to meet some software and hardware requirements, please refer to the [Enhanced `torch.compile`](#enhanced-torchcompile) section for more information.
 If you have problems with the compilation node, you can remove it from the workflow and only use the `Apply First Block Cache` node.
@@ -54,6 +55,8 @@ This can significantly reduce the computation cost of the model, achieving a spe
 To use first block cache, simply add the `wavespeed->Apply First Block Cache` node to your workflow after your `Load Diffusion Model` node and adjust the `residual_diff_threashold` value to a suitable value for your model, for example: `0.12` for `flux-dev.safetensors` with `fp8_e4m3fn_fast` and 28 steps.
 It is expected to see a speedup of 1.5x to 3.0x with acceptable accuracy loss.
 
+It supports many models like `FLUX`, `LTXV (native and non-native)`, `HunyuanVideo (native)`, `SD3.5` and `SDXL`, feel free to try it out and let us know if you have any issues!
+
 Some configurations for different models that you can try:
 
 | Model | Steps | `residual_diff_threashold` |
@@ -61,9 +64,8 @@ Some configurations for different models that you can try:
 | `flux-dev.safetensors` with `fp8_e4m3fn_fast` | 28 | 0.12 |
 | `ltx-video-2b-v0.9.1.safetensors` | 30 | 0.1 |
 | `hunyuan_video_720_cfgdistill_fp8_e4m3fn.safetensors` | 20 | 0.1 |
+| `sd3.5_large_fp8_scaled.safetensors` | 30 | 0.12 |
 | `sd_xl_base_1.0.safetensors` | 25 | 0.2 |
-
-It supports many models like `FLUX`, `LTXV (native and non-native)`, `HunyuanVideo (native)` and `SDXL`, feel free to try it out and let us know if you have any issues!
 
 See [Apply First Block Cache on FLUX.1-dev](https://github.com/chengzeyi/ParaAttention/blob/main/doc/fastest_flux.md#apply-first-block-cache-on-flux1-dev) for more information and detailed comparison on quality and speed.
 

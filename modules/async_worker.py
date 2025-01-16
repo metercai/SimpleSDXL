@@ -1391,15 +1391,15 @@ def worker():
         
         if async_task.task_class in flags.comfy_classes:
             logger.info(f'[TaskEngine] Enable Comfyd backend.')
-            if "flux_aio" in async_task.task_method and \
-                (((async_task.current_tab in ['uov', 'inpaint', 'ip'] \
-                        and len(async_task.cn_tasks[flags.cn_pose]) > 0 \
-                        and len(async_task.cn_tasks[flags.cn_ip_face]) == 0) \
-                    or ((async_task.current_tab in ['uov'] and 'hires.fix' in async_task.uov_method) \
-                        and ((len(async_task.cn_tasks[flags.cn_ip_face]) == 0 ) or not async_task.mixing_image_prompt_and_vary_upscale))) \
-                or (len(async_task.cn_tasks[flags.cn_canny]) > 0 and len(async_task.cn_tasks[flags.cn_cpds]) > 0)):
-                logger.info(f'Clean the model cache in comfyd.')
-                comfyd.stop()
+            # if "flux_aio" in async_task.task_method and \
+            #     (((async_task.current_tab in ['uov', 'inpaint', 'ip'] \
+            #             and len(async_task.cn_tasks[flags.cn_pose]) > 0 \
+            #             and len(async_task.cn_tasks[flags.cn_ip_face]) == 0) \
+            #         or ((async_task.current_tab in ['uov'] and 'hires.fix' in async_task.uov_method) \
+            #             and ((len(async_task.cn_tasks[flags.cn_ip_face]) == 0 ) or not async_task.mixing_image_prompt_and_vary_upscale))) \
+            #     or (len(async_task.cn_tasks[flags.cn_canny]) > 0 and len(async_task.cn_tasks[flags.cn_cpds]) > 0)):
+            #     logger.info(f'Clean the model cache in comfyd.')
+            #     comfyd.stop()
             comfyd.start()
         else:
             logger.info(f'Enable Fooocus backend.')

@@ -121,9 +121,17 @@ class ApplyFBCacheOnModel:
         model = model.clone()
         diffusion_model = model.get_model_object(object_to_patch)
 
-        if diffusion_model.__class__.__name__ == "UNetModel":
+        if diffusion_model.__class__.__name__ in ("UNetModel", "Flux"):
 
-            patch__forward = first_block_cache.create_patch_unet_model__forward(
+            if diffusion_model.__class__.__name__ == "UNetModel":
+                create_patch_function = first_block_cache.create_patch_unet_model__forward
+            elif diffusion_model.__class__.__name__ == "Flux":
+                create_patch_function = first_block_cache.create_patch_flux_forward_orig
+            else:
+                raise ValueError(
+                    f"Unsupported model {diffusion_model.__class__.__name__}")
+
+            patch_foward = create_patch_function(
                 diffusion_model,
                 residual_diff_threshold=residual_diff_threshold,
                 validate_can_use_cache_function=validate_use_cache,
@@ -144,7 +152,11 @@ class ApplyFBCacheOnModel:
                         first_block_cache.set_current_cache_context(
                             first_block_cache.create_cache_context())
 
-                    with patch__forward():
+                    if first_block_cache.get_current_cache_context() is None:
+                        first_block_cache.set_current_cache_context(
+                            first_block_cache.create_cache_context())
+
+                    with patch_foward():
                         return model_function(input, timestep, **c)
                 except model_management.InterruptProcessingException as exc:
                     prev_timestep = None
@@ -223,6 +235,10 @@ class ApplyFBCacheOnModel:
                     if prev_timestep is None or t >= prev_timestep:
                         prev_timestep = t
                         consecutive_cache_hits = 0
+                        first_block_cache.set_current_cache_context(
+                            first_block_cache.create_cache_context())
+
+                    if first_block_cache.get_current_cache_context() is None:
                         first_block_cache.set_current_cache_context(
                             first_block_cache.create_cache_context())
 
