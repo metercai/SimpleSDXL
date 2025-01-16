@@ -59,8 +59,33 @@ def check_virtual_memory(total_virtual):
     else:
         print_colored("√系统虚拟内存充足", Fore.GREEN)
     print(f"系统总虚拟内存: {total_gb:.2f} GB")
+
+import os
+
+def find_simplemodels_dir(start_path):
+    """
+    从当前路径开始，逐级向上查找 SimpleModels 目录
+    """
+    current_dir = start_path
+    while current_dir != os.path.dirname(current_dir):  # 防止进入根目录
+        simplemodels_path = os.path.join(current_dir, "SimpleModels")
+        if os.path.isdir(simplemodels_path):
+            return simplemodels_path
+        current_dir = os.path.dirname(current_dir)
+    return None
+
 def normalize_path(path):
-    return os.path.abspath(os.path.normpath(path))
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    simplemodels_dir = find_simplemodels_dir(script_dir)
+    
+    if simplemodels_dir:
+        if path.startswith("SimpleModels"):
+            normalized_path = os.path.join(simplemodels_dir, path[len("SimpleModels/"):])
+        else:
+            normalized_path = os.path.join(simplemodels_dir, path)
+        return os.path.abspath(normalized_path)
+    else:
+        return os.path.abspath(path)
 
 def typewriter_effect(text, delay=0.01):
     for char in text:
@@ -615,16 +640,21 @@ packages = {
         "name": "一键换脸",
         "files": [
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
             ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/loras/flux1-turbo.safetensors", 694082424),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
-            ("SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
