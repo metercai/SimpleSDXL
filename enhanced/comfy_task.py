@@ -118,6 +118,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     global defaul_method_names, default_method_list
 
     #print(f'task_name:{task_name}, task_method:{task_method}')
+    total_steps = default_params.pop("display_steps", None)
     comfy_params = ComfyTaskParams(default_params, user_did)
     if task_name == 'default':
         if task_method == default_method_names[1]:
@@ -153,7 +154,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             config.downloading_sd3_medium_model()
         if 'base_model_dtype' in default_params:
             comfy_params.delete_params(['base_model_dtype'])
-        return ComfyTask(task_method, comfy_params)
+        return ComfyTask(task_method, comfy_params, steps=total_steps)
     
     elif task_name in ['Kolors']:
         if 'llms_model' not in default_params or default_params['llms_model'] == 'auto':
@@ -173,7 +174,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
         base_model = default_params['base_model']
         clip_model = '' if 'clip_model' not in default_params else default_params['clip_model']
         if 'scene_' in task_method:
-            return ComfyTask(task_method, comfy_params, input_images)
+            return ComfyTask(task_method, comfy_params, input_images, total_steps)
 
         if '_aio' in task_method:
             total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
@@ -237,13 +238,12 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
         return ComfyTask(task_method, comfy_params, input_images)
     elif task_name == 'SD15AIO' and '_aio' in task_method:
-        total_steps = default_params["steps"] if 'display_steps' not in default_params else default_params["display_steps"]
-        if 'display_steps' in default_params:
-            comfy_params.delete_params(["display_steps"])
+        total_steps = total_steps if total_steps else default_params["steps"]
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])
-        return ComfyTask(task_method, comfy_params, input_images)
+        total_steps = total_steps if total_steps else default_params["steps"]
+        return ComfyTask(task_method, comfy_params, input_imagesi, total_steps)
 
 
 
