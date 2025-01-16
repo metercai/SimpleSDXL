@@ -12,7 +12,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE解码"
     }
   },
   "10": {
@@ -21,18 +21,19 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "加载VAE"
     }
   },
   "11": {
     "inputs": {
       "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "type": "flux"
+      "type": "flux",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
-      "title": "DualCLIPLoader"
+      "title": "双CLIP加载器"
     }
   },
   "38": {
@@ -41,7 +42,7 @@
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {
-      "title": "Load CLIP Vision"
+      "title": "加载CLIP视觉"
     }
   },
   "40": {
@@ -60,14 +61,14 @@
     },
     "class_type": "StyleModelLoader",
     "_meta": {
-      "title": "Load Style Model"
+      "title": "加载风格模型"
     }
   },
   "54": {
     "inputs": {
       "image_strength": "medium",
       "conditioning": [
-        "73",
+        "102",
         0
       ],
       "style_model": [
@@ -98,7 +99,7 @@
     },
     "class_type": "CLIPVisionEncode",
     "_meta": {
-      "title": "CLIP Vision Encode"
+      "title": "CLIP视觉编码"
     }
   },
   "56": {
@@ -112,16 +113,47 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "LoraLoaderModelOnly"
+      "title": "LoRA加载器（仅模型）"
+    }
+  },
+  "63": {
+    "inputs": {
+      "weight": 1,
+      "start_at": 0,
+      "end_at": 0.9,
+      "model": [
+        "56",
+        0
+      ],
+      "pulid_flux": [
+        "66",
+        0
+      ],
+      "eva_clip": [
+        "95",
+        0
+      ],
+      "face_analysis": [
+        "96",
+        0
+      ],
+      "image": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ApplyPulidFlux",
+    "_meta": {
+      "title": "Apply PuLID Flux"
     }
   },
   "66": {
     "inputs": {
       "pulid_file": "pulid_flux_v0.9.1.safetensors"
     },
-    "class_type": "GRPulidFluxModelLoader",
+    "class_type": "PulidFluxModelLoader",
     "_meta": {
-      "title": "GR Load PuLID Flux Model"
+      "title": "Load PuLID Flux Model"
     }
   },
   "71": {
@@ -141,23 +173,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "Empty Latent Image"
-    }
-  },
-  "73": {
-    "inputs": {
-      "text": [
-        "89",
-        4
-      ],
-      "clip": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
+      "title": "空Latent图像"
     }
   },
   "81": {
@@ -175,15 +191,6 @@
       "title": "LayerColor: Brightness & Contrast"
     }
   },
-  "87": {
-    "inputs": {
-      "positive": "Text titled \\\"Happy New Year\\\",\\n\\nDoodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moon, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation,"
-    },
-    "class_type": "easy positive",
-    "_meta": {
-      "title": "Positive"
-    }
-  },
   "89": {
     "inputs": {
       "clip_skip": -1,
@@ -193,8 +200,8 @@
       "batch_size": 1,
       "positive": "Text titled \"Happy New Year\", Doodle, graffiti style Keith Haring, cute, marker pen illustration, MBE illustration, stars, moon, bold lines, grunge aesthetic style, mixed pattern, text and emoji installation, A captivating illustration of an anime-style female character is set against the backdrop of a festive Christmas scene. She is elegantly dressed in a black dress with gold accents, complemented by thigh-high stockings and high-heeled shoes. Her long hair is adorned with a golden flower accessory, adding to her enchanting appearance. The character's pose suggests she is seated comfortably on a surface, possibly during a holiday celebration. In the background, a beautifully decorated Christmas tree stands tall, surrounded by wrapped gifts in vibrant colors like red, green, yellow, and orange. The warm lighting enhances the cozy atmosphere, creating a sense of joy and festivity. This image evokes feelings of warmth, celebration, and the magic of the holiday season",
       "negative": "",
-      "seed": 4788786607529,
-      "steps": 20,
+      "seed": 261601274103633,
+      "steps": 10,
       "cfg": 3.5,
       "denoise": 1
     },
@@ -222,10 +229,7 @@
         "89",
         7
       ],
-      "cfg": [
-        "89",
-        8
-      ],
+      "cfg": 1,
       "sampler_name": [
         "93",
         3
@@ -239,7 +243,7 @@
         9
       ],
       "model": [
-        "97",
+        "103",
         0
       ],
       "positive": [
@@ -257,19 +261,19 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler"
+      "title": "K采样器"
     }
   },
   "92": {
     "inputs": {
       "conditioning": [
-        "73",
+        "102",
         0
       ]
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "ConditioningZeroOut"
+      "title": "条件零化"
     }
   },
   "93": {
@@ -294,7 +298,23 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "SaveImageWebsocket"
+      "title": "保存图像（网络接口）"
+    }
+  },
+  "95": {
+    "inputs": {},
+    "class_type": "PulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "96": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "PulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "Load InsightFace (PuLID Flux)"
     }
   },
   "97": {
@@ -304,7 +324,7 @@
         0
       ],
       "on_true": [
-        "102",
+        "63",
         0
       ],
       "on_false": [
@@ -354,67 +374,55 @@
   },
   "102": {
     "inputs": {
-      "weight": 1,
-      "start_at": 0,
-      "end_at": 0.9,
-      "use_face_number": false,
-      "face_number": 0,
-      "blur": 0.01,
-      "face_select": "center_face",
-      "fusion": "mean",
-      "fusion_weight_max": 1,
-      "fusion_weight_min": 0,
-      "train_step": 1000,
-      "use_gray": true,
-      "model": [
-        "56",
-        0
+      "clip_l": [
+        "89",
+        4
       ],
-      "pulid_flux": [
-        "104",
-        0
+      "t5xxl": [
+        "89",
+        4
       ],
-      "eva_clip": [
-        "105",
-        0
+      "guidance": [
+        "89",
+        8
       ],
-      "face_analysis": [
-        "106",
-        0
-      ],
-      "image": [
-        "40",
+      "clip": [
+        "11",
         0
       ]
     },
-    "class_type": "GRApplyPulidFlux",
+    "class_type": "CLIPTextEncodeFlux",
     "_meta": {
-      "title": "GR Apply PuLID Flux"
+      "title": "CLIP文本编码Flux"
     }
   },
-  "104": {
+  "103": {
     "inputs": {
-      "pulid_file": "pulid_flux_v0.9.1.safetensors"
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "108",
+        0
+      ],
+      "start": 0,
+      "end": 0.5,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "97",
+        0
+      ]
     },
-    "class_type": "GRPulidFluxModelLoader",
+    "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "GR Load PuLID Flux Model"
+      "title": "Apply First Block Cache"
     }
   },
-  "105": {
-    "inputs": {},
-    "class_type": "GRPulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "GR Load Eva Clip (PuLID Flux)"
-    }
-  },
-  "106": {
+  "108": {
     "inputs": {
-      "provider": "CPU"
+      "value": 0.12
     },
-    "class_type": "GRPulidFluxInsightFaceLoader",
+    "class_type": "easy float",
     "_meta": {
-      "title": "GR Load InsightFace (PuLID Flux)"
+      "title": "wavespeed_strength"
     }
   }
 }
