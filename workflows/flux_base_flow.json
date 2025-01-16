@@ -1,6 +1,6 @@
 {
-  "last_node_id": 30,
-  "last_link_id": 71,
+  "last_node_id": 32,
+  "last_link_id": 75,
   "nodes": [
     {
       "id": 28,
@@ -9,10 +9,10 @@
         421,
         174
       ],
-      "size": {
-        "0": 400,
-        "1": 200
-      },
+      "size": [
+        400,
+        200
+      ],
       "flags": {},
       "order": 9,
       "mode": 0,
@@ -31,9 +31,9 @@
           "links": [
             43
           ],
+          "slot_index": 0,
           "shape": 3,
-          "label": "CONDITIONING",
-          "slot_index": 0
+          "label": "CONDITIONING"
         }
       ],
       "title": "prompt",
@@ -53,18 +53,18 @@
         473,
         86
       ],
-      "size": {
-        "0": 241.79998779296875,
-        "1": 46
-      },
+      "size": [
+        241.79998779296875,
+        46
+      ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 68,
+          "link": 74,
           "slot_index": 0,
           "label": "model"
         },
@@ -83,14 +83,15 @@
           "links": [
             30
           ],
-          "shape": 3,
           "slot_index": 0,
+          "shape": 3,
           "label": "GUIDER"
         }
       ],
       "properties": {
         "Node name for S&R": "BasicGuider"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 16,
@@ -99,13 +100,14 @@
         477,
         826
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 0,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "SAMPLER",
@@ -132,13 +134,14 @@
         476,
         707
       ],
-      "size": {
-        "0": 315,
-        "1": 82
-      },
+      "size": [
+        315,
+        82
+      ],
       "flags": {},
       "order": 1,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "NOISE",
@@ -166,13 +169,14 @@
         476,
         561
       ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
+      "size": [
+        315,
+        106
+      ],
       "flags": {},
       "order": 2,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LATENT",
@@ -201,12 +205,12 @@
         846,
         94
       ],
-      "size": {
-        "0": 355.20001220703125,
-        "1": 326
-      },
+      "size": [
+        355.20001220703125,
+        326
+      ],
       "flags": {},
-      "order": 11,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
@@ -252,8 +256,8 @@
           "links": [
             24
           ],
-          "shape": 3,
           "slot_index": 0,
+          "shape": 3,
           "label": "output"
         },
         {
@@ -266,7 +270,8 @@
       ],
       "properties": {
         "Node name for S&R": "SamplerCustomAdvanced"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 8,
@@ -275,12 +280,12 @@
         1248,
         97
       ],
-      "size": {
-        "0": 210,
-        "1": 46
-      },
+      "size": [
+        210,
+        46
+      ],
       "flags": {},
-      "order": 12,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
@@ -309,7 +314,8 @@
       ],
       "properties": {
         "Node name for S&R": "VAEDecode"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 27,
@@ -318,12 +324,12 @@
         1248,
         204
       ],
-      "size": {
-        "0": 588.496826171875,
-        "1": 693.9654541015625
-      },
+      "size": [
+        588.496826171875,
+        693.9654541015625
+      ],
       "flags": {},
-      "order": 13,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -333,10 +339,12 @@
           "label": "images"
         }
       ],
+      "outputs": [],
       "title": "result_image",
       "properties": {
         "Node name for S&R": "SaveImageWebsocket"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 17,
@@ -345,18 +353,18 @@
         479,
         413
       ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
+      "size": [
+        315,
+        106
+      ],
       "flags": {},
-      "order": 8,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 69,
+          "link": 75,
           "slot_index": 0,
           "label": "model"
         }
@@ -389,37 +397,38 @@
         30,
         643
       ],
-      "size": {
-        "0": 315,
-        "1": 98
-      },
+      "size": [
+        315,
+        98
+      ],
       "flags": {},
       "order": 3,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "MODEL",
           "type": "MODEL",
           "links": [],
+          "slot_index": 0,
           "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
+          "label": "MODEL"
         },
         {
           "name": "CLIP",
           "type": "CLIP",
           "links": [],
+          "slot_index": 1,
           "shape": 3,
-          "label": "CLIP",
-          "slot_index": 1
+          "label": "CLIP"
         },
         {
           "name": "VAE",
           "type": "VAE",
           "links": [],
+          "slot_index": 2,
           "shape": 3,
-          "label": "VAE",
-          "slot_index": 2
+          "label": "VAE"
         }
       ],
       "title": "base_model",
@@ -437,13 +446,14 @@
         31,
         401
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 4,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VAE",
@@ -451,8 +461,8 @@
           "links": [
             71
           ],
-          "shape": 3,
           "slot_index": 0,
+          "shape": 3,
           "label": "VAE"
         }
       ],
@@ -470,37 +480,38 @@
         30,
         501
       ],
-      "size": {
-        "0": 315,
-        "1": 98
-      },
+      "size": [
+        315,
+        98
+      ],
       "flags": {},
       "order": 5,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "MODEL",
           "type": "MODEL",
           "links": [],
+          "slot_index": 0,
           "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
+          "label": "MODEL"
         },
         {
           "name": "CLIP",
           "type": "CLIP",
           "links": [],
+          "slot_index": 1,
           "shape": 3,
-          "label": "CLIP",
-          "slot_index": 1
+          "label": "CLIP"
         },
         {
           "name": "VAE",
           "type": "VAE",
           "links": [],
+          "slot_index": 2,
           "shape": 3,
-          "label": "VAE",
-          "slot_index": 2
+          "label": "VAE"
         }
       ],
       "title": "base_model",
@@ -512,29 +523,100 @@
       ]
     },
     {
+      "id": 11,
+      "type": "DualCLIPLoader",
+      "pos": [
+        29,
+        253
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            70
+          ],
+          "slot_index": 0,
+          "shape": 3,
+          "label": "CLIP"
+        }
+      ],
+      "title": "clip_model",
+      "properties": {
+        "Node name for S&R": "DualCLIPLoader"
+      },
+      "widgets_values": [
+        "t5xxl_fp8_e4m3fn.safetensors",
+        "clip_l.safetensors",
+        "flux",
+        "default"
+      ]
+    },
+    {
+      "id": 31,
+      "type": "easy float",
+      "pos": [
+        130,
+        -150
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "float",
+          "type": "FLOAT",
+          "links": [
+            72
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "wavespeed_strength",
+      "properties": {
+        "Node name for S&R": "easy float"
+      },
+      "widgets_values": [
+        0
+      ]
+    },
+    {
       "id": 12,
       "type": "UNETLoader",
       "pos": [
         31,
         127
       ],
-      "size": {
-        "0": 315,
-        "1": 82
-      },
+      "size": [
+        315,
+        82
+      ],
       "flags": {},
-      "order": 6,
+      "order": 8,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            68,
-            69
+            73
           ],
-          "shape": 3,
           "slot_index": 0,
+          "shape": 3,
           "label": "MODEL"
         }
       ],
@@ -548,39 +630,54 @@
       ]
     },
     {
-      "id": 11,
-      "type": "DualCLIPLoader",
+      "id": 32,
+      "type": "ApplyFBCacheOnModel",
       "pos": [
-        29,
-        253
+        510,
+        -170
       ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
+      "size": [
+        315,
+        154
+      ],
       "flags": {},
-      "order": 7,
+      "order": 10,
       "mode": 0,
-      "outputs": [
+      "inputs": [
         {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            70
-          ],
-          "shape": 3,
-          "slot_index": 0,
-          "label": "CLIP"
+          "name": "model",
+          "type": "MODEL",
+          "link": 73
+        },
+        {
+          "name": "residual_diff_threshold",
+          "type": "FLOAT",
+          "link": 72,
+          "widget": {
+            "name": "residual_diff_threshold"
+          }
         }
       ],
-      "title": "clip_model",
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            74,
+            75
+          ],
+          "slot_index": 0
+        }
+      ],
       "properties": {
-        "Node name for S&R": "DualCLIPLoader"
+        "Node name for S&R": "ApplyFBCacheOnModel"
       },
       "widgets_values": [
-        "t5xxl_fp8_e4m3fn.safetensors",
-        "clip_l.safetensors",
-        "flux"
+        "diffusion_model",
+        0,
+        0,
+        1,
+        -1
       ]
     }
   ],
@@ -650,22 +747,6 @@
       "CONDITIONING"
     ],
     [
-      68,
-      12,
-      0,
-      22,
-      0,
-      "MODEL"
-    ],
-    [
-      69,
-      12,
-      0,
-      17,
-      0,
-      "MODEL"
-    ],
-    [
       70,
       11,
       0,
@@ -680,16 +761,48 @@
       8,
       1,
       "VAE"
+    ],
+    [
+      72,
+      31,
+      0,
+      32,
+      1,
+      "FLOAT"
+    ],
+    [
+      73,
+      12,
+      0,
+      32,
+      0,
+      "MODEL"
+    ],
+    [
+      74,
+      32,
+      0,
+      22,
+      0,
+      "MODEL"
+    ],
+    [
+      75,
+      32,
+      0,
+      17,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.8954302432552435,
+      "scale": 0.6727499949325749,
       "offset": [
-        158.3447531939544,
-        57.438129456065475
+        260.01792774644264,
+        215.75651664659352
       ]
     }
   },
