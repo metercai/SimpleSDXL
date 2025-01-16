@@ -243,7 +243,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])
         total_steps = total_steps if total_steps else default_params["steps"]
-        return ComfyTask(task_method, comfy_params, input_imagesi, total_steps)
+        return ComfyTask(task_method, comfy_params, input_images, total_steps)
 
 
 
