@@ -6,7 +6,7 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "disvisible": ["scene_additional_prompt"],
+	    "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2"],
 	    "additional_prompt_title": "参考图检测目标",
 	    "additional_prompt": {
             "相似度99%": "head and face",

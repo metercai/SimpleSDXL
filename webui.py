@@ -225,6 +225,7 @@ with shared.gradio_root:
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
+                        scene_additional_prompt_2 = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, visible=False, elem_classes='scene_input_2')
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios[:3], label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
 
@@ -1177,7 +1178,7 @@ with shared.gradio_root:
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number]
+            scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
             language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1343,7 +1344,7 @@ with shared.gradio_root:
         protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
         generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps + scene_params, 
                 outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [preset_store, identity_dialog], show_progress=False) \
-            .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt], outputs=prompt, show_progress=True) \
+            .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
@@ -1400,12 +1401,12 @@ with shared.gradio_root:
             .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
 
-        def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt): 
+        def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt, additional_prompt_2): 
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
             ready_to_gen = True 
             if canvas_image is None and is_canvas_image:
                 ready_to_gen = False
-            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
+            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, f'{additional_prompt}{additional_prompt_2}')
             styles = set()
             styles.update([])
             return describe_prompt if describe_prompt else gr.update(), list(styles), gr.update(interactive=ready_to_gen and img_is_ok)
@@ -1440,12 +1441,12 @@ with shared.gradio_root:
         scene_canvas_image.upload(trigger_auto_aspect_ratio_for_scene_from_canvas_image, inputs=[state_topbar, scene_canvas_image, scene_theme],
                         outputs=scene_aspect_ratio, show_progress=False, queue=False).then(lambda: None, _js='()=>{refresh_scene_localization();}')
         scene_canvas_image.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
-        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
+        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene_from_input_image, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
         scene_input_image1.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
-        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections], show_progress=True, queue=True) \
+        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
