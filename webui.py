@@ -208,7 +208,7 @@ with shared.gradio_root:
                     for i in range(shared.BUTTON_NUM):
                         bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=40, elem_id=f'bar{i}', elem_classes='bar_button'))
                 with gr.Row(visible=False, elem_classes='preset_store') as preset_store:
-                    preset_store_list = gr.Dataset(label="My candidate preset: Click on the candidate preset to append it to the navigation. If it is already on, it will be automatically removed.", components=[gallery_index_stat], samples=topbar.get_preset_samples(), visible=True, samples_per_page=48, type='index')
+                    preset_store_list = gr.Dataset(label="My preset store: Click on the preset in store to append it to the navigation. If it is already on, it will be automatically removed.", components=[gallery_index_stat], samples=topbar.get_preset_samples(), visible=True, samples_per_page=48, type='index')
                 with gr.Row():
                     with gr.Column(scale=2, visible=True):
                         with gr.Row():

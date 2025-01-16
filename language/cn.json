@@ -159,7 +159,7 @@
   "Presets▼": "预置包▼",
   "MyPresets▼": "我的预置▼",
   "MyPresets▶": "我的预置▶",
-  "My candidate preset: Click on the candidate preset to append it to the navigation. If it is already on, it will be automatically removed.": "我的候选预置包: 点击候选预置包，会自动追加到导航尾部。若已在导航上，则会自动撤下。",
+  "My preset store: Click on the preset in store to append it to the navigation. If it is already on, it will be automatically removed.": "我的预置包仓库: 点击仓库内预置包，会自动追加到导航尾部。若已在导航上，则会自动撤下。",
   "Theme:": "背景:",
   "default": "默认",
   "default\u2B07": "默认\u2B07",
