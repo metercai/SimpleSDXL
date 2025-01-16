@@ -201,7 +201,7 @@
   },
   "32": {
     "inputs": {
-      "max_shift": 1.1500000000000001,
+      "max_shift": 1.15,
       "base_shift": 0.5,
       "width": [
         "33",

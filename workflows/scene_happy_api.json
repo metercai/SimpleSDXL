@@ -12,7 +12,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "10": {
@@ -21,7 +21,7 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "加载VAE"
+      "title": "Load VAE"
     }
   },
   "11": {
@@ -33,7 +33,7 @@
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
-      "title": "双CLIP加载器"
+      "title": "DualCLIPLoader"
     }
   },
   "38": {
@@ -42,7 +42,7 @@
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {
-      "title": "加载CLIP视觉"
+      "title": "Load CLIP Vision"
     }
   },
   "40": {
@@ -61,7 +61,7 @@
     },
     "class_type": "StyleModelLoader",
     "_meta": {
-      "title": "加载风格模型"
+      "title": "Load Style Model"
     }
   },
   "54": {
@@ -99,7 +99,7 @@
     },
     "class_type": "CLIPVisionEncode",
     "_meta": {
-      "title": "CLIP视觉编码"
+      "title": "CLIP Vision Encode"
     }
   },
   "56": {
@@ -113,7 +113,7 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "LoRA加载器（仅模型）"
+      "title": "LoraLoaderModelOnly"
     }
   },
   "63": {
@@ -173,7 +173,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "空Latent图像"
+      "title": "Empty Latent Image"
     }
   },
   "81": {
@@ -261,7 +261,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "92": {
@@ -273,7 +273,7 @@
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "条件零化"
+      "title": "ConditioningZeroOut"
     }
   },
   "93": {
@@ -298,7 +298,7 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "保存图像（网络接口）"
+      "title": "SaveImageWebsocket"
     }
   },
   "95": {
@@ -393,7 +393,7 @@
     },
     "class_type": "CLIPTextEncodeFlux",
     "_meta": {
-      "title": "CLIP文本编码Flux"
+      "title": "CLIPTextEncodeFlux"
     }
   },
   "103": {
