@@ -1,0 +1,15 @@
+[project]
+name = "comfyui_pulid_flux_ll"
+description = "The implementation for PuLID-Flux, support use with TeaCache and WaveSpeed, no model pollution."
+version = "1.0.3"
+license = {file = "LICENSE"}
+dependencies = ['facexlib', 'insightface', 'onnxruntime', 'onnxruntime-gpu', 'ftfy', 'timm']
+
+[project.urls]
+Repository = "https://github.com/lldacing/ComfyUI_PuLID_Flux_ll"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "lldacing"
+DisplayName = "ComfyUI_PuLID_Flux_ll"
+Icon = ""
