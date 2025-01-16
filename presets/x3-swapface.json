@@ -77,7 +77,7 @@
         "insightface,models/antelopev2/glintr100.onnx,260665334,0,",
         "insightface,models/antelopev2/scrfd_10g_bnkps.onnx,16923827,0,",
 	"inpaint,groundingdino_swint_ogc.pth,693997677,0,",
-	"inpaint,GroundingDINO_SwinT_OGC.cfg.py,1006,0,https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py",
+	"clip,EVA02_CLIP_L_336_psz14_s6B.pt,856461210,0,",
 	"inpaint,sam_vit_h_4b8939.pth,2564550879,0,"
     	]
 }
