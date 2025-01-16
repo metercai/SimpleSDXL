@@ -73,15 +73,16 @@
 	"juggernautXL_juggXIByRundiffusion.safetensors"
     ],
     "model_list": [
-        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
+        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf",
     	"checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
-        "checkpoints,LEOSAM_HelloWorldXL_70.safetensors,6938040682,0,",
-        "clip,clip_l.safetensors,246144152,0,",
-	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
-        "vae,ae.safetensors,335304388,0,",
-        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
-        "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,",
-        "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,"
+        "checkpoints,LEOSAM_HelloWorldXL_70.safetensors,6938040682,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/LEOSAM_HelloWorldXL_70.safetensors",
+        "clip,clip_l.safetensors,246144152,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/clip_l.safetensors",
+	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors",
+        "vae,ae.safetensors,335304388,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/ae.safetensors",
+        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors",
+        "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors",
+        "controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors",
+        "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth"
         ]
 }
 
