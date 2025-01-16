@@ -68,7 +68,11 @@
     "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
-    "vae_downloads": {}
+    "vae_downloads": {},
+    "model_list": [
+        "rembg,ckpt_base.pth,367520613,0,",
+        "rembg,RMBG-1.4.pth,176718373,0,"
+        ]
 }
 
 
