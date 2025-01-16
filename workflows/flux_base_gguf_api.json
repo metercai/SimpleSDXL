@@ -39,7 +39,8 @@
     "inputs": {
       "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "type": "flux"
+      "type": "flux",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
@@ -99,7 +100,7 @@
       "steps": 20,
       "denoise": 1,
       "model": [
-        "36",
+        "38",
         0
       ]
     },
@@ -111,7 +112,7 @@
   "22": {
     "inputs": {
       "model": [
-        "36",
+        "38",
         0
       ],
       "conditioning": [
@@ -195,6 +196,35 @@
     "class_type": "UnetLoaderGGUF",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "37": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "38": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "37",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
