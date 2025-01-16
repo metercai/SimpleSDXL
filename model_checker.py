@@ -655,6 +655,7 @@ packages = {
             ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
             ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
             ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
