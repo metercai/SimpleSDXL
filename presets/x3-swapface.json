@@ -9,16 +9,16 @@
 	    "disvisible": ["scene_additional_prompt"],
 	    "additional_prompt_title": "参考图检测目标",
 	    "additional_prompt": {
-            "相似度1": "head and face",
-	    "相似度0.5": "head and face"
+            "相似度99%": "head and face",
+	    "相似度50%": "head and face"
             },
-	    "theme": ["相似度1", "相似度0.5"],
-	    "theme_title": "相似度，角度相同用1，角度不同用0.5，尺寸影响清晰度和耗时",
+	    "theme": ["相似度99%", "相似度50%"],
+	    "theme_title": "主体与参考人脸角度相同选99%，角度不同选50%，尺寸越大越清晰越耗时"，
 	    "aspect_ratio" : ["768|1:1", "1024|1:1", "1536|1:1"],
 	    "aspect_ratio_select_mode": "",
 	    "task_method": {
-		"相似度1": "x3-swapface2",
-		"相似度0.5": "x3-swapface1"
+		"相似度99%": "x3-swapface2",
+		"相似度50%": "x3-swapface1"
 	    }
     	}
     },
@@ -71,7 +71,13 @@
         "vae,ae.safetensors,335304388,0,",
 	"loras,flux1-turbo.safetensors,694082424,0,",
 	"style_models,flux1-redux-dev.safetensors,129063232,0,",
+	"insightface,models/antelopev2/1k3d68.onnx,143607619,0,",
+        "insightface,models/antelopev2/2d106det.onnx,5030888,0,",
+        "insightface,models/antelopev2/genderage.onnx,1322532,0,",
+        "insightface,models/antelopev2/glintr100.onnx,260665334,0,",
+        "insightface,models/antelopev2/scrfd_10g_bnkps.onnx,16923827,0,",
 	"inpaint,groundingdino_swint_ogc.pth,693997677,0,",
+	"inpaint,GroundingDINO_SwinT_OGC.cfg.py,1006,0,https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py",
 	"inpaint,sam_vit_h_4b8939.pth,2564550879,0,"
     	]
 }
