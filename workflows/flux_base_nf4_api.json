@@ -39,7 +39,8 @@
     "inputs": {
       "clip_name1": "t5xxl_fp16.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "type": "flux"
+      "type": "flux",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
@@ -99,7 +100,7 @@
       "steps": 4,
       "denoise": 1,
       "model": [
-        "29",
+        "32",
         0
       ]
     },
@@ -111,7 +112,7 @@
   "22": {
     "inputs": {
       "model": [
-        "29",
+        "32",
         0
       ],
       "conditioning": [
@@ -176,6 +177,35 @@
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "31": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "32": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "31",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "29",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
