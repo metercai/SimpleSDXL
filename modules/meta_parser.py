@@ -66,13 +66,21 @@ def switch_scene_theme(state, image_number, theme=None):
     index = themes.index(theme) if theme and themes and theme in themes else 0
     results.append(get_layout_setting_choices_visible_inter(themes, themes[index], 'scene_theme', visible, inter))
     title = scenes.get('additional_prompt_title', '')
-    additional_prompt = scenes.get('additional_prompt', [])
+    additional_prompt = scenes.get('additional_prompt', '')
     if isinstance(additional_prompt, dict):
         if index==0:
             additional_prompt = additional_prompt[next(iter(additional_prompt))] if additional_prompt else ''
         else:
             additional_prompt = additional_prompt[theme]
     results.append(get_layout_update_label_visible_inter(title, additional_prompt, 'scene_additional_prompt', visible, inter))
+    title_2 = scenes.get('additional_prompt_title_2', '')
+    additional_prompt_2 = scenes.get('additional_prompt_2', '')
+    if isinstance(additional_prompt_2, dict):
+        if index==0:
+            additional_prompt_2 = additional_prompt_2[next(iter(additional_prompt_2))] if additional_prompt_2 else ''
+        else:
+            additional_prompt_2 = additional_prompt_2[theme]
+    results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2, 'scene_additional_prompt_2', visible, inter))
     aspect_ratio = scenes.get('aspect_ratio', [])
     if isinstance(aspect_ratio, dict):
         if index==0:

@@ -8,7 +8,7 @@
 	    "version": "m1.1",
 	    "theme": ["Inspyrenet", "RMBG"],
 	    "theme_title": "选择不同的模型，抠图效果和耗时也有所不同",
-            "disvisible": ["scene_additional_prompt", "scene_aspect_ratio", "scene_image_number", "scene_canvas_image"],  
+            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_image_number", "scene_canvas_image"],  
 	    "prompt": {
     		"Inspyrenet": "使用 Inspyrenet 模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
 	    	"RMBG": "使用 RMBG 模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片"

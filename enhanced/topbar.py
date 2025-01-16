@@ -337,10 +337,10 @@ def refresh_nav_bars(state_params):
     return results
 
 
-def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt):
+def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_prompt, additional_prompt_2):
     describe_prompt = None
     if not prompt and 'scene_frontend' in state:
-        describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
+        describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, f'{additional_prompt}{additional_prompt_2}')
     return gr.update() if describe_prompt is None else describe_prompt
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
@@ -368,7 +368,7 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     return describe_prompt, img_is_ok
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -385,6 +385,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         backend_params.update(dict(wavespeed_strength=wavespeed_strength))
     
     if 'scene_frontend' in state_params:
+        scene_additional_prompt = f'{scene_additional_prompt}{scene_additional_prompt_2}'
         if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
             scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         backend_params.update(dict(

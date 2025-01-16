@@ -55,18 +55,22 @@ def refresh_model_list(presets, user_did=None):
                 preset = f'{preset}{user_did[:7]}'
             else:
                 preset_file = os.path.join(path_preset, f'{preset}.json')
-            mtime = os.path.getmtime(preset_file)
-            if preset not in presets_mtime:
-                presets_mtime[preset] = 0
-            if  mtime>presets_mtime[preset]:
-                presets_mtime[preset] = mtime
-                with open(preset_file, "r", encoding="utf-8") as json_file:
-                    config_preset = json.load(json_file)
-                if 'model_list' in config_preset:
-                    model_list = config_preset['model_list']
-                    model_list = [tuple(p.split(',')) for p in model_list]
-                    model_list = [(cata.strip(), path_file.strip(), int(size), hash10.strip(), url.strip()) for (cata, path_file, size, hash10, url) in model_list]
-                    presets_model_list[preset] = model_list
+            try:
+                mtime = os.path.getmtime(preset_file)
+                if preset not in presets_mtime:
+                    presets_mtime[preset] = 0
+                if mtime>presets_mtime[preset]:
+                    presets_mtime[preset] = mtime
+                    with open(preset_file, "r", encoding="utf-8") as json_file:
+                        config_preset = json.load(json_file)
+                    if 'model_list' in config_preset:
+                        model_list = config_preset['model_list']
+                        model_list = [tuple(p.split(',')) for p in model_list]
+                        model_list = [(cata.strip(), path_file.strip(), int(size), hash10.strip(), url.strip()) for (cata, path_file, size, hash10, url) in model_list]
+                        presets_model_list[preset] = model_list
+            except Exception as e:
+                logger.info(f'load preset file failed: {preset_file}')
+                continue
     return
             
 
