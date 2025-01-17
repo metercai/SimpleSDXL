@@ -3,13 +3,17 @@
 
 ### 🚀 飞书wiki: [《SimpleSDXL创意生图应用指南》](https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe), 包括如何快速下载、安装和运行，如何操作进行创意出图，在不同应用场景下如何使用SimpleSDXL等等。
 
-### 🚀 B站视频推荐：[6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU 
+### 🚀 B站视频推荐：
+- [6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU
+- [SimpleAI安装指南+虚拟内存设置](https://www.bilibili.com/video/BV1ddkdYcEWg/) : https://www.bilibili.com/video/BV1ddkdYcEWg
 
-### SimpleAI.FluxAIO 公测版预览
+### 对于 simpleai_base 依赖包的说明：https://github.com/metercai/simpleai_base/blob/main/README.md
+
+### SimpleAI.FluxAIO 公测版预览, Flux和SD3.5上提速50%-100%，控制显存用量，低显存显卡几乎不爆显存。
+admin panel/管理员面板: fast + wavespeed + reserve-vram -> Speed up by 50%~100% for Flux and SD3.5 and no OOM in lower VRAM <br>
+<img width="300" src="https://github.com/user-attachments/assets/5d129305-4967-4f59-b077-d56be0be726a" /><br>
 preset store/预置包仓库:<br>
 <img width="600"  src="https://github.com/user-attachments/assets/973eb424-83b3-4462-93ee-615f41f36fba" /><br>
-admin panel/管理员面板:<br>
-<img width="300"  src="https://github.com/user-attachments/assets/7ed70f4a-febd-4856-af37-53d5a835032a" /><br>
 Flux i2i/Flux版图生图:<br>
 <img width="600"  src="https://github.com/user-attachments/assets/c8ea27c1-0d99-454b-b350-fc2189b67db5" /><br>
 
@@ -22,6 +26,7 @@ The preset for change clothes/换装预置包<br>
 
 ## 🔔 最新更新 / Update
 - [2025-01-15] <b>公测版彻底清除simpleai_base包内的测试残留代码，确保无风险运行。</b>
+
 - [2024-09-16] <b>解锁Flux的lora和可图lora。自动修图开关移到增强修图标签内。添加提示面板开关，可点击触发批量通配符面板。反推提示词和图片参数提取两个标签移入参数设置栏。添加基于预置包的基础模型过滤功能。修复Comfyd引擎的跳过和中断逻辑bug。优化预置包参数和预置包导航。Flux模型自动适配硬件环境。优选Hyp8Q5KM模型，支持Flux Lora，兼具速度与质量的平衡。新增两个无缝贴图的预置包。升级comfyd到最新版。优化下载安装和启动流程，强制基础包检测，并提供模型包安装脚本。</b>
 
 - [2024.08.20] 新架构进一步优化，提升在Windows环境的兼容性，压缩Fooocus和Comfy后端切换的资源消耗。优化支持最低6G显存的Flux模型出图，提供质量优先的Fluxdev和速度优先的Flux+两个预置包，并可根据系统资源自动适配。同步升级主线v2.5.5，优化增强修图UI，更符合Fooocus交互习惯。
