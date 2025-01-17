@@ -19,6 +19,7 @@ from .PulidFluxHook import pulid_forward_orig, set_model_dit_patch_replace, puli
 from .patch_util import PatchKeys, add_model_patch_option, set_model_patch
 
 INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
+
 MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
 CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
 CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
@@ -199,7 +200,6 @@ class ApplyPulidFlux:
         eva_clip.to(device, dtype=dtype)
         pulid_flux.to(device, dtype=dtype)
 
-        # TODO: Add masking support!
         if attn_mask is not None:
             if attn_mask.dim() > 3:
                 attn_mask = attn_mask.squeeze(-1)
@@ -304,7 +304,6 @@ class ApplyPulidFlux:
             "embedding": cond,
             "sigma_start": sigma_start,
             "sigma_end": sigma_end,
-            # don't know how to apply mask
             "mask": attn_mask
         }
 
@@ -326,13 +325,8 @@ class ApplyPulidFlux:
         if len(model.get_wrappers(comfy.patcher_extension.WrappersMP.APPLY_MODEL, wrappers_name)) == 0:
             # Just add it once when connecting in series
             model.add_wrapper_with_key(comfy.patcher_extension.WrappersMP.APPLY_MODEL, wrappers_name, pulid_apply_model_wrappers)
-        
-        device = torch.device("cpu")
-        eva_clip.to(device, dtype=dtype)
-        pulid_flux.to(device, dtype=dtype)
-        torch.cuda.empty_cache()
-        del eva_clip
-        del pulid_flux
+
+        del eva_clip, face_analysis, pulid_flux
         return (model,)
 
 
@@ -434,4 +428,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ApplyPulidFlux": "Apply PuLID Flux",
     "FixPulidFluxPatch": "Fix PuLID Flux Patch",
 }
-
