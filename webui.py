@@ -793,15 +793,16 @@ with shared.gradio_root:
                 
                 with gr.Tabs():
                     with gr.Tab(label='Describe Image', id='describe_tab', visible=True) as image_describe:
-                        with gr.Row():
+                        with gr.Group():
                             with gr.Column():
                                 describe_input_image = grh.Image(label='Image to be described', source='upload', type='numpy', show_label=True)
                             with gr.Column():
-                                with gr.Group():
+                                with gr.Row():
                                     describe_methods = gr.CheckboxGroup(
                                         label='Content Type', 
                                         choices=flags.describe_types,
-                                        value=modules.config.default_describe_content_type)
+                                        value=modules.config.default_describe_content_type, visible= not MiniCPM.get_enable())
+                                    describe_prompt = gr.Textbox(label="Additional prompt for describe", show_label=True, max_lines=1, placeholder="Type additional prompt for describe image.", visible=MiniCPM.get_enable())
                                     with gr.Row():
                                         describe_apply_styles = gr.Checkbox(label='Apply Styles', value=modules.config.default_describe_apply_prompts_checkbox)
                                         describe_output_chinese = gr.Checkbox(label='Output in Chinese', value=False, visible=MiniCPM.get_enable())
@@ -814,8 +815,7 @@ with shared.gradio_root:
                                     image_size = modules.util.get_image_size_info(image, modules.flags.available_aspect_ratios[0])
                                     return gr.update(value=image_size, visible=True)
 
-                                describe_input_image.upload(trigger_show_image_properties, inputs=describe_input_image,
-                                                            outputs=describe_image_size, show_progress=False, queue=False)
+                                #describe_input_image.upload(trigger_show_image_properties, inputs=describe_input_image, outputs=describe_image_size, show_progress=False, queue=False)
 
                     with gr.Tab(label='Metadata', id='metadata_tab', visible=True) as metadata_tab:
                         with gr.Column():
@@ -1122,11 +1122,11 @@ with shared.gradio_root:
 
                         def toggle_minicpm(x):
                             MiniCPM.set_enable(x)
-                            return gr.update(visible=x)
+                            return gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
 
                         translation_methods.change(lambda x,y: sync_params_backend('translation_methods',x,y), inputs=[translation_methods, params_backend])
                         fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=fast_comfyd_checkbox)
-                        minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=describe_output_chinese, queue=False, show_progress=False)
+                        minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=[describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
                         reserved_vram.change(lambda x,y: sync_params_backend('reserved_vram',x,y), inputs=[reserved_vram, params_backend])
                         advanced_logs.change(simpleai.change_advanced_logs, inputs=advanced_logs)
                         wavespeed_strength.change(lambda x,y: sync_params_backend('wavespeed_strength',x,y), inputs=[wavespeed_strength, params_backend])
@@ -1365,22 +1365,22 @@ with shared.gradio_root:
                 gr.Audio(interactive=False, value=notification_file, elem_id='audio_notification', visible=False)
                 break
 
-        def trigger_describe(modes, img, apply_styles, output_chinese):
-            describe_prompts = []
+        def trigger_describe(modes, img, apply_styles, output_chinese, describe_prompt=""):
+            describe_images = []
             styles = set()
 
             if flags.describe_type_photo in modes and not MiniCPM.get_enable():
                 from extras.interrogate import default_interrogator as default_interrogator_photo
-                describe_prompts.append(default_interrogator_photo(img))
+                describe_images.append(default_interrogator_photo(img))
                 styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"])
 
             if flags.describe_type_anime in modes and not MiniCPM.get_enable():
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
-                describe_prompts.append(default_interrogator_anime(img))
+                describe_images.append(default_interrogator_anime(img))
                 styles.update(["Fooocus V2", "Fooocus Masterpiece"])
             
             if MiniCPM.get_enable():
-                describe_prompts.append(minicpm.interrogate(img, output_chinese))
+                describe_images.append(minicpm.interrogate(img, output_chinese, additional_prompt=describe_prompt))
                 styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp", "Fooocus Masterpiece"])
 
             if len(styles) == 0 or not apply_styles:
@@ -1388,14 +1388,14 @@ with shared.gradio_root:
             else:
                 styles = list(styles)
 
-            if len(describe_prompts) == 0:
-                describe_prompt = gr.update()
+            if len(describe_images) == 0:
+                describe_image = gr.update()
             else:
-                describe_prompt = ', '.join(describe_prompts)
+                describe_image = ', '.join(describe_images)
 
-            return describe_prompt, styles
+            return describe_image, styles
 
-        describe_btn.click(trigger_describe, inputs=[describe_methods, describe_input_image, describe_apply_styles, describe_output_chinese],
+        describe_btn.click(trigger_describe, inputs=[describe_methods, describe_input_image, describe_apply_styles, describe_output_chinese, describe_prompt],
                            outputs=[prompt, style_selections], show_progress=True, queue=True) \
             .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
             .then(lambda: None, _js='()=>{refresh_style_localization();}')
@@ -1461,11 +1461,6 @@ with shared.gradio_root:
                 return gr.update(), gr.update()
 
             uov_input_image.upload(trigger_auto_describe, inputs=[describe_methods, uov_input_image, prompt, describe_apply_styles, describe_output_chinese],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True) \
-                .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
-                .then(lambda: None, _js='()=>{refresh_style_localization();}')
-
-            describe_input_image.upload(trigger_auto_describe, inputs=[describe_methods, describe_input_image, prompt, describe_apply_styles, describe_output_chinese],
                                    outputs=[prompt, style_selections], show_progress=True, queue=True) \
                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
                 .then(lambda: None, _js='()=>{refresh_style_localization();}')
