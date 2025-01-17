@@ -22,7 +22,7 @@ from enhanced.simpleai import comfyd
 class MiniCPM:  
     model = "MiniCPMv2_6-prompt-generator" # "MiniCPM-V-2_6-int4"
     prompt_i2t = "A descriptive caption for this image"
-    prompt_i2t_chinese = "A descriptive caption for this image, and output it in Chinese"
+    output_chinese = "and output it in Chinese"
     prompt_extend = "Expand the following description to obtain a descriptive caption with more details in image: "
     prompt_translator = "Translate the following Chinese text into English, remind you only need respons the translation itself and no other information:"
     model_file = os.path.join(model, "pytorch_model-00001-of-00002.bin")  # "model-00001-of-00002.safetensors")
@@ -108,16 +108,17 @@ class MiniCPM:
         ldm_patched.modules.model_management.print_memory_info("after minicpm inference")
         return generated_text
 
-    def interrogate(self, image, output_chinese=False, prompt=None):
+    def interrogate(self, image, output_chinese=False, prompt=None, additional_prompt=None):
         if prompt is not None:
             logger.info(f'The prompt of image: {prompt}')
             return self.inference(image, prompt)
+        prompt = MiniCPM.prompt_i2t
+        if additional_prompt:
+            prompt = f'{prompt}, {additional_prompt}'
         if output_chinese:
-            logger.info(f'The prompt of image: {MiniCPM.prompt_i2t_chinese}')
-            return self.inference(image, MiniCPM.prompt_i2t_chinese)
-        else:
-            logger.info(f'The prompt of image: {MiniCPM.prompt_i2t}')
-            return self.inference(image, MiniCPM.prompt_i2t)
+            prompt = f'{prompt}, {MiniCPM.output_chinese}'
+        logger.info(f'The prompt of image: {prompt}')
+        return self.inference(image, prompt)
 
     def extended_prompt(self, input_text, prompt, translation_methods='Third APIs'):
         if not MiniCPM.get_enable() or not shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file):
