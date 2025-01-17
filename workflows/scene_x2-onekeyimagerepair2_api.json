@@ -1,39 +1,9 @@
 {
-  "3": {
+  "107": {
     "inputs": {
-      "seed": 976512205133628,
-      "steps": 28,
-      "cfg": 1,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "denoise": 1,
-      "model": [
-        "101",
-        0
-      ],
-      "positive": [
-        "47",
-        0
-      ],
-      "negative": [
-        "47",
-        1
-      ],
-      "latent_image": [
-        "87",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
-  "6": {
-    "inputs": {
-      "text": "professional raw photo , realistic, analog photo, photograph of a 18-year-old young man, portraitsolo, looking at viewer, black hair,  upper body,  male focus, black eyes,",
+      "text": "professional raw photo , realistic, analog photo, A 18-year-old Chinese  young man",
       "clip": [
-        "113",
+        "123",
         0
       ]
     },
@@ -42,49 +12,7 @@
       "title": "prompt"
     }
   },
-  "7": {
-    "inputs": {
-      "text": "Noise, spots, cracks",
-      "clip": [
-        "113",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "8": {
-    "inputs": {
-      "samples": [
-        "3",
-        0
-      ],
-      "vae": [
-        "27",
-        0
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
-    }
-  },
-  "11": {
-    "inputs": {
-      "guidance": 3.5,
-      "conditioning": [
-        "6",
-        0
-      ]
-    },
-    "class_type": "FluxGuidance",
-    "_meta": {
-      "title": "FluxGuidance"
-    }
-  },
-  "27": {
+  "108": {
     "inputs": {
       "vae_name": "ae.safetensors"
     },
@@ -93,73 +21,65 @@
       "title": "Load VAE"
     }
   },
-  "30": {
+  "112": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "i2i_ip_image1"
-    }
-  },
-  "47": {
-    "inputs": {
-      "strength": 0.7000000000000001,
-      "start_percent": 0,
-      "end_percent": 1,
-      "positive": [
-        "11",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ],
-      "control_net": [
-        "48",
-        0
-      ],
-      "image": [
-        "179",
-        0
-      ],
-      "vae": [
-        "27",
+      "guidance": 2.5,
+      "conditioning": [
+        "107",
         0
       ]
     },
-    "class_type": "ControlNetApplyAdvanced",
+    "class_type": "FluxGuidance",
     "_meta": {
-      "title": "Apply ControlNet"
+      "title": "FluxGuidance"
     }
   },
-  "48": {
+  "123": {
     "inputs": {
-      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux",
+      "device": "default"
     },
-    "class_type": "ControlNetLoader",
+    "class_type": "DualCLIPLoader",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "DualCLIPLoader"
     }
   },
-  "87": {
+  "187": {
     "inputs": {
-      "pixels": [
-        "153",
-        0
-      ],
-      "vae": [
-        "27",
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 0.12,
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "197",
         0
       ]
     },
-    "class_type": "VAEEncode",
+    "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "VAE Encode"
+      "title": "Apply First Block Cache"
     }
   },
-  "101": {
+  "189": {
+    "inputs": {
+      "samples": [
+        "217:4",
+        0
+      ],
+      "vae": [
+        "108",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "196": {
     "inputs": {
       "unet_name": "flux-hyp8-Q5_K_M.gguf"
     },
@@ -168,238 +88,29 @@
       "title": "Unet Loader (GGUF)"
     }
   },
-  "113": {
+  "197": {
     "inputs": {
-      "clip_name1": "clip_l.safetensors",
-      "clip_name2": "t5xxl_fp16.safetensors",
-      "type": "flux"
-    },
-    "class_type": "DualCLIPLoader",
-    "_meta": {
-      "title": "DualCLIPLoader"
-    }
-  },
-  "123": {
-    "inputs": {
-      "width": 1024,
-      "height": 1024,
-      "interpolation": "lanczos",
-      "method": "keep proportion",
-      "condition": "always",
-      "multiple_of": 8,
-      "image": [
-        "180",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "138": {
-    "inputs": {
-      "images": [
-        "168",
-        0
-      ]
-    },
-    "class_type": "SaveImageWebsocket",
-    "_meta": {
-      "title": "SaveImageWebsocket"
-    }
-  },
-  "153": {
-    "inputs": {
-      "blur_radius": 2,
-      "sigma": 2,
-      "image": [
-        "123",
-        0
-      ]
-    },
-    "class_type": "ImageBlur",
-    "_meta": {
-      "title": "Image Blur"
-    }
-  },
-  "166": {
-    "inputs": {
-      "seed": 444275945157085,
-      "steps": 8,
-      "cfg": 0.8,
-      "sampler_name": "euler_ancestral_cfg_pp",
-      "scheduler": "sgm_uniform",
-      "denoise": [
-        "192",
-        0
-      ],
       "model": [
-        "174",
-        0
-      ],
-      "positive": [
-        "169",
-        0
-      ],
-      "negative": [
-        "169",
-        1
-      ],
-      "latent_image": [
-        "171",
+        "196",
         0
       ]
     },
-    "class_type": "KSampler",
+    "class_type": "DifferentialDiffusion",
     "_meta": {
-      "title": "main_sampler"
+      "title": "Differential Diffusion"
     }
   },
-  "167": {
+  "202": {
     "inputs": {
-      "text": "professional raw photo , realistic, analog photo, A 18-year-old Chinese  young man",
-      "clip": [
-        "173",
-        1
-      ]
+      "image": "原始照片.png",
+      "upload": "image"
     },
-    "class_type": "CLIPTextEncode",
+    "class_type": "LoadImage",
     "_meta": {
-      "title": "prompt"
+      "title": "i2i_ip_image1"
     }
   },
-  "168": {
-    "inputs": {
-      "samples": [
-        "166",
-        0
-      ],
-      "vae": [
-        "173",
-        2
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
-    }
-  },
-  "169": {
-    "inputs": {
-      "strength": 0.8,
-      "start_percent": 0,
-      "end_percent": 1,
-      "positive": [
-        "167",
-        0
-      ],
-      "negative": [
-        "177",
-        0
-      ],
-      "control_net": [
-        "176",
-        0
-      ],
-      "image": [
-        "179",
-        0
-      ],
-      "vae": [
-        "173",
-        2
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "170": {
-    "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "171": {
-    "inputs": {
-      "pixels": [
-        "182",
-        0
-      ],
-      "vae": [
-        "173",
-        2
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "172": {
-    "inputs": {
-      "model_name": "4xNomos8kSCHAT-L.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
-  "173": {
-    "inputs": {
-      "ckpt_name": "LEOSAM_HelloWorldXL_70.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
-  "174": {
-    "inputs": {
-      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 1,
-      "model": [
-        "173",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
-  "176": {
-    "inputs": {
-      "type": "auto",
-      "control_net": [
-        "170",
-        0
-      ]
-    },
-    "class_type": "SetUnionControlNetType",
-    "_meta": {
-      "title": "SetUnionControlNetType"
-    }
-  },
-  "177": {
-    "inputs": {
-      "text": "Noise, spots, cracks",
-      "clip": [
-        "173",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "negative_prompt"
-    }
-  },
-  "179": {
+  "204": {
     "inputs": {
       "width": 512,
       "height": 512,
@@ -408,7 +119,7 @@
       "condition": "always",
       "multiple_of": 8,
       "image": [
-        "30",
+        "202",
         0
       ]
     },
@@ -417,38 +128,16 @@
       "title": "🔧 Image Resize"
     }
   },
-  "180": {
+  "206": {
     "inputs": {
-      "upscale_model": [
-        "172",
-        0
-      ],
-      "image": [
-        "179",
-        0
-      ]
-    },
-    "class_type": "ImageUpscaleWithModel",
-    "_meta": {
-      "title": "Upscale Image (using Model)"
-    }
-  },
-  "181": {
-    "inputs": {
-      "width": [
-        "191",
-        0
-      ],
-      "height": [
-        "191",
-        0
-      ],
+      "width": 1024,
+      "height": 1024,
       "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 8,
       "image": [
-        "190",
+        "241:1",
         0
       ]
     },
@@ -457,12 +146,12 @@
       "title": "🔧 Image Resize"
     }
   },
-  "182": {
+  "207": {
     "inputs": {
-      "blur_radius": 4,
+      "blur_radius": 2,
       "sigma": 2,
       "image": [
-        "181",
+        "206",
         0
       ]
     },
@@ -471,7 +160,369 @@
       "title": "Image Blur"
     }
   },
-  "189": {
+  "208": {
+    "inputs": {
+      "pixels": [
+        "206",
+        0
+      ],
+      "vae": [
+        "108",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "219": {
+    "inputs": {
+      "text": "professional raw photo , realistic, analog photo, A 18-year-old Chinese  young man",
+      "clip": [
+        "220",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "220": {
+    "inputs": {
+      "ckpt_name": "LEOSAM_HelloWorldXL_70.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "221": {
+    "inputs": {
+      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
+      "strength_model": 1,
+      "model": [
+        "220",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "222": {
+    "inputs": {
+      "strength": 0.8,
+      "start_percent": 0,
+      "end_percent": 0.9500000000000001,
+      "positive": [
+        "219",
+        0
+      ],
+      "negative": [
+        "227",
+        0
+      ],
+      "control_net": [
+        "223",
+        0
+      ],
+      "image": [
+        "207",
+        0
+      ],
+      "vae": [
+        "220",
+        2
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "223": {
+    "inputs": {
+      "type": "auto",
+      "control_net": [
+        "228",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "224": {
+    "inputs": {
+      "width": [
+        "232",
+        0
+      ],
+      "height": [
+        "232",
+        0
+      ],
+      "interpolation": "lanczos",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "189",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "225": {
+    "inputs": {
+      "pixels": [
+        "224",
+        0
+      ],
+      "vae": [
+        "220",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "226": {
+    "inputs": {
+      "seed": [
+        "236",
+        6
+      ],
+      "steps": [
+        "248",
+        0
+      ],
+      "cfg": 0.8,
+      "sampler_name": "euler_ancestral_cfg_pp",
+      "scheduler": "sgm_uniform",
+      "denoise": 0.45,
+      "model": [
+        "221",
+        0
+      ],
+      "positive": [
+        "222",
+        0
+      ],
+      "negative": [
+        "222",
+        1
+      ],
+      "latent_image": [
+        "225",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "227": {
+    "inputs": {
+      "text": "Noise, spots, cracks",
+      "clip": [
+        "220",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "228": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "229": {
+    "inputs": {
+      "purge_cache": true,
+      "purge_models": true,
+      "anything": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "230": {
+    "inputs": {
+      "images": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image"
+    }
+  },
+  "231": {
+    "inputs": {
+      "samples": [
+        "226",
+        0
+      ],
+      "vae": [
+        "220",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "232": {
+    "inputs": {
+      "value": [
+        "236",
+        1
+      ]
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_width"
+    }
+  },
+  "235": {
+    "inputs": {
+      "value": 36
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "main_steps"
+    }
+  },
+  "236": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 1536,
+      "height": 1024,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 1104130433580464,
+      "steps": 10,
+      "cfg": 30,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "238": {
+    "inputs": {
+      "conditioning": [
+        "107",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "244": {
+    "inputs": {
+      "images": [
+        "189",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "mask_image1"
+    }
+  },
+  "245": {
+    "inputs": {
+      "purge_cache": true,
+      "purge_models": true,
+      "anything": [
+        "189",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "247": {
+    "inputs": {
+      "value": 28
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "K1 steps"
+    }
+  },
+  "248": {
+    "inputs": {
+      "value": 8
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "K2 steps"
+    }
+  },
+  "249": {
+    "inputs": {
+      "value": "a+b",
+      "a": [
+        "247",
+        0
+      ],
+      "b": [
+        "248",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "250": {
+    "inputs": {
+      "input": [
+        "249",
+        0
+      ],
+      "output": ""
+    },
+    "class_type": "Display Int (rgthree)",
+    "_meta": {
+      "title": "all steps"
+    }
+  },
+  "241:0": {
     "inputs": {
       "model_name": "4xNomos8kSCHAT-L.pth"
     },
@@ -480,14 +531,14 @@
       "title": "Load Upscale Model"
     }
   },
-  "190": {
+  "241:1": {
     "inputs": {
       "upscale_model": [
-        "189",
+        "241:0",
         0
       ],
       "image": [
-        "8",
+        "204",
         0
       ]
     },
@@ -496,22 +547,121 @@
       "title": "Upscale Image (using Model)"
     }
   },
-  "191": {
+  "240:0": {
     "inputs": {
-      "value": 1536
+      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
     },
-    "class_type": "easy int",
+    "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "aspect_ratios_width"
+      "title": "Load ControlNet Model"
     }
   },
-  "192": {
+  "240:1": {
     "inputs": {
-      "value": 0.45
+      "strength": 0.7000000000000001,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "112",
+        0
+      ],
+      "negative": [
+        "238",
+        0
+      ],
+      "control_net": [
+        "240:0",
+        0
+      ],
+      "image": [
+        "207",
+        0
+      ],
+      "vae": [
+        "108",
+        0
+      ]
     },
-    "class_type": "easy float",
+    "class_type": "ControlNetApplyAdvanced",
     "_meta": {
-      "title": "Float"
+      "title": "Apply ControlNet"
+    }
+  },
+  "217:0": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "217:1": {
+    "inputs": {
+      "noise_seed": 169933447484194
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "217:2": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 28,
+      "denoise": 1,
+      "model": [
+        "187",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "217:3": {
+    "inputs": {
+      "model": [
+        "187",
+        0
+      ],
+      "conditioning": [
+        "240:1",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "217:4": {
+    "inputs": {
+      "noise": [
+        "217:1",
+        0
+      ],
+      "guider": [
+        "217:3",
+        0
+      ],
+      "sampler": [
+        "217:0",
+        0
+      ],
+      "sigmas": [
+        "217:2",
+        0
+      ],
+      "latent_image": [
+        "208",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "wavespeed"
     }
   }
 }
