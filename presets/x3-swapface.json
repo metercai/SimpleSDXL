@@ -9,16 +9,16 @@
 	    "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2"],
 	    "additional_prompt_title": "参考图检测目标",
 	    "additional_prompt": {
-            "相似度99%": "head and face",
-	    "相似度50%": "head and face"
+            "相似度99%": "head, face",
+	    "相似度50%": "head, face"
             },
 	    "theme": ["相似度99%", "相似度50%"],
 	    "theme_title": "主体与参考人脸角度相同选99%，角度不同选50%，尺寸越大越清晰越耗时",
 	    "aspect_ratio" : ["768|1:1", "1024|1:1", "1536|1:1"],
 	    "aspect_ratio_select_mode": "",
 	    "task_method": {
-		"相似度99%": "x3-swapface2",
-		"相似度50%": "x3-swapface1"
+		"相似度99%": "x3-swapface1",
+		"相似度50%": "x3-swapface2"
 	    }
     	}
     },
