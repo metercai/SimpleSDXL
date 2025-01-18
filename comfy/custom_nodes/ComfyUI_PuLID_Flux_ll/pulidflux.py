@@ -12,6 +12,7 @@ from insightface.app import FaceAnalysis
 from facexlib.parsing import init_parsing_model
 from facexlib.utils.face_restoration_helper import FaceRestoreHelper
 
+from comfy import model_management
 from .eva_clip.constants import OPENAI_DATASET_MEAN, OPENAI_DATASET_STD
 from .encoders_flux import IDFormer, PerceiverAttentionCA
 
@@ -104,12 +105,18 @@ class PulidFluxModelLoader:
         model_path = folder_paths.get_full_path("pulid", pulid_file)
 
         # Also initialize the model, takes longer to load but then it doesn't have to be done every time you change parameters in the apply node
+        offload_device = model_management.unet_offload_device()
+        load_device = model_management.get_torch_device()
+
         model = PulidFluxModel()
 
         logging.info("Loading PuLID-Flux model.")
         model.from_pretrained(path=model_path)
 
-        return (model,)
+        model_patcher = comfy.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=offload_device)
+        del model
+
+        return (model_patcher,)
 
 class PulidFluxInsightFaceLoader:
     @classmethod
@@ -198,14 +205,15 @@ class ApplyPulidFlux:
             dtype = model.model.manual_cast_dtype
 
         eva_clip.to(device, dtype=dtype)
-        pulid_flux.to(device, dtype=dtype)
+        pulid_flux.model.to(dtype=dtype)
+        model_management.load_model_gpu(pulid_flux)
 
         if attn_mask is not None:
             if attn_mask.dim() > 3:
                 attn_mask = attn_mask.squeeze(-1)
             elif attn_mask.dim() < 3:
                 attn_mask = attn_mask.unsqueeze(0)
-            attn_mask = attn_mask.to(device, dtype=dtype)
+            # attn_mask = attn_mask.to(device, dtype=dtype)
 
         image = tensor_to_image(image)
 
@@ -283,8 +291,9 @@ class ApplyPulidFlux:
             id_cond = torch.cat([iface_embeds, id_cond_vit], dim=-1)
 
             # Pulid_encoder
-            cond.append(pulid_flux.get_embeds(id_cond, id_vit_hidden))
+            cond.append(pulid_flux.model.get_embeds(id_cond, id_vit_hidden))
 
+        eva_clip.to(torch.device('cpu'))
         if not cond:
             # No faces detected, return the original model
             logging.warning("PuLID warning: No faces detected in any of the given images, returning unmodified model.")
@@ -309,15 +318,18 @@ class ApplyPulidFlux:
 
         ca_idx = 0
         for i in range(19):
-            if i % pulid_flux.double_interval == 0:
+            if i % pulid_flux.model.double_interval == 0:
                 patch_kwargs["ca_idx"] = ca_idx
                 set_model_dit_patch_replace(model, patch_kwargs, ("double_block", i))
                 ca_idx += 1
         for i in range(38):
-            if i % pulid_flux.single_interval == 0:
+            if i % pulid_flux.model.single_interval == 0:
                 patch_kwargs["ca_idx"] = ca_idx
                 set_model_dit_patch_replace(model, patch_kwargs, ("single_block", i))
                 ca_idx += 1
+
+        if len(model.get_additional_models_with_key("pulid_flux_model_patcher")) == 0:
+            model.set_additional_models("pulid_flux_model_patcher", [pulid_flux])
 
         if len(model.get_wrappers(comfy.patcher_extension.WrappersMP.OUTER_SAMPLE, wrappers_name)) == 0:
             # Just add it once when connecting in series
@@ -326,12 +338,7 @@ class ApplyPulidFlux:
             # Just add it once when connecting in series
             model.add_wrapper_with_key(comfy.patcher_extension.WrappersMP.APPLY_MODEL, wrappers_name, pulid_apply_model_wrappers)
 
-        device = torch.device("cpu")
-        eva_clip.to(device, dtype=dtype)
-        pulid_flux.to(device, dtype=dtype)
-        del eva_clip, face_analysis, pulid_flux
-        torch.cuda.empty_cache()
-
+        del eva_clip, face_analysis, pulid_flux, face_helper, attn_mask
         return (model,)
 
 
@@ -390,6 +397,7 @@ def pulid_outer_sample_wrappers_with_override(wrapper_executor, noise, latent_im
     finally:
         del PULID_model_patch['latent_image_shape']
         clean_hook(diffusion_model)
+        del diffusion_model, cfg_guider
 
     return out
 
@@ -414,7 +422,7 @@ def pulid_apply_model_wrappers(wrapper_executor, x, t, c_concat=None, c_crossatt
     finally:
         if PatchKeys.running_net_model in transformer_options:
             del transformer_options[PatchKeys.running_net_model]
-        del PULID_model_patch['timesteps']
+        del PULID_model_patch['timesteps'], base_model
 
     return out
 

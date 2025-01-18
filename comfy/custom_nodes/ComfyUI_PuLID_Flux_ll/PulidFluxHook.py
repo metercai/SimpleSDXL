@@ -6,16 +6,16 @@ import comfy
 from .patch_util import PatchKeys
 
 def set_model_dit_patch_replace(model, patch_kwargs, key):
-    to = model.model_options["transformer_options"].copy()
+    to = model.model_options["transformer_options"]
     if "patches_replace" not in to:
         to["patches_replace"] = {}
     else:
-        to["patches_replace"] = to["patches_replace"].copy()
+        to["patches_replace"] = to["patches_replace"]
 
     if "dit" not in to["patches_replace"]:
         to["patches_replace"]["dit"] = {}
     else:
-        to["patches_replace"]["dit"] = to["patches_replace"]["dit"].copy()
+        to["patches_replace"]["dit"] = to["patches_replace"]["dit"]
 
     if key not in to["patches_replace"]["dit"]:
         if "double_block" in key:
@@ -25,12 +25,12 @@ def set_model_dit_patch_replace(model, patch_kwargs, key):
                 to["patches_replace"]["dit"][key] = DitDoubleBlockReplace(pulid_patch, **patch_kwargs)
         else:
             to["patches_replace"]["dit"][key] = DitSingleBlockReplace(pulid_patch, **patch_kwargs)
-        model.model_options["transformer_options"] = to
+        # model.model_options["transformer_options"] = to
     else:
         to["patches_replace"]["dit"][key].add(pulid_patch, **patch_kwargs)
 
 def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, mask=None, transformer_options={}):
-    pulid_img = weight * pulid_model.pulid_ca[ca_idx].to(img.device)(embedding, img)
+    pulid_img = weight * pulid_model.model.pulid_ca[ca_idx](embedding, img)
     if mask is not None:
         pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
         latent_image_shape = pulid_temp_attrs.get("latent_image_shape", None)
@@ -41,12 +41,12 @@ def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, 
             mask = comfy.ldm.common_dit.pad_to_patch_size(mask, (patch_size, patch_size))
             mask = rearrange(mask, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
             # (b, seq_len, _) =>(b, seq_len, seq_len)
-            mask = mask[..., 0].unsqueeze(-1).repeat(1, 1, mask.shape[1])
+            mask = mask[..., 0].unsqueeze(-1).repeat(1, 1, mask.shape[1]).to(dtype=pulid_img.dtype)
             del patch_size, latent_image_shape
 
         pulid_img = pulid_img * mask
 
-        del mask
+        del mask, pulid_temp_attrs
 
     return pulid_img
 
@@ -65,7 +65,7 @@ class DitDoubleBlockReplace:
     def __call__(self, input_args, extra_options):
         transformer_options = extra_options["transformer_options"]
         pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
-        sigma = pulid_temp_attrs["timesteps"].detach().cpu()[0]
+        sigma = pulid_temp_attrs["timesteps"].detach().cpu().item()
         out = extra_options["original_block"](input_args)
         img = out['img']
         temp_img = img
@@ -112,7 +112,7 @@ class DitSingleBlockReplace:
 
         out = extra_options["original_block"](input_args)
 
-        sigma = pulid_temp_attrs["timesteps"][0]
+        sigma = pulid_temp_attrs["timesteps"][0].detach().cpu().item()
         img = out['img']
         txt = pulid_temp_attrs['double_blocks_txt']
         real_img, txt = img[:, txt.shape[1]:, ...], img[:, :txt.shape[1], ...]
