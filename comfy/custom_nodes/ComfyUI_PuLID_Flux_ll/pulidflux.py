@@ -326,7 +326,12 @@ class ApplyPulidFlux:
             # Just add it once when connecting in series
             model.add_wrapper_with_key(comfy.patcher_extension.WrappersMP.APPLY_MODEL, wrappers_name, pulid_apply_model_wrappers)
 
+        device = torch.device("cpu")
+        eva_clip.to(device, dtype=dtype)
+        pulid_flux.to(device, dtype=dtype)
         del eva_clip, face_analysis, pulid_flux
+        torch.cuda.empty_cache()
+
         return (model,)
 
 
