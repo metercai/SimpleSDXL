@@ -113,6 +113,9 @@ def print_instructions():
 def validate_files(packages):
     root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
+    # 使用 set 来确保路径唯一
+    download_paths = set()
+
     for package_key, package_info in packages.items():
         package_name = package_info["name"]
         files_and_sizes = package_info["files"]
@@ -145,33 +148,57 @@ def validate_files(packages):
                 if actual_size != expected_size:
                     size_mismatch_files.append((os.path.join(expected_dir, actual_filename), actual_size, expected_size))
 
-        # 输出结果
+        # 输出结果并拼接有问题的文件的下载链接
         if missing_files:
             print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
             for file in missing_files:
                 print(normalize_path(file))  # 调用 normalize_path 规范化路径
                 time.sleep(0.01)
+                # 拼接下载路径并添加到 download_paths 列表中
+                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
+                else:
+                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
             print("请使用以下链接下载所需的文件：")
             for link in download_links:
                 print(Fore.YELLOW + link + Fore.RESET)  # 直接打印字符串，避免输出单引号
             print("下载后，请按照安装视频使用脚本安装模型")
+
         if size_mismatch_files:
             print(f"{Fore.RED}×{package_name}中有文件大小不匹配，可能存在下载不完全或损坏，请检查列出的文件。{Style.RESET_ALL}")
             for file, actual_size, expected_size in size_mismatch_files:
                 print(f"{normalize_path(file)} 当前大小={actual_size}, 预期大小={expected_size}")  # 调用 normalize_path
                 time.sleep(0.1)
+                # 拼接下载路径并添加到 download_paths 列表中
+                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
+                else:
+                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
             print(f"请前往模型总仓{Fore.YELLOW}https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels{Style.RESET_ALL}收集替换")
+
         if case_mismatch_files:
             print(f"{Fore.RED}×{package_name}中有文件名大小写不匹配，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_filename in case_mismatch_files:
                 print(f"文件: {normalize_path(file)}")  # 调用 normalize_path
                 time.sleep(0.1)
                 print(f"正确文件名: {expected_filename}")
-                print()
-        
+                # 拼接下载路径并添加到 download_paths 列表中
+                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
+                else:
+                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
+
         if not missing_files and not size_mismatch_files and not case_mismatch_files:
             print(f"{Fore.GREEN}√{package_name}文件全部验证通过{Style.RESET_ALL}")
-        time.sleep(0.1)    
+        time.sleep(0.1)
+        print()
+    # 保存有问题的文件的下载路径到一个txt文件中
+    if download_paths:
+        with open("缺失模型下载链接.txt", "w") as f:
+            for path in download_paths:
+                f.write(path + "\n")
+        print(f"{Fore.YELLOW}>>>所有有问题的文件下载路径已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
+
 packages = {
     "base_package": {
         "name": "基础模型包",
