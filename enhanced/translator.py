@@ -91,6 +91,11 @@ def translate2en_apis(text):
 def init_or_load_translator_model(method='Slim Model'):
     global g_tokenizer, g_model, g_model_type
 
+    if 'g_tokenizer' not in globals():
+        globals()['g_tokenizer'] = None
+    if 'g_model' not in globals():
+        globals()['g_model'] = None
+
     logger.info(f'init_or_load_translator_model: {method}')
     if method != g_model_type or g_tokenizer is None or g_model is None:
         if method == "Big Model":
