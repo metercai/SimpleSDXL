@@ -88,7 +88,7 @@
         0
       ],
       "model": [
-        "936",
+        "2991",
         0
       ],
       "positive": [
@@ -703,7 +703,7 @@
         0
       ],
       "model": [
-        "936",
+        "2993",
         0
       ],
       "positive": [
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 809746598211317,
+      "seed": 504271946049411,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -2131,7 +2131,7 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "1314",
+        "2989",
         0
       ],
       "positive": [
@@ -3107,7 +3107,7 @@
       ],
       "denoise": 0.5,
       "model": [
-        "2696",
+        "2987",
         0
       ],
       "positive": [
@@ -3994,7 +3994,7 @@
         1
       ],
       "model": [
-        "1314",
+        "2989",
         0
       ],
       "positive": [
@@ -4071,7 +4071,7 @@
         0
       ],
       "model": [
-        "936",
+        "2993",
         0
       ],
       "positive": [
@@ -5529,6 +5529,95 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "2985": {
+    "inputs": {
+      "value": 0.12
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "2987": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2985",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "2696",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2989": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2985",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "1314",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2991": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2985",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2993": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2985",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": -1,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
