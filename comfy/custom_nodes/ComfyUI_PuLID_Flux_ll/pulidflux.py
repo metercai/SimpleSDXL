@@ -331,7 +331,7 @@ class ApplyPulidFlux:
         pulid_flux.to(device, dtype=dtype)
         del eva_clip, face_analysis, pulid_flux
         torch.cuda.empty_cache()
-        
+
         return (model,)
 
 
