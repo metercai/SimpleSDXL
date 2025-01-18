@@ -29,10 +29,24 @@ def set_model_dit_patch_replace(model, patch_kwargs, key):
     else:
         to["patches_replace"]["dit"][key].add(pulid_patch, **patch_kwargs)
 
-def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, mask=None):
+def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, mask=None, transformer_options={}):
     pulid_img = weight * pulid_model.pulid_ca[ca_idx].to(img.device)(embedding, img)
     if mask is not None:
+        pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
+        latent_image_shape = pulid_temp_attrs.get("latent_image_shape", None)
+        if latent_image_shape is not None:
+            bs, c, h, w = latent_image_shape
+            mask = comfy.sampler_helpers.prepare_mask(mask, (bs, c, h, w), img.device)
+            patch_size = transformer_options[PatchKeys.running_net_model].patch_size
+            mask = comfy.ldm.common_dit.pad_to_patch_size(mask, (patch_size, patch_size))
+            mask = rearrange(mask, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
+            # (b, seq_len, _) =>(b, seq_len, seq_len)
+            mask = mask[..., 0].unsqueeze(-1).repeat(1, 1, mask.shape[1])
+            del patch_size, latent_image_shape
+
         pulid_img = pulid_img * mask
+
+        del mask
 
     return pulid_img
 
@@ -51,33 +65,24 @@ class DitDoubleBlockReplace:
     def __call__(self, input_args, extra_options):
         transformer_options = extra_options["transformer_options"]
         pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
-        sigma = pulid_temp_attrs["timesteps"][0]
+        sigma = pulid_temp_attrs["timesteps"].detach().cpu()[0]
         out = extra_options["original_block"](input_args)
         img = out['img']
         temp_img = img
         for i, callback in enumerate(self.callback):
             if sigma <= self.kwargs[i]["sigma_start"] and sigma >= self.kwargs[i]["sigma_end"]:
-                mask = self.kwargs[i]['mask']
-                if mask is not None:
-                    latent_image_shape = pulid_temp_attrs.get("latent_image_shape", None)
-                    if latent_image_shape is not None:
-                        bs, c, h, w = latent_image_shape
-                        mask = comfy.sampler_helpers.prepare_mask(mask, (bs, c, h, w), img.device)
-                        flux_model = transformer_options[PatchKeys.running_net_model]
-                        patch_size = flux_model.patch_size
-                        mask = comfy.ldm.common_dit.pad_to_patch_size(mask, (patch_size, patch_size))
-                        mask = rearrange(mask, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
-                        mask = flux_model.img_in(mask)
-
                 img = img + callback(temp_img,
                                      pulid_model=self.kwargs[i]['pulid_model'],
                                      ca_idx=self.kwargs[i]['ca_idx'],
                                      weight=self.kwargs[i]['weight'],
                                      embedding=self.kwargs[i]['embedding'],
-                                     mask = mask,
+                                     mask = self.kwargs[i]['mask'],
+                                     transformer_options=transformer_options
                                      )
-
         out['img'] = img
+
+        del temp_img, pulid_temp_attrs, sigma, transformer_options, img
+
         return out
 
 
@@ -114,29 +119,21 @@ class DitSingleBlockReplace:
         temp_img = real_img
         for i, callback in enumerate(self.callback):
             if sigma <= self.kwargs[i]["sigma_start"] and sigma >= self.kwargs[i]["sigma_end"]:
-                mask = self.kwargs[i]['mask']
-                if mask is not None:
-                    latent_image_shape = pulid_temp_attrs.get("latent_image_shape", None)
-                    if latent_image_shape is not None:
-                        bs, c, h, w = latent_image_shape
-                        mask = comfy.sampler_helpers.prepare_mask(mask, (bs, c, h, w), img.device)
-                        flux_model = transformer_options[PatchKeys.running_net_model]
-                        patch_size = flux_model.patch_size
-                        mask = comfy.ldm.common_dit.pad_to_patch_size(mask, (patch_size, patch_size))
-                        mask = rearrange(mask, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
-                        mask = flux_model.img_in(mask)
-
                 real_img = real_img + callback(temp_img,
                                                pulid_model=self.kwargs[i]['pulid_model'],
                                                ca_idx=self.kwargs[i]['ca_idx'],
                                                weight=self.kwargs[i]['weight'],
                                                embedding=self.kwargs[i]['embedding'],
-                                               mask=mask,
+                                               mask=self.kwargs[i]['mask'],
+                                               transformer_options = transformer_options,
                                                )
 
         img = torch.cat((txt, real_img), 1)
 
         out['img'] = img
+
+        del temp_img, pulid_temp_attrs, sigma, transformer_options, real_img, img
+
         return out
 
 def pulid_forward_orig(

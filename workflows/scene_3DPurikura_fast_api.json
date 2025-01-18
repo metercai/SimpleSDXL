@@ -134,7 +134,7 @@
   "881": {
     "inputs": {
       "images": [
-        "908",
+        "551",
         0
       ]
     },
@@ -165,7 +165,7 @@
   "886": {
     "inputs": {
       "seed": 987410687245418,
-      "steps": 20,
+      "steps": 30,
       "cfg": 3.5,
       "sampler_name": "dpmpp_2m_sde_gpu",
       "scheduler": "karras",
@@ -223,7 +223,7 @@
   },
   "895": {
     "inputs": {
-      "text": "nsfw, nude, ugly，shiny, soft, broken, oversaturated，watermark",
+      "text": "nsfw, nude",
       "clip": [
         "884",
         1
@@ -236,7 +236,7 @@
   },
   "896": {
     "inputs": {
-      "text": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render, portrait, close shot,smiling",
+      "text": "Sticker, svg, vector, vector art, 3D render, portrait, close shot",
       "clip": [
         "884",
         1
@@ -259,33 +259,6 @@
     "class_type": "LayerUtility: PurgeVRAM",
     "_meta": {
       "title": "LayerUtility: Purge VRAM"
-    }
-  },
-  "908": {
-    "inputs": {
-      "model": [
-        "909",
-        0
-      ],
-      "images": [
-        "551",
-        0
-      ]
-    },
-    "class_type": "RembgByBiRefNet",
-    "_meta": {
-      "title": "RembgByBiRefNet"
-    }
-  },
-  "909": {
-    "inputs": {
-      "model": "Portrait.safetensors",
-      "device": "AUTO",
-      "use_weight": false
-    },
-    "class_type": "LoadRembgByBiRefNetModel",
-    "_meta": {
-      "title": "LoadRembgByBiRefNetModel"
     }
   }
 }
