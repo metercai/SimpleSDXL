@@ -7,13 +7,13 @@
 	"scene_frontend": {
 	    "version": "m1.1",
 	    "theme": ["clothing"],
-	    "disvisible": ["scene_theme","scene_aspect_ratio","aspect_ratio_select_mode"],
+	    "disvisible": ["scene_theme","scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
-        "additional_prompt_title": "参考图检测目标",
-        "additional_prompt": {
-            "clothing": "subject"
-            },
+            "additional_prompt_title_2": "参考图检测目标",
+            "additional_prompt_2": {
+                "clothing": "subject"
+                },
 	    "task_method": {
 		"clothing": "clothing"
 	    }

@@ -199,6 +199,8 @@
   "Content Type": "类型选择",
   "Photograph": "写实照片",
   "Art/Anime": "艺术/动漫",
+  "Additional prompt for describe": "附加的反推提示词",
+  "Type additional prompt for describe image.": "输入图片反推的附加提示词",
   "Apply Styles": "设置对应风格",
   "Output in Chinese": "输出中文",
   "Describe this Image into Prompt": "反推图片提示词",

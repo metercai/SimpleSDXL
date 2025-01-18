@@ -6,24 +6,27 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "m1.1",
-                "theme": ["快速普通画质", "慢速精细画质"],
-                "theme_title": "出图速度与画质选择",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt"],
+                "theme": ["快速出图", "慢速精细画质"],
+                "theme_title": "可选择快速出图或慢速精细画质（清晰度更高，出图变慢）",            
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_additional_prompt_2"],
                 "prompt": {
-                     "快速普通画质": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render,  portrait, close shot, smiling ",
-                     "慢速精细画质": "Sticker, svg, vector, vector art, cartoon, cartoon style, anime style, 3D render,  portrait, close shot, smiling "
-                 },
+                     "快速出图": "Sticker, svg, vector, vector art, 3D render, portrait, close shot ",
+                     "慢速精细画质": "Sticker, svg, vector, vector art, 3D render, portrait, close shot "
+                },
 	"image_preprocessor_method": [["face"]],
                  "aspect_ratio" : {
-                     "快速普通画质": ["1024|1:1"],
+                     "快速出图": ["1024|1:1"],
                      "慢速精细画质": ["1024|1:1"]
-                 },
+                },
                  "aspect_ratio_select_mode": "auto_candidate",
 	"task_method": {
-	    "快速普通画质": "3DPurikura_fast",
+	                 "快速出图": "3DPurikura_fast",
                      "慢速精细画质": "3DPurikura_hq"
-	             }
-             }
+                },
+    "scene_steps": {
+                     "慢速精细画质": 48
+                }
+            }
     },
     "default_model": "SDXL_Yamers_Cartoon_Arcadia.safetensors",
     "default_refiner": "None",
@@ -58,9 +61,9 @@
     "default_styles": [],
     "default_aspect_ratio": "1024*1024",
     "default_image_number": 1,
-    "default_overwrite_step":20,
+    "default_overwrite_step":30,
     "default_prompt": "",
-    "default_prompt_negative": "nsfw, nude, ugly，shiny, soft, broken, oversaturated，watermark",
+    "default_prompt_negative": "nsfw, nude",
     "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
@@ -68,7 +71,6 @@
     "model_list": [
         "checkpoints,SDXL_Yamers_Cartoon_Arcadia.safetensors,6938040714,0,",
         "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
-        "rembg,Portrait.safetensors,884878856,0,",
         "ipadapter,ip-adapter-faceid-plusv2_sdxl.bin,1487555181,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
         "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
@@ -76,7 +78,6 @@
         "insightface,models/buffalo_l/det_10g.onnx,16923827,0,",
         "insightface,models/buffalo_l/genderage.onnx,1322532,0,",
         "insightface,models/buffalo_l/w600k_r50.onnx,174383860,0,",
-        "loras,ip-adapter-faceid-plusv2_sdxl_lora.safetensors,371842896,0,",
         "loras,StickersRedmond.safetensors,170540036,0,"
         ]
 }

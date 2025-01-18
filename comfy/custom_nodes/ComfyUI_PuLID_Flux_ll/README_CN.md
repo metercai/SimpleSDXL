@@ -8,6 +8,7 @@
 
 ## 预览 (图片含工作流)
 ![save api extended](examples/PuLID_with_speedup.png)
+![save api extended](examples/PuLID_with_attn_mask.png)
 
 ## 安装
 
@@ -31,11 +32,11 @@
   - 同 [ComfyUI-PuLID-Flux](https://github.com/balazik/ComfyUI-PuLID-Flux)
 - ApplyPulidFlux
   - 解决了原插件中模型污染的问题
-  - `attn_mask`可能不能正确工作， 因为我不知道如何实现它， 尝试了多种方式效果都未能达到预期
+  - `attn_mask`~~可能不能正确工作， 因为我不知道如何实现它， 尝试了多种方式效果都未能达到预期~~，可以正常工作了。
   - 使用 [TeaCache](https://github.com/ali-vilab/TeaCache)加速, 必须加在[`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll)之前.
   - 使用 [Comfy-WaveSpeed](https://github.com/chengzeyi/Comfy-WaveSpeed)加速, 必须加在[`ApplyFBCacheOnModel`](https://github.com/lldacing/ComfyUI_Patches_ll)之前.
 - FixPulidFluxPatch (已弃用)
-  - 如果想使用 [TeaCache](https://github.com/ali-vilab/TeaCache)加速, 必须加在 `ApplyPulidFlux` 节点之后, 并在后面连接节点 [`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll).
+  - 如果想使用 [TeaCache](https://github.com/ali-vilab/TeaCache)加速, 必须~~加在 `ApplyPulidFlux` 节点之后, 并~~在后面连接节点 [`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll).
 
 ## 感谢
 
