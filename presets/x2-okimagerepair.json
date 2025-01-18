@@ -13,11 +13,6 @@
     		"SDXL加速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n",
 	    	"Flux加速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n"
 	    },
-	    "additional_prompt": {
-		"SDXL加速": "Happy New Year",
-		"Flux加速": "新年快乐"
-	    },
-	    "additional_prompt_title": "祝福语",
 	    "multimodal_prompt": {
 		"SDXL加速": "A descriptive caption for this image",
 		"Flux加速": "A descriptive caption for this image"
