@@ -9,6 +9,7 @@ Must uninstall or disable `ComfyUI-PuLID-Flux` and other PuLID-Flux nodes before
 
 ## Preview (Image with WorkFlow)
 ![save api extended](examples/PuLID_with_speedup.png)
+![save api extended](examples/PuLID_with_attn_mask.png)
 
 ## Install
 
@@ -34,11 +35,11 @@ Please see [ComfyUI-PuLID-Flux](https://github.com/balazik/ComfyUI-PuLID-Flux)
   - See [ComfyUI-PuLID-Flux](https://github.com/balazik/ComfyUI-PuLID-Flux)
 - ApplyPulidFlux
   - Solved the model pollution problem of the original plugin ComfyUI-PuLID-Flux
-  - `attn_mask` may not work correctly (I have no idea how to apply it, I have tried multiple methods and the results have been not satisfactory)
+  - `attn_mask` ~~may not work correctly (I have no idea how to apply it, I have tried multiple methods and the results have been not satisfactory)~~ works now.
   - If you want use with [TeaCache](https://github.com/ali-vilab/TeaCache), must put it before node [`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll).
   - If you want use with [Comfy-WaveSpeed](https://github.com/chengzeyi/Comfy-WaveSpeed), must put it before node `ApplyFBCacheOnModel`.
 - FixPulidFluxPatch (Deprecated)
-  - If you want use with [TeaCache](https://github.com/ali-vilab/TeaCache), must link it after node `ApplyPulidFlux`, and link node [`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll) after it.
+  - If you want use with [TeaCache](https://github.com/ali-vilab/TeaCache), must ~~link it after node `ApplyPulidFlux`, and~~ link node [`FluxForwardOverrider` and `ApplyTeaCachePatch`](https://github.com/lldacing/ComfyUI_Patches_ll) after it.
 
 ## Thanks
 

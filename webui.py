@@ -225,6 +225,7 @@ with shared.gradio_root:
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
                         scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
+                        scene_additional_prompt_2 = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, visible=False, elem_classes='scene_input_2')
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios[:3], label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
 
@@ -792,15 +793,16 @@ with shared.gradio_root:
                 
                 with gr.Tabs():
                     with gr.Tab(label='Describe Image', id='describe_tab', visible=True) as image_describe:
-                        with gr.Row():
+                        with gr.Group():
                             with gr.Column():
                                 describe_input_image = grh.Image(label='Image to be described', source='upload', type='numpy', show_label=True)
                             with gr.Column():
-                                with gr.Group():
+                                with gr.Row():
                                     describe_methods = gr.CheckboxGroup(
                                         label='Content Type', 
                                         choices=flags.describe_types,
-                                        value=modules.config.default_describe_content_type)
+                                        value=modules.config.default_describe_content_type, visible= not MiniCPM.get_enable())
+                                    describe_prompt = gr.Textbox(label="Additional prompt for describe", show_label=True, max_lines=1, placeholder="Type additional prompt for describe image.", visible=MiniCPM.get_enable())
                                     with gr.Row():
                                         describe_apply_styles = gr.Checkbox(label='Apply Styles', value=modules.config.default_describe_apply_prompts_checkbox)
                                         describe_output_chinese = gr.Checkbox(label='Output in Chinese', value=False, visible=MiniCPM.get_enable())
@@ -813,8 +815,7 @@ with shared.gradio_root:
                                     image_size = modules.util.get_image_size_info(image, modules.flags.available_aspect_ratios[0])
                                     return gr.update(value=image_size, visible=True)
 
-                                describe_input_image.upload(trigger_show_image_properties, inputs=describe_input_image,
-                                                            outputs=describe_image_size, show_progress=False, queue=False)
+                                #describe_input_image.upload(trigger_show_image_properties, inputs=describe_input_image, outputs=describe_image_size, show_progress=False, queue=False)
 
                     with gr.Tab(label='Metadata', id='metadata_tab', visible=True) as metadata_tab:
                         with gr.Column():
@@ -1121,11 +1122,11 @@ with shared.gradio_root:
 
                         def toggle_minicpm(x):
                             MiniCPM.set_enable(x)
-                            return gr.update(visible=x)
+                            return gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
 
                         translation_methods.change(lambda x,y: sync_params_backend('translation_methods',x,y), inputs=[translation_methods, params_backend])
                         fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=fast_comfyd_checkbox)
-                        minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=describe_output_chinese, queue=False, show_progress=False)
+                        minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=[describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
                         reserved_vram.change(lambda x,y: sync_params_backend('reserved_vram',x,y), inputs=[reserved_vram, params_backend])
                         advanced_logs.change(simpleai.change_advanced_logs, inputs=advanced_logs)
                         wavespeed_strength.change(lambda x,y: sync_params_backend('wavespeed_strength',x,y), inputs=[wavespeed_strength, params_backend])
@@ -1177,7 +1178,7 @@ with shared.gradio_root:
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_aspect_ratio, scene_image_number]
+            scene_params = [scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
             language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1343,7 +1344,7 @@ with shared.gradio_root:
         protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
         generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps + scene_params, 
                 outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [preset_store, identity_dialog], show_progress=False) \
-            .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt], outputs=prompt, show_progress=True) \
+            .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
@@ -1364,22 +1365,22 @@ with shared.gradio_root:
                 gr.Audio(interactive=False, value=notification_file, elem_id='audio_notification', visible=False)
                 break
 
-        def trigger_describe(modes, img, apply_styles, output_chinese):
-            describe_prompts = []
+        def trigger_describe(modes, img, apply_styles, output_chinese, describe_prompt=""):
+            describe_images = []
             styles = set()
 
             if flags.describe_type_photo in modes and not MiniCPM.get_enable():
                 from extras.interrogate import default_interrogator as default_interrogator_photo
-                describe_prompts.append(default_interrogator_photo(img))
+                describe_images.append(default_interrogator_photo(img))
                 styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"])
 
             if flags.describe_type_anime in modes and not MiniCPM.get_enable():
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
-                describe_prompts.append(default_interrogator_anime(img))
+                describe_images.append(default_interrogator_anime(img))
                 styles.update(["Fooocus V2", "Fooocus Masterpiece"])
             
             if MiniCPM.get_enable():
-                describe_prompts.append(minicpm.interrogate(img, output_chinese))
+                describe_images.append(minicpm.interrogate(img, output_chinese, additional_prompt=describe_prompt))
                 styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp", "Fooocus Masterpiece"])
 
             if len(styles) == 0 or not apply_styles:
@@ -1387,25 +1388,25 @@ with shared.gradio_root:
             else:
                 styles = list(styles)
 
-            if len(describe_prompts) == 0:
-                describe_prompt = gr.update()
+            if len(describe_images) == 0:
+                describe_image = gr.update()
             else:
-                describe_prompt = ', '.join(describe_prompts)
+                describe_image = ', '.join(describe_images)
 
-            return describe_prompt, styles
+            return describe_image, styles
 
-        describe_btn.click(trigger_describe, inputs=[describe_methods, describe_input_image, describe_apply_styles, describe_output_chinese],
+        describe_btn.click(trigger_describe, inputs=[describe_methods, describe_input_image, describe_apply_styles, describe_output_chinese, describe_prompt],
                            outputs=[prompt, style_selections], show_progress=True, queue=True) \
             .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
             .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
 
-        def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt): 
+        def trigger_auto_describe_for_scene(state, canvas_image, img, scene_theme, additional_prompt, additional_prompt_2): 
             is_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
             ready_to_gen = True 
             if canvas_image is None and is_canvas_image:
                 ready_to_gen = False
-            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, additional_prompt)
+            describe_prompt, img_is_ok = topbar.describe_prompt_for_scene(state, img, scene_theme, f'{additional_prompt}{additional_prompt_2}')
             styles = set()
             styles.update([])
             return describe_prompt if describe_prompt else gr.update(), list(styles), gr.update(interactive=ready_to_gen and img_is_ok)
@@ -1440,12 +1441,12 @@ with shared.gradio_root:
         scene_canvas_image.upload(trigger_auto_aspect_ratio_for_scene_from_canvas_image, inputs=[state_topbar, scene_canvas_image, scene_theme],
                         outputs=scene_aspect_ratio, show_progress=False, queue=False).then(lambda: None, _js='()=>{refresh_scene_localization();}')
         scene_canvas_image.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
-        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
+        scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene_from_input_image, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
         scene_input_image1.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
-        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt], outputs=[prompt, style_selections], show_progress=True, queue=True) \
+        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
@@ -1460,11 +1461,6 @@ with shared.gradio_root:
                 return gr.update(), gr.update()
 
             uov_input_image.upload(trigger_auto_describe, inputs=[describe_methods, uov_input_image, prompt, describe_apply_styles, describe_output_chinese],
-                                   outputs=[prompt, style_selections], show_progress=True, queue=True) \
-                .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
-                .then(lambda: None, _js='()=>{refresh_style_localization();}')
-
-            describe_input_image.upload(trigger_auto_describe, inputs=[describe_methods, describe_input_image, prompt, describe_apply_styles, describe_output_chinese],
                                    outputs=[prompt, style_selections], show_progress=True, queue=True) \
                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
                 .then(lambda: None, _js='()=>{refresh_style_localization();}')
