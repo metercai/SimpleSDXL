@@ -1381,7 +1381,7 @@ with shared.gradio_root:
             
             if MiniCPM.get_enable():
                 describe_images.append(minicpm.interrogate(img, output_chinese, additional_prompt=describe_prompt))
-                styles.update(["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp", "Fooocus Masterpiece"])
+                styles.update([])
 
             if len(styles) == 0 or not apply_styles:
                 styles = gr.update()
@@ -1421,6 +1421,8 @@ with shared.gradio_root:
             return trigger_auto_aspect_ratio_for_scene(state, input_image1, scene_theme)
 
         def trigger_auto_aspect_ratio_for_scene(state, img, scene_theme):
+            if img is None:
+                return gr.update()
             img = resize_image(img, max_side=1280, resize_mode=4)
             aspect_ratios = state['scene_frontend'].get('aspect_ratio', [])
             if isinstance(aspect_ratios, dict):
