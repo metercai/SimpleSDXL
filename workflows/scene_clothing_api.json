@@ -448,23 +448,9 @@
       "title": "🔧 Get Image Size"
     }
   },
-  "169": {
-    "inputs": {
-      "lora_name": "flux1-turbo.safetensors",
-      "strength_model": 1,
-      "model": [
-        "92",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
   "170": {
     "inputs": {
-      "value": "subject"
+      "value": "Subject"
     },
     "class_type": "easy string",
     "_meta": {
@@ -474,12 +460,15 @@
   "178": {
     "inputs": {
       "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": 0.1,
+      "residual_diff_threshold": [
+        "208",
+        0
+      ],
       "start": 0,
       "end": 1,
       "max_consecutive_cache_hits": -1,
       "model": [
-        "169",
+        "92",
         0
       ]
     },
@@ -505,10 +494,10 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 150,
-      "bottom_reserve": 150,
-      "left_reserve": 150,
-      "right_reserve": 150,
+      "top_reserve": 180,
+      "bottom_reserve": 180,
+      "left_reserve": 180,
+      "right_reserve": 180,
       "round_to_multiple": "8",
       "image": [
         "89",
@@ -549,10 +538,10 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 150,
-      "bottom_reserve": 150,
-      "left_reserve": 150,
-      "right_reserve": 150,
+      "top_reserve": 180,
+      "bottom_reserve": 180,
+      "left_reserve": 180,
+      "right_reserve": 180,
       "round_to_multiple": "8",
       "image": [
         "110",
@@ -760,7 +749,7 @@
         "170",
         0
       ],
-      "b": "subject",
+      "b": "Subject",
       "operation": "a == b",
       "case_sensitive": true
     },
@@ -821,7 +810,7 @@
       "fill_background": true,
       "background_color": "#FFFFFF",
       "RGBA_image": [
-        "202",
+        "214",
         0
       ]
     },
@@ -881,6 +870,27 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
+    }
+  },
+  "208": {
+    "inputs": {
+      "value": 0.12
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "214": {
+    "inputs": {
+      "anything": [
+        "202",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
     }
   }
 }
