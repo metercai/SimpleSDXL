@@ -13,17 +13,17 @@
                      "快速出图": "Sticker, svg, vector, vector art, 3D render, portrait, close shot ",
                      "慢速精细画质": "Sticker, svg, vector, vector art, 3D render, portrait, close shot "
                 },
-	"image_preprocessor_method": [["face"]],
+		"image_preprocessor_method": [["face"]],
                  "aspect_ratio" : {
                      "快速出图": ["1024|1:1"],
                      "慢速精细画质": ["1024|1:1"]
                 },
                  "aspect_ratio_select_mode": "auto_candidate",
-	"task_method": {
-	                 "快速出图": "3DPurikura_fast",
+		"task_method": {
+	             "快速出图": "3DPurikura_fast",
                      "慢速精细画质": "3DPurikura_hq"
                 },
-    "scene_steps": {
+    		"scene_steps": {
                      "慢速精细画质": 48
                 }
             }
