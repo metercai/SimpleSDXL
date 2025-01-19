@@ -1413,11 +1413,13 @@ with shared.gradio_root:
 
         def trigger_auto_aspect_ratio_for_scene_from_canvas_image(state, canvas_image, input_image1, scene_theme):
             results = [trigger_auto_aspect_ratio_for_scene(state, canvas_image['image'], scene_theme)]
-            is_input_image1 = 'scene_input_image1' not in state["scene_frontend"].get('disvisible', [])
-            if is_input_image1:
-                results.append(gr.update(interactive= input_image1 is not None))
+            print(f'scene_canvas_image upload')
+            need_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
+            need_input_image1 = 'scene_input_image1' not in state["scene_frontend"].get('disvisible', [])
+            if need_canvas_image and canvas_image is not None and (not need_input_image1 or (need_input_image1 and input_image1 is not None)):
+                results.append(gr.update(interactive=True, visible=True))
             else:
-                results.append(gr.update(interactive=True))
+                results.append(gr.update(interactive=False, visible=True))
             return results
 
         def trigger_auto_aspect_ratio_for_scene_from_input_image(state, input_image1, scene_theme):
@@ -1452,8 +1454,21 @@ with shared.gradio_root:
             else:
                 return [gr.update()]*3
 
+        def scene_canvas_image_clear(state, canvas_image, input_image1):
+            if canvas_image is None:
+                print(f'scene_canvas_image_clear')
+                need_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
+                need_input_image1 = 'scene_input_image1' not in state["scene_frontend"].get('disvisible', [])
+                if need_canvas_image and canvas_image is not None and (not need_input_image1 or (need_input_image1 and input_image1 is not None)):
+                    return gr.update(interactive=True, visible=True)
+                else:
+                    return gr.update(interactive=False, visible=True)
+            else:
+                return gr.update()
+
+
         scene_canvas_image.upload(trigger_auto_aspect_ratio_for_scene_from_canvas_image, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme], outputs=[scene_aspect_ratio, generate_button], show_progress=False, queue=False).then(lambda: None, _js='()=>{refresh_scene_localization();}')
-        scene_canvas_image.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=True, queue=True)
+        #scene_canvas_image.change(scene_canvas_image_clear, inputs=[state_topbar, scene_canvas_image, scene_input_image1], outputs=[generate_button], show_progress=False, queue=False)
         scene_input_image1.upload(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=True) \
                         .then(trigger_auto_aspect_ratio_for_scene_from_input_image, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
