@@ -2,7 +2,7 @@
   "107": {
     "inputs": {
       "text": [
-        "310",
+        "305",
         0
       ],
       "clip": [
@@ -328,6 +328,42 @@
       "title": "mask_image1"
     }
   },
+  "295": {
+    "inputs": {
+      "prompt": [
+        "296",
+        0
+      ],
+      "find1": "sepia",
+      "replace1": "",
+      "find2": "yellowing",
+      "replace2": "",
+      "find3": "fuzzy",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "296": {
+    "inputs": {
+      "prompt": [
+        "310",
+        0
+      ],
+      "find1": "monochrome",
+      "replace1": "",
+      "find2": "greyscale",
+      "replace2": "",
+      "find3": "black and white",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
   "297": {
     "inputs": {
       "ckpt_name": "LEOSAM_HelloWorldXL_70.safetensors"
@@ -415,7 +451,7 @@
   "304": {
     "inputs": {
       "text": [
-        "310",
+        "305",
         0
       ],
       "clip": [
@@ -426,6 +462,24 @@
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "305": {
+    "inputs": {
+      "prompt": [
+        "295",
+        0
+      ],
+      "find1": "there are no traces of old photos such as",
+      "replace1": "",
+      "find2": "old photos",
+      "replace2": "photo",
+      "find3": "old photo",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
     }
   },
   "306": {
@@ -510,7 +564,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "negative_prompt"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "313": {
