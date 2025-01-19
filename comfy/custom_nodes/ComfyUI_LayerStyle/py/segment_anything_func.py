@@ -100,6 +100,7 @@ def get_local_filepath(url, dirname, local_file_name=None):
     if not os.path.exists(destination):
         if 'HF_ENDPOINT' in os.environ:
             logger.warn(f'HF endpoint: {os.environ["HF_ENDPOINT"]}')
+        url = str.replace(url, "huggingface.co", "hf-mirror.com", 1)
         logger.warn(f'downloading {url} to {destination}')
         download_url_to_file(url, destination)
     return destination
