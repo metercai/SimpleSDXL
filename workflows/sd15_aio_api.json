@@ -4,7 +4,7 @@
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "2759",
+        "2996",
         0
       ]
     },
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 504271946049411,
+      "seed": 723854978444132,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -5533,7 +5533,7 @@
   },
   "2985": {
     "inputs": {
-      "value": 0.00
+      "value": 0
     },
     "class_type": "easy float",
     "_meta": {
@@ -5618,6 +5618,16 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "2996": {
+    "inputs": {
+      "unet_name": "realisticVisionV60B1_v51VAE.safetensors",
+      "weight_dtype": "fp8_e4m3fn_fast"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "base_model"
     }
   }
 }
