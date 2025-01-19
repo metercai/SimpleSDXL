@@ -24,7 +24,6 @@ import enhanced.gallery as gallery_util
 import enhanced.superprompter as superprompter
 import enhanced.comfy_task as comfy_task
 import ldm_patched.modules.model_management
-import extras.preprocessors as preprocessors
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
@@ -32,9 +31,9 @@ logger = logging.getLogger(format_name(__name__))
 from datetime import datetime
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
-from modules.meta_parser import get_welcome_image
+from modules.meta_parser import get_welcome_image, describe_prompt_for_scene
 from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
-from enhanced.minicpm import minicpm, MiniCPM
+from enhanced.minicpm import minicpm
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
 # app context
@@ -343,32 +342,8 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
         describe_prompt, img_is_ok = describe_prompt_for_scene(state, img, scene_theme, f'{additional_prompt}{additional_prompt_2}')
     return gr.update() if describe_prompt is None else describe_prompt
 
-def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
-    img = img if img is None else util.resize_image(img, max_side=1280, resize_mode=4)
-    image_preprocessor_method = state['scene_frontend'].get('image_preprocessor_method', [])
-    img_is_ok = preprocessors.openpose_have(img, image_preprocessor_method[0]) if len(image_preprocessor_method)>0 and img is not None else True
-    s_prompts = state['scene_frontend'].get('prompt', {})
-    describe_prompt = s_prompts.get(scene_theme, '')
-    if not describe_prompt:
-        return '', img_is_ok
-    if util.is_chinese(additional_prompt) and not state['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
-        additional_prompt = minicpm.translate(additional_prompt, 'Slim Model')
-    describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
-    m_prompts = state['scene_frontend'].get('multimodal_prompt', {})
-    prompt_prompt = m_prompts.get(scene_theme, '')
-    if prompt_prompt and img is not None:
-        prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
-        if MiniCPM.get_enable():
-            describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
-        else:
-            from extras.interrogate import default_interrogator as default_interrogator_photo
-            describe_prompt += default_interrogator_photo(img)
-            from extras.wd14tagger import default_interrogator as default_interrogator_anime
-            describe_prompt += default_interrogator_anime(img)
-    return describe_prompt, img_is_ok
 
-
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -814,21 +789,6 @@ def get_all_admin_default(currunt_value):
             result.append(gr.update(interactive=True, value=admin_value))
 
     return result
-
-
-def get_auto_candidate(img, selections, mode):
-    H, W, C = img.shape
-    selections2 = [ x.split('|')[1] if '|' in x else x for x in selections ]
-    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections2 ]
-    selection = float(W)/float(H)
-    selections2 = np.array(selections2)
-    index = np.argmin(np.abs(selections2 - selection))
-    index_value = selections[index]
-    if '_candidate' in mode:
-        start_index = max(index - 1, 0)
-        end_index = min(index + 2, len(selections2))
-        selections = selections[start_index:end_index]
-    return selections, index_value
 
 
 from transformers import CLIPTokenizer
