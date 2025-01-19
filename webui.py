@@ -1417,7 +1417,7 @@ with shared.gradio_root:
             if is_input_image1:
                 results.append(gr.update(interactive= input_image1 is not None))
             else:
-                results.append(gr.update())
+                results.append(gr.update(interactive=True))
             return results
 
         def trigger_auto_aspect_ratio_for_scene_from_input_image(state, input_image1, scene_theme):
