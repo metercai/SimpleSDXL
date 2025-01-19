@@ -6,25 +6,32 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["SDXL加速", "Flux加速"],
+	    "theme": ["SDXL", "Flux", "SDXL上色", "Flux上色"],
 	    "theme_title": "不同的引擎，耗时有极大差距，修复的效果也不相同",
-            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_canvas_image"],  
+            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_canvas_image", "scene_image_number"],  
 	    "prompt": {
-    		"SDXL加速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n",
-	    	"Flux加速": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo , analog photo,     \n"
+    		"SDXL": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,     \n",
+	    	"Flux": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,     \n",
+	    	"SDXL上色": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,      \n",
+	    	"Flux上色": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,      \n"
 	    },
 	    "multimodal_prompt": {
-		"SDXL加速": "A descriptive caption for this image",
-		"Flux加速": "A descriptive caption for this image"
+		"SDXL": "A descriptive caption for this image, and output it in Chinese",
+		"Flux": "A descriptive caption for this image, and output it in Chinese",
+		"SDXL上色": "请根据图片内容生成一段详细的提示词，用崭新、清晰、彩色、专业摄影照片的特征来描述图片中的场景、主体、细节，不能出现老旧照片的特征（如泛黄、模糊、黑白、褪色、划痕等），请确保生成的提示词能够引导 Stable Diffusion 生成一张高质量、现代感强彩色照片图像，只保留替换后的提示词，总字数不少于70个汉字，且不超过100个汉字, 要用中文回复。",
+		"Flux上色": "请根据图片内容生成一段详细的提示词，用崭新、清晰、彩色、专业摄影照片的特征来描述图片中的场景、主体、细节，不能出现老旧照片的特征（如泛黄、模糊、黑白、褪色、划痕等），请确保生成的提示词能够引导 Stable Diffusion 生成一张高质量、现代感强彩色照片图像，只保留替换后的提示词，总字数不少于70个汉字，且不超过100个汉字, 要用中文回复。"
 	    },
 	    "aspect_ratio" : ["1536|1:1", "2048|1:1", "1024|1:1"],
 	    "aspect_ratio_select_mode": "",
 	    "task_method": {
-		"SDXL加速": "x2-onekeyimagerepair1",
-		"Flux加速": "x2-onekeyimagerepair2"
+		"SDXL": "x2-onekeyimagerepair1",
+		"Flux": "x2-onekeyimagerepair2",
+		"SDXL上色": "x2-onekeyimagerepair3",
+		"Flux上色": "x2-onekeyimagerepair4"
 	    },
 	    "scene_steps": {
-		"Flux加速": 36
+		"Flux": 36,
+		"Flux上色": 36
 	    }
     	}
     },
