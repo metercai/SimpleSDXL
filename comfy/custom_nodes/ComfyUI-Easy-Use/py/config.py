@@ -80,7 +80,7 @@ BRUSHNET_MODELS = {
 }
 POWERPAINT_MODELS = {
     "base_fp16": {
-        "model_url": "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/text_encoder/model.fp16.safetensors"
+        "model_url": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/sd15_clip_model.fp16.safetensors"
     },
     "v2.1": {
         "model_url": "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/inpaint/sd15_powerpaint_brushnet_v2_1.safetensors",
