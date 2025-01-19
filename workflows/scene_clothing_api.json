@@ -306,7 +306,7 @@
   "118": {
     "inputs": {
       "downsampling_factor": 1,
-      "downsampling_function": "bicubic",
+      "downsampling_function": "bilinear",
       "mode": "autocrop with mask",
       "weight": 1,
       "autocrop_margin": 0.05,
@@ -345,8 +345,8 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 244950111499620,
-      "steps": 10,
+      "seed": 786741836739024,
+      "steps": 20,
       "cfg": 30,
       "denoise": 1
     },
@@ -422,7 +422,7 @@
         "155",
         1
       ],
-      "interpolation": "nearest",
+      "interpolation": "bilinear",
       "method": "pad",
       "condition": "always",
       "multiple_of": 0,
@@ -494,11 +494,11 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 180,
-      "bottom_reserve": 180,
-      "left_reserve": 180,
-      "right_reserve": 180,
-      "round_to_multiple": "8",
+      "top_reserve": 192,
+      "bottom_reserve": 192,
+      "left_reserve": 192,
+      "right_reserve": 192,
+      "round_to_multiple": "16",
       "image": [
         "89",
         0
@@ -538,11 +538,11 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 180,
-      "bottom_reserve": 180,
-      "left_reserve": 180,
-      "right_reserve": 180,
-      "round_to_multiple": "8",
+      "top_reserve": 192,
+      "bottom_reserve": 192,
+      "left_reserve": 192,
+      "right_reserve": 192,
+      "round_to_multiple": "16",
       "image": [
         "110",
         0
@@ -561,7 +561,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bicubic",
+      "interpolation": "bilinear",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
@@ -579,7 +579,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bicubic",
+      "interpolation": "bilinear",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
@@ -603,7 +603,7 @@
         "190",
         1
       ],
-      "interpolation": "bicubic",
+      "interpolation": "bilinear",
       "method": "fill / crop",
       "condition": "always",
       "multiple_of": 0,
@@ -682,7 +682,7 @@
   "197": {
     "inputs": {
       "downsampling_factor": 1,
-      "downsampling_function": "bicubic",
+      "downsampling_function": "bilinear",
       "mode": "keep aspect ratio",
       "weight": 1,
       "autocrop_margin": 0.05,
@@ -842,7 +842,7 @@
   "207": {
     "inputs": {
       "downsampling_factor": 1,
-      "downsampling_function": "bicubic",
+      "downsampling_function": "bilinear",
       "mode": "keep aspect ratio",
       "weight": 1,
       "autocrop_margin": 0.05,
@@ -874,7 +874,7 @@
   },
   "208": {
     "inputs": {
-      "value": 0.12
+      "value": 0
     },
     "class_type": "easy float",
     "_meta": {
@@ -891,6 +891,30 @@
     "class_type": "easy cleanGpuUsed",
     "_meta": {
       "title": "Clean VRAM Used"
+    }
+  },
+  "224": {
+    "inputs": {
+      "images": [
+        "189",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "227": {
+    "inputs": {
+      "images": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
     }
   }
 }
