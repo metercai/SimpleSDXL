@@ -15,9 +15,13 @@ import shared
 
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
-from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder
+from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder, resize_image, is_chinese
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
+import extras.preprocessors as preprocessors
+import numpy as np
+from enhanced.minicpm import minicpm, MiniCPM
+
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
@@ -54,44 +58,117 @@ def get_layout_visible_inter_loras(y,z,max_number):
         results += [gr.update(visible= i+y1<max_number or y1<0, interactive= i+z1<max_number or z1<0)] * 3
     return results
 
-def switch_scene_theme(state, image_number, theme=None):
+def get_auto_candidate(img, selections, mode):
+    H, W, C = img.shape
+    selections2 = [ x.split('|')[1] if '|' in x else x for x in selections ]
+    selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections2 ]
+    selection = float(W)/float(H)
+    selections2 = np.array(selections2)
+    index = np.argmin(np.abs(selections2 - selection))
+    index_value = selections[index]
+    if '_candidate' in mode:
+        start_index = max(index - 1, 0)
+        end_index = min(index + 2, len(selections2))
+        selections = selections[start_index:end_index]
+    return selections, index_value
+
+def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
+    img = img if img is None else resize_image(img, max_side=1280, resize_mode=4)
+    image_preprocessor_method = state['scene_frontend'].get('image_preprocessor_method', [])
+    img_is_ok = preprocessors.openpose_have(img, image_preprocessor_method[0]) if len(image_preprocessor_method)>0 and img is not None else True
+    s_prompts = state['scene_frontend'].get('prompt', {})
+    describe_prompt = s_prompts.get(scene_theme, '')
+    if not describe_prompt:
+        return '', img_is_ok
+    if is_chinese(additional_prompt) and not state['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
+        additional_prompt = minicpm.translate(additional_prompt, 'Slim Model')
+    describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
+    m_prompts = state['scene_frontend'].get('multimodal_prompt', {})
+    prompt_prompt = m_prompts.get(scene_theme, '')
+    if prompt_prompt and img is not None:
+        prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
+        if MiniCPM.get_enable():
+            describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
+        else:
+            from extras.interrogate import default_interrogator as default_interrogator_photo
+            describe_prompt += default_interrogator_photo(img)
+            from extras.wd14tagger import default_interrogator as default_interrogator_anime
+            describe_prompt += default_interrogator_anime(img)
+    return describe_prompt, img_is_ok
+
+def switch_scene_theme_select(state):
+    state["switch_scene_theme"] = True
+
+def switch_scene_theme_ready_to_gen(state, image_number, canvas_image, input_image1, additional_prompt, additional_prompt_2, theme=None):
     scenes = state.get("scene_frontend",{})
     visible = scenes.get('disvisible', [])
     inter = scenes.get('disinteractive', [])
-    input_image_number = 1 if 'scene_canvas_image' in visible or 'scene_input_image1' in visible else 0
-    input_image_number = 2 if 'scene_canvas_image' in visible and 'scene_input_image1' in visible else input_image_number
-    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 250)]
-    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=300 if input_image_number==1 else 170))
+    input_image_number = 1 if 'scene_canvas_image' not in visible or 'scene_input_image1' not in visible else 0
+    input_image_number = 2 if 'scene_canvas_image' not in visible and 'scene_input_image1' not in visible else input_image_number
+    ready_to_gen = True if (input_image_number==1 and (('scene_canvas_image' not in visible and canvas_image is not None) or ('scene_input_image1' not in visible and input_image1 is not None))) or (input_image_number==2 and (('scene_canvas_image' not in visible and canvas_image is not None) and ('scene_input_image1' not in visible and input_image1 is not None))) else False
+    describe_prompt, img_is_ok = describe_prompt_for_scene(state, input_image1, theme, f'{additional_prompt}{additional_prompt_2}') if ready_to_gen else ('', False)
+    return describe_prompt if describe_prompt else gr.update(), gr.update(interactive=ready_to_gen and img_is_ok)
+
+
+def switch_scene_theme(state, image_number, canvas_image, input_image1, additional_prompt, additional_prompt_2, theme=None):
+    scenes = state.get("scene_frontend",{})
+    visible = scenes.get('disvisible', [])
+    inter = scenes.get('disinteractive', [])
+    input_image_number = 1 if 'scene_canvas_image' not in visible or 'scene_input_image1' not in visible else 0
+    input_image_number = 2 if 'scene_canvas_image' not in visible and 'scene_input_image1' not in visible else input_image_number
+    switch_flag = state.get("switch_scene_theme", False)
+    ready_to_gen = True if switch_flag and ((input_image_number==1 and (('scene_canvas_image' not in visible and canvas_image is not None) or ('scene_input_image1' not in visible and input_image1 is not None))) or (input_image_number==2 and (('scene_canvas_image' not in visible and canvas_image is not None) and ('scene_input_image1' not in visible and input_image1 is not None)))) else False
+    #print(f'input_image_number={input_image_number}, ready_to_gen={ready_to_gen}, switch_flag={switch_flag}')
+    
+    canvas_image_update_with_value = gr.update(visible=True, value=None, height=300 if input_image_number==1 else 250)
+    input_image1_update_with_value = gr.update(visible=True, value=None, height=300 if input_image_number==1 else 170)
+    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else canvas_image_update_with_value if not switch_flag else gr.update(visible=True, height=300 if input_image_number==1 else 250)]
+    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else input_image1_update_with_value if not switch_flag else gr.update(visible=True, height=300 if input_image_number==1 else 170))
     themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
-    results.append(get_layout_setting_choices_visible_inter(themes, themes[index], 'scene_theme', visible, inter))
     title = scenes.get('additional_prompt_title', '')
-    additional_prompt = scenes.get('additional_prompt', '')
-    if isinstance(additional_prompt, dict):
+    additional_prompt_default = scenes.get('additional_prompt', '')
+    if isinstance(additional_prompt_default, dict):
         if index==0:
-            additional_prompt = additional_prompt[next(iter(additional_prompt))] if additional_prompt else ''
+            additional_prompt_default = additional_prompt_default[next(iter(additional_prompt_default))] if additional_prompt_default else ''
         else:
-            additional_prompt = additional_prompt[theme]
-    results.append(get_layout_update_label_visible_inter(title, additional_prompt, 'scene_additional_prompt', visible, inter))
+            additional_prompt_default = additional_prompt_default[theme]
+    results.append(get_layout_update_label_visible_inter(title, additional_prompt if ready_to_gen and switch_flag else additional_prompt_default, 'scene_additional_prompt', visible, inter))
     title_2 = scenes.get('additional_prompt_title_2', '')
-    additional_prompt_2 = scenes.get('additional_prompt_2', '')
-    if isinstance(additional_prompt_2, dict):
+    additional_prompt_2_default = scenes.get('additional_prompt_2', '')
+    if isinstance(additional_prompt_2_default, dict):
         if index==0:
-            additional_prompt_2 = additional_prompt_2[next(iter(additional_prompt_2))] if additional_prompt_2 else ''
+            additional_prompt_2_default = additional_prompt_2_default[next(iter(additional_prompt_2_default))] if additional_prompt_2_default else ''
         else:
-            additional_prompt_2 = additional_prompt_2[theme]
-    results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2, 'scene_additional_prompt_2', visible, inter))
-    aspect_ratio = scenes.get('aspect_ratio', [])
-    if isinstance(aspect_ratio, dict):
-        if index==0:
-            aspect_ratio = aspect_ratio[next(iter(aspect_ratio))] if aspect_ratio else []
-        else:
-            aspect_ratio = aspect_ratio[theme]
-    aspect_ratio = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratio)
-    aspect_ratio_default = '' if len(aspect_ratio)==0 else aspect_ratio[0]
-    results.append(get_layout_setting_choices_visible_inter(aspect_ratio[0:3], aspect_ratio_default, 'scene_aspect_ratio', visible, inter))
+            additional_prompt_2_default = additional_prompt_2_default[theme]
+    results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2 if ready_to_gen and switch_flag else additional_prompt_2_default, 'scene_additional_prompt_2', visible, inter))
+    aspect_ratios = scenes.get('aspect_ratio', [])
+    if ready_to_gen and switch_flag:
+        img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image
+        img = resize_image(img, max_side=1280, resize_mode=4)
+        if isinstance(aspect_ratios, dict):
+            if theme in aspect_ratios:
+                aspect_ratios = aspect_ratios[theme]
+            else:
+                aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
+        aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
+        aspect_ratios_new, aspect_ratio = get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
+        if aspect_ratio_select_mode:
+            aspect_ratios = aspect_ratios_new
+            if 'auto_match' in aspect_ratio_select_mode:
+                aspect_ratios = [aspect_ratio]
+        aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)
+        aspect_ratio = modules.flags.scene_aspect_ratios_mapping(aspect_ratio)
+    else:
+        if isinstance(aspect_ratios, dict):
+            if index==0:
+                aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
+            else:
+                aspect_ratios = aspect_ratios[theme]
+        aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)[0:3]
+        aspect_ratio = '' if len(aspect_ratios)==0 else aspect_ratios[0]
+    results.append(get_layout_setting_choices_visible_inter(aspect_ratios, aspect_ratio, 'scene_aspect_ratio', visible, inter))
     results.append(get_layout_update_and_visible_inter(image_number, 'scene_image_number', visible, inter))
-    results.append(gr.update(interactive=False))   #generate_button
     return results
 
 
@@ -179,7 +256,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
         themes = scenes.get('theme', [])
         theme_default = themes[0] if themes else None
         themes_title = scenes.get('theme_title', '')
-        results.append(get_layout_update_label_and_choice_visible_inter(themes_title, themes, None, 'scene_theme', visible, inter))
+        results.append(get_layout_update_label_and_choice_visible_inter(themes_title, themes, theme_default, 'scene_theme', visible, inter))
         results.append(gr.update(visible=True, interactive=False)) #generate_button
         results.append(gr.update(visible=False))                   #load_parameter_button
     else:
@@ -190,6 +267,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
         results.append(gr.update(visible=True, interactive=True))
         results.append(gr.update(visible=True, interactive=True))  #generate_button
         results.append(gr.update(visible=False))                   #load_parameter_button
+    state_params.pop("switch_scene_theme", None)
 
     if 'image_catalog_max_number' in presetdata_dict:
         state_params.update({'__max_catalog': presetdata_dict['image_catalog_max_number']})
