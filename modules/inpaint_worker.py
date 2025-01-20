@@ -247,9 +247,22 @@ class InpaintWorker:
     def color_correction(self, img):
         fg = img.astype(np.float32)
         bg = self.image.copy().astype(np.float32)
-        w = cv2.GaussianBlur(self.mask, (99, 99), 0)  # Enhance fusion in the feedback image of flux outpaint
-        w = self.mask[:, :, None].astype(np.float32) / 255.0
+        
+        mask_height, mask_width = self.mask.shape[:2]     
+        kernel_size = int(min(mask_height, mask_width) * 0.10)
+        kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size
+        kernel = np.ones((kernel_size, kernel_size), np.uint8)
+        dilated_mask = cv2.dilate(self.mask, kernel, iterations=1)
+        
+        blur_kernel_size = int(min(mask_height, mask_width) * 0.10)
+        blur_kernel_size = blur_kernel_size + 1 if blur_kernel_size % 2 == 0 else blur_kernel_size
+        sigma = blur_kernel_size / 5
+
+        w = cv2.GaussianBlur(dilated_mask, (blur_kernel_size, blur_kernel_size), sigma)
+             
+        w = w[:, :, None].astype(np.float32) / 255.0
         y = fg * w + bg * (1 - w)
+        
         return y.clip(0, 255).astype(np.uint8)
 
     def post_process(self, img):
