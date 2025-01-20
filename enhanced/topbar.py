@@ -363,6 +363,13 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         scene_additional_prompt = f'{scene_additional_prompt}{scene_additional_prompt_2}'
         if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
             scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
+        resize_image_flag = True
+        preprocessor_methods = state_params['scene_frontend'].get('image_preprocessor_method', [])
+        if len(preprocessor_methods)>0 and scene_input_image1 is not None:
+            for preprocessor_method in preprocessor_methods:
+                if '-normalization' in preprocessor_method:
+                    resize_image_flag = False
+        scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
         backend_params.update(dict(
             task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],
