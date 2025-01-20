@@ -1,7 +1,7 @@
 {
   "30": {
     "inputs": {
-      "image": "991.png",
+      "image": "12-3D的Q版人偶.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -12,7 +12,7 @@
   "138": {
     "inputs": {
       "images": [
-        "168",
+        "193",
         0
       ]
     },
@@ -23,7 +23,7 @@
   },
   "166": {
     "inputs": {
-      "seed": 1093415990109060,
+      "seed": 235501214085360,
       "steps": 8,
       "cfg": 0.8,
       "sampler_name": "euler_ancestral_cfg_pp",
@@ -48,7 +48,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler1"
+      "title": "main_sampler"
     }
   },
   "167": {
@@ -124,7 +124,7 @@
   },
   "177": {
     "inputs": {
-      "text": "monochrome, greyscale, black and white, yellowing, Noise, spots, cracks",
+      "text": "blurry, fuzzy, Noise, spots, cracks",
       "clip": [
         "173",
         1
@@ -202,7 +202,7 @@
   },
   "188": {
     "inputs": {
-      "positive": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,      \nan old - time photo of a man in a suit and tiesolo, looking at viewer, shirt, 1boy, closed mouth, monochrome, upper body, male focus, necktie, collared shirt, expressionless, formal, suit, realistic, sepia, brown theme"
+      "positive": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,     \na small figure on display in a game1girl, solo, black hair, hair ornament, standing, full body, closed eyes, braid, hair bun, double bun, ^ ^, snow"
     },
     "class_type": "easy positive",
     "_meta": {
@@ -249,6 +249,46 @@
       "title": "LayerColor: AutoAdjust V2"
     }
   },
+  "193": {
+    "inputs": {
+      "strength": 100,
+      "brightness": 0,
+      "contrast": 0,
+      "saturation": 0,
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "mode": "RGB",
+      "image": [
+        "194",
+        0
+      ]
+    },
+    "class_type": "LayerColor: AutoAdjustV2",
+    "_meta": {
+      "title": "LayerColor: AutoAdjust V2"
+    }
+  },
+  "194": {
+    "inputs": {
+      "strength": 0,
+      "brightness": 0,
+      "contrast": -5,
+      "saturation": 0,
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "mode": "RGB",
+      "image": [
+        "168",
+        0
+      ]
+    },
+    "class_type": "LayerColor: AutoAdjustV2",
+    "_meta": {
+      "title": "LayerColor: AutoAdjust V2"
+    }
+  },
   "194:0": {
     "inputs": {
       "model_name": "4xNomos8kSCHAT-L.pth"
@@ -256,6 +296,15 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
+    }
+  },
+  "193:0": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
     }
   },
   "194:1": {
@@ -272,15 +321,6 @@
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
-    }
-  },
-  "193:0": {
-    "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
     }
   },
   "193:1": {

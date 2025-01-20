@@ -468,7 +468,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler1"
+      "title": "main_sampler"
     }
   },
   "308": {
