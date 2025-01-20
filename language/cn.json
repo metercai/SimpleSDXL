@@ -417,6 +417,8 @@
   "Sync presets nav to guest": "同步预置导航给游客",
   "wavespeed_strength": "Wave加速强度",
 
+  "Contact": "联系",
+
   "This preset requires identity binding before it will run. Please complete the identity binding first.": "需要拥有绑定的身份才能运行,请先在右侧顶部\"服务\"标签栏内完成身份绑定.",
 
   "Happy": "贺年卡",
