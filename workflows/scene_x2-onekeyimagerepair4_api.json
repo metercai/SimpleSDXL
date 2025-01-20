@@ -2,7 +2,7 @@
   "107": {
     "inputs": {
       "text": [
-        "305",
+        "330",
         0
       ],
       "clip": [
@@ -120,7 +120,7 @@
   "208": {
     "inputs": {
       "pixels": [
-        "284",
+        "328",
         0
       ],
       "vae": [
@@ -131,37 +131,6 @@
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE Encode"
-    }
-  },
-  "232": {
-    "inputs": {
-      "value": [
-        "236",
-        1
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "aspect_ratios_width"
-    }
-  },
-  "236": {
-    "inputs": {
-      "clip_skip": -1,
-      "width": 1536,
-      "height": 1024,
-      "swap": false,
-      "batch_size": 1,
-      "positive": "",
-      "negative": "",
-      "seed": 837688174129972,
-      "steps": 10,
-      "cfg": 30,
-      "denoise": 1
-    },
-    "class_type": "Co_Input_Zho",
-    "_meta": {
-      "title": "i2i_overall_input"
     }
   },
   "238": {
@@ -202,68 +171,10 @@
       "title": "LayerUtility: Purge VRAM"
     }
   },
-  "247": {
-    "inputs": {
-      "value": 28
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "K1 steps"
-    }
-  },
-  "248": {
-    "inputs": {
-      "value": 8
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "K2 steps"
-    }
-  },
-  "283": {
-    "inputs": {
-      "strength": 0,
-      "brightness": 0,
-      "contrast": 5,
-      "saturation": 0,
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "mode": "RGB",
-      "image": [
-        "207",
-        0
-      ]
-    },
-    "class_type": "LayerColor: AutoAdjustV2",
-    "_meta": {
-      "title": "LayerColor: AutoAdjust V2"
-    }
-  },
-  "284": {
-    "inputs": {
-      "strength": 100,
-      "brightness": 0,
-      "contrast": 0,
-      "saturation": 0,
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "mode": "RGB",
-      "image": [
-        "283",
-        0
-      ]
-    },
-    "class_type": "LayerColor: AutoAdjustV2",
-    "_meta": {
-      "title": "LayerColor: AutoAdjust V2"
-    }
-  },
   "290": {
     "inputs": {
       "pixels": [
-        "308",
+        "322",
         0
       ],
       "vae": [
@@ -279,12 +190,12 @@
   "291": {
     "inputs": {
       "width": [
-        "300",
-        0
+        "315",
+        1
       ],
       "height": [
-        "300",
-        0
+        "315",
+        1
       ],
       "interpolation": "lanczos",
       "method": "keep proportion",
@@ -319,49 +230,13 @@
   "294": {
     "inputs": {
       "images": [
-        "292",
+        "321",
         0
       ]
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "mask_image1"
-    }
-  },
-  "295": {
-    "inputs": {
-      "prompt": [
-        "296",
-        0
-      ],
-      "find1": "sepia",
-      "replace1": "",
-      "find2": "yellowing",
-      "replace2": "",
-      "find3": "fuzzy",
-      "replace3": ""
-    },
-    "class_type": "easy promptReplace",
-    "_meta": {
-      "title": "PromptReplace"
-    }
-  },
-  "296": {
-    "inputs": {
-      "prompt": [
-        "310",
-        0
-      ],
-      "find1": "monochrome",
-      "replace1": "",
-      "find2": "greyscale",
-      "replace2": "",
-      "find3": "black and white",
-      "replace3": ""
-    },
-    "class_type": "easy promptReplace",
-    "_meta": {
-      "title": "PromptReplace"
     }
   },
   "297": {
@@ -371,26 +246,6 @@
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
       "title": "base_model"
-    }
-  },
-  "298": {
-    "inputs": {
-      "strength": 0,
-      "brightness": 0,
-      "contrast": 5,
-      "saturation": 0,
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "mode": "RGB",
-      "image": [
-        "299",
-        0
-      ]
-    },
-    "class_type": "LayerColor: AutoAdjustV2",
-    "_meta": {
-      "title": "LayerColor: AutoAdjust V2"
     }
   },
   "299": {
@@ -405,15 +260,6 @@
     "class_type": "ImageBlur",
     "_meta": {
       "title": "Image Blur"
-    }
-  },
-  "300": {
-    "inputs": {
-      "value": 1536
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "aspect_ratios_width"
     }
   },
   "302": {
@@ -451,7 +297,7 @@
   "304": {
     "inputs": {
       "text": [
-        "305",
+        "330",
         0
       ],
       "clip": [
@@ -464,27 +310,9 @@
       "title": "CLIP Text Encode (Prompt)"
     }
   },
-  "305": {
-    "inputs": {
-      "prompt": [
-        "295",
-        0
-      ],
-      "find1": "there are no traces of old photos such as",
-      "replace1": "",
-      "find2": "old photos",
-      "replace2": "photo",
-      "find3": "old photo",
-      "replace3": ""
-    },
-    "class_type": "easy promptReplace",
-    "_meta": {
-      "title": "PromptReplace"
-    }
-  },
   "306": {
     "inputs": {
-      "image": "2-美国男青年.png",
+      "image": "1原始照片.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -494,12 +322,18 @@
   },
   "307": {
     "inputs": {
-      "seed": 633067730008468,
+      "seed": [
+        "315",
+        6
+      ],
       "steps": [
-        "248",
+        "325",
         0
       ],
-      "cfg": 0.8,
+      "cfg": [
+        "315",
+        8
+      ],
       "sampler_name": "euler_ancestral_cfg_pp",
       "scheduler": "sgm_uniform",
       "denoise": 1,
@@ -525,35 +359,6 @@
       "title": "KSampler1"
     }
   },
-  "308": {
-    "inputs": {
-      "strength": 100,
-      "brightness": 0,
-      "contrast": 0,
-      "saturation": 0,
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "mode": "RGB",
-      "image": [
-        "298",
-        0
-      ]
-    },
-    "class_type": "LayerColor: AutoAdjustV2",
-    "_meta": {
-      "title": "LayerColor: AutoAdjust V2"
-    }
-  },
-  "310": {
-    "inputs": {
-      "positive": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,      \nan old photograph of a young man in a baseball uniformsolo, looking at viewer, short hair, black hair, 1boy, monochrome, upper body, greyscale, male focus, uniform, black eyes, military, military uniform, facial hair, stubble"
-    },
-    "class_type": "easy positive",
-    "_meta": {
-      "title": "prompt"
-    }
-  },
   "311": {
     "inputs": {
       "text": "monochrome, greyscale, black and white, yellowing, Noise, spots, cracks",
@@ -570,12 +375,12 @@
   "313": {
     "inputs": {
       "width": [
-        "300",
-        0
+        "315",
+        1
       ],
       "height": [
-        "300",
-        0
+        "315",
+        1
       ],
       "interpolation": "lanczos",
       "method": "keep proportion",
@@ -591,6 +396,264 @@
       "title": "🔧 Image Resize"
     }
   },
+  "314": {
+    "inputs": {
+      "prompt": [
+        "320",
+        0
+      ],
+      "find1": "noise",
+      "replace1": "",
+      "find2": "spots",
+      "replace2": "",
+      "find3": "cracks",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "315": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 1024,
+      "height": 1024,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 898074628056779,
+      "steps": 36,
+      "cfg": 0.8,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "316": {
+    "inputs": {
+      "prompt": [
+        "315",
+        4
+      ],
+      "find1": "photograph",
+      "replace1": "photo",
+      "find2": "old photo",
+      "replace2": "",
+      "find3": "",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "317": {
+    "inputs": {
+      "prompt": [
+        "316",
+        0
+      ],
+      "find1": "vintage photo",
+      "replace1": "",
+      "find2": "old time photo",
+      "replace2": "",
+      "find3": "old style photo",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "318": {
+    "inputs": {
+      "prompt": [
+        "317",
+        0
+      ],
+      "find1": "old picture",
+      "replace1": "",
+      "find2": "old portrait",
+      "replace2": "",
+      "find3": "old image",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "319": {
+    "inputs": {
+      "prompt": [
+        "314",
+        0
+      ],
+      "find1": "incomplete",
+      "replace1": "",
+      "find2": "scratch",
+      "replace2": "",
+      "find3": "crack",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "320": {
+    "inputs": {
+      "prompt": [
+        "318",
+        0
+      ],
+      "find1": "fuzzy",
+      "replace1": "",
+      "find2": "blurry",
+      "replace2": "clear, sharp, focused",
+      "find3": "yellowing",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "321": {
+    "inputs": {
+      "strength": 100,
+      "brightness": 0,
+      "contrast": 0,
+      "saturation": 0,
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "mode": "RGB",
+      "image": [
+        "323",
+        0
+      ]
+    },
+    "class_type": "LayerColor: AutoAdjustV2",
+    "_meta": {
+      "title": "LayerColor: AutoAdjust V2"
+    }
+  },
+  "322": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1.3,
+      "saturation": 0,
+      "image": [
+        "299",
+        0
+      ]
+    },
+    "class_type": "LayerColor: BrightnessContrastV2",
+    "_meta": {
+      "title": "LayerColor: Brightness Contrast V2"
+    }
+  },
+  "323": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1,
+      "saturation": 0.7000000000000001,
+      "image": [
+        "292",
+        0
+      ]
+    },
+    "class_type": "LayerColor: BrightnessContrastV2",
+    "_meta": {
+      "title": "LayerColor: Brightness Contrast V2"
+    }
+  },
+  "324": {
+    "inputs": {
+      "value": "a-8",
+      "a": [
+        "315",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "325": {
+    "inputs": {
+      "value": "a-b",
+      "a": [
+        "315",
+        7
+      ],
+      "b": [
+        "324",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "328": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1.3,
+      "saturation": 0,
+      "image": [
+        "207",
+        0
+      ]
+    },
+    "class_type": "LayerColor: BrightnessContrastV2",
+    "_meta": {
+      "title": "LayerColor: Brightness Contrast V2"
+    }
+  },
+  "329": {
+    "inputs": {
+      "prompt": [
+        "319",
+        0
+      ],
+      "find1": "monochrome",
+      "replace1": "",
+      "find2": "greyscale",
+      "replace2": "",
+      "find3": "black and white",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "330": {
+    "inputs": {
+      "prompt": [
+        "329",
+        0
+      ],
+      "find1": "sepia",
+      "replace1": "",
+      "find2": "brown theme",
+      "replace2": "",
+      "find3": "yellowed",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
   "309:0": {
     "inputs": {
       "model_name": "4xNomos8kSCHAT-L.pth"
@@ -598,6 +661,60 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
+    }
+  },
+  "301:0": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "251:0": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "251:1": {
+    "inputs": {
+      "style_model_name": "flux1-redux-dev.safetensors"
+    },
+    "class_type": "StyleModelLoader",
+    "_meta": {
+      "title": "Load Style Model"
+    }
+  },
+  "240:0": {
+    "inputs": {
+      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "217:0": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "217:1": {
+    "inputs": {
+      "noise_seed": 215499800430395
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
     }
   },
   "309:1": {
@@ -616,13 +733,19 @@
       "title": "Upscale Image (using Model)"
     }
   },
-  "301:0": {
+  "217:2": {
     "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+      "scheduler": "normal",
+      "steps": 28,
+      "denoise": 1,
+      "model": [
+        "187",
+        0
+      ]
     },
-    "class_type": "ControlNetLoader",
+    "class_type": "BasicScheduler",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "BasicScheduler"
     }
   },
   "301:1": {
@@ -656,24 +779,6 @@
       "title": "Apply ControlNet"
     }
   },
-  "251:0": {
-    "inputs": {
-      "clip_name": "sigclip_vision_patch14_384.safetensors"
-    },
-    "class_type": "CLIPVisionLoader",
-    "_meta": {
-      "title": "Load CLIP Vision"
-    }
-  },
-  "251:1": {
-    "inputs": {
-      "style_model_name": "flux1-redux-dev.safetensors"
-    },
-    "class_type": "StyleModelLoader",
-    "_meta": {
-      "title": "Load Style Model"
-    }
-  },
   "251:2": {
     "inputs": {
       "downsampling_factor": 1,
@@ -701,15 +806,6 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
-    }
-  },
-  "240:0": {
-    "inputs": {
-      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
     }
   },
   "240:1": {
@@ -741,39 +837,6 @@
     "class_type": "ControlNetApplyAdvanced",
     "_meta": {
       "title": "Apply ControlNet"
-    }
-  },
-  "217:0": {
-    "inputs": {
-      "sampler_name": "euler"
-    },
-    "class_type": "KSamplerSelect",
-    "_meta": {
-      "title": "KSamplerSelect"
-    }
-  },
-  "217:1": {
-    "inputs": {
-      "noise_seed": 683531140777675
-    },
-    "class_type": "RandomNoise",
-    "_meta": {
-      "title": "RandomNoise"
-    }
-  },
-  "217:2": {
-    "inputs": {
-      "scheduler": "normal",
-      "steps": 28,
-      "denoise": 1,
-      "model": [
-        "187",
-        0
-      ]
-    },
-    "class_type": "BasicScheduler",
-    "_meta": {
-      "title": "BasicScheduler"
     }
   },
   "217:3": {

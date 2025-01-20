@@ -1,7 +1,7 @@
 {
   "30": {
     "inputs": {
-      "image": "991.png",
+      "image": "11-写实拟人兔-自动色彩平衡会模糊.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -12,7 +12,7 @@
   "138": {
     "inputs": {
       "images": [
-        "168",
+        "207",
         0
       ]
     },
@@ -23,9 +23,18 @@
   },
   "166": {
     "inputs": {
-      "seed": 1093415990109060,
-      "steps": 8,
-      "cfg": 0.8,
+      "seed": [
+        "196",
+        6
+      ],
+      "steps": [
+        "196",
+        7
+      ],
+      "cfg": [
+        "196",
+        8
+      ],
       "sampler_name": "euler_ancestral_cfg_pp",
       "scheduler": "sgm_uniform",
       "denoise": 1,
@@ -48,13 +57,13 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler1"
+      "title": "KSampler"
     }
   },
   "167": {
     "inputs": {
       "text": [
-        "188",
+        "198",
         0
       ],
       "clip": [
@@ -86,7 +95,7 @@
   "171": {
     "inputs": {
       "pixels": [
-        "192",
+        "205",
         0
       ],
       "vae": [
@@ -124,7 +133,10 @@
   },
   "177": {
     "inputs": {
-      "text": "monochrome, greyscale, black and white, yellowing, Noise, spots, cracks",
+      "text": [
+        "196",
+        5
+      ],
       "clip": [
         "173",
         1
@@ -156,12 +168,12 @@
   "181": {
     "inputs": {
       "width": [
-        "183",
-        0
+        "196",
+        1
       ],
       "height": [
-        "183",
-        0
+        "196",
+        1
       ],
       "interpolation": "lanczos",
       "method": "keep proportion",
@@ -191,45 +203,149 @@
       "title": "Image Blur"
     }
   },
-  "183": {
+  "196": {
     "inputs": {
-      "value": 1536
+      "clip_skip": -1,
+      "width": 1024,
+      "height": 1024,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 1123928013424186,
+      "steps": 9,
+      "cfg": 1.3,
+      "denoise": 1
     },
-    "class_type": "easy int",
+    "class_type": "Co_Input_Zho",
     "_meta": {
-      "title": "aspect_ratios_width"
+      "title": "i2i_overall_input"
     }
   },
-  "188": {
+  "197": {
     "inputs": {
-      "positive": "ultra-high resolution, fine details, precise focus, sharp edges, smooth lines, natural colors, rich light and shadow, pure image, professional raw photo, analog photo,      \nan old - time photo of a man in a suit and tiesolo, looking at viewer, shirt, 1boy, closed mouth, monochrome, upper body, male focus, necktie, collared shirt, expressionless, formal, suit, realistic, sepia, brown theme"
+      "prompt": [
+        "202",
+        0
+      ],
+      "find1": "noise",
+      "replace1": "",
+      "find2": "spots",
+      "replace2": "",
+      "find3": "cracks",
+      "replace3": ""
     },
-    "class_type": "easy positive",
+    "class_type": "easy promptReplace",
     "_meta": {
-      "title": "prompt"
+      "title": "PromptReplace"
     }
   },
-  "191": {
+  "198": {
     "inputs": {
-      "strength": 0,
-      "brightness": 0,
-      "contrast": 5,
+      "prompt": [
+        "197",
+        0
+      ],
+      "find1": "incomplete",
+      "replace1": "",
+      "find2": "scratch",
+      "replace2": "",
+      "find3": "crack",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "199": {
+    "inputs": {
+      "prompt": [
+        "201",
+        0
+      ],
+      "find1": "old picture",
+      "replace1": "",
+      "find2": "old portrait",
+      "replace2": "",
+      "find3": "old image",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "200": {
+    "inputs": {
+      "prompt": [
+        "196",
+        4
+      ],
+      "find1": "photograph",
+      "replace1": "photo",
+      "find2": "old photo",
+      "replace2": "",
+      "find3": "",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "201": {
+    "inputs": {
+      "prompt": [
+        "200",
+        0
+      ],
+      "find1": "vintage photo",
+      "replace1": "",
+      "find2": "old time photo",
+      "replace2": "",
+      "find3": "old style photo",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "202": {
+    "inputs": {
+      "prompt": [
+        "199",
+        0
+      ],
+      "find1": "fuzzy",
+      "replace1": "",
+      "find2": "blurry",
+      "replace2": "clear, sharp, focused",
+      "find3": "yellowing",
+      "replace3": ""
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  },
+  "205": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1.3,
       "saturation": 0,
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "mode": "RGB",
       "image": [
         "182",
         0
       ]
     },
-    "class_type": "LayerColor: AutoAdjustV2",
+    "class_type": "LayerColor: BrightnessContrastV2",
     "_meta": {
-      "title": "LayerColor: AutoAdjust V2"
+      "title": "LayerColor: Brightness Contrast V2"
     }
   },
-  "192": {
+  "207": {
     "inputs": {
       "strength": 100,
       "brightness": 0,
@@ -240,13 +356,28 @@
       "blue": 0,
       "mode": "RGB",
       "image": [
-        "191",
+        "208",
         0
       ]
     },
     "class_type": "LayerColor: AutoAdjustV2",
     "_meta": {
       "title": "LayerColor: AutoAdjust V2"
+    }
+  },
+  "208": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1,
+      "saturation": 0.7000000000000001,
+      "image": [
+        "168",
+        0
+      ]
+    },
+    "class_type": "LayerColor: BrightnessContrastV2",
+    "_meta": {
+      "title": "LayerColor: Brightness Contrast V2"
     }
   },
   "194:0": {
