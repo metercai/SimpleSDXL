@@ -1552,7 +1552,7 @@ def worker():
             if "scene_" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if async_task.scene_input_image1 is not None:
-                    input_images.set_image('i2i_ip_image1', resize_image(HWC3(async_task.scene_input_image1), max_side=1280, resize_mode=4))
+                    input_images.set_image('i2i_ip_image1', async_task.scene_input_image1)
                 if async_task.scene_canvas_image is not None:
                     canvas_image = async_task.scene_canvas_image['image']
                     canvas_mask = async_task.scene_canvas_image['mask'][:, :, 0]
