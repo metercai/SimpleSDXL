@@ -20,7 +20,7 @@
     },
     "class_type": "CLIPTextEncodeFlux",
     "_meta": {
-      "title": "CLIP文本编码Flux"
+      "title": "CLIPTextEncodeFlux"
     }
   },
   "59": {
@@ -32,7 +32,7 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "保存图像（网络接口）"
+      "title": "SaveImageWebsocket"
     }
   },
   "131": {
@@ -52,7 +52,7 @@
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
-      "title": "空Latent图像"
+      "title": "Empty Latent Image"
     }
   },
   "140": {
@@ -64,7 +64,7 @@
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "条件零化"
+      "title": "ConditioningZeroOut"
     }
   },
   "256": {
@@ -73,7 +73,7 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "加载VAE"
+      "title": "Load VAE"
     }
   },
   "257": {
@@ -249,7 +249,7 @@
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
-      "title": "加载放大模型"
+      "title": "Load Upscale Model"
     }
   },
   "289": {
@@ -261,7 +261,7 @@
     },
     "class_type": "ConditioningZeroOut",
     "_meta": {
-      "title": "条件零化"
+      "title": "ConditioningZeroOut"
     }
   },
   "296": {
@@ -298,7 +298,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "297": {
@@ -307,7 +307,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "加载ControlNet模型"
+      "title": "Load ControlNet Model"
     }
   },
   "298": {
@@ -324,7 +324,7 @@
     },
     "class_type": "ImageBlur",
     "_meta": {
-      "title": "模糊图像"
+      "title": "Image Blur"
     }
   },
   "299": {
@@ -369,7 +369,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "300": {
@@ -385,7 +385,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE编码"
+      "title": "VAE Encode"
     }
   },
   "301": {
@@ -401,7 +401,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "303": {
@@ -434,7 +434,7 @@
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
-      "title": "加载放大模型"
+      "title": "Load Upscale Model"
     }
   },
   "305": {
@@ -450,7 +450,7 @@
     },
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
-      "title": "使用模型放大图像"
+      "title": "Upscale Image (using Model)"
     }
   },
   "307": {
@@ -562,7 +562,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "332": {
@@ -607,7 +607,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "421": {
@@ -649,7 +649,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "422": {
@@ -665,7 +665,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "702": {
@@ -1045,7 +1045,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "982": {
@@ -1090,7 +1090,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "983": {
@@ -1135,7 +1135,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "K采样器"
+      "title": "KSampler"
     }
   },
   "984": {
@@ -1151,7 +1151,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "994": {
@@ -1167,7 +1167,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE编码"
+      "title": "VAE Encode"
     }
   },
   "995": {
@@ -1183,7 +1183,7 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE编码"
+      "title": "VAE Encode"
     }
   },
   "999": {
@@ -2269,7 +2269,7 @@
     },
     "class_type": "ImageToMask",
     "_meta": {
-      "title": "图像转换为遮罩"
+      "title": "Convert Image to Mask"
     }
   },
   "1899": {
@@ -2413,7 +2413,7 @@
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {
-      "title": "加载CLIP视觉"
+      "title": "Load CLIP Vision"
     }
   },
   "2007": {
@@ -2422,7 +2422,7 @@
     },
     "class_type": "StyleModelLoader",
     "_meta": {
-      "title": "加载风格模型"
+      "title": "Load Style Model"
     }
   },
   "2008": {
@@ -2451,7 +2451,7 @@
     },
     "class_type": "InpaintModelConditioning",
     "_meta": {
-      "title": "内补模型条件"
+      "title": "InpaintModelConditioning"
     }
   },
   "2037": {
@@ -2514,59 +2514,7 @@
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
-      "title": "差异扩散DifferentialDiffusion"
-    }
-  },
-  "2122": {
-    "inputs": {
-      "value": "(1-4)*a+4",
-      "a": [
-        "1079",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2124": {
-    "inputs": {
-      "value": "(1-4)*a+4",
-      "a": [
-        "1075",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2126": {
-    "inputs": {
-      "value": "(1-4)*a+4",
-      "a": [
-        "1080",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2128": {
-    "inputs": {
-      "value": "(1-4)*a+4",
-      "a": [
-        "1081",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
+      "title": "Differential Diffusion"
     }
   },
   "2209": {
@@ -2590,7 +2538,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2221": {
@@ -2614,7 +2562,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2224": {
@@ -2638,7 +2586,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2227": {
@@ -2662,7 +2610,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2230": {
@@ -2679,7 +2627,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2231": {
@@ -2696,7 +2644,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2233": {
@@ -2713,7 +2661,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2234": {
@@ -2730,7 +2678,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2236": {
@@ -2747,7 +2695,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2237": {
@@ -2764,7 +2712,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2239": {
@@ -2781,7 +2729,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2240": {
@@ -2798,7 +2746,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2242": {
@@ -2814,7 +2762,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2243": {
@@ -2830,7 +2778,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2244": {
@@ -2846,7 +2794,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2245": {
@@ -2862,7 +2810,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2260": {
@@ -3213,7 +3161,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2279": {
@@ -3250,7 +3198,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2280": {
@@ -3287,7 +3235,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2281": {
@@ -3324,7 +3272,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2290": {
@@ -3372,7 +3320,7 @@
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
-      "title": "K采样器（高级）"
+      "title": "KSampler (Advanced)"
     }
   },
   "2293": {
@@ -3381,7 +3329,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "加载ControlNet模型"
+      "title": "Load ControlNet Model"
     }
   },
   "2308": {
@@ -3397,7 +3345,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE解码"
+      "title": "VAE Decode"
     }
   },
   "2309": {
@@ -3654,10 +3602,7 @@
   },
   "2378": {
     "inputs": {
-      "downsampling_factor": [
-        "2122",
-        0
-      ],
+      "downsampling_factor": 1.5,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": [
@@ -3689,10 +3634,7 @@
   },
   "2379": {
     "inputs": {
-      "downsampling_factor": [
-        "2124",
-        0
-      ],
+      "downsampling_factor": 1.5,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": [
@@ -3724,10 +3666,7 @@
   },
   "2380": {
     "inputs": {
-      "downsampling_factor": [
-        "2126",
-        0
-      ],
+      "downsampling_factor": 1.5,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": [
@@ -3759,10 +3698,7 @@
   },
   "2381": {
     "inputs": {
-      "downsampling_factor": [
-        "2128",
-        0
-      ],
+      "downsampling_factor": 1.5,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": [
@@ -3853,7 +3789,7 @@
     },
     "class_type": "ImageScaleBy",
     "_meta": {
-      "title": "缩放图像（比例）"
+      "title": "Upscale Image By"
     }
   },
   "2392": {
@@ -3904,7 +3840,7 @@
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
-      "title": "K采样器（高级）"
+      "title": "KSampler (Advanced)"
     }
   },
   "2394": {
@@ -4151,7 +4087,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2443": {
@@ -4168,7 +4104,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2444": {
@@ -4185,7 +4121,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2445": {
@@ -4209,7 +4145,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2449": {
@@ -4246,7 +4182,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2452": {
@@ -4263,7 +4199,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2456": {
@@ -4279,7 +4215,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2457": {
@@ -4303,7 +4239,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2458": {
@@ -4340,7 +4276,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2461": {
@@ -4357,7 +4293,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2465": {
@@ -4373,7 +4309,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2466": {
@@ -4397,7 +4333,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2467": {
@@ -4434,7 +4370,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2470": {
@@ -4451,7 +4387,7 @@
     },
     "class_type": "ConditioningSetTimestepRange",
     "_meta": {
-      "title": "设置条件时间"
+      "title": "ConditioningSetTimestepRange"
     }
   },
   "2474": {
@@ -4467,7 +4403,7 @@
     },
     "class_type": "ConditioningCombine",
     "_meta": {
-      "title": "条件合并"
+      "title": "Conditioning (Combine)"
     }
   },
   "2475": {
@@ -4491,7 +4427,7 @@
     },
     "class_type": "InstructPixToPixConditioning",
     "_meta": {
-      "title": "InstructPixToPix条件"
+      "title": "InstructPixToPixConditioning"
     }
   },
   "2476": {
@@ -5073,7 +5009,7 @@
     },
     "class_type": "ControlNetLoader",
     "_meta": {
-      "title": "加载ControlNet模型"
+      "title": "Load ControlNet Model"
     }
   },
   "2548": {
@@ -5110,7 +5046,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2559": {
@@ -5147,7 +5083,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2566": {
@@ -5184,7 +5120,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2573": {
@@ -5221,7 +5157,7 @@
     },
     "class_type": "ControlNetApplySD3",
     "_meta": {
-      "title": "应用ControlNet"
+      "title": "Apply Controlnet with VAE"
     }
   },
   "2582": {
@@ -6273,7 +6209,7 @@
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": "遮罩转换为图像"
+      "title": "Convert Mask to Image"
     }
   },
   "2750": {
@@ -6310,7 +6246,7 @@
     },
     "class_type": "ImageToMask",
     "_meta": {
-      "title": "图像转换为遮罩"
+      "title": "Convert Image to Mask"
     }
   },
   "2752": {
@@ -6426,7 +6362,7 @@
     },
     "class_type": "SetLatentNoiseMask",
     "_meta": {
-      "title": "设置Latent噪波遮罩"
+      "title": "Set Latent Noise Mask"
     }
   },
   "2772": {
@@ -6646,7 +6582,7 @@
   },
   "2795": {
     "inputs": {
-      "value": 0.00
+      "value": 0
     },
     "class_type": "easy float",
     "_meta": {
@@ -6722,7 +6658,7 @@
   },
   "2852": {
     "inputs": {
-      "provider": "CPU"
+      "provider": "CUDA"
     },
     "class_type": "PulidFluxInsightFaceLoader",
     "_meta": {
