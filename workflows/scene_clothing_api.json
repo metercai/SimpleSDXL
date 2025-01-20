@@ -305,7 +305,7 @@
   },
   "118": {
     "inputs": {
-      "downsampling_factor": 1,
+      "downsampling_factor": 1.5,
       "downsampling_function": "bilinear",
       "mode": "autocrop with mask",
       "weight": 1,
@@ -345,7 +345,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 786741836739024,
+      "seed": 854258631067713,
       "steps": 20,
       "cfg": 30,
       "denoise": 1
@@ -527,6 +527,10 @@
       "crop_box": [
         "183",
         2
+      ],
+      "croped_mask": [
+        "231",
+        0
       ]
     },
     "class_type": "LayerUtility: RestoreCropBox",
@@ -681,7 +685,7 @@
   },
   "197": {
     "inputs": {
-      "downsampling_factor": 1,
+      "downsampling_factor": 1.5,
       "downsampling_function": "bilinear",
       "mode": "keep aspect ratio",
       "weight": 1,
@@ -841,7 +845,7 @@
   },
   "207": {
     "inputs": {
-      "downsampling_factor": 1,
+      "downsampling_factor": 1.5,
       "downsampling_function": "bilinear",
       "mode": "keep aspect ratio",
       "weight": 1,
@@ -893,18 +897,6 @@
       "title": "Clean VRAM Used"
     }
   },
-  "224": {
-    "inputs": {
-      "images": [
-        "189",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "227": {
     "inputs": {
       "images": [
@@ -915,6 +907,26 @@
     "class_type": "PreviewImage",
     "_meta": {
       "title": "Preview Image"
+    }
+  },
+  "231": {
+    "inputs": {
+      "expand": 5,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 5,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "183",
+        1
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
     }
   }
 }
