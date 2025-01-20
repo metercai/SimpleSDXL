@@ -22,6 +22,7 @@
 		"Inspyrenet": "",
 		"RMBG": ""
 	    },
+	    "image_preprocessor_method": [["-normalization"]],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "task_method": {
 		"Inspyrenet": "x1-onekeyremovebg1",

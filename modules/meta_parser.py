@@ -74,8 +74,12 @@ def get_auto_candidate(img, selections, mode):
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else resize_image(img, max_side=1280, resize_mode=4)
-    image_preprocessor_method = state['scene_frontend'].get('image_preprocessor_method', [])
-    img_is_ok = preprocessors.openpose_have(img, image_preprocessor_method[0]) if len(image_preprocessor_method)>0 and img is not None else True
+    preprocessor_methods = state['scene_frontend'].get('image_preprocessor_method', [])
+    img_is_ok = True
+    if len(preprocessor_methods)>0 and img is not None:
+        for preprocessor_method in preprocessor_methods:
+            if 'face' in preprocessor_method or 'hand' in preprocessor_method or 'body' in preprocessor_method:
+                img_is_ok = preprocessors.openpose_have(img, preprocessor_method)
     s_prompts = state['scene_frontend'].get('prompt', {})
     describe_prompt = s_prompts.get(scene_theme, '')
     if not describe_prompt:
