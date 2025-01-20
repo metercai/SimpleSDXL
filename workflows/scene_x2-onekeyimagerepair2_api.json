@@ -171,19 +171,6 @@
       "title": "LayerUtility: Purge VRAM"
     }
   },
-  "286": {
-    "inputs": {
-      "filename_prefix": "ComfyUI_flux上色",
-      "images": [
-        "189",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
-  },
   "290": {
     "inputs": {
       "pixels": [
@@ -640,6 +627,60 @@
       "title": "Load Upscale Model"
     }
   },
+  "301:0": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "251:0": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "251:1": {
+    "inputs": {
+      "style_model_name": "flux1-redux-dev.safetensors"
+    },
+    "class_type": "StyleModelLoader",
+    "_meta": {
+      "title": "Load Style Model"
+    }
+  },
+  "240:0": {
+    "inputs": {
+      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "217:0": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "217:1": {
+    "inputs": {
+      "noise_seed": 215499800430395
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
   "309:1": {
     "inputs": {
       "upscale_model": [
@@ -656,13 +697,19 @@
       "title": "Upscale Image (using Model)"
     }
   },
-  "301:0": {
+  "217:2": {
     "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+      "scheduler": "normal",
+      "steps": 28,
+      "denoise": 1,
+      "model": [
+        "187",
+        0
+      ]
     },
-    "class_type": "ControlNetLoader",
+    "class_type": "BasicScheduler",
     "_meta": {
-      "title": "Load ControlNet Model"
+      "title": "BasicScheduler"
     }
   },
   "301:1": {
@@ -696,24 +743,6 @@
       "title": "Apply ControlNet"
     }
   },
-  "251:0": {
-    "inputs": {
-      "clip_name": "sigclip_vision_patch14_384.safetensors"
-    },
-    "class_type": "CLIPVisionLoader",
-    "_meta": {
-      "title": "Load CLIP Vision"
-    }
-  },
-  "251:1": {
-    "inputs": {
-      "style_model_name": "flux1-redux-dev.safetensors"
-    },
-    "class_type": "StyleModelLoader",
-    "_meta": {
-      "title": "Load Style Model"
-    }
-  },
   "251:2": {
     "inputs": {
       "downsampling_factor": 1,
@@ -741,15 +770,6 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
-    }
-  },
-  "240:0": {
-    "inputs": {
-      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
     }
   },
   "240:1": {
@@ -781,39 +801,6 @@
     "class_type": "ControlNetApplyAdvanced",
     "_meta": {
       "title": "Apply ControlNet"
-    }
-  },
-  "217:0": {
-    "inputs": {
-      "sampler_name": "euler"
-    },
-    "class_type": "KSamplerSelect",
-    "_meta": {
-      "title": "KSamplerSelect"
-    }
-  },
-  "217:1": {
-    "inputs": {
-      "noise_seed": 215499800430395
-    },
-    "class_type": "RandomNoise",
-    "_meta": {
-      "title": "RandomNoise"
-    }
-  },
-  "217:2": {
-    "inputs": {
-      "scheduler": "normal",
-      "steps": 28,
-      "denoise": 1,
-      "model": [
-        "187",
-        0
-      ]
-    },
-    "class_type": "BasicScheduler",
-    "_meta": {
-      "title": "BasicScheduler"
     }
   },
   "217:3": {
