@@ -2222,7 +2222,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 801948487966673,
+      "seed": 88771058538656,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -3355,7 +3355,7 @@
         0
       ],
       "on_true": [
-        "2308",
+        "2858",
         0
       ],
       "on_false": [
@@ -6259,7 +6259,7 @@
         "1890",
         2
       ],
-      "interpolation": "bicubic",
+      "interpolation": "bilinear",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
@@ -6456,7 +6456,7 @@
   },
   "2785": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a",
       "a": [
         "2542",
         0
@@ -6469,7 +6469,7 @@
   },
   "2786": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a",
       "a": [
         "2542",
         1
@@ -6491,7 +6491,7 @@
       "end": 1,
       "max_consecutive_cache_hits": -1,
       "model": [
-        "2532",
+        "2860",
         0
       ]
     },
@@ -6794,6 +6794,45 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "2858": {
+    "inputs": {
+      "upscale_model": [
+        "2859",
+        0
+      ],
+      "image": [
+        "2308",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "2859": {
+    "inputs": {
+      "model_name": "4xNomos8kSCHAT-L.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "2860": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "2532",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_5"
     }
   }
 }
