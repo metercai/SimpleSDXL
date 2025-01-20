@@ -2035,7 +2035,7 @@
         0
       ],
       "on_true": [
-        "2308",
+        "2997",
         0
       ],
       "on_false": [
@@ -4960,7 +4960,7 @@
         "1890",
         2
       ],
-      "interpolation": "bicubic",
+      "interpolation": "bilinear",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
@@ -5628,6 +5628,31 @@
     "class_type": "UNETLoader",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "2997": {
+    "inputs": {
+      "upscale_model": [
+        "2998",
+        0
+      ],
+      "image": [
+        "2308",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "2998": {
+    "inputs": {
+      "model_name": "4xNomos8kSCHAT-L.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
     }
   }
 }
