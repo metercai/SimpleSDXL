@@ -4,9 +4,23 @@ import time
 import requests
 from tqdm import tqdm
 from colorama import init, Fore, Style
+import threading
+import queue
 
 # 初始化 colorama
 init(autoreset=True)
+class DownloadStatus:
+    def __init__(self, filename, total_size):
+        self.filename = filename
+        self.total_size = total_size
+        self.progress_bar = tqdm(
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            desc=filename,
+            position=0,
+            leave=True
+        )
 
 def print_colored(text, color=Fore.WHITE):
     print(f"{color}{text}{Style.RESET_ALL}")
@@ -249,22 +263,46 @@ def delete_partial_files():
         print(f"{Fore.GREEN}所有下载不完全的临时文件文件处理完毕。{Style.RESET_ALL}")
         print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
 
+def download_file(link, file_path, position):
+    partial_file_path = file_path + ".partial"
+
+    response = requests.get(link, stream=True)
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 8192  # 8 KB
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # 使用.partial文件进行下载
+    with open(partial_file_path, 'wb') as file, tqdm(
+            desc=os.path.basename(file_path),
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            position=position
+    ) as progress_bar:
+        for data in response.iter_content(block_size):
+            file.write(data)
+            progress_bar.update(len(data))
+    
+    # 下载完成后重命名临时文件为最终文件名
+    os.rename(partial_file_path, file_path)
+
 def auto_download_missing_files():
-    """自动下载缺失文件的功能，显示下载进度和速度"""
     if not os.path.exists("缺失模型下载链接.txt"):
-        print(f"{Fore.YELLOW}未找到 '缺失模型下载链接.txt' 文件。{Style.RESET_ALL}")
+        print("未找到 '缺失模型下载链接.txt' 文件。")
         return
 
     with open("缺失模型下载链接.txt", "r") as f:
         links = f.readlines()
     
     if not links:
-        print(f"{Fore.GREEN}没有缺失文件需要下载！{Style.RESET_ALL}")
+        print("没有缺失文件需要下载！")
         return
 
-    for line in links:
+    threads = []
+
+    for position, line in enumerate(links):
         link, size = line.strip().split(',')
-        size = int(size)
         
         if "ShilongLiu/GroundingDINO" in link:
             relative_path = "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py"
@@ -274,40 +312,13 @@ def auto_download_missing_files():
         root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         file_path = os.path.join(root, relative_path)
         
-        print(f"{Fore.YELLOW}准备下载: {file_path} (大小: {size} bytes){Style.RESET_ALL}")
-        
-        try:
-            response = requests.get(link, stream=True)
-            response.raise_for_status()
+        thread = threading.Thread(target=download_file, args=(link, file_path, position))
+        threads.append(thread)
+        thread.start()
 
-            total_size = int(response.headers.get('content-length', 0))
-            block_size = 1024  # 1 KB
-            
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    for thread in threads:
+        thread.join()
 
-            with open(file_path, "wb") as f, tqdm(
-                desc=os.path.basename(file_path),
-                total=total_size,
-                unit='iB',
-                unit_scale=True,
-                unit_divisor=1024,
-            ) as progress_bar:
-                start_time = time.time()
-                downloaded = 0
-                for data in response.iter_content(block_size):
-                    size = f.write(data)
-                    progress_bar.update(size)
-                    downloaded += size
-                    elapsed_time = time.time() - start_time
-                    if elapsed_time > 0:
-                        speed = downloaded / elapsed_time / 1024 / 1024  # MB/s
-                        progress_bar.set_postfix(speed=f"{speed:.2f} MB/s", refresh=True)
-
-            print(f"{Fore.GREEN}下载完成: {file_path}{Style.RESET_ALL}")
-        except requests.exceptions.RequestException as e:
-            print(f"{Fore.RED}下载失败: {file_path} - 错误: {e}{Style.RESET_ALL}")
-        except Exception as e:
-            print(f"{Fore.RED}发生未知错误: {file_path} - 错误: {e}{Style.RESET_ALL}")
 
 packages = {
     "base_package": {
@@ -820,4 +831,4 @@ if __name__ == "__main__":
     main()
     print()
     input(">>>按【Enter回车】启动自动下载模块，镜像速度不稳定若文件过多建议打包下载。<<<")  # 等待用户按键启动下载模块
-    auto_download_missing_files()
+    auto_download_missing_files(max_threads=5)
