@@ -314,3 +314,19 @@ def check_vcode(vcode):
     if len(vcode)<4 or len(vcode)>6:
         return False
     return True
+
+self_contact = '''
+特性说明:<br>
+<b>SimpleAI</b>，开源的 AI 创意生图平台，简洁、高效而稳定。<br>
+<b>SimpleAI</b>，完善的中文支持和开放架构，支持 Flux、可图等丰富的开源模型，实现“所想即所得，创意无边界”。<br>
+<b>SimpleAI</b>，采用本地部署，可保障数据的安全与可控；可按需加载多种预置包，成为贴合场景需求的创作利器。<br>
+<b>SimpleAI</b>，引入分布式身份管理机制，让本地部署节点具有多用户服务和多节点组网能力，具备企业级服务的特性。<br>
+<br>使用技巧参见: <br>
+Wiki: <a target= "_blank" href="https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe">https://acnmokx5gwds.feishu.cn/wiki/</a><br>
+开源代码参见:<br>
+Github: <a target= "_blank" href="https://github.com/metercai/SimpleSDXL">https://github.com/metercai/SimpleSDXL</a><br>
+学习交流: <br>
+QQ群: 938075852<br>
+商务合作: <br>
+邮箱: 925457@qq.com
+'''
