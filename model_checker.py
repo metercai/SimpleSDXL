@@ -1,10 +1,26 @@
 import os
 import sys
 import time
+import requests
+from tqdm import tqdm
 from colorama import init, Fore, Style
+import threading
+import queue
 
 # 初始化 colorama
 init(autoreset=True)
+class DownloadStatus:
+    def __init__(self, filename, total_size):
+        self.filename = filename
+        self.total_size = total_size
+        self.progress_bar = tqdm(
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            desc=filename,
+            position=0,
+            leave=True
+        )
 
 def print_colored(text, color=Fore.WHITE):
     print(f"{color}{text}{Style.RESET_ALL}")
@@ -109,20 +125,28 @@ def print_instructions():
     print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 {Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.2)
+    
+def get_unique_filename(file_path, extension=".corrupted"):
+    base = file_path + extension
+    counter = 1
+    while os.path.exists(base):
+        base = f"{file_path}{extension}_{counter}"
+        counter += 1
+    return base
 
 def validate_files(packages):
     root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-    # 使用 set 来确保路径唯一
-    download_paths = set()
-
+    # 使用字典来存储下载信息，确保路径唯一
+    download_files = {}
+    
     for package_key, package_info in packages.items():
         package_name = package_info["name"]
         files_and_sizes = package_info["files"]
         download_links = package_info["download_links"]
-        print(f"－－－－－－－", end='')  # 不换行
+        print(f"－－－－－－－", end='')
         time.sleep(0.1)
-        print(f"校验{package_name}文件－－－－－－－")  # 打字动态效果
+        print(f"校验{package_name}文件－－－－－－－")
         time.sleep(0.1)
         missing_files = []
         size_mismatch_files = []
@@ -133,14 +157,14 @@ def validate_files(packages):
             expected_filename = os.path.basename(expected_path)
 
             if not os.path.exists(expected_dir):
-                missing_files.append(expected_path)
+                missing_files.append((expected_path, expected_size))
                 continue
 
             directory_listing = os.listdir(expected_dir)
             actual_filename = next((f for f in directory_listing if f.lower() == expected_filename.lower()), None)
 
             if actual_filename is None:
-                missing_files.append(expected_path)
+                missing_files.append((expected_path, expected_size))
             elif actual_filename != expected_filename:
                 case_mismatch_files.append((os.path.join(expected_dir, actual_filename), expected_filename))
             else:
@@ -148,56 +172,153 @@ def validate_files(packages):
                 if actual_size != expected_size:
                     size_mismatch_files.append((os.path.join(expected_dir, actual_filename), actual_size, expected_size))
 
-        # 输出结果并拼接有问题的文件的下载链接
-        if missing_files:
-            print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
-            for file in missing_files:
-                print(normalize_path(file))  # 调用 normalize_path 规范化路径
-                time.sleep(0.01)
-                # 拼接下载路径并添加到 download_paths 列表中
-                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
-                else:
-                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
-            print("请使用以下链接下载所需的文件：")
-            for link in download_links:
-                print(Fore.YELLOW + link + Fore.RESET)  # 直接打印字符串，避免输出单引号
-            print("下载后，请按照安装视频使用脚本安装模型")
-
-        if size_mismatch_files:
-            print(f"{Fore.RED}×{package_name}中有文件大小不匹配，可能存在下载不完全或损坏，请检查列出的文件。{Style.RESET_ALL}")
-            for file, actual_size, expected_size in size_mismatch_files:
-                print(f"{normalize_path(file)} 当前大小={actual_size}, 预期大小={expected_size}")  # 调用 normalize_path
-                time.sleep(0.1)
-                # 拼接下载路径并添加到 download_paths 列表中
-                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
-                else:
-                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
-            print(f"请前往模型总仓{Fore.YELLOW}https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels{Style.RESET_ALL}收集替换")
-
+        # 处理文件名大小写不匹配
         if case_mismatch_files:
             print(f"{Fore.RED}×{package_name}中有文件名大小写不匹配，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_filename in case_mismatch_files:
-                print(f"文件: {normalize_path(file)}")  # 调用 normalize_path
+                print(f"文件: {normalize_path(file)}")
                 time.sleep(0.1)
                 print(f"正确文件名: {expected_filename}")
-                # 拼接下载路径并添加到 download_paths 列表中
-                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                    download_paths.add("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py")
-                else:
-                    download_paths.add(f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}")
+                
+                corrected_file_path = os.path.join(os.path.dirname(file), expected_filename)
+                os.rename(file, corrected_file_path)
+                print(f"{Fore.GREEN}文件名已更正为: {expected_filename}{Style.RESET_ALL}")
+
+        # 处理文件大小不匹配
+        if size_mismatch_files:
+            print(f"{Fore.RED}×{package_name}中有文件大小不匹配，可能存在下载不完全或损坏，请检查列出的文件。{Style.RESET_ALL}")
+            for file, actual_size, expected_size in size_mismatch_files:
+                normalized_path = normalize_path(file)
+                print(f"{normalized_path} 当前大小={actual_size}, 预期大小={expected_size}")
+                time.sleep(0.1)
+                
+                corrupted_file_path = get_unique_filename(file)
+                os.rename(file, corrupted_file_path)
+                print(f"{Fore.YELLOW}文件已重命名为: {normalize_path(corrupted_file_path)}（大小不匹配）{Style.RESET_ALL}")
+                
+                relative_path = os.path.relpath(file, root).replace(os.sep, '/')
+                download_files[relative_path] = expected_size
+
+        # 输出文件验证结果
+        if missing_files:
+            print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
+            for file, expected_size in missing_files:
+                print(normalize_path(file))
+                time.sleep(0.01)
+                download_files[file] = expected_size
 
         if not missing_files and not size_mismatch_files and not case_mismatch_files:
             print(f"{Fore.GREEN}√{package_name}文件全部验证通过{Style.RESET_ALL}")
         time.sleep(0.1)
         print()
+
+     # 将字典转换为列表并按文件大小排序
+    sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
+
     # 保存有问题的文件的下载路径到一个txt文件中
-    if download_paths:
+    if sorted_download_files:
         with open("缺失模型下载链接.txt", "w") as f:
-            for path in download_paths:
-                f.write(path + "\n")
+            for file, size in sorted_download_files:
+                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                    link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
+                else:
+                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}"
+                f.write(f"{link},{size}\n")
         print(f"{Fore.YELLOW}>>>所有有问题的文件下载路径已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
+        # 调用删除 .partial 文件的函数
+    delete_partial_files()
+
+def delete_partial_files():
+    """
+    从当前脚本位置开始，查找 SimpleModels 目录，并删除其中所有 .partial 文件
+    """
+    # 获取脚本所在目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 查找 SimpleModels 目录
+    simplemodels_dir = find_simplemodels_dir(script_dir)
+
+    if not simplemodels_dir:
+        print(f"{Fore.RED}未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
+        return
+
+    print(f"{Fore.CYAN}开始在目录 '{simplemodels_dir}' 中搜索以往下载不完全的临时文件...{Style.RESET_ALL}")
+    
+    partial_files_found = False
+
+    for root, _, files in os.walk(simplemodels_dir):
+        for file in files:
+            if file.endswith(".partial"):
+                partial_files_found = True
+                file_path = os.path.join(root, file)
+                try:
+                    os.remove(file_path)  # 删除文件
+                    print(f"{Fore.GREEN}已删除下载不完全的临时文件: {file_path}{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
+    
+    if not partial_files_found:
+        print(f"{Fore.YELLOW}在目录 '{simplemodels_dir}' 中未发现任何下载不完全的临时文件。{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.GREEN}所有下载不完全的临时文件文件处理完毕。{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
+
+def download_file(link, file_path, position):
+    partial_file_path = file_path + ".partial"
+
+    response = requests.get(link, stream=True)
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 8192  # 8 KB
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # 使用.partial文件进行下载
+    with open(partial_file_path, 'wb') as file, tqdm(
+            desc=os.path.basename(file_path),
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            position=position
+    ) as progress_bar:
+        for data in response.iter_content(block_size):
+            file.write(data)
+            progress_bar.update(len(data))
+    
+    # 下载完成后重命名临时文件为最终文件名
+    os.rename(partial_file_path, file_path)
+
+def auto_download_missing_files():
+    if not os.path.exists("缺失模型下载链接.txt"):
+        print("未找到 '缺失模型下载链接.txt' 文件。")
+        return
+
+    with open("缺失模型下载链接.txt", "r") as f:
+        links = f.readlines()
+    
+    if not links:
+        print("没有缺失文件需要下载！")
+        return
+
+    threads = []
+
+    for position, line in enumerate(links):
+        link, size = line.strip().split(',')
+        
+        if "ShilongLiu/GroundingDINO" in link:
+            relative_path = "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py"
+        else:
+            relative_path = link.replace("https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/", "")
+        
+        root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        file_path = os.path.join(root, relative_path)
+        
+        thread = threading.Thread(target=download_file, args=(link, file_path, position))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
 
 packages = {
     "base_package": {
@@ -705,6 +826,9 @@ def main():
     time.sleep(0.1)
     validate_files(packages)
     print()
-    print_colored("★★★★★★★★★★★★★★★★★★检测已结束执行自动解压脚本★★★★★★★★★★★★★★★★★★", Fore.CYAN)
+    print_colored("★★★★★★★★★★★★★★★★★★检测已结束执行自动下载模块★★★★★★★★★★★★★★★★★★", Fore.CYAN)
 if __name__ == "__main__":
     main()
+    print()
+    input(">>>按【Enter回车】启动自动下载模块，镜像速度不稳定若文件过多建议打包下载。<<<")  # 等待用户按键启动下载模块
+    auto_download_missing_files(max_threads=5)
