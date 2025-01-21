@@ -94,6 +94,7 @@ function refresh_aspect_ratios_label(value) {
     label.textContent = translation + " - " + htmlDecode(value);
 }
 
+
 function refresh_finished_images_catalog_label(value) {
     var label = document.querySelector('#finished_images_catalog div span');
     var translation = getTranslation("Finished Images Catalog");
@@ -104,9 +105,15 @@ function refresh_finished_images_catalog_label(value) {
     if (typeof translation_stat == "undefined") {
         translation_stat = "total: xxx images and yyy pages";
     }
-    var xxx = value.split(",")[0]
-    var yyy = value.split(",")[1]
-    label.textContent = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
+    var xxx = value.split(",")[0];
+    var yyy = value.split(",")[1];
+    var finished_label = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
+    const randomTip = getRandomTip();
+    if (randomTip) {
+	var space_num = 60 - randomTip.length;
+	const spaces = space_num > 0 ? '&nbsp;'.repeat(space_num) : '';
+        label.innerHTML = finished_label + spaces + randomTip; 
+    } else { label.innerHTML = finished_label; }
 }
 
 function refresh_identity_center_label(role) {
