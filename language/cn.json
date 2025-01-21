@@ -288,6 +288,7 @@
   "Preview Metadata": "参数预览",
   "The preset package being loaded has model files that need to be downloaded.": "预置包内有需要下载的模型文件，请提前下载模型文件，避免生图卡顿。",
   "Downloading the model file required for image generation, please wait for a moment...": "正在下载生成图像所需的模型文件，请稍候...",
+  "The model file is missing and the production process has been aborted. Please download the model file in advance.": "模型文件有缺失，退出生图进程，请提前下载好模型文件。",
   "Generate Engine": "生图引擎",
   "SDXL": "SDXL",
   "HyDiT": "混元",
