@@ -383,7 +383,7 @@ function updatePresetStore(nav_name_list, role, expand_flag, theme) {
         let text = div.textContent.trim();
         let item_name = originalText || text;
         item_name = item_name.trim();
-	console.log("updatePresetStore: otext="+originalText+", text="+text+", name="+item_name);
+	// console.log("updatePresetStore: otext="+originalText+", text="+text+", name="+item_name);
 	if (item_name) {
             if (nav_name_list.includes(item_name)) {
                 if (theme === 'light') {
@@ -396,6 +396,13 @@ function updatePresetStore(nav_name_list, role, expand_flag, theme) {
             }
 	}
     });
+}
+
+function getRandomTip() {
+  if (tips && tips.length > 0) {
+    return tips[Math.floor(Math.random() * tips.length)];
+  }
+  return '';
 }
 
 document.addEventListener("DOMContentLoaded", function() {
