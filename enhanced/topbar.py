@@ -382,9 +382,12 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
             scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"]['scene_steps'][scene_theme] if scene_theme in state_params["scene_frontend"]['scene_steps'] else None
             ))
 
+    state_params["absent_model"] = False
     if is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
-        gr.Info(preset_downing_note_info)
-        download_model_files(state_params["__preset"], state_params["user"].get_did())
+        gr.Info(preset_absent_model_note_info)
+        state_params["absent_model"] = True
+        if shared.token.is_admin(state_params["user"].get_did()):
+            download_model_files(state_params["__preset"], state_params["user"].get_did(), True)
 
     superprompter.remove_superprompt()
     remove_tokenizer()
@@ -445,6 +448,7 @@ def sync_message(state_params):
 
 preset_down_note_info = 'The preset package being loaded has model files that need to be downloaded.'
 preset_downing_note_info = 'Downloading the model file required for image generation, please wait for a moment...'
+preset_absent_model_note_info = 'The model file is missing and the production process has been aborted. Please download the model file in advance.'
 
 def check_absent_model(bar_button, state_params):
     #logger.info(f'check_absent_model,state_params:{state_params}')
@@ -468,7 +472,8 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     logger.info(f'Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
-        download_model_files(preset, state_params["user"].get_did(), True)
+        if shared.token.is_admin(state_params["user"].get_did()):
+            download_model_files(preset, state_params["user"].get_did(), True)
 
     state_params.update({"__preset": preset})
 

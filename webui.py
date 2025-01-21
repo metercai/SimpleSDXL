@@ -57,6 +57,13 @@ def generate_clicked(task: worker.AsyncTask, state):
         return
 
     is_mobile = state["__is_mobile"]
+    if "absent_model" in state and state["absent_model"]:
+        yield gr.update(visible=False), \
+            gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
+            gr.update(visible=False, value=None), \
+            gr.update(visible=False)
+        return
+
     execution_start_time = time.perf_counter()
     finished = False
 
@@ -1477,7 +1484,7 @@ with shared.gradio_root:
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
         #scene_input_image1.clear(lambda: ['', gr.update(interactive=False)], outputs=[prompt, generate_button], show_progress=False, queue=False)
         scene_input_image1.change(scene_input_image1_clear, inputs=[state_topbar, scene_input_image1], outputs=[prompt, generate_button, load_parameter_button], show_progress=False, queue=False) 
-        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections], show_progress=True, queue=False) \
+        load_parameter_button.click(trigger_auto_describe_for_scene, inputs=[state_topbar, scene_canvas_image, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=[prompt, style_selections, generate_button], show_progress=True, queue=False) \
                         .then(trigger_auto_aspect_ratio_for_scene, inputs=[state_topbar, scene_input_image1, scene_theme],
                                 outputs=scene_aspect_ratio, show_progress=False, queue=False) \
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
