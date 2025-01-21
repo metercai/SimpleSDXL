@@ -206,11 +206,16 @@ def validate_files(packages):
                 print(normalize_path(file))
                 time.sleep(0.01)
                 download_files[file] = expected_size
-
+            # 统一在最后打印下载链接
+            if package_info["download_links"]:
+                print(f"{Fore.YELLOW}下载链接(若为压缩包，则参考安装视频流程安装):{Style.RESET_ALL}")
+                for link in package_info["download_links"]:
+                    print(f"{Fore.YELLOW}{link}{Style.RESET_ALL}")
         if not missing_files and not size_mismatch_files and not case_mismatch_files:
             print(f"{Fore.GREEN}√{package_name}文件全部验证通过{Style.RESET_ALL}")
         time.sleep(0.1)
         print()
+
 
      # 将字典转换为列表并按文件大小排序
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
@@ -529,7 +534,7 @@ packages = {
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
             ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
             ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
