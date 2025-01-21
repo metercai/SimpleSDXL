@@ -1,4 +1,9 @@
 import os
+import anyio
+import httpx
+from tqdm import tqdm
+import threading
+import queue
 import json
 import ast
 import shared
@@ -8,14 +13,52 @@ import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
 
+
+async def download_file_with_progress(url: str, file_path: str):
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        try:
+            async with client.stream("GET", url) as response:
+                response.raise_for_status()
+                total_size = int(response.headers.get("Content-Length", 0))
+
+                with tqdm(
+                    total=total_size, unit="B", unit_scale=True, desc='' #os.path.basename(file_path)
+                ) as progress_bar:
+                    with open(file_path, "wb") as f:
+                        async for chunk in response.aiter_bytes():
+                            f.write(chunk)
+                            progress_bar.update(len(chunk))
+
+            shared.modelsinfo.refresh_file('add', file_path, url)
+        except httpx.HTTPStatusError as e:
+            logger.error(f"下载失败: {e}")
+            logger.error(f"请求 URL: {e.request.url}")
+            logger.error(f"重定向 URL: {e.response.headers.get('Location')}")
+            raise
+        except Exception as e:
+            logger.error(f"下载过程中发生错误: {e}")
+            raise
+
+async def download_multiple_files(task_list):
+    for task_type, task_params in task_list:
+        if task_type == 'file':
+            await download_file_with_progress(task_params['url'], task_params['path_file'])
+        elif task_type == 'diffusers':
+            await download_diffusers_model(task_params['cata'], task_params['model_name'], task_params['num'], task_params['url'])
+
+
 def load_file_from_url(
         url: str,
         *,
         model_dir: str,
         progress: bool = True,
         file_name: Optional[str] = None,
+        async_task: bool = False,
 ) -> str:
-    """Download a file from `url` into `model_dir`, using the file present if possible.
+    global download_queue
+
+    """
+    Download a file from `url` into `model_dir`, using the file present if possible.
 
     Returns the path to the downloaded file.
     """
@@ -30,9 +73,18 @@ def load_file_from_url(
     if not os.path.exists(cached_file):
         logger.info(f'Downloading: "{url}" to {cached_file}')
         logger.info(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，然后重启应用。\n')
-        from torch.hub import download_url_to_file
-        download_url_to_file(url, cached_file, progress=progress)
-        shared.modelsinfo.refresh_file('add', cached_file, url)
+        
+        def _download_task():
+            anyio.run(download_file_with_progress, url, cached_file)
+
+        if async_task:
+            #download_queue.put(lambda: download_file_with_progress(url, cached_file))  
+            thread = threading.Thread(target=_download_task)
+            thread.start()
+        else:
+            from torch.hub import download_url_to_file
+            download_url_to_file(url, cached_file, progress=progress)
+            shared.modelsinfo.refresh_file('add', cached_file, url)
     return cached_file
 
 
@@ -94,16 +146,15 @@ def check_models_exists(preset, user_did=None):
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)
                 if file_path is None or file_path == '' or not os.path.exists(file_path) or size != os.path.getsize(file_path):
-                    logger.info(f'[ModelInfos] Missing model file in preset({preset}): {cata}, {path_file}')
+                    logger.info(f'Missing model file in preset({preset}): {cata}, {path_file}')
                     return False
         return True
     return False
 
-download_async = False
 default_download_url_prefix = 'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels'
-def download_model_files(preset, user_did=None):
+def download_model_files(preset, user_did=None, async_task=False):
     from modules.config import path_models_root, model_cata_map
-    global presets_model_list, default_download_url_prefix, download_async
+    global presets_model_list, default_download_url_prefix, download_queue
     
     from others.model_async_downloader import ready_to_download_url, download_it_from_ready_list
     
@@ -113,7 +164,9 @@ def download_model_files(preset, user_did=None):
         preset = f'{preset}{user_did[:7]}'
     model_list = [] if preset not in presets_model_list else presets_model_list[preset]
     if len(model_list)>0:
+        download_task_list = []
         for cata, path_file, size, hash10, url in model_list:
+            download_task = ('', {})
             if path_file[:1]=='[' and path_file[-1:]==']':
                 if url:
                     parts = urlparse(url)
@@ -129,30 +182,45 @@ def download_model_files(preset, user_did=None):
             full_path_file = os.path.abspath(os.path.join(model_dir, file_name))
             if os.path.exists(full_path_file):
                 continue
-            logger.info(f'[Download] The model file is not exists, ready to download: {file_name}')
+            logger.info(f'The model file is not exists, ready to download: {file_name}')
             model_dir = os.path.dirname(full_path_file)
             file_name = os.path.basename(full_path_file)
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
             if path_file[:1]=='[' and path_file[-1:]==']' and url.endswith('.zip'):
-                if not download_async:
-                    download_diffusers_model(cata, path_file[1:-1], size, url)
+                if not async_task:
+                    download_diffusers_model_sync(cata, path_file[1:-1], size, url)
                 else:
-                    ready_to_download_url(preset, user_did, cata, path_file[1:-1], size, url, model_dir)
+                    params=(dict(cata=cata, path_file=path_file[1:-1], num=size, url=url))
+                    download_task = ('diffusers', params)
+                    download_task_list.append(download_task)
             else:
-                if not download_async:
+                if not async_task:
                     load_file_from_url(
                         url=url,
                         model_dir=model_dir,
                         file_name=file_name
                     )
                 else:
-                    ready_to_download_url(preset, user_did, cata, file_name, size, url, model_dir)
-        if download_async:
-            download_it_from_ready_list(preset, user_did)
+                    load_file_from_url(
+                        url=url,
+                        model_dir=model_dir,
+                        file_name=file_name,
+                        async_task=True
+                    )
+                    params=(dict(url=url, path_file=full_path_file))
+                    download_task = ('file', params)
+                    download_task_list.append(download_task)
+        if async_task:
+            pass #logger.info(f'download_task_list:{download_task_list}')
+            #download_queue.put(lambda: download_multiple_files(download_task_list))
     return
 
-def download_diffusers_model(cata, model_name, num, url):
+async def download_diffusers_model(cata, model_name, num, url):
+    download_diffusers_model_sync(cata, model_name, num, url)
+
+
+def download_diffusers_model_sync(cata, model_name, num, url):
     import zipfile
     import shutil
     from modules.config import path_models_root, model_cata_map
@@ -179,3 +247,14 @@ def download_diffusers_model(cata, model_name, num, url):
     shared.modelsinfo.refresh_from_path()
     return
 
+def downloader(task_queue):
+    while True:
+        task = task_queue.get()
+        logger.info('got download task')
+        anyio.run(task)
+        task_queue.task_done()
+
+download_queue = queue.Queue()
+
+#thread = threading.Thread(target=downloader, args=(download_queue,))
+#thread.start()

@@ -468,7 +468,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     logger.info(f'Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
     if '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
-        #download_model_files(preset, state_params["user"].get_did())
+        download_model_files(preset, state_params["user"].get_did(), True)
 
     state_params.update({"__preset": preset})
 
