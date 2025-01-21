@@ -530,6 +530,7 @@ packages = {
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Flux_AIO_simpleai_1214.zip"
@@ -558,6 +559,7 @@ packages = {
             ("SimpleModels/ipadapter/ip-adapter_sd15.safetensors", 44642768),
             ("SimpleModels/loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors", 51059544),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
+            ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd15_aio_simpleai_1214.zip"
@@ -609,6 +611,7 @@ packages = {
             ("SimpleModels/unet/kolors_inpainting.safetensors", 5159169040),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
             ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342),
+            ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Kolors_AIO_simpleai_1214.zip"
