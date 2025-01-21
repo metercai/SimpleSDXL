@@ -5,7 +5,15 @@ import requests
 from tqdm import tqdm
 from colorama import init, Fore, Style
 import threading
-import queue
+import atexit
+
+def cleanup():
+    if os.path.exists("downloadlist.txt"):
+        os.remove("downloadlist.txt")
+        print("已删除 'downloadlist.txt' 文件。")
+
+# 在程序开始时注册退出时执行清理操作
+atexit.register(cleanup)
 
 # 初始化 colorama
 init(autoreset=True)
@@ -220,15 +228,20 @@ def validate_files(packages):
      # 将字典转换为列表并按文件大小排序
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
 
-    # 保存有问题的文件的下载路径到一个txt文件中
+    # 保存有问题的文件的下载路径到两个不同的txt文件中
     if sorted_download_files:
-        with open("缺失模型下载链接.txt", "w") as f:
+        with open("downloadlist.txt", "w") as f1, open("缺失模型下载链接.txt", "w") as f2:
             for file, size in sorted_download_files:
                 if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
                     link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}"
-                f.write(f"{link},{size}\n")
+                
+                # 写入带有大小信息的文件
+                f1.write(f"{link},{size}\n")
+                
+                # 写入仅包含下载路径的文件
+                f2.write(f"{link}\n")
         print(f"{Fore.YELLOW}>>>所有有问题的文件下载路径已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
         # 调用删除 .partial 文件的函数
     delete_partial_files()
@@ -292,12 +305,15 @@ def download_file(link, file_path, position):
     # 下载完成后重命名临时文件为最终文件名
     os.rename(partial_file_path, file_path)
 
-def auto_download_missing_files():
-    if not os.path.exists("缺失模型下载链接.txt"):
-        print("未找到 '缺失模型下载链接.txt' 文件。")
+import threading
+import os
+
+def auto_download_missing_files(max_threads = 0):  # 加入max_threads参数
+    if not os.path.exists("downloadlist.txt"):
+        print("未找到 'downloadlist.txt' 文件。")
         return
 
-    with open("缺失模型下载链接.txt", "r") as f:
+    with open("downloadlist.txt", "r") as f:
         links = f.readlines()
     
     if not links:
@@ -305,6 +321,7 @@ def auto_download_missing_files():
         return
 
     threads = []
+    active_threads = 0
 
     for position, line in enumerate(links):
         link, size = line.strip().split(',')
@@ -319,10 +336,24 @@ def auto_download_missing_files():
         
         thread = threading.Thread(target=download_file, args=(link, file_path, position))
         threads.append(thread)
+        
+        active_threads += 1
         thread.start()
+        
+        # 控制最大线程数
+        if active_threads >= max_threads:
+            for t in threads:
+                t.join()
+            threads = []
+            active_threads = 0
 
     for thread in threads:
         thread.join()
+        
+        # 下载完成后删除downloadlist.txt
+    if os.path.exists("downloadlist.txt"):
+        os.remove("downloadlist.txt")
+        print("下载完成，已删除 'downloadlist.txt' 文件。")
 
 
 packages = {
@@ -838,5 +869,5 @@ def main():
 if __name__ == "__main__":
     main()
     print()
-    input(">>>按【Enter回车】启动自动下载模块，镜像速度不稳定若文件过多建议打包下载。<<<")  # 等待用户按键启动下载模块
+    input(">>>按【Enter回车】启动自动下载模块，CTRL+C中断并清理downloadlist。镜像速度不稳定若文件过多建议打包下载。<<<")  # 等待用户按键启动下载模块
     auto_download_missing_files(max_threads=5)
