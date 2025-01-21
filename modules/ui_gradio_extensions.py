@@ -22,6 +22,19 @@ def webpath(fn):
 
     return f'file={web_path}?{os.path.getmtime(fn)}'
 
+def load_tips_text():
+    tips_path = os.path.join(script_path, 'tips.txt')
+    tips_text = ''
+    if os.path.exists(tips_path):
+        try:
+            with open(tips_path, encoding='utf-8') as f:
+                tips_text = f.readlines()
+            tips_text = [line.strip() for line in tips_text if line.strip()]
+            tips_text = ','.join([f'"{line}"' for line in tips_text])
+        except Exception as e:
+            logger.info(str(e))
+            logger.info(f'Failed to load tips file {tips_path}')
+    return f'let tips = [{tips_text}];'
 
 def javascript_html():
     script_js_path = webpath('javascript/script.js')
@@ -36,6 +49,7 @@ def javascript_html():
     samples_path = webpath(os.path.abspath('./sdxl_styles/samples/fooocus_v2.jpg'))
     preset_samples_path = webpath(os.path.abspath('./presets/samples/default.jpg'))
     head = f'<script type="text/javascript">{localization_js(args_manager.args.language)}</script>\n'
+    head += f'<script type="text/javascript">{load_tips_text()}</script>\n'
     head += f'<script type="text/javascript" src="{script_js_path}"></script>\n'
     head += f'<script type="text/javascript" src="{context_menus_js_path}"></script>\n'
     head += f'<script type="text/javascript" src="{localization_js_path}"></script>\n'
