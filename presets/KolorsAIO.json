@@ -64,7 +64,6 @@
         "ipadapter,kolors_ip_adapter_plus_general.bin,1013163359,0,",
         "ipadapter,kolors_ipa_faceid_plus.bin,2385842603,0,",
         "diffusers,[Kolors],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
-        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
-        "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,"
+        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,"
         ] 
 }
