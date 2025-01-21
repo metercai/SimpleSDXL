@@ -4986,7 +4986,7 @@
   },
   "2867": {
     "inputs": {
-      "model_name": "4xNomos8kSCHAT-L.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
