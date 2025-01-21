@@ -69,13 +69,13 @@
   },
   "862": {
     "inputs": {
-      "weight": 1.1500000000000001,
-      "weight_faceidv2": 1.35,
-      "weight_type": "linear",
+      "weight": 1.5,
+      "weight_faceidv2": 2.85,
+      "weight_type": "ease in-out",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
-      "embeds_scaling": "V only",
+      "embeds_scaling": "K+V",
       "model": [
         "884",
         0
@@ -86,10 +86,6 @@
       ],
       "image": [
         "776",
-        0
-      ],
-      "image_negative": [
-        "871",
         0
       ],
       "clip_vision": [
@@ -106,21 +102,6 @@
       "title": "IPAdapterFaceID"
     }
   },
-  "871": {
-    "inputs": {
-      "type": "shuffle",
-      "strength": 0.7000000000000001,
-      "blur": 0,
-      "image_optional": [
-        "776",
-        0
-      ]
-    },
-    "class_type": "IPAdapterNoise",
-    "_meta": {
-      "title": "IPAdapterNoise"
-    }
-  },
   "873": {
     "inputs": {
       "provider": "CPU",
@@ -134,7 +115,7 @@
   "884": {
     "inputs": {
       "lora_name": "StickersRedmond.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.1,
       "strength_clip": 1,
       "model": [
         "751",
@@ -181,7 +162,7 @@
   },
   "895": {
     "inputs": {
-      "text": "nsfw, nude",
+      "text": "low quality, worst quality",
       "clip": [
         "884",
         1
@@ -194,7 +175,7 @@
   },
   "896": {
     "inputs": {
-      "text": "Sticker, svg, vector, vector art, 3D render, portrait, close shot",
+      "text": "cartoon, cartoon style, Sticker, Stickers, svg, vector design, portrait from chest up, Cinema 4D, 3D Render, 3D model, solo, an individual, a figure",
       "clip": [
         "884",
         1
@@ -380,9 +361,9 @@
         "928",
         0
       ],
-      "cfg": 3.5,
-      "sampler_name": "dpmpp_2m_sde_gpu",
-      "scheduler": "karras",
+      "cfg": 2.6,
+      "sampler_name": "dpmpp_sde_gpu",
+      "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
         "862",
@@ -408,7 +389,7 @@
   },
   "928": {
     "inputs": {
-      "value": 30
+      "value": 20
     },
     "class_type": "easy int",
     "_meta": {
