@@ -22,13 +22,14 @@ async def download_file_with_progress(url: str, file_path: str):
                 total_size = int(response.headers.get("Content-Length", 0))
 
                 with tqdm(
-                    total=total_size, unit="B", unit_scale=True, desc='' #os.path.basename(file_path)
+                    total=total_size, unit="iB", unit_scale=True, desc='' #os.path.basename(file_path)
                 ) as progress_bar:
-                    with open(file_path, "wb") as f:
+                    partial_file_path = file_path + ".partial"
+                    with open(partial_file_path, "wb") as f:
                         async for chunk in response.aiter_bytes():
                             f.write(chunk)
                             progress_bar.update(len(chunk))
-
+            os.rename(partial_file_path, file_path)
             shared.modelsinfo.refresh_file('add', file_path, url)
         except httpx.HTTPStatusError as e:
             logger.error(f"下载失败: {e}")
