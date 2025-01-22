@@ -345,7 +345,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 854258631067713,
+      "seed": 436971200766730,
       "steps": 20,
       "cfg": 30,
       "denoise": 1
@@ -494,10 +494,22 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 192,
-      "bottom_reserve": 192,
-      "left_reserve": 192,
-      "right_reserve": 192,
+      "top_reserve": [
+        "236",
+        0
+      ],
+      "bottom_reserve": [
+        "236",
+        0
+      ],
+      "left_reserve": [
+        "235",
+        0
+      ],
+      "right_reserve": [
+        "235",
+        0
+      ],
       "round_to_multiple": "16",
       "image": [
         "89",
@@ -542,10 +554,22 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 192,
-      "bottom_reserve": 192,
-      "left_reserve": 192,
-      "right_reserve": 192,
+      "top_reserve": [
+        "236",
+        0
+      ],
+      "bottom_reserve": [
+        "236",
+        0
+      ],
+      "left_reserve": [
+        "235",
+        0
+      ],
+      "right_reserve": [
+        "235",
+        0
+      ],
       "round_to_multiple": "16",
       "image": [
         "110",
@@ -897,18 +921,6 @@
       "title": "Clean VRAM Used"
     }
   },
-  "227": {
-    "inputs": {
-      "images": [
-        "5",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "231": {
     "inputs": {
       "expand": 5,
@@ -927,6 +939,48 @@
     "class_type": "GrowMaskWithBlur",
     "_meta": {
       "title": "Grow Mask With Blur"
+    }
+  },
+  "234": {
+    "inputs": {
+      "image": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "235": {
+    "inputs": {
+      "value": "a*0.2",
+      "a": [
+        "234",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "236": {
+    "inputs": {
+      "value": "a*0.2+b*0.2",
+      "a": [
+        "234",
+        1
+      ],
+      "b": [
+        "234",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
