@@ -1,17 +1,23 @@
 {
   "3": {
     "inputs": {
-      "seed": 188679083188513,
-      "steps": 8,
-      "cfg": 1,
+      "seed": [
+        "478",
+        6
+      ],
+      "steps": [
+        "478",
+        7
+      ],
+      "cfg": [
+        "478",
+        8
+      ],
       "sampler_name": "euler",
       "scheduler": "normal",
-      "denoise": [
-        "422",
-        0
-      ],
+      "denoise": 0.9,
       "model": [
-        "405:3",
+        "479:3",
         0
       ],
       "positive": [
@@ -29,7 +35,7 @@
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "main_sampler"
+      "title": "KSampler"
     }
   },
   "8": {
@@ -229,8 +235,8 @@
       "method": "lanczos",
       "scale_by": "longest",
       "scale_by_length": [
-        "471",
-        0
+        "478",
+        1
       ],
       "image": [
         "57",
@@ -354,15 +360,6 @@
     "class_type": "ImageToMask",
     "_meta": {
       "title": "Convert Image to Mask"
-    }
-  },
-  "422": {
-    "inputs": {
-      "value": 0.8
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
     }
   },
   "426": {
@@ -629,15 +626,6 @@
       "title": "Grow Mask With Blur"
     }
   },
-  "471": {
-    "inputs": {
-      "value": 768
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "aspect_ratios_width"
-    }
-  },
   "472": {
     "inputs": {
       "positive": "head, face"
@@ -713,6 +701,25 @@
       "title": "LayerUtility: CropByMask V2"
     }
   },
+  "478": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 1024,
+      "height": 1024,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "logo,Backlight,nsfw,(worst quality,low resolution),distorted,twisted,watermark,,Noise, spots, cracks",
+      "seed": 898074628056779,
+      "steps": 9,
+      "cfg": 0.9,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
   "403:0": {
     "inputs": {
       "clip_name": "sigclip_vision_patch14_384.safetensors"
@@ -764,59 +771,50 @@
       "title": "ReduxAdvanced"
     }
   },
-  "405:0": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "GRPulidFluxInsightFaceLoader",
-    "_meta": {
-      "title": "GR Load InsightFace (PuLID Flux)"
-    }
-  },
-  "405:1": {
-    "inputs": {},
-    "class_type": "GRPulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "GR Load Eva Clip (PuLID Flux)"
-    }
-  },
-  "405:2": {
+  "479:0": {
     "inputs": {
       "pulid_file": "pulid_flux_v0.9.1.safetensors"
     },
-    "class_type": "GRPulidFluxModelLoader",
+    "class_type": "PulidFluxModelLoader",
     "_meta": {
-      "title": "GR Load PuLID Flux Model"
+      "title": "Load PuLID Flux Model"
     }
   },
-  "405:3": {
+  "479:1": {
+    "inputs": {},
+    "class_type": "PulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "479:2": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "PulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "Load InsightFace (PuLID Flux)"
+    }
+  },
+  "479:3": {
     "inputs": {
       "weight": 1,
       "start_at": 0,
       "end_at": 1,
-      "use_face_number": false,
-      "face_number": 0,
-      "blur": 0.01,
-      "face_select": "center_face",
-      "fusion": "norm_id",
-      "fusion_weight_max": 1,
-      "fusion_weight_min": 0,
-      "train_step": 1000,
-      "use_gray": true,
       "model": [
         "39",
         0
       ],
       "pulid_flux": [
-        "405:2",
+        "479:0",
         0
       ],
       "eva_clip": [
-        "405:1",
+        "479:1",
         0
       ],
       "face_analysis": [
-        "405:0",
+        "479:2",
         0
       ],
       "image": [
@@ -824,9 +822,9 @@
         1
       ]
     },
-    "class_type": "GRApplyPulidFlux",
+    "class_type": "ApplyPulidFlux",
     "_meta": {
-      "title": "GR Apply PuLID Flux"
+      "title": "Apply PuLID Flux"
     }
   }
 }
