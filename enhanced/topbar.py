@@ -223,6 +223,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
+    logger.info(f'admin_currunt_value: {admin_currunt_value}')
 
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
@@ -387,7 +388,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         gr.Info(preset_absent_model_note_info)
         state_params["absent_model"] = True
         if shared.token.is_admin(state_params["user"].get_did()):
-            download_model_files(state_params["__preset"], state_params["user"].get_did(), True)
+            download_model_files(state_params["__preset"], state_params["user"].get_did())
 
     superprompter.remove_superprompt()
     remove_tokenizer()
@@ -682,17 +683,13 @@ identity_introduce = '''
 1，解锁“我的预置”功能，支持个性化的预置导航。<br>
 2，独立的出图存储空间和日志历史页，保障隐私安全。<br>
 3，可将当前环境参数保存为个人定制的预置包。<br>
-4，解锁更多功能的配置管理，包括翻译器/定制OBP等。<br>
-5，其他计划中的个性化服务、增强功能及互助服务。<br>
-如：提示词库、创意分享、共享预置包、共享算力等<br>
+4，解锁更多的功能配置管理和个性化服务。<br>
 <br>
 系统将指定首个绑定身份为管理员，赋予超级管理权限: <br>
 1，可一键进入内嵌的Comfyd引擎工作流操作界面。<br>
 2，可管理内嵌Comfyd引擎的更多性能参数和配置。<br>
 3，解锁MiniCPM，升级更高级的反推/翻译/扩写服务。<br>
-4，对本节点的其他身份进行管理(计划)。<br>
-5，申请预置包发布和二次打包的授权标识(计划)。<br>
-关注计划中需求的可以入QQ群:938075852 进行交流。<br>
+更多管理需求可以入QQ群:938075852 进行交流。<br>
 <br>
 系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
 '''
