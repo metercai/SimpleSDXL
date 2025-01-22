@@ -345,7 +345,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 239051395596,
+      "seed": 436971200766730,
       "steps": 20,
       "cfg": 30,
       "denoise": 1
@@ -968,10 +968,14 @@
   },
   "236": {
     "inputs": {
-      "value": "a*0.2",
+      "value": "a*0.2+b*0.2",
       "a": [
         "234",
         1
+      ],
+      "b": [
+        "234",
+        0
       ]
     },
     "class_type": "SimpleMath+",
