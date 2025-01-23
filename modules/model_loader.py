@@ -17,12 +17,17 @@ logger = logging.getLogger(format_name(__name__))
 async def download_file_with_progress(url: str, file_path: str):
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
+            if 'HF_MIRROR' in os.environ:
+                url = str.replace(url, "huggingface.co", os.environ["HF_MIRROR"].rstrip('/'), 1)
+            model_dir = os.path.dirname(file_path)
+            if not os.path.exists(model_dir):
+                os.makedirs(model_dir, exist_ok=True)
             async with client.stream("GET", url) as response:
                 response.raise_for_status()
                 total_size = int(response.headers.get("Content-Length", 0))
 
                 with tqdm(
-                    total=total_size, unit="iB", unit_scale=True, desc='' #os.path.basename(file_path)
+                    total=total_size, unit="iB", unit_scale=True, desc=''
                 ) as progress_bar:
                     partial_file_path = file_path + ".partial"
                     with open(partial_file_path, "wb") as f:

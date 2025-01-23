@@ -27,12 +27,15 @@ def get_config_path(key, default_value):
     else:
         return os.path.abspath(default_value)
 
-wildcards_max_bfs_depth = 64
-config_path = get_config_path('config_path', "config.txt") if args_manager.args.config is None else os.path.abspath(os.path.join(args_manager.args.config, "config.txt"))
-config_example_path = get_config_path('config_example_path', "config_modification_tutorial.txt")
+userhome_path = get_config_path('simpleai_userhome', "users") if not args_manager.args.userhome_path else args_manager.args.userhome_path
+config_path_old = get_config_path('config_path', "config.txt")
+config_path = os.path.abspath(os.path.join(userhome_path, "config.txt"))
+config_example_path = os.path.join(os.path.dirname(config_path), "config_modification_tutorial.txt")
+
 config_dict = {}
 always_save_keys = []
 visited_keys = []
+wildcards_max_bfs_depth = 64
 
 try:
     with open(os.path.abspath(f'./presets/default.json'), "r", encoding="utf-8") as json_file:
@@ -42,6 +45,10 @@ except Exception as e:
     logger.info(e)
 
 try:
+    if os.path.exists(config_path_old) and not os.path.exists(config_path):
+        shutil.copy(config_path_old, config_path)
+        config_path_deprecated = config_path_old + '.deprecated'
+        os.rename(config_path_old, config_path_deprecated)
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as json_file:
             config_dict.update(json.load(json_file))
@@ -151,9 +158,9 @@ def get_path_userhome() -> str:
     """
     Checking users path argument and overriding default path.
     """
-    global config_dict
-    path_userhome = 'users' if not args_manager.args.userhome_path else args_manager.args.userhome_path
-    path_userhome = get_dir_or_set_default('path_userhome', path_userhome)
+    global config_dict, userhome_path
+    path_userhome = get_dir_or_set_default('path_userhome', userhome_path)
+    path_userhome = userhome_path
     logger.info(f'The path_userhome: {os.path.abspath(path_userhome)}')
     return path_userhome
 
