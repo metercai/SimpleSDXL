@@ -245,7 +245,7 @@
   },
   "288": {
     "inputs": {
-      "model_name": "4x-UltraSharp.pth"
+      "model_name": "4xNomosUniDAT_bokeh_jpg.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -2222,7 +2222,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 88771058538656,
+      "seed": 620754918125991,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -2492,7 +2492,7 @@
     "inputs": {
       "lora_name": "flux1-depth-dev-lora.safetensors",
       "strength_model": [
-        "2664",
+        "2889",
         0
       ],
       "model": [
@@ -2867,7 +2867,7 @@
         0
       ],
       "on_false": [
-        "2449",
+        "2885",
         0
       ]
     },
@@ -2887,7 +2887,7 @@
         0
       ],
       "on_false": [
-        "2242",
+        "2868",
         0
       ]
     },
@@ -2950,7 +2950,7 @@
         0
       ],
       "on_false": [
-        "2458",
+        "2886",
         0
       ]
     },
@@ -2970,7 +2970,7 @@
         0
       ],
       "on_false": [
-        "2243",
+        "2869",
         0
       ]
     },
@@ -3024,7 +3024,7 @@
         0
       ],
       "on_false": [
-        "2467",
+        "2887",
         0
       ]
     },
@@ -3044,7 +3044,7 @@
         0
       ],
       "on_false": [
-        "2244",
+        "2870",
         0
       ]
     },
@@ -3098,7 +3098,7 @@
         0
       ],
       "on_false": [
-        "2476",
+        "2888",
         0
       ]
     },
@@ -3118,7 +3118,7 @@
         0
       ],
       "on_false": [
-        "2245",
+        "2871",
         0
       ]
     },
@@ -3147,7 +3147,7 @@
         0
       ],
       "control_net": [
-        "2293",
+        "2896",
         0
       ],
       "vae": [
@@ -3184,7 +3184,7 @@
         0
       ],
       "control_net": [
-        "2293",
+        "2896",
         0
       ],
       "vae": [
@@ -3221,7 +3221,7 @@
         0
       ],
       "control_net": [
-        "2293",
+        "2896",
         0
       ],
       "vae": [
@@ -3258,7 +3258,7 @@
         0
       ],
       "control_net": [
-        "2293",
+        "2896",
         0
       ],
       "vae": [
@@ -3858,7 +3858,7 @@
   },
   "2421": {
     "inputs": {
-      "value": "a*0.4",
+      "value": "a",
       "a": [
         "1079",
         0
@@ -3871,7 +3871,7 @@
   },
   "2422": {
     "inputs": {
-      "value": "a*0.4",
+      "value": "a",
       "a": [
         "1075",
         0
@@ -3884,7 +3884,7 @@
   },
   "2423": {
     "inputs": {
-      "value": "a*0.4",
+      "value": "a",
       "a": [
         "1080",
         0
@@ -3897,7 +3897,7 @@
   },
   "2424": {
     "inputs": {
-      "value": "a*0.4",
+      "value": "a",
       "a": [
         "1081",
         0
@@ -4454,7 +4454,7 @@
     "inputs": {
       "lora_name": "flux1-canny-dev-lora.safetensors",
       "strength_model": [
-        "2495",
+        "2890",
         0
       ],
       "model": [
@@ -5032,7 +5032,7 @@
         0
       ],
       "control_net": [
-        "2547",
+        "2895",
         0
       ],
       "vae": [
@@ -5069,7 +5069,7 @@
         0
       ],
       "control_net": [
-        "2547",
+        "2895",
         0
       ],
       "vae": [
@@ -5106,7 +5106,7 @@
         0
       ],
       "control_net": [
-        "2547",
+        "2895",
         0
       ],
       "vae": [
@@ -5143,7 +5143,7 @@
         0
       ],
       "control_net": [
-        "2547",
+        "2895",
         0
       ],
       "vae": [
@@ -6489,7 +6489,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "2860",
         0
@@ -6509,7 +6509,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 0,
       "model": [
         "2096",
         0
@@ -6529,7 +6529,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "936",
         0
@@ -6569,7 +6569,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "2037",
         0
@@ -6785,7 +6785,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "936",
         0
@@ -6814,7 +6814,7 @@
   },
   "2859": {
     "inputs": {
-      "model_name": "4x-UltraSharp.pth"
+      "model_name": "4xNomosUniDAT_bokeh_jpg.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -6833,6 +6833,419 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_5"
+    }
+  },
+  "2861": {
+    "inputs": {
+      "strength": [
+        "1079",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1082",
+        0
+      ],
+      "positive": [
+        "1211",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2897",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2741",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2862": {
+    "inputs": {
+      "strength": [
+        "1075",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1083",
+        0
+      ],
+      "positive": [
+        "2642",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2897",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2742",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2863": {
+    "inputs": {
+      "strength": [
+        "1081",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1085",
+        0
+      ],
+      "positive": [
+        "2646",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2897",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2744",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2864": {
+    "inputs": {
+      "strength": [
+        "1080",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "1084",
+        0
+      ],
+      "positive": [
+        "2644",
+        0
+      ],
+      "negative": [
+        "140",
+        0
+      ],
+      "control_net": [
+        "2897",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ],
+      "image": [
+        "2743",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "2866": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "1043",
+        0
+      ],
+      "b": [
+        "2867",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2867": {
+    "inputs": {
+      "value": 3
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2868": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2861",
+        0
+      ],
+      "on_false": [
+        "2242",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2869": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2862",
+        0
+      ],
+      "on_false": [
+        "2243",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2870": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2864",
+        0
+      ],
+      "on_false": [
+        "2244",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2871": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2863",
+        0
+      ],
+      "on_false": [
+        "2245",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2885": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2278",
+        0
+      ],
+      "on_false": [
+        "2449",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2886": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2280",
+        0
+      ],
+      "on_false": [
+        "2458",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2887": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2279",
+        0
+      ],
+      "on_false": [
+        "2467",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2888": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2281",
+        0
+      ],
+      "on_false": [
+        "2476",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2889": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2374",
+        0
+      ],
+      "on_false": [
+        "2664",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2890": {
+    "inputs": {
+      "boolean": [
+        "2866",
+        0
+      ],
+      "on_true": [
+        "2374",
+        0
+      ],
+      "on_false": [
+        "2495",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2895": {
+    "inputs": {
+      "type": "auto",
+      "control_net": [
+        "2547",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "2896": {
+    "inputs": {
+      "type": "auto",
+      "control_net": [
+        "2293",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "2897": {
+    "inputs": {
+      "type": "auto",
+      "control_net": [
+        "2293",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
     }
   }
 }
