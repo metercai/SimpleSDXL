@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style type="text/css">
+    .imgtext {
+      position: relative;
+      max-height: 110px;
+    }
+    .text {
+      position:fixed;
+      left: 0;
+      right: 1%;
+      margin: 0;
+      padding: 0;
+    }
+    .imgbox {
+      position:fixed;
+      right: 0;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      left: 99%;
+      max-width: 140px;
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(1, 1fr);
+      justify-items: center;
+      align-items: center;
+      grid-gap: 1px;
+    }
+    .imgbox img {
+      width: 72px;
+      object-fit: cover;
+    }
+  </style>
+  <script>
+    function get_url_params() {
+      var current={theme:"light", lang:"cn"};
+      var url=document.documentURI.split("?");
+      if (url.length>1) {
+          var args=url[1].split("&");
+          for (var i=0;i<args.length;i++) {
+              var arg=args[i].split("=");
+              if (arg.length>1) {
+                  switch(arg[0]) {
+                      case "__theme": current.theme=arg[1];break;
+                      case "__lang": current.lang=arg[1];break;
+                  }
+              }
+          }
+      }
+      return current;
+    }
+  </script>
+  <base target="_blank">
+</head>
+<body style="width: 100%;margin: 0;padding: 0;display: flex;flex-direction: column;flex-grow: 1;">
+<div id="imgtext" class="imgtext">
+    <div class="text" id="text">
+        <span id="descr" style="float: left; color: white; font-size: 12px;"> SD15AIO是经典SD1.5模型为核心的综合预置包，SD15All In One。采用SD1.5套件Ipadapter、Canny、Depth、Pose、Powerpaint等模型和节点，在SimpleSDXL双引擎架构上成功解锁了SD1.5庞大的生态圈，为社区群友带来了福音。预置包支持SD1.5系列大模型与Lora。</span>
+    </div>
+    <div class="imgbox">
+    </div>
+</div>
+<script>
+params = get_url_params();
+set_text_color(params);
+
+function set_text_color(info) {
+    pos1 = document.getElementById("descr");
+    if (info.theme == "dark") {
+        pos1.style.color = "#f9fafb";
+    } else {
+        pos1.style.color = "#1f2937";
+    }
+}
+
+</script>
+</body>
+</html>
