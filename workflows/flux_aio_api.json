@@ -245,7 +245,7 @@
   },
   "288": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.pth"
+      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -6814,7 +6814,7 @@
   },
   "2859": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.pth"
+      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
