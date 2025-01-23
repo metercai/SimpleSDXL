@@ -120,19 +120,19 @@ def typewriter_effect(text, delay=0.01):
 def print_instructions():
     print()
     print(f"{Fore.GREEN}★★★★★{Style.RESET_ALL}安装视频教程{Fore.YELLOW}https://www.bilibili.com/video/BV1ddkdYcEWg/{Style.RESET_ALL}{Fore.GREEN}★★★★★{Style.RESET_ALL}{Fore.GREEN}★{Style.RESET_ALL}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     print()
     print(f"{Fore.GREEN}★{Style.RESET_ALL}攻略地址飞书文档:{Fore.YELLOW}https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe{Style.RESET_ALL}文章无权限即为未编辑完毕。{Fore.GREEN}★{Style.RESET_ALL}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}稳速生图指南:Nvidia显卡驱动选择最新版驱动,驱动类型最好为Studio。{Fore.GREEN}★{Style.RESET_ALL}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}在遇到生图速度断崖式下降或者爆显存OutOfMemory时,提高{Fore.GREEN}预留显存功能{Style.RESET_ALL}的数值至（1~2）{Fore.GREEN}★{Style.RESET_ALL}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 {Fore.GREEN}★{Style.RESET_ALL}")
     print()
-    time.sleep(0.2)
+    time.sleep(0.1)
     
 def get_unique_filename(file_path, extension=".corrupted"):
     base = file_path + extension
@@ -147,7 +147,8 @@ def validate_files(packages):
 
     # 使用字典来存储下载信息，确保路径唯一
     download_files = {}
-    
+    missing_package_names = []  # 用于存储缺失文件的包体名称
+
     for package_key, package_info in packages.items():
         package_name = package_info["name"]
         files_and_sizes = package_info["files"]
@@ -155,7 +156,6 @@ def validate_files(packages):
         print(f"－－－－－－－", end='')
         time.sleep(0.1)
         print(f"校验{package_name}文件－－－－－－－")
-        time.sleep(0.1)
         missing_files = []
         size_mismatch_files = []
         case_mismatch_files = []
@@ -214,6 +214,8 @@ def validate_files(packages):
                 print(normalize_path(file))
                 time.sleep(0.01)
                 download_files[file] = expected_size
+            # 将缺失包体名称保存到列表中
+            missing_package_names.append(package_name)
             # 统一在最后打印下载链接
             if package_info["download_links"]:
                 print(f"{Fore.YELLOW}下载链接(若为压缩包，则参考安装视频流程安装):{Style.RESET_ALL}")
@@ -224,8 +226,13 @@ def validate_files(packages):
         time.sleep(0.1)
         print()
 
+    # 将缺失的包体名称打印出来
+    if missing_package_names:
+        print(f"{Fore.RED}以下包体缺失文件，请检查并重新下载：{Style.RESET_ALL}")
+        for package_name in missing_package_names:
+            print(f"- {package_name}")
 
-     # 将字典转换为列表并按文件大小排序
+    # 将字典转换为列表并按文件大小排序
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
 
     # 保存有问题的文件的下载路径到两个不同的txt文件中
@@ -243,9 +250,10 @@ def validate_files(packages):
                 # 写入仅包含下载路径的文件
                 f2.write(f"{link}\n")
         print(f"{Fore.YELLOW}>>>所有有问题的文件下载路径已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
-        # 调用删除 .partial 文件的函数
+        
+    # 调用删除 .partial 文件的函数
     delete_partial_files()
-
+    
 def delete_partial_files():
     """
     从当前脚本位置开始，查找 SimpleModels 目录，并删除其中所有 .partial 文件
@@ -259,7 +267,7 @@ def delete_partial_files():
         print(f"{Fore.RED}未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
         return
 
-    print(f"{Fore.CYAN}开始在目录 '{simplemodels_dir}' 中搜索以往下载不完全的临时文件...{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}开始在目录 '{simplemodels_dir}' 中搜索下载的临时文件...{Style.RESET_ALL}")
     
     partial_files_found = False
 
@@ -270,7 +278,7 @@ def delete_partial_files():
                 file_path = os.path.join(root, file)
                 try:
                     os.remove(file_path)  # 删除文件
-                    print(f"{Fore.GREEN}已删除下载不完全的临时文件: {file_path}{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}已删除下载的临时文件: {file_path}{Style.RESET_ALL}")
                 except Exception as e:
                     print(f"{Fore.RED}删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
     
@@ -355,10 +363,50 @@ def auto_download_missing_files(max_threads = 0):  # 加入max_threads参数
         os.remove("downloadlist.txt")
         print("下载完成，已删除 'downloadlist.txt' 文件。")
 
+def get_download_links_for_package(packages, download_list_path):
+    """
+    根据 packages 中的 files 列表生成路径，并与 downloadlist.txt 中的需求进行比对，
+    更新 downloadlist.txt 中需要下载的文件，只保留 files 中有的文件链接。
+    """
+    # 检查 downloadlist.txt 是否存在
+    if not os.path.exists(download_list_path):
+        print(f"{Fore.RED}>>>downloadlist.txt不存在<<<{Style.RESET_ALL}")
+        return []
+
+    # 读取 downloadlist.txt 中的所有文件链接
+    with open(download_list_path, "r") as f:
+        existing_links = [line.strip().split(",")[0] for line in f.readlines()]
+
+    # 创建一个列表存储需要保留的文件链接
+    valid_files = []
+
+    # 遍历 packages 中的 files 列表，生成需要保留的文件链接
+    for package_name, package_info in packages.items():
+        for file_path, file_size in package_info["files"]:
+            # 拼接完整下载链接
+            if file_path == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
+            else:
+                link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file_path}"
+
+            # 如果该链接在现有的下载列表中，添加到需要保留的文件列表
+            if link in existing_links:
+                valid_files.append((link, file_size))
+
+    # 更新 downloadlist.txt，只保留需要保留的文件链接
+    with open(download_list_path, "w") as f:
+        for link, size in valid_files:
+            f.write(f"{link},{size}\n")
+
+    print(f"{Fore.YELLOW}>>>downloadlist.txt 已更新<<<{Style.RESET_ALL}")
+
+    return valid_files
+
 
 packages = {
     "base_package": {
-        "name": "基础模型包",
+        "id": 1,
+        "name": "[1]基础模型包",
         "files": [
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
@@ -452,7 +500,8 @@ packages = {
         ]
     },
     "extension_package": {
-        "name": "增强模型包",
+        "id": 2,
+        "name": "[2]增强模型包",
         "files": [
             ("SimpleModels/embeddings/unaestheticXLhk1.safetensors", 33296),
             ("SimpleModels/embeddings/unaestheticXLv31.safetensors", 33296),
@@ -478,7 +527,8 @@ packages = {
         ]
     },
         "kolors_package": {
-        "name": "可图扩展包",
+        "id": 3,
+        "name": "[3]可图扩展包",
         "files": [
             ("SimpleModels/diffusers/Kolors/model_index.json", 427),
             ("SimpleModels/diffusers/Kolors/MODEL_LICENSE", 14920),
@@ -515,7 +565,8 @@ packages = {
         ]
     },
         "additional_package": {
-        "name": "额外模型包",
+        "id": 4,
+        "name": "[4]额外模型包",
         "files": [
             ("SimpleModels/checkpoints/animaPencilXL_v500.safetensors", 6938041144),
             ("SimpleModels/checkpoints/hunyuan_dit_1.2.safetensors", 8240228270),
@@ -529,7 +580,8 @@ packages = {
         ]
     },
         "Flux_package": {
-        "name": "Flux全量包",
+        "id": 5,
+        "name": "[5]Flux全量包",
         "files": [
             ("SimpleModels/checkpoints/flux1-dev.safetensors", 23802932552),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -541,7 +593,8 @@ packages = {
         ]
     },
         "Flux_aio_package": {
-        "name": "Flux_AIO扩展包",
+        "id": 6,
+        "name": "[6]Flux_AIO扩展包",
         "files": [
             ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -572,7 +625,8 @@ packages = {
         ]
     },
         "SD15_aio_package": {
-        "name": "SD1.5_AIO扩展包",
+        "id": 7,
+        "name": "[7]SD1.5_AIO扩展包",
         "files": [
             ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
@@ -600,7 +654,8 @@ packages = {
         ]
     },
         "Kolors_aio_package": {
-        "name": "Kolors_AIO扩展包",
+        "id": 8,
+        "name": "[8]Kolors_AIO扩展包",
         "files": [
             ("SimpleModels/checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("SimpleModels/clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
@@ -651,7 +706,8 @@ packages = {
         ]
     },
         "SD3x_medium_package": {
-        "name": "SD3.5_medium扩展包",
+        "id": 9,
+        "name": "[9]SD3.5_medium扩展包",
         "files": [
             ("SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -663,7 +719,8 @@ packages = {
         ]
     },
         "SD3x_large_package": {
-        "name": "SD3.5_Large 扩展包",
+        "id": 10,
+        "name": "[10]SD3.5_Large 扩展包",
         "files": [
             ("SimpleModels/clip/clip_g.safetensors", 1389382176),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -676,7 +733,8 @@ packages = {
         ]
     },
         "MiniCPM_package": {
-        "name": "MiniCPMv26反推扩展包",
+        "id": 11,
+        "name": "[11]MiniCPMv26反推扩展包",
         "files": [
             ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.gitattributes", 1657),
             ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.mdl", 49),
@@ -710,7 +768,8 @@ packages = {
         ]
     },
         "happy_package": {
-        "name": "贺年卡",
+        "id": 12,
+        "name": "[12]贺年卡",
         "files": [
             ("SimpleModels/loras/flux_graffiti_v1.safetensors", 612893792),
             ("SimpleModels/loras/kolors_crayonsketch_e10.safetensors", 170566628),
@@ -755,7 +814,8 @@ packages = {
         ]
     },
         "clothing_package": {
-        "name": "换装包",
+        "id": 13,
+        "name": "[13]换装包",
         "files": [
             ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
@@ -773,7 +833,8 @@ packages = {
         ]
     },
         "3DPurikura_package": {
-        "name": "3D大头贴",
+        "id": 14,
+        "name": "[14]3D大头贴",
         "files": [
             ("SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
             ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
@@ -793,7 +854,8 @@ packages = {
         ]
     },
         "x1-okremovebg_package": {
-        "name": "一键抠图",
+        "id": 15,
+        "name": "[15]一键抠图",
         "files": [
             ("SimpleModels/rembg/ckpt_base.pth", 367520613),
             ("SimpleModels/rembg/RMBG-1.4.pth", 176718373)
@@ -803,7 +865,8 @@ packages = {
         ]
     },
         "x2-okimagerepair_package": {
-        "name": "一键修复",
+        "id": 16,
+        "name": "[16]一键修复",
         "files": [
             ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
@@ -820,7 +883,8 @@ packages = {
         ]
     },
         "x3-swapface_package": {
-        "name": "一键换脸",
+        "id": 17,
+        "name": "[17]一键换脸",
         "files": [
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
@@ -863,8 +927,34 @@ def main():
     validate_files(packages)
     print()
     print_colored("★★★★★★★★★★★★★★★★★★检测已结束执行自动下载模块★★★★★★★★★★★★★★★★★★", Fore.CYAN)
+
 if __name__ == "__main__":
-    main()
+    main()  # 执行初始化
     print()
-    input(">>>按【Enter回车】启动自动下载模块，CTRL+C中断并清理downloadlist。镜像速度不稳定若文件过多建议打包下载。<<<")  # 等待用户按键启动下载模块
-    auto_download_missing_files(max_threads=5)
+
+    # 提示用户输入操作
+    user_input = input(">>>按【Enter回车】启动全部文件下载，或者输入包体编号回车启动下载，关闭则退出。镜像速度不稳定若文件过多建议打包下载：")
+
+    if user_input == "":
+        # 如果用户直接按回车，执行下载所有文件的操作
+        print("启动自动下载模块...")
+        auto_download_missing_files(max_threads=5)  # 启动下载所有文件
+
+    elif user_input.isdigit():
+        # 如果用户输入了包体 ID 数字，执行 get_download_links_for_package
+        package_id = int(user_input)  # 将用户输入的包体 ID 转换为整数
+
+        # 遍历所有包体，找到匹配的包体
+        selected_package = None
+        for package_name, package_info in packages.items():
+            if package_info["id"] == package_id:
+                selected_package = package_info
+                break
+
+        if selected_package:
+            get_download_links_for_package({package_name: selected_package}, "downloadlist.txt")
+            auto_download_missing_files(max_threads=5)
+        else:
+            print(f"{Fore.RED}包体编号{package_id} 无效，请输入正确的包体 ID。{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}无效的输入，请输入回车或有效的包体编号。{Style.RESET_ALL}")
