@@ -388,7 +388,7 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
         gr.Info(preset_absent_model_note_info)
         state_params["absent_model"] = True
         if shared.token.is_admin(state_params["user"].get_did()):
-            download_model_files(state_params["__preset"], state_params["user"].get_did())
+            download_model_files(state_params["__preset"], state_params["user"].get_did(), True)
 
     superprompter.remove_superprompt()
     remove_tokenizer()

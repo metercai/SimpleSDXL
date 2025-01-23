@@ -160,38 +160,12 @@
       "title": "ImageResize+"
     }
   },
-  "895": {
-    "inputs": {
-      "text": "low quality, worst quality",
-      "clip": [
-        "884",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "negative_prompt"
-    }
-  },
-  "896": {
-    "inputs": {
-      "text": "cartoon, cartoon style, Sticker, Stickers, svg, vector design, portrait from chest up, Cinema 4D, 3D Render, 3D model, solo, an individual, a figure",
-      "clip": [
-        "884",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "prompt"
-    }
-  },
   "903": {
     "inputs": {
       "upscale_by": 2,
-      "seed": 899296785881132,
+      "seed": 1017925367244215,
       "steps": [
-        "922",
+        "934",
         0
       ],
       "cfg": 7,
@@ -215,7 +189,7 @@
         0
       ],
       "model": [
-        "919",
+        "940",
         0
       ],
       "positive": [
@@ -259,7 +233,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "negative_prompt2"
+      "title": "negative_prompt"
     }
   },
   "907": {
@@ -272,7 +246,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "prompt2"
+      "title": "prompt"
     }
   },
   "908": {
@@ -328,7 +302,145 @@
       "title": "LayerUtility: Purge VRAM"
     }
   },
-  "919": {
+  "926": {
+    "inputs": {
+      "seed": [
+        "932",
+        6
+      ],
+      "steps": [
+        "933",
+        0
+      ],
+      "cfg": [
+        "932",
+        8
+      ],
+      "sampler_name": [
+        "939",
+        3
+      ],
+      "scheduler": [
+        "939",
+        4
+      ],
+      "denoise": [
+        "932",
+        9
+      ],
+      "model": [
+        "862",
+        0
+      ],
+      "positive": [
+        "937",
+        0
+      ],
+      "negative": [
+        "938",
+        0
+      ],
+      "latent_image": [
+        "887",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "932": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 512,
+      "height": 512,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "cartoon, cartoon style, Sticker, Stickers, svg, vector design, portrait from shoulders up, Cinema 4D, 3D Render, solo, an individual, a figure",
+      "negative": "low quality, worst quality",
+      "seed": 0,
+      "steps": 38,
+      "cfg": 2.6,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "933": {
+    "inputs": {
+      "value": "a-18",
+      "a": [
+        "932",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "934": {
+    "inputs": {
+      "value": "b-20",
+      "b": [
+        "932",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "937": {
+    "inputs": {
+      "text": [
+        "932",
+        4
+      ],
+      "clip": [
+        "884",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "938": {
+    "inputs": {
+      "text": [
+        "932",
+        5
+      ],
+      "clip": [
+        "884",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "939": {
+    "inputs": {
+      "steps_total": 30,
+      "refiner_step": 24,
+      "cfg": 8,
+      "sampler_name": "dpmpp_sde_gpu",
+      "scheduler": "sgm_uniform"
+    },
+    "class_type": "KSampler Config (rgthree)",
+    "_meta": {
+      "title": "i2i_KSampler"
+    }
+  },
+  "940": {
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": 0.1,
@@ -343,87 +455,6 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
-    }
-  },
-  "922": {
-    "inputs": {
-      "value": 18
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "K1 steps"
-    }
-  },
-  "926": {
-    "inputs": {
-      "seed": 0,
-      "steps": [
-        "928",
-        0
-      ],
-      "cfg": 2.6,
-      "sampler_name": "dpmpp_sde_gpu",
-      "scheduler": "sgm_uniform",
-      "denoise": 1,
-      "model": [
-        "862",
-        0
-      ],
-      "positive": [
-        "896",
-        0
-      ],
-      "negative": [
-        "895",
-        0
-      ],
-      "latent_image": [
-        "887",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
-  "928": {
-    "inputs": {
-      "value": 20
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "K2 steps"
-    }
-  },
-  "930": {
-    "inputs": {
-      "value": "a+b",
-      "a": [
-        "922",
-        0
-      ],
-      "b": [
-        "928",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "931": {
-    "inputs": {
-      "input": [
-        "930",
-        0
-      ],
-      "output": ""
-    },
-    "class_type": "Display Int (rgthree)",
-    "_meta": {
-      "title": "KS SD"
     }
   }
 }
