@@ -229,7 +229,6 @@ def download_models(default_model, previous_default_models, checkpoint_downloads
 def reset_env_args():
     shared.sysinfo = json.loads(shared.token.get_sysinfo().to_json())
     shared.sysinfo.update(dict(did=shared.token.get_sys_did()))
-    #print(f'sysinfo/基础环境信息:{sysinfo}')
 
     if '--location' in sys.argv:
         shared.sysinfo["location"] = args.location
@@ -252,9 +251,7 @@ def reset_env_args():
     reset_simpleai_args()
 
 
-#build_launcher()
 ready_checker()
-#os.environ["SIMPLEAI_VERBOSE"] = "on"
 
 shared.token, shared.sysinfo = check_base_environment()
 logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')

@@ -18,6 +18,7 @@ sorted_styles.json
 /test_imgs
 /config.txt
 /config_modification_tutorial.txt
+/config.txt.deprecated
 /user_path_config.txt
 /user_path_config-deprecated.txt
 /modules/*.png
@@ -27,6 +28,7 @@ sorted_styles.json
 /tmp
 /ui-config.json
 /outputs
+/users
 /config.json
 /log
 /webui.settings.bat
