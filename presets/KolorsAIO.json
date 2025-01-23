@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Kolors",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["enhance_checkbox", "performance_selection", "base_model", "loras-4", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
+	"disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "kolors_aio"
