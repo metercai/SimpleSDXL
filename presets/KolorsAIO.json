@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Kolors",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["enhance_checkbox", "performance_selection", "base_model", "loras-4", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
+	"disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "kolors_aio"
@@ -64,6 +64,7 @@
         "ipadapter,kolors_ip_adapter_plus_general.bin,1013163359,0,",
         "ipadapter,kolors_ipa_faceid_plus.bin,2385842603,0,",
         "diffusers,[Kolors],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
-        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,"
+        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
+        "upscale_models,4xNomosUniDAT_bokeh_jpg.pth,154697745,0,"
         ] 
 }

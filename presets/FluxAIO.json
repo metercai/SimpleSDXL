@@ -70,6 +70,7 @@
         "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
 	"loras,flux1-canny-dev-lora.safetensors,1244443944,0,",
 	"loras,flux1-depth-dev-lora.safetensors,1244440512,0,",
-	"style_models,flux1-redux-dev.safetensors,129063232,0,"
+	"style_models,flux1-redux-dev.safetensors,129063232,0,",
+    "upscale_models,4xNomosUniDAT_bokeh_jpg.pth,154697745,0,"
         ]
 }
