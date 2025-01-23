@@ -65,6 +65,6 @@
         "ipadapter,kolors_ipa_faceid_plus.bin,2385842603,0,",
         "diffusers,[Kolors],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
-        "upscale_models,4xNomosUniDAT_bokeh_jpg.pth,154697745,0,"
+        "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,"
         ] 
 }
