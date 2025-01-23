@@ -611,7 +611,7 @@ packages = {
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.pth", 154697745),
+            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
         ],
@@ -643,7 +643,7 @@ packages = {
             ("SimpleModels/ipadapter/ip-adapter_sd15.safetensors", 44642768),
             ("SimpleModels/loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors", 51059544),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.pth", 154697745)
+            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd15_aio_simpleai_1214.zip"
@@ -695,7 +695,7 @@ packages = {
             ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("SimpleModels/unet/kolors_inpainting.safetensors", 5159169040),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.pth", 154697745),
+            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
             ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342)
         ],
         "download_links": [

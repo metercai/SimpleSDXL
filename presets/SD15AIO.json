@@ -67,7 +67,7 @@
         "insightface,models/buffalo_l/det_10g.onnx,16923827,0,",
         "insightface,models/buffalo_l/genderage.onnx,1322532,0,",
         "insightface,models/buffalo_l/w600k_r50.onnx,174383860,0,",
-        "upscale_models,4xNomosUniDAT_bokeh_jpg.pth,154697745,0,"
+        "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,"
     ]
 }
 
