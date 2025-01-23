@@ -267,7 +267,8 @@ def delete_partial_files():
         print(f"{Fore.RED}未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
         return
 
-    print(f"{Fore.CYAN}开始在目录 '{simplemodels_dir}' 中搜索下载的临时文件...{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}正在清理目录 '{simplemodels_dir}' 中下载的临时文件...{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
     
     partial_files_found = False
 
@@ -282,13 +283,6 @@ def delete_partial_files():
                 except Exception as e:
                     print(f"{Fore.RED}删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
     
-    if not partial_files_found:
-        print(f"{Fore.YELLOW}在目录 '{simplemodels_dir}' 中未发现任何下载不完全的临时文件。{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
-    else:
-        print(f"{Fore.GREEN}所有下载不完全的临时文件文件处理完毕。{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}后缀名为.corrupted的损坏文件建议手动清理。{Style.RESET_ALL}")
-
 def download_file(link, file_path, position):
     partial_file_path = file_path + ".partial"
 
