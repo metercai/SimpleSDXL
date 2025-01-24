@@ -873,6 +873,7 @@ packages = {
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
             ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
