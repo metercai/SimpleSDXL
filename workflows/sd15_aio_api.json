@@ -5549,7 +5549,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "2696",
         0
@@ -5569,7 +5569,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "1314",
         0
@@ -5589,7 +5589,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "936",
         0
@@ -5609,7 +5609,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "936",
         0
