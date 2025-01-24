@@ -162,8 +162,6 @@ def download_model_files(preset, user_did=None, async_task=False):
     from modules.config import path_models_root, model_cata_map
     global presets_model_list, default_download_url_prefix, download_queue
     
-    from others.model_async_downloader import ready_to_download_url, download_it_from_ready_list
-    
     if preset.endswith('.'):
         if user_did is None:
             return False
