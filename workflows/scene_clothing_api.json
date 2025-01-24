@@ -398,7 +398,7 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 5,
+      "blur_radius": 10,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -923,11 +923,11 @@
   },
   "231": {
     "inputs": {
-      "expand": 5,
+      "expand": 10,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 5,
+      "blur_radius": 10,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
