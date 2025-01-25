@@ -145,7 +145,7 @@
   },
   "886": {
     "inputs": {
-      "seed": 669842764713305,
+      "seed": 527538921225104,
       "steps": 20,
       "cfg": 2.5500000000000003,
       "sampler_name": "dpmpp_sde_gpu",
@@ -217,7 +217,7 @@
   },
   "896": {
     "inputs": {
-      "text": "cartoon, cartoon style, Sticker, Stickers, svg, vector design, portrait from shoulders up, Cinema 4D, 3D Render, solo, an individual, a figure",
+      "text": "Sticker, Stickers, (extreme close-up portrait:1.1), tight framing, cut-out sticker with white outline, upper body shot emphasizing the neck and head, matching expression, svg, vector design, solo, an individual, cartoon, cartoon style, adorable 3D render, Cinema 4D render, deep gray background",
       "clip": [
         "884",
         1
