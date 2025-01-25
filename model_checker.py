@@ -148,14 +148,24 @@ def validate_files(packages):
     # 使用字典来存储下载信息，确保路径唯一
     download_files = {}
     missing_package_names = []  # 用于存储缺失文件的包体名称
+    package_percentages = {}  # 存储包体百分比信息
+    package_sizes = {}  # 存储包体总大小（GB）
 
     for package_key, package_info in packages.items():
         package_name = package_info["name"]
+        package_note = package_info.get("note", "")  # 获取备注信息，如果没有则为空字符串
         files_and_sizes = package_info["files"]
         download_links = package_info["download_links"]
+
+        # 计算包体总大小和非缺失文件的总大小
+        total_size = sum([size for _, size in files_and_sizes])  # 计算包体中所有文件的总大小
+        total_size_gb = total_size / (1024 ** 3)  # 转换为GB
+        non_missing_size = 0  # 非缺失文件的总大小
+
         print(f"－－－－－－－", end='')
         time.sleep(0.1)
-        print(f"校验{package_name}文件－－－－－－－")
+        print(f"校验{package_name}文件－－－－{package_note}")
+
         missing_files = []
         size_mismatch_files = []
         case_mismatch_files = []
@@ -179,6 +189,15 @@ def validate_files(packages):
                 actual_size = os.path.getsize(os.path.join(expected_dir, actual_filename))
                 if actual_size != expected_size:
                     size_mismatch_files.append((os.path.join(expected_dir, actual_filename), actual_size, expected_size))
+                else:
+                    # 如果文件没有缺失且大小匹配，则累加到非缺失文件的总大小
+                    non_missing_size += expected_size
+
+        # 计算非缺失文件的百分比
+        if total_size > 0:
+            non_missing_percentage = (non_missing_size / total_size) * 100
+            package_percentages[package_name] = non_missing_percentage
+            package_sizes[package_name] = total_size_gb
 
         # 处理文件名大小写不匹配
         if case_mismatch_files:
@@ -226,11 +245,15 @@ def validate_files(packages):
         time.sleep(0.1)
         print()
 
-    # 将缺失的包体名称打印出来
+    # 将缺失的包体名称打印出来，同时显示百分比（如果有缺失文件）
     if missing_package_names:
         print(f"{Fore.RED}以下包体缺失文件，请检查并重新下载：{Style.RESET_ALL}")
         for package_name in missing_package_names:
-            print(f"- {package_name}")
+            percentage = package_percentages.get(package_name, 0)
+            total_size_gb = package_sizes.get(package_name, 0)
+            # 计算尚需下载的 GB
+            missing_size_gb = total_size_gb * (1 - (percentage / 100))
+            print(f"- {package_name} - 总大小：{total_size_gb:.2f}GB，完整度：{percentage:.2f}%，尚需下载：{missing_size_gb:.2f}GB")
 
     # 将字典转换为列表并按文件大小排序
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
@@ -253,6 +276,10 @@ def validate_files(packages):
         
     # 调用删除 .partial 文件的函数
     delete_partial_files()
+
+
+
+
     
 def delete_partial_files():
     """
@@ -401,6 +428,7 @@ packages = {
     "base_package": {
         "id": 1,
         "name": "[1]基础模型包",
+        "note": "SDXL全功能|显存需求：★★ 速度：★★★☆",
         "files": [
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
@@ -496,6 +524,7 @@ packages = {
     "extension_package": {
         "id": 2,
         "name": "[2]增强模型包",
+        "note": "功能性补充|显存需求：★★ 速度：★★★☆",
         "files": [
             ("SimpleModels/embeddings/unaestheticXLhk1.safetensors", 33296),
             ("SimpleModels/embeddings/unaestheticXLv31.safetensors", 33296),
@@ -523,6 +552,7 @@ packages = {
         "kolors_package": {
         "id": 3,
         "name": "[3]可图扩展包",
+        "note": "可图文生图|显存需求：★★ 速度：★★★☆",
         "files": [
             ("SimpleModels/diffusers/Kolors/model_index.json", 427),
             ("SimpleModels/diffusers/Kolors/MODEL_LICENSE", 14920),
@@ -561,6 +591,7 @@ packages = {
         "additional_package": {
         "id": 4,
         "name": "[4]额外模型包",
+        "note": "动漫/混元/PG/小马/写实/SD3|显存需求：★★ 速度：★★★☆",
         "files": [
             ("SimpleModels/checkpoints/animaPencilXL_v500.safetensors", 6938041144),
             ("SimpleModels/checkpoints/hunyuan_dit_1.2.safetensors", 8240228270),
@@ -576,6 +607,7 @@ packages = {
         "Flux_package": {
         "id": 5,
         "name": "[5]Flux全量包",
+        "note": "Flux官方全量|显存需求：★★★★★ 速度：★★☆",
         "files": [
             ("SimpleModels/checkpoints/flux1-dev.safetensors", 23802932552),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -589,6 +621,7 @@ packages = {
         "Flux_aio_package": {
         "id": 6,
         "name": "[6]Flux_AIO扩展包",
+        "note": "Flux全功能[Q5模型]|显存需求：★★★☆ 速度：★★",
         "files": [
             ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -622,6 +655,7 @@ packages = {
         "SD15_aio_package": {
         "id": 7,
         "name": "[7]SD1.5_AIO扩展包",
+        "note": "SD1.5全功能|显存需求：★ 速度：★★★★",
         "files": [
             ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
@@ -652,6 +686,7 @@ packages = {
         "Kolors_aio_package": {
         "id": 8,
         "name": "[8]Kolors_AIO扩展包",
+        "note": "可图全功能|显存需求：★★★ 速度：★★★",
         "files": [
             ("SimpleModels/checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("SimpleModels/clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
@@ -705,6 +740,7 @@ packages = {
         "SD3x_medium_package": {
         "id": 9,
         "name": "[9]SD3.5_medium扩展包",
+        "note": "SD3.5中号文生图|显存需求：★★ 速度：★★★",
         "files": [
             ("SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -718,7 +754,9 @@ packages = {
         "SD3x_large_package": {
         "id": 10,
         "name": "[10]SD3.5_Large 扩展包",
+        "note": "SD3.5大号文生图|显存需求：★★★★★ 速度：★★",
         "files": [
+            ("SimpleModels/checkpoints/sd3.5_large.safetensors", 16460379262),
             ("SimpleModels/clip/clip_g.safetensors", 1389382176),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
             ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
@@ -732,6 +770,7 @@ packages = {
         "MiniCPM_package": {
         "id": 11,
         "name": "[11]MiniCPMv26反推扩展包",
+        "note": "本地多模态大语言模型|显存需求：★★ 速度：★★",
         "files": [
             ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.gitattributes", 1657),
             ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.mdl", 49),
@@ -767,6 +806,7 @@ packages = {
         "happy_package": {
         "id": 12,
         "name": "[12]贺年卡",
+        "note": "贺卡预设|显存需求：★★★ 速度：★★",
         "files": [
             ("SimpleModels/loras/flux_graffiti_v1.safetensors", 612893792),
             ("SimpleModels/loras/kolors_crayonsketch_e10.safetensors", 170566628),
@@ -813,6 +853,7 @@ packages = {
         "clothing_package": {
         "id": 13,
         "name": "[13]换装包",
+        "note": "万物迁移[Q4模型]|显存需求：★★★ 速度：★★",
         "files": [
             ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
@@ -832,6 +873,7 @@ packages = {
         "3DPurikura_package": {
         "id": 14,
         "name": "[14]3D大头贴",
+        "note": "3D个性头像|显存需求：★★ 速度：★★",
         "files": [
             ("SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
             ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
@@ -853,6 +895,7 @@ packages = {
         "x1-okremovebg_package": {
         "id": 15,
         "name": "[15]一键抠图",
+        "note": "抠图去背景神器|显存需求：★ 速度：★★★★★",
         "files": [
             ("SimpleModels/rembg/ckpt_base.pth", 367520613),
             ("SimpleModels/rembg/RMBG-1.4.pth", 176718373)
@@ -864,6 +907,7 @@ packages = {
         "x2-okimagerepair_package": {
         "id": 16,
         "name": "[16]一键修复",
+        "note": "上色、修复模糊、旧照片|显存需求：★★★ 速度：★☆",
         "files": [
             ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
@@ -883,6 +927,7 @@ packages = {
         "x3-swapface_package": {
         "id": 17,
         "name": "[17]一键换脸",
+        "note": "高精度换脸|显存需求：★★★ 速度：★☆",
         "files": [
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
@@ -904,6 +949,62 @@ packages = {
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+            "Flux_aio_fp8_package": {
+        "id": 18,
+        "name": "[18]Flux_AIO_fp8扩展包",
+        "note": "Flux全功能[fp8模型]|显存需求：★★★★ 速度：★★☆",
+        "files": [
+            ("SimpleModels/checkpoints/flux1-dev-fp8.safetensors", 11901525888),
+            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152),
+            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("SimpleModels/controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
+            ("SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("SimpleModels/controlnet/parsing_bisenet.pth", 53289463),
+            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("SimpleModels/loras/flux1-canny-dev-lora.safetensors", 1244443944),
+            ("SimpleModels/loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
+            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+        ],
+        "download_links": [
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Flux_AIO_simpleai_1214.zip",
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
+        ]
+    },
+            "clothing_fp8_package": {
+        "id": 19,
+        "name": "[19]换装_fp8包",
+        "note": "万物迁移[fp8模型]|显存需求：★★★☆ 速度：★★★",
+        "files": [
+            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors", 11902532704),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152),
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
+            ("SimpleModels/rembg/General.safetensors", 884878856)
+        ],
+        "download_links": [
+        "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。",
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors"
         ]
     },
 }
@@ -931,7 +1032,7 @@ if __name__ == "__main__":
     print()
 
     # 提示用户输入操作
-    user_input = input(">>>按【Enter回车】启动全部文件下载，或者输入包体编号回车启动下载，关闭则退出。镜像速度不稳定若文件过多建议打包下载：")
+    user_input = input(f">>>按{Fore.YELLOW}【Enter回车】{Style.RESET_ALL}启动全部文件下载，或者输入{Fore.YELLOW}【包体编号】{Style.RESET_ALL}+回车启动下载，关闭则退出。镜像速度不稳定若文件过多建议打包下载：")
 
     if user_input == "":
         # 如果用户直接按回车，执行下载所有文件的操作
