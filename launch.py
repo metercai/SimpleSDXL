@@ -20,7 +20,6 @@ from enhanced.logger import setup_logger, now_string
 setup_logger(log_level='INFO')
 logger = logging.getLogger(__name__)
 
-#print('[System PATH] ' + str(sys.path))
 logger.debug('[System ARGV] ' + str(sys.argv))
 
 root = os.path.dirname(os.path.abspath(__file__))
@@ -246,8 +245,8 @@ def reset_env_args():
             shared.args.listen = shared.sysinfo["local_ip"]
     if '--port' not in sys.argv:
         shared.args.port = shared.sysinfo["local_port"]
-    
-    if shared.args.node_type != "online":
+   
+    if shared.args.node_type and shared.args.node_type != "online":
         shared.sysinfo["local_ip"] = '127.0.0.1'
         shared.args.listen = '127.0.0.1'
 
