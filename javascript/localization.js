@@ -116,7 +116,7 @@ function refresh_finished_images_catalog_label(value) {
     } else { label.innerHTML = finished_label; }
 }
 
-function refresh_identity_center_label(role) {
+function refresh_identity_center_label(role, upstream) {
     let label = document.getElementById("identity_center");
     var translation = getTranslation("IdentityCenter");
     if (typeof translation == "undefined") {
@@ -126,7 +126,8 @@ function refresh_identity_center_label(role) {
     if (role=="admin") {
 	display_name = nickname + ", admin";
     }
-    label.textContent = translation + "(" + display_name + ")";
+    let display_upstream = upstream ? "On" : "Off";
+    label.textContent = translation + "(" + display_name + ") - " + display_upstream;
 }
 
 function refresh_input_image_tab_label() {

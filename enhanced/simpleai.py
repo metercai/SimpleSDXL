@@ -92,8 +92,8 @@ def change_advanced_logs(advanced_logs):
         utils.echo_off = True
 
 
-identity_note = '用昵称+手机号组成的可信数字身份绑定本机节点，激活"我的预置"及个性导航等高级服务。若已有身份二维码，可用其快速安全地导入已有身份。首个绑定者为系统管理员。'
-identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，以及离线和漫游场景，导出后请妥善保存。'
+identity_note = '你的昵称+手机号组成你的可信身份。绑定本机节点后，可以激活"我的预置"及个性导航等高级服务。昵称为字母或汉字组合。若有身份二维码，可安全快速导入身份。首个绑定身份者为系统管理员。'
+identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，适用离线和漫游场景，导出后请妥善保存。'
 identity_note_0 = '孤岛节点只有游客和本机管理员身份。用"导出身份"可直接导出本地管理员身份二维码，身份口令见后台日志。'
 
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
@@ -132,7 +132,7 @@ theme_color = {
 
 id_info_css = lambda x: f'style="color: {theme_color[x]};"'
 #lambda x: f'style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px; color: {theme_color[x]};"'
-guest_inc = "为游客身份" if shared.token.get_node_mode()=='online' else "为孤岛节点游客"
+guest_inc = "身份为游客" if shared.token.get_node_mode()=='online' else "为孤岛节点游客"
 user_inc = "绑定身份为" if shared.token.get_node_mode()=='online' else "为孤岛节点管理员"
 current_id_info = lambda x,y,z,t: f'<b>当前{guest_inc if shared.token.is_guest(y) else user_inc}</b><br>身份昵称: <span {id_info_css(t)}>' + f'{x}' + f'</span><br>身份标识: <span {id_info_css(t)}>{y}</span><br>节点标识: <span {id_info_css(t)}>{z}</span>'
 

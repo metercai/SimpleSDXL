@@ -283,6 +283,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     state_params.update({"bar_button": config.preset})
     state_params.update({"preset_store": False})
     state_params.update({"engine": 'Fooocus'})
+    state_params.update({"upstream": shared.upstream_did})
     results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     preset = 'default'
@@ -638,6 +639,7 @@ def update_topbar_js_params(state):
         user_name=state["user"].get_nickname(),
         user_did=state["user"].get_did(),
         user_role='guest' if shared.token.is_guest(state["user"].get_did()) else 'admin' if shared.token.is_admin(state["user"].get_did()) else 'member',
+        upstream=state["upstream"],
         task_class_name=state["engine"],
         preset_store=state["preset_store"],
         __message=state["__message"],

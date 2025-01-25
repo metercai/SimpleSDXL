@@ -14,5 +14,7 @@ modelsinfo = None
 
 torch_device = ''
 
+upstream_did = ''
+
 BUTTON_NUM = 10 
 
