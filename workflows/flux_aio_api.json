@@ -2222,7 +2222,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 620754918125991,
+      "seed": 327897120317951,
       "steps": 12,
       "cfg": 3.5,
       "denoise": 0
@@ -6489,7 +6489,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "2860",
         0
@@ -6508,8 +6508,8 @@
         0
       ],
       "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 0,
+      "end": 0.5,
+      "max_consecutive_cache_hits": 2,
       "model": [
         "2096",
         0
@@ -6529,7 +6529,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "936",
         0
@@ -6549,7 +6549,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "936",
         0
@@ -6569,7 +6569,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "2037",
         0
@@ -6785,7 +6785,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "936",
         0
