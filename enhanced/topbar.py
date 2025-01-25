@@ -223,7 +223,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
-    logger.info(f'admin_currunt_value: {admin_currunt_value}')
+    #logger.info(f'admin_currunt_value: {admin_currunt_value}')
 
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
@@ -370,7 +370,8 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
             for preprocessor_method in preprocessor_methods:
                 if '-normalization' in preprocessor_method:
                     resize_image_flag = False
-        scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
+        if scene_input_image1 is not None:
+            scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
         backend_params.update(dict(
             task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],
@@ -644,7 +645,7 @@ def update_topbar_js_params(state):
         __lang=state["__lang"],
         __preset_url=state["__preset_url"],
         __finished_nums_pages=state["__finished_nums_pages"],
-        user_qr="" if 'user_qr' not in state else state["user_qr"]
+        user_qr="" if 'user_qr' not in state else state.pop("user_qr")
         )
     return [system_params]
 
@@ -653,6 +654,11 @@ def export_identity(state):
     if not shared.token.is_guest(state["user"].get_did()):
         state["user_qr"] = export_identity_qrcode_svg(state["user"].get_did())
         #logger.info(f'user_qrcode_svg: {state["user_qr"]}')
+    elif shared.token.get_node_mode()!='online':
+        admin_qr = shared.token.export_isolated_admin_qrcode_svg()
+        if admin_qr:
+            state["user_qr"] = admin_qr
+            #logger.info(f'admin_user_qrcode_svg: {state["user_qr"]}')
     return update_topbar_js_params(state)[0]
 
 def trigger_input_identity(img):
