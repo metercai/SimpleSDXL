@@ -357,7 +357,7 @@
       "height": 512,
       "swap": false,
       "batch_size": 1,
-      "positive": "cartoon, cartoon style, Sticker, Stickers, svg, vector design, portrait from shoulders up, Cinema 4D, 3D Render, solo, an individual, a figure",
+      "positive": "Sticker, Stickers, (extreme close-up portrait:1.1), tight framing, cut-out sticker with white outline, upper body shot emphasizing the neck and head, matching expression, svg, vector design, solo, an individual, cartoon, cartoon style, adorable 3D render, Cinema 4D render, deep gray background",
       "negative": "low quality, worst quality",
       "seed": 0,
       "steps": 38,

@@ -10,8 +10,8 @@
                 "theme_title": "可选择快速出图或慢速精细画质（清晰度更高，出图变慢）",            
                 "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_additional_prompt_2"],
                 "prompt": {
-                     "快速出图": "cartoon, cartoon style, Sticker, Stickers, (svg:1.05), vector design, solo, an individual, upper body shot emphasizing the neck and head, adorable 3D render, Cinema 4D render",
-                     "慢速精细画质": "cartoon, cartoon style, Sticker, Stickers, (svg:1.05), vector design, solo, an individual, upper body shot emphasizing the neck and head, adorable 3D render, Cinema 4D render"
+                     "快速出图": "Sticker, Stickers, (extreme close-up portrait:1.1), tight framing, cut-out sticker with white outline, upper body shot emphasizing the neck and head, matching expression, svg, vector design, solo, an individual, cartoon, cartoon style, adorable 3D render, Cinema 4D render, deep gray background",
+                     "慢速精细画质": "Sticker, Stickers, (extreme close-up portrait:1.1), tight framing, cut-out sticker with white outline, upper body shot emphasizing the neck and head, matching expression, svg, vector design, solo, an individual, cartoon, cartoon style, adorable 3D render, Cinema 4D render, deep gray background"
                 },
 		"image_preprocessor_method": [["face"]],
                  "aspect_ratio" : {
@@ -81,3 +81,4 @@
         "loras,StickersRedmond.safetensors,170540036,0,"
         ]
 }
+

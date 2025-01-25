@@ -123,11 +123,11 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     switch_flag = state.get("switch_scene_theme", False)
     ready_to_gen = True if switch_flag and ((input_image_number==1 and (('scene_canvas_image' not in visible and canvas_image is not None) or ('scene_input_image1' not in visible and input_image1 is not None))) or (input_image_number==2 and (('scene_canvas_image' not in visible and canvas_image is not None) and ('scene_input_image1' not in visible and input_image1 is not None)))) else False
     #print(f'input_image_number={input_image_number}, ready_to_gen={ready_to_gen}, switch_flag={switch_flag}')
-    
-    canvas_image_update_with_value = gr.update(visible=True, value=None, height=300 if input_image_number==1 else 250)
-    input_image1_update_with_value = gr.update(visible=True, value=None, height=300 if input_image_number==1 else 170)
-    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else canvas_image_update_with_value if not switch_flag else gr.update(visible=True, height=300 if input_image_number==1 else 250)]
-    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else input_image1_update_with_value if not switch_flag else gr.update(visible=True, height=300 if input_image_number==1 else 170))
+   
+    canvas_image_height=300 if input_image_number==1 else 250
+    input_image1_height=300 if input_image_number==1 else 170
+    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=canvas_image_height) if not switch_flag else gr.update(visible=True, height=canvas_image_height)]
+    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=input_image1_height) if not switch_flag else gr.update(visible=True, height=input_image1_height))
     themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
     title = scenes.get('additional_prompt_title', '')

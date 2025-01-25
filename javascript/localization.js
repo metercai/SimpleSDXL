@@ -110,7 +110,7 @@ function refresh_finished_images_catalog_label(value) {
     var finished_label = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
     const randomTip = getRandomTip();
     if (randomTip) {
-	var space_num = 60 - randomTip.length;
+	var space_num = 56 - randomTip.length;
 	const spaces = space_num > 0 ? '&nbsp;'.repeat(space_num) : '';
         label.innerHTML = finished_label + spaces + randomTip; 
     } else { label.innerHTML = finished_label; }

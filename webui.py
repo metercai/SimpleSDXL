@@ -13,10 +13,10 @@ import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.style_sorter as style_sorter
 import modules.meta_parser
-import args_manager
 import copy
-from extras.inpaint_mask import SAMOptions
+import args_manager
 
+from extras.inpaint_mask import SAMOptions
 from PIL import Image
 from modules.sdxl_styles import legal_style_names, fooocus_expansion
 from modules.private_logger import get_current_html_path
@@ -1572,7 +1572,6 @@ httpx_logger.setLevel(logging.WARNING)
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
-
 
 if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd:
     comfyd.active(True)

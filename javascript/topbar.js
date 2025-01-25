@@ -243,7 +243,7 @@ function setLinkColor(theme) {
 }
 
 
-async function refresh_identity_qrcode(nickname, did, user_qrcode) {
+async function refresh_identity_qrcode(nickname, did, memo, user_qrcode) {
     let Canvg;
 
     if (window.canvg && window.canvg.Canvg) {
@@ -256,10 +256,18 @@ async function refresh_identity_qrcode(nickname, did, user_qrcode) {
       console.error('Canvg not found');
     } 
     if (user_qrcode) {
+	const regex = /^[^|]+\|[^|]+\|[^|]+$/;
+	if (regex.test(user_qrcode)) {
+	    const [name, id, svg] = user_qrcode.split("|");
+	    nickname = name;
+	    did = id;
+	    user_qrcode = svg;
+	    memo = "admin";
+	}
 	didstr = did.substr(0, 10);
         const svg = document.getElementById('qrcode');
 	var svgText = `<text x="40" y="20" font-family="Arial, sans-serif" font-size="16" fill="blue">`;
-        svgText = svgText + nickname + "(" + didstr + ")</text>";
+        svgText = svgText + nickname + "(" + didstr + ")-" + memo + "  SimpAI.cn</text>";
         const svgContent = user_qrcode.replace('</svg>', `${svgText}</svg>`);
 	const ctx = svg.getContext('2d');
         const v = await Canvg.from(ctx, svgContent);
@@ -267,7 +275,7 @@ async function refresh_identity_qrcode(nickname, did, user_qrcode) {
 	const pngDataUrl = svg.toDataURL('image/png');
 	const link = document.createElement('a');
         link.href = pngDataUrl;
-        link.download = "SimpleAI_identity_" + didstr +".png";
+        link.download = "SimpAI_identity_" + didstr + "_" + memo + ".png";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -339,7 +347,7 @@ function refresh_topbar_status_js(system_params) {
     (async () => {
         try {
 	    await Promise.all([
-            	refresh_identity_qrcode(nickname, system_params["user_did"], system_params["user_qr"]),
+            	refresh_identity_qrcode(nickname, system_params["user_did"], system_params["user_role"], system_params["user_qr"]),
             ]);
         } catch (error) {
             console.error('Error refreshing QR code:', error);

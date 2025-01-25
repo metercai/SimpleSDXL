@@ -170,8 +170,8 @@ def prepare_environment():
     return
 
 def ini_args():
-    from args_manager import args
-    return args
+    import args_manager
+    return args_manager.args
 
 
 def is_ipynb():
@@ -246,6 +246,10 @@ def reset_env_args():
             shared.args.listen = shared.sysinfo["local_ip"]
     if '--port' not in sys.argv:
         shared.args.port = shared.sysinfo["local_port"]
+    
+    if shared.args.node_type != "online":
+        shared.sysinfo["local_ip"] = '127.0.0.1'
+        shared.args.listen = '127.0.0.1'
 
     from enhanced.simpleai import reset_simpleai_args
     reset_simpleai_args()
@@ -259,6 +263,9 @@ logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_
 
 prepare_environment()
 shared.args = ini_args()
+
+if shared.args.node_type is not None:
+    shared.token.reset_node_mode(shared.args.node_type)
 
 if shared.args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(shared.args.gpu_device_id)
