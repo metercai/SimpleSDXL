@@ -343,7 +343,7 @@ function refresh_topbar_status_js(system_params) {
     if (image_num_pages) {
 	refresh_finished_images_catalog_label(image_num_pages);
     }
-    refresh_identity_center_label(system_params["user_role"]);
+    refresh_identity_center_label(system_params["user_role"], system_params["upstream"]);
     (async () => {
         try {
 	    await Promise.all([

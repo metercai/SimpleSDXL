@@ -257,7 +257,8 @@ def reset_env_args():
 ready_checker()
 
 shared.token, shared.sysinfo = check_base_environment()
-logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.token.get_upstream_did() if shared.token.get_upstream_did() else "no upstream node"}')
+shared.upstream_did = shared.token.get_upstream_did()
+logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.upstream_did if shared.upstream_did else "no upstream node"}')
 logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
 
 prepare_environment()
