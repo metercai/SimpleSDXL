@@ -1,0 +1,231 @@
+{
+  "301": {
+    "inputs": {
+      "samples": [
+        "312",
+        0
+      ],
+      "vae": [
+        "303",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "303": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "vae_model"
+    }
+  },
+  "307": {
+    "inputs": {
+      "guidance": 30,
+      "conditioning": [
+        "313",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "309": {
+    "inputs": {
+      "lora_name": "fill_remove.safetensors",
+      "strength_model": 1,
+      "model": [
+        "334",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_1"
+    }
+  },
+  "312": {
+    "inputs": {
+      "seed": 10086,
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "316",
+        0
+      ],
+      "positive": [
+        "314",
+        0
+      ],
+      "negative": [
+        "314",
+        1
+      ],
+      "latent_image": [
+        "314",
+        2
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "main_sampler"
+    }
+  },
+  "313": {
+    "inputs": {
+      "text": "Remove the selected objects from the image",
+      "clip": [
+        "345",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "314": {
+    "inputs": {
+      "noise_mask": false,
+      "positive": [
+        "307",
+        0
+      ],
+      "negative": [
+        "342",
+        0
+      ],
+      "vae": [
+        "303",
+        0
+      ],
+      "pixels": [
+        "315",
+        0
+      ],
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "InpaintModelConditioning"
+    }
+  },
+  "315": {
+    "inputs": {
+      "image": "welcome.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_image"
+    }
+  },
+  "316": {
+    "inputs": {
+      "model": [
+        "309",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "334": {
+    "inputs": {
+      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "342": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "345",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "negative_prompt"
+    }
+  },
+  "343": {
+    "inputs": {
+      "purge_cache": false,
+      "purge_models": true,
+      "anything": [
+        "301",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: PurgeVRAM",
+    "_meta": {
+      "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "344": {
+    "inputs": {
+      "images": [
+        "301",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  },
+  "345": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "350": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "351",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "351": {
+    "inputs": {
+      "image": "welcome.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_mask"
+    }
+  }
+}

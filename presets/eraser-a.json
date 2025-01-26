@@ -1,0 +1,73 @@
+{ 
+  "default_engine": {
+	"backend_engine": "Comfy",
+	"disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+	"disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+	"available_aspect_ratios_selection": "Flux",
+      "scene_frontend": {
+        "version": "V1.0",
+        "disvisible": [ "scene_aspect_ratio",  "scene_additional_prompt_2",  "scene_input_image1" ],
+        "theme": [ "橡皮擦" ],
+        "prompt": {
+          "橡皮擦": "Remove the selected objects from the image,  {additional_prompt}, "
+        },
+	    "additional_prompt": {
+		"橡皮擦": "Outdoor scenic environment "
+	    },
+	    "additional_prompt_title": "图像环境描述(英文提示词）",
+        "theme_title": "涂抹需要擦除的区域",
+        "aspect_ratio": [ "9:16", "4:5", "4:3", "3:2", "16:9", "21:9" ],
+        "task_method": {
+          "橡皮擦": "eraser_one"
+        }
+      }
+    },
+    "default_model": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "fill_remove.safetensors",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 1,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler",
+    "default_scheduler": "normal",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1280*720",
+    "default_image_number": 1,
+    "default_overwrite_step": 20,
+    "default_prompt": "",
+    "default_prompt_negative": "",
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
+        "clip,clip_l.safetensors,246144152,0,",
+    	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
+        "vae,ae.safetensors,335304388,0,",
+    	"loras,fill_remove.safetensors,104667792,0,"
+    	]
+}
+
