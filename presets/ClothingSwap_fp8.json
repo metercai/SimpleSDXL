@@ -13,8 +13,8 @@
 	    "aspect_ratio_select_mode": "auto_candidate",
             "additional_prompt_title_2": "参考图检测目标=[主体] / [输入自定目标] / [无（留空）]",
             "additional_prompt_2": {
-                "clothing": "主体",
-                "clothing+": "主体"
+                "换装": "主体",
+                "换装Plus": "主体"
                 },
 	    "task_method": {
 		"换装": "clothing2",
