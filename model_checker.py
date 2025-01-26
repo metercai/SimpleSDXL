@@ -951,7 +951,7 @@ packages = {
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
-            "Flux_aio_fp8_package": {
+        "Flux_aio_fp8_package": {
         "id": 18,
         "name": "[18]Flux_AIO_fp8扩展包",
         "note": "Flux全功能[fp8模型]|显存需求：★★★★ 速度：★★☆",
@@ -986,7 +986,7 @@ packages = {
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
         ]
     },
-            "clothing_fp8_package": {
+        "clothing_fp8_package": {
         "id": 19,
         "name": "[19]换装_fp8包",
         "note": "万物迁移[fp8模型]|显存需求：★★★☆ 速度：★★★",
@@ -994,6 +994,7 @@ packages = {
             ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
             ("SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors", 11902532704),
+            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
             ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
@@ -1005,6 +1006,23 @@ packages = {
         "download_links": [
         "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors"
+        ]
+    },
+        "eraser-a_package": {
+        "id": 20,
+        "name": "[20]一键消除",
+        "note": "一键消除|显存需求：★★ 速度：★★☆",
+        "files": [
+            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("SimpleModels/clip/clip_l.safetensors", 246144152),
+            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("SimpleModels/loras/fill_remove.safetensors",104667792),
+            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+        ],
+        "download_links": [
+        "【选配】一键消除基于FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
         ]
     },
 }
