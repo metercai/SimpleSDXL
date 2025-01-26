@@ -59,6 +59,8 @@ def get_layout_visible_inter_loras(y,z,max_number):
     return results
 
 def get_auto_candidate(img, selections, mode):
+    if img is None:
+        return modules.flags.scene_aspect_ratios[:3], modules.flags.scene_aspect_ratios[0]
     H, W, C = img.shape
     selections2 = [ x.split('|')[1] if '|' in x else x for x in selections ]
     selections2 = [ float(x.split(':')[0])/float(x.split(':')[1]) for x in selections2 ]
@@ -149,7 +151,8 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     aspect_ratios = scenes.get('aspect_ratio', [])
     if ready_to_gen and switch_flag:
         img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image
-        img = resize_image(img, max_side=1280, resize_mode=4)
+        if img is not None:
+            img = resize_image(img, max_side=1280, resize_mode=4)
         if isinstance(aspect_ratios, dict):
             if theme in aspect_ratios:
                 aspect_ratios = aspect_ratios[theme]

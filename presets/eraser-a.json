@@ -7,18 +7,20 @@
       "scene_frontend": {
         "version": "V1.0",
         "disvisible": [ "scene_aspect_ratio",  "scene_additional_prompt_2",  "scene_input_image1" ],
-        "theme": [ "橡皮擦" ],
+        "theme": [ "橡皮擦", "魔法擦" ],
         "prompt": {
-          "橡皮擦": "Remove the selected objects from the image,  {additional_prompt}, "
+          "橡皮擦": "Remove the selected objects from the image,  {additional_prompt} "
         },
 	    "additional_prompt": {
-		"橡皮擦": "Outdoor scenic environment "
+		"橡皮擦": "",
+                     	"魔法擦": ""
 	    },
-	    "additional_prompt_title": "图像环境描述(英文提示词）",
+	    "additional_prompt_title": "擦除背景描述(非必填）",
         "theme_title": "涂抹需要擦除的区域",
         "aspect_ratio": [ "9:16", "4:5", "4:3", "3:2", "16:9", "21:9" ],
         "task_method": {
-          "橡皮擦": "eraser_one"
+          "橡皮擦": "eraser_one",
+          "魔法擦": "eraser_two"
         }
       }
     },
@@ -28,7 +30,7 @@
     "default_loras": [
         [
             "fill_remove.safetensors",
-            1.0
+            1.2
         ],
         [
             "None",
@@ -50,7 +52,7 @@
     "default_cfg_scale": 1,
     "default_sample_sharpness": 2,
     "default_sampler": "euler",
-    "default_scheduler": "normal",
+    "default_scheduler": "simple",
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1280*720",
@@ -64,8 +66,10 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
+        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
         "clip,clip_l.safetensors,246144152,0,",
     	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
+	"style_models,flux1-redux-dev.safetensors,129063232,0,",
         "vae,ae.safetensors,335304388,0,",
     	"loras,fill_remove.safetensors,104667792,0,"
     	]

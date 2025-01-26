@@ -588,7 +588,7 @@ def toggle_preset_store(state):
             flag = False
         state['preset_store'] = not flag
         state['identity_dialog'] = False
-        return [gr.update(visible=not flag)] + update_topbar_js_params(state) + [gr.update(visible=False)] + [gr.update()]*16
+        return [gr.update(visible=not flag)] + update_topbar_js_params(state) + [gr.update(visible=False)] + [gr.update()]*17
     else:
         #state['identity_dialog'] = False
         return [gr.update()] + update_topbar_js_params(state) + toggle_identity_dialog(state)
@@ -693,13 +693,17 @@ identity_introduce = '''
 3，可将当前环境参数保存为个人定制的预置包。<br>
 4，解锁更多的功能配置管理和个性化服务。<br>
 <br>
-系统将指定首个绑定身份为管理员，赋予超级管理权限: <br>
-1，可一键进入内嵌的Comfyd引擎工作流操作界面。<br>
-2，可管理内嵌Comfyd引擎的更多性能参数和配置。<br>
-3，解锁MiniCPM，升级更高级的反推/翻译/扩写服务。<br>
+系统指定首个绑定身份者为管理员，赋予超级管理权限: <br>
+1，可管理和进入内嵌的Comfyd工作流引擎。<br>
+2，可管理游客的预置导航及下载预置包所需模型。<br>
+3，解锁MiniCPM多模态模型，可对话的反推/扩写服务。<br>
 更多管理需求可以入QQ群:938075852 进行交流。<br>
 <br>
-系统遵循分布式身份管理机制，即用户自主掌控身份私钥，授权AI节点使用身份；AI节点私有部署，管理多用户相互隔离的数字空间；社区节点保存加密副本用于追溯和自证。在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
+系统遵循分布式身份管理机制，即: <br>
+1，用户掌控身份私钥，授权本地部署的节点使用身份。<br>
+2，本地部署的AI节点管理多用户相互隔离的数字空间。<br>
+3，上游社区节点保存加密身份副本用于追溯和自证。<br>
+在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
 '''
 
 def update_after_identity(state):
