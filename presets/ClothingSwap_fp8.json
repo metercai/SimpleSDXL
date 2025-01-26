@@ -1,0 +1,75 @@
+{ 
+    "default_engine": {
+	"backend_engine": "Comfy",
+	"disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+	"disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+	"available_aspect_ratios_selection": "Flux",
+	"scene_frontend": {
+	    "version": "m1.1",
+	    "theme": ["clothing"],
+	    "disvisible": ["scene_theme","scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
+	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
+	    "aspect_ratio_select_mode": "auto_candidate",
+            "additional_prompt_title_2": "参考图检测目标=[主体] / [输入自定目标] / [无（留空）]",
+            "additional_prompt_2": {
+                "clothing": "主体"
+                },
+	    "task_method": {
+		"clothing": "clothing2"
+	    }
+    	}
+    },
+    "default_model": "flux1-fill-dev_fp8.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 30,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1280*720",
+    "default_image_number": 1,
+    "default_overwrite_step": 20,
+    "default_prompt": "",
+    "default_prompt_negative": "",
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,flux1-fill-dev_fp8.safetensors,11902532704,0,",
+        "clip,clip_l.safetensors,246144152,0,",
+    	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
+        "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
+        "vae,ae.safetensors,335304388,0,",
+        "inpaint,sam_vit_h_4b8939.pth,2564550879,0,",
+        "inpaint,groundingdino_swint_ogc.pth,693997677,0,",
+        "style_models,flux1-redux-dev.safetensors,129063232,0,",
+    	"rembg,General.safetensors,884878856,0,"
+    	]
+}
+
+
