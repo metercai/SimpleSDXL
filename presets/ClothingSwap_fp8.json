@@ -6,17 +6,24 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["clothing"],
-	    "disvisible": ["scene_theme","scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
+	    "theme": ["换装", "换装Plus"],
+        "theme_title":"换装模式",
+	    "disvisible": ["scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
             "additional_prompt_title_2": "参考图检测目标=[主体] / [输入自定目标] / [无（留空）]",
             "additional_prompt_2": {
-                "clothing": "主体"
+                "换装": "主体",
+                "换装Plus": "主体"
                 },
 	    "task_method": {
-		"clothing": "clothing2"
-	    }
+		"换装": "clothing2",
+        "换装Plus": "clothing3"
+	    },
+        "scene_steps": {
+            "换装": 20,
+            "换装Plus": 25
+            }
     	}
     },
     "default_model": "flux1-fill-dev_fp8.safetensors",
@@ -61,6 +68,7 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,flux1-fill-dev_fp8.safetensors,11902532704,0,",
+        "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
         "clip,clip_l.safetensors,246144152,0,",
     	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
