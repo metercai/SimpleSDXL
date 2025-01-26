@@ -258,11 +258,13 @@ ready_checker()
 
 shared.token, shared.sysinfo = check_base_environment()
 shared.upstream_did = shared.token.get_upstream_did()
-logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.upstream_did if shared.upstream_did else "no upstream node"}')
-logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
 
 prepare_environment()
 shared.args = ini_args()
+
+shared.upstream_did = '' if shared.args.node_type is not None and shared.args.node_type!='online' else shared.upstream_did
+logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.upstream_did if shared.upstream_did else "no upstream node"}')
+logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_nickname()}, user_did/身份标识: {shared.token.get_guest_did()}')
 
 if shared.args.node_type is not None:
     shared.token.reset_node_mode(shared.args.node_type)
