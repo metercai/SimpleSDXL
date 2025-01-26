@@ -40,7 +40,7 @@
   "309": {
     "inputs": {
       "lora_name": "fill_remove.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.2,
       "model": [
         "334",
         0
@@ -55,7 +55,7 @@
     "inputs": {
       "seed": 10086,
       "steps": 20,
-      "cfg": 1,
+      "cfg": 2,
       "sampler_name": "euler",
       "scheduler": "simple",
       "denoise": 1,

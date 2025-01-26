@@ -24,6 +24,10 @@ def get_simplesdxl_ver():
             simplesdxl_ver += f'.{commit_id}'
     return simplesdxl_ver
 
+def get_simplesdxl_short_ver():
+    ver = get_simplesdxl_ver()
+    return ver.split('.')[1]
+
 def get_branch():
     global branch, commit_id
     if not branch:

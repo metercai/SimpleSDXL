@@ -252,6 +252,7 @@ with shared.gradio_root:
                                 with gr.Column(scale=5, min_width=250):
                                     current_id_info = gr.Markdown(elem_classes='note_info')
                                 with gr.Column(scale=1, min_width=50):
+                                    current_upstream_status = gr.Markdown(elem_classes='note_info')
                                     identity_export_btn = gr.Button(value='Export identity', size='sm', min_width=35, elem_classes='identity_export', visible=False)
                             with gr.Row(visible=True) as input_identity:
                                 with gr.Column(scale=4, min_width=126):
@@ -294,7 +295,7 @@ with shared.gradio_root:
                     identity_qr.upload(simpleai.trigger_input_identity, inputs=identity_qr, outputs=identity_crtl + [input_id_info], show_progress=False, queue=False)
                 
                 nav_bars = [bar_store_button] + bar_buttons
-                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
+                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_crtl + identity_input, show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 preset_store_list.click(topbar.update_navbar_from_mystore, inputs=[preset_store_list, state_topbar], outputs=nav_bars + [system_params], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 
                 with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
@@ -1153,7 +1154,7 @@ with shared.gradio_root:
                 with gr.Row():
                     simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
                 with gr.Row():
-                    gr.Markdown(value=f'系统信息<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+                    gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
             layout_image_tab = [performance_selection, style_selections, image_number, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
@@ -1524,16 +1525,16 @@ with shared.gradio_root:
 
     
     after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params] + ip_types
-    identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + identity_input + [current_id_info, identity_export_btn], show_progress=False) \
+    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + identity_input + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
+    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
 
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
