@@ -92,9 +92,13 @@ def change_advanced_logs(advanced_logs):
         utils.echo_off = True
 
 
-identity_note = '你的昵称+手机号组成你的可信身份。绑定本机节点后，可以激活"我的预置"及个性导航等高级服务。昵称为字母或汉字组合。若有身份二维码，可安全快速导入身份。首个绑定身份者为系统管理员。'
+identity_note = '您的昵称+手机号组成您的可信身份，昵称可包含汉字。绑定本机节点即激活"我的预置"个性导航等高级服务。用身份二维码可安全快速导入已有身份。首个绑定身份者为系统管理员。'
 identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，适用离线和漫游场景，导出后请妥善保存。'
 identity_note_0 = '孤岛节点只有游客和本机管理员身份。用"导出身份"可直接导出本地管理员身份二维码，身份口令见后台日志。'
+
+upstream_tooltip = "请查看后台日志，排除错误后" if shared.upstream_did else "无法连接上游节点，请检查网络环境"
+upstream_status_text = "<b>On</b>" if shared.upstream_did else "<b>Off</b>"
+is_export_qr = lambda x: not shared.token.is_guest(x) or shared.token.get_node_mode()!='online'
 
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
 note1_1 = '未匹配到数字身份，请注意查收手机短信验证码，用其认证新身份。若十分钟未收到短信验证码，请点击"更换身份信息"，重新输入，再次绑定。'
@@ -104,8 +108,8 @@ note1_4 = '身份信息格式不对，昵称最少4个字符或2个汉字，国�
 note1_5 = '该手机号绑定身份数量超过上限，无法绑定该身份，请更换身份信息，再次申请绑定。'
 note1_6 = '短时间内重复提交相同身份信息，请稍后再重新输入身份信息，再次申请绑定。'
 note1_7 = '已提交过但未验证通过的身份，已清除遗留数据，需重新输入身份信息，再次绑定。'
-note1_8 = '无法找回加密副本或验证身份。请检查网络环境，重新输入身份信息，再次绑定。'
-note1_9 = '当前系统为孤岛节点，无法绑定非本地管理员。请导入本地管理员身份二维码绑定。'
+note1_8 = f'找回加密副本或验证身份出错。{upstream_tooltip}，重启软件，再次绑定。'
+note1_9 = '当前系统为孤岛节点，只能绑定本地管理员身份。请导入本地管理员身份二维码绑定。'
 
 note2_0 = lambda x: f'口令最少8位字符，必须包含大写、小写字母和数字，不能有特殊字符。\n**<span style="color: {x};">特别提醒</span>**<span style="color: {x};">: 身份口令是唯一解锁数字身份的密钥，无法找回，遗失将导致已存储的配置信息和数据丢失，需妥善保存!!!</span>'
 note2_1 = f'身份已验证，请按提示预设个人身份口令。{note2_0("lightseagreen")}'
@@ -236,8 +240,9 @@ def set_phrases(input_id_info, state, phrase, steps):
             result = [note2_7] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')]+ [gr.update(visible=True)] + [gr.update(visible=False)]*3
         state["user_phrase"] = ''
     id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
-    export_qr = gr.update(visible=not shared.token.is_guest(state["user"].get_did()) or shared.token.get_node_mode()!='online')
-    return result + [id_info, export_qr]
+    upstream_status = gr.update(visible=not is_export_qr(state["user"].get_did()), value=upstream_status_text)
+    export_qr = gr.update(visible=is_export_qr(state["user"].get_did()))
+    return result + [id_info, upstream_status, export_qr]
 
 def confirm_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
@@ -255,8 +260,9 @@ def confirm_identity(input_id_info, state, phrase):
     else: # 口令格式不对, 重新输入口令, 再次绑定
         result = [note3_2] + [gr.update(visible=False)] + [gr.update(visible=True)] + [gr.update(visible=False)]*2 + [gr.update(visible=True, value='')] + [gr.update(visible=False)]*2 +[gr.update(visible=True)] + [gr.update(visible=False)]
     id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
-    export_qr = gr.update(visible=not shared.token.is_guest(state["user"].get_did()) or shared.token.get_node_mode()!='online')
-    return result + [id_info, export_qr]
+    upstream_status = gr.update(visible=not is_export_qr(state["user"].get_did()), value=upstream_status_text)
+    export_qr = gr.update(visible=is_export_qr(state["user"].get_did()))
+    return result + [id_info, upstream_status, export_qr]
 
 def unbind_identity(input_id_info, state, phrase):
     if check_phrase(phrase):
@@ -273,8 +279,9 @@ def unbind_identity(input_id_info, state, phrase):
     else: # 口令格式不对, 重新输入口令, 再次解绑
         result = [note3_2] + [gr.update(visible=False)]*4 + [gr.update(visible=True, value="")] + [gr.update(visible=False)]*3 +[gr.update(visible=True)] + ['', '86-CN-中国', '', None]
     id_info = current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"])
-    export_qr = gr.update(visible=not shared.token.is_guest(state["user"].get_did()) or shared.token.get_node_mode()!='online')
-    return result + [id_info, export_qr]
+    upstream_status = gr.update(visible=not is_export_qr(state["user"].get_did()), value=upstream_status_text)
+    export_qr = gr.update(visible=is_export_qr(state["user"].get_did()))
+    return result + [id_info, upstream_status, export_qr]
 
 
 # [identity_dialog, current_id_info, identity_export_btn]
@@ -289,7 +296,9 @@ def toggle_identity_dialog(state):
     state['identity_dialog'] = not flag
     is_guest = shared.token.is_guest(state["user"].get_did())
     result = [identity_note_0 if shared.token.get_node_mode()!='online' else identity_note if is_guest else identity_note_1] + [gr.update(visible=is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + [gr.update(visible=False)]*3 + [gr.update(visible=not is_guest)] + ['', '86-CN-中国', '', None]
-    result = [gr.update(visible=not flag), current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"]), gr.update(visible=not is_guest or shared.token.get_node_mode()!='online')] + result
+    upstream_status = gr.update(visible=not is_export_qr(state["user"].get_did()), value=upstream_status_text)
+    export_qr = gr.update(visible=is_export_qr(state["user"].get_did()))
+    result = [gr.update(visible=not flag), current_id_info(state["user"].get_nickname(), state["user"].get_did(), state["sys_did"], state["__theme"]), upstream_status, export_qr] + result
     return result
 
 def check_input(nick, tele):
