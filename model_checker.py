@@ -606,7 +606,7 @@ packages = {
         "Flux_package": {
         "id": 5,
         "name": "[5]Flux全量包",
-        "note": "Flux官方全量|显存需求：★★★★★ 速度：★★☆",
+        "note": "Flux官方全量|显存需求：★★★★★ 速度：★★",
         "files": [
             ("SimpleModels/checkpoints/flux1-dev.safetensors", 23802932552),
             ("SimpleModels/clip/clip_l.safetensors", 246144152),
@@ -953,9 +953,9 @@ packages = {
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
-        "Flux_aio_fp8_package": {
+        "Flux_aio_plus_package": {
         "id": 18,
-        "name": "[18]Flux_AIO_fp8扩展包",
+        "name": "[18]Flux_AIO_plus扩展包",
         "note": "Flux全功能[fp8模型]|显存需求：★★★★ 速度：★★☆",
         "files": [
             ("SimpleModels/checkpoints/flux1-dev-fp8.safetensors", 11901525888),
@@ -988,9 +988,9 @@ packages = {
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
         ]
     },
-        "clothing_fp8_package": {
+        "clothing_plus_package": {
         "id": 19,
-        "name": "[19]换装_fp8包",
+        "name": "[19]换装plus包",
         "note": "万物迁移[fp8模型]|显存需求：★★★☆ 速度：★★★",
         "files": [
             ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
@@ -1030,7 +1030,7 @@ packages = {
         "Illustrious_package": {
         "id": 21,
         "name": "[21]光辉模型包",
-        "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★",
+        "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★☆",
         "files": [
             ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958)
         ],

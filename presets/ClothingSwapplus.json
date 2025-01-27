@@ -7,7 +7,7 @@
 	"scene_frontend": {
 	    "version": "m1.1",
 	    "theme": ["换装", "换装Plus"],
-        "theme_title":"换装模式",
+        "theme_title":"换装模式[模型:fill_fp8]",
 	    "disvisible": ["scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
