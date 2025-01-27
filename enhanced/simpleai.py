@@ -342,7 +342,7 @@ self_contact = '''
 <b>SimpAI</b>，引入分布式身份管理机制，让本地部署的节点具有多用户服务和多节点组网能力，具备企业级服务的特性。<br>
 <br>
 使用技巧:<br>
-Wiki: <a target= "_blank" href="https://acnmokx5gwds.feishu.cn/wiki/QK3LwOp2oiRRaTkFRhYcO4LonGe">https://acnmokx5gwds.feishu.cn/wiki/</a><br>
+Wiki: <a target= "_blank" href="http://simpai.cn">http://simpai.cn</a><br>
 开源代码:<br>
 Github: <a target= "_blank" href="https://github.com/metercai/SimpleSDXL">https://github.com/metercai/SimpleSDXL</a><br>
 学习交流:<br>
