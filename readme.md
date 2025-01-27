@@ -11,7 +11,7 @@
 ### ✋ 对于simpleai_base依赖包的说明：
 - https://github.com/metercai/simpleai_base/blob/main/README.md
 ### 🏭 SmipAI 全新架构 / New Architecture
-- <img width="500" align=center src="https://github.com/metercai/SimpleSDXL/assets/5652458/364df3ce-3420-4cec-b26e-f315c76b4c1e">
+- <img width="400" align=center src="https://github.com/metercai/SimpleSDXL/assets/5652458/364df3ce-3420-4cec-b26e-f315c76b4c1e">
 
 ## SimpAI 公测版预览
 - 精细的显存优化和管理，Flux和SD3.5上提速100%，低显存显卡几乎不爆显存。<br>
@@ -31,7 +31,7 @@ preset store/预置包仓库:<br>
 tags词，小作文，中英文，跟随指令信手拈来<br>
 <img width="300" src="https://github.com/user-attachments/assets/c8839e26-52cf-4d04-9a60-040edf08acd1" /><br>
 
-## 极简预置包，为场景应用而生，一键直达的自动挡傻瓜机 <br>
+## 极简预置包，为场景效果而生，一键直达的自动挡傻瓜机 <br>
 - 新年贺卡 / The preset for greeting card<br>
 <img width="800"  src="https://github.com/user-attachments/assets/6e8850e9-b984-4038-8878-4d1d50576eae" /><br>
 - 万能换装 / The preset for change clothes<br>
@@ -46,9 +46,12 @@ tags词，小作文，中英文，跟随指令信手拈来<br>
 <img width="800" src="https://github.com/user-attachments/assets/36809ef7-a7c2-45fe-9713-98c2018f53a9" /><br>
 - 一键抠图 <br>
 <img width="800" src="https://github.com/user-attachments/assets/d9f1e86c-c5f3-4d21-877c-d2a2b0e9285d" /><br>
-- 我想制作我的预置包，可进QQ群交流：938075852  
+- 我想制作我的预置包，可进QQ群交流：938075852
+  
+<b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
+Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
 
-## 共享预置包，共享模型，共享算力，让AI更加简单，为我所用！
+## 共享预置，共享模型，共享算力，让AI更简单，为我所用！
 
 ## 🔔 最新更新 / Update
 - [2025-01-26] <b>公测版新春版资料包上线，一键消除和光辉模型预置包上线。</b>
@@ -59,9 +62,6 @@ tags词，小作文，中英文，跟随指令信手拈来<br>
 - [2024.06.30] 扩展架构，新增Comfy后端，全新升级SimpleSDXL2。支持SDXL、混元、SD3和Playground-v2.5本地模型，最低6G显卡内存可用，保持Fooocus简洁、高效和稳定的出图风格。新增融图打光模块，可自主生成前景及蒙版，可自动抠取产品或人物图片切换场景进行融合。升级OBP一键提示词到最新版。UI整体优化。
 - [2024.05.28] 同步主线升级到v2.4.3，新增nsfw过滤等功能。
 - [2024.04.23] 升级OBP到最新版，集成[Superprompt](https://huggingface.co/roborovski/superprompt-v1)超级提示词扩展，为提示词增补细节描写。新增SD3生图引擎接口，可到[stability.ai](https://stability.ai/membership)申请免费会员，获取接口密钥后无缝对接SD3新引擎生成图片。优化界面，包括将OBP和Superprompt入口整合到提示词框，新增预置包导航浮层提示、提示词框token数统计、图生图多个参数前置到操作页面等。
-
-<b>重要：如果项目给您带来了便利和价值，不要吝惜加颗星"⭐️"，促进项目更好的发展！😜<br>
-Note: Please don't forget to give us a star if you like this project. Thanks! 😜</b>
 
 ### 如果对旧版情有独钟，可选择不升级，运行旧版
 - SimpleSDXL1独立分支的完全包，含环境、程序和默认模型，后续不增功能仅修bug :  [SimpleSDXL1_win64_all.zip (30G)](https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.zip)
