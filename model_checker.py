@@ -232,7 +232,6 @@ def validate_files(packages):
             print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_size in missing_files:
                 print(normalize_path(file))
-                time.sleep(0.01)
                 download_files[file] = expected_size
             # 将缺失包体名称保存到列表中
             missing_package_names.append(package_name)
@@ -243,7 +242,6 @@ def validate_files(packages):
                     print(f"{Fore.YELLOW}{link}{Style.RESET_ALL}")
         if not missing_files and not size_mismatch_files and not case_mismatch_files:
             print(f"{Fore.GREEN}√{package_name}文件全部验证通过{Style.RESET_ALL}")
-        time.sleep(0.1)
         print()
 
     # 将缺失的包体名称打印出来，同时显示百分比（如果有缺失文件）
@@ -1035,6 +1033,30 @@ packages = {
             ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958)
         ],
         "download_links": [
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors"
+        ]
+    },
+        "Illustrious_aio_package": {
+        "id": 22,
+        "name": "[22]光辉AIO扩展包",
+        "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958),
+            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("SimpleModels/controlnet/noob_sdxl_controlnet_canny.fp16.safetensors", 2502139104),
+            ("SimpleModels/controlnet/noob_sdxl_controlnet_depth.fp16.safetensors", 2502139136),
+            ("SimpleModels/controlnet/noob_sdxl_controlnet_pose.fp16.safetensors", 2502140008),
+            ("SimpleModels/ipadapter/noob_ip_adapter.bin", 1396798350),
+            ("SimpleModels/inpaint/inpaint_v25.fooocus.patch", 2580722369),
+            ("SimpleModels/inpaint/fooocus_inpaint_head.pth", 52602),
+            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("SimpleModels/ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors"
         ]
     }
