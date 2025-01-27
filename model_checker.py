@@ -225,6 +225,7 @@ def validate_files(packages):
                 
                 relative_path = os.path.relpath(file, root).replace(os.sep, '/')
                 download_files[relative_path] = expected_size
+                missing_package_names.append(package_name)
 
         # 输出文件验证结果
         if missing_files:
@@ -277,10 +278,6 @@ def validate_files(packages):
     # 调用删除 .partial 文件的函数
     delete_partial_files()
 
-
-
-
-    
 def delete_partial_files():
     """
     从当前脚本位置开始，查找 SimpleModels 目录，并删除其中所有 .partial 文件
