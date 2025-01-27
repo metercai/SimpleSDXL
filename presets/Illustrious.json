@@ -1,0 +1,53 @@
+{
+    "default_engine": {
+        "backend_engine": "Comfy",
+        "disvisible": ["backend_selection", "performance_selection"],
+        "disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "refiner_model"],
+        "available_aspect_ratios_selection": "Illustrious",
+        "backend_params": {
+                "task_method": "il_v_pre_aio"
+                }
+        },
+    "default_model": "NoobAI-XL-v1.1.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 7.0,
+    "default_sample_sharpness": 2.0,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "normal",
+    "default_performance": "Speed",
+    "default_prompt_negative": "lowres,(bad),bad feet,text,error,fewer,extra,missing,worst quality,jpeg artifacts,low quality,watermark,unfinished,displeasing,oldest,early,chromatic aberration,signature,artistic error,username,scan,[abstract],english text,shiny_skin,low quality, bad anatomy, bad hands, 4koma, comic, greyscale, censored, overly saturated, overly vivid",
+    "default_styles": [
+        "Illustrious"
+    ],
+    "default_aspect_ratio": "768*1344",
+    "default_overwrite_step": 30,
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "model_list": [
+        "checkpoints,NoobAI-XL-v1.1.safetensors,7105349958,0,"
+    ]
+}
+
