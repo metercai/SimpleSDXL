@@ -130,7 +130,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 {Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.01.27{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -1022,6 +1022,17 @@ packages = {
         "【选配】一键消除基于FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
         ]
     },
+        "Illustrious_package": {
+        "id": 21,
+        "name": "[21]光辉模型包",
+        "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★",
+        "files": [
+            ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958)
+        ],
+        "download_links": [
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors"
+        ]
+    }
 }
 def main():
     print()
