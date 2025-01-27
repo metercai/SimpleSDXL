@@ -14,8 +14,10 @@ from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
 
 
-async def download_file_with_progress(url: str, file_path: str):
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+async def download_file_with_progress(url: str, file_path: str, size: int=0):
+    timeout = int(max(60.0, size / (1024 * 1024)))
+    logger.info(f'the download file timeout: {timeout}s')
+    async with httpx.AsyncClient(follow_redirects=True, timeout=timeout) as client:
         try:
             if 'HF_MIRROR' in os.environ:
                 url = str.replace(url, "huggingface.co", os.environ["HF_MIRROR"].rstrip('/'), 1)
@@ -25,7 +27,7 @@ async def download_file_with_progress(url: str, file_path: str):
             async with client.stream("GET", url) as response:
                 response.raise_for_status()
                 total_size = int(response.headers.get("Content-Length", 0))
-
+                
                 with tqdm(
                     total=total_size, unit="iB", unit_scale=True, desc=''
                 ) as progress_bar:
@@ -48,7 +50,7 @@ async def download_file_with_progress(url: str, file_path: str):
 async def download_multiple_files(task_list):
     for task_type, task_params in task_list:
         if task_type == 'file':
-            await download_file_with_progress(task_params['url'], task_params['path_file'])
+            await download_file_with_progress(task_params['url'], task_params['path_file'], task_params['size'])
         elif task_type == 'diffusers':
             await download_diffusers_model(task_params['cata'], task_params['model_name'], task_params['num'], task_params['url'])
 
@@ -60,6 +62,7 @@ def load_file_from_url(
         progress: bool = True,
         file_name: Optional[str] = None,
         async_task: bool = False,
+        size: int = 0,
 ) -> str:
     global download_queue
 
@@ -77,14 +80,14 @@ def load_file_from_url(
         file_name = os.path.basename(parts.path)
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
-        logger.info(f'Downloading: "{url}" to {cached_file}')
-        logger.info(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，然后重启应用。\n')
+        #logger.info(f'Downloading: "{url}" to {cached_file}')
+        logger.info(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，进入"模型"页点击"本地刷新"按钮。\n')
         
         def _download_task():
-            anyio.run(download_file_with_progress, url, cached_file)
+            anyio.run(download_file_with_progress, url, cached_file, size)
 
         if async_task:
-            #download_queue.put(lambda: download_file_with_progress(url, cached_file))  
+            #download_queue.put(lambda: download_file_with_progress(url, cached_file, size))  
             thread = threading.Thread(target=_download_task)
             thread.start()
         else:
@@ -210,9 +213,10 @@ def download_model_files(preset, user_did=None, async_task=False):
                         url=url,
                         model_dir=model_dir,
                         file_name=file_name,
-                        async_task=True
+                        async_task=True,
+                        size=size
                     )
-                    params=(dict(url=url, path_file=full_path_file))
+                    params=(dict(url=url, path_file=full_path_file, size=size))
                     download_task = ('file', params)
                     download_task_list.append(download_task)
         if async_task:
