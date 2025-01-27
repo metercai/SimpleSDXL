@@ -136,6 +136,12 @@ def scene_aspect_ratios_derive(ar):
 scene_aspect_ratios_mapping = lambda x: scene_aspect_ratios_map[x] if '|' not in x else scene_aspect_ratios_derive(x)
 scene_aspect_ratios_mapping_list = lambda m: [scene_aspect_ratios_mapping(x) for x in m]
 
+def get_value_by_scene_theme(state, theme, key, default):
+    value = state.get('scene_frontend', {}).get(key, default)
+    if isinstance(value, dict):
+        return value.get(theme, next(iter(value.values()), default))
+    return value
+
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 
