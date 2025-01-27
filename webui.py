@@ -25,6 +25,7 @@ from modules.auth import auth_enabled, check_auth
 from modules.util import is_json, HWC3, resize_image
 from modules.meta_parser import switch_scene_theme, switch_scene_theme_select, switch_scene_theme_ready_to_gen, get_welcome_image, describe_prompt_for_scene, get_auto_candidate
 
+import comfy.comfy_version as comfy_version
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
 import enhanced.toolbox  as toolbox
@@ -1155,7 +1156,7 @@ with shared.gradio_root:
                 with gr.Row():
                     simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
                 with gr.Row():
-                    gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Fooocus {fooocus_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+                    gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Comfy {comfy_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
             layout_image_tab = [performance_selection, style_selections, image_number, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
@@ -1240,18 +1241,17 @@ with shared.gradio_root:
             if len(aspect_ratios.split(','))>1:
                 template = aspect_ratios.split(',')[1]
                 aspect_ratios = aspect_ratios.split(',')[0]
-                if template=='HyDiT':
-                    results = [gr.update(visible=False), gr.update(value=aspect_ratios, visible=True)] + [gr.update(visible=False)] * 3
-                elif template=='Common':
-                    results = [gr.update(visible=False)] * 2 + [gr.update(value=aspect_ratios, visible=True), gr.update(visible=False)] * 2
-                elif template=='Flux':
-                    results = [gr.update(visible=False)] * 3 + [gr.update(value=aspect_ratios, visible=True)] * 2
-                elif template=='Illustrious':
-                    results = [gr.update(visible=False)] * 4 + [gr.update(value=aspect_ratios, visible=True)]
-                else:
-                    results = [gr.update(value=aspect_ratios, visible=True)] + [gr.update(visible=False)] * 4
+                results = []
+                for aspect_ratio_name in flags.aspect_ratios_templates:
+                    if template == aspect_ratio_name:
+                        results.append(gr.update(value=aspect_ratios, visible=True))
+                        is_hit = True
+                    else:
+                        results.append(gr.update(visible=False))
+                if not is_hit:
+                    results = [gr.update()] * len(flags.aspect_ratios_templates)
             else:
-                results = [gr.update()] * 5
+                results = [gr.update()] * len(flags.aspect_ratios_templates)
             return results
 
 
