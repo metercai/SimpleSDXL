@@ -1683,7 +1683,7 @@ def worker():
                 if async_task.task_class == 'Flux':
                     async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
                 if async_task.task_class == 'Comfy':
-                    if 'i2i_uov_tiled_steps' not in async_task.params_backend:
+                    if 'i2i_uov_tiled_steps' not in async_task.params_backend and async_task.task_method == "sd15_aio":
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
                         all_steps = async_task.params_backend['display_steps'] * async_task.image_number
                     else:
