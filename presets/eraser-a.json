@@ -6,16 +6,16 @@
 	"available_aspect_ratios_selection": "Flux",
       "scene_frontend": {
         "version": "V1.0",
-        "disvisible": [ "scene_aspect_ratio",  "scene_additional_prompt_2",  "scene_input_image1" ],
+        "disvisible": [ "scene_aspect_ratio",  "scene_additional_prompt",  "scene_input_image1" ],
         "theme": [ "橡皮擦", "魔法擦" ],
         "prompt": {
           "橡皮擦": "Remove the selected objects from the image,  {additional_prompt} "
         },
-	    "additional_prompt": {
+	    "additional_prompt_2": {
 		"橡皮擦": "",
                      	"魔法擦": ""
 	    },
-	    "additional_prompt_title": "擦除背景描述(非必填）",
+	    "additional_prompt_title_2": "擦除背景描述(非必填）",
         "theme_title": "涂抹需要擦除的区域",
         "aspect_ratio": [ "9:16", "4:5", "4:3", "3:2", "16:9", "21:9" ],
         "task_method": {

@@ -74,9 +74,10 @@ def get_auto_candidate(img, selections, mode):
         selections = selections[start_index:end_index]
     return selections, index_value
 
+
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     img = img if img is None else resize_image(img, max_side=1280, resize_mode=4)
-    preprocessor_methods = state['scene_frontend'].get('image_preprocessor_method', [])
+    preprocessor_methods = modules.flags.get_value_by_scene_theme(state, scene_theme, 'image_preprocessor_method', [])
     img_is_ok = True
     if len(preprocessor_methods)>0 and img is not None:
         for preprocessor_method in preprocessor_methods:
@@ -126,38 +127,23 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     ready_to_gen = True if switch_flag and ((input_image_number==1 and (('scene_canvas_image' not in visible and canvas_image is not None) or ('scene_input_image1' not in visible and input_image1 is not None))) or (input_image_number==2 and (('scene_canvas_image' not in visible and canvas_image is not None) and ('scene_input_image1' not in visible and input_image1 is not None)))) else False
     #print(f'input_image_number={input_image_number}, ready_to_gen={ready_to_gen}, switch_flag={switch_flag}')
    
-    canvas_image_height=300 if input_image_number==1 else 250
-    input_image1_height=300 if input_image_number==1 else 170
-    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=canvas_image_height) if not switch_flag else gr.update(visible=True, height=canvas_image_height)]
-    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=input_image1_height) if not switch_flag else gr.update(visible=True, height=input_image1_height))
+    canvas_height=300 if input_image_number==1 else 250
+    input_height=300 if input_image_number==1 else 170
+    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=canvas_height) if not switch_flag else gr.update(visible=True, height=canvas_height)]
+    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=input_height) if not switch_flag else gr.update(visible=True, height=input_height))
     themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
     title = scenes.get('additional_prompt_title', '')
-    additional_prompt_default = scenes.get('additional_prompt', '')
-    if isinstance(additional_prompt_default, dict):
-        if index==0:
-            additional_prompt_default = additional_prompt_default[next(iter(additional_prompt_default))] if additional_prompt_default else ''
-        else:
-            additional_prompt_default = additional_prompt_default[theme]
+    additional_prompt_default = modules.flags.get_value_by_scene_theme(state, theme, 'additional_prompt', '')
     results.append(get_layout_update_label_visible_inter(title, additional_prompt if ready_to_gen and switch_flag else additional_prompt_default, 'scene_additional_prompt', visible, inter))
     title_2 = scenes.get('additional_prompt_title_2', '')
-    additional_prompt_2_default = scenes.get('additional_prompt_2', '')
-    if isinstance(additional_prompt_2_default, dict):
-        if index==0:
-            additional_prompt_2_default = additional_prompt_2_default[next(iter(additional_prompt_2_default))] if additional_prompt_2_default else ''
-        else:
-            additional_prompt_2_default = additional_prompt_2_default[theme]
+    additional_prompt_2_default = modules.flags.get_value_by_scene_theme(state, theme, 'additional_prompt_2', '')
     results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2 if ready_to_gen and switch_flag else additional_prompt_2_default, 'scene_additional_prompt_2', visible, inter))
-    aspect_ratios = scenes.get('aspect_ratio', [])
+    aspect_ratios = modules.flags.get_value_by_scene_theme(state, theme, 'aspect_ratio', [])
     if ready_to_gen and switch_flag:
         img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image
         if img is not None:
             img = resize_image(img, max_side=1280, resize_mode=4)
-        if isinstance(aspect_ratios, dict):
-            if theme in aspect_ratios:
-                aspect_ratios = aspect_ratios[theme]
-            else:
-                aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
         aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
         aspect_ratios_new, aspect_ratio = get_auto_candidate(img, aspect_ratios, aspect_ratio_select_mode)
         if aspect_ratio_select_mode:
@@ -167,11 +153,6 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
         aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)
         aspect_ratio = modules.flags.scene_aspect_ratios_mapping(aspect_ratio)
     else:
-        if isinstance(aspect_ratios, dict):
-            if index==0:
-                aspect_ratios = aspect_ratios[next(iter(aspect_ratios))] if aspect_ratios else []
-            else:
-                aspect_ratios = aspect_ratios[theme]
         aspect_ratios = modules.flags.scene_aspect_ratios_mapping_list(aspect_ratios)[0:3]
         aspect_ratio = '' if len(aspect_ratios)==0 else aspect_ratios[0]
     results.append(get_layout_setting_choices_visible_inter(aspect_ratios, aspect_ratio, 'scene_aspect_ratio', visible, inter))

@@ -24,7 +24,8 @@ class MiniCPM:
     prompt_i2t = "A descriptive caption for this image"
     output_chinese = "and output it in Chinese"
     prompt_extend = "Expand the following description to obtain a descriptive caption with more details in image: "
-    prompt_translator = "Translate the following Chinese text into English, remind you only need respons the translation itself and no other information:"
+    prompt_translator = "Translate the following text into English, remind you only need respons the translation itself and no other information:"
+    prompt_translator_cn = "Translate the following text into Chinese, remind you only need respons the translation itself and no other information:"
     model_file = os.path.join(model, "pytorch_model-00001-of-00002.bin")  # "model-00001-of-00002.safetensors")
     model_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
     
@@ -133,6 +134,12 @@ class MiniCPM:
             return self.inference(None, prompt=f'{MiniCPM.prompt_translator}{input_text}')
         else:
             return translator.convert(input_text, method)
+
+    def translate_cn(self, input_text_cn):
+        if MiniCPM.get_enable() and shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file):
+            return self.inference(None, prompt=f'{MiniCPM.prompt_translator_cn}{input_text_cn}')
+        else:
+            return input_text_cn
 
 minicpm = MiniCPM()
 default_interrogator = minicpm.interrogate
