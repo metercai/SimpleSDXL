@@ -510,7 +510,7 @@
         "235",
         0
       ],
-      "round_to_multiple": "16",
+      "round_to_multiple": "8",
       "image": [
         "89",
         0
@@ -570,7 +570,7 @@
         "235",
         0
       ],
-      "round_to_multiple": "16",
+      "round_to_multiple": "8",
       "image": [
         "110",
         0
@@ -592,7 +592,7 @@
       "interpolation": "bilinear",
       "method": "keep proportion",
       "condition": "always",
-      "multiple_of": 0,
+      "multiple_of": 8,
       "image": [
         "183",
         0
