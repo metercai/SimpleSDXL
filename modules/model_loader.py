@@ -150,7 +150,7 @@ def check_models_exists(preset, user_did=None):
                 path_file = [path_file[1:-1]]
                 result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
                 if result is None or len(result)<size:
-                    #logger.info(f'[ModelInfos] Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
+                    logger.info(f'Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
                     return False
             else:
                 file_path = shared.modelsinfo.get_model_filepath(cata, path_file)
@@ -178,6 +178,9 @@ def download_model_files(preset, user_did=None, async_task=False):
                 if url:
                     parts = urlparse(url)
                     file_name = os.path.basename(parts.path)
+                    result = shared.modelsinfo.get_model_names(cata, [path_file[1:-1]], casesensitive=True)
+                    if result and len(result)>=size:
+                        continue
                 else:
                     continue
             else:
