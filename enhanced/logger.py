@@ -79,7 +79,7 @@ def setup_logger(log_level: str = 'INFO', capacity: int = 300):
     logger.setLevel(log_level)
 
     stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(MilliSecondsFormatter("%(asctime)s [SimpleAI-%(name)s] %(message)s"))
+    stream_handler.setFormatter(MilliSecondsFormatter("%(asctime)s [SimpAI-%(name)s] %(message)s"))
     logger.addHandler(stream_handler)
 
     #file_handler = logging.FileHandler(log_file, mode="a")
