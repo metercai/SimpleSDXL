@@ -38,7 +38,7 @@ def get_branch():
         if branch=="main":
             branch = "Fooocus"
         elif branch=="SimpleSDXL_dev":
-            branch = "SimpleAI.FluxAIO"
+            branch = "SimpAI_dev"
         commit_id = f'{repo.head.target}'[:7]
     return branch
 
