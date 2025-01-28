@@ -3,6 +3,8 @@
 - SimpAI，开放架构，支持SDXL/SD1.5/Flux/Kolors/MiniCPM等多种开源模型，丰富的控图方式，真正“所想即所得，创意无边界”。
 - SimpAI，本地部署，可保障数据的安全与可控；可按需加载多种场景预置包，使用简单，贴合实际场景。
 - SimpAI，引入分布式身份管理，让本地部署的节点具有多用户服务和多节点组网能力，具备企业级服务的特性。
+<img width="900"  src="https://github.com/user-attachments/assets/91fcd772-27ea-445f-96f5-30dfc1858a14" />
+
 ### 🚀 Wiki 域名直达: [SimpAI.cn](https://simpai.cn) 
 - [《SimpAI创意生图集中营：应用指南全收录》](https://simpai.cn), 包括如何快速下载、模型安装和本地运行，如何操作进行创意出图，在不同应用场景下如何使用SimpAI等等。
 ### 🚀 B站视频推荐：
