@@ -3641,8 +3641,8 @@
   "2803": {
     "inputs": {
       "strength": [
-        "2833",
-        1
+        "1079",
+        0
       ],
       "start_percent": 0,
       "end_percent": [
@@ -3678,8 +3678,8 @@
   "2804": {
     "inputs": {
       "strength": [
-        "2834",
-        1
+        "1075",
+        0
       ],
       "start_percent": 0,
       "end_percent": [
@@ -3715,8 +3715,8 @@
   "2805": {
     "inputs": {
       "strength": [
-        "2835",
-        1
+        "1080",
+        0
       ],
       "start_percent": 0,
       "end_percent": [
@@ -3752,8 +3752,8 @@
   "2806": {
     "inputs": {
       "strength": [
-        "2836",
-        1
+        "1081",
+        0
       ],
       "start_percent": 0,
       "end_percent": [
@@ -4296,58 +4296,6 @@
   "2832": {
     "inputs": {
       "value": "a*0.75",
-      "a": [
-        "1081",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2833": {
-    "inputs": {
-      "value": "a*0.8",
-      "a": [
-        "1079",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2834": {
-    "inputs": {
-      "value": "a*0.8",
-      "a": [
-        "1075",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2835": {
-    "inputs": {
-      "value": "a*0.8",
-      "a": [
-        "1080",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2836": {
-    "inputs": {
-      "value": "a*0.8",
       "a": [
         "1081",
         0
