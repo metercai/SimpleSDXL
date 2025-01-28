@@ -1,0 +1,65 @@
+{
+    "default_engine": {
+        "backend_engine": "Comfy",
+        "disvisible": ["backend_selection", "performance_selection"],
+        "disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "FaceSwap"],
+        "available_aspect_ratios_selection": "Illustrious",
+        "backend_params": {
+                "task_method": "il_v_pre_aio2"
+                }
+        },
+    "default_model": "NoobAI-XL-v1.1.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ],
+	    [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 7.0,
+    "default_sample_sharpness": 2.0,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "normal",
+    "default_performance": "Speed",
+    "default_prompt_negative": "lowres,(bad),bad feet,text,error,fewer,extra,missing,worst quality,jpeg artifacts,low quality,watermark,unfinished,displeasing,oldest,early,chromatic aberration,signature,artistic error,username,scan,[abstract],english text,shiny_skin,low quality, bad anatomy, bad hands, 4koma, comic, greyscale, censored, overly saturated, overly vivid",
+    "default_styles": [
+        "Illustrious"
+    ],
+    "default_aspect_ratio": "768*1344",
+    "default_overwrite_step": 30,
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "model_list": [
+        "checkpoints,NoobAI-XL-v1.1.safetensors,7105349958,0,",
+        "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
+	    "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
+        "controlnet,noob_sdxl_controlnet_canny.fp16.safetensors,2502139104,0,",
+        "controlnet,noob_sdxl_controlnet_depth.fp16.safetensors,2502139136,0,",
+        "controlnet,noob_sdxl_controlnet_pose.fp16.safetensors,2502140008,0,",
+        "ipadapter,noob_ip_adapter.bin,1396798350,0,",
+        "inpaint,inpaint_v25.fooocus.patch,2580722369,0,",
+        "inpaint,fooocus_inpaint_head.pth, 52602,0,",
+        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
+        "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
+        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,"
+    ]
+}
+
