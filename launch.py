@@ -38,7 +38,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def check_base_environment():
     print(f"{now_string()} Python {sys.version}")
     print(f"{now_string()} Fooocus version: {fooocus_version.version}")
-    print(f"{now_string()} Comfy version: {comfy_version.version}")
+    print(f"{now_string()} Comfyd version: {comfy_version.version}")
     print(f'{now_string()} {version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
