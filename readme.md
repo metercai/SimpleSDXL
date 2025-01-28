@@ -1,10 +1,10 @@
 ## SimpleSDXL2 升级为 SimpAI, 强强组合Fooocus+ComfyUI更上一层楼
-- SimpAI，最强开源创意生图本地平台，吸收Fooocus和ComfyUI的各自优点，简洁、高效、稳定！
+- SimpAI，最强本地开源创意生图平台，吸收Fooocus和ComfyUI的各自优点，简洁、高效、稳定！
 - SimpAI，开放架构，支持SDXL/SD1.5/Flux/Kolors/MiniCPM等多种开源模型，丰富的控图方式，真正“所想即所得，创意无边界”。
 - SimpAI，本地部署，可保障数据的安全与可控；可按需加载多种场景预置包，使用简单，贴合实际场景。
 - SimpAI，引入分布式身份管理，让本地部署的节点具有多用户服务和多节点组网能力，具备企业级服务的特性。
 ### 🚀 Wiki 域名直达: [SimpAI.cn](https://simpai.cn) 
-- [《SimpAI创意生图集中营：应用指南全收录》](https://simpai.cn), 包括如何快速下载、安装和运行，如何操作进行创意出图，在不同应用场景下如何使用SimpAI等等。
+- [《SimpAI创意生图集中营：应用指南全收录》](https://simpai.cn), 包括如何快速下载、模型安装和本地运行，如何操作进行创意出图，在不同应用场景下如何使用SimpAI等等。
 ### 🚀 B站视频推荐：
 - [SimpAI安装指南+虚拟内存设置](https://www.bilibili.com/video/BV1ddkdYcEWg/) : https://www.bilibili.com/video/BV1ddkdYcEWg
 - [6G显存玩转Flux](https://www.bilibili.com/video/BV1KJWreyEuU) :  https://www.bilibili.com/video/BV1KJWreyEuU
