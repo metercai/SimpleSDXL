@@ -983,7 +983,7 @@ packages = {
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Flux_AIO_simpleai_1214.zip",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
         ]
     },
         "clothing_plus_package": {
