@@ -270,7 +270,7 @@ def validate_files(packages):
                 
                 # 写入仅包含下载路径的文件
                 f2.write(f"{link}\n")
-        print(f"{Fore.YELLOW}>>>所有有问题的文件下载路径已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
 
 def delete_partial_files():
     """
@@ -288,6 +288,7 @@ def delete_partial_files():
     print(f"{Fore.CYAN}正在清理目录 '{simplemodels_dir}' 中下载的临时文件与损坏文件...{Style.RESET_ALL}")
     
     files_found = False
+    files_to_delete = []  # 存储需要删除的文件路径
 
     for root, _, files in os.walk(simplemodels_dir):
         for file in files:
@@ -295,15 +296,29 @@ def delete_partial_files():
             if ".partial" in file or ".corrupted" in file:
                 files_found = True
                 file_path = os.path.join(root, file)
+                files_to_delete.append(file_path)
+
+    # 如果找到需要删除的文件，则打印文件列表并进行确认
+    if files_found:
+        print(f"{Fore.YELLOW}以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
+        for file_path in files_to_delete:
+            print(f"- {file_path}")
+
+        # 确认删除操作
+        confirm = input(f"{Fore.GREEN}是否确认删除这些未下载完或损坏的文件？(y/n): {Style.RESET_ALL}")
+        if confirm.lower() == 'y':
+            for file_path in files_to_delete:
                 try:
                     os.remove(file_path)  # 删除文件
                     print(f"{Fore.GREEN}已删除临时文件: {file_path}{Style.RESET_ALL}")
                 except Exception as e:
                     print(f"{Fore.RED}删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
-
-    if not files_found:
+        else:
+            print(f"{Fore.RED}删除操作已取消。{Style.RESET_ALL}")
+    else:
         print(f">>>未找到需要删除的临时文件<<<")
         print()
+
 
     
 def download_file_with_resume(link, file_path, position, max_retries=5):
@@ -452,7 +467,7 @@ def get_download_links_for_package(packages, download_list_path):
         for link, size in valid_files:
             f.write(f"{link},{size}\n")
 
-    print(f"{Fore.YELLOW}>>>downloadlist.txt 已更新<<<{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}>>>下载列表已更新，开始下载（关闭窗口可中断）。<<<{Style.RESET_ALL}")
 
     return valid_files
 
@@ -1185,17 +1200,17 @@ if __name__ == "__main__":
     main()  # 执行初始化
     print()
     while True:
-        print(f">>>按【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】启动全部文件下载。支持断点续传，顺序从小文件开始")
-        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】启动预置包补全，支持断点续传，顺序从小文件开始")
-        print(f">>>输入【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】清理下载缓存与损坏文件")
-        print(f">>>输入【{Fore.YELLOW}del+包体编号{Style.RESET_ALL}】删除已有包体文件（避开关联文件）")
-        print(f">>>输入【{Fore.YELLOW}r{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】重新检测")
+        print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。若速度太慢直接拿链接用P2P软件下载")
+        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：同上")
+        print(f">>>输入【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】---------清理下载缓存与损坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
+        print(f">>>输入【{Fore.YELLOW}del{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
+        print(f">>>输入【{Fore.YELLOW}r{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
         
-        user_input = input("请选择操作：")
+        user_input = input("请选择操作(不需要括号):")
 
         if user_input == "":
             # 启动下载所有文件
-            print("启动自动下载模块,支持断点续传，关闭窗口则中断。")
+            print("启动自动下载模块,支持断点续传，关闭窗口可中断。")
             auto_download_missing_files_with_retry(max_threads=5)  # 启动下载所有文件
 
         elif user_input.isdigit():
