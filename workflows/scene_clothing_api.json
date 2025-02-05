@@ -398,7 +398,7 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -512,7 +512,7 @@
       ],
       "round_to_multiple": "8",
       "image": [
-        "89",
+        "237",
         0
       ],
       "mask": [
@@ -529,7 +529,7 @@
     "inputs": {
       "invert_mask": false,
       "background_image": [
-        "89",
+        "237",
         0
       ],
       "croped_image": [
@@ -944,7 +944,7 @@
   "234": {
     "inputs": {
       "image": [
-        "89",
+        "237",
         0
       ]
     },
@@ -981,6 +981,24 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "237": {
+    "inputs": {
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "bilinear",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
