@@ -374,6 +374,7 @@ def get_save_image_path(filename_prefix: str, output_dir: str, image_width=0, im
     subfolder = os.path.dirname(os.path.normpath(filename_prefix))
     filename = os.path.basename(os.path.normpath(filename_prefix))
 
+    output_dir = get_output_directory()
     full_output_folder = os.path.join(output_dir, subfolder)
 
     if os.path.commonpath((output_dir, os.path.abspath(full_output_folder))) != output_dir:
