@@ -295,7 +295,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 258042572539249,
+      "seed": 335431198265572,
       "steps": 20,
       "cfg": 30,
       "denoise": 1
@@ -450,7 +450,7 @@
       ],
       "round_to_multiple": "8",
       "image": [
-        "89",
+        "290",
         0
       ],
       "mask": [
@@ -467,7 +467,7 @@
     "inputs": {
       "invert_mask": false,
       "background_image": [
-        "89",
+        "290",
         0
       ],
       "croped_image": [
@@ -865,7 +865,7 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -882,7 +882,7 @@
   "234": {
     "inputs": {
       "image": [
-        "89",
+        "290",
         0
       ]
     },
@@ -933,7 +933,7 @@
   },
   "238": {
     "inputs": {
-      "seed": 68581036679116,
+      "seed": 1073690851569824,
       "steps": [
         "246",
         0
@@ -941,7 +941,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "denoise": 0.20,
+      "denoise": 0.2,
       "model": [
         "252",
         0
@@ -1162,24 +1162,10 @@
       "title": "Load Upscale Model"
     }
   },
-  "267": {
-    "inputs": {
-      "upscale_method": "bicubic",
-      "scale_by": 0.375,
-      "image": [
-        "265",
-        0
-      ]
-    },
-    "class_type": "ImageScaleBy",
-    "_meta": {
-      "title": "Upscale Image By"
-    }
-  },
   "268": {
     "inputs": {
       "pixels": [
-        "267",
+        "286",
         0
       ],
       "vae": [
@@ -1190,6 +1176,84 @@
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE Encode"
+    }
+  },
+  "286": {
+    "inputs": {
+      "upscale_method": "bicubic",
+      "width": [
+        "288",
+        0
+      ],
+      "height": [
+        "289",
+        0
+      ],
+      "crop": "disabled",
+      "image": [
+        "265",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "287": {
+    "inputs": {
+      "image": [
+        "264",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "288": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "289": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "287",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "290": {
+    "inputs": {
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "bilinear",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
