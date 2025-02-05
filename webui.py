@@ -407,7 +407,7 @@ with shared.gradio_root:
                                             ip_weights.append(ip_weight)
                                             ip_ctrls.append(ip_weight)
 
-                                        ip_type = gr.Radio(label='Type', choices=flags.ip_list[:-1], value=modules.config.default_ip_types[image_count], container=False)
+                                        ip_type = gr.Radio(label='Type', choices=flags.ip_list, value=modules.config.default_ip_types[image_count], container=False)
                                         ip_types.append(ip_type)
                                         ip_ctrls.append(ip_type)
 
@@ -1427,7 +1427,6 @@ with shared.gradio_root:
 
         def trigger_auto_aspect_ratio_for_scene_from_canvas_image(state, canvas_image, input_image1, scene_theme):
             results = [trigger_auto_aspect_ratio_for_scene(state, canvas_image['image'], scene_theme)]
-            print(f'scene_canvas_image upload')
             need_canvas_image = 'scene_canvas_image' not in state["scene_frontend"].get('disvisible', [])
             need_input_image1 = 'scene_input_image1' not in state["scene_frontend"].get('disvisible', [])
             if need_canvas_image and canvas_image is not None and (not need_input_image1 or (need_input_image1 and input_image1 is not None)):

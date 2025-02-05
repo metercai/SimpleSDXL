@@ -373,6 +373,10 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
                     resize_image_flag = False
         if scene_input_image1 is not None:
             scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
+        if scene_canvas_image is not None:
+            scene_canvas_image['image'] = util.resize_image(util.HWC3(scene_canvas_image['image']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
+            scene_canvas_image['mask'] = scene_canvas_image['mask'][:, :, 0]
+            scene_canvas_image['mask'] = util.resize_image(util.HWC3(scene_canvas_image['mask']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['mask']
         backend_params.update(dict(
             task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
             scene_frontend=state_params['scene_frontend']['version'],
@@ -493,17 +497,11 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     scene_frontend = preset_prepared.get('engine', {}).get('scene_frontend', None)
     if scene_frontend:
         state_params.update({"scene_frontend": scene_frontend})
-        task_method = scene_frontend['task_method']
-        if isinstance(task_method, list):
-            task_method = task_method[0]
-        elif isinstance(task_method, dict):
-            if task_method:
-                task_method = task_method[next(iter(task_method))]
+        task_method = modules.flags.get_value_by_scene_theme(state_params, scene_theme, 'task_method', [])
     else:
         if 'scene_frontend' in state_params:
             del state_params["scene_frontend"]
-
-        task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine))
+        task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine)).get('task_method', 'text2image')
     state_params.update({"task_method": task_method})
     
     if comfyd_active_checkbox:
@@ -740,8 +738,7 @@ def update_after_identity_sub(state):
     results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
     ip_list = modules.flags.ip_list if state["engine"] in ['Fooocus', 'Flux', 'Kolors', 'Comfy']  else modules.flags.ip_list[:-1]
-    #ip_list = ip_list[:3] + ip_list[:-1] if state["engine"]=='Comfy' and state["task_method"] == 'il_v_pre_aio2' else ip_list
-    #print(f'ip_list:{ip_list}, {state["engine"]}, {state["task_method"]}')
+    ip_list = (ip_list[:3] + ip_list[-1:]) if state["engine"]=='Comfy' and state["task_method"] == 'il_v_pre_aio2' else ip_list
     default_controlnet_image_count = config.default_controlnet_image_count if state["engine"]=='Fooocus' else 4
     for image_count in range(default_controlnet_image_count):
         image_count += 1
