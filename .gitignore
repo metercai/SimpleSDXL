@@ -94,3 +94,4 @@ comfy/user/
 /comfy/custom_nodes/comfyui_controlnet_aux/config.yaml
 /patch_pyhash.py*
 /logs/
+/enhanced/llmsd.py
