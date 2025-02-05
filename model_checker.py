@@ -1117,6 +1117,7 @@ packages = {
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
+            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
             ("SimpleModels/rembg/General.safetensors", 884878856)
         ],
         "download_links": [
