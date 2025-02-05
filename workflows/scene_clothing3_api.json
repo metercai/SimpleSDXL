@@ -941,7 +941,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "denoise": 0.1,
+      "denoise": 0.20,
       "model": [
         "252",
         0
@@ -1063,7 +1063,7 @@
   "249": {
     "inputs": {
       "samples": [
-        "247",
+        "268",
         0
       ],
       "mask": [
@@ -1121,16 +1121,75 @@
       "title": "Differential Diffusion"
     }
   },
-  "262": {
+  "264": {
     "inputs": {
-      "images": [
-        "189",
+      "samples": [
+        "247",
+        0
+      ],
+      "vae": [
+        "75",
         0
       ]
     },
-    "class_type": "PreviewImage",
+    "class_type": "VAEDecode",
     "_meta": {
-      "title": "Preview Image"
+      "title": "VAE Decode"
+    }
+  },
+  "265": {
+    "inputs": {
+      "upscale_model": [
+        "266",
+        0
+      ],
+      "image": [
+        "264",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "266": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "267": {
+    "inputs": {
+      "upscale_method": "bicubic",
+      "scale_by": 0.375,
+      "image": [
+        "265",
+        0
+      ]
+    },
+    "class_type": "ImageScaleBy",
+    "_meta": {
+      "title": "Upscale Image By"
+    }
+  },
+  "268": {
+    "inputs": {
+      "pixels": [
+        "267",
+        0
+      ],
+      "vae": [
+        "75",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
     }
   }
 }
