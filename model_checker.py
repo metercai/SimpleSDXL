@@ -1201,8 +1201,8 @@ if __name__ == "__main__":
     main()  # 执行初始化
     print()
     while True:
-        print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。若速度太慢直接拿链接用P2P软件下载")
-        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：同上")
+        print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
+        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
         print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】---------清理下载缓存与损坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
