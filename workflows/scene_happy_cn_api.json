@@ -199,14 +199,14 @@
   "102": {
     "inputs": {
       "preset": "FACEID PLUS KOLORS",
-      "lora_strength": 0.6,
+      "lora_strength": 1.0,
       "provider": "CPU",
-      "weight": 0.8,
-      "weight_faceidv2": 1,
-      "weight_kolors": 0.8,
-      "weight_type": "strong middle",
+      "weight": 0.80,
+      "weight_faceidv2": 1.0,
+      "weight_kolors": 0.80,
+      "weight_type": "style transfer",
       "combine_embeds": "concat",
-      "start_at": 0.35000000000000003,
+      "start_at": 0,
       "end_at": 1,
       "embeds_scaling": "V only",
       "cache_mode": "all",
@@ -570,7 +570,7 @@
   },
   "169": {
     "inputs": {
-      "value": 0
+      "value": 4
     },
     "class_type": "easy int",
     "_meta": {
@@ -655,7 +655,7 @@
     "inputs": {
       "strength": 1,
       "start_percent": 0,
-      "end_percent": 0.7,
+      "end_percent": 0.7000000000000001,
       "positive": [
         "224",
         0
