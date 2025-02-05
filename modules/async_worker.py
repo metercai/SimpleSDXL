@@ -412,7 +412,7 @@ def worker():
                 yield_result(async_task, empty_path, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
                 return imgs, [], current_progress
-
+            logger.info(f'comfypipeline.process_flow finished.')
         else:
             if 'cn' in goals:
                 for cn_flag, cn_path in [
@@ -445,7 +445,8 @@ def worker():
             del positive_cond, negative_cond  # Save memory
             if inpaint_worker.current_task is not None:
                 imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
-        
+            logger.info(f'pipeline.process_diffusion finished.')
+
         current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
         if modules.config.default_black_out_nsfw or async_task.black_out_nsfw:
             progressbar(async_task, current_progress, 'Checking for NSFW content ...')
@@ -454,7 +455,8 @@ def worker():
         img_paths = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
         yield_result(async_task, img_paths, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
-
+        
+        logger.info(f'The process_task end.')
         return imgs, img_paths, current_progress
 
     def apply_patch_settings(async_task):
@@ -1553,11 +1555,13 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 if async_task.scene_input_image1 is not None:
                     input_images.set_image('i2i_ip_image1', async_task.scene_input_image1)
+                    if "happy_cn" in async_task.task_method and preprocessors.openpose_have(async_task.scene_input_image1, ['face']):
+                        async_task.params_backend['i2i_ip_fn1'] = 4
                 if async_task.scene_canvas_image is not None:
                     canvas_image = async_task.scene_canvas_image['image']
-                    canvas_mask = async_task.scene_canvas_image['mask'][:, :, 0]
-                    input_images.set_image('i2i_inpaint_image', resize_image(HWC3(canvas_image), max_side=1280, resize_mode=4))
-                    input_images.set_image('i2i_inpaint_mask', resize_image(HWC3(canvas_mask), max_side=1280, resize_mode=4))
+                    canvas_mask = async_task.scene_canvas_image['mask']
+                    input_images.set_image('i2i_inpaint_image', canvas_image)
+                    input_images.set_image('i2i_inpaint_mask', canvas_mask)
                 if async_task.scene_steps is not None:
                     async_task.steps = async_task.scene_steps
                     all_steps = async_task.steps * async_task.image_number
