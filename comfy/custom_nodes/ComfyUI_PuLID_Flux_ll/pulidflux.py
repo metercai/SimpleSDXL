@@ -206,7 +206,8 @@ class ApplyPulidFlux:
 
         eva_clip.to(device, dtype=dtype)
         pulid_flux.model.to(dtype=dtype)
-        model_management.load_model_gpu(pulid_flux)
+        model_management.load_models_gpu([pulid_flux], force_full_load=True)
+        # model_management.load_model_gpu(pulid_flux)
 
         if attn_mask is not None:
             if attn_mask.dim() > 3:
