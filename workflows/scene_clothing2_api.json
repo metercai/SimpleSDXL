@@ -491,7 +491,7 @@
       ],
       "round_to_multiple": "8",
       "image": [
-        "89",
+        "238",
         0
       ],
       "mask": [
@@ -508,7 +508,7 @@
     "inputs": {
       "invert_mask": false,
       "background_image": [
-        "89",
+        "238",
         0
       ],
       "croped_image": [
@@ -923,7 +923,7 @@
   "234": {
     "inputs": {
       "image": [
-        "89",
+        "238",
         0
       ]
     },
@@ -970,6 +970,24 @@
     "class_type": "UNETLoader",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "238": {
+    "inputs": {
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "bilinear",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
