@@ -1,6 +1,6 @@
 facexlib
 insightface
 onnxruntime
-onnxruntime-gpu; sys_platform != 'darwin' and platform_machine == 'x86_64'
+onnxruntime-gpu; sys_platform != 'darwin' and (platform_machine == 'x86_64' or platform_machine == 'AMD64')
 ftfy
 timm
