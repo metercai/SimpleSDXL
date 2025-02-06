@@ -1311,7 +1311,7 @@ if __name__ == "__main__":
                                 full_file_path = normalize_path(full_file_path)
 
                                 # 打印规范化的文件路径
-                                print(f"※被关联文件: {full_file_path}")
+                                print(f"※被关联文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
                                 
                         # 打印将要释放的空间
                         if files_to_delete:
