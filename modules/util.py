@@ -67,6 +67,22 @@ def resize_image(im, width=None, height=None, resize_mode=1, min_side=None, max_
     def resize(im, w, h):
         return im.resize((w, h), resample=LANCZOS)
 
+    def adjust_and_crop(arr, target_dim, is_height):
+        adjusted_dim = (target_dim // 8) * 8
+        adjusted_dim = max(adjusted_dim, 8)  # 确保最小尺寸为8
+        
+        if adjusted_dim == target_dim:
+            return arr
+        
+        delta = target_dim - adjusted_dim
+        start = delta // 2
+        end = start + adjusted_dim
+        
+        if is_height:
+            return arr[start:end, :, :]  # 裁切高度
+        else:
+            return arr[:, start:end, :]   # 裁切宽度
+
     if resize_mode == 0:
         res = resize(im, width, height)
 
@@ -107,15 +123,27 @@ def resize_image(im, width=None, height=None, resize_mode=1, min_side=None, max_
 
         new_width = int(im.width * scale)
         new_height = int(im.height * scale)
+        resized = resize(im, new_width, new_height)
 
-        res = resize(im, new_width, new_height)
+        resized_array = np.array(resized)
+        if new_width < new_height:  
+            processed_array = adjust_and_crop(resized_array, new_height, is_height=True)
+        else:
+            processed_array = adjust_and_crop(resized_array, new_width, is_height=False)
+        res = Image.fromarray(processed_array)
     elif resize_mode == 4 and max_side:
         scale = max_side / max(im.width, im.height)
 
         new_width = int(im.width * scale)
         new_height = int(im.height * scale)
+        resized = resize(im, new_width, new_height)
 
-        res = resize(im, new_width, new_height)
+        resized_array = np.array(resized)
+        if new_width > new_height:
+            processed_array = adjust_and_crop(resized_array, new_height, is_height=True)
+        else:
+            processed_array = adjust_and_crop(resized_array, new_width, is_height=False)
+        res = Image.fromarray(processed_array)
     else:
         pass
     
