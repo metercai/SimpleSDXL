@@ -497,7 +497,12 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     scene_frontend = preset_prepared.get('engine', {}).get('scene_frontend', None)
     if scene_frontend:
         state_params.update({"scene_frontend": scene_frontend})
-        task_method = modules.flags.get_value_by_scene_theme(state_params, scene_theme, 'task_method', [])
+        task_method = scene_frontend['task_method']
+        if isinstance(task_method, list):
+            task_method = task_method[0]
+        elif isinstance(task_method, dict):
+            if task_method:
+                task_method = task_method[next(iter(task_method))]
     else:
         if 'scene_frontend' in state_params:
             del state_params["scene_frontend"]
