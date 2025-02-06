@@ -6658,7 +6658,7 @@
   },
   "2852": {
     "inputs": {
-      "provider": "CUDA"
+      "provider": "CPU"
     },
     "class_type": "PulidFluxInsightFaceLoader",
     "_meta": {

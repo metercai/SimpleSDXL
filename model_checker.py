@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import requests
+import queue
 from tqdm import tqdm
 from colorama import init, Fore, Style
 import threading
@@ -245,7 +246,7 @@ def validate_files(packages):
 
     # 将缺失的包体名称打印出来，同时显示百分比（如果有缺失文件）
     if missing_package_names:
-        print(f"{Fore.RED}以下包体缺失文件，请检查并重新下载：{Style.RESET_ALL}")
+        print(f"{Fore.RED}△以下包体缺失文件，请检查并重新下载：{Style.RESET_ALL}")
         for package_name in missing_package_names:
             percentage = package_percentages.get(package_name, 0)
             total_size_gb = package_sizes.get(package_name, 0)
@@ -282,10 +283,10 @@ def delete_partial_files():
     simplemodels_dir = find_simplemodels_dir(script_dir)
 
     if not simplemodels_dir:
-        print(f"{Fore.RED}未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
+        print(f"{Fore.RED}△未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
         return
 
-    print(f"{Fore.CYAN}正在清理目录 '{simplemodels_dir}' 中下载的临时文件与损坏文件...{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}△正在清理目录 '{simplemodels_dir}' 中下载的临时文件与损坏文件...{Style.RESET_ALL}")
     
     files_found = False
     files_to_delete = []  # 存储需要删除的文件路径
@@ -300,34 +301,34 @@ def delete_partial_files():
 
     # 如果找到需要删除的文件，则打印文件列表并进行确认
     if files_found:
-        print(f"{Fore.YELLOW}以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}△以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
         for file_path in files_to_delete:
             print(f"- {file_path}")
 
         # 确认删除操作
-        confirm = input(f"{Fore.GREEN}是否确认删除这些未下载完或损坏的文件？(y/n): {Style.RESET_ALL}")
+        confirm = input(f"{Fore.GREEN}△是否确认删除这些未下载完或损坏的文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
             for file_path in files_to_delete:
                 try:
                     os.remove(file_path)  # 删除文件
-                    print(f"{Fore.GREEN}已删除临时文件: {file_path}{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}√已删除临时文件: {file_path}{Style.RESET_ALL}")
                 except Exception as e:
-                    print(f"{Fore.RED}删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
+                    print(f"{Fore.RED}△删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
         else:
-            print(f"{Fore.RED}删除操作已取消。{Style.RESET_ALL}")
+            print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
     else:
         print(f">>>未找到需要删除的临时文件<<<")
         print()
 
-
-    
-def download_file_with_resume(link, file_path, position, max_retries=5):
+def download_file_with_resume(link, file_path, position, result_queue, max_retries=5, lock=None):
     """
     支持断点续传和重连的下载方法
     :param link: 下载链接
     :param file_path: 文件保存路径
     :param position: 下载位置（用于显示进度条）
+    :param result_queue: 用于传递结果的队列
     :param max_retries: 最大重试次数
+    :param lock: 用于保护对下载列表文件的访问
     :return: None
     """
     partial_file_path = file_path + ".partial"
@@ -363,19 +364,46 @@ def download_file_with_resume(link, file_path, position, max_retries=5):
                     progress_bar.update(len(data))
 
             # 下载完成后重命名临时文件为最终文件名
-            os.rename(partial_file_path, file_path)
-            print(f"{Fore.GREEN}下载完成：{file_path}{Style.RESET_ALL}")
-            return  # 下载成功，跳出循环
+            final_file_path = os.path.normpath(file_path)  # 规范化路径
+            partial_file_path = os.path.normpath(partial_file_path)  # 规范化路径
+            os.rename(partial_file_path, final_file_path)  # 重命名文件
+            print(f"{Fore.GREEN}√下载完成：{final_file_path}{Style.RESET_ALL}")
+
+            # 下载成功，加入队列
+            if lock:
+                with lock:
+                    remove_link_from_downloadlist(link)
+
+            result_queue.put(True)
+            return
 
         except requests.exceptions.RequestException as e:
-            print(f"{Fore.RED}下载失败，正在重试... 错误：{e}{Style.RESET_ALL}")
+            print(f"{Fore.RED}△下载失败，正在重试... 错误：{e}{Style.RESET_ALL}")
             retries += 1
             time.sleep(5)  # 重试间隔 5 秒
         except Exception as e:
             print(f"{Fore.RED}发生错误：{e}{Style.RESET_ALL}")
-            break  # 出现其他错误，跳出循环
+            result_queue.put(False)
+            return
 
-    print(f"{Fore.RED}多次尝试后下载失败，请检查网络连接或手动下载文件。{Style.RESET_ALL}")
+    # 如果多次重试失败，依然加入失败队列
+    result_queue.put(False)
+
+
+def remove_link_from_downloadlist(link):
+    """
+    删除下载列表中已成功下载的条目
+    :param link: 下载链接
+    :return: None
+    """
+    with open("downloadlist.txt", "r") as f:
+        lines = f.readlines()
+
+    # 删除成功下载的链接
+    with open("downloadlist.txt", "w") as f:
+        for line in lines:
+            if link.strip() not in line.strip():
+                f.write(line)
 
 
 def auto_download_missing_files_with_retry(max_threads=5):
@@ -394,12 +422,13 @@ def auto_download_missing_files_with_retry(max_threads=5):
         print("没有缺失文件需要下载！")
         return
 
+    result_queue = queue.Queue()
     threads = []
     active_threads = 0
+    lock = threading.Lock()  # 创建一个锁用于同步操作文件
 
     for position, line in enumerate(links):
         link, size = line.strip().split(',')
-        
         # 处理路径
         if "ShilongLiu/GroundingDINO" in link:
             relative_path = "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py"
@@ -408,14 +437,12 @@ def auto_download_missing_files_with_retry(max_threads=5):
         
         root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         file_path = os.path.join(root, relative_path)
-        
         # 启动下载线程
-        thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position))
+        thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position, result_queue, 5, lock))
         threads.append(thread)
         
         active_threads += 1
         thread.start()
-        
         # 控制最大线程数
         if active_threads >= max_threads:
             for t in threads:
@@ -425,12 +452,26 @@ def auto_download_missing_files_with_retry(max_threads=5):
 
     for thread in threads:
         thread.join()
-        
-    # 下载完成后删除downloadlist.txt
-    if os.path.exists("downloadlist.txt"):
-        os.remove("downloadlist.txt")
-        print("下载完成，已删除 'downloadlist.txt' 文件。")
 
+    success_count = 0
+    fail_count = 0
+
+    while not result_queue.empty():
+        success = result_queue.get()
+        if success:
+            success_count += 1
+        else:
+            fail_count += 1
+
+    print(f"√下载成功：{success_count}个")
+    print(f"×下载失败：{fail_count}个")
+
+    if fail_count == 0 and success_count > 0:
+        if os.path.exists("downloadlist.txt"):
+            os.remove("downloadlist.txt")
+            print("√下载完成，已删除 'downloadlist.txt' 文件。输入【R】重新检测")
+    else:
+        print(f"△有{fail_count}个文件下载失败，请检查网络连接或手动下载文件。")
 
 def get_download_links_for_package(packages, download_list_path):
     """
@@ -439,7 +480,7 @@ def get_download_links_for_package(packages, download_list_path):
     """
     # 检查 downloadlist.txt 是否存在
     if not os.path.exists(download_list_path):
-        print(f"{Fore.RED}>>>downloadlist.txt不存在<<<{Style.RESET_ALL}")
+        print(f"{Fore.RED}>>>downloadlist.txt不存在，输入【R】重新检测<<<{Style.RESET_ALL}")
         return []
 
     # 读取 downloadlist.txt 中的所有文件链接
@@ -1201,8 +1242,8 @@ if __name__ == "__main__":
     main()  # 执行初始化
     print()
     while True:
-        print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。若速度太慢直接拿链接用P2P软件下载")
-        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：同上")
+        print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
+        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
         print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】---------清理下载缓存与损坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
@@ -1211,7 +1252,7 @@ if __name__ == "__main__":
 
         if user_input == "":
             # 启动下载所有文件
-            print("启动自动下载模块,支持断点续传，关闭窗口可中断。")
+            print("※启动自动下载模块,支持断点续传，关闭窗口可中断。")
             auto_download_missing_files_with_retry(max_threads=5)  # 启动下载所有文件
 
         elif user_input.isdigit():
@@ -1230,7 +1271,7 @@ if __name__ == "__main__":
                 # 如果用户输入0，则清除所有下载缓存
                 delete_partial_files()
             else:
-                print(f"{Fore.RED}包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
+                print(f"{Fore.RED}△包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
 
         elif user_input.lower().startswith("del"):
             root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -1241,7 +1282,7 @@ if __name__ == "__main__":
                 
                 # 如果输入为空或不合法，提醒用户
                 if not package_id_str.isdigit():
-                    print(f"{Fore.RED}输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
+                    print(f"{Fore.RED}△输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
                 else:
                     package_id = int(package_id_str)  # 转换为整数
                     selected_package = None
@@ -1255,9 +1296,9 @@ if __name__ == "__main__":
                     # 判断包体是否找到并打印信息
                     if selected_package:
                         # 打印包体信息
-                        print(f"{Fore.YELLOW}即将删除以下包体文件：{Style.RESET_ALL}")
-                        print(f"包体编号: {package_id}")
-                        print(f"包体名称: {selected_package['name']}")
+                        print(f"{Fore.YELLOW}△即将删除以下包体文件：{Style.RESET_ALL}")
+                        print(f"---包体编号: {package_id}")
+                        print(f"---包体名称: {selected_package['name']}")
                         
                         # 先构建一个文件引用计数
                         file_references = {}
@@ -1272,6 +1313,9 @@ if __name__ == "__main__":
                         files_to_delete = []
                         total_size_to_free = 0  # 用来存储即将删除的文件的总大小
                         
+                        # 打印被多个包体引用的文件路径
+                        files_referenced_by_multiple_packages = []
+
                         for file_info in selected_package["files"]:
                             file_path = file_info[0]
                             # 只删除那些在当前包体中独有的文件，并检查文件是否存在
@@ -1289,30 +1333,50 @@ if __name__ == "__main__":
                                     files_to_delete.append(full_file_path)
                                     # 获取文件大小并累加
                                     total_size_to_free += os.path.getsize(full_file_path)
-                                    print(f"文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
+                                    print(f"√非关联文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
+                            else:
+                                # 记录被多个包体引用的文件
+                                if file_references[file_path] > 1:
+                                    files_referenced_by_multiple_packages.append(file_path)
+
+                        # 打印被多个包体引用的文件
+                        if files_referenced_by_multiple_packages:
+                            print()
+                            print(f"{Fore.RED}△以下文件被多个包体引用无法删除，请手动清理（会破坏其他预置包完整性）：{Style.RESET_ALL}")
+                            for file_path in files_referenced_by_multiple_packages:
+                                # 确保路径转换一致
+                                expected_dir = os.path.join(root, os.path.dirname(file_path))
+                                expected_filename = os.path.basename(file_path)
+                                full_file_path = os.path.join(expected_dir, expected_filename)
+
+                                # 规范化路径
+                                full_file_path = normalize_path(full_file_path)
+
+                                # 打印规范化的文件路径
+                                print(f"※被关联文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
                                 
                         # 打印将要释放的空间
                         if files_to_delete:
                             print(f"{Fore.GREEN}总共可以释放空间: {total_size_to_free / (1024 * 1024 * 1024):.2f} GB{Style.RESET_ALL}")
                             
-                            confirm = input(f"{Fore.GREEN}是否确认删除此包体内文件？【y/n】+【回车】: {Style.RESET_ALL}")
+                            confirm = input(f"{Fore.GREEN}△是否确认删除此包体内文件？【y/n】+【回车】: {Style.RESET_ALL}")
                             
                             if confirm.lower() == 'y':
                                 # 先删除文件
                                 for file_path in files_to_delete:
                                     try:
                                         os.remove(file_path)
-                                        print(f"{Fore.GREEN}已删除文件: {file_path}{Style.RESET_ALL}")
+                                        print(f"{Fore.GREEN}△已删除文件: {file_path}{Style.RESET_ALL}")
                                     except Exception as e:
-                                        print(f"{Fore.RED}删除文件失败: {file_path}，错误信息: {e}{Style.RESET_ALL}")
+                                        print(f"{Fore.RED}△删除文件失败: {file_path}，错误信息: {e}{Style.RESET_ALL}")
                             else:
-                                print(f"{Fore.RED}删除操作已取消。{Style.RESET_ALL}")
+                                print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
                         else:
-                            print(f"{Fore.RED}没有可删除的文件，因为它们被多个包体引用或文件不存在。{Style.RESET_ALL}")
+                            print(f"{Fore.RED}△没有可删除的文件，因为它们被多个包体引用或文件不存在。{Style.RESET_ALL}")
                     else:
-                        print(f"{Fore.RED}无效的包体编号！无法找到对应的包体。{Style.RESET_ALL}")
+                        print(f"{Fore.RED}△无效的包体编号！无法找到对应的包体。{Style.RESET_ALL}")
             except ValueError:
-                print(f"{Fore.RED}输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
+                print(f"{Fore.RED}△输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
 
         elif user_input.lower() == "r":
             # 重新执行文件检测
@@ -1320,4 +1384,4 @@ if __name__ == "__main__":
             validate_files(packages)
 
         else:
-            print(f"{Fore.RED}无效的输入，请输入回车或有效的包体编号（不需要括号）。{Style.RESET_ALL}")
+            print(f"{Fore.RED}△无效的输入，请输入回车或有效的包体编号（不需要括号）。{Style.RESET_ALL}")
