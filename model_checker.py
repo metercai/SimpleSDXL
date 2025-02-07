@@ -386,7 +386,8 @@ def download_file_with_resume(link, file_path, position, result_queue, max_retri
             result_queue.put(False)
             return
 
-    # 如果多次重试失败，依然加入失败队列
+    # 如果多次重试失败，依然加入失败队列，并打印失败链接
+    print(f"△下载链接失败：{link}")
     result_queue.put(False)
 
 
@@ -803,7 +804,7 @@ packages = {
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Flux_AIO_simpleai_1214.zip"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux_aio_simpleai_1214.zip"
         ]
     },
         "SD15_aio_package": {
@@ -891,7 +892,7 @@ packages = {
             ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342)
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_Kolors_AIO_simpleai_1214.zip"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_kolors_aio_simpleai_1214.zip"
         ]
     },
         "SD3x_medium_package": {
@@ -957,7 +958,7 @@ packages = {
             ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/vocab.json", 2776833),
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/blob/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
         ]
     },
         "happy_package": {
