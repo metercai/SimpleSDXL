@@ -29,6 +29,11 @@ class MiniCPM:
     model_file = os.path.join(model, "pytorch_model-00001-of-00002.bin")  # "model-00001-of-00002.safetensors")
     model_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
     
+    remove_prefixs = [
+        'A descriptive caption for this image could be: "',
+        '"',
+        ]
+
     lock = threading.Lock()
     model_v26 = None
     tokenizer = None
@@ -119,7 +124,14 @@ class MiniCPM:
         if output_chinese:
             prompt = f'{prompt}, {MiniCPM.output_chinese}'
         logger.info(f'The prompt of image: {prompt}')
-        return self.inference(image, prompt)
+        result_prompt = self.inference(image, prompt)
+
+        for prefix in MiniCPM.remove_prefixs:
+            if result_prompt.startswith(prefix):
+                result_prompt = result_prompt[len(prefix):]
+        if result_prompt.endswith('"'):
+            result_prompt = result_prompt[:-1]
+        return result_prompt
 
     def extended_prompt(self, input_text, prompt, translation_methods='Third APIs'):
         if not MiniCPM.get_enable() or not shared.modelsinfo.exists_model(catalog="llms", model_path=MiniCPM.model_file):

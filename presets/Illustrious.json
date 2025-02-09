@@ -5,7 +5,7 @@
         "disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "refiner_model"],
         "available_aspect_ratios_selection": "Illustrious",
         "backend_params": {
-                "task_method": "il_v_pre_aio"
+                "task_method": "il_v_pre"
                 }
         },
     "default_model": "NoobAI-XL-v1.1.safetensors",

@@ -99,7 +99,14 @@ inpaint_mask_models = ['u2net', 'u2netp', 'u2net_human_seg', 'u2net_cloth_seg', 
 inpaint_mask_cloth_category = ['full', 'upper', 'lower']
 inpaint_mask_sam_model = ['vit_b', 'vit_l', 'vit_h']
 
-inpaint_engine_versions = ['None', 'v2.5', 'v2.6']
+inpaint_engine_versions = {
+    "SDXL": ['v2.6', 'v2.5', 'None'],
+    "sd15_aio": ['powerpaint', 'None'],
+    "kolors_aio": ['kolors_inpainting', 'None'],
+    "flux_aio": ['Q4', 'fp8', 'None'],
+    "il_v_pre_aio": ['None'],
+    }
+default_inpaint_engine_versions = lambda x: inpaint_engine_versions[x][0] if x in inpaint_engine_versions else inpaint_engine_versions["SDXL"][0]
 inpaint_option_default = 'Inpaint or Outpaint (default)'
 inpaint_option_detail = 'Improve Detail (face, hand, eyes, etc.)'
 inpaint_option_modify = 'Modify Content (add objects, change background, etc.)'

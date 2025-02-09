@@ -65,6 +65,7 @@
   "Random": "随机种子",
   "Seed": "种子",
   "\ud83d\udcda History Log": "\uD83D\uDCDA 历史记录",
+  "\ud83d\udcd4 Images Directory": "\uD83D\uDCD4 存图目录",
 
   "* Powered by Fooocus Image Mixture Engine (v1.0.1),": "* 由Fooocus图像混合引擎(v1.0.1)驱动, ",
   "The scaler multiplied to positive ADM (use 1.0 to disable).": "缩放器乘以正向ADM（使用1.0表示禁用）.",
@@ -199,8 +200,8 @@
   "Content Type": "类型选择",
   "Photograph": "写实照片",
   "Art/Anime": "艺术/动漫",
-  "Additional prompt for describe": "附加的反推提示词",
-  "Type additional prompt for describe image.": "输入图片反推的附加提示词",
+  "Additional prompt for describe": "附加反推提示词",
+  "Type additional prompt for describe image.": "输入反推的提示词",
   "Apply Styles": "设置对应风格",
   "Output with tags": "输出Tags",
   "Output in Chinese": "输出中文",

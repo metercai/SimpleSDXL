@@ -6,7 +6,7 @@
         "disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "FaceSwap"],
         "available_aspect_ratios_selection": "Illustrious",
         "backend_params": {
-                "task_method": "il_v_pre_aio2"
+                "task_method": "il_v_pre_aio"
                 }
         },
     "default_model": "NoobAI-XL-v1.1.safetensors",

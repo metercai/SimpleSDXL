@@ -1596,6 +1596,8 @@ class SaveImage:
 
     def save_images(self, images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
         filename_prefix += self.prefix_append
+        if self.output_dir != folder_paths.get_temp_directory() and self.output_dir != folder_paths.get_output_directory():
+            self.output_dir = folder_paths.get_output_directory()
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
         results = list()
         for (batch_number, image) in enumerate(images):

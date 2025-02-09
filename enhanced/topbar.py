@@ -264,6 +264,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
             logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
     state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
+    state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' else False})
 
     if "__is_mobile" not in state_params.keys():
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
@@ -437,7 +438,7 @@ def process_after_generation(state_params):
     results += [gr.update()] * (shared.BUTTON_NUM-preset_nums)
     # [history_link, gallery_index_stat]
     results += [state_params['__finished_nums_pages']]
-    results += [update_history_link(user_did)]
+    results += [update_history_link(user_did, state_params["local_access"])]
     
 
     if len(state_params["__output_list"]) > 0:
@@ -486,11 +487,6 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
 
     config_preset = config.try_get_preset_content(preset, state_params["user"].get_did())
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
-    preset_prepared.update({
-        'preset': preset,
-        'is_mobile': state_params["__is_mobile"] })
-    
-    #logger.info(f'preset_prepared:{preset_prepared}')
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
     state_params.update({"engine": engine})
@@ -508,7 +504,11 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
             del state_params["scene_frontend"]
         task_method = preset_prepared.get('engine', {}).get('backend_params', modules.flags.get_engine_default_backend_params(engine)).get('task_method', 'text2image')
     state_params.update({"task_method": task_method})
-    
+    preset_prepared.update({
+        'preset': preset,
+        'task_method': task_method,
+        'is_mobile': state_params["__is_mobile"] })
+
     if comfyd_active_checkbox:
         comfyd.stop()
    
@@ -680,8 +680,11 @@ def trigger_input_identity(img):
         user_did, nickname, telephone = '', '', ''
     return [gr.update(visible=False), gr.update(visible=True), f'{nickname}, {telephone}']
 
-def update_history_link(user_did):
-    return gr.update(value='' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>')
+def update_history_link(user_did, local_access):
+    log_link = '' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>'
+    if local_access:
+        log_link = f'{log_link} , <a href="file:///{os.path.dirname(get_current_html_path(None, user_did))}" target="_blank">\U0001F4D4 Images Directory</a>'
+    return gr.update(value=log_link) 
 
 def update_comfyd_url(user_did):
     entry_point = '' if comfyd.get_entry_point_id() is None else shared.token.get_entry_point(user_did, comfyd.get_entry_point_id())
@@ -736,7 +739,7 @@ def update_after_identity_sub(state):
     results += [gr.update(interactive=True if state["engine"]=='Fooocus' and not shared.token.is_guest(user_did) else False)] *2
     results += [gr.update(visible=False if 'preset_store' not in state else state['preset_store'])]
     results += [gr.Dataset.update(samples=get_preset_samples(user_did))]
-    results += [update_history_link(user_did)]
+    results += [update_history_link(user_did, state["local_access"])]
     results += [gr.update(visible=shared.token.is_guest(user_did))]
     results += [gr.update(visible=shared.token.is_admin(user_did))]
     results += [gr.update(value=update_comfyd_url(user_did))]
