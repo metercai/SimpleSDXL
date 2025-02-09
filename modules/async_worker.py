@@ -1575,13 +1575,8 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:
                     async_task.params_backend['base_model_gguf'] = async_task.base_model_name
-                    if 'hyp8' in async_task.base_model_name.lower() and ( 'q8' in async_task.base_model_name.lower() or 'q6' in async_task.base_model_name.lower()):
-                        i2i_model_type = 2 # hyp8
-                    else:
-                        i2i_model_type = 3 # hyp8 low
                 else:
                     if async_task.task_class == 'Flux':
-                        i2i_model_type = 1 # dev full-size
                         async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
@@ -1665,29 +1660,30 @@ def worker():
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
                 if 'inpaint' in goals:
-                    async_task.params_backend['i2i_inpaint_version'] = self.inpaint_engine
+                    async_task.params_backend['i2i_inpaint_version'] = async_task.inpaint_engine
                     async_task.params_backend['i2i_function'] = 3 # image inpaint
                     input_images.set_image(f'i2i_inpaint_image', inpaint_worker.current_task.interested_image)
                     input_images.set_image(f'i2i_inpaint_mask', inpaint_worker.current_task.interested_mask)
-                    if async_task.task_class == 'Kolors':
-                        async_task.base_model_name = 'kolors_inpainting.safetensors'
+                    inpaint_engine_model_index = f'{async_task.task_method}_{async_task.inpaint_engine}'
+                    if inpaint_engine_model_index in flags.inpaint_engine_model_names:
+                        async_task.base_model_name = flags.inpaint_engine_model_names[inpaint_engine_model_index]
+                        if async_task.task_class == 'Flux':
+                            if 'gguf' in async_task.base_model_name:
+                                async_task.params_backend['base_model_gguf'] = async_task.base_model_name
+                            else:
+                                async_task.params_backend.pop('base_model_gguf', None)
                     if async_task.invert_mask_checkbox:
                         async_task.params_backend['i2i_inpaint_is_invert_mask'] = True
                     if 'cn' in goals:
                         async_task.params_backend['i2i_inpaint_is_mix_ip'] = True
                     if async_task.task_class == 'Flux':
-                        i2i_model_type = 2
-                        async_task.base_model_name = 'flux1-fill-dev-hyp8-Q4_K_S.gguf'
-                        async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                         async_task.cfg_scale = 30
                     if len(async_task.outpaint_selections)>0:
                         async_task.params_backend['i2i_inpaint_fn'] = 1  # out
-                        if async_task.task_class == 'Flux':
-                            async_task.cfg_scale = 30
                     else:
                         async_task.params_backend['i2i_inpaint_fn'] = 2 # detail, object, general
                 if async_task.task_class == 'Flux':
-                    async_task.params_backend['i2i_model_type'] = 1 if i2i_model_type==1 else 2
+                    async_task.params_backend['i2i_model_type'] = 2 if 'gguf' in async_task.base_model_name else 1
                 if async_task.task_class == 'Comfy':
                     if 'i2i_uov_tiled_steps' not in async_task.params_backend and async_task.task_method == "sd15_aio":
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
