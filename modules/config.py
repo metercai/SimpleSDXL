@@ -1064,7 +1064,7 @@ def update_files(engine='Fooocus', task_method=None):
 
 
 def downloading_inpaint_models(v):
-    assert v in modules.flags.inpaint_engine_versions
+    assert v in modules.flags.inpaint_engine_versions_all
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/fooocus_inpaint_head.pth',
@@ -1097,6 +1097,27 @@ def downloading_inpaint_models(v):
             file_name='inpaint_v26.fooocus.patch'
         )
         patch_file = os.path.join(paths_inpaint[0], 'inpaint_v26.fooocus.patch')
+    if v == 'Q4':
+        load_file_from_url(
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf',
+            model_dir=paths_checkpoints[0],
+            file_name='flux1-fill-dev-hyp8-Q4_K_S.gguf'
+        )
+        patch_file = os.path.join(paths_checkpoints[0], 'flux1-fill-dev-hyp8-Q4_K_S.gguf')
+    if v == 'fp8':
+        load_file_from_url(
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors',
+            model_dir=paths_checkpoints[0],
+            file_name='flux1-fill-dev_fp8.safetensors'
+        )
+        patch_file = os.path.join(paths_checkpoints[0], 'flux1-fill-dev_fp8.safetensors')
+    if v == 'kolors_inpainting':
+        load_file_from_url(
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/unet/kolors_inpainting.safetensors',
+            model_dir=path_unet,
+            file_name='kolors_inpainting.safetensors'
+        )
+        patch_file = os.path.join(path_unet, 'kolors_inpainting.safetensors')
 
     return head_file, patch_file
 
