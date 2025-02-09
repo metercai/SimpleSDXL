@@ -42,6 +42,7 @@
     "default_aspect_ratio": "1280*720",
     "default_image_number": 1,
     "default_overwrite_step": 20,
+    "default_inpaint_engine": "fp16",
     "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
