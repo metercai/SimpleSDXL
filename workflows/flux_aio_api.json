@@ -91,7 +91,7 @@
   "258": {
     "inputs": {
       "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
-      "weight_dtype": "fp8_e4m3fn"
+      "weight_dtype": "default"
     },
     "class_type": "UNETLoader",
     "_meta": {
