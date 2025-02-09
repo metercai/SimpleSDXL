@@ -106,7 +106,13 @@ inpaint_engine_versions = {
     "flux_aio": ['Q4', 'fp8', 'None'],
     "il_v_pre_aio": ['None'],
     }
+inpaint_engine_model_names = {
+    "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
+    "flux_aio_Q4": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
+    "flux_aio_fp8": "flux1-fill-dev_fp8.safetensors",
+    }
 default_inpaint_engine_versions = lambda x: inpaint_engine_versions[x][0] if x in inpaint_engine_versions else inpaint_engine_versions["SDXL"][0]
+inpaint_engine_versions_all = list({version for versions in inpaint_engine_versions.values() for version in versions})
 inpaint_option_default = 'Inpaint or Outpaint (default)'
 inpaint_option_detail = 'Improve Detail (face, hand, eyes, etc.)'
 inpaint_option_modify = 'Modify Content (add objects, change background, etc.)'
