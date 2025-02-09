@@ -154,7 +154,8 @@ def inpaint_mode_change(mode, inpaint_engine_version, outpaint, state):
         ]
 
     if inpaint_engine_version == 'empty':
-        inpaint_engine_version = modules.config.default_inpaint_engine_version
+        task_method = 'SDXL' if 'task_method' not in state else state["task_method"]
+        inpaint_engine_version = modules.flags.default_inpaint_engine_versions(task_method)
     
     engine = 'Fooocus' if 'engine' not in state else state['engine']
     if mode == modules.flags.inpaint_option_modify:
@@ -170,7 +171,7 @@ def inpaint_mode_change(mode, inpaint_engine_version, outpaint, state):
         False, inpaint_engine_version, 1.0 if engine=='Fooocus' else 1.0 if len(outpaint)>0 else 1.0, 0.618
     ]
 
-def enhance_inpaint_mode_change(mode, inpaint_engine_version):
+def enhance_inpaint_mode_change(mode, inpaint_engine_version, state):
     assert mode in modules.flags.inpaint_options
 
     # inpaint_disable_initial_latent, inpaint_engine,
@@ -182,7 +183,8 @@ def enhance_inpaint_mode_change(mode, inpaint_engine_version):
         ]
 
     if inpaint_engine_version == 'empty':
-        inpaint_engine_version = modules.config.default_inpaint_engine_version
+        task_method = 'SDXL' if 'task_method' not in state else state["task_method"]
+        inpaint_engine_version = modules.flags.default_inpaint_engine_versions(task_method)
 
     if mode == modules.flags.inpaint_option_modify:
         return [
@@ -661,7 +663,7 @@ with shared.gradio_root:
                                                         label='Disable initial latent in inpaint', value=False)
                                                     enhance_inpaint_engine = gr.Dropdown(label='Inpaint Engine',
                                                                      value=modules.config.default_inpaint_engine_version,
-                                                                     choices=flags.inpaint_engine_versions,
+                                                                     choices=flags.inpaint_engine_versions["SDXL"],
                                                                      info='Version of Fooocus inpaint model. If set, use performance Quality or Speed (no performance LoRAs) for best results.')
                                                     enhance_inpaint_strength = gr.Slider(label='Inpaint Denoising Strength',
                                                                      minimum=0.0, maximum=1.0, step=0.001,
@@ -713,7 +715,7 @@ with shared.gradio_root:
                                                 enhance_inpaint_strength, enhance_inpaint_respective_field
                                             ]]
 
-                                            enhance_inpaint_mode.change(enhance_inpaint_mode_change, inputs=[enhance_inpaint_mode, inpaint_engine_state], outputs=[
+                                            enhance_inpaint_mode.change(enhance_inpaint_mode_change, inputs=[enhance_inpaint_mode, inpaint_engine_state, state_topbar], outputs=[
                                                 enhance_inpaint_disable_initial_latent, enhance_inpaint_engine,
                                                 enhance_inpaint_strength, enhance_inpaint_respective_field
                                             ], show_progress=False, queue=False)
@@ -1033,7 +1035,7 @@ with shared.gradio_root:
                         inpaint_disable_initial_latent = gr.Checkbox(label='Disable initial latent in inpaint', value=False)
                         inpaint_engine = gr.Dropdown(label='Inpaint Engine',
                                                      value=modules.config.default_inpaint_engine_version,
-                                                     choices=flags.inpaint_engine_versions,
+                                                     choices=flags.inpaint_engine_versions["SDXL"],
                                                      info='Version of Fooocus inpaint model. If set, use performance Quality or Speed (no performance LoRAs) for best results.')
                         inpaint_erode_or_dilate = gr.Slider(label='Mask Erode or Dilate',
                                                             minimum=-64, maximum=64, step=1, value=0,
@@ -1213,9 +1215,10 @@ with shared.gradio_root:
                              inpaint_mode] + enhance_inpaint_mode_ctrls + freeu_ctrls + lora_ctrls
 
 
-        def inpaint_engine_state_change(inpaint_engine_version, *args):
+        def inpaint_engine_state_change(inpaint_engine_version, state, *args):
             if inpaint_engine_version == 'empty':
-                inpaint_engine_version = modules.config.default_inpaint_engine_version
+                task_method = 'SDXL' if 'task_method' not in state else state["task_method"]
+                inpaint_engine_version = modules.flags.default_inpaint_engine_versions(task_method)
 
             result = []
             for inpaint_mode in args:
@@ -1276,7 +1279,7 @@ with shared.gradio_root:
         ], show_progress=False, queue=False)
 
         for mode, disable_initial_latent, engine, strength, respective_field in enhance_inpaint_update_ctrls:
-            shared.gradio_root.load(enhance_inpaint_mode_change, inputs=[mode, inpaint_engine_state], outputs=[
+            shared.gradio_root.load(enhance_inpaint_mode_change, inputs=[mode, inpaint_engine_state, state_topbar], outputs=[
                 disable_initial_latent, engine, strength, respective_field
             ], show_progress=False, queue=False)
 
@@ -1543,7 +1546,7 @@ with shared.gradio_root:
                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
                .then(lambda: None, _js='()=>{refresh_scene_localization();}') \
                .then(inpaint_mode_change, inputs=[inpaint_mode, inpaint_engine_state, outpaint_selections, state_topbar], outputs=[inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field], show_progress=False, queue=False) \
-               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
+               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
 
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \

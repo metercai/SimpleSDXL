@@ -192,22 +192,23 @@ class AsyncTask:
         if self.task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x'] and self.task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
-            if '_aio' in self.task_method:
+            if self.task_name in ['Kolors', 'Flux'] and '_aio' not in self.task_method:
+                self.params_backend.update({
+                    "lora_1": self.loras[0][0],
+                    "lora_1_strength": self.loras[0][1],
+                    })
+            elif len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method) and '_aio' not in self.task_method:
+                self.params_backend.update({
+                    "lora_1": self.loras[0][0],
+                    "lora_1_strength": self.loras[0][1],
+                    "lora_2": self.loras[1][0],
+                    "lora_2_strength": self.loras[1][1],
+                    })
+            else:
                 for i, (lora_name, lora_strength) in enumerate(self.loras):
                     self.params_backend.update({
                         f"lora_{i+1}": lora_name,
                         f"lora_{i+1}_strength": lora_strength,
-                        })
-            else:
-                if self.task_name in ['Kolors', 'Flux']:
-                    self.params_backend.update({
-                        "lora_1": self.loras[0][0],
-                        "lora_1_strength": self.loras[0][1],
-                        })
-                if len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method):
-                    self.params_backend.update({
-                        "lora_2": self.loras[1][0],
-                        "lora_2_strength": self.loras[1][1],
                         })
 
         ui_options = {
@@ -1664,7 +1665,8 @@ def worker():
                         async_task.params_backend['i2i_uov_fn'] = 0
                     async_task.params_backend['i2i_uov_is_mix_ip'] = True if 'cn' in goals else False
                 if 'inpaint' in goals:
-                    async_task.params_backend['i2i_function'] = 3 # iamge inpaint
+                    async_task.params_backend['i2i_inpaint_version'] = self.inpaint_engine
+                    async_task.params_backend['i2i_function'] = 3 # image inpaint
                     input_images.set_image(f'i2i_inpaint_image', inpaint_worker.current_task.interested_image)
                     input_images.set_image(f'i2i_inpaint_mask', inpaint_worker.current_task.interested_mask)
                     if async_task.task_class == 'Kolors':
