@@ -682,8 +682,10 @@ def trigger_input_identity(img):
 
 def update_history_link(user_did, local_access):
     log_link = '' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>'
+    image_dir = ''.join(os.path.dirname(get_current_html_path(None, user_did)).split('/')[-3:-2])
+    user_dir_name = '用户目录' if shared.sysinfo["location"] == 'CN' else 'User Directory'
     if local_access:
-        log_link = f'{log_link} , <a href="file:///{os.path.dirname(get_current_html_path(None, user_did))}" target="_blank">\U0001F4D4 Images Directory</a>'
+        log_link = f'{log_link}<br>\U0001F4D4 {user_dir_name}: {image_dir}'
     return gr.update(value=log_link) 
 
 def update_comfyd_url(user_did):
