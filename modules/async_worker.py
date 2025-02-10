@@ -1577,7 +1577,7 @@ def worker():
                     async_task.params_backend['base_model_gguf'] = async_task.base_model_name
                 else:
                     if async_task.task_class == 'Flux':
-                        async_task.params_backend['base_model_dtype'] = 'fp8_e4m3fn'
+                        async_task.params_backend['base_model_dtype'] = 'default'
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
                     if async_task.skipping_cn_preprocessor:
