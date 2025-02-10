@@ -65,6 +65,13 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
+    MAX_WAIT_TIME = 300  
+    POLL_INTERVAL = 0.1
+    worker.async_tasks.put(task)
+
+    start_time = time.time()
+    last_update_time = time.time()
+
     execution_start_time = time.perf_counter()
     finished = False
 
@@ -73,13 +80,23 @@ def generate_clicked(task: worker.AsyncTask, state):
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
 
-    worker.async_tasks.append(task)
-
+    last_update_time = time.time()
     while not finished:
-        time.sleep(0.01)
+        current_time = time.time()
+        if current_time - last_update_time > MAX_WAIT_TIME:
+            yield gr.update(visible=True, value=modules.html.make_progress_html(0, 'Task timeout!')), \
+                gr.update(visible=True), \
+                gr.update(visible=False), \
+                gr.update(visible=False)
+            logger.error(f"Task timeout after {MAX_WAIT_TIME} seconds")
+            break
+
+        time.sleep(POLL_INTERVAL)
+        
         if len(task.yields) > 0:
             flag, product = task.yields.pop(0)
             if flag == 'preview':
+                last_update_time = current_time
 
                 # help bad internet connection by skipping duplicated preview
                 if len(task.yields) > 0:  # if we have the next item
@@ -94,6 +111,8 @@ def generate_clicked(task: worker.AsyncTask, state):
                     gr.update(), \
                     gr.update(visible=False)
             if flag == 'results':
+                last_update_time = current_time
+
                 yield gr.update(visible=True), \
                     gr.update(visible=True), \
                     gr.update(visible=True, value=product), \
