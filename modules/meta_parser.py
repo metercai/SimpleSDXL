@@ -449,7 +449,6 @@ def get_inpaint_engine_version(key: str, fallback: str | None, source_dict: dict
         h = source_dict.get(key, source_dict.get(fallback, default))
         task_method = source_dict.get('task_method', source_dict.get(fallback, 'text2image'))
         inpaint_engine_versions = modules.flags.inpaint_engine_versions["SDXL"] if task_method not in modules.flags.inpaint_engine_versions else modules.flags.inpaint_engine_versions[task_method]
-        print(f'h:{h}, task_method:{task_method}, inpaint_engine_versions:{inpaint_engine_versions}')
         #assert isinstance(h, str) and h in inpaint_engine_versions
         if h not in inpaint_engine_versions:
             h = inpaint_engine_versions[0]
