@@ -1646,7 +1646,7 @@ def worker():
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
                         if async_task.task_class == 'Flux':
-                            async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[i2i_model_type-1 if i2i_model_type>0 and i2i_model_type<4 else 2]
+                            async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[1 if 'gguf' in async_task.base_model_name else 0]
                         else:
                             async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width'])) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']))
