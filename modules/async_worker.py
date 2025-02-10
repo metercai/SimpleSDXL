@@ -1,4 +1,5 @@
 import threading
+import queue
 
 from extras.inpaint_mask import generate_mask_from_image, SAMOptions
 from modules.patch import PatchSettings, patch_settings, patch_all
@@ -229,7 +230,7 @@ class AsyncTask:
             self.scene_frontend = self.params_backend.pop('scene_frontend')
 
 
-async_tasks = []
+async_tasks = queue.Queue()
 
 
 class EarlyReturnException(BaseException):
@@ -1893,10 +1894,9 @@ def worker():
         return
 
     while True:
-        time.sleep(0.01)
-        if len(async_tasks) > 0:
+        try:
+            task = async_tasks.get(block=True, timeout=1)
             logger.info(f'Got async_tasks')
-            task = async_tasks.pop(0)
             try:
                 handler(task)
                 if task.generate_image_grid:
@@ -1910,6 +1910,9 @@ def worker():
             finally:
                 if pid in modules.patch.patch_settings:
                     del modules.patch.patch_settings[pid]
+            async_tasks.task_done()
+        except queue.Empty:
+            pass
     pass
 
 
