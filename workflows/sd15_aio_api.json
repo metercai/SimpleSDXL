@@ -276,8 +276,8 @@
         0
       ],
       "model": [
-        "2747",
-        1
+        "3003",
+        0
       ],
       "positive": [
         "2747",
@@ -288,7 +288,7 @@
         3
       ],
       "latent_image": [
-        "2969",
+        "3004",
         0
       ]
     },
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 723854978444132,
+      "seed": 989480264105587,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -1991,8 +1991,8 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "2864",
-        1
+        "3003",
+        0
       ],
       "positive": [
         "2864",
@@ -2003,8 +2003,8 @@
         3
       ],
       "latent_image": [
-        "2864",
-        4
+        "3004",
+        0
       ]
     },
     "class_type": "KSamplerAdvanced",
@@ -5653,6 +5653,77 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
+    }
+  },
+  "2999": {
+    "inputs": {
+      "value": "powerpaint"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "i2i_inpaint_version"
+    }
+  },
+  "3000": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "2999",
+        0
+      ],
+      "b": [
+        "3002",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "3002": {
+    "inputs": {
+      "value": "powerpaint"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "3003": {
+    "inputs": {
+      "boolean": [
+        "3000",
+        0
+      ],
+      "on_true": [
+        "2747",
+        1
+      ],
+      "on_false": [
+        "2989",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3004": {
+    "inputs": {
+      "samples": [
+        "2969",
+        0
+      ],
+      "mask": [
+        "1989",
+        0
+      ]
+    },
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Set Latent Noise Mask"
     }
   }
 }
