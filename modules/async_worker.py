@@ -1893,9 +1893,10 @@ def worker():
         stop_processing(async_task, processing_start_time)
         return
 
+    last_active = time.time()
     while True:
         try:
-            task = async_tasks.get(block=True, timeout=1)
+            task = async_tasks.get(block=True, timeout=0.5)
             logger.info(f'Got async_tasks')
             try:
                 handler(task)
@@ -1912,8 +1913,14 @@ def worker():
                     del modules.patch.patch_settings[pid]
             async_tasks.task_done()
         except queue.Empty:
-            pass
-    pass
+            time.sleep(0.01)
+        except Exception as e:
+            logger.error(f"Worker loop error: {str(e)}", exc_info=True)
+            time.sleep(1)
+        if time.time() - last_active > 10:
+            logger.info("Worker is alive and waiting...")
+            last_active = time.time()
+    logger.info("Unexpected exit in worker thread")
 
 
 threading.Thread(target=worker, daemon=True).start()
