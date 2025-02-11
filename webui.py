@@ -64,10 +64,6 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
-    MAX_WAIT_TIME = 300  
-    POLL_INTERVAL = 0.1
-    worker.async_tasks.put(task)
-
     execution_start_time = time.perf_counter()
     finished = False
 
@@ -75,6 +71,12 @@ def generate_clicked(task: worker.AsyncTask, state):
         gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
+    
+    MAX_WAIT_TIME = 300
+    POLL_INTERVAL = 0.1
+    qsize = worker.async_tasks.qsize()
+    worker.async_tasks.put(task)
+    logger.info(f"Task queue size: {qsize} -> {worker.async_tasks.qsize()}")
 
     last_update_time = time.time()
     while not finished:
