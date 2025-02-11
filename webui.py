@@ -15,6 +15,7 @@ import modules.style_sorter as style_sorter
 import modules.meta_parser
 import copy
 import args_manager
+import ldm_patched.modules.model_management as model_management
 
 from extras.inpaint_mask import SAMOptions
 from PIL import Image
@@ -48,8 +49,6 @@ def get_task(*args):
     return worker.AsyncTask(args=args)
 
 def generate_clicked(task: worker.AsyncTask, state):
-    import ldm_patched.modules.model_management as model_management
-
     with model_management.interrupt_processing_mutex:
         model_management.interrupt_processing = False
     # outputs=[progress_html, progress_window, progress_gallery, gallery]
@@ -69,9 +68,6 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.1
     worker.async_tasks.put(task)
 
-    start_time = time.time()
-    last_update_time = time.time()
-
     execution_start_time = time.perf_counter()
     finished = False
 
@@ -89,6 +85,10 @@ def generate_clicked(task: worker.AsyncTask, state):
                 gr.update(visible=False), \
                 gr.update(visible=False)
             logger.error(f"Task timeout after {MAX_WAIT_TIME} seconds")
+            task.last_stop = 'stop'
+            if (task.processing):
+                comfyd.interrupt()
+                model_management.interrupt_current_processing()
             break
 
         time.sleep(POLL_INTERVAL)
@@ -358,7 +358,6 @@ with shared.gradio_root:
                         stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False, min_width = 70)
 
                         def stop_clicked(currentTask):
-                            import ldm_patched.modules.model_management as model_management
                             currentTask.last_stop = 'stop'
                             if (currentTask.processing):
                                 comfyd.interrupt()
@@ -366,7 +365,6 @@ with shared.gradio_root:
                             return currentTask
 
                         def skip_clicked(currentTask):
-                            import ldm_patched.modules.model_management as model_management
                             currentTask.last_stop = 'skip'
                             if (currentTask.processing):
                                 comfyd.interrupt()
