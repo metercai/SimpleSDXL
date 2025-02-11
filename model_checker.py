@@ -276,7 +276,7 @@ def validate_files(packages):
                 
                 # 写入仅包含下载路径的文件
                 f2.write(f"{link}\n")
-        print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<<<<<<<<<<<<<<<<<<<{Style.RESET_ALL}")
 
 def delete_partial_files():
     """
