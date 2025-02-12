@@ -56,7 +56,7 @@
   },
   "17": {
     "inputs": {
-      "image": "无间道2.jfif",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -146,7 +146,7 @@
   "39": {
     "inputs": {
       "model": [
-        "48",
+        "479",
         0
       ]
     },
@@ -198,7 +198,7 @@
   },
   "56": {
     "inputs": {
-      "image": "QQ截图20240109101039.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -323,7 +323,7 @@
   },
   "88": {
     "inputs": {
-      "image": "无间道2.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -720,6 +720,20 @@
       "title": "i2i_overall_input"
     }
   },
+  "479": {
+    "inputs": {
+      "lora_name": "comfyui_portrait_lora64.safetensors",
+      "strength_model": 1,
+      "model": [
+        "48",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
   "403:0": {
     "inputs": {
       "clip_name": "sigclip_vision_patch14_384.safetensors"
@@ -736,6 +750,31 @@
     "class_type": "StyleModelLoader",
     "_meta": {
       "title": "Load Style Model"
+    }
+  },
+  "479:0": {
+    "inputs": {
+      "pulid_file": "pulid_flux_v0.9.1.safetensors"
+    },
+    "class_type": "PulidFluxModelLoader",
+    "_meta": {
+      "title": "Load PuLID Flux Model"
+    }
+  },
+  "479:1": {
+    "inputs": {},
+    "class_type": "PulidFluxEvaClipLoader",
+    "_meta": {
+      "title": "Load Eva Clip (PuLID Flux)"
+    }
+  },
+  "479:2": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "PulidFluxInsightFaceLoader",
+    "_meta": {
+      "title": "Load InsightFace (PuLID Flux)"
     }
   },
   "403:2": {
@@ -769,31 +808,6 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
-    }
-  },
-  "479:0": {
-    "inputs": {
-      "pulid_file": "pulid_flux_v0.9.1.safetensors"
-    },
-    "class_type": "PulidFluxModelLoader",
-    "_meta": {
-      "title": "Load PuLID Flux Model"
-    }
-  },
-  "479:1": {
-    "inputs": {},
-    "class_type": "PulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "Load Eva Clip (PuLID Flux)"
-    }
-  },
-  "479:2": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "PulidFluxInsightFaceLoader",
-    "_meta": {
-      "title": "Load InsightFace (PuLID Flux)"
     }
   },
   "479:3": {

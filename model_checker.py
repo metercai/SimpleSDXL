@@ -1027,7 +1027,8 @@ packages = {
             ("SimpleModels/vae/ae.safetensors", 335304388),
             ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
-            ("SimpleModels/rembg/General.safetensors", 884878856)
+            ("SimpleModels/rembg/General.safetensors", 884878856),
+            ("SimpleModels/loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
         "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
@@ -1090,7 +1091,7 @@ packages = {
         "x3-swapface_package": {
         "id": 17,
         "name": "[17]一键换脸",
-        "note": "高精度换脸|显存需求：★★★ 速度：★☆",
+        "note": "高精度换脸|显存需求：★★★ 速度：★★",
         "files": [
             ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
             ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
@@ -1108,7 +1109,8 @@ packages = {
             ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
             ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
             ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
-            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210)
+            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("SimpleModels/loras/comfyui_portrait_lora64.safetensors",612742344)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
@@ -1165,7 +1167,8 @@ packages = {
             ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
             ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/rembg/General.safetensors", 884878856)
+            ("SimpleModels/rembg/General.safetensors", 884878856),
+            ("SimpleModels/loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
         "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。",
