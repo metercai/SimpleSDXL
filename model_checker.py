@@ -65,8 +65,8 @@ def check_script_file():
         print_colored("√主程序目录层级验证通过", Fore.GREEN)
 
 def get_total_virtual_memory():
-    import psutil
     try:
+        import psutil
         virtual_mem = psutil.virtual_memory().total  # 物理内存
         swap_mem = psutil.swap_memory().total        # 交换分区
         total_virtual_memory = virtual_mem + swap_mem
@@ -74,9 +74,14 @@ def get_total_virtual_memory():
     except ImportError:
         print_colored("无法导入 psutil 模块，跳过内存检查", Fore.YELLOW)
         return None
+    except Exception as e:
+        print_colored(f"无法获取系统虚拟内存，可能是性能计数器未开启或其他问题。\n错误详情: {e}", Fore.YELLOW)
+        print_colored("请参考https://learn.microsoft.com/zh-cn/troubleshoot/windows-server/performance/rebuild-performance-counter-library-values重新启用系统性能计数器，或忽略此警告继续。", Fore.YELLOW)
+        return None
 
 def check_virtual_memory(total_virtual):
     if total_virtual is None:
+        print_colored("跳过虚拟内存检查。", Fore.YELLOW)
         return
     total_gb = total_virtual / (1024 ** 3)
     if total_gb < 40:
@@ -271,7 +276,7 @@ def validate_files(packages):
                 
                 # 写入仅包含下载路径的文件
                 f2.write(f"{link}\n")
-        print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<<<<<<<<<<<<<<<<<<<{Style.RESET_ALL}")
 
 def delete_partial_files():
     """
