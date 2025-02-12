@@ -146,7 +146,7 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2 if ready_to_gen and switch_flag else additional_prompt_2_default, 'scene_additional_prompt_2', visible, inter))
     aspect_ratios = modules.flags.get_value_by_scene_theme(state, theme, 'aspect_ratio', [])
     if ready_to_gen and switch_flag:
-        img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image
+        img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image['image']
         if img is not None:
             img = resize_image(img, max_side=1280, resize_mode=4)
         aspect_ratio_select_mode = state['scene_frontend'].get('aspect_ratio_select_mode', '')
