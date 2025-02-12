@@ -72,7 +72,7 @@ def generate_clicked(task: worker.AsyncTask, state):
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
     
-    MAX_WAIT_TIME = 300
+    MAX_WAIT_TIME = 480
     POLL_INTERVAL = 0.1
     qsize = worker.async_tasks.qsize()
     worker.async_tasks.put(task)
@@ -89,6 +89,7 @@ def generate_clicked(task: worker.AsyncTask, state):
             logger.error(f"Task timeout after {MAX_WAIT_TIME} seconds")
             task.last_stop = 'stop'
             if (task.processing):
+                logger.error("Send interrupt flag to process and comfyd")
                 comfyd.interrupt()
                 model_management.interrupt_current_processing()
             break
