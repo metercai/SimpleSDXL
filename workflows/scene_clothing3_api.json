@@ -569,8 +569,8 @@
         "190",
         1
       ],
-      "interpolation": "bilinear",
-      "method": "fill / crop",
+      "interpolation": "lanczos",
+      "method": "stretch",
       "condition": "always",
       "multiple_of": 0,
       "image": [
@@ -933,7 +933,10 @@
   },
   "238": {
     "inputs": {
-      "seed": 1073690851569824,
+      "seed": [
+        "122",
+        6
+      ],
       "steps": [
         "246",
         0
