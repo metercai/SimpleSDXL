@@ -276,7 +276,7 @@ def worker():
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser
-    from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline
+    from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline, get_echo_off
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
     from enhanced.all_parameters import default as default_params
     from enhanced.minicpm import MiniCPM
@@ -1917,7 +1917,7 @@ def worker():
         except Exception as e:
             logger.error(f"Worker loop error: {str(e)}", exc_info=True)
             time.sleep(1)
-        if time.time() - last_active > 10:
+        if not get_echo_off() and time.time() - last_active > 10:
             logger.info("Worker is alive and waiting...")
             last_active = time.time()
     logger.info("Unexpected exit in worker thread")

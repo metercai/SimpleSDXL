@@ -91,6 +91,9 @@ def change_advanced_logs(advanced_logs):
     else:
         utils.echo_off = True
 
+def get_echo_off():
+    return utils.echo_off
+
 
 identity_note = '您的昵称+手机号组成您的可信身份，昵称支持汉字。绑定身份即激活"我的预置"导航等高级服务。用身份二维码导入既安全又快捷。首个绑定身份者为系统管理员。'
 identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要更换其他身份，需先"解除绑定"。导出身份二维码可方便再次绑定，适用离线和漫游场景，导出后请妥善保存。'
