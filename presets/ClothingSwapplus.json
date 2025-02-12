@@ -80,7 +80,8 @@
         "inpaint,groundingdino_swint_ogc.pth,693997677,0,",
         "style_models,flux1-redux-dev.safetensors,129063232,0,",
         "upscale_models,4x-UltraSharp.pth,66961958,0,",
-    	"rembg,General.safetensors,884878856,0,"
+    	"rembg,General.safetensors,884878856,0,",
+        "loras,comfyui_subject_lora16.safetensors,153268392,0,"
     	]
 }
 
