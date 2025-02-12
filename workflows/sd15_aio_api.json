@@ -125,7 +125,7 @@
   },
   "288": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -5589,7 +5589,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 3,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "936",
         0

@@ -422,7 +422,7 @@
         "235",
         0
       ],
-      "round_to_multiple": "8",
+      "round_to_multiple": "64",
       "image": [
         "89",
         0
@@ -482,7 +482,7 @@
         "235",
         0
       ],
-      "round_to_multiple": "8",
+      "round_to_multiple": "64",
       "image": [
         "110",
         0
