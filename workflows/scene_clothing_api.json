@@ -468,7 +468,7 @@
       "end": 0.7000000000000001,
       "max_consecutive_cache_hits": 1,
       "model": [
-        "92",
+        "238",
         0
       ]
     },
@@ -999,6 +999,20 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
+    }
+  },
+  "238": {
+    "inputs": {
+      "lora_name": "comfyui_subject_lora16.safetensors",
+      "strength_model": 1,
+      "model": [
+        "92",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
     }
   }
 }
