@@ -75,7 +75,8 @@
         "inpaint,sam_vit_h_4b8939.pth,2564550879,0,",
         "inpaint,groundingdino_swint_ogc.pth,693997677,0,",
         "style_models,flux1-redux-dev.safetensors,129063232,0,",
-    	"rembg,General.safetensors,884878856,0,"
+    	"rembg,General.safetensors,884878856,0,",
+        "loras,comfyui_subject_lora16.safetensors,153268392,0,"
     	]
 }
 
