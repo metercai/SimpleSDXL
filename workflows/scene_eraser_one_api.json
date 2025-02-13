@@ -2,7 +2,7 @@
   "301": {
     "inputs": {
       "samples": [
-        "312",
+        "360",
         0
       ],
       "vae": [
@@ -51,39 +51,9 @@
       "title": "lora_1"
     }
   },
-  "312": {
-    "inputs": {
-      "seed": 10086,
-      "steps": 20,
-      "cfg": 2,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "denoise": 1,
-      "model": [
-        "316",
-        0
-      ],
-      "positive": [
-        "314",
-        0
-      ],
-      "negative": [
-        "314",
-        1
-      ],
-      "latent_image": [
-        "314",
-        2
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "main_sampler"
-    }
-  },
   "313": {
     "inputs": {
-      "text": "Remove the selected objects from the image",
+      "text": "",
       "clip": [
         "345",
         0
@@ -96,7 +66,7 @@
   },
   "314": {
     "inputs": {
-      "noise_mask": false,
+      "noise_mask": true,
       "positive": [
         "307",
         0
@@ -110,12 +80,12 @@
         0
       ],
       "pixels": [
-        "315",
+        "353",
         0
       ],
       "mask": [
-        "350",
-        0
+        "353",
+        1
       ]
     },
     "class_type": "InpaintModelConditioning",
@@ -136,7 +106,7 @@
   "316": {
     "inputs": {
       "model": [
-        "309",
+        "356",
         0
       ]
     },
@@ -184,7 +154,7 @@
   "344": {
     "inputs": {
       "images": [
-        "301",
+        "354",
         0
       ]
     },
@@ -226,6 +196,252 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_inpaint_mask"
+    }
+  },
+  "352": {
+    "inputs": {
+      "image": [
+        "315",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "353": {
+    "inputs": {
+      "width": [
+        "352",
+        0
+      ],
+      "height": [
+        "352",
+        1
+      ],
+      "image": [
+        "315",
+        0
+      ],
+      "mask": [
+        "364",
+        0
+      ]
+    },
+    "class_type": "CutForInpaint",
+    "_meta": {
+      "title": "Cut For Inpaint"
+    }
+  },
+  "354": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "301",
+        0
+      ],
+      "original": [
+        "353",
+        0
+      ],
+      "mask": [
+        "353",
+        1
+      ],
+      "origin": [
+        "353",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "356": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "357",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "309",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "357": {
+    "inputs": {
+      "value": 0.12
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "359": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "369",
+        0
+      ],
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "end_at_step": 4,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "316",
+        0
+      ],
+      "positive": [
+        "314",
+        0
+      ],
+      "negative": [
+        "314",
+        1
+      ],
+      "latent_image": [
+        "314",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "360": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "369",
+        0
+      ],
+      "steps": 20,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 4,
+      "end_at_step": 20,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "366",
+        0
+      ],
+      "positive": [
+        "314",
+        0
+      ],
+      "negative": [
+        "314",
+        1
+      ],
+      "latent_image": [
+        "368",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "362": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "357",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "334",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "364": {
+    "inputs": {
+      "expand": 20,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 15,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "366": {
+    "inputs": {
+      "model": [
+        "362",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "368": {
+    "inputs": {
+      "noise_seed": [
+        "369",
+        0
+      ],
+      "noise_strength": 1,
+      "normalize": "false",
+      "latent": [
+        "359",
+        0
+      ],
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "InjectLatentNoise+",
+    "_meta": {
+      "title": "🔧 Inject Latent Noise"
+    }
+  },
+  "369": {
+    "inputs": {
+      "seed": 47068142677336
+    },
+    "class_type": "easy seed",
+    "_meta": {
+      "title": "sync_seed"
     }
   }
 }
