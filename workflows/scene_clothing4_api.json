@@ -393,7 +393,7 @@
       "end": 0.7000000000000001,
       "max_consecutive_cache_hits": 1,
       "model": [
-        "237",
+        "328",
         0
       ]
     },
@@ -1259,6 +1259,20 @@
     "class_type": "ImageToMask",
     "_meta": {
       "title": "Convert Image to Mask"
+    }
+  },
+  "328": {
+    "inputs": {
+      "lora_name": "comfyui_subject_lora16.safetensors",
+      "strength_model": 1,
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
     }
   }
 }
