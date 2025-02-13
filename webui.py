@@ -255,12 +255,16 @@ with shared.gradio_root:
                         with gr.Row():
                             scene_additional_prompt = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, elem_classes='scene_input')
                             scene_theme = gr.Radio(choices=modules.flags.scene_themes, label="Themes", value=modules.flags.scene_themes[0])
-                        scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#FFFFFF", elem_id='scene_canvas')
+                        scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#70FF81", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
                         scene_additional_prompt_2 = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, visible=False, elem_classes='scene_input_2')
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios[:3], label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
                         scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
-
+                        scene_mask_color = gr.ColorPicker(label="Scene brush color", value="#70FF81", elem_id="scene_brush_color")
+                        scene_mask_color.change(lambda x: gr.update(brush_color=x),inputs=scene_mask_color,
+                            outputs=scene_canvas_image,
+                            queue=False,show_progress=False)
+                        
                 progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                     elem_id='progress-bar', elem_classes='progress-bar')
                 prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None, args_manager.args.theme), visible=False, elem_id='infobox', elem_classes='infobox')
