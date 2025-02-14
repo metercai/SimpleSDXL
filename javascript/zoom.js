@@ -1,6 +1,6 @@
 onUiLoaded(async() => {
     // Helper functions
-
+    let buttonsVisible = true;
     // Detect whether the element has a horizontal scroll bar
     function hasHorizontalScrollbar(element) {
         return element.scrollWidth > element.clientWidth;
@@ -38,6 +38,7 @@ onUiLoaded(async() => {
         canvas_hotkey_reset: "KeyR",
         canvas_hotkey_fullscreen: "KeyS",
         canvas_hotkey_move: "KeyF",
+        canvas_hotkey_hide: "KeyQ",
         canvas_show_tooltip: true,
         canvas_auto_expand: true,
         canvas_blur_prompt: true,
@@ -105,7 +106,8 @@ onUiLoaded(async() => {
                     configKey: "canvas_hotkey_fullscreen",
                     action: "全屏模式"
                 },
-                {configKey: "canvas_hotkey_move", action: "移动画布"}
+                {configKey: "canvas_hotkey_move", action: "移动画布"},
+                {configKey: "canvas_hotkey_hide", action: "隐藏按钮"}
             ];
 
             // Create hotkeys array based on the config values
@@ -353,6 +355,29 @@ onUiLoaded(async() => {
          * zoomLevel, panX, and panY to reflect the new state.
          */
 
+        function toggleButtons() {
+            const undoButton = document.querySelector(`${activeElement} button[aria-label="Undo"]`);
+            const clearButton = document.querySelector(`${activeElement} button[aria-label="Clear"]`);
+            const removeButton = document.querySelector(`${activeElement} button[aria-label="Remove Image"]`);
+            const useBrushButton = document.querySelector(`${activeElement} button[aria-label="Use brush"]`);
+            const BrushRadius = document.querySelector(`${activeElement} input[aria-label="Brush radius"]`)
+
+            if (buttonsVisible) {
+                if (undoButton) undoButton.style.display = 'none';
+                if (clearButton) clearButton.style.display = 'none';
+                if (removeButton) removeButton.style.display = 'none';
+                if (useBrushButton) useBrushButton.style.display = 'none';
+                if (BrushRadius) BrushRadius.style.display = 'none';
+            } else {
+                if (undoButton) undoButton.style.display = '';
+                if (clearButton) clearButton.style.display = '';
+                if (removeButton) removeButton.style.display = '';
+                if (useBrushButton) useBrushButton.style.display = '';
+                if (BrushRadius) BrushRadius.style.display = '';
+            }
+
+            buttonsVisible = !buttonsVisible;
+        }
         // Fullscreen mode
         function fitToScreen() {
             const canvas = gradioApp().querySelector(
@@ -441,6 +466,7 @@ onUiLoaded(async() => {
                 [hotkeysConfig.canvas_hotkey_overlap]: toggleOverlap,
                 [hotkeysConfig.canvas_hotkey_fullscreen]: fitToScreen,
                 [hotkeysConfig.canvas_zoom_hotkey_undo]: undoLastAction,
+                [hotkeysConfig.canvas_hotkey_hide]: toggleButtons,
             };
 
             const action = hotkeyActions[event.code];

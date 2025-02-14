@@ -301,7 +301,7 @@
       "sampler_name": "euler",
       "scheduler": "simple",
       "start_at_step": 0,
-      "end_at_step": 4,
+      "end_at_step": 10,
       "return_with_leftover_noise": "disable",
       "model": [
         "316",
@@ -336,7 +336,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "start_at_step": 4,
+      "start_at_step": 10,
       "end_at_step": 20,
       "return_with_leftover_noise": "disable",
       "model": [
@@ -419,7 +419,7 @@
         "369",
         0
       ],
-      "noise_strength": 1,
+      "noise_strength": 0.3,
       "normalize": "false",
       "latent": [
         "359",
