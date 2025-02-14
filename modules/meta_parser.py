@@ -162,6 +162,7 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
         aspect_ratio = '' if len(aspect_ratios)==0 else aspect_ratios[0]
     results.append(get_layout_setting_choices_visible_inter(aspect_ratios, aspect_ratio, 'scene_aspect_ratio', visible, inter))
     results.append(get_layout_update_and_visible_inter(image_number, 'scene_image_number', visible, inter))
+    results.append(gr.update(visible= 'scene_canvas_image' not in visible))
     return results
 
 
