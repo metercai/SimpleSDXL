@@ -312,7 +312,7 @@
   "Api engine needs to configure the api key before use": "使用接口引擎需要事先配置接口密钥。密钥从stability.ai官网申请。",
   "Original Size / Recommended Size": "图片尺寸 / 推荐尺寸",
   "Inpaint brush color": "画笔颜色",
-  "Scene brush color": "场景画笔颜色",
+  "Scene brush color": "画笔颜色",
   "VAE": "变分自编码器VAE",
   "Black Out NSFW": "禁止NSFW",
   "Use black image if NSFW is detected.": "用黑色图像替换检测到的NSFW内容。",
