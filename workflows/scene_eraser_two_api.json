@@ -89,7 +89,10 @@
   },
   "313": {
     "inputs": {
-      "text": "",
+      "text": [
+        "370",
+        4
+      ],
       "clip": [
         "345",
         0
@@ -361,8 +364,8 @@
       "height": 512,
       "swap": false,
       "batch_size": 1,
-      "positive": "+正向提示词",
-      "negative": "-负向提示词",
+      "positive": "",
+      "negative": "",
       "seed": 633053972513273,
       "steps": 20,
       "cfg": 3.5,
