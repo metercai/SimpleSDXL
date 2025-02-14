@@ -1525,17 +1525,19 @@ def worker():
             if step == 0:
                 async_task.callback_steps = 0
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
+            percentage = int(current_progress + async_task.callback_steps)
             async_task.yields.append(['preview', (
-                int(current_progress + async_task.callback_steps),
-                f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
+                percentage, f'Sampling step {step + 1}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         def callback_comfytask(step, total_steps, y):
             if step == 1:
-                async_task.callback_steps = 1
+                async_task.callback_steps = 0
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
+            if async_task.task_method == 'sd15_aio' and step % 4 != 1 and step <= 30:
+                return
+            percentage = int(current_progress + async_task.callback_steps)
             async_task.yields.append(['preview', (
-                int(current_progress + async_task.callback_steps),
-                f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
+                percentage, f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])
 
         callback_function = callback
         i2i_uov_hires_fix_blurred = async_task.params_backend.pop('hires_fix_blurred', 0.0)
