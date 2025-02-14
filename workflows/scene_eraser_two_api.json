@@ -100,7 +100,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "prompt"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "314": {
@@ -161,7 +161,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "negative_prompt"
+      "title": "CLIP Text Encode (Prompt)"
     }
   },
   "343": {
