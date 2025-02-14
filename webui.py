@@ -48,15 +48,15 @@ def get_task(*args):
 
     return worker.AsyncTask(args=args)
 
+
 def generate_clicked(task: worker.AsyncTask, state):
     with model_management.interrupt_processing_mutex:
         model_management.interrupt_processing = False
-    # outputs=[progress_html, progress_window, progress_gallery, gallery]
-
     if len(task.args) == 0:
         return
-
     is_mobile = state["__is_mobile"]
+
+    # outputs=[progress_html, progress_window, progress_gallery, gallery]
     if "absent_model" in state and state["absent_model"]:
         yield gr.update(visible=False), \
             gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
@@ -64,19 +64,18 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
-    execution_start_time = time.perf_counter()
-    finished = False
-
-    yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
+    WAIT_TASK_INTERVAL = 1
+    worker.async_tasks.put(task)
+    qsize = worker.async_tasks.qsize()
+    yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'Waiting for task({qsize}) to start ...')), \
         gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
         gr.update(visible=False, value=None), \
         gr.update(visible=False)
-    
+
+    execution_start_time = time.perf_counter()
+    finished = False
     MAX_WAIT_TIME = 480
     POLL_INTERVAL = 0.1
-    qsize = worker.async_tasks.qsize()
-    worker.async_tasks.put(task)
-    logger.info(f"Task queue size: {qsize} -> {worker.async_tasks.qsize()}")
 
     last_update_time = time.time()
     while not finished:

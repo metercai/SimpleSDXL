@@ -10,7 +10,7 @@ logs = None
 stdout_interceptor = None
 stderr_interceptor = None
 
-log_file = None
+log_file = None if "SIMPAI_LOG_FILE" not in os.environ else os.environ["SIMPAI_LOG_FILE"]
 
 class MilliSecondsFormatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):

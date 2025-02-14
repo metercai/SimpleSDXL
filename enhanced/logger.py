@@ -5,12 +5,21 @@ import os
 import logging
 import sys
 import threading
-from comfy.app.logger import MilliSecondsFormatter, get_log_file
 
 logs = None
 stdout_interceptor = None
 stderr_interceptor = None
+log_file = None
 
+class MilliSecondsFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        ct = datetime.fromtimestamp(record.created)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            t = ct.strftime("%H:%M:%S")  # 分钟和秒
+            s = f"{t}.{int(record.msecs):03d}"  # 添加毫秒
+        return s
 
 class LogInterceptor(io.TextIOWrapper):
     def __init__(self, stream, log_file, *args, **kwargs):
@@ -48,10 +57,18 @@ class LogInterceptor(io.TextIOWrapper):
     def on_flush(self, callback):
         self._flush_callbacks.append(callback)
 
+def get_log_file():
+    global log_file
+    if log_file is None:
+        now_string = datetime.now().strftime("%Y%m%d%H%M%S")
+        log_file = os.path.join("logs", f'app_simpleai_{now_string}.log')
+        dirs_log = os.path.dirname(log_file)
+        if not os.path.exists(dirs_log):
+            os.makedirs(dirs_log)
+    return log_file
 
 def get_logs():
     return logs
-
 
 def on_flush(callback):
     if stdout_interceptor is not None:
