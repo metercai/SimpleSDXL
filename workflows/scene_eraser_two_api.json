@@ -258,7 +258,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "denoise": 0.6,
+      "denoise": 0.5,
       "model": [
         "384",
         0
@@ -422,7 +422,7 @@
   },
   "385": {
     "inputs": {
-      "downsampling_factor": 1.5,
+      "downsampling_factor": 3,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
@@ -551,7 +551,7 @@
         "370",
         6
       ],
-      "noise_strength": 1,
+      "noise_strength": 0.2,
       "normalize": "false",
       "latent": [
         "312",
