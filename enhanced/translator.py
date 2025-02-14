@@ -21,7 +21,7 @@ Q_alphabet = 'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖ
 B_alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 translator_org = ['baidu', 'alibaba', 'sogou', 'caiyun']
-translator_default = translator_org[random.randint(1,2)]
+translator_default = translator_org[random.randint(0,1)]
 translator_path = os.path.join(paths_llms[0], 'nllb-200-distilled-600M')
 translator_slim_path = os.path.join(paths_llms[0], 'Helsinki-NLP/opus-mt-zh-en')
 
@@ -82,7 +82,7 @@ def translate2en_apis(text):
     except Exception as e:
         try:
             logger.info(f'Change another translator because of {e}')
-            translator_default = translator_org[random.randint(1,2)]
+            translator_default = translator_org[random.randint(0,1)]
             return ts.translate_text(text, translator=translator_default, to_language='en')
         except Exception as e:
             logger.info(f'Error during translation of APIs methods: {e}')

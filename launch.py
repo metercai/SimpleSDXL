@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 from build_launcher import build_launcher, ready_checker, is_win32_standalone_build, python_embeded_path
 from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, extra_index_url, target_path_install, met_diff
-from enhanced.logger import setup_logger, now_string
+from enhanced.logger import setup_logger, now_string, get_log_file
 
 setup_logger(log_level='INFO')
 logger = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
 os.chdir(root)
 
+os.environ["SIMPAI_LOG_FILE"] = get_log_file()
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 os.environ["translators_default_region"] = "China"
