@@ -449,7 +449,7 @@ def worker():
                 imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
             logger.info(f'pipeline.process_diffusion finished.')
 
-        current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * steps)
+        current_progress = int(base_progress + (100 - preparation_steps) / float(all_steps) * int(all_steps/async_task.image_number))
         if modules.config.default_black_out_nsfw or async_task.black_out_nsfw:
             progressbar(async_task, current_progress, 'Checking for NSFW content ...')
             imgs = default_censor(imgs)
@@ -1690,9 +1690,12 @@ def worker():
                 if async_task.task_class == 'Comfy':
                     if 'i2i_uov_tiled_steps' not in async_task.params_backend and async_task.task_method == "sd15_aio":
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
-                        all_steps = async_task.params_backend['display_steps'] * async_task.image_number
                     else:
                         async_task.params_backend['display_steps'] = async_task.steps
+                    all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+                elif async_task.task_class == 'Kolors':
+                    async_task.params_backend['display_steps'] = async_task.steps + 1
+                    all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             async_task.params_backend['input_images'] = input_images
 
         ldm_patched.modules.model_management.print_memory_info("begin to process_task")
@@ -1714,7 +1717,7 @@ def worker():
                                                                  async_task.image_number, show_intermediate_results,
                                                                  persist_image)
 
-                current_progress = int(preparation_steps + (100 - preparation_steps) / float(all_steps) * async_task.steps * (current_task_id + 1))
+                current_progress = int(preparation_steps + (100 - preparation_steps) / float(all_steps) * int(all_steps/async_task.image_number) * (current_task_id + 1))
                 images_to_enhance += imgs
 
             except ldm_patched.modules.model_management.InterruptProcessingException:
