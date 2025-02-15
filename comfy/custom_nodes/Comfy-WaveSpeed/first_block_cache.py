@@ -9,9 +9,11 @@ import torch
 
 @dataclasses.dataclass
 class CacheContext:
-    buffers: Dict[str, torch.Tensor] = dataclasses.field(default_factory=dict)
+    buffers: Dict[str, list] = dataclasses.field(default_factory=dict)
     incremental_name_counters: DefaultDict[str, int] = dataclasses.field(
         default_factory=lambda: defaultdict(int))
+    sequence_num: int = 0
+    use_cache: bool = False
 
     def get_incremental_name(self, name=None):
         if name is None:
@@ -25,13 +27,22 @@ class CacheContext:
 
     @torch.compiler.disable()
     def get_buffer(self, name):
-        return self.buffers.get(name)
+        item = self.buffers.get(name)
+        if item is None or self.sequence_num >= len(item):
+            return None
+        return item[self.sequence_num]
 
     @torch.compiler.disable()
     def set_buffer(self, name, buffer):
-        self.buffers[name] = buffer
+        curr_item = self.buffers.get(name)
+        if curr_item is None:
+            curr_item = []
+            self.buffers[name] = curr_item
+        curr_item += [None] * (self.sequence_num - len(curr_item) + 1)
+        curr_item[self.sequence_num] = buffer
 
     def clear_buffers(self):
+        self.sequence_num = 0
         self.buffers.clear()
 
 
@@ -99,9 +110,11 @@ def patch_get_output_data():
 
 
 @torch.compiler.disable()
-def are_two_tensors_similar(t1, t2, *, threshold):
+def are_two_tensors_similar(t1, t2, *, threshold, only_shape=False):
     if t1.shape != t2.shape:
         return False
+    elif only_shape:
+        return True
     mean_diff = (t1 - t2).abs().mean()
     mean_t1 = t1.abs().mean()
     diff = mean_diff / mean_t1
@@ -133,15 +146,26 @@ def apply_prev_hidden_states_residual(hidden_states,
 @torch.compiler.disable()
 def get_can_use_cache(first_hidden_states_residual,
                       threshold,
-                      parallelized=False):
+                      parallelized=False,
+                      validation_function=None):
     prev_first_hidden_states_residual = get_buffer(
         "first_hidden_states_residual")
-    can_use_cache = prev_first_hidden_states_residual is not None and are_two_tensors_similar(
+    cache_context = get_current_cache_context()
+    if cache_context is None or prev_first_hidden_states_residual is None:
+        return False
+    can_use_cache = are_two_tensors_similar(
         prev_first_hidden_states_residual,
         first_hidden_states_residual,
         threshold=threshold,
+        only_shape=cache_context.sequence_num > 0,
     )
-    return can_use_cache
+    if cache_context.sequence_num > 0:
+        cache_context.use_cache &= can_use_cache
+    else:
+        if validation_function is not None:
+            can_use_cache = validation_function(can_use_cache)
+        cache_context.use_cache = can_use_cache
+    return cache_context.use_cache
 
 
 class CachedTransformerBlocks(torch.nn.Module):
@@ -271,9 +295,8 @@ class CachedTransformerBlocks(torch.nn.Module):
         can_use_cache = get_can_use_cache(
             first_hidden_states_residual,
             threshold=self.residual_diff_threshold,
+            validation_function=self.validate_can_use_cache_function,
         )
-        if self.validate_can_use_cache_function is not None:
-            can_use_cache = self.validate_can_use_cache_function(can_use_cache)
 
         torch._dynamo.graph_break()
         if can_use_cache:
@@ -361,20 +384,21 @@ class CachedTransformerBlocks(torch.nn.Module):
                     ],
                     dim=1)
 
-        hidden_states_shape = hidden_states.shape
-        hidden_states = hidden_states.flatten().contiguous().reshape(
-            hidden_states_shape)
-
+        hidden_states = hidden_states.reshape(-1).contiguous().reshape(
+            original_hidden_states.shape)
         if encoder_hidden_states is not None:
-            encoder_hidden_states_shape = encoder_hidden_states.shape
-            encoder_hidden_states = encoder_hidden_states.flatten().contiguous(
-            ).reshape(encoder_hidden_states_shape)
+            encoder_hidden_states = encoder_hidden_states.reshape(
+                -1).contiguous().reshape(original_encoder_hidden_states.shape)
 
         hidden_states_residual = hidden_states - original_hidden_states
+        hidden_states_residual = hidden_states_residual.reshape(-1).contiguous(
+        ).reshape(original_hidden_states.shape)
         if encoder_hidden_states is None:
             encoder_hidden_states_residual = None
         else:
             encoder_hidden_states_residual = encoder_hidden_states - original_encoder_hidden_states
+            encoder_hidden_states_residual = encoder_hidden_states_residual.reshape(
+                -1).contiguous().reshape(original_encoder_hidden_states.shape)
         return hidden_states, encoder_hidden_states, hidden_states_residual, encoder_hidden_states_residual
 
 
@@ -510,10 +534,8 @@ def create_patch_unet_model__forward(model,
                 can_use_cache = get_can_use_cache(
                     first_hidden_states_residual,
                     threshold=residual_diff_threshold,
+                    validation_function=validate_can_use_cache_function,
                 )
-                if validate_can_use_cache_function is not None:
-                    can_use_cache = validate_can_use_cache_function(
-                        can_use_cache)
                 if not can_use_cache:
                     set_buffer("first_hidden_states_residual",
                                first_hidden_states_residual)
@@ -778,10 +800,8 @@ def create_patch_flux_forward_orig(model,
                 can_use_cache = get_can_use_cache(
                     first_hidden_states_residual,
                     threshold=residual_diff_threshold,
+                    validation_function=validate_can_use_cache_function,
                 )
-                if validate_can_use_cache_function is not None:
-                    can_use_cache = validate_can_use_cache_function(
-                        can_use_cache)
                 if not can_use_cache:
                     set_buffer("first_hidden_states_residual",
                                first_hidden_states_residual)
