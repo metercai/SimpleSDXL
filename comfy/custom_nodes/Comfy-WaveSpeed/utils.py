@@ -102,3 +102,26 @@ def patch_optimized_module():
     OptimizedModule.__delattr__ = __delattr__
     OptimizedModule.__instancecheck__ = __instancecheck__
     OptimizedModule._patched = True
+
+
+def patch_same_meta():
+    try:
+        from torch._inductor.fx_passes import post_grad
+    except ImportError:
+        return
+
+    same_meta = getattr(post_grad, "same_meta", None)
+    if same_meta is None:
+        return
+
+    if getattr(same_meta, "_patched", False):
+        return
+
+    def new_same_meta(a, b):
+        try:
+            return same_meta(a, b)
+        except Exception:
+            return False
+
+    post_grad.same_meta = new_same_meta
+    new_same_meta._patched = True

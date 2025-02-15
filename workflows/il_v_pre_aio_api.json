@@ -88,7 +88,7 @@
         0
       ],
       "model": [
-        "936",
+        "2915",
         0
       ],
       "positive": [
@@ -321,7 +321,7 @@
       ],
       "denoise": 1,
       "model": [
-        "2696",
+        "2917",
         0
       ],
       "positive": [
@@ -703,7 +703,7 @@
         0
       ],
       "model": [
-        "936",
+        "2910",
         0
       ],
       "positive": [
@@ -879,7 +879,7 @@
   },
   "1075": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -888,7 +888,7 @@
   },
   "1079": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -897,7 +897,7 @@
   },
   "1080": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -906,7 +906,7 @@
   },
   "1081": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 376352432634889,
+      "seed": 760340959297597,
       "steps": 30,
       "cfg": 3,
       "denoise": 0
@@ -1491,7 +1491,7 @@
   },
   "1892": {
     "inputs": {
-      "value": 1040
+      "value": 1024
     },
     "class_type": "easy int",
     "_meta": {
@@ -1500,7 +1500,7 @@
   },
   "1893": {
     "inputs": {
-      "value": 1040
+      "value": 1024
     },
     "class_type": "easy int",
     "_meta": {
@@ -4896,7 +4896,7 @@
         1
       ],
       "model": [
-        "2096",
+        "2919",
         0
       ],
       "positive": [
@@ -5143,6 +5143,95 @@
     "class_type": "InpaintModelConditioning",
     "_meta": {
       "title": "InpaintModelConditioning"
+    }
+  },
+  "2910": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2911",
+        0
+      ],
+      "start": 0,
+      "end": 0.9,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2911": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "2915": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2911",
+        0
+      ],
+      "start": 0,
+      "end": 0.9,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "936",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2917": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2911",
+        0
+      ],
+      "start": 0,
+      "end": 0.9,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "2696",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "2919": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "2911",
+        0
+      ],
+      "start": 0,
+      "end": 0.9,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "2096",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }

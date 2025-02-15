@@ -1535,6 +1535,8 @@ def worker():
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
             if async_task.task_method == 'sd15_aio' and step % 4 != 1 and step <= 30:
                 return
+            if async_task.task_method in ('il_v_pre', 'il_v_pre_aio') and step % 2 != 1 and step <= 30:
+                return
             percentage = int(current_progress + async_task.callback_steps)
             async_task.yields.append(['preview', (
                 percentage, f'Sampling step {step}/{total_steps}, image {current_task_id + 1}/{total_count} ...', y)])

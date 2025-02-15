@@ -49,7 +49,7 @@
   },
   "5": {
     "inputs": {
-      "seed": 138994455449725,
+      "seed": 819637870335342,
       "steps": 40,
       "cfg": 5,
       "sampler_name": "euler",
@@ -190,13 +190,42 @@
     "inputs": {
       "multiplier": 0.7,
       "model": [
-        "16",
+        "18",
         0
       ]
     },
     "class_type": "RescaleCFG",
     "_meta": {
       "title": "RescaleCFG"
+    }
+  },
+  "18": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "19",
+        0
+      ],
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "19": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
     }
   }
 }
