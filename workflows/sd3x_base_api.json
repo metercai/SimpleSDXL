@@ -1,14 +1,14 @@
 {
   "3": {
     "inputs": {
-      "seed": 297491696968509,
+      "seed": 697693309708461,
       "steps": 28,
       "cfg": 4.5,
       "sampler_name": "dpmpp_2m",
       "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
-        "55",
+        "62",
         0
       ],
       "positive": [
@@ -16,7 +16,7 @@
         0
       ],
       "negative": [
-        "56",
+        "40",
         0
       ],
       "latent_image": [
@@ -103,80 +103,12 @@
       "title": "SaveImageWebsocket"
     }
   },
-  "55": {
-    "inputs": {
-      "shift": 3,
-      "model": [
-        "4",
-        0
-      ]
-    },
-    "class_type": "ModelSamplingSD3",
-    "_meta": {
-      "title": "ModelSamplingSD3"
-    }
-  },
-  "56": {
-    "inputs": {
-      "conditioning_1": [
-        "58",
-        0
-      ],
-      "conditioning_2": [
-        "59",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "57": {
-    "inputs": {
-      "conditioning": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ConditioningZeroOut",
-    "_meta": {
-      "title": "ConditioningZeroOut"
-    }
-  },
-  "58": {
-    "inputs": {
-      "start": 0.1,
-      "end": 1,
-      "conditioning": [
-        "57",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "59": {
-    "inputs": {
-      "start": 0,
-      "end": 0.1,
-      "conditioning": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
   "60": {
     "inputs": {
       "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
       "clip_name2": "clip_l.safetensors",
-      "type": "sd3"
+      "type": "sd3",
+      "device": "default"
     },
     "class_type": "DualCLIPLoader",
     "_meta": {
@@ -190,6 +122,35 @@
     "class_type": "VAELoader",
     "_meta": {
       "title": "Load VAE"
+    }
+  },
+  "62": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "63",
+        0
+      ],
+      "start": 0.4,
+      "end": 1,
+      "max_consecutive_cache_hits": 1,
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "63": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "wavespeed_strength"
     }
   }
 }
