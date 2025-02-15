@@ -9,10 +9,16 @@ import ast
 import shared
 from urllib.parse import urlparse
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
+from torch.hub import download_url_to_file
+
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
 
+thread_pool = ThreadPoolExecutor(max_workers=6)
+download_tasks = set()
+task_lock = threading.Lock()
 
 async def download_file_with_progress(url: str, file_path: str, size: int=0):
     timeout = int(max(60.0, size / (1024 * 1024)))
@@ -47,13 +53,6 @@ async def download_file_with_progress(url: str, file_path: str, size: int=0):
             logger.error(f"下载过程中发生错误: {e}")
             raise
 
-async def download_multiple_files(task_list):
-    for task_type, task_params in task_list:
-        if task_type == 'file':
-            await download_file_with_progress(task_params['url'], task_params['path_file'], task_params['size'])
-        elif task_type == 'diffusers':
-            await download_diffusers_model(task_params['cata'], task_params['model_name'], task_params['num'], task_params['url'])
-
 
 def load_file_from_url(
         url: str,
@@ -81,17 +80,25 @@ def load_file_from_url(
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
         #logger.info(f'Downloading: "{url}" to {cached_file}')
-        logger.info(f'正在下载模型文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，进入"模型"页点击"本地刷新"按钮。\n')
-        
+        logger.info(f'正在下载文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，进入"模型"页点击"本地刷新"按钮。')
         def _download_task():
-            anyio.run(download_file_with_progress, url, cached_file, size)
-
+            try:
+                anyio.run(download_file_with_progress, url, cached_file, size)
+            except Exception as e:
+                print(f'下载任务:{model_name} 失败, 错误为: {e}')
+            finally:
+                with task_lock:
+                    download_tasks.discard(file_name)
+                    logger.info(f"下载任务:{file_name} 已完成, 从任务队列中清除.")
         if async_task:
-            #download_queue.put(lambda: download_file_with_progress(url, cached_file, size))  
-            thread = threading.Thread(target=_download_task)
-            thread.start()
+            with task_lock:
+                if file_name in download_tasks:
+                    print(f"下载任务:{file_name} 已经在任务队列中.")
+                    return
+                download_tasks.add(file_name)
+                print(f"启动新的下载任务:{file_name}.")
+            thread_pool.submit(_download_task)
         else:
-            from torch.hub import download_url_to_file
             download_url_to_file(url, cached_file, progress=progress)
             shared.modelsinfo.refresh_file('add', cached_file, url)
     return cached_file
@@ -147,7 +154,7 @@ def check_models_exists(preset, user_did=None):
     if len(model_list)>0:
         for cata, path_file, size, hash10, url in model_list:
             if path_file[:1]=='[' and path_file[-1:]==']':
-                path_file = [path_file[1:-1]]
+                path_file = [f'{path_file[1:-1]}/']
                 result = shared.modelsinfo.get_model_names(cata, path_file, casesensitive=True)
                 if result is None or len(result)<size:
                     logger.info(f'Missing model dir in preset({preset}): {cata}, filter={path_file}, len={size}\nresult={result}')
@@ -178,7 +185,7 @@ def download_model_files(preset, user_did=None, async_task=False):
                 if url:
                     parts = urlparse(url)
                     file_name = os.path.basename(parts.path)
-                    result = shared.modelsinfo.get_model_names(cata, [path_file[1:-1]], casesensitive=True)
+                    result = shared.modelsinfo.get_model_names(cata, [f'{path_file[1:-1]}/'], casesensitive=True)
                     if result and len(result)>=size:
                         continue
                 else:
@@ -198,12 +205,7 @@ def download_model_files(preset, user_did=None, async_task=False):
             if url is None or url == '':
                 url = f'{default_download_url_prefix}/{cata}/{path_file}'
             if path_file[:1]=='[' and path_file[-1:]==']' and url.endswith('.zip'):
-                if not async_task:
-                    download_diffusers_model_sync(cata, path_file[1:-1], size, url)
-                else:
-                    params=(dict(cata=cata, path_file=path_file[1:-1], num=size, url=url))
-                    download_task = ('diffusers', params)
-                    download_task_list.append(download_task)
+                download_diffusers_model(cata, path_file[1:-1], size, url)
             else:
                 if not async_task:
                     load_file_from_url(
@@ -219,19 +221,31 @@ def download_model_files(preset, user_did=None, async_task=False):
                         async_task=True,
                         size=size
                     )
-                    params=(dict(url=url, path_file=full_path_file, size=size))
-                    download_task = ('file', params)
-                    download_task_list.append(download_task)
-        if async_task:
-            pass #logger.info(f'download_task_list:{download_task_list}')
-            #download_queue.put(lambda: download_multiple_files(download_task_list))
     return
 
-async def download_diffusers_model(cata, model_name, num, url):
-    download_diffusers_model_sync(cata, model_name, num, url)
+
+def download_diffusers_model(cata, model_name, num, url):
+    def _download_task():
+        try:
+            anyio.run(download_diffusers_model_async, cata, model_name, num, url)
+        except Exception as e:
+            print(f'下载任务:{model_name} 失败, 错误为: {e}')
+        finally:
+            with task_lock:
+                download_tasks.discard(model_name)
+                print(f"下载任务:{model_name} 已完成, 从任务队列中清除.")
+
+    with task_lock:
+        if model_name in download_tasks:
+            print(f"下载任务:{model_name} 已经在任务队列中.")
+            return
+        download_tasks.add(model_name)
+        print(f'开启新的下载任务:{model_name} in "{cata}" from {url}.')
+
+    thread_pool.submit(_download_task)
 
 
-def download_diffusers_model_sync(cata, model_name, num, url):
+async def download_diffusers_model_async(cata, model_name, num, url):
     import zipfile
     import shutil
     from modules.config import path_models_root, model_cata_map
@@ -243,12 +257,8 @@ def download_diffusers_model_sync(cata, model_name, num, url):
         if not os.path.exists(path_temp):
             os.makedirs(path_temp)
         file_name = os.path.basename(urlparse(url).path)
-        load_file_from_url(
-            url=url,
-            model_dir=path_temp,
-            file_name=file_name
-        )
         downfile = os.path.join(path_temp, file_name)
+        download_url_to_file(url, downfile, progress=True)
         with zipfile.ZipFile(downfile, 'r') as zipf:
             logger.info(f'extractall: {downfile} to {path_temp}')
             zipf.extractall(path_temp)
@@ -258,14 +268,3 @@ def download_diffusers_model_sync(cata, model_name, num, url):
     shared.modelsinfo.refresh_from_path()
     return
 
-def downloader(task_queue):
-    while True:
-        task = task_queue.get()
-        logger.info('got download task')
-        anyio.run(task)
-        task_queue.task_done()
-
-download_queue = queue.Queue()
-
-#thread = threading.Thread(target=downloader, args=(download_queue,))
-#thread.start()
