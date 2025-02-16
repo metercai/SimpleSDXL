@@ -42,12 +42,18 @@ from enhanced.minicpm import MiniCPM, minicpm
 import logging
 logger = logging.getLogger(__name__)
 
+START_TIMESTAMP = time.time()
+
 def get_task(*args):
     args = list(args)
     args.pop(0)
 
     return worker.AsyncTask(args=args)
 
+def get_start_timestamp():
+    global START_TIMESTAMP
+    qsize = worker.async_tasks.qsize() + (1 if worker.is_worker_processing() else 0)
+    return f'{START_TIMESTAMP},{qsize}'
 
 def generate_clicked(task: worker.AsyncTask, state):
     with model_management.interrupt_processing_mutex:
@@ -234,10 +240,12 @@ with shared.gradio_root:
         with gr.Column(scale=2):
             with gr.Group():
                 with gr.Row():
+                    start_timestamp = gr.Textbox(visible=False)
                     bar_store_button = gr.Button(value='PresetStore', size='sm', min_width=50, elem_id='bar_store', elem_classes='bar_store')
                     bar_buttons = []
                     for i in range(shared.BUTTON_NUM):
                         bar_buttons.append(gr.Button(value='default' if i==0 else '', size='sm', visible=True, min_width=40, elem_id=f'bar{i}', elem_classes='bar_button'))
+                    shared.gradio_root.load(get_start_timestamp, outputs=start_timestamp, queue=False)
                 with gr.Row(visible=False, elem_classes='preset_store') as preset_store:
                     preset_store_list = gr.Dataset(label="My preset store: Click on the preset in store to append it to the navigation. If it is already on, it will be automatically removed.", components=[gallery_index_stat], samples=topbar.get_preset_samples(), visible=True, samples_per_page=48, type='index')
                 with gr.Row():
@@ -359,7 +367,6 @@ with shared.gradio_root:
                         super_prompter = gr.Button(value="SuperPrompt", elem_classes='type_row_third', size="sm", min_width = 70)
                     with gr.Column(scale=2, min_width=0):
                         generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True, min_width = 70)
-                        reset_button = gr.Button(label="Reconnect", value="Reconnect", elem_classes='type_row', elem_id='reset_button', visible=False)
                         load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False, min_width = 70)
                         skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', elem_id='skip_button', visible=False, min_width = 70)
                         stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False, min_width = 70)
@@ -1391,14 +1398,6 @@ with shared.gradio_root:
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
-
-        reset_button.click(lambda: [worker.AsyncTask(args=[]), False, gr.update(visible=True, interactive=True)] +
-                                   [gr.update(visible=False)] * 6 +
-                                   [gr.update(visible=True, value=[])],
-                           outputs=[currentTask, state_is_generating, generate_button,
-                                    reset_button, stop_button, skip_button,
-                                    progress_html, progress_window, progress_gallery, gallery],
-                           queue=False)
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
             if os.path.exists(notification_file):
