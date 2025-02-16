@@ -1628,7 +1628,7 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_block = 1024 if async_task.task_class == 'Comfy' else 2048
+                    tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
                     tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
                     tiled_steps = [10, 6, 4]
                     match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
