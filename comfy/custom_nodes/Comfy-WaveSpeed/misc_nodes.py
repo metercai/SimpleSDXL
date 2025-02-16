@@ -110,6 +110,7 @@ class EnhancedCompileModel:
         backend,
     ):
         utils.patch_optimized_module()
+        utils.patch_same_meta()
 
         import_path, function_name = compiler.rsplit(".", 1)
         module = importlib.import_module(import_path)

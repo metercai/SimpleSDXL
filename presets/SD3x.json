@@ -41,7 +41,7 @@
     "default_performance": "Speed",
     "default_styles": [],
     "default_aspect_ratio": "1152*896",
-    "default_overwrite_step": 28,
+    "default_overwrite_step": 30,
     "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
