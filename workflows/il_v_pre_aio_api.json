@@ -4,7 +4,7 @@
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "2883",
+        "2921",
         0
       ]
     },
@@ -92,7 +92,7 @@
         0
       ],
       "positive": [
-        "1311",
+        "2922",
         0
       ],
       "negative": [
@@ -5232,6 +5232,135 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "2920": {
+    "inputs": {
+      "check_mode": "any_vpred",
+      "specific_type": "V_PREDICTION",
+      "model": [
+        "2869",
+        0
+      ]
+    },
+    "class_type": "CheckVpredictionNode",
+    "_meta": {
+      "title": "Advanced V-Prediction Checker"
+    }
+  },
+  "2921": {
+    "inputs": {
+      "boolean": [
+        "2920",
+        0
+      ],
+      "on_true": [
+        "2883",
+        0
+      ],
+      "on_false": [
+        "2869",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2922": {
+    "inputs": {
+      "boolean": [
+        "2928",
+        0
+      ],
+      "on_true": [
+        "2929",
+        0
+      ],
+      "on_false": [
+        "1311",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2923": {
+    "inputs": {
+      "boolean": [
+        "2924",
+        0
+      ],
+      "on_true": [
+        "1890",
+        1
+      ],
+      "on_false": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2924": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "1890",
+        1
+      ],
+      "b": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2925": {
+    "inputs": {
+      "value": 8192
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2928": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "2923",
+        0
+      ],
+      "b": [
+        "2925",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2929": {
+    "inputs": {
+      "conditioning": [
+        "1311",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
     }
   }
 }

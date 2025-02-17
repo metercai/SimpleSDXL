@@ -212,7 +212,7 @@
         0
       ],
       "positive": [
-        "140",
+        "2898",
         0
       ],
       "negative": [
@@ -1309,7 +1309,7 @@
   },
   "1075": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -1318,7 +1318,7 @@
   },
   "1079": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -1327,7 +1327,7 @@
   },
   "1080": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -1336,7 +1336,7 @@
   },
   "1081": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -7246,6 +7246,89 @@
     "class_type": "SetUnionControlNetType",
     "_meta": {
       "title": "SetUnionControlNetType"
+    }
+  },
+  "2898": {
+    "inputs": {
+      "boolean": [
+        "2903",
+        0
+      ],
+      "on_true": [
+        "140",
+        0
+      ],
+      "on_false": [
+        "1311",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2901": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "1890",
+        1
+      ],
+      "b": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2902": {
+    "inputs": {
+      "boolean": [
+        "2901",
+        0
+      ],
+      "on_true": [
+        "1890",
+        1
+      ],
+      "on_false": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2903": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "2902",
+        0
+      ],
+      "b": [
+        "2904",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2904": {
+    "inputs": {
+      "value": 8192
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
     }
   }
 }
