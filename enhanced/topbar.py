@@ -346,7 +346,7 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
     return gr.update() if describe_prompt is None else describe_prompt
 
 
-def process_before_generation(state_params, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, seed_random, image_seed, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -403,6 +403,17 @@ def process_before_generation(state_params, backend_params, backfill_prompt, tra
 
     # stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box
     results = [gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True, gr.update(visible=False, open=False), gr.update(visible=False), gr.update(visible=False)]
+    # image_seed
+    if seed_random:
+        seed_value = random.randint(constants.MIN_SEED, constants.MAX_SEED)
+    else:
+        try:
+            seed_value = int(image_seed)
+            if constants.MIN_SEED <= seed_value <= constants.MAX_SEED:
+                 pass
+        except ValueError:
+            seed_value = random.randint(constants.MIN_SEED, constants.MAX_SEED)
+    results += [seed_value]
     # random_button, translator_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(','))
     results += [gr.update(interactive=False)] * (preset_nums + 6)

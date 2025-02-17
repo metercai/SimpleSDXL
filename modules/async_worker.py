@@ -13,6 +13,7 @@ class AsyncTask:
         from modules.flags import Performance, MetadataScheme, ip_list, disabled, task_class_mapping
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
+        import uuid
         import args_manager
         import re
         import shared
@@ -26,6 +27,7 @@ class AsyncTask:
         self.results = []
         self.last_stop = False
         self.processing = False
+        self.task_id = str(uuid.uuid4())
 
         self.performance_loras = []
 
@@ -231,7 +233,7 @@ class AsyncTask:
 
 
 async_tasks = queue.Queue()
-worker_processing = False
+worker_processing = None
 
 class EarlyReturnException(BaseException):
     pass
@@ -1905,9 +1907,9 @@ def worker():
     while True:
         try:
             task = async_tasks.get(block=True, timeout=0.5)
-            logger.info(f'Got async_tasks')
+            logger.info(f'Got async_tasks: {task.task_id}')
             try:
-                worker_processing = True
+                worker_processing = task.task_id
                 handler(task)
                 if task.generate_image_grid:
                     build_image_wall(task)
@@ -1918,23 +1920,23 @@ def worker():
                 traceback.print_exc()
                 task.yields.append(['finish', task.results])
             finally:
-                worker_processing = False
+                worker_processing = None
                 if pid in modules.patch.patch_settings:
                     del modules.patch.patch_settings[pid]
             async_tasks.task_done()
         except queue.Empty:
-            worker_processing = False
+            worker_processing = None
             time.sleep(0.01)
         except Exception as e:
             logger.error(f"Worker loop error: {str(e)}", exc_info=True)
             time.sleep(1)
         if not get_echo_off() and time.time() - last_active > 10:
-            worker_processing = False
+            worker_processing = None
             logger.info("Worker is alive and waiting...")
             last_active = time.time()
     logger.info("Unexpected exit in worker thread")
 
 def is_worker_processing():
-    return worker_processing
+    return worker_processing is not None
 
 threading.Thread(target=worker, daemon=True).start()
