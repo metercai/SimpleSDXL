@@ -206,8 +206,8 @@
         "19",
         0
       ],
-      "start": 0,
-      "end": 1,
+      "start": 0.2,
+      "end": 0.9,
       "max_consecutive_cache_hits": 2,
       "model": [
         "16",
