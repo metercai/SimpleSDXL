@@ -3,6 +3,7 @@ import random
 import os
 import json
 import time
+import anyio
 import shared
 import modules.config
 import fooocus_version
@@ -47,7 +48,6 @@ START_TIMESTAMP = time.time()
 def get_task(*args):
     args = list(args)
     args.pop(0)
-
     return worker.AsyncTask(args=args)
 
 def get_start_timestamp():
@@ -70,18 +70,21 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
-    WAIT_TASK_INTERVAL = 1
     worker.async_tasks.put(task)
-    qsize = worker.async_tasks.qsize()
-    yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'Waiting for task({qsize}) to start ...')), \
-        gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
-        gr.update(visible=False, value=None), \
-        gr.update(visible=False)
-
+    while True:
+        qsize = worker.async_tasks.qsize()
+        yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'Waiting for task({qsize}) to start ...')), \
+            gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
+            gr.update(visible=False, value=None), \
+            gr.update(visible=False)
+        time.sleep(0.1)
+        if worker.worker_processing == task.task_id:
+            break
+    
     execution_start_time = time.perf_counter()
     finished = False
     MAX_WAIT_TIME = 480
-    POLL_INTERVAL = 0.1
+    POLL_INTERVAL = 0.08
 
     last_update_time = time.time()
     while not finished:
@@ -227,7 +230,7 @@ reload_javascript()
 
 title = f'{version.branch}创意生图应用平台'
 
-shared.gradio_root = gr.Blocks(title=title).queue()
+shared.gradio_root = gr.Blocks(title=title).queue(concurrency_count=3)
 
 with shared.gradio_root:
     state_topbar = gr.State({})
@@ -816,18 +819,6 @@ with shared.gradio_root:
                 def random_checked(r):
                     return gr.update(visible=not r)
 
-                def refresh_seed(r, seed_string):
-                    if r:
-                        return random.randint(constants.MIN_SEED, constants.MAX_SEED)
-                    else:
-                        try:
-                            seed_value = int(seed_string)
-                            if constants.MIN_SEED <= seed_value <= constants.MAX_SEED:
-                                return seed_value
-                        except ValueError:
-                            pass
-                        return random.randint(constants.MIN_SEED, constants.MAX_SEED)
-
                 seed_random.change(random_checked, inputs=[seed_random], outputs=[image_seed],
                                    queue=False, show_progress=False)
 
@@ -1389,10 +1380,8 @@ with shared.gradio_root:
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
         protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
-        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, params_backend] + ehps + scene_params[:-1], 
-                outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box] + protections + [preset_store, identity_dialog], show_progress=False) \
+        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, seed_random, image_seed, params_backend] + ehps + scene_params[:-1], outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box, image_seed] + protections + [preset_store, identity_dialog], show_progress=False) \
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
-            .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
