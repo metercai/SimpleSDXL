@@ -593,6 +593,7 @@ packages = {
             ("SimpleModels/clip_vision/clip_vision_vit_h.safetensors", 1972298538),
             ("SimpleModels/clip_vision/model_base_caption_capfilt_large.pth", 896081425),
             ("SimpleModels/clip_vision/wd-v1-4-moat-tagger-v2.onnx", 326197340),
+            ("SimpleModels/clip_vision/wd-v1-4-moat-tagger-v2.csv", 253906),
             ("SimpleModels/clip_vision/clip-vit-large-patch14/merges.txt", 524619),
             ("SimpleModels/clip_vision/clip-vit-large-patch14/special_tokens_map.json", 389),
             ("SimpleModels/clip_vision/clip-vit-large-patch14/tokenizer_config.json", 905),
