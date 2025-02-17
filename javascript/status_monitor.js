@@ -158,7 +158,7 @@
             statusIndicator.appendChild(reconnectBtn);
         } else {
             const retryText = document.createElement('span');
-            retryText.textContent = ` (${state.retryCount})`;
+            retryText.textContent = ` (${state.retryCount*CHECK_INTERVAL/1000}s)`;
             statusIndicator.appendChild(retryText);
         }
     }
