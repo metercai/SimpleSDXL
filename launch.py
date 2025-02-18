@@ -270,6 +270,9 @@ logger.info(f'nickname/用户昵称: {shared.token.get_guest_user_context().get_
 if shared.args.node_type is not None:
     shared.token.reset_node_mode(shared.args.node_type)
 
+if shared.args.reset_admin is not None:
+    shared.token.reset_admin(shared.args.reset_admin)
+
 if shared.args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(shared.args.gpu_device_id)
     logger.info("Set device to:", shared.args.gpu_device_id)
