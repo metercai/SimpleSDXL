@@ -291,7 +291,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 430207535634604,
+      "seed": 672197044238763,
       "steps": 30,
       "cfg": 30,
       "denoise": 1
@@ -1285,7 +1285,7 @@
   },
   "277": {
     "inputs": {
-      "noise_seed": 52959635870935,
+      "noise_seed": 122549629084875,
       "noise_strength": 0.25,
       "normalize": "false",
       "latent": [
@@ -1339,7 +1339,7 @@
   },
   "283": {
     "inputs": {
-      "value": "a*0.66",
+      "value": "a*0.8",
       "a": [
         "122",
         7
@@ -1352,7 +1352,7 @@
   },
   "285": {
     "inputs": {
-      "value": "a*0.33",
+      "value": "a*0.2",
       "a": [
         "122",
         7
@@ -1549,13 +1549,33 @@
   "297": {
     "inputs": {
       "model": [
-        "281",
+        "299",
         0
       ]
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
+    }
+  },
+  "299": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "208",
+        0
+      ],
+      "start": 0,
+      "end": 0.8,
+      "max_consecutive_cache_hits": 1,
+      "model": [
+        "281",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
