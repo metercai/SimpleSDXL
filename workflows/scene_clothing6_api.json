@@ -120,55 +120,10 @@
       "title": "Differential Diffusion"
     }
   },
-  "36": {
-    "inputs": {
-      "seed": [
-        "122",
-        6
-      ],
-      "steps": [
-        "283",
-        0
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "123",
-        3
-      ],
-      "scheduler": [
-        "123",
-        4
-      ],
-      "denoise": [
-        "122",
-        9
-      ],
-      "model": [
-        "35",
-        0
-      ],
-      "positive": [
-        "34",
-        0
-      ],
-      "negative": [
-        "34",
-        1
-      ],
-      "latent_image": [
-        "34",
-        2
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
   "37": {
     "inputs": {
       "samples": [
-        "36",
+        "296",
         0
       ],
       "vae": [
@@ -336,7 +291,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 890989260678775,
+      "seed": 430207535634604,
       "steps": 30,
       "cfg": 30,
       "denoise": 1
@@ -1330,7 +1285,7 @@
   },
   "277": {
     "inputs": {
-      "noise_seed": 879708514114934,
+      "noise_seed": 52959635870935,
       "noise_strength": 0.25,
       "normalize": "false",
       "latent": [
@@ -1374,7 +1329,7 @@
   },
   "281": {
     "inputs": {
-      "unet_name": "juggernautXL_juggXIByRundiffusion.safetensors",
+      "unet_name": "flux1-fill-dev_fp8.safetensors",
       "weight_dtype": "default"
     },
     "class_type": "UNETLoader",
@@ -1499,6 +1454,108 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
+    }
+  },
+  "294": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "283",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": 12,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "35",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "34",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "296": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "283",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 12,
+      "end_at_step": 20,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "297",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "294",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "297": {
+    "inputs": {
+      "model": [
+        "281",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
     }
   }
 }
