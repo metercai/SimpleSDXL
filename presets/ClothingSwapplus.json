@@ -6,8 +6,8 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["换装", "换装+","换装++"],
-        "theme_title":"换装[fp8]，换装+[精修]，换装++[蒙版自动填充]",
+	    "theme": ["换装", "换装+","换装++","换装+++"],
+        "theme_title":"换装[fp8]，换装+[精修]，换装++[蒙版自动填充],换装+++[高像素原图]",
 	    "disvisible": ["scene_additional_prompt","scene_aspect_ratio","aspect_ratio_select_mode"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9"],
 	    "aspect_ratio_select_mode": "auto_candidate",
@@ -15,17 +15,26 @@
             "additional_prompt_2": {
                 "换装": "主体",
                 "换装+": "主体",
-                "换装++": "主体"
+                "换装++": "主体",
+                "换装+++": "主体"
                 },
 	    "task_method": {
 		"换装": "clothing2",
         "换装+": "clothing3",
-        "换装++": "clothing4"
+        "换装++": "clothing4",
+        "换装+++": "clothing6"
 	    },
+        "image_preprocessor_method": {
+            "换装":  [[""]],
+            "换装+":  [[""]],
+            "换装++":  [[""]],
+            "换装+++": [["-normalization"]]
+        },
         "scene_steps": {
             "换装": 25,
             "换装+": 25,
-            "换装++": 25
+            "换装++": 25,
+            "换装+++": 30
             }
     	}
     },
