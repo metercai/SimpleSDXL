@@ -102,6 +102,18 @@ def find_simplemodels_dir(start_path):
         current_dir = os.path.dirname(current_dir)
     return None
 
+def find_users_dir(start_path):
+    """
+    从当前路径开始，逐级向上查找 users 目录
+    """
+    current_dir = start_path
+    while current_dir != os.path.dirname(current_dir):  # 防止进入根目录
+        users_path = os.path.join(current_dir, "users")
+        if os.path.isdir(users_path):
+            return users_path
+        current_dir = os.path.dirname(current_dir)
+    return None
+
 def normalize_path(path):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     simplemodels_dir = find_simplemodels_dir(script_dir)
@@ -134,7 +146,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.01.27{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.02.18{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -293,6 +305,7 @@ def delete_partial_files():
 
     print(f"{Fore.CYAN}△正在清理目录 '{simplemodels_dir}' 中下载的临时文件与损坏文件...{Style.RESET_ALL}")
     
+    total_size = 0  # 统计删除文件的总大小
     files_found = False
     files_to_delete = []  # 存储需要删除的文件路径
 
@@ -303,14 +316,15 @@ def delete_partial_files():
                 files_found = True
                 file_path = os.path.join(root, file)
                 files_to_delete.append(file_path)
-
+                total_size += os.path.getsize(file_path)  # 累加文件大小
     # 如果找到需要删除的文件，则打印文件列表并进行确认
     if files_found:
         print(f"{Fore.YELLOW}△以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
         for file_path in files_to_delete:
             print(f"- {file_path}")
-
         # 确认删除操作
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
+
         confirm = input(f"{Fore.GREEN}△是否确认删除这些未下载完或损坏的文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
             for file_path in files_to_delete:
@@ -324,6 +338,104 @@ def delete_partial_files():
     else:
         print(f">>>未找到需要删除的临时文件<<<")
         print()
+
+def delete_specific_image_files():
+    """
+    从相对路径查找并删除所有 .png、.webp 和 .jpg 文件，排除 welcome.png。
+    """
+    # 获取当前脚本所在目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 查找 users 目录
+    users_dir = find_users_dir(script_dir)
+    # 根据相对路径构建目标目录
+    target_dir = os.path.join(users_dir, "guest_user", "comfyd_inputs")
+    # 检查目录是否存在
+    if not os.path.exists(target_dir):
+        print(f"{Fore.RED}△未找到指定目录: {target_dir}{Style.RESET_ALL}")
+        return
+
+    print(f"{Fore.CYAN}△正在清理目录 '{target_dir}' 中的临时图片缓存...{Style.RESET_ALL}")
+
+    total_size = 0  # 统计删除文件的总大小
+    files_found = False
+    files_to_delete = []  # 存储需要删除的文件路径
+
+    for root, _, files in os.walk(target_dir):
+        for file in files:
+            # 检查文件扩展名是否为 .png、.webp 或 .jpg，且不为 welcome.png
+            if (file.endswith(".png") or file.endswith(".webp") or file.endswith(".jpg")) and file != "welcome.png":
+                files_found = True
+                file_path = os.path.join(root, file)
+                files_to_delete.append(file_path)
+                total_size += os.path.getsize(file_path)  # 累加文件大小
+    # 如果找到需要删除的文件，则打印文件列表并进行确认
+    if files_found:
+        print(f"{Fore.YELLOW}△以下临时图片缓存文件将被删除：{Style.RESET_ALL}")
+        for file_path in files_to_delete:
+            print(f"- {file_path}")
+        # 确认删除操作
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
+
+        confirm = input(f"{Fore.GREEN}△是否确认删除这些文件？(y/n): {Style.RESET_ALL}")
+        if confirm.lower() == 'y':
+            for file_path in files_to_delete:
+                try:
+                    os.remove(file_path)  # 删除文件
+                    print(f"{Fore.GREEN}√已删除文件: {file_path}{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}△删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
+    else:
+        print(f">>>未找到需要删除的临时图片缓存<<<")
+        print()
+
+def delete_log_files():
+    """
+    删除与脚本所在位置一致的 logs 目录下的所有 .logs 文件
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # 获取脚本所在的目录
+    logs_dir = os.path.join(script_dir, "logs")  # 构建 logs 目录的相对路径
+
+    if not os.path.exists(logs_dir):
+        print(f"{Fore.RED}△未找到指定日志目录: {logs_dir}{Style.RESET_ALL}")
+        return
+
+    print(f"{Fore.CYAN}△正在清理目录 '{logs_dir}' 中的日志文件...{Style.RESET_ALL}")
+
+    total_size = 0  # 统计删除文件的总大小
+    files_found = False
+    files_to_delete = []
+
+    for root, _, files in os.walk(logs_dir):
+        for file in files:
+            if file.endswith(".log"):
+                files_found = True
+                file_path = os.path.join(root, file)
+                files_to_delete.append(file_path)
+                total_size += os.path.getsize(file_path)  # 累加文件大小
+
+    if files_found:
+        print(f"{Fore.YELLOW}△以下日志文件将被删除：{Style.RESET_ALL}")
+        for file_path in files_to_delete:
+            print(f"- {file_path}")
+
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
+
+        confirm = input(f"{Fore.GREEN}△是否确认删除这些日志文件？(y/n): {Style.RESET_ALL}")
+        if confirm.lower() == 'y':
+            for file_path in files_to_delete:
+                try:
+                    os.remove(file_path)
+                    print(f"{Fore.GREEN}√已删除日志文件: {file_path}{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}△删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
+    else:
+        print(f">>>未找到需要删除的日志文件<<<")
+        print()
+    
 
 def download_file_with_resume(link, file_path, position, result_queue, max_retries=5, lock=None):
     """
@@ -1254,7 +1366,7 @@ if __name__ == "__main__":
     while True:
         print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
         print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
-        print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】---------清理下载缓存与损坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
+        print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】--清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
         
@@ -1280,6 +1392,8 @@ if __name__ == "__main__":
             elif package_id == 0:
                 # 如果用户输入0，则清除所有下载缓存
                 delete_partial_files()
+                delete_specific_image_files()
+                delete_log_files()
             else:
                 print(f"{Fore.RED}△包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
 
