@@ -120,51 +120,6 @@
       "title": "Differential Diffusion"
     }
   },
-  "36": {
-    "inputs": {
-      "seed": [
-        "122",
-        6
-      ],
-      "steps": [
-        "245",
-        0
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "123",
-        3
-      ],
-      "scheduler": [
-        "123",
-        4
-      ],
-      "denoise": [
-        "122",
-        9
-      ],
-      "model": [
-        "35",
-        0
-      ],
-      "positive": [
-        "34",
-        0
-      ],
-      "negative": [
-        "34",
-        1
-      ],
-      "latent_image": [
-        "34",
-        2
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
   "75": {
     "inputs": {
       "vae_name": "ae.safetensors"
@@ -240,19 +195,6 @@
       "title": "Image Concatenate"
     }
   },
-  "117": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "113",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
   "118": {
     "inputs": {
       "downsampling_factor": 1.5,
@@ -295,8 +237,8 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 335431198265572,
-      "steps": 20,
+      "seed": 671442553792418,
+      "steps": 25,
       "cfg": 30,
       "denoise": 1
     },
@@ -353,7 +295,7 @@
       "decay_factor": 1,
       "fill_holes": false,
       "mask": [
-        "117",
+        "327",
         0
       ]
     },
@@ -406,26 +348,13 @@
       "end": 0.7000000000000001,
       "max_consecutive_cache_hits": 1,
       "model": [
-        "291",
+        "328",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
-    }
-  },
-  "180": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "110",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
     }
   },
   "183": {
@@ -450,11 +379,11 @@
       ],
       "round_to_multiple": "64",
       "image": [
-        "290",
+        "89",
         0
       ],
       "mask": [
-        "180",
+        "326",
         0
       ]
     },
@@ -467,7 +396,7 @@
     "inputs": {
       "invert_mask": false,
       "background_image": [
-        "290",
+        "89",
         0
       ],
       "croped_image": [
@@ -479,7 +408,7 @@
         2
       ],
       "croped_mask": [
-        "231",
+        "299",
         0
       ]
     },
@@ -514,7 +443,7 @@
         0
       ],
       "mask": [
-        "180",
+        "326",
         0
       ]
     },
@@ -882,7 +811,7 @@
   "234": {
     "inputs": {
       "image": [
-        "290",
+        "89",
         0
       ]
     },
@@ -1045,7 +974,7 @@
       ],
       "y": 0,
       "samples": [
-        "36",
+        "332",
         0
       ]
     },
@@ -1183,7 +1112,7 @@
   },
   "286": {
     "inputs": {
-      "upscale_method": "bicubic",
+      "upscale_method": "lanczos",
       "width": [
         "288",
         0
@@ -1241,25 +1170,53 @@
       "title": "🔧 Simple Math"
     }
   },
-  "290": {
+  "299": {
     "inputs": {
-      "width": 1280,
-      "height": 1280,
-      "interpolation": "bilinear",
-      "method": "keep proportion",
-      "condition": "always",
-      "multiple_of": 8,
-      "image": [
-        "89",
+      "expand": 25,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 25,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "231",
         0
       ]
     },
-    "class_type": "ImageResize+",
+    "class_type": "GrowMaskWithBlur",
     "_meta": {
-      "title": "🔧 Image Resize"
+      "title": "Grow Mask With Blur"
     }
   },
-  "291": {
+  "326": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "110",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "327": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "113",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "328": {
     "inputs": {
       "lora_name": "comfyui_subject_lora16.safetensors",
       "strength_model": 1,
@@ -1271,6 +1228,108 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "LoraLoaderModelOnly"
+    }
+  },
+  "330": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "245",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": 12,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "35",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "34",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "332": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "245",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 12,
+      "end_at_step": 20,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "333",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "330",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "333": {
+    "inputs": {
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
     }
   }
 }
