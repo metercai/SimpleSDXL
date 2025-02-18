@@ -8,25 +8,12 @@
       "title": "base_model"
     }
   },
-  "2": {
-    "inputs": {
-      "stop_at_clip_layer": -2,
-      "clip": [
-        "1",
-        1
-      ]
-    },
-    "class_type": "CLIPSetLastLayer",
-    "_meta": {
-      "title": "CLIP Set Last Layer"
-    }
-  },
   "3": {
     "inputs": {
       "text": "",
       "clip": [
-        "2",
-        0
+        "1",
+        1
       ]
     },
     "class_type": "CLIPTextEncode",
@@ -36,10 +23,10 @@
   },
   "4": {
     "inputs": {
-      "text": "text,watermark,bad anatomy,bad proportions,extra limbs,extra digit,extra legs,extra legs and arms,disfigured,missing arms,too many fingers,fused fingers,missing fingers,unclear eyes,watermark,username,",
+      "text": "",
       "clip": [
-        "2",
-        0
+        "1",
+        1
       ]
     },
     "class_type": "CLIPTextEncode",
@@ -49,14 +36,14 @@
   },
   "5": {
     "inputs": {
-      "seed": 819637870335342,
-      "steps": 40,
-      "cfg": 5,
-      "sampler_name": "euler",
+      "seed": 869765023274291,
+      "steps": 30,
+      "cfg": 6,
+      "sampler_name": "euler_ancestral",
       "scheduler": "normal",
       "denoise": 1,
       "model": [
-        "17",
+        "49",
         0
       ],
       "positive": [
@@ -102,18 +89,6 @@
     "class_type": "VAEDecode",
     "_meta": {
       "title": "VAE Decode"
-    }
-  },
-  "11": {
-    "inputs": {
-      "images": [
-        "7",
-        0
-      ]
-    },
-    "class_type": "SaveImageWebsocket",
-    "_meta": {
-      "title": "SaveImageWebsocket"
     }
   },
   "12": {
@@ -206,8 +181,8 @@
         "19",
         0
       ],
-      "start": 0,
-      "end": 1,
+      "start": 0.2,
+      "end": 0.9,
       "max_consecutive_cache_hits": 2,
       "model": [
         "16",
@@ -226,6 +201,52 @@
     "class_type": "easy float",
     "_meta": {
       "title": "wavespeed_strength"
+    }
+  },
+  "41": {
+    "inputs": {
+      "check_mode": "any_vpred",
+      "specific_type": "V_PREDICTION",
+      "model": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "CheckVpredictionNode",
+    "_meta": {
+      "title": "Advanced V-Prediction Checker"
+    }
+  },
+  "49": {
+    "inputs": {
+      "boolean": [
+        "41",
+        0
+      ],
+      "on_true": [
+        "17",
+        0
+      ],
+      "on_false": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "51": {
+    "inputs": {
+      "images": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
     }
   }
 }

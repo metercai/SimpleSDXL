@@ -101,7 +101,7 @@
         0
       ],
       "positive": [
-        "289",
+        "2869",
         0
       ],
       "negative": [
@@ -900,7 +900,7 @@
   },
   "1075": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -909,7 +909,7 @@
   },
   "1079": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -918,7 +918,7 @@
   },
   "1080": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -927,7 +927,7 @@
   },
   "1081": {
     "inputs": {
-      "value": 0.7000000000000001
+      "value": 0.7
     },
     "class_type": "easy float",
     "_meta": {
@@ -5007,6 +5007,89 @@
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
+    }
+  },
+  "2869": {
+    "inputs": {
+      "boolean": [
+        "2872",
+        0
+      ],
+      "on_true": [
+        "289",
+        0
+      ],
+      "on_false": [
+        "1311",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "2870": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "1890",
+        1
+      ],
+      "b": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2871": {
+    "inputs": {
+      "value": 8192
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "2872": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "2875",
+        0
+      ],
+      "b": [
+        "2871",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "2875": {
+    "inputs": {
+      "boolean": [
+        "2870",
+        0
+      ],
+      "on_true": [
+        "1890",
+        1
+      ],
+      "on_false": [
+        "1890",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }
