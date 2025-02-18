@@ -1323,13 +1323,33 @@
   "333": {
     "inputs": {
       "model": [
-        "237",
+        "334",
         0
       ]
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
+    }
+  },
+  "334": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "208",
+        0
+      ],
+      "start": 0,
+      "end": 0.8,
+      "max_consecutive_cache_hits": 1,
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
