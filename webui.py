@@ -73,7 +73,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     worker.async_tasks.put(task)
     while True:
         qsize = worker.async_tasks.qsize()
-        yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'Waiting for task({qsize}) to start ...')), \
+        yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中(No.{qsize})，请等待...')), \
             gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
             gr.update(visible=False, value=None), \
             gr.update(visible=False)
@@ -90,7 +90,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     while not finished:
         current_time = time.time()
         if current_time - last_update_time > MAX_WAIT_TIME:
-            yield gr.update(visible=True, value=modules.html.make_progress_html(0, 'Task timeout!')), \
+            yield gr.update(visible=True, value=modules.html.make_progress_html(0, '生图任务已超时!')), \
                 gr.update(visible=True), \
                 gr.update(visible=False), \
                 gr.update(visible=False)
@@ -230,7 +230,7 @@ reload_javascript()
 
 title = f'{version.branch}创意生图应用平台'
 
-shared.gradio_root = gr.Blocks(title=title).queue(concurrency_count=3)
+shared.gradio_root = gr.Blocks(title=title).queue(concurrency_count=5)
 
 with shared.gradio_root:
     state_topbar = gr.State({})

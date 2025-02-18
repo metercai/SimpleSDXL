@@ -45,7 +45,10 @@ args_parser.parser.add_argument("--rebuild-hash-cache", help="Generates missing 
 args_parser.parser.add_argument("--dev", action='store_true',
                                 help="launch the dev branch", default=False)
 args_parser.parser.add_argument("--models-root", type=str, help="Set the path root of models", default=None)
+
 args_parser.parser.add_argument("--node-type", type=str, help="Set the isolated or online mode for node", default=None)
+
+args_parser.parser.add_argument("--reset-admin", type=str, help="Reset the admin did for node", default=None)
 
 args_parser.parser.add_argument("--disable-comfyd", action='store_true',
                                 help="disable auto start comfyd server at launch", default=False)
