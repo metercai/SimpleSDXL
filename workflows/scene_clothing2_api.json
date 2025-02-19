@@ -120,55 +120,10 @@
       "title": "Differential Diffusion"
     }
   },
-  "36": {
-    "inputs": {
-      "seed": [
-        "122",
-        6
-      ],
-      "steps": [
-        "122",
-        7
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "123",
-        3
-      ],
-      "scheduler": [
-        "123",
-        4
-      ],
-      "denoise": [
-        "122",
-        9
-      ],
-      "model": [
-        "35",
-        0
-      ],
-      "positive": [
-        "34",
-        0
-      ],
-      "negative": [
-        "34",
-        1
-      ],
-      "latent_image": [
-        "34",
-        2
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
   "37": {
     "inputs": {
       "samples": [
-        "36",
+        "242",
         0
       ],
       "vae": [
@@ -1002,6 +957,128 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "LoraLoaderModelOnly"
+    }
+  },
+  "241": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "122",
+        7
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": 15,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "35",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "34",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "242": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "steps": [
+        "122",
+        7
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "123",
+        3
+      ],
+      "scheduler": [
+        "123",
+        4
+      ],
+      "start_at_step": 15,
+      "end_at_step": 25,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "243",
+        0
+      ],
+      "positive": [
+        "34",
+        0
+      ],
+      "negative": [
+        "34",
+        1
+      ],
+      "latent_image": [
+        "241",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "243": {
+    "inputs": {
+      "model": [
+        "244",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "244": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "208",
+        0
+      ],
+      "start": 0,
+      "end": 0.8,
+      "max_consecutive_cache_hits": 1,
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
     }
   }
 }
