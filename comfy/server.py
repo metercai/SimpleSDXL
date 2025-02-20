@@ -35,6 +35,7 @@ from app.custom_node_manager import CustomNodeManager
 from typing import Optional
 from api_server.routes.internal.internal_routes import InternalRoutes
 from simpleai_base.simpleai_base import check_entry_point, cert_verify_by_did
+from simpleai_base.params_mapper import ComfyTaskParams
 from datetime import datetime
 import re
 
@@ -658,6 +659,14 @@ class PromptServer():
                     return web.json_response({"error": valid[1], "node_errors": valid[3]}, status=400)
             else:
                 return web.json_response({"error": "no prompt", "node_errors": []}, status=400)
+
+        @routes.post("/mapping")
+        async def post_mapping(request):
+            json_data =  await request.json()
+            json_string = json.dumps(json_data)
+            params = ComfyTaskParams({})
+            mapping = params.get_key_mapped(json_string)
+            return web.json_response(mapping)
 
         @routes.post("/queue")
         async def post_queue(request):

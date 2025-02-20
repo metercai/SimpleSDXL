@@ -677,19 +677,6 @@ def export_identity(state):
             #logger.info(f'admin_user_qrcode_svg: {state["user_qr"]}')
     return update_topbar_js_params(state)[0]
 
-def trigger_input_identity(img):
-    image = util.HWC3(img)
-    qr_code_detector = cv2.QRCodeDetector()
-    data, bbox, _ = qr_code_detector.detectAndDecode(image)
-    if bbox is not None:
-        try:
-            user_did, nickname, telephone = import_identity_qrcode(data)
-        except Exception as e:
-            logger.info("qrcode parse error")
-            user_did, nickname, telephone = '', '', ''
-    else:
-        user_did, nickname, telephone = '', '', ''
-    return [gr.update(visible=False), gr.update(visible=True), f'{nickname}, {telephone}']
 
 def update_history_link(user_did, local_access):
     log_link = '' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>'
