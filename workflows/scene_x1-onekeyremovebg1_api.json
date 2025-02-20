@@ -1,12 +1,12 @@
 {
   "30": {
     "inputs": {
-      "image": "2024-04-12_22-25-30_2071.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
     "_meta": {
-      "title": "i2i_ip_image1"
+      "title": "i2i_inpaint_image"
     }
   },
   "43": {
@@ -18,7 +18,7 @@
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": ""
+      "title": "Convert Mask to Image"
     }
   },
   "44": {
@@ -42,7 +42,7 @@
     },
     "class_type": "InvertMask",
     "_meta": {
-      "title": ""
+      "title": "InvertMask"
     }
   },
   "47": {
@@ -66,7 +66,7 @@
     },
     "class_type": "MaskToImage",
     "_meta": {
-      "title": ""
+      "title": "Convert Mask to Image"
     }
   },
   "49": {
@@ -93,13 +93,108 @@
       "device": "cuda",
       "max_megapixels": 2,
       "image": [
-        "30",
+        "65",
         0
       ]
     },
     "class_type": "LayerMask: TransparentBackgroundUltra",
     "_meta": {
       "title": "LayerMask: Transparent Background Ultra"
+    }
+  },
+  "56": {
+    "inputs": {
+      "image": "welcome.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_mask"
+    }
+  },
+  "57": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "61": {
+    "inputs": {
+      "detect": "min_bounding_rect",
+      "x_adjust": 0,
+      "y_adjust": 0,
+      "scale_adjust": 1.1,
+      "mask": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "LayerMask: MaskBoxDetect",
+    "_meta": {
+      "title": "LayerMask: MaskBoxDetect"
+    }
+  },
+  "63": {
+    "inputs": {
+      "width": [
+        "61",
+        3
+      ],
+      "height": [
+        "61",
+        4
+      ],
+      "image": [
+        "30",
+        0
+      ],
+      "mask": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "CutForInpaint",
+    "_meta": {
+      "title": "Cut For Inpaint"
+    }
+  },
+  "64": {
+    "inputs": {
+      "mask": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "65": {
+    "inputs": {
+      "boolean": [
+        "64",
+        0
+      ],
+      "on_true": [
+        "30",
+        0
+      ],
+      "on_false": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

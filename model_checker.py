@@ -1175,7 +1175,9 @@ packages = {
         "note": "抠图去背景神器|显存需求：★ 速度：★★★★★",
         "files": [
             ("SimpleModels/rembg/ckpt_base.pth", 367520613),
-            ("SimpleModels/rembg/RMBG-1.4.pth", 176718373)
+            ("SimpleModels/rembg/RMBG-1.4.pth", 176718373),
+            ("SimpleModels/rembg/General.safetensors", 884878856),
+            ("SimpleModels/rembg/Portrait.safetensors", 884878856)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
