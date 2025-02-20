@@ -7,7 +7,7 @@
       "torchscript_jit": false,
       "add_background": "none",
       "images": [
-        "61",
+        "54",
         0
       ]
     },
@@ -95,7 +95,7 @@
       "y_adjust": 0,
       "scale_adjust": 1.1,
       "mask": [
-        "52",
+        "71",
         0
       ]
     },
@@ -119,7 +119,7 @@
         0
       ],
       "mask": [
-        "52",
+        "70",
         0
       ]
     },
@@ -193,43 +193,6 @@
       "title": "i2i_inpaint_mask"
     }
   },
-  "57": {
-    "inputs": {
-      "width": [
-        "50",
-        3
-      ],
-      "height": [
-        "50",
-        4
-      ],
-      "image": [
-        "56",
-        0
-      ],
-      "mask": [
-        "52",
-        0
-      ]
-    },
-    "class_type": "CutForInpaint",
-    "_meta": {
-      "title": "Cut For Inpaint"
-    }
-  },
-  "58": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "57",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
   "59": {
     "inputs": {
       "size": "custom",
@@ -244,44 +207,6 @@
     "class_type": "LayerUtility: ColorImage V2",
     "_meta": {
       "title": "LayerUtility: ColorImage V2"
-    }
-  },
-  "60": {
-    "inputs": {
-      "expand": 0,
-      "incremental_expandrate": 0,
-      "tapered_corners": true,
-      "flip_input": false,
-      "blur_radius": 0,
-      "lerp_alpha": 1,
-      "decay_factor": 1,
-      "fill_holes": true,
-      "mask": [
-        "58",
-        0
-      ]
-    },
-    "class_type": "GrowMaskWithBlur",
-    "_meta": {
-      "title": "Grow Mask With Blur"
-    }
-  },
-  "61": {
-    "inputs": {
-      "fill": "telea",
-      "falloff": 0,
-      "image": [
-        "54",
-        0
-      ],
-      "mask": [
-        "60",
-        1
-      ]
-    },
-    "class_type": "INPAINT_MaskedFill",
-    "_meta": {
-      "title": "Fill Masked Area"
     }
   },
   "62": {
@@ -405,6 +330,46 @@
     "class_type": "BlendInpaint",
     "_meta": {
       "title": "Blend Inpaint"
+    }
+  },
+  "70": {
+    "inputs": {
+      "boolean": [
+        "53",
+        0
+      ],
+      "on_true": [
+        "63",
+        0
+      ],
+      "on_false": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "71": {
+    "inputs": {
+      "expand": 1,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 0,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": true,
+      "mask": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
     }
   }
 }
