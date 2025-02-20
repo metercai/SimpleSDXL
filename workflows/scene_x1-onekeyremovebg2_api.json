@@ -7,7 +7,7 @@
       "torchscript_jit": false,
       "add_background": "none",
       "images": [
-        "54",
+        "61",
         0
       ]
     },
@@ -31,7 +31,7 @@
   "44": {
     "inputs": {
       "images": [
-        "43",
+        "67",
         0
       ]
     },
@@ -55,7 +55,7 @@
   "47": {
     "inputs": {
       "images": [
-        "37",
+        "64",
         0
       ]
     },
@@ -79,7 +79,7 @@
   "49": {
     "inputs": {
       "images": [
-        "48",
+        "66",
         0
       ]
     },
@@ -191,6 +191,220 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_inpaint_mask"
+    }
+  },
+  "57": {
+    "inputs": {
+      "width": [
+        "50",
+        3
+      ],
+      "height": [
+        "50",
+        4
+      ],
+      "image": [
+        "56",
+        0
+      ],
+      "mask": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "CutForInpaint",
+    "_meta": {
+      "title": "Cut For Inpaint"
+    }
+  },
+  "58": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "59": {
+    "inputs": {
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#000000",
+      "size_as": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "60": {
+    "inputs": {
+      "expand": 0,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 0,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": true,
+      "mask": [
+        "58",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "61": {
+    "inputs": {
+      "fill": "telea",
+      "falloff": 0,
+      "image": [
+        "54",
+        0
+      ],
+      "mask": [
+        "60",
+        1
+      ]
+    },
+    "class_type": "INPAINT_MaskedFill",
+    "_meta": {
+      "title": "Fill Masked Area"
+    }
+  },
+  "62": {
+    "inputs": {
+      "image": [
+        "55",
+        0
+      ],
+      "alpha": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Join Image with Alpha"
+    }
+  },
+  "63": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "64": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "37",
+        0
+      ],
+      "original": [
+        "62",
+        0
+      ],
+      "mask": [
+        "37",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "65": {
+    "inputs": {
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#FFFFFF",
+      "size_as": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "66": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "48",
+        0
+      ],
+      "original": [
+        "59",
+        0
+      ],
+      "mask": [
+        "37",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "67": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "43",
+        0
+      ],
+      "original": [
+        "65",
+        0
+      ],
+      "mask": [
+        "37",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
     }
   }
 }
