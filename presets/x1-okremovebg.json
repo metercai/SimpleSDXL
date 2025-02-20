@@ -6,27 +6,35 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["Inspyrenet", "RMBG"],
-	    "theme_title": "选择不同的模型，抠图效果和耗时也有所不同",
-            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_image_number", "scene_canvas_image"],  
+	    "theme": ["通用I", "通用R","通用B","人像"],
+	    "theme_title": "选择不同的模型，抠图效果和耗时也有所不同，后两个框选效果更好",
+            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_image_number", "scene_input_image1"],
 	    "prompt": {
-    		"Inspyrenet": "使用 Inspyrenet 模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
-	    	"RMBG": "使用 RMBG 模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片"
+            "通用I": "使用 Inspyrenet 通用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
+            "通用R": "使用 RMBG 通用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
+            "通用B": "使用 ByBiRefNet-General 通用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
+            "人像": "使用 ByBiRefNet-Portrait 人像专用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片"
 	    },
 	    "additional_prompt": {
-		"Inspyrenet": "",
-		"RMBG": ""
+		"通用I": "",
+		"通用R": "",
+        "通用B":"",
+        "人像":""
 	    },
 	    "additional_prompt_title": "",
 	    "multimodal_prompt": {
-		"Inspyrenet": "",
-		"RMBG": ""
+                "通用I": "",
+                "通用R": "",
+                "通用B":"",
+                "人像":""
 	    },
 	    "image_preprocessor_method": [["-normalization"]],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "task_method": {
-		"Inspyrenet": "x1-onekeyremovebg1",
-		"RMBG": "x1-onekeyremovebg2"
+                "通用I": "x1-onekeyremovebg1",
+                "通用R": "x1-onekeyremovebg2",
+                "通用B":"x1-onekeyremovebg3",
+                "人像":"x1-onekeyremovebg4"
 	    }
     	}
     },
@@ -72,7 +80,9 @@
     "vae_downloads": {},
     "model_list": [
         "rembg,ckpt_base.pth,367520613,0,",
-        "rembg,RMBG-1.4.pth,176718373,0,"
+        "rembg,RMBG-1.4.pth,176718373,0,",
+        "rembg,General.safetensors,884878856,0,",
+        "rembg,Portrait.safetensors,884878856,0,"
         ]
 }
 
