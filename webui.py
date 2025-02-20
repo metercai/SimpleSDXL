@@ -1129,17 +1129,18 @@ with shared.gradio_root:
                     with gr.Group(visible=False) as admin_panel:
                         with gr.Row():
                             admin_link = gr.HTML(elem_classes=["htmlcontent"])
-                            admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
+                            admin_mgr_link = gr.HTML(value='')
                         with gr.Row():
-                            advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
+                            admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
                             admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
                         with gr.Row():
                             comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
                             fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
                         with gr.Row():
-                            reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
+                            advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
                             minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
                         with gr.Row():
+                            reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
                             wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
                     with gr.Group(visible=False) as user_panel:
                         prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
@@ -1587,6 +1588,81 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd:
     comfyd.active(True)
+
+def create_analysis_page():
+    with gr.Blocks(title="分析中心", css=topbar.css) as analysis_page:
+        state_topbar = gr.State({})
+        with gr.Row():
+            gr.Markdown("## 数据分析中心")
+        with gr.Tabs():
+            with gr.Tab(label="文本分析"):
+                text_input = gr.Textbox(label="输入待分析文本", lines=5)
+                analyze_btn = gr.Button("开始分析")
+                wordcloud = gr.Image(label="词云图")
+
+                def generate_wordcloud(text):
+                    from wordcloud import WordCloud
+                    import matplotlib.pyplot as plt
+                    import io
+
+                    wc = WordCloud().generate(text)
+                    plt.imshow(wc)
+                    plt.axis("off")
+
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png')
+                    buf.seek(0)
+                    return buf
+
+                analyze_btn.click(
+                    generate_wordcloud,
+                    inputs=text_input,
+                    outputs=wordcloud
+                )
+
+            with gr.Tab(label="文件分析"):
+                file_input = gr.File(label="上传数据文件")
+                report_btn = gr.Button("生成报告")
+                report_view = gr.HTML()
+
+                # 示例报告生成函数
+                def generate_report(file):
+                    return f"<div style='padding:20px'><h3>{file.name} 分析报告</h3>...</div>"
+
+                report_btn.click(
+                    generate_report,
+                    inputs=file_input,
+                    outputs=report_view
+                )
+
+        return analysis_page
+
+def launch_app():
+    main_app = shared.gradio_root
+    analysis_app = create_analysis_page()
+
+    # 组合应用
+    combined_app = gr.App(
+        title="AI Art Studio Pro",
+        pages=[
+            {"path": "/", "app": main_app},
+            {"path": "/analysis", "app": analysis_app}
+        ]
+    )
+
+    combined_app.launch(
+        inbrowser=args_manager.args.in_browser,
+        server_name=args_manager.args.listen,
+        server_port=args_manager.args.port,
+        share=args_manager.args.share,
+        root_path=args_manager.args.webroot,
+        auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
+        allowed_paths=[modules.config.path_outputs],
+        blocked_paths=[constants.AUTH_FILENAME]
+    )
+
+#if __name__ == "__main__":
+#    launch_app()
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,
