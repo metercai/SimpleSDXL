@@ -291,8 +291,8 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 672197044238763,
-      "steps": 30,
+      "seed": 335675887817782,
+      "steps": 25,
       "cfg": 30,
       "denoise": 1
     },
@@ -340,11 +340,11 @@
   },
   "152": {
     "inputs": {
-      "expand": 10,
+      "expand": 3,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 5,
+      "blur_radius": 2.5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": true,
@@ -869,11 +869,11 @@
   },
   "231": {
     "inputs": {
-      "expand": 10,
+      "expand": 15,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 2,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": true,
@@ -1242,7 +1242,7 @@
         0
       ],
       "mask": [
-        "291",
+        "308",
         0
       ]
     },
@@ -1285,15 +1285,18 @@
   },
   "277": {
     "inputs": {
-      "noise_seed": 122549629084875,
-      "noise_strength": 0.25,
+      "noise_seed": [
+        "122",
+        6
+      ],
+      "noise_strength": 0.2,
       "normalize": "false",
       "latent": [
         "274",
         0
       ],
       "mask": [
-        "291",
+        "308",
         0
       ]
     },
@@ -1576,6 +1579,20 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "308": {
+    "inputs": {
+      "expand": 10,
+      "tapered_corners": true,
+      "mask": [
+        "291",
+        0
+      ]
+    },
+    "class_type": "GrowMask",
+    "_meta": {
+      "title": "GrowMask"
     }
   }
 }
