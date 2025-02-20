@@ -93,7 +93,7 @@
       "device": "cuda",
       "max_megapixels": 2,
       "image": [
-        "68",
+        "65",
         0
       ]
     },
@@ -132,7 +132,7 @@
       "y_adjust": 0,
       "scale_adjust": 1.1,
       "mask": [
-        "57",
+        "111",
         0
       ]
     },
@@ -156,7 +156,7 @@
         0
       ],
       "mask": [
-        "57",
+        "99",
         0
       ]
     },
@@ -195,81 +195,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "68": {
-    "inputs": {
-      "fill": "telea",
-      "falloff": 0,
-      "image": [
-        "65",
-        0
-      ],
-      "mask": [
-        "72",
-        1
-      ]
-    },
-    "class_type": "INPAINT_MaskedFill",
-    "_meta": {
-      "title": "Fill Masked Area"
-    }
-  },
-  "69": {
-    "inputs": {
-      "width": [
-        "61",
-        3
-      ],
-      "height": [
-        "61",
-        4
-      ],
-      "image": [
-        "56",
-        0
-      ],
-      "mask": [
-        "57",
-        0
-      ]
-    },
-    "class_type": "CutForInpaint",
-    "_meta": {
-      "title": "Cut For Inpaint"
-    }
-  },
-  "71": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "69",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
-  "72": {
-    "inputs": {
-      "expand": 0,
-      "incremental_expandrate": 0,
-      "tapered_corners": true,
-      "flip_input": false,
-      "blur_radius": 0,
-      "lerp_alpha": 1,
-      "decay_factor": 1,
-      "fill_holes": true,
-      "mask": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "GrowMaskWithBlur",
-    "_meta": {
-      "title": "Grow Mask With Blur"
     }
   },
   "75": {
@@ -409,6 +334,46 @@
     "class_type": "BlendInpaint",
     "_meta": {
       "title": "Blend Inpaint"
+    }
+  },
+  "99": {
+    "inputs": {
+      "boolean": [
+        "64",
+        0
+      ],
+      "on_true": [
+        "91",
+        0
+      ],
+      "on_false": [
+        "57",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "111": {
+    "inputs": {
+      "expand": 1,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 0,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": true,
+      "mask": [
+        "99",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
     }
   }
 }
