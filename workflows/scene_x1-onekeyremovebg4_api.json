@@ -1,14 +1,4 @@
 {
-  "30": {
-    "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "i2i_inpaint_image"
-    }
-  },
   "43": {
     "inputs": {
       "mask": [
@@ -24,7 +14,7 @@
   "44": {
     "inputs": {
       "images": [
-        "93",
+        "69",
         0
       ]
     },
@@ -36,7 +26,7 @@
   "45": {
     "inputs": {
       "mask": [
-        "52",
+        "57",
         1
       ]
     },
@@ -48,7 +38,7 @@
   "47": {
     "inputs": {
       "images": [
-        "75",
+        "66",
         0
       ]
     },
@@ -60,7 +50,7 @@
   "48": {
     "inputs": {
       "mask": [
-        "52",
+        "57",
         1
       ]
     },
@@ -72,7 +62,7 @@
   "49": {
     "inputs": {
       "images": [
-        "85",
+        "68",
         0
       ]
     },
@@ -81,25 +71,99 @@
       "title": "mask_image2"
     }
   },
-  "52": {
+  "50": {
     "inputs": {
-      "model": "ckpt_base.pth",
-      "detail_method": "GuidedFilter",
-      "detail_erode": 6,
-      "detail_dilate": 6,
-      "black_point": 0.01,
-      "white_point": 0.99,
-      "process_detail": true,
-      "device": "cuda",
-      "max_megapixels": 2,
-      "image": [
-        "65",
+      "detect": "min_bounding_rect",
+      "x_adjust": 0,
+      "y_adjust": 0,
+      "scale_adjust": 1.1,
+      "mask": [
+        "75",
         0
       ]
     },
-    "class_type": "LayerMask: TransparentBackgroundUltra",
+    "class_type": "LayerMask: MaskBoxDetect",
     "_meta": {
-      "title": "LayerMask: Transparent Background Ultra"
+      "title": "LayerMask: MaskBoxDetect"
+    }
+  },
+  "51": {
+    "inputs": {
+      "width": [
+        "50",
+        3
+      ],
+      "height": [
+        "50",
+        4
+      ],
+      "image": [
+        "55",
+        0
+      ],
+      "mask": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "CutForInpaint",
+    "_meta": {
+      "title": "Cut For Inpaint"
+    }
+  },
+  "52": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "53": {
+    "inputs": {
+      "mask": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "54": {
+    "inputs": {
+      "boolean": [
+        "53",
+        0
+      ],
+      "on_true": [
+        "55",
+        0
+      ],
+      "on_false": [
+        "51",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "55": {
+    "inputs": {
+      "image": "welcome.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_image"
     }
   },
   "56": {
@@ -114,9 +178,68 @@
   },
   "57": {
     "inputs": {
+      "model": [
+        "58",
+        0
+      ],
+      "images": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "RembgByBiRefNet",
+    "_meta": {
+      "title": "RembgByBiRefNet"
+    }
+  },
+  "58": {
+    "inputs": {
+      "model": "Portrait.safetensors",
+      "device": "AUTO",
+      "use_weight": false
+    },
+    "class_type": "LoadRembgByBiRefNetModel",
+    "_meta": {
+      "title": "LoadRembgByBiRefNetModel"
+    }
+  },
+  "61": {
+    "inputs": {
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#000000",
+      "size_as": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "64": {
+    "inputs": {
+      "image": [
+        "55",
+        0
+      ],
+      "alpha": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Join Image with Alpha"
+    }
+  },
+  "65": {
+    "inputs": {
       "channel": "red",
       "image": [
-        "56",
+        "67",
         0
       ]
     },
@@ -125,70 +248,112 @@
       "title": "Convert Image to Mask"
     }
   },
-  "61": {
+  "66": {
     "inputs": {
-      "detect": "min_bounding_rect",
-      "x_adjust": 0,
-      "y_adjust": 0,
-      "scale_adjust": 1.1,
-      "mask": [
-        "111",
-        0
-      ]
-    },
-    "class_type": "LayerMask: MaskBoxDetect",
-    "_meta": {
-      "title": "LayerMask: MaskBoxDetect"
-    }
-  },
-  "63": {
-    "inputs": {
-      "width": [
-        "61",
-        3
-      ],
-      "height": [
-        "61",
-        4
-      ],
-      "image": [
-        "30",
-        0
-      ],
-      "mask": [
-        "99",
-        0
-      ]
-    },
-    "class_type": "CutForInpaint",
-    "_meta": {
-      "title": "Cut For Inpaint"
-    }
-  },
-  "64": {
-    "inputs": {
-      "mask": [
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
         "57",
         0
-      ]
-    },
-    "class_type": "easy isMaskEmpty",
-    "_meta": {
-      "title": "Is Mask Empty"
-    }
-  },
-  "65": {
-    "inputs": {
-      "boolean": [
+      ],
+      "original": [
         "64",
         0
       ],
+      "mask": [
+        "57",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "67": {
+    "inputs": {
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#FFFFFF",
+      "size_as": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "68": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "48",
+        0
+      ],
+      "original": [
+        "61",
+        0
+      ],
+      "mask": [
+        "57",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "69": {
+    "inputs": {
+      "kernel": 1,
+      "sigma": 10,
+      "inpaint": [
+        "43",
+        0
+      ],
+      "original": [
+        "67",
+        0
+      ],
+      "mask": [
+        "57",
+        1
+      ],
+      "origin": [
+        "51",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "74": {
+    "inputs": {
+      "boolean": [
+        "53",
+        0
+      ],
       "on_true": [
-        "30",
+        "65",
         0
       ],
       "on_false": [
-        "63",
+        "52",
         0
       ]
     },
@@ -199,175 +364,16 @@
   },
   "75": {
     "inputs": {
-      "kernel": 1,
-      "sigma": 10,
-      "inpaint": [
-        "52",
-        0
-      ],
-      "original": [
-        "81",
-        0
-      ],
-      "mask": [
-        "52",
-        1
-      ],
-      "origin": [
-        "63",
-        2
-      ]
-    },
-    "class_type": "BlendInpaint",
-    "_meta": {
-      "title": "Blend Inpaint"
-    }
-  },
-  "81": {
-    "inputs": {
-      "image": [
-        "30",
-        0
-      ],
-      "alpha": [
-        "91",
-        0
-      ]
-    },
-    "class_type": "JoinImageWithAlpha",
-    "_meta": {
-      "title": "Join Image with Alpha"
-    }
-  },
-  "85": {
-    "inputs": {
-      "kernel": 1,
-      "sigma": 10,
-      "inpaint": [
-        "48",
-        0
-      ],
-      "original": [
-        "90",
-        0
-      ],
-      "mask": [
-        "52",
-        1
-      ],
-      "origin": [
-        "63",
-        2
-      ]
-    },
-    "class_type": "BlendInpaint",
-    "_meta": {
-      "title": "Blend Inpaint"
-    }
-  },
-  "90": {
-    "inputs": {
-      "size": "custom",
-      "custom_width": 512,
-      "custom_height": 512,
-      "color": "#000000",
-      "size_as": [
-        "30",
-        0
-      ]
-    },
-    "class_type": "LayerUtility: ColorImage V2",
-    "_meta": {
-      "title": "LayerUtility: ColorImage V2"
-    }
-  },
-  "91": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "92",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
-  "92": {
-    "inputs": {
-      "size": "custom",
-      "custom_width": 512,
-      "custom_height": 512,
-      "color": "#FFFFFF",
-      "size_as": [
-        "30",
-        0
-      ]
-    },
-    "class_type": "LayerUtility: ColorImage V2",
-    "_meta": {
-      "title": "LayerUtility: ColorImage V2"
-    }
-  },
-  "93": {
-    "inputs": {
-      "kernel": 1,
-      "sigma": 10,
-      "inpaint": [
-        "43",
-        0
-      ],
-      "original": [
-        "92",
-        0
-      ],
-      "mask": [
-        "52",
-        1
-      ],
-      "origin": [
-        "63",
-        2
-      ]
-    },
-    "class_type": "BlendInpaint",
-    "_meta": {
-      "title": "Blend Inpaint"
-    }
-  },
-  "99": {
-    "inputs": {
-      "boolean": [
-        "64",
-        0
-      ],
-      "on_true": [
-        "91",
-        0
-      ],
-      "on_false": [
-        "57",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "111": {
-    "inputs": {
       "expand": 1,
       "incremental_expandrate": 0,
-      "tapered_corners": true,
+      "tapered_corners": false,
       "flip_input": false,
-      "blur_radius": 0,
+      "blur_radius": 0.9,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": true,
       "mask": [
-        "99",
+        "74",
         0
       ]
     },
