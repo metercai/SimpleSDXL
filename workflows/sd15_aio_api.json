@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 989480264105587,
+      "seed": 548404199857307,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
@@ -5362,7 +5362,10 @@
   },
   "2972": {
     "inputs": {
-      "boolean": false,
+      "boolean": [
+        "3006",
+        0
+      ],
       "on_true": [
         "2975",
         0
@@ -5374,7 +5377,7 @@
     },
     "class_type": "easy ifElse",
     "_meta": {
-      "title": "is_custom_vae"
+      "title": "If else"
     }
   },
   "2975": {
@@ -5724,6 +5727,15 @@
     "class_type": "SetLatentNoiseMask",
     "_meta": {
       "title": "Set Latent Noise Mask"
+    }
+  },
+  "3006": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "is_custom_vae"
     }
   }
 }

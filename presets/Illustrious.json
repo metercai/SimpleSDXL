@@ -8,7 +8,7 @@
                 "task_method": "il_v_pre"
                 }
         },
-    "default_model": "NoobAI-XL-v1.1.safetensors",
+    "default_model": "miaomiaoHarem_v15b.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -47,7 +47,7 @@
     "embeddings_downloads": {},
     "lora_downloads": {},
     "model_list": [
-        "checkpoints,NoobAI-XL-v1.1.safetensors,7105349958,0,"
+        "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,"
     ]
 }
 

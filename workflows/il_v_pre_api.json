@@ -36,7 +36,7 @@
   },
   "5": {
     "inputs": {
-      "seed": 869765023274291,
+      "seed": 555803607816172,
       "steps": 30,
       "cfg": 6,
       "sampler_name": "euler_ancestral",
@@ -82,8 +82,8 @@
         0
       ],
       "vae": [
-        "1",
-        2
+        "52",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -163,7 +163,7 @@
   },
   "17": {
     "inputs": {
-      "multiplier": 0.7,
+      "multiplier": 0.7000000000000001,
       "model": [
         "18",
         0
@@ -247,6 +247,44 @@
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "SaveImageWebsocket"
+    }
+  },
+  "52": {
+    "inputs": {
+      "boolean": [
+        "54",
+        0
+      ],
+      "on_true": [
+        "53",
+        0
+      ],
+      "on_false": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "53": {
+    "inputs": {
+      "vae_name": "ponyDiffusionV6XL_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "54": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "is_custom_vae"
     }
   }
 }
