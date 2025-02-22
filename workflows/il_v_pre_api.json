@@ -163,7 +163,7 @@
   },
   "17": {
     "inputs": {
-      "multiplier": 0.7,
+      "multiplier": 0.7000000000000001,
       "model": [
         "18",
         0
@@ -251,7 +251,10 @@
   },
   "52": {
     "inputs": {
-      "boolean": false,
+      "boolean": [
+        "54",
+        0
+      ],
       "on_true": [
         "53",
         0
@@ -263,7 +266,7 @@
     },
     "class_type": "easy ifElse",
     "_meta": {
-      "title": "is_custom_vae"
+      "title": "If else"
     }
   },
   "53": {
@@ -273,6 +276,15 @@
     "class_type": "VAELoader",
     "_meta": {
       "title": "Load VAE"
+    }
+  },
+  "54": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "is_custom_vae"
     }
   }
 }

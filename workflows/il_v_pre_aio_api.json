@@ -879,7 +879,7 @@
   },
   "1075": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -888,7 +888,7 @@
   },
   "1079": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -897,7 +897,7 @@
   },
   "1080": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -906,7 +906,7 @@
   },
   "1081": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -5365,7 +5365,10 @@
   },
   "2932": {
     "inputs": {
-      "boolean": false,
+      "boolean": [
+        "2934",
+        0
+      ],
       "on_true": [
         "2933",
         0
@@ -5377,7 +5380,7 @@
     },
     "class_type": "easy ifElse",
     "_meta": {
-      "title": "is_custom_vae"
+      "title": "If else"
     }
   },
   "2933": {
@@ -5387,6 +5390,15 @@
     "class_type": "VAELoader",
     "_meta": {
       "title": "vae_model"
+    }
+  },
+  "2934": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "is_custom_vae"
     }
   }
 }
