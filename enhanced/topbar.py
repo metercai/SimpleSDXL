@@ -760,18 +760,22 @@ def update_size_and_hires_fix(image, uov_method, params_backend, hires_fix_stop,
     params_backend.update({'i2i_uov_hires_fix_w': hires_fix_weight})
     params_backend.update({'i2i_uov_hires_fix_blurred': hires_fix_blurred})
     vary_strength = -1
+    vary_visible = False
     upscale_strength = -1
-    #if 'Upscale' in uov_method:
-    #    upscale_strength = 0.2
-    #if 'Subtle' in uov_method:
-    #    vary_strength = 0.5
-    #if 'Strong' in uov_method:
-    #    vary_strength = 0.85
+    upscale_visible = False
+    if 'Upscale' in uov_method:
+        upscale_visible = True
+        upscale_strength = 0.2
+    if 'Vary' in uov_method:
+        vary_visible = True
+        if 'Subtle' in uov_method:
+            vary_strength = 0.5
+        if 'Strong' in uov_method:
+            vary_strength = 0.85
     if 'Hires.fix' in uov_method:
         vary_strength = 0.85
-        return gr.update(visible=False, value=size_image), gr.update(visible=True), vary_strength, upscale_strength
-    else:
-        return gr.update(visible=True, value=size_image), gr.update(visible=False), vary_strength, upscale_strength
+        vary_visible = True
+    return gr.update(value=size_image), gr.update(visible='Hires.fix' in uov_method), gr.update(visible=vary_visible, value=vary_strength), gr.update(interactive=not 'Fast' in uov_method, visible=upscale_visible, value=upscale_strength)
 
 def update_upscale_size_of_image(image, uov_method):
     if image is not None:
