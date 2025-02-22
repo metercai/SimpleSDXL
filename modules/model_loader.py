@@ -80,7 +80,7 @@ def load_file_from_url(
     cached_file = os.path.abspath(os.path.join(model_dir, file_name))
     if not os.path.exists(cached_file):
         #logger.info(f'Downloading: "{url}" to {cached_file}')
-        logger.info(f'正在下载文件: "{url}"。如果速度慢，可终止运行，自行用工具下载后保存到: {cached_file}，进入"模型"页点击"本地刷新"按钮。')
+        logger.info(f'正在下载文件: "{url}"。如果速度慢，建议自行用工具下载后保存到: {cached_file}。')
         def _download_task():
             try:
                 anyio.run(download_file_with_progress, url, cached_file, size)
