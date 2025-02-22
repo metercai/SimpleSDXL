@@ -10,7 +10,7 @@ patch_all()
 
 class AsyncTask:
     def __init__(self, args):
-        from modules.flags import Performance, MetadataScheme, ip_list, disabled, task_class_mapping
+        from modules.flags import Performance, MetadataScheme, ip_list, disabled, task_class_mapping, default_vae
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
         import uuid
@@ -221,7 +221,7 @@ class AsyncTask:
         if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
        
-        if self.task_class != 'Fooocus' and self.vae_name != flags.default_vae:
+        if self.task_class != 'Fooocus' and self.vae_name != default_vae:
             self.params_backend.update({"vae_model": self.vae_name})
             self.params_backend.update({"is_custom_vae": True})
 
