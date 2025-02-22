@@ -1312,10 +1312,10 @@ packages = {
         "name": "[21]光辉模型包",
         "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958)
+            ("SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
         ]
     },
         "Illustrious_aio_package": {
@@ -1323,7 +1323,7 @@ packages = {
         "name": "[22]光辉AIO扩展包",
         "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
         "files": [
-            ("SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors", 7105349958),
+            ("SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
             ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
             ("SimpleModels/controlnet/noob_sdxl_controlnet_canny.fp16.safetensors", 2502139104),
@@ -1339,7 +1339,7 @@ packages = {
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/NoobAI-XL-v1.1.safetensors"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
         ]
     }
 }
