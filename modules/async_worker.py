@@ -220,7 +220,11 @@ class AsyncTask:
             }
         if self.task_name == 'default' and self.task_class == 'Comfy':
             self.params_backend.update({"ui_options": ui_options})
-        
+       
+        if self.task_class != 'Fooocus' and self.vae_name != flags.default_vae:
+            self.params_backend.update({"vae_model": self.vae_name})
+            self.params_backend.update({"is_custom_vae": True})
+
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')

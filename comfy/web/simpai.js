@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 创建界面元素
   const btn = document.createElement('button');
   btn.id = 'paramExtractBtn';
-  btn.textContent = '参数提取';
+  btn.textContent = '参数映射';
   document.body.appendChild(btn);
 
   const popup = document.createElement('div');
