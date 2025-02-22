@@ -100,8 +100,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ],
       "upscale_model": [
         "288",
@@ -240,8 +240,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -349,8 +349,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -731,8 +731,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -747,8 +747,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "VAEEncode",
@@ -1470,7 +1470,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 760340959297597,
+      "seed": 958199455735961,
       "steps": 30,
       "cfg": 3,
       "denoise": 0
@@ -1625,8 +1625,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ],
       "pixels": [
         "2801",
@@ -2009,8 +2009,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -3666,8 +3666,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3703,8 +3703,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3740,8 +3740,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3777,8 +3777,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3814,8 +3814,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3851,8 +3851,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3888,8 +3888,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3925,8 +3925,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3962,8 +3962,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -3999,8 +3999,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4036,8 +4036,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4073,8 +4073,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -4204,7 +4204,7 @@
   },
   "2825": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1079",
         0
@@ -4217,7 +4217,7 @@
   },
   "2826": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1075",
         0
@@ -4230,7 +4230,7 @@
   },
   "2827": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1080",
         0
@@ -4243,7 +4243,7 @@
   },
   "2828": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1081",
         0
@@ -4256,7 +4256,7 @@
   },
   "2829": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1079",
         0
@@ -4269,7 +4269,7 @@
   },
   "2830": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1075",
         0
@@ -4282,7 +4282,7 @@
   },
   "2831": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1080",
         0
@@ -4295,7 +4295,7 @@
   },
   "2832": {
     "inputs": {
-      "value": "a*0.75",
+      "value": "a",
       "a": [
         "1081",
         0
@@ -5128,8 +5128,8 @@
         0
       ],
       "vae": [
-        "2869",
-        2
+        "2932",
+        0
       ],
       "pixels": [
         "2901",
@@ -5181,7 +5181,7 @@
         "2911",
         0
       ],
-      "start": 0.2,
+      "start": 0,
       "end": 0.9,
       "max_consecutive_cache_hits": 2,
       "model": [
@@ -5361,6 +5361,32 @@
     "class_type": "ConditioningZeroOut",
     "_meta": {
       "title": "ConditioningZeroOut"
+    }
+  },
+  "2932": {
+    "inputs": {
+      "boolean": false,
+      "on_true": [
+        "2933",
+        0
+      ],
+      "on_false": [
+        "2869",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "is_custom_vae"
+    }
+  },
+  "2933": {
+    "inputs": {
+      "vae_name": "ponyDiffusionV6XL_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "vae_model"
     }
   }
 }
