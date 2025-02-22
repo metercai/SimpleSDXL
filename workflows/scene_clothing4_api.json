@@ -237,7 +237,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 1056869594436965,
+      "seed": 604172683933467,
       "steps": 25,
       "cfg": 30,
       "denoise": 1
@@ -286,11 +286,11 @@
   },
   "152": {
     "inputs": {
-      "expand": 10,
+      "expand": 3,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 2.5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": true,
