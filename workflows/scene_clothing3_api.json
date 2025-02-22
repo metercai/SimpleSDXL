@@ -286,11 +286,11 @@
   },
   "152": {
     "inputs": {
-      "expand": 10,
+      "expand": 3,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 2.5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
