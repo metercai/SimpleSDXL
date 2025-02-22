@@ -473,10 +473,10 @@ with shared.gradio_root:
                                     with gr.Row():
                                         uov_image_size = gr.Textbox(label='OriginalSize | FinalSize', elem_classes='uov_image_size')
                                         overwrite_upscale_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Upscale"',
-                                                               visible=False, minimum=-1, maximum=1.0, step=0.001,
+                                                               visible=False, minimum=0, maximum=1.0, step=0.001,
                                                                value=modules.config.default_overwrite_upscale)
                                         overwrite_vary_strength = gr.Slider(label='Forced Overwrite of Denoising Strength of "Vary"',
-                                                            visible=False, minimum=-1, maximum=1.0, step=0.001, value=-1)
+                                                            visible=False, minimum=0, maximum=1.0, step=0.001, value=-1)
 
                                     with gr.Row(visible=False) as uov_hires_fix:
                                         hires_fix_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.8, min_width=20)
