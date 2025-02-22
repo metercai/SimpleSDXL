@@ -341,7 +341,7 @@ def delete_partial_files():
 
 def delete_specific_image_files():
     """
-    从相对路径查找并删除所有 .png、.webp 和 .jpg 文件，排除 welcome.png。
+    从相对路径查找并删除所有 .png、.webp 和 .jpg/jpeg 文件，排除 welcome.png。
     """
     # 获取当前脚本所在目录
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -363,7 +363,7 @@ def delete_specific_image_files():
     for root, _, files in os.walk(target_dir):
         for file in files:
             # 检查文件扩展名是否为 .png、.webp 或 .jpg，且不为 welcome.png
-            if (file.endswith(".png") or file.endswith(".webp") or file.endswith(".jpg")) and file != "welcome.png":
+            if (file.endswith(".png") or file.endswith(".webp") or file.endswith(".jpg") or file.endswith(".jpeg")) and file != "welcome.png":
                 files_found = True
                 file_path = os.path.join(root, file)
                 files_to_delete.append(file_path)
