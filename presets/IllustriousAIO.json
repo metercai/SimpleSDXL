@@ -9,7 +9,7 @@
                 "task_method": "il_v_pre_aio"
                 }
         },
-    "default_model": "NoobAI-XL-v1.1.safetensors",
+    "default_model": "miaomiaoHarem_v15b.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -48,7 +48,7 @@
     "embeddings_downloads": {},
     "lora_downloads": {},
     "model_list": [
-        "checkpoints,NoobAI-XL-v1.1.safetensors,7105349958,0,",
+        "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,",
         "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
 	    "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
         "controlnet,noob_sdxl_controlnet_canny.fp16.safetensors,2502139104,0,",
