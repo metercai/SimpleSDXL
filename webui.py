@@ -26,7 +26,6 @@ from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 from modules.util import is_json, HWC3, resize_image
 from modules.meta_parser import switch_scene_theme, switch_scene_theme_select, switch_scene_theme_ready_to_gen, get_welcome_image, describe_prompt_for_scene, get_auto_candidate
-
 import comfy.comfy_version as comfy_version
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
@@ -906,11 +905,134 @@ with shared.gradio_root:
                 prompt.change(lambda x,y: calculateTokenCounter(x,y), inputs=[prompt, style_selections], outputs=prompt_token_counter)
 
             with gr.Tab(label='Models', elem_id="scrollable-box"):
+                gallery_visible = gr.State(value=False)
+                current_previews = gr.State(value=[])
+                active_target = gr.State(value="base")
+                lora_gallery_visible = [gr.State(value=False) for _ in range(len(modules.config.default_loras))]
+                lora_current_previews = [gr.State(value=[]) for _ in range(len(modules.config.default_loras))]
+
+                def get_model_previews():
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    model_dir = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels", "checkpoints"))
+                    previews = []
+
+                    allowed_models = {
+                        os.path.normpath(path).lower().replace('/', '\\')
+                        for path in modules.config.model_filenames
+                    }
+
+                    for root, dirs, files in os.walk(model_dir):
+                        model_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+
+                        for model_file in model_files:
+                            full_path = os.path.normpath(os.path.join(root, model_file))
+                            relative_model_path = os.path.relpath(full_path, model_dir).replace('/', '\\').lower()
+                            filename_only = model_file.lower()
+                            if filename_only not in allowed_models and relative_model_path not in allowed_models:
+                                continue
+                            relative_path = os.path.relpath(root, model_dir).replace('/', '\\')
+                            base_name = os.path.splitext(model_file)[0]
+                            model_full_path = os.path.normpath(os.path.join(root, model_file))
+                            image_path = None
+                            for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                possible_path = os.path.join(root, f"{base_name}{ext}")
+                                if os.path.exists(possible_path):
+                                    image_path = possible_path
+                                    break
+                            if not image_path and relative_path != ".":
+                                parent_dir = os.path.dirname(root)
+                                for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                    possible_path = os.path.join(parent_dir, f"{base_name}{ext}")
+                                    if os.path.exists(possible_path):
+                                        image_path = possible_path
+                                        break
+                            image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                            display_name = f"{relative_path}\{model_file}" if relative_path != "." else model_file
+                            previews.append((image_path, display_name, model_full_path))
+                    return previews
+
+                def get_lora_previews():
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    lora_dir = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels", "loras"))
+                    previews = []
+                    for root, dirs, files in os.walk(lora_dir):
+                        lora_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+                        for lora_file in lora_files:
+                            relative_path = os.path.relpath(root, lora_dir).replace('/', '\\')
+                            base_name = os.path.splitext(lora_file)[0]
+                            lora_full_path = os.path.normpath(os.path.join(root, lora_file))
+                            image_path = None
+                            for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                possible_path = os.path.normpath(os.path.join(root, f"{base_name}{ext}"))
+                                if os.path.exists(possible_path):
+                                    image_path = possible_path
+                                    break
+                            if not image_path and relative_path != ".":
+                                parent_dir = os.path.dirname(root)
+                                for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                    possible_path = os.path.normpath(os.path.join(parent_dir, f"{base_name}{ext}"))
+                                    if os.path.exists(possible_path):
+                                        image_path = possible_path
+                                        break
+                            image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                            display_name = f"{relative_path}\{lora_file}" if relative_path != "." else lora_file
+                            previews.append((image_path, display_name, lora_full_path))
+                    return previews
+
+                def show_model_gallery(current_visible, target_type):
+                    new_visible = not current_visible
+                    if new_visible:
+                        previews = get_model_previews()
+                        return [gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
+                            gr.Button.update(variant="primary") if target_type == "base" else gr.Button.update(variant="secondary"),
+                            gr.Button.update(variant="primary") if target_type == "refiner" else gr.Button.update(variant="secondary")]
+                    else:
+                        return [gr.Gallery.update(visible=new_visible, value=[]),new_visible,[],target_type,
+                            gr.Button.update(variant="secondary"),
+                            gr.Button.update(variant="secondary")
+                        ]
+
+                def show_lora_gallery(current_visible, index):
+                    new_visible = not current_visible
+                    previews = get_lora_previews()
+                    lora_current_previews[index].value = previews
+                    return (gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible), new_visible, previews, gr.Button.update(variant="primary" if new_visible else "secondary"))
+
+                def on_gallery_select(evt: gr.SelectData, previews, target_type):
+                    if previews and evt.index < len(previews):
+                        selected_path = previews[evt.index][1].replace('/', '\\')
+                        if target_type == "base":
+                            return [gr.Dropdown.update(value=selected_path), gr.Dropdown.update(), gr.Gallery.update()]
+                        elif target_type == "refiner":
+                            return [gr.Dropdown.update(), gr.Dropdown.update(value=selected_path), gr.Gallery.update()]
+                    return [gr.Dropdown(), gr.Dropdown(), gr.Gallery.update()]
+
+                def on_lora_gallery_select(evt: gr.SelectData, previews, index):
+                    if previews and isinstance(previews, list):
+                        if evt.index < len(previews):
+                            selected_path = previews[evt.index][1].replace('/', '\\')
+                            return gr.Dropdown.update(value=selected_path)
+                    return gr.Dropdown.update(value='None')
+
                 with gr.Group():
                     with gr.Row():
                         base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
                         refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
-
+                    with gr.Row():
+                        base_preview_btn = gr.Button("🖼️ Base Model", variant="secondary")
+                        refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary")
+                    model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
+                    base_preview_btn.click(
+                        fn=lambda current_visible, target: show_model_gallery(current_visible, target),
+                        inputs=[gallery_visible, gr.State("base")],
+                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
+                    )
+                    refiner_preview_btn.click(
+                        fn=lambda current_visible, target: show_model_gallery(current_visible, target),
+                        inputs=[gallery_visible, gr.State("refiner")],
+                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
+                    )
+                    model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery])
                     refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
                                                info='Use 0.4 for SD1.5 realistic models; '
                                                     'or 0.667 for SD1.5 anime models; '
@@ -921,22 +1043,27 @@ with shared.gradio_root:
 
                     refiner_model.change(lambda x: gr.update(visible=x != 'None'),
                                          inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
-
                 with gr.Group():
                     lora_ctrls = []
-
+                    lora_galleries = []
+                    lora_preview_btns = []
+                    lora_models = []
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
-                            lora_enabled = gr.Checkbox(label='Enable', value=enabled,
-                                                       elem_classes=['lora_enable', 'min_check'], scale=1)
-                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
-                                                     choices=['None'] + modules.config.lora_filenames, value=filename,
-                                                     elem_classes='lora_model', scale=5)
-                            lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
-                                                    maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
-                                                    elem_classes='lora_weight', scale=5)
+                            lora_enabled = gr.Checkbox(label='Enable', value=enabled, elem_classes=['lora_enable', 'min_check'], scale=1, min_width=20)
+                            lora_preview_btn = gr.Button(f"🖼️", variant="secondary", elem_id=f"lora_preview_btn_{i}", scale=1, min_width=20)
+                            lora_preview_btns.append(lora_preview_btn)
+                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}', choices=['None'] + modules.config.lora_filenames, value=filename, elem_classes='lora_model', scale=5)
+                            lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight, maximum=modules.config.default_loras_max_weight, step=0.01, value=weight, elem_classes='lora_weight', scale=5)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
+                            lora_models.append(lora_model)
+                        with gr.Row():
+                            lora_gallery = gr.Gallery(label=f"LoRA {i + 1} Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="lora-gallery")
+                            lora_galleries.append(lora_gallery)
 
+                    for i in range(len(modules.config.default_loras)):
+                        lora_galleries[i].select(fn=on_lora_gallery_select, inputs=[lora_current_previews[i], gr.State(i)], outputs=[lora_models[i]])
+                        lora_preview_btns[i].click(fn=lambda current_visible, idx=i: show_lora_gallery(current_visible, idx), inputs=[lora_gallery_visible[i]], outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]])
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 #with gr.Row():
