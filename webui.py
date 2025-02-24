@@ -1002,7 +1002,8 @@ with shared.gradio_root:
                                 previews.append((image_path, display_name, lora_full_path))
                     return previews
 
-                def show_model_gallery(current_visible, current_active_target, target_type):
+                def show_model_gallery(current_visible, current_active_target, target_type, state_params):
+                    refresh_files_clicked(state_params)
                     if current_active_target != target_type:
                         new_visible = True
                     else:
@@ -1010,13 +1011,19 @@ with shared.gradio_root:
                     if new_visible:
                         previews = get_model_previews()
                         return [
-                            gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
+                            gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),
+                            new_visible,
+                            previews,
+                            target_type,
                             gr.Button.update(variant="primary" if target_type == "base" else "secondary"),
                             gr.Button.update(variant="primary" if target_type == "refiner" else "secondary")
                         ]
                     else:
                         return [
-                            gr.Gallery.update(visible=False, value=[]),new_visible,[],current_active_target,
+                            gr.Gallery.update(visible=False, value=[]),
+                            new_visible,
+                            [],
+                            current_active_target,
                             gr.Button.update(variant="secondary"),
                             gr.Button.update(variant="secondary")
                         ]
@@ -1052,14 +1059,14 @@ with shared.gradio_root:
                         refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary")
                     model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
                     base_preview_btn.click(
-                        fn=lambda cv, cat, tt: show_model_gallery(cv, cat, tt),
-                        inputs=[gallery_visible, active_target, gr.State("base")],
+                        fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                        inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
                         outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
                     )
 
                     refiner_preview_btn.click(
-                        fn=lambda cv, cat, tt: show_model_gallery(cv, cat, tt),
-                        inputs=[gallery_visible, active_target, gr.State("refiner")],
+                        fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                        inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
                         outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
                     )
                     model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery])
@@ -1715,8 +1722,13 @@ with shared.gradio_root:
                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
                .then(lambda: None, _js='()=>{refresh_scene_localization();}') \
                .then(inpaint_mode_change, inputs=[inpaint_mode, inpaint_engine_state, outpaint_selections, state_topbar], outputs=[inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field], show_progress=False, queue=False) \
-               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
-
+               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)  \
+               .then(fn=lambda: [gr.update(visible=False),False,[],"base",gr.update(variant="secondary"),gr.update(variant="secondary")]
+                     + [gr.update(visible=False) for _ in lora_galleries]
+                     + [False for _ in lora_gallery_visible]
+                     + [[] for _ in lora_current_previews]
+                     + [gr.update(variant="secondary") for _ in lora_preview_btns],
+                    outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn] + lora_galleries + lora_gallery_visible + lora_current_previews + lora_preview_btns)
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
                       .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction] + admin_ctrls, show_progress=False) \
