@@ -979,15 +979,22 @@ with shared.gradio_root:
                             previews.append((image_path, display_name, lora_full_path))
                     return previews
 
-                def show_model_gallery(current_visible, target_type):
-                    new_visible = not current_visible
+                def show_model_gallery(current_visible, current_active_target, target_type):
+                    if current_active_target != target_type:
+                        new_visible = True
+                    else:
+                        new_visible = not current_visible
+
                     if new_visible:
                         previews = get_model_previews()
-                        return [gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
-                            gr.Button.update(variant="primary") if target_type == "base" else gr.Button.update(variant="secondary"),
-                            gr.Button.update(variant="primary") if target_type == "refiner" else gr.Button.update(variant="secondary")]
+                        return [
+                            gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
+                            gr.Button.update(variant="primary" if target_type == "base" else "secondary"),
+                            gr.Button.update(variant="primary" if target_type == "refiner" else "secondary")
+                        ]
                     else:
-                        return [gr.Gallery.update(visible=new_visible, value=[]),new_visible,[],target_type,
+                        return [
+                            gr.Gallery.update(visible=False, value=[]),new_visible,[],current_active_target,
                             gr.Button.update(variant="secondary"),
                             gr.Button.update(variant="secondary")
                         ]
@@ -1023,13 +1030,14 @@ with shared.gradio_root:
                         refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary")
                     model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
                     base_preview_btn.click(
-                        fn=lambda current_visible, target: show_model_gallery(current_visible, target),
-                        inputs=[gallery_visible, gr.State("base")],
+                        fn=lambda cv, cat, tt: show_model_gallery(cv, cat, tt),
+                        inputs=[gallery_visible, active_target, gr.State("base")],
                         outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
                     )
+
                     refiner_preview_btn.click(
-                        fn=lambda current_visible, target: show_model_gallery(current_visible, target),
-                        inputs=[gallery_visible, gr.State("refiner")],
+                        fn=lambda cv, cat, tt: show_model_gallery(cv, cat, tt),
+                        inputs=[gallery_visible, active_target, gr.State("refiner")],
                         outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
                     )
                     model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery])
