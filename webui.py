@@ -910,73 +910,96 @@ with shared.gradio_root:
                 active_target = gr.State(value="base")
                 lora_gallery_visible = [gr.State(value=False) for _ in range(len(modules.config.default_loras))]
                 lora_current_previews = [gr.State(value=[]) for _ in range(len(modules.config.default_loras))]
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+
+                def load_config_paths():
+                    config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
+                    default_paths = { "path_checkpoints": [], "path_loras": [] }
+                    try:
+                        with open(config_path, 'r', encoding='utf-8') as f:
+                            config = json.load(f)
+                        if isinstance(config, list) and len(config) > 0:
+                            config = config[0]
+                        config["path_checkpoints"] = [
+                            os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                            for p in config.get("path_checkpoints", default_paths["path_checkpoints"])
+                        ]
+                        config["path_loras"] = [
+                            os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                            for p in config.get("path_loras", default_paths["path_loras"])
+                        ]
+                        return config
+                    except Exception as e:
+                        print(f"Error loading config: {e}, using default paths")
+                        return default_paths
 
                 def get_model_previews():
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-                    model_dir = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels", "checkpoints"))
-                    previews = []
-
+                    config = load_config_paths()
                     allowed_models = {
                         os.path.normpath(path).lower().replace('/', '\\')
                         for path in modules.config.model_filenames
                     }
-
-                    for root, dirs, files in os.walk(model_dir):
-                        model_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
-
-                        for model_file in model_files:
-                            full_path = os.path.normpath(os.path.join(root, model_file))
-                            relative_model_path = os.path.relpath(full_path, model_dir).replace('/', '\\').lower()
-                            filename_only = model_file.lower()
-                            if filename_only not in allowed_models and relative_model_path not in allowed_models:
-                                continue
-                            relative_path = os.path.relpath(root, model_dir).replace('/', '\\')
-                            base_name = os.path.splitext(model_file)[0]
-                            model_full_path = os.path.normpath(os.path.join(root, model_file))
-                            image_path = None
-                            for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                                possible_path = os.path.join(root, f"{base_name}{ext}")
-                                if os.path.exists(possible_path):
-                                    image_path = possible_path
-                                    break
-                            if not image_path and relative_path != ".":
-                                parent_dir = os.path.dirname(root)
+                    previews = []
+                    for model_dir in config.get("path_checkpoints", []):
+                        if not os.path.exists(model_dir):
+                            continue
+                        for root, dirs, files in os.walk(model_dir):
+                            model_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+                            for model_file in model_files:
+                                full_path = os.path.normpath(os.path.join(root, model_file))
+                                relative_model_path = os.path.relpath(full_path, model_dir).replace('/', '\\').lower()
+                                filename_only = model_file.lower()
+                                if filename_only not in allowed_models and relative_model_path not in allowed_models:
+                                    continue
+                                relative_path = os.path.relpath(root, model_dir).replace('/', '\\')
+                                base_name = os.path.splitext(model_file)[0]
+                                model_full_path = os.path.normpath(os.path.join(root, model_file))
+                                image_path = None
                                 for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                                    possible_path = os.path.join(parent_dir, f"{base_name}{ext}")
+                                    possible_path = os.path.join(root, f"{base_name}{ext}")
                                     if os.path.exists(possible_path):
                                         image_path = possible_path
                                         break
-                            image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
-                            display_name = f"{relative_path}\{model_file}" if relative_path != "." else model_file
-                            previews.append((image_path, display_name, model_full_path))
+                                if not image_path and relative_path != ".":
+                                    parent_dir = os.path.dirname(root)
+                                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                        possible_path = os.path.join(parent_dir, f"{base_name}{ext}")
+                                        if os.path.exists(possible_path):
+                                            image_path = possible_path
+                                            break
+                                image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                                display_name = f"{relative_path}\{model_file}" if relative_path != "." else model_file
+                                previews.append((image_path, display_name, model_full_path))
                     return previews
 
                 def get_lora_previews():
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-                    lora_dir = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels", "loras"))
+                    config = load_config_paths()
                     previews = []
-                    for root, dirs, files in os.walk(lora_dir):
-                        lora_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
-                        for lora_file in lora_files:
-                            relative_path = os.path.relpath(root, lora_dir).replace('/', '\\')
-                            base_name = os.path.splitext(lora_file)[0]
-                            lora_full_path = os.path.normpath(os.path.join(root, lora_file))
-                            image_path = None
-                            for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                                possible_path = os.path.normpath(os.path.join(root, f"{base_name}{ext}"))
-                                if os.path.exists(possible_path):
-                                    image_path = possible_path
-                                    break
-                            if not image_path and relative_path != ".":
-                                parent_dir = os.path.dirname(root)
+                    for lora_dir in config.get("path_loras", []):
+                        if not os.path.exists(lora_dir):
+                            continue
+                        for root, dirs, files in os.walk(lora_dir):
+                            lora_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+                            for lora_file in lora_files:
+                                relative_path = os.path.relpath(root, lora_dir).replace('/', '\\')
+                                base_name = os.path.splitext(lora_file)[0]
+                                lora_full_path = os.path.normpath(os.path.join(root, lora_file))
+                                image_path = None
                                 for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                                    possible_path = os.path.normpath(os.path.join(parent_dir, f"{base_name}{ext}"))
+                                    possible_path = os.path.normpath(os.path.join(root, f"{base_name}{ext}"))
                                     if os.path.exists(possible_path):
                                         image_path = possible_path
                                         break
-                            image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
-                            display_name = f"{relative_path}\{lora_file}" if relative_path != "." else lora_file
-                            previews.append((image_path, display_name, lora_full_path))
+                                if not image_path and relative_path != ".":
+                                    parent_dir = os.path.dirname(root)
+                                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                        possible_path = os.path.normpath(os.path.join(parent_dir, f"{base_name}{ext}"))
+                                        if os.path.exists(possible_path):
+                                            image_path = possible_path
+                                            break
+                                image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                                display_name = f"{relative_path}\{lora_file}" if relative_path != "." else lora_file
+                                previews.append((image_path, display_name, lora_full_path))
                     return previews
 
                 def show_model_gallery(current_visible, current_active_target, target_type):
@@ -984,7 +1007,6 @@ with shared.gradio_root:
                         new_visible = True
                     else:
                         new_visible = not current_visible
-
                     if new_visible:
                         previews = get_model_previews()
                         return [
