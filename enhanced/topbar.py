@@ -368,7 +368,7 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
             scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         resize_image_flag = True
         preprocessor_methods = modules.flags.get_value_by_scene_theme(state_params, scene_theme, 'image_preprocessor_method', [])
-        if len(preprocessor_methods)>0 and scene_input_image1 is not None:
+        if len(preprocessor_methods)>0:
             for preprocessor_method in preprocessor_methods:
                 if '-normalization' in preprocessor_method:
                     resize_image_flag = False
