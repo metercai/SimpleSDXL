@@ -486,12 +486,12 @@
   "391": {
     "inputs": {
       "width": [
-        "393",
-        0
+        "398",
+        1
       ],
       "height": [
-        "393",
-        1
+        "398",
+        2
       ],
       "image": [
         "315",
@@ -516,7 +516,7 @@
         0
       ],
       "original": [
-        "391",
+        "315",
         0
       ],
       "mask": [
@@ -531,18 +531,6 @@
     "class_type": "BlendInpaint",
     "_meta": {
       "title": "Blend Inpaint"
-    }
-  },
-  "393": {
-    "inputs": {
-      "image": [
-        "315",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "🔧 Get Image Size"
     }
   },
   "396": {
@@ -565,6 +553,41 @@
     "class_type": "InjectLatentNoise+",
     "_meta": {
       "title": "🔧 Inject Latent Noise"
+    }
+  },
+  "397": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "min_bounding_rect",
+      "top_reserve": 100,
+      "bottom_reserve": 100,
+      "left_reserve": 100,
+      "right_reserve": 100,
+      "round_to_multiple": "64",
+      "image": [
+        "315",
+        0
+      ],
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "398": {
+    "inputs": {
+      "mask": [
+        "397",
+        1
+      ]
+    },
+    "class_type": "GetMaskSizeAndCount",
+    "_meta": {
+      "title": "Get Mask Size & Count"
     }
   }
 }

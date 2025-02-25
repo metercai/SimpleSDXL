@@ -95,7 +95,7 @@
   },
   "315": {
     "inputs": {
-      "image": "welcome.png",
+      "image": "upload_image_f55c7941c16c6f6add059e95cff1f20c.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -190,7 +190,7 @@
   },
   "351": {
     "inputs": {
-      "image": "welcome.png",
+      "image": "upload_image_de7a15b44fc6001cb4a98883c94b1f5d.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -198,27 +198,15 @@
       "title": "i2i_inpaint_mask"
     }
   },
-  "352": {
-    "inputs": {
-      "image": [
-        "315",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "🔧 Get Image Size"
-    }
-  },
   "353": {
     "inputs": {
       "width": [
-        "352",
-        0
+        "380",
+        1
       ],
       "height": [
-        "352",
-        1
+        "380",
+        2
       ],
       "image": [
         "315",
@@ -243,7 +231,7 @@
         0
       ],
       "original": [
-        "353",
+        "315",
         0
       ],
       "mask": [
@@ -437,11 +425,58 @@
   },
   "369": {
     "inputs": {
-      "seed": 47068142677336
+      "seed": 1005154796750475
     },
     "class_type": "easy seed",
     "_meta": {
       "title": "sync_seed"
+    }
+  },
+  "379": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "mask_area",
+      "top_reserve": 100,
+      "bottom_reserve": 100,
+      "left_reserve": 100,
+      "right_reserve": 100,
+      "round_to_multiple": "64",
+      "image": [
+        "315",
+        0
+      ],
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "380": {
+    "inputs": {
+      "mask": [
+        "379",
+        1
+      ]
+    },
+    "class_type": "GetMaskSizeAndCount",
+    "_meta": {
+      "title": "Get Mask Size & Count"
+    }
+  },
+  "381": {
+    "inputs": {
+      "images": [
+        "379",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
     }
   }
 }
