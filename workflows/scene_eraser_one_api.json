@@ -375,7 +375,7 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 15,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -436,11 +436,11 @@
     "inputs": {
       "invert_mask": false,
       "detect": "mask_area",
-      "top_reserve": 100,
-      "bottom_reserve": 100,
-      "left_reserve": 100,
-      "right_reserve": 100,
-      "round_to_multiple": "64",
+      "top_reserve": 150,
+      "bottom_reserve": 150,
+      "left_reserve": 150,
+      "right_reserve": 150,
+      "round_to_multiple": "32",
       "image": [
         "315",
         0
