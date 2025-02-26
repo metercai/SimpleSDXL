@@ -7,16 +7,108 @@ from tqdm import tqdm
 from colorama import init, Fore, Style
 import threading
 import atexit
+import json
+from collections import defaultdict
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
+def load_model_paths():
+
+    config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
+    path_mapping = {}
+
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+
+        path_mapping = {
+            "checkpoints": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                        for p in config.get("path_checkpoints", [])],
+            "loras": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                    for p in config.get("path_loras", [])],
+            "controlnet": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                        for p in config.get("path_controlnet", [])],
+            "embeddings": [os.path.abspath(os.path.join(script_dir, p))
+                        for p in ([config.get("path_embeddings")] if isinstance(config.get("path_embeddings"), str)
+                                else config.get("path_embeddings", []))],
+            "vae_approx": [os.path.abspath(os.path.join(script_dir, p))
+                        for p in ([config.get("path_vae_approx")] if isinstance(config.get("path_vae_approx"), str)
+                                else config.get("path_vae_approx", []))],
+            "vae": [os.path.abspath(os.path.join(script_dir, p))
+                    for p in ([config.get("path_vae")] if isinstance(config.get("path_vae"), str)
+                            else config.get("path_vae", []))],
+            "upscale_models": [os.path.abspath(os.path.join(script_dir, p))
+                            for p in ([config.get("path_upscale_models")] if isinstance(config.get("path_upscale_models"), str)
+                                    else config.get("path_upscale_models", []))],
+            "inpaint": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                    for p in config.get("path_inpaint", [])],
+            "clip": [os.path.abspath(os.path.join(script_dir, p))
+                    for p in ([config.get("path_clip")] if isinstance(config.get("path_clip"), str)
+                            else config.get("path_clip", []))],
+            "clip_vision": [os.path.abspath(os.path.join(script_dir, p))
+                            for p in ([config.get("path_clip_vision")] if isinstance(config.get("path_clip_vision"), str)
+                                    else config.get("path_clip_vision", []))],
+            "fooocus_expansion": [os.path.abspath(os.path.join(script_dir, config.get("path_fooocus_expansion", "")))],
+            "llms": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                    for p in config.get("path_llms", [])],
+            "safety_checker": [os.path.abspath(os.path.join(script_dir, config.get("path_safety_checker", "")))],
+            "unet": [os.path.abspath(os.path.join(script_dir, config.get("path_unet", "")))],
+            "rembg": [os.path.abspath(os.path.join(script_dir, config.get("path_rembg", "")))],
+            "layer_model": [os.path.abspath(os.path.join(script_dir, config.get("path_layer_model", "")))],
+            "diffusers": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                        for p in config.get("path_diffusers", [])],
+            "ipadapter": [os.path.abspath(os.path.join(script_dir, config.get("path_ipadapter", "")))],
+            "pulid": [os.path.abspath(os.path.join(script_dir, config.get("path_pulid", "")))],
+            "insightface": [os.path.abspath(os.path.join(script_dir, config.get("path_insightface", "")))],
+            "style_models": [os.path.abspath(os.path.join(script_dir, config.get("path_style_models", "")))],
+            "configs": [os.path.abspath(os.path.join(simplemodels_root, "configs"))],
+            "prompt_expansion": [os.path.abspath(os.path.join(simplemodels_root, "prompt_expansion"))],
+        }
+
+    except Exception as e:
+        print(f"{Fore.YELLOW}△配置文件加载失败: {e}，使用默认路径{Style.RESET_ALL}")
+        path_mapping = {
+            "checkpoints": [os.path.join(simplemodels_root, "checkpoints")],
+            "loras": [os.path.join(simplemodels_root, "loras")],
+            "controlnet": [os.path.join(simplemodels_root, "controlnet")],
+            "embeddings": [os.path.join(simplemodels_root, "embeddings")],
+            "vae_approx": [os.path.join(simplemodels_root, "vae_approx")],
+            "vae": [os.path.join(simplemodels_root, "vae")],
+            "upscale_models": [os.path.join(simplemodels_root, "upscale_models")],
+            "inpaint": [os.path.join(simplemodels_root, "inpaint")],
+            "clip": [os.path.join(simplemodels_root, "clip")],
+            "clip_vision": [os.path.join(simplemodels_root, "clip_vision")],
+            "fooocus_expansion": [os.path.join(simplemodels_root, "prompt_expansion", "fooocus_expansion")],
+            "llms": [os.path.join(simplemodels_root, "llms")],
+            "safety_checker": [os.path.join(simplemodels_root, "safety_checker")],
+            "unet": [os.path.join(simplemodels_root, "unet")],
+            "rembg": [os.path.join(simplemodels_root, "rembg")],
+            "layer_model": [os.path.join(simplemodels_root, "layer_model")],
+            "diffusers": [os.path.join(simplemodels_root, "diffusers")],
+            "ipadapter": [os.path.join(simplemodels_root, "ipadapter")],
+            "pulid": [os.path.join(simplemodels_root, "pulid")],
+            "insightface": [os.path.join(simplemodels_root, "insightface")],
+            "style_models": [os.path.join(simplemodels_root, "style_models")],
+            "configs": [os.path.normpath(os.path.join(simplemodels_root, "configs"))],
+            "prompt_expansion": [os.path.normpath(os.path.join(simplemodels_root, "prompt_expansion"))],
+        }
+
+    for key in path_mapping:
+        path_mapping[key] = [
+            os.path.abspath(p) if not os.path.isabs(p) else p
+            for p in path_mapping[key]
+        ]
+        path_mapping[key] = list(set(path_mapping[key]))
+
+    return path_mapping
 
 def cleanup():
     if os.path.exists("downloadlist.txt"):
         os.remove("downloadlist.txt")
         print("已删除 'downloadlist.txt' 文件。")
 
-# 在程序开始时注册退出时执行清理操作
 atexit.register(cleanup)
 
-# 初始化 colorama
 init(autoreset=True)
 class DownloadStatus:
     def __init__(self, filename, total_size):
@@ -44,10 +136,8 @@ def check_python_embedded():
         sys.exit(1)
 
 def check_script_file():
-    # 获取主程序路径
     script_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "SimpleSDXL", "entry_with_update.py")
 
-    # 检查文件是否存在
     if os.path.exists(script_file):
         print_colored("√找到主程序目录", Fore.GREEN)
     else:
@@ -55,20 +145,35 @@ def check_script_file():
         input("按任意键继续。")
         sys.exit(1)
 
-    # 验证主程序目录的层级是否超过 2
-    base_dir = os.path.dirname(os.path.dirname(script_file))  # 获取 "SimpleSDXL" 的上级目录
-    directory_level = len(base_dir.split(os.sep))  # 按系统分隔符分割路径，计算层级
+    base_dir = os.path.dirname(os.path.dirname(script_file))
+    directory_level = len(base_dir.split(os.sep))
 
-    if directory_level <= 2:  # 如果层级小于等于 2，则提示错误
+    if directory_level <= 2:
         print_colored("×主程序目录层级不足，可能会导致脚本结果有误。请按照安装视频指引先建立SimpleAI主文件夹", Fore.RED)
     else: 
         print_colored("√主程序目录层级验证通过", Fore.GREEN)
 
+    paths_to_check = [
+        ("当前脚本路径", os.path.abspath(__file__)),
+        ("主程序目录", base_dir),
+        ("入口文件路径", script_file)
+    ]
+
+    has_space = False
+    for desc, path in paths_to_check:
+        if ' ' in path:
+            print_colored(f"!警告：{desc}包含空格 -> {path}", Fore.YELLOW)
+            has_space = True
+
+    if has_space:
+        print_colored("!路径包含空格可能导致程序异常，建议将SimpleAI安装到无空格路径（如D:\\SimpleAI）", Fore.YELLOW)
+        time.sleep(10)
+
 def get_total_virtual_memory():
     try:
         import psutil
-        virtual_mem = psutil.virtual_memory().total  # 物理内存
-        swap_mem = psutil.swap_memory().total        # 交换分区
+        virtual_mem = psutil.virtual_memory().total
+        swap_mem = psutil.swap_memory().total
         total_virtual_memory = virtual_mem + swap_mem
         return total_virtual_memory
     except ImportError:
@@ -91,11 +196,8 @@ def check_virtual_memory(total_virtual):
     print(f"系统总虚拟内存: {total_gb:.2f} GB")
 
 def find_simplemodels_dir(start_path):
-    """
-    从当前路径开始，逐级向上查找 SimpleModels 目录
-    """
     current_dir = start_path
-    while current_dir != os.path.dirname(current_dir):  # 防止进入根目录
+    while current_dir != os.path.dirname(current_dir):
         simplemodels_path = os.path.join(current_dir, "SimpleModels")
         if os.path.isdir(simplemodels_path):
             return simplemodels_path
@@ -103,11 +205,8 @@ def find_simplemodels_dir(start_path):
     return None
 
 def find_users_dir(start_path):
-    """
-    从当前路径开始，逐级向上查找 users 目录
-    """
     current_dir = start_path
-    while current_dir != os.path.dirname(current_dir):  # 防止进入根目录
+    while current_dir != os.path.dirname(current_dir):
         users_path = os.path.join(current_dir, "users")
         if os.path.isdir(users_path):
             return users_path
@@ -115,24 +214,31 @@ def find_users_dir(start_path):
     return None
 
 def normalize_path(path):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    simplemodels_dir = find_simplemodels_dir(script_dir)
-    
-    if simplemodels_dir:
-        if path.startswith("SimpleModels"):
-            normalized_path = os.path.join(simplemodels_dir, path[len("SimpleModels/"):])
-        else:
-            normalized_path = os.path.join(simplemodels_dir, path)
-        return os.path.abspath(normalized_path)
-    else:
+    path_mapping = load_model_paths()
+
+    path_parts = path.split('/')
+    if len(path_parts) < 2:
         return os.path.abspath(path)
+
+    path_type = path_parts[0].lower()
+    filename = '/'.join(path_parts[1:])
+
+    for base_dir in path_mapping.get(path_type, []):
+        full_path = os.path.join(base_dir, filename)
+        if os.path.exists(full_path):
+            return os.path.abspath(full_path)
+
+    return os.path.abspath(os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        path
+    ))
 
 def typewriter_effect(text, delay=0.01):
     for char in text:
-        print(char, end='', flush=True)  # 确保即时输出字符
+        print(char, end='', flush=True)
         time.sleep(delay)
         
-    print()  # 打印换行符
+    print()
 def print_instructions():
     print()
     print(f"{Fore.GREEN}★★★★★{Style.RESET_ALL}安装视频教程{Fore.YELLOW}https://www.bilibili.com/video/BV1ddkdYcEWg/{Style.RESET_ALL}{Fore.GREEN}★★★★★{Style.RESET_ALL}{Fore.GREEN}★{Style.RESET_ALL}")
@@ -146,7 +252,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.02.18{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.02.27{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -159,24 +265,22 @@ def get_unique_filename(file_path, extension=".corrupted"):
     return base
 
 def validate_files(packages):
-    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-    # 使用字典来存储下载信息，确保路径唯一
+    path_mapping = load_model_paths()
     download_files = {}
-    missing_package_names = []  # 用于存储缺失文件的包体名称
-    package_percentages = {}  # 存储包体百分比信息
-    package_sizes = {}  # 存储包体总大小（GB）
-
+    missing_package_names = []
+    package_percentages = {}
+    package_sizes = {}
+    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     for package_key, package_info in packages.items():
         package_name = package_info["name"]
-        package_note = package_info.get("note", "")  # 获取备注信息，如果没有则为空字符串
+        package_note = package_info.get("note", "")
         files_and_sizes = package_info["files"]
         download_links = package_info["download_links"]
 
-        # 计算包体总大小和非缺失文件的总大小
-        total_size = sum([size for _, size in files_and_sizes])  # 计算包体中所有文件的总大小
-        total_size_gb = total_size / (1024 ** 3)  # 转换为GB
-        non_missing_size = 0  # 非缺失文件的总大小
+
+        total_size = sum([size for _, size in files_and_sizes])
+        total_size_gb = total_size / (1024 ** 3)
+        non_missing_size = 0
 
         print(f"－－－－－－－", end='')
         time.sleep(0.1)
@@ -187,35 +291,86 @@ def validate_files(packages):
         case_mismatch_files = []
 
         for expected_path, expected_size in files_and_sizes:
-            expected_dir = os.path.join(root, os.path.dirname(expected_path))
-            expected_filename = os.path.basename(expected_path)
+            expected_filename = os.path.basename(expected_path) 
+            path_parts = expected_path.split('/')
+            path_type = path_parts[0].lower() if len(path_parts) > 0 else ''
+            sub_path = '/'.join(path_parts[1:]) if len(path_parts) > 1 else ''
 
-            if not os.path.exists(expected_dir):
+
+            type_mapping = {
+                "checkpoints": "checkpoints",
+                "loras": "loras",
+                "controlnet": "controlnet",
+                "embeddings": "embeddings",
+                "vae_approx": "vae_approx",
+                "vae": "vae",
+                "upscale_models": "upscale_models",
+                "inpaint": "inpaint",
+                "clip": "clip",
+                "clip_vision": "clip_vision",
+                "fooocus_expansion": "prompt_expansion/fooocus_expansion",
+                "llms": "llms",
+                "safety_checker": "safety_checker",
+                "unet": "unet",
+                "rembg": "rembg",
+                "layer_model": "layer_model",
+                "diffusers": "diffusers",
+                "ipadapter": "ipadapter",
+                "pulid": "pulid",
+                "insightface": "insightface",
+                "style_models": "style_models",
+                "configs": "configs",
+                "prompt_expansion":"prompt_expansion"
+            }
+            search_dirs = path_mapping.get(type_mapping.get(path_type, ''), [])
+
+            if not search_dirs:
+                simplemodels_default = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__)), "SimpleModels"))
+                search_dirs = [os.path.join(simplemodels_default, path_type)]
+
+            found = False
+            actual_dir = None
+
+            # 遍历所有可能的目录
+            for base_dir in search_dirs:
+                full_path = os.path.join(base_dir, sub_path) if sub_path else os.path.join(base_dir, os.path.basename(expected_path))
+                if os.path.exists(full_path):
+                    actual_dir = os.path.dirname(full_path)
+                    found = True
+                    break
+
+            if not found:
                 missing_files.append((expected_path, expected_size))
                 continue
 
-            directory_listing = os.listdir(expected_dir)
+            try:
+                directory_listing = os.listdir(actual_dir)
+            except Exception as e:
+                print(f"{Fore.RED}目录访问错误: {actual_dir} - {str(e)}{Style.RESET_ALL}")
+                missing_files.append((expected_path, expected_size))
+                continue
+
+            expected_filename = os.path.basename(expected_path)
+            actual_filename = next((f for f in directory_listing if f.lower() == expected_filename.lower()), None)
+            directory_listing = os.listdir(actual_dir)
             actual_filename = next((f for f in directory_listing if f.lower() == expected_filename.lower()), None)
 
             if actual_filename is None:
                 missing_files.append((expected_path, expected_size))
             elif actual_filename != expected_filename:
-                case_mismatch_files.append((os.path.join(expected_dir, actual_filename), expected_filename))
+                case_mismatch_files.append((os.path.join(actual_dir, actual_filename), expected_filename))
             else:
-                actual_size = os.path.getsize(os.path.join(expected_dir, actual_filename))
+                actual_size = os.path.getsize(os.path.join(actual_dir, actual_filename))
                 if actual_size != expected_size:
-                    size_mismatch_files.append((os.path.join(expected_dir, actual_filename), actual_size, expected_size))
+                    size_mismatch_files.append((os.path.join(actual_dir, actual_filename), actual_size, expected_size))
                 else:
-                    # 如果文件没有缺失且大小匹配，则累加到非缺失文件的总大小
                     non_missing_size += expected_size
 
-        # 计算非缺失文件的百分比
         if total_size > 0:
             non_missing_percentage = (non_missing_size / total_size) * 100
             package_percentages[package_name] = non_missing_percentage
             package_sizes[package_name] = total_size_gb
 
-        # 处理文件名大小写不匹配
         if case_mismatch_files:
             print(f"{Fore.RED}×{package_name}中有文件名大小写不匹配，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_filename in case_mismatch_files:
@@ -227,7 +382,6 @@ def validate_files(packages):
                 os.rename(file, corrected_file_path)
                 print(f"{Fore.GREEN}文件名已更正为: {expected_filename}{Style.RESET_ALL}")
 
-        # 处理文件大小不匹配
         if size_mismatch_files:
             print(f"{Fore.RED}×{package_name}中有文件大小不匹配，可能存在下载不完全或损坏，请检查列出的文件。{Style.RESET_ALL}")
             for file, actual_size, expected_size in size_mismatch_files:
@@ -244,16 +398,14 @@ def validate_files(packages):
                 if package_name not in missing_package_names:
                     missing_package_names.append(package_name)
 
-        # 输出文件验证结果
         if missing_files:
             print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_size in missing_files:
                 print(normalize_path(file))
                 download_files[file] = expected_size
-            # 将缺失包体名称保存到列表中，确保没有重复添加
             if package_name not in missing_package_names:
                 missing_package_names.append(package_name)
-            # 统一在最后打印下载链接
+
             if package_info["download_links"]:
                 print(f"{Fore.YELLOW}下载链接(若为压缩包，则参考安装视频流程安装):{Style.RESET_ALL}")
                 for link in package_info["download_links"]:
@@ -261,126 +413,135 @@ def validate_files(packages):
         if not missing_files and not size_mismatch_files and not case_mismatch_files:
             print(f"{Fore.GREEN}√{package_name}文件全部验证通过{Style.RESET_ALL}")
 
-    # 将缺失的包体名称打印出来，同时显示百分比（如果有缺失文件）
+
     if missing_package_names:
         print(f"{Fore.RED}△以下包体缺失文件，请检查并重新下载：{Style.RESET_ALL}")
         for package_name in missing_package_names:
             percentage = package_percentages.get(package_name, 0)
             total_size_gb = package_sizes.get(package_name, 0)
-            # 计算尚需下载的 GB
+
             missing_size_gb = total_size_gb * (1 - (percentage / 100))
             print(f"- {package_name} - 总大小：{total_size_gb:.2f}GB，完整度：{percentage:.2f}%，尚需下载：{missing_size_gb:.2f}GB")
 
-    # 将字典转换为列表并按文件大小排序
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
 
-    # 保存有问题的文件的下载路径到两个不同的txt文件中
     if sorted_download_files:
         with open("downloadlist.txt", "w") as f1, open("缺失模型下载链接.txt", "w") as f2:
             for file, size in sorted_download_files:
-                if file == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                if file == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file}"
+                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file}"
                 
-                # 写入带有大小信息的文件
                 f1.write(f"{link},{size}\n")
                 
-                # 写入仅包含下载路径的文件
                 f2.write(f"{link}\n")
         print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<<<<<<<<<<<<<<<<<<<{Style.RESET_ALL}")
 
 def delete_partial_files():
-    """
-    从当前脚本位置开始，查找 SimpleModels 目录，并删除其中所有 .partial 和 .corrupted 文件
-    """
-    # 获取脚本所在目录
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # 查找 SimpleModels 目录
-    simplemodels_dir = find_simplemodels_dir(script_dir)
-
-    if not simplemodels_dir:
-        print(f"{Fore.RED}△未找到 SimpleModels 目录，请检查目录结构。{Style.RESET_ALL}")
+    try:
+        path_mapping = load_model_paths()
+    except Exception as e:
+        print(f"{Fore.RED}△路径配置加载失败: {str(e)}{Style.RESET_ALL}")
         return
 
-    print(f"{Fore.CYAN}△正在清理目录 '{simplemodels_dir}' 中下载的临时文件与损坏文件...{Style.RESET_ALL}")
-    
-    total_size = 0  # 统计删除文件的总大小
-    files_found = False
-    files_to_delete = []  # 存储需要删除的文件路径
+    scan_categories = [
+        'checkpoints', 'loras', 'controlnet', 'embeddings',
+        'vae_approx', 'vae', 'upscale_models', 'inpaint',
+        'clip', 'clip_vision', 'llms', 'unet', 'diffusers'
+    ]
 
-    for root, _, files in os.walk(simplemodels_dir):
-        for file in files:
-            # 删除文件名包含 .partial 或 .corrupted（包括 .corrupted_1 等）的文件
-            if ".partial" in file or ".corrupted" in file:
-                files_found = True
-                file_path = os.path.join(root, file)
-                files_to_delete.append(file_path)
-                total_size += os.path.getsize(file_path)  # 累加文件大小
-    # 如果找到需要删除的文件，则打印文件列表并进行确认
+    scan_dirs = []
+    for category in scan_categories:
+        scan_dirs.extend(path_mapping.get(category, []))
+    
+    default_dir = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), 
+        "..", 
+        "SimpleModels"
+    ))
+    if default_dir not in scan_dirs:
+        scan_dirs.append(default_dir)
+
+    total_size = 0
+    files_found = False
+    files_to_delete = []
+
+    for model_dir in scan_dirs:
+        if not os.path.exists(model_dir):
+            continue
+
+        print(f"{Fore.CYAN}△扫描目录: {model_dir}{Style.RESET_ALL}")
+
+        for root, _, files in os.walk(model_dir):
+            for file in files:
+                if ".partial" in file or file.endswith(".corrupted"):
+                    file_path = os.path.join(root, file)
+                    files_found = True
+                    files_to_delete.append(file_path)
+                    try:
+                        total_size += os.path.getsize(file_path)
+                    except:
+                        pass
+
     if files_found:
         print(f"{Fore.YELLOW}△以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
         for file_path in files_to_delete:
             print(f"- {file_path}")
-        # 确认删除操作
-        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
 
-        confirm = input(f"{Fore.GREEN}△是否确认删除这些未下载完或损坏的文件？(y/n): {Style.RESET_ALL}")
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")
+
+        confirm = input(f"{Fore.GREEN}△是否确认删除这些文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
+            success_count = 0
             for file_path in files_to_delete:
                 try:
-                    os.remove(file_path)  # 删除文件
-                    print(f"{Fore.GREEN}√已删除临时文件: {file_path}{Style.RESET_ALL}")
+                    os.remove(file_path)
+                    print(f"{Fore.GREEN}√已删除: {file_path}{Style.RESET_ALL}")
+                    success_count += 1
                 except Exception as e:
-                    print(f"{Fore.RED}△删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
+                    print(f"{Fore.RED}×删除失败[{file_path}]: {str(e)}{Style.RESET_ALL}")
+            print(f"操作完成！成功删除 {success_count}/{len(files_to_delete)} 个文件")
         else:
-            print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
+            print(f"{Fore.RED}△删除操作已取消{Style.RESET_ALL}")
     else:
         print(f">>>未找到需要删除的临时文件<<<")
-        print()
 
 def delete_specific_image_files():
     """
     从相对路径查找并删除所有 .png、.webp 和 .jpg/jpeg 文件，排除 welcome.png。
     """
-    # 获取当前脚本所在目录
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # 查找 users 目录
     users_dir = find_users_dir(script_dir)
-    # 根据相对路径构建目标目录
     target_dir = os.path.join(users_dir, "guest_user", "comfyd_inputs")
-    # 检查目录是否存在
     if not os.path.exists(target_dir):
         print(f"{Fore.RED}△未找到指定目录: {target_dir}{Style.RESET_ALL}")
         return
 
     print(f"{Fore.CYAN}△正在清理目录 '{target_dir}' 中的临时图片缓存...{Style.RESET_ALL}")
 
-    total_size = 0  # 统计删除文件的总大小
+    total_size = 0
     files_found = False
-    files_to_delete = []  # 存储需要删除的文件路径
+    files_to_delete = []
 
     for root, _, files in os.walk(target_dir):
         for file in files:
-            # 检查文件扩展名是否为 .png、.webp 或 .jpg，且不为 welcome.png
             if (file.endswith(".png") or file.endswith(".webp") or file.endswith(".jpg") or file.endswith(".jpeg")) and file != "welcome.png":
                 files_found = True
                 file_path = os.path.join(root, file)
                 files_to_delete.append(file_path)
-                total_size += os.path.getsize(file_path)  # 累加文件大小
-    # 如果找到需要删除的文件，则打印文件列表并进行确认
+                total_size += os.path.getsize(file_path)
     if files_found:
         print(f"{Fore.YELLOW}△以下临时图片缓存文件将被删除：{Style.RESET_ALL}")
         for file_path in files_to_delete:
             print(f"- {file_path}")
-        # 确认删除操作
-        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")
 
         confirm = input(f"{Fore.GREEN}△是否确认删除这些文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
             for file_path in files_to_delete:
                 try:
-                    os.remove(file_path)  # 删除文件
+                    os.remove(file_path)
                     print(f"{Fore.GREEN}√已删除文件: {file_path}{Style.RESET_ALL}")
                 except Exception as e:
                     print(f"{Fore.RED}△删除文件时出错: {file_path}, 错误原因: {e}{Style.RESET_ALL}")
@@ -394,8 +555,8 @@ def delete_log_files():
     """
     删除与脚本所在位置一致的 logs 目录下的所有 .logs 文件
     """
-    script_dir = os.path.dirname(os.path.abspath(__file__))  # 获取脚本所在的目录
-    logs_dir = os.path.join(script_dir, "logs")  # 构建 logs 目录的相对路径
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(script_dir, "logs")
 
     if not os.path.exists(logs_dir):
         print(f"{Fore.RED}△未找到指定日志目录: {logs_dir}{Style.RESET_ALL}")
@@ -403,7 +564,7 @@ def delete_log_files():
 
     print(f"{Fore.CYAN}△正在清理目录 '{logs_dir}' 中的日志文件...{Style.RESET_ALL}")
 
-    total_size = 0  # 统计删除文件的总大小
+    total_size = 0
     files_found = False
     files_to_delete = []
 
@@ -413,7 +574,7 @@ def delete_log_files():
                 files_found = True
                 file_path = os.path.join(root, file)
                 files_to_delete.append(file_path)
-                total_size += os.path.getsize(file_path)  # 累加文件大小
+                total_size += os.path.getsize(file_path)
 
     if files_found:
         print(f"{Fore.YELLOW}△以下日志文件将被删除：{Style.RESET_ALL}")
@@ -435,58 +596,43 @@ def delete_log_files():
     else:
         print(f">>>未找到需要删除的日志文件<<<")
         print()
-    
 
 def download_file_with_resume(link, file_path, position, result_queue, max_retries=5, lock=None):
-    """
-    支持断点续传和重连的下载方法
-    :param link: 下载链接
-    :param file_path: 文件保存路径
-    :param position: 下载位置（用于显示进度条）
-    :param result_queue: 用于传递结果的队列
-    :param max_retries: 最大重试次数
-    :param lock: 用于保护对下载列表文件的访问
-    :return: None
-    """
     partial_file_path = file_path + ".partial"
-    
+
     retries = 0
     while retries < max_retries:
         try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             if os.path.exists(partial_file_path):
-                # 获取已下载部分的文件大小
                 resume_size = os.path.getsize(partial_file_path)
-                headers = {'Range': f"bytes={resume_size}-"}  # 从已下载的位置继续下载
+                headers = {'Range': f"bytes={resume_size}-"}
             else:
                 resume_size = 0
-                headers = {}  # 如果没有文件，就从头开始下载
-
+                headers = {}
             response = requests.get(link, stream=True, headers=headers)
             total_size = int(response.headers.get('content-length', 0)) + resume_size
-            block_size = 8192  # 8 KB
+            block_size = 8192
 
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-            # 使用.partial文件进行下载
             with open(partial_file_path, 'ab') as file, tqdm(
                     desc=os.path.basename(file_path),
                     total=total_size,
                     unit='iB',
                     unit_scale=True,
                     position=position,
-                    initial=resume_size  # 设置下载的起始位置
+                    initial=resume_size
             ) as progress_bar:
                 for data in response.iter_content(block_size):
                     file.write(data)
                     progress_bar.update(len(data))
 
-            # 下载完成后重命名临时文件为最终文件名
-            final_file_path = os.path.normpath(file_path)  # 规范化路径
-            partial_file_path = os.path.normpath(partial_file_path)  # 规范化路径
-            os.rename(partial_file_path, final_file_path)  # 重命名文件
+            final_file_path = os.path.normpath(file_path)
+            partial_file_path = os.path.normpath(partial_file_path)
+            os.rename(partial_file_path, final_file_path)
             print(f"{Fore.GREEN}√下载完成：{final_file_path}{Style.RESET_ALL}")
 
-            # 下载成功，加入队列
             if lock:
                 with lock:
                     remove_link_from_downloadlist(link)
@@ -497,16 +643,14 @@ def download_file_with_resume(link, file_path, position, result_queue, max_retri
         except requests.exceptions.RequestException as e:
             print(f"{Fore.RED}△下载失败，正在重试... 错误：{e}{Style.RESET_ALL}")
             retries += 1
-            time.sleep(5)  # 重试间隔 5 秒
+            time.sleep(5)
         except Exception as e:
             print(f"{Fore.RED}发生错误：{e}{Style.RESET_ALL}")
             result_queue.put(False)
             return
 
-    # 如果多次重试失败，依然加入失败队列，并打印失败链接
     print(f"△下载链接失败：{link}")
     result_queue.put(False)
-
 
 def remove_link_from_downloadlist(link):
     """
@@ -517,18 +661,12 @@ def remove_link_from_downloadlist(link):
     with open("downloadlist.txt", "r") as f:
         lines = f.readlines()
 
-    # 删除成功下载的链接
     with open("downloadlist.txt", "w") as f:
         for line in lines:
             if link.strip() not in line.strip():
                 f.write(line)
 
-
 def auto_download_missing_files_with_retry(max_threads=5):
-    """
-    启动多线程下载文件，支持断点续传和重试机制
-    :param max_threads: 最大线程数
-    """
     if not os.path.exists("downloadlist.txt"):
         print("未找到 'downloadlist.txt' 文件。")
         return
@@ -540,28 +678,35 @@ def auto_download_missing_files_with_retry(max_threads=5):
         print("没有缺失文件需要下载！")
         return
 
+    path_mapping = load_model_paths()
+
     result_queue = queue.Queue()
     threads = []
     active_threads = 0
-    lock = threading.Lock()  # 创建一个锁用于同步操作文件
+    lock = threading.Lock()
 
     for position, line in enumerate(links):
         link, size = line.strip().split(',')
-        # 处理路径
-        if "ShilongLiu/GroundingDINO" in link:
-            relative_path = "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py"
-        else:
-            relative_path = link.replace("https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/", "")
-        
-        root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        file_path = os.path.join(root, relative_path)
-        # 启动下载线程
+        relative_path = link.replace("https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/", "").strip()
+        relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
+        path_type = relative_path_without_prefix.split('/')[0].lower()
+
+        target_base_dir = path_mapping.get(path_type, [None])[0]
+        if not target_base_dir:
+            print(f"{Fore.RED}×无法找到路径类型 '{path_type}' 的配置，跳过下载: {relative_path}{Style.RESET_ALL}")
+            continue
+
+        file_name = os.path.basename(relative_path)
+        file_sub_dir = os.path.dirname(relative_path).replace(path_type, "").strip('/')
+        save_dir = os.path.join(target_base_dir, file_sub_dir)
+        file_path = os.path.join(save_dir, file_name)
+
         thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position, result_queue, 5, lock))
+        print(link)
         threads.append(thread)
-        
         active_threads += 1
         thread.start()
-        # 控制最大线程数
+
         if active_threads >= max_threads:
             for t in threads:
                 t.join()
@@ -596,32 +741,25 @@ def get_download_links_for_package(packages, download_list_path):
     根据 packages 中的 files 列表生成路径，并与 downloadlist.txt 中的需求进行比对，
     更新 downloadlist.txt 中需要下载的文件，只保留 files 中有的文件链接。
     """
-    # 检查 downloadlist.txt 是否存在
     if not os.path.exists(download_list_path):
         print(f"{Fore.RED}>>>downloadlist.txt不存在，输入【R】重新检测<<<{Style.RESET_ALL}")
         return []
 
-    # 读取 downloadlist.txt 中的所有文件链接
     with open(download_list_path, "r") as f:
         existing_links = [line.strip().split(",")[0] for line in f.readlines()]
 
-    # 创建一个列表存储需要保留的文件链接
     valid_files = []
 
-    # 遍历 packages 中的 files 列表，生成需要保留的文件链接
     for package_name, package_info in packages.items():
         for file_path, file_size in package_info["files"]:
-            # 拼接完整下载链接
-            if file_path == "SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+            if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                 link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
             else:
-                link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{file_path}"
+                link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file_path}"
 
-            # 如果该链接在现有的下载列表中，添加到需要保留的文件列表
             if link in existing_links:
                 valid_files.append((link, file_size))
 
-    # 更新 downloadlist.txt，只保留需要保留的文件链接
     with open(download_list_path, "w") as f:
         for link, size in valid_files:
             f.write(f"{link},{size}\n")
@@ -631,68 +769,99 @@ def get_download_links_for_package(packages, download_list_path):
     return valid_files
 
 def delete_package(package_name, packages):
-    """
-    删除指定包体的文件
-    :param package_name: 包体名称
-    :param packages: 包体字典
-    """
-    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    """删除指定包体文件（基于config路径配置）"""
+    try:
+        path_mapping = load_model_paths()
+    except Exception as e:
+        print(f"{Fore.RED}× 路径配置加载失败: {str(e)}{Style.RESET_ALL}")
+        return
 
-    # 确保包体名称在 packages 字典中
     if package_name not in packages:
-        print(f"{Fore.RED}无效的包体名称！{Style.RESET_ALL}")
+        print(f"{Fore.RED}× 无效的包体名称！{Style.RESET_ALL}")
         return
 
     package = packages[package_name]
-    print(f"开始删除包体：{package['name']}")
+    print(f"\n{Fore.CYAN}△ 开始处理包体：{package['name']}{Style.RESET_ALL}")
 
-    # 先构建一个文件引用计数
-    file_references = {}
+    file_refs = defaultdict(list)
     for pkg_name, pkg_info in packages.items():
-        for file_info in pkg_info["files"]:
-            file_path = file_info[0]
-            if file_path not in file_references:
-                file_references[file_path] = 0
-            file_references[file_path] += 1  # 增加引用计数
+        for file_entry in pkg_info["files"]:
+            path_parts = file_entry[0].split('/')
+            if len(path_parts) < 1: continue
 
-    # 存储将要删除的有效文件
-    files_to_delete = []
-    for file_info in package["files"]:
-        file_path = file_info[0]
-        expected_dir = os.path.join(root, os.path.dirname(file_path))  # 路径转换
-        expected_filename = os.path.basename(file_path)
+            file_type = path_parts[0].lower()
+            rel_path = '/'.join(path_parts[1:]) if len(path_parts) > 1 else ""
 
-        # 构造完整的文件路径
-        full_file_path = os.path.join(expected_dir, expected_filename)
+            for base_dir in path_mapping.get(file_type, []):
+                full_path = os.path.join(base_dir, rel_path)
+                if os.path.exists(full_path):
+                    file_refs[full_path].append(pkg_name)
 
-        # 只删除那些在当前包体中独有的文件，并检查文件是否存在
-        if file_references[file_path] == 1:  # 该文件仅属于当前包体
-            if os.path.exists(full_file_path):
-                files_to_delete.append(full_file_path)
-                print(f"文件: {full_file_path}")
-            else:
-                print(f"{Fore.RED}文件不存在: {full_file_path}{Style.RESET_ALL}")
-    
-    # 如果有文件准备删除，询问用户确认
-    if files_to_delete:
-        confirm = input(f"{Fore.GREEN}是否确认删除此包体及其文件？(y/n): {Style.RESET_ALL}")
+    delete_candidates = []
+    shared_files = []
+
+    for file_entry in package["files"]:
+        path_parts = file_entry[0].split('/')
+        if len(path_parts) < 1: continue
+
+        file_type = path_parts[0].lower()
+        rel_path = '/'.join(path_parts[1:]) if len(path_parts) > 1 else ""
+        found = False
+
+        for base_dir in path_mapping.get(file_type, []):
+            full_path = os.path.join(base_dir, rel_path)
+            if os.path.exists(full_path):
+
+                if len(file_refs[full_path]) == 1 and file_refs[full_path][0] == package_name:
+                    delete_candidates.append(full_path)
+                else:
+                    shared_files.append(full_path)
+                found = True
+                break
+
+        if not found:
+            default_path = os.path.join(simplemodels_root, file_type, rel_path)
+            if os.path.exists(default_path):
+                if len(file_refs[default_path]) == 1 and file_refs[default_path][0] == package_name:
+                    delete_candidates.append(default_path)
+                else:
+                    shared_files.append(default_path)
+
+    if shared_files:
+        print(f"\n{Fore.YELLOW}△ 以下文件被其他包体共享：{Style.RESET_ALL}")
+        for path in shared_files:
+            print(f"  {path}")
+
+    if delete_candidates:
+        print(f"\n{Fore.YELLOW}△ 以下孤立文件将被删除：{Style.RESET_ALL}")
+        total_size = 0
+        for path in delete_candidates:
+            try:
+                size = os.path.getsize(path)
+                print(f"  {path} ({size/1024/1024:.1f}MB)")
+                total_size += size
+            except:
+                print(f"  {path} (大小未知)")
+
+        print(f"{Fore.CYAN}△ 总计释放空间: {total_size/1024/1024/1024:.2f}GB{Style.RESET_ALL}")
         
+        confirm = input(f"\n{Fore.GREEN}是否确认删除？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
-            # 执行删除操作
-            for file in files_to_delete:
+            success = 0
+            for path in delete_candidates:
                 try:
-                    os.remove(file)
-                    print(f"{Fore.GREEN}已删除文件: {file}{Style.RESET_ALL}")
+                    os.remove(path)
+                    print(f"{Fore.GREEN}✓ 已删除: {path}{Style.RESET_ALL}")
+                    success += 1
                 except Exception as e:
-                    print(f"{Fore.RED}删除文件失败: {file}，错误信息: {e}{Style.RESET_ALL}")
+                    print(f"{Fore.RED}× 删除失败: {path} ({str(e)}){Style.RESET_ALL}")
             
-            # 删除包体条目
-            del packages[package_name]
-            print(f"{Fore.GREEN}包体 [{package_name}] 已从列表中删除。{Style.RESET_ALL}")
+            print(f"\n{Fore.GREEN}✓ 包体{selected_package['name']}孤立文件已清除{Style.RESET_ALL}")
         else:
-            print(f"{Fore.RED}删除操作已取消。{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}× 操作已取消{Style.RESET_ALL}")
     else:
-        print(f"{Fore.RED}没有可删除的文件，文件已被删除，或被其他包体引用。{Style.RESET_ALL}")
+        print(f"{Fore.BLUE}△ 未找到可安全删除的文件{Style.RESET_ALL}")
+
 
 packages = {
     "base_package": {
@@ -700,93 +869,93 @@ packages = {
         "name": "[1]基础模型包",
         "note": "SDXL全功能|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
-            ("SimpleModels/clip_vision/clip_vision_vit_h.safetensors", 1972298538),
-            ("SimpleModels/clip_vision/model_base_caption_capfilt_large.pth", 896081425),
-            ("SimpleModels/clip_vision/wd-v1-4-moat-tagger-v2.onnx", 326197340),
-            ("SimpleModels/clip_vision/wd-v1-4-moat-tagger-v2.csv", 253906),
-            ("SimpleModels/clip_vision/clip-vit-large-patch14/merges.txt", 524619),
-            ("SimpleModels/clip_vision/clip-vit-large-patch14/special_tokens_map.json", 389),
-            ("SimpleModels/clip_vision/clip-vit-large-patch14/tokenizer_config.json", 905),
-            ("SimpleModels/clip_vision/clip-vit-large-patch14/vocab.json", 961143),
-            ("SimpleModels/configs/anything_v3.yaml", 1933),
-            ("SimpleModels/configs/v1-inference.yaml", 1873),
-            ("SimpleModels/configs/v1-inference_clip_skip_2.yaml", 1933),
-            ("SimpleModels/configs/v1-inference_clip_skip_2_fp16.yaml", 1956),
-            ("SimpleModels/configs/v1-inference_fp16.yaml", 1896),
-            ("SimpleModels/configs/v1-inpainting-inference.yaml", 1992),
-            ("SimpleModels/configs/v2-inference-v.yaml", 1815),
-            ("SimpleModels/configs/v2-inference-v_fp32.yaml", 1816),
-            ("SimpleModels/configs/v2-inference.yaml", 1789),
-            ("SimpleModels/configs/v2-inference_fp32.yaml", 1790),
-            ("SimpleModels/configs/v2-inpainting-inference.yaml", 4450),
-            ("SimpleModels/controlnet/control-lora-canny-rank128.safetensors", 395733680),
-            ("SimpleModels/controlnet/detection_Resnet50_Final.pth", 109497761),
-            ("SimpleModels/controlnet/fooocus_ip_negative.safetensors", 65616),
-            ("SimpleModels/controlnet/fooocus_xl_cpds_128.safetensors", 395706528),
-            ("SimpleModels/controlnet/ip-adapter-plus-face_sdxl_vit-h.bin", 1013454761),
-            ("SimpleModels/controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
-            ("SimpleModels/controlnet/parsing_parsenet.pth", 85331193),
-            ("SimpleModels/controlnet/xinsir_cn_openpose_sdxl_1.0.safetensors", 2502139104),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/body_pose_model.pth", 209267595),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/facenet.pth", 153718792),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/hand_pose_model.pth", 147341049),
-            ("SimpleModels/inpaint/fooocus_inpaint_head.pth", 52602),
-            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("SimpleModels/inpaint/inpaint_v26.fooocus.patch", 1323362033),
-            ("SimpleModels/inpaint/isnet-anime.onnx", 176069933),
-            ("SimpleModels/inpaint/isnet-general-use.onnx", 178648008),
-            ("SimpleModels/inpaint/sam_vit_b_01ec64.pth", 375042383),
-            ("SimpleModels/inpaint/silueta.onnx", 44173029),
-            ("SimpleModels/inpaint/u2net.onnx", 175997641),
-            ("SimpleModels/inpaint/u2netp.onnx", 4574861),
-            ("SimpleModels/inpaint/u2net_cloth_seg.onnx", 176194565),
-            ("SimpleModels/inpaint/u2net_human_seg.onnx", 175997641),
-            ("SimpleModels/layer_model/layer_xl_fg2ble.safetensors", 701981624),
-            ("SimpleModels/layer_model/layer_xl_transparent_conv.safetensors", 3619745776),
-            ("SimpleModels/layer_model/vae_transparent_decoder.safetensors", 208266320),
-            ("SimpleModels/llms/bert-base-uncased/config.json", 570),
-            ("SimpleModels/llms/bert-base-uncased/model.safetensors", 440449768),
-            ("SimpleModels/llms/bert-base-uncased/tokenizer.json", 466062),
-            ("SimpleModels/llms/bert-base-uncased/tokenizer_config.json", 28),
-            ("SimpleModels/llms/bert-base-uncased/vocab.txt", 231508),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/config.json", 1394),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/generation_config.json", 293),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/metadata.json", 1477),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/pytorch_model.bin", 312087009),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/source.spm", 804677),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/target.spm", 806530),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/tokenizer_config.json", 44),
-            ("SimpleModels/llms/Helsinki-NLP/opus-mt-zh-en/vocab.json", 1617902),
-            ("SimpleModels/llms/superprompt-v1/config.json", 1512),
-            ("SimpleModels/llms/superprompt-v1/generation_config.json", 142),
-            ("SimpleModels/llms/superprompt-v1/model.safetensors", 307867048),
-            ("SimpleModels/llms/superprompt-v1/README.md", 3661),
-            ("SimpleModels/llms/superprompt-v1/spiece.model", 791656),
-            ("SimpleModels/llms/superprompt-v1/tokenizer.json", 2424064),
-            ("SimpleModels/llms/superprompt-v1/tokenizer_config.json", 2539),
-            ("SimpleModels/loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
-            ("SimpleModels/loras/sdxl_hyper_sd_4step_lora.safetensors", 787359648),
-            ("SimpleModels/loras/sdxl_lightning_4step_lora.safetensors", 393854592),
-            ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/config.json", 937),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/merges.txt", 456356),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/positive.txt", 5655),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/pytorch_model.bin", 351283802),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/special_tokens_map.json", 99),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/tokenizer.json", 2107625),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/tokenizer_config.json", 255),
-            ("SimpleModels/prompt_expansion/fooocus_expansion/vocab.json", 798156),
-            ("SimpleModels/rembg/RMBG-1.4.pth", 176718373),
-            ("SimpleModels/unet/iclight_sd15_fc_unet_ldm.safetensors", 1719144856),
-            ("SimpleModels/upscale_models/fooocus_upscaler_s409985e5.bin", 33636613),
-            ("SimpleModels/vae_approx/vaeapp_sd15.pth", 213777),
-            ("SimpleModels/vae_approx/xl-to-v1_interposer-v4.0.safetensors", 5667280),
-            ("SimpleModels/vae_approx/xlvaeapp.pth", 213777),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/vae/ponyDiffusionV6XL_vae.safetensors", 334641162),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
+            ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
+            ("clip_vision/model_base_caption_capfilt_large.pth", 896081425),
+            ("clip_vision/wd-v1-4-moat-tagger-v2.onnx", 326197340),
+            ("clip_vision/wd-v1-4-moat-tagger-v2.csv", 253906),
+            ("clip_vision/clip-vit-large-patch14/merges.txt", 524619),
+            ("clip_vision/clip-vit-large-patch14/special_tokens_map.json", 389),
+            ("clip_vision/clip-vit-large-patch14/tokenizer_config.json", 905),
+            ("clip_vision/clip-vit-large-patch14/vocab.json", 961143),
+            ("configs/anything_v3.yaml", 1933),
+            ("configs/v1-inference.yaml", 1873),
+            ("configs/v1-inference_clip_skip_2.yaml", 1933),
+            ("configs/v1-inference_clip_skip_2_fp16.yaml", 1956),
+            ("configs/v1-inference_fp16.yaml", 1896),
+            ("configs/v1-inpainting-inference.yaml", 1992),
+            ("configs/v2-inference-v.yaml", 1815),
+            ("configs/v2-inference-v_fp32.yaml", 1816),
+            ("configs/v2-inference.yaml", 1789),
+            ("configs/v2-inference_fp32.yaml", 1790),
+            ("configs/v2-inpainting-inference.yaml", 4450),
+            ("controlnet/control-lora-canny-rank128.safetensors", 395733680),
+            ("controlnet/detection_Resnet50_Final.pth", 109497761),
+            ("controlnet/fooocus_ip_negative.safetensors", 65616),
+            ("controlnet/fooocus_xl_cpds_128.safetensors", 395706528),
+            ("controlnet/ip-adapter-plus-face_sdxl_vit-h.bin", 1013454761),
+            ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
+            ("controlnet/parsing_parsenet.pth", 85331193),
+            ("controlnet/xinsir_cn_openpose_sdxl_1.0.safetensors", 2502139104),
+            ("controlnet/lllyasviel/Annotators/body_pose_model.pth", 209267595),
+            ("controlnet/lllyasviel/Annotators/facenet.pth", 153718792),
+            ("controlnet/lllyasviel/Annotators/hand_pose_model.pth", 147341049),
+            ("inpaint/fooocus_inpaint_head.pth", 52602),
+            ("inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("inpaint/inpaint_v26.fooocus.patch", 1323362033),
+            ("inpaint/isnet-anime.onnx", 176069933),
+            ("inpaint/isnet-general-use.onnx", 178648008),
+            ("inpaint/sam_vit_b_01ec64.pth", 375042383),
+            ("inpaint/silueta.onnx", 44173029),
+            ("inpaint/u2net.onnx", 175997641),
+            ("inpaint/u2netp.onnx", 4574861),
+            ("inpaint/u2net_cloth_seg.onnx", 176194565),
+            ("inpaint/u2net_human_seg.onnx", 175997641),
+            ("layer_model/layer_xl_fg2ble.safetensors", 701981624),
+            ("layer_model/layer_xl_transparent_conv.safetensors", 3619745776),
+            ("layer_model/vae_transparent_decoder.safetensors", 208266320),
+            ("llms/bert-base-uncased/config.json", 570),
+            ("llms/bert-base-uncased/model.safetensors", 440449768),
+            ("llms/bert-base-uncased/tokenizer.json", 466062),
+            ("llms/bert-base-uncased/tokenizer_config.json", 28),
+            ("llms/bert-base-uncased/vocab.txt", 231508),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/config.json", 1394),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/generation_config.json", 293),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/metadata.json", 1477),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/pytorch_model.bin", 312087009),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/source.spm", 804677),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/target.spm", 806530),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/tokenizer_config.json", 44),
+            ("llms/Helsinki-NLP/opus-mt-zh-en/vocab.json", 1617902),
+            ("llms/superprompt-v1/config.json", 1512),
+            ("llms/superprompt-v1/generation_config.json", 142),
+            ("llms/superprompt-v1/model.safetensors", 307867048),
+            ("llms/superprompt-v1/README.md", 3661),
+            ("llms/superprompt-v1/spiece.model", 791656),
+            ("llms/superprompt-v1/tokenizer.json", 2424064),
+            ("llms/superprompt-v1/tokenizer_config.json", 2539),
+            ("loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
+            ("loras/sdxl_hyper_sd_4step_lora.safetensors", 787359648),
+            ("loras/sdxl_lightning_4step_lora.safetensors", 393854592),
+            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("prompt_expansion/fooocus_expansion/config.json", 937),
+            ("prompt_expansion/fooocus_expansion/merges.txt", 456356),
+            ("prompt_expansion/fooocus_expansion/positive.txt", 5655),
+            ("prompt_expansion/fooocus_expansion/pytorch_model.bin", 351283802),
+            ("prompt_expansion/fooocus_expansion/special_tokens_map.json", 99),
+            ("prompt_expansion/fooocus_expansion/tokenizer.json", 2107625),
+            ("prompt_expansion/fooocus_expansion/tokenizer_config.json", 255),
+            ("prompt_expansion/fooocus_expansion/vocab.json", 798156),
+            ("rembg/RMBG-1.4.pth", 176718373),
+            ("unet/iclight_sd15_fc_unet_ldm.safetensors", 1719144856),
+            ("upscale_models/fooocus_upscaler_s409985e5.bin", 33636613),
+            ("vae_approx/vaeapp_sd15.pth", 213777),
+            ("vae_approx/xl-to-v1_interposer-v4.0.safetensors", 5667280),
+            ("vae_approx/xlvaeapp.pth", 213777),
+            ("clip/clip_l.safetensors", 246144152),
+            ("vae/ponyDiffusionV6XL_vae.safetensors", 334641162),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
         ],
         "download_links": [
         "【必要】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_simpleai_1214.zip"
@@ -797,24 +966,24 @@ packages = {
         "name": "[2]增强模型包",
         "note": "功能性补充|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/embeddings/unaestheticXLhk1.safetensors", 33296),
-            ("SimpleModels/embeddings/unaestheticXLv31.safetensors", 33296),
-            ("SimpleModels/inpaint/inpaint_v25.fooocus.patch", 2580722369),
-            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("SimpleModels/inpaint/sam_vit_l_0b3195.pth", 1249524607),
-            ("SimpleModels/layer_model/layer_xl_bg2ble.safetensors", 701981624),
-            ("SimpleModels/layer_model/layer_xl_transparent_attn.safetensors", 743352688),
-            ("SimpleModels/llms/nllb-200-distilled-600M/pytorch_model.bin", 2460457927),
-            ("SimpleModels/llms/nllb-200-distilled-600M/sentencepiece.bpe.model", 4852054),
-            ("SimpleModels/llms/nllb-200-distilled-600M/tokenizer.json", 17331176),
-            ("SimpleModels/loras/FilmVelvia3.safetensors", 151108832),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("SimpleModels/loras/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors", 912593164),
-            ("SimpleModels/safety_checker/stable-diffusion-safety-checker.bin", 1216067303),
-            ("SimpleModels/unet/iclight_sd15_fbc_unet_ldm.safetensors", 1719167896),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/vae/ponyDiffusionV6XL_vae.safetensors", 334641162),
-            ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342),
+            ("embeddings/unaestheticXLhk1.safetensors", 33296),
+            ("embeddings/unaestheticXLv31.safetensors", 33296),
+            ("inpaint/inpaint_v25.fooocus.patch", 2580722369),
+            ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("inpaint/sam_vit_l_0b3195.pth", 1249524607),
+            ("layer_model/layer_xl_bg2ble.safetensors", 701981624),
+            ("layer_model/layer_xl_transparent_attn.safetensors", 743352688),
+            ("llms/nllb-200-distilled-600M/pytorch_model.bin", 2460457927),
+            ("llms/nllb-200-distilled-600M/sentencepiece.bpe.model", 4852054),
+            ("llms/nllb-200-distilled-600M/tokenizer.json", 17331176),
+            ("loras/FilmVelvia3.safetensors", 151108832),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("loras/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.safetensors", 912593164),
+            ("safety_checker/stable-diffusion-safety-checker.bin", 1216067303),
+            ("unet/iclight_sd15_fbc_unet_ldm.safetensors", 1719167896),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("vae/ponyDiffusionV6XL_vae.safetensors", 334641162),
+            ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_enhance_simpleai_0908.zip"
@@ -825,37 +994,37 @@ packages = {
         "name": "[3]可图扩展包",
         "note": "可图文生图|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/diffusers/Kolors/model_index.json", 427),
-            ("SimpleModels/diffusers/Kolors/MODEL_LICENSE", 14920),
-            ("SimpleModels/diffusers/Kolors/README.md", 4707),
-            ("SimpleModels/diffusers/Kolors/scheduler/scheduler_config.json", 606),
-            ("SimpleModels/diffusers/Kolors/text_encoder/config.json", 1323),
-            ("SimpleModels/diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
-            ("SimpleModels/diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
-            ("SimpleModels/diffusers/Kolors/text_encoder/quantization.py", 14692),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/text_encoder/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/tokenizer/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/unet/config.json", 1785),
-            ("SimpleModels/diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("SimpleModels/diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("SimpleModels/diffusers/Kolors/vae/config.json", 611),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("SimpleModels/checkpoints/kolors_unet_fp16.safetensors", 5159140240),
-            ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342),
+            ("diffusers/Kolors/model_index.json", 427),
+            ("diffusers/Kolors/MODEL_LICENSE", 14920),
+            ("diffusers/Kolors/README.md", 4707),
+            ("diffusers/Kolors/scheduler/scheduler_config.json", 606),
+            ("diffusers/Kolors/text_encoder/config.json", 1323),
+            ("diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
+            ("diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
+            ("diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
+            ("diffusers/Kolors/text_encoder/quantization.py", 14692),
+            ("diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
+            ("diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
+            ("diffusers/Kolors/text_encoder/vocab.txt", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
+            ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
+            ("diffusers/Kolors/unet/config.json", 1785),
+            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("diffusers/Kolors/vae/config.json", 611),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
+            ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_0909.zip"
@@ -866,12 +1035,12 @@ packages = {
         "name": "[4]额外模型包",
         "note": "动漫/混元/PG/小马/写实/SD3|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/checkpoints/animaPencilXL_v500.safetensors", 6938041144),
-            ("SimpleModels/checkpoints/hunyuan_dit_1.2.safetensors", 8240228270),
-            ("SimpleModels/checkpoints/playground-v2.5-1024px.safetensors", 6938040576),
-            ("SimpleModels/checkpoints/ponyDiffusionV6XL.safetensors", 6938041050),
-            ("SimpleModels/checkpoints/realisticStockPhoto_v20.safetensors", 6938054242),
-            ("SimpleModels/checkpoints/sd3_medium_incl_clips_t5xxlfp8.safetensors", 10867168284),
+            ("checkpoints/animaPencilXL_v500.safetensors", 6938041144),
+            ("checkpoints/hunyuan_dit_1.2.safetensors", 8240228270),
+            ("checkpoints/playground-v2.5-1024px.safetensors", 6938040576),
+            ("checkpoints/ponyDiffusionV6XL.safetensors", 6938041050),
+            ("checkpoints/realisticStockPhoto_v20.safetensors", 6938054242),
+            ("checkpoints/sd3_medium_incl_clips_t5xxlfp8.safetensors", 10867168284),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_SD3_HY_PonyV6_PGv25_aPencilXL_rsPhoto_simpleai_0909.zip"
@@ -882,10 +1051,10 @@ packages = {
         "name": "[5]Flux全量包",
         "note": "Flux官方全量|显存需求：★★★★★ 速度：★★",
         "files": [
-            ("SimpleModels/checkpoints/flux1-dev.safetensors", 23802932552),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
+            ("checkpoints/flux1-dev.safetensors", 23802932552),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp16.safetensors", 9787841024),
+            ("vae/ae.safetensors", 335304388),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux1_fp16_simpleai_0909.zip"
@@ -896,30 +1065,30 @@ packages = {
         "name": "[6]Flux_AIO扩展包",
         "note": "Flux全功能[Q5模型]|显存需求：★★★☆ 速度：★★",
         "files": [
-            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
-            ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
-            ("SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
-            ("SimpleModels/controlnet/parsing_bisenet.pth", 53289463),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
-            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
-            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
-            ("SimpleModels/loras/flux1-canny-dev-lora.safetensors", 1244443944),
-            ("SimpleModels/loras/flux1-depth-dev-lora.safetensors", 1244440512),
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("clip/t5xxl_fp16.safetensors", 9787841024),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
+            ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("controlnet/parsing_bisenet.pth", 53289463),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("loras/flux1-canny-dev-lora.safetensors", 1244443944),
+            ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("vae/ae.safetensors", 335304388),
+            ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux_aio_simpleai_1214.zip"
@@ -930,27 +1099,27 @@ packages = {
         "name": "[7]SD1.5_AIO扩展包",
         "note": "SD1.5全功能|显存需求：★ 速度：★★★★",
         "files": [
-            ("SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
-            ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
-            ("SimpleModels/clip/sd15_clip_model.fp16.safetensors", 246144864),
-            ("SimpleModels/controlnet/control_v11f1e_sd15_tile_fp16.safetensors", 722601104),
-            ("SimpleModels/controlnet/control_v11f1p_sd15_depth_fp16.safetensors", 722601100),
-            ("SimpleModels/controlnet/control_v11p_sd15_canny_fp16.safetensors", 722601100),
-            ("SimpleModels/controlnet/control_v11p_sd15_openpose_fp16.safetensors", 722601100),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
-            ("SimpleModels/inpaint/sd15_powerpaint_brushnet_clip_v2_1.bin", 492401329),
-            ("SimpleModels/inpaint/sd15_powerpaint_brushnet_v2_1.safetensors", 3544366408),
-            ("SimpleModels/insightface/models/buffalo_l/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/buffalo_l/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/buffalo_l/det_10g.onnx", 16923827),
-            ("SimpleModels/insightface/models/buffalo_l/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
-            ("SimpleModels/ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
-            ("SimpleModels/ipadapter/ip-adapter-faceid-plusv2_sd15.bin", 156558509),
-            ("SimpleModels/ipadapter/ip-adapter_sd15.safetensors", 44642768),
-            ("SimpleModels/loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors", 51059544),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604)
+            ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
+            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("clip/sd15_clip_model.fp16.safetensors", 246144864),
+            ("controlnet/control_v11f1e_sd15_tile_fp16.safetensors", 722601104),
+            ("controlnet/control_v11f1p_sd15_depth_fp16.safetensors", 722601100),
+            ("controlnet/control_v11p_sd15_canny_fp16.safetensors", 722601100),
+            ("controlnet/control_v11p_sd15_openpose_fp16.safetensors", 722601100),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("inpaint/sd15_powerpaint_brushnet_clip_v2_1.bin", 492401329),
+            ("inpaint/sd15_powerpaint_brushnet_v2_1.safetensors", 3544366408),
+            ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
+            ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
+            ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
+            ("insightface/models/buffalo_l/genderage.onnx", 1322532),
+            ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("ipadapter/ip-adapter-faceid-plusv2_sd15.bin", 156558509),
+            ("ipadapter/ip-adapter_sd15.safetensors", 44642768),
+            ("loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors", 51059544),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd15_aio_simpleai_1214.zip"
@@ -961,53 +1130,53 @@ packages = {
         "name": "[8]Kolors_AIO扩展包",
         "note": "可图全功能|显存需求：★★★ 速度：★★★",
         "files": [
-            ("SimpleModels/checkpoints/kolors_unet_fp16.safetensors", 5159140240),
-            ("SimpleModels/clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("SimpleModels/controlnet/kolors_controlnet_canny.safetensors", 2526129624),
-            ("SimpleModels/controlnet/kolors_controlnet_depth.safetensors", 2526129624),
-            ("SimpleModels/controlnet/kolors_controlnet_pose.safetensors", 2526129624),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
-            ("SimpleModels/diffusers/Kolors/model_index.json", 427),
-            ("SimpleModels/diffusers/Kolors/MODEL_LICENSE", 14920),
-            ("SimpleModels/diffusers/Kolors/README.md", 4707),
-            ("SimpleModels/diffusers/Kolors/scheduler/scheduler_config.json", 606),
-            ("SimpleModels/diffusers/Kolors/text_encoder/config.json", 1323),
-            ("SimpleModels/diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
-            ("SimpleModels/diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
-            ("SimpleModels/diffusers/Kolors/text_encoder/quantization.py", 14692),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/text_encoder/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/tokenizer/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/unet/config.json", 1785),
-            ("SimpleModels/diffusers/Kolors/vae/config.json", 611),
-            ("SimpleModels/diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("SimpleModels/diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
-            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
-            ("SimpleModels/ipadapter/kolors_ipa_faceid_plus.bin", 2385842603),
-            ("SimpleModels/ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
-            ("SimpleModels/unet/kolors_inpainting.safetensors", 5159169040),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
-            ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342)
+            ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
+            ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
+            ("controlnet/kolors_controlnet_canny.safetensors", 2526129624),
+            ("controlnet/kolors_controlnet_depth.safetensors", 2526129624),
+            ("controlnet/kolors_controlnet_pose.safetensors", 2526129624),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("diffusers/Kolors/model_index.json", 427),
+            ("diffusers/Kolors/MODEL_LICENSE", 14920),
+            ("diffusers/Kolors/README.md", 4707),
+            ("diffusers/Kolors/scheduler/scheduler_config.json", 606),
+            ("diffusers/Kolors/text_encoder/config.json", 1323),
+            ("diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
+            ("diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
+            ("diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
+            ("diffusers/Kolors/text_encoder/quantization.py", 14692),
+            ("diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
+            ("diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
+            ("diffusers/Kolors/text_encoder/vocab.txt", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
+            ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
+            ("diffusers/Kolors/unet/config.json", 1785),
+            ("diffusers/Kolors/vae/config.json", 611),
+            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("ipadapter/kolors_ipa_faceid_plus.bin", 2385842603),
+            ("ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("unet/kolors_inpainting.safetensors", 5159169040),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("vae/sdxl_fp16.vae.safetensors", 167335342)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_kolors_aio_simpleai_1214.zip"
@@ -1018,10 +1187,10 @@ packages = {
         "name": "[9]SD3.5_medium扩展包",
         "note": "SD3.5中号文生图|显存需求：★★ 速度：★★★",
         "files": [
-            ("SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/vae/sd3x_fp16.vae.safetensors", 167666654),
+            ("checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("vae/sd3x_fp16.vae.safetensors", 167666654),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors"
@@ -1032,12 +1201,12 @@ packages = {
         "name": "[10]SD3.5_Large 扩展包",
         "note": "SD3.5大号文生图|显存需求：★★★★★ 速度：★★",
         "files": [
-            ("SimpleModels/checkpoints/sd3.5_large.safetensors", 16460379262),
-            ("SimpleModels/clip/clip_g.safetensors", 1389382176),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/vae/sd3x_fp16.vae.safetensors", 167666654),
+            ("checkpoints/sd3.5_large.safetensors", 16460379262),
+            ("clip/clip_g.safetensors", 1389382176),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp16.safetensors", 9787841024),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("vae/sd3x_fp16.vae.safetensors", 167666654),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd35_large_clips_simpleai_1214.zip"
@@ -1048,32 +1217,32 @@ packages = {
         "name": "[11]MiniCPMv26反推扩展包",
         "note": "本地多模态大语言模型|显存需求：★★ 速度：★★",
         "files": [
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.gitattributes", 1657),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.mdl", 49),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.msc", 1655),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/.mv", 36),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/added_tokens.json", 629),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/config.json", 1951),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/configuration.json", 27),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/configuration_minicpm.py", 3280),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/generation_config.json", 121),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/image_processing_minicpmv.py", 16579),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/merges.txt", 1671853),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/modeling_minicpmv.py", 15738),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/modeling_navit_siglip.py", 41835),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/preprocessor_config.json", 714),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/processing_minicpmv.py", 9962),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/pytorch_model-00001-of-00002.bin", 4454731094),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/pytorch_model-00002-of-00002.bin", 1503635286),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/pytorch_model.bin.index.json", 233389),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/README.md", 2124),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/resampler.py", 34699),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/special_tokens_map.json", 1041),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/test.py", 1162),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/tokenization_minicpmv_fast.py", 1659),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/tokenizer.json", 7032006),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/tokenizer_config.json", 5663),
-            ("SimpleModels/llms/MiniCPMv2_6-prompt-generator/vocab.json", 2776833),
+            ("llms/MiniCPMv2_6-prompt-generator/.gitattributes", 1657),
+            ("llms/MiniCPMv2_6-prompt-generator/.mdl", 49),
+            ("llms/MiniCPMv2_6-prompt-generator/.msc", 1655),
+            ("llms/MiniCPMv2_6-prompt-generator/.mv", 36),
+            ("llms/MiniCPMv2_6-prompt-generator/added_tokens.json", 629),
+            ("llms/MiniCPMv2_6-prompt-generator/config.json", 1951),
+            ("llms/MiniCPMv2_6-prompt-generator/configuration.json", 27),
+            ("llms/MiniCPMv2_6-prompt-generator/configuration_minicpm.py", 3280),
+            ("llms/MiniCPMv2_6-prompt-generator/generation_config.json", 121),
+            ("llms/MiniCPMv2_6-prompt-generator/image_processing_minicpmv.py", 16579),
+            ("llms/MiniCPMv2_6-prompt-generator/merges.txt", 1671853),
+            ("llms/MiniCPMv2_6-prompt-generator/modeling_minicpmv.py", 15738),
+            ("llms/MiniCPMv2_6-prompt-generator/modeling_navit_siglip.py", 41835),
+            ("llms/MiniCPMv2_6-prompt-generator/preprocessor_config.json", 714),
+            ("llms/MiniCPMv2_6-prompt-generator/processing_minicpmv.py", 9962),
+            ("llms/MiniCPMv2_6-prompt-generator/pytorch_model-00001-of-00002.bin", 4454731094),
+            ("llms/MiniCPMv2_6-prompt-generator/pytorch_model-00002-of-00002.bin", 1503635286),
+            ("llms/MiniCPMv2_6-prompt-generator/pytorch_model.bin.index.json", 233389),
+            ("llms/MiniCPMv2_6-prompt-generator/README.md", 2124),
+            ("llms/MiniCPMv2_6-prompt-generator/resampler.py", 34699),
+            ("llms/MiniCPMv2_6-prompt-generator/special_tokens_map.json", 1041),
+            ("llms/MiniCPMv2_6-prompt-generator/test.py", 1162),
+            ("llms/MiniCPMv2_6-prompt-generator/tokenization_minicpmv_fast.py", 1659),
+            ("llms/MiniCPMv2_6-prompt-generator/tokenizer.json", 7032006),
+            ("llms/MiniCPMv2_6-prompt-generator/tokenizer_config.json", 5663),
+            ("llms/MiniCPMv2_6-prompt-generator/vocab.json", 2776833),
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
@@ -1084,43 +1253,43 @@ packages = {
         "name": "[12]贺年卡",
         "note": "贺卡预设|显存需求：★★★ 速度：★★",
         "files": [
-            ("SimpleModels/loras/flux_graffiti_v1.safetensors", 612893792),
-            ("SimpleModels/loras/kolors_crayonsketch_e10.safetensors", 170566628),
-            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/checkpoints/kolors_unet_fp16.safetensors", 5159140240),
-            ("SimpleModels/clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("SimpleModels/controlnet/kolors_controlnet_canny.safetensors", 2526129624),
-            ("SimpleModels/diffusers/Kolors/model_index.json", 427),
-            ("SimpleModels/diffusers/Kolors/MODEL_LICENSE", 14920),
-            ("SimpleModels/diffusers/Kolors/README.md", 4707),
-            ("SimpleModels/diffusers/Kolors/scheduler/scheduler_config.json", 606),
-            ("SimpleModels/diffusers/Kolors/text_encoder/config.json", 1323),
-            ("SimpleModels/diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
-            ("SimpleModels/diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
-            ("SimpleModels/diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
-            ("SimpleModels/diffusers/Kolors/text_encoder/quantization.py", 14692),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/text_encoder/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
-            ("SimpleModels/diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
-            ("SimpleModels/diffusers/Kolors/tokenizer/vocab.txt", 1018370),
-            ("SimpleModels/diffusers/Kolors/unet/config.json", 1785),
-            ("SimpleModels/diffusers/Kolors/vae/config.json", 611),
-            ("SimpleModels/ipadapter/kolors_ipa_faceid_plus.bin", 2385842603),
-            ("SimpleModels/ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
-            ("SimpleModels/vae/sdxl_fp16.vae.safetensors", 167335342),
+            ("loras/flux_graffiti_v1.safetensors", 612893792),
+            ("loras/kolors_crayonsketch_e10.safetensors", 170566628),
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/ae.safetensors", 335304388),
+            ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
+            ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
+            ("controlnet/kolors_controlnet_canny.safetensors", 2526129624),
+            ("diffusers/Kolors/model_index.json", 427),
+            ("diffusers/Kolors/MODEL_LICENSE", 14920),
+            ("diffusers/Kolors/README.md", 4707),
+            ("diffusers/Kolors/scheduler/scheduler_config.json", 606),
+            ("diffusers/Kolors/text_encoder/config.json", 1323),
+            ("diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
+            ("diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
+            ("diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
+            ("diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
+            ("diffusers/Kolors/text_encoder/quantization.py", 14692),
+            ("diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
+            ("diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
+            ("diffusers/Kolors/text_encoder/vocab.txt", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
+            ("diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
+            ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
+            ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
+            ("diffusers/Kolors/unet/config.json", 1785),
+            ("diffusers/Kolors/vae/config.json", 611),
+            ("ipadapter/kolors_ipa_faceid_plus.bin", 2385842603),
+            ("ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
+            ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
         "download_links": [
         "【选配】贺年卡基于FluxAIO、可图AIO扩展，请检查所需包体。Lora点击生成会自动下载。"
@@ -1131,17 +1300,17 @@ packages = {
         "name": "[13]换装包",
         "note": "万物迁移[Q4模型]|显存需求：★★★ 速度：★★",
         "files": [
-            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
-            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152), 
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
-            ("SimpleModels/rembg/General.safetensors", 884878856),
-            ("SimpleModels/loras/comfyui_subject_lora16.safetensors", 153268392)
+            ("inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("clip/clip_l.safetensors", 246144152), 
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/ae.safetensors", 335304388),
+            ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("style_models/flux1-redux-dev.safetensors", 129063232),
+            ("rembg/General.safetensors", 884878856),
+            ("loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
         "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
@@ -1152,18 +1321,18 @@ packages = {
         "name": "[14]3D大头贴",
         "note": "3D个性头像|显存需求：★★ 速度：★★",
         "files": [
-            ("SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
-            ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
-            ("SimpleModels/rembg/Portrait.safetensors", 884878856),
-            ("SimpleModels/ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
-            ("SimpleModels/ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
-            ("SimpleModels/insightface/models/buffalo_l/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/buffalo_l/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/buffalo_l/det_10g.onnx", 16923827),
-            ("SimpleModels/insightface/models/buffalo_l/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
-            ("SimpleModels/loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
-            ("SimpleModels/loras/StickersRedmond.safetensors", 170540036)
+            ("checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
+            ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("rembg/Portrait.safetensors", 884878856),
+            ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
+            ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
+            ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
+            ("insightface/models/buffalo_l/genderage.onnx", 1322532),
+            ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
+            ("loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
+            ("loras/StickersRedmond.safetensors", 170540036)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
@@ -1174,10 +1343,10 @@ packages = {
         "name": "[15]一键抠图",
         "note": "抠图去背景神器|显存需求：★ 速度：★★★★★",
         "files": [
-            ("SimpleModels/rembg/ckpt_base.pth", 367520613),
-            ("SimpleModels/rembg/RMBG-1.4.pth", 176718373),
-            ("SimpleModels/rembg/General.safetensors", 884878856),
-            ("SimpleModels/rembg/Portrait.safetensors", 884878856)
+            ("rembg/ckpt_base.pth", 367520613),
+            ("rembg/RMBG-1.4.pth", 176718373),
+            ("rembg/General.safetensors", 884878856),
+            ("rembg/Portrait.safetensors", 884878856)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
@@ -1188,16 +1357,16 @@ packages = {
         "name": "[16]一键修复",
         "note": "上色、修复模糊、旧照片|显存需求：★★★ 速度：★☆",
         "files": [
-            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("SimpleModels/checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
-            ("SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
-            ("SimpleModels/upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("vae/ae.safetensors", 335304388),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
@@ -1208,24 +1377,24 @@ packages = {
         "name": "[17]一键换脸",
         "note": "高精度换脸|显存需求：★★★ 速度：★★",
         "files": [
-            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/loras/flux1-turbo.safetensors", 694082424),
-            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
-            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
-            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
-            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
-            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
-            ("SimpleModels/loras/comfyui_portrait_lora64.safetensors",612742344)
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/ae.safetensors", 335304388),
+            ("loras/flux1-turbo.safetensors", 694082424),
+            ("inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("style_models/flux1-redux-dev.safetensors", 129063232),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("loras/comfyui_portrait_lora64.safetensors",612742344)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
@@ -1236,30 +1405,30 @@ packages = {
         "name": "[18]Flux_AIO_plus扩展包",
         "note": "Flux全功能[fp8模型]|显存需求：★★★★ 速度：★★☆",
         "files": [
-            ("SimpleModels/checkpoints/flux1-dev-fp8.safetensors", 11901525888),
-            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
-            ("SimpleModels/clip/t5xxl_fp16.safetensors", 9787841024),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
-            ("SimpleModels/controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
-            ("SimpleModels/controlnet/parsing_bisenet.pth", 53289463),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
-            ("SimpleModels/insightface/models/antelopev2/1k3d68.onnx", 143607619),
-            ("SimpleModels/insightface/models/antelopev2/2d106det.onnx", 5030888),
-            ("SimpleModels/insightface/models/antelopev2/genderage.onnx", 1322532),
-            ("SimpleModels/insightface/models/antelopev2/glintr100.onnx", 260665334),
-            ("SimpleModels/insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
-            ("SimpleModels/loras/flux1-canny-dev-lora.safetensors", 1244443944),
-            ("SimpleModels/loras/flux1-depth-dev-lora.safetensors", 1244440512),
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("SimpleModels/pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("checkpoints/flux1-dev-fp8.safetensors", 11901525888),
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("clip/t5xxl_fp16.safetensors", 9787841024),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
+            ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("controlnet/parsing_bisenet.pth", 53289463),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("loras/flux1-canny-dev-lora.safetensors", 1244443944),
+            ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("vae/ae.safetensors", 335304388),
+            ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
         "【选配】基于FluxAIO扩展包扩展",
@@ -1271,19 +1440,19 @@ packages = {
         "name": "[19]换装plus包",
         "note": "万物迁移[fp8模型]|显存需求：★★★☆ 速度：★★★",
         "files": [
-            ("SimpleModels/inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("SimpleModels/inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
-            ("SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors", 11902532704),
-            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232),
-            ("SimpleModels/upscale_models/4x-UltraSharp.pth", 66961958),
-            ("SimpleModels/rembg/General.safetensors", 884878856),
-            ("SimpleModels/loras/comfyui_subject_lora16.safetensors", 153268392)
+            ("inpaint/groundingdino_swint_ogc.pth", 693997677),
+            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("checkpoints/flux1-fill-dev_fp8.safetensors", 11902532704),
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/ae.safetensors", 335304388),
+            ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
+            ("style_models/flux1-redux-dev.safetensors", 129063232),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("rembg/General.safetensors", 884878856),
+            ("loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
         "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。",
@@ -1295,13 +1464,13 @@ packages = {
         "name": "[20]一键消除",
         "note": "一键消除|显存需求：★★ 速度：★★☆",
         "files": [
-            ("SimpleModels/checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("SimpleModels/clip/clip_l.safetensors", 246144152),
-            ("SimpleModels/clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("SimpleModels/vae/ae.safetensors", 335304388),
-            ("SimpleModels/loras/fill_remove.safetensors",104667792),
-            ("SimpleModels/style_models/flux1-redux-dev.safetensors", 129063232)
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("vae/ae.safetensors", 335304388),
+            ("loras/fill_remove.safetensors",104667792),
+            ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
         "【选配】一键消除基于FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
@@ -1312,7 +1481,7 @@ packages = {
         "name": "[21]光辉模型包",
         "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★☆",
         "files": [
-            ("SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
+            ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
         ],
         "download_links": [
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
@@ -1323,19 +1492,19 @@ packages = {
         "name": "[22]光辉AIO扩展包",
         "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
         "files": [
-            ("SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
-            ("SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("SimpleModels/loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
-            ("SimpleModels/controlnet/noob_sdxl_controlnet_canny.fp16.safetensors", 2502139104),
-            ("SimpleModels/controlnet/noob_sdxl_controlnet_depth.fp16.safetensors", 2502139136),
-            ("SimpleModels/controlnet/noob_sdxl_controlnet_pose.fp16.safetensors", 2502140008),
-            ("SimpleModels/ipadapter/noob_ip_adapter.bin", 1396798350),
-            ("SimpleModels/inpaint/inpaint_v25.fooocus.patch", 2580722369),
-            ("SimpleModels/inpaint/fooocus_inpaint_head.pth", 52602),
-            ("SimpleModels/loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("SimpleModels/upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
-            ("SimpleModels/ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
-            ("SimpleModels/controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099)
+            ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("controlnet/noob_sdxl_controlnet_canny.fp16.safetensors", 2502139104),
+            ("controlnet/noob_sdxl_controlnet_depth.fp16.safetensors", 2502139136),
+            ("controlnet/noob_sdxl_controlnet_pose.fp16.safetensors", 2502140008),
+            ("ipadapter/noob_ip_adapter.bin", 1396798350),
+            ("inpaint/inpaint_v25.fooocus.patch", 2580722369),
+            ("inpaint/fooocus_inpaint_head.pth", 52602),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099)
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
@@ -1368,19 +1537,16 @@ if __name__ == "__main__":
     while True:
         print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
         print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
-        print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】--清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
+        print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
         
         user_input = input("请选择操作(不需要括号):")
 
         if user_input == "":
-            # 启动下载所有文件
             print("※启动自动下载模块,支持断点续传，关闭窗口可中断。")
-            auto_download_missing_files_with_retry(max_threads=5)  # 启动下载所有文件
-
+            auto_download_missing_files_with_retry(max_threads=5)
         elif user_input.isdigit():
-            # 如果用户输入了包体 ID 数字，执行下载指定包体文件
             package_id = int(user_input)
             selected_package = None
             for package_name, package_info in packages.items():
@@ -1392,7 +1558,6 @@ if __name__ == "__main__":
                 get_download_links_for_package({package_name: selected_package}, "downloadlist.txt")
                 auto_download_missing_files_with_retry(max_threads=5)
             elif package_id == 0:
-                # 如果用户输入0，则清除所有下载缓存
                 delete_partial_files()
                 delete_specific_image_files()
                 delete_log_files()
@@ -1400,112 +1565,29 @@ if __name__ == "__main__":
                 print(f"{Fore.RED}△包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
 
         elif user_input.lower().startswith("del"):
-            root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            # 删除包体文件
             try:
-                # 去除 'del' 前缀并去除多余的空格
+                path_mapping = load_model_paths()
                 package_id_str = user_input[3:].strip()
                 
-                # 如果输入为空或不合法，提醒用户
                 if not package_id_str.isdigit():
                     print(f"{Fore.RED}△输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
                 else:
-                    package_id = int(package_id_str)  # 转换为整数
+                    package_id = int(package_id_str)
                     selected_package = None
                     
-                    # 查找对应包体
-                    for package_name, package_info in packages.items():
-                        if package_info["id"] == package_id:
-                            selected_package = package_info
+                    for pkg_name, pkg_info in packages.items():
+                        if pkg_info["id"] == package_id:
+                            selected_package = pkg_info
                             break
                     
-                    # 判断包体是否找到并打印信息
                     if selected_package:
-                        # 打印包体信息
-                        print(f"{Fore.YELLOW}△即将删除以下包体文件：{Style.RESET_ALL}")
-                        print(f"---包体编号: {package_id}")
-                        print(f"---包体名称: {selected_package['name']}")
-                        
-                        # 先构建一个文件引用计数
-                        file_references = {}
-                        for pkg_name, pkg_info in packages.items():
-                            for file_info in pkg_info["files"]:
-                                file_path = file_info[0]
-                                if file_path not in file_references:
-                                    file_references[file_path] = 0
-                                file_references[file_path] += 1  # 增加引用计数
-
-                        # 存储将要删除的有效文件
-                        files_to_delete = []
-                        total_size_to_free = 0  # 用来存储即将删除的文件的总大小
-                        
-                        # 打印被多个包体引用的文件路径
-                        files_referenced_by_multiple_packages = []
-
-                        for file_info in selected_package["files"]:
-                            file_path = file_info[0]
-                            # 只删除那些在当前包体中独有的文件，并检查文件是否存在
-                            if file_references[file_path] == 1:  # 该文件仅属于当前包体
-                                # 确保路径转换一致
-                                expected_dir = os.path.join(root, os.path.dirname(file_path))
-                                expected_filename = os.path.basename(file_path)
-                                full_file_path = os.path.join(expected_dir, expected_filename)
-
-                                # 规范化路径
-                                full_file_path = normalize_path(full_file_path)
-
-                                # 检查文件是否存在
-                                if os.path.exists(full_file_path):
-                                    files_to_delete.append(full_file_path)
-                                    # 获取文件大小并累加
-                                    total_size_to_free += os.path.getsize(full_file_path)
-                                    print(f"√非关联文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
-                            else:
-                                # 记录被多个包体引用的文件
-                                if file_references[file_path] > 1:
-                                    files_referenced_by_multiple_packages.append(file_path)
-
-                        # 打印被多个包体引用的文件
-                        if files_referenced_by_multiple_packages:
-                            print()
-                            print(f"{Fore.RED}△以下文件被多个包体引用无法删除，请手动清理（会破坏其他预置包完整性）：{Style.RESET_ALL}")
-                            for file_path in files_referenced_by_multiple_packages:
-                                # 确保路径转换一致
-                                expected_dir = os.path.join(root, os.path.dirname(file_path))
-                                expected_filename = os.path.basename(file_path)
-                                full_file_path = os.path.join(expected_dir, expected_filename)
-
-                                # 规范化路径
-                                full_file_path = normalize_path(full_file_path)
-
-                                # 打印规范化的文件路径
-                                print(f"※被关联文件: {full_file_path} 大小: {os.path.getsize(full_file_path) / (1024 * 1024):.2f} MB")
-                                
-                        # 打印将要释放的空间
-                        if files_to_delete:
-                            print(f"{Fore.GREEN}总共可以释放空间: {total_size_to_free / (1024 * 1024 * 1024):.2f} GB{Style.RESET_ALL}")
-                            
-                            confirm = input(f"{Fore.GREEN}△是否确认删除此包体内文件？【y/n】+【回车】: {Style.RESET_ALL}")
-                            
-                            if confirm.lower() == 'y':
-                                # 先删除文件
-                                for file_path in files_to_delete:
-                                    try:
-                                        os.remove(file_path)
-                                        print(f"{Fore.GREEN}△已删除文件: {file_path}{Style.RESET_ALL}")
-                                    except Exception as e:
-                                        print(f"{Fore.RED}△删除文件失败: {file_path}，错误信息: {e}{Style.RESET_ALL}")
-                            else:
-                                print(f"{Fore.RED}△删除操作已取消。{Style.RESET_ALL}")
-                        else:
-                            print(f"{Fore.RED}△没有可删除的文件，因为它们被多个包体引用或文件不存在。{Style.RESET_ALL}")
+                        print(f"{Fore.YELLOW}△即将删除包体：[{selected_package['name']}]{Style.RESET_ALL}")
+                        delete_package(pkg_name, packages)
                     else:
-                        print(f"{Fore.RED}△无效的包体编号！无法找到对应的包体。{Style.RESET_ALL}")
-            except ValueError:
-                print(f"{Fore.RED}△输入格式错误，请输入类似 del1 来删除对应包体。{Style.RESET_ALL}")
-
+                        print(f"{Fore.RED}△无效的包体编号！{Style.RESET_ALL}")
+            except Exception as e:
+                print(f"{Fore.RED}△删除过程中发生错误：{str(e)}{Style.RESET_ALL}")
         elif user_input.lower() == "r":
-            # 重新执行文件检测
             print("重新检测文件...")
             validate_files(packages)
 
