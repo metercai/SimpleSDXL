@@ -866,3 +866,6 @@ div.prose.tokenCounter {
   color: var(--button-hover-text-color, #000);
 }
 
+.thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
+}
