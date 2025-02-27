@@ -223,15 +223,19 @@ def normalize_path(path):
     path_type = path_parts[0].lower()
     filename = '/'.join(path_parts[1:])
 
-    for base_dir in path_mapping.get(path_type, []):
-        full_path = os.path.join(base_dir, filename)
-        if os.path.exists(full_path):
-            return os.path.abspath(full_path)
+    sorted_dirs = sorted(
+        path_mapping.get(path_type, []),
+        key=lambda x: (
+            0 if "SimpleModels" in x else
+            1 if any(part == "models" for part in x.split(os.sep)) else
+            2,
+            x
+        )
+    )
 
-    return os.path.abspath(os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        path
-    ))
+    for base_dir in sorted_dirs:
+        full_path = os.path.join(base_dir, filename)
+        return os.path.abspath(full_path)
 
 def typewriter_effect(text, delay=0.01):
     for char in text:
@@ -296,42 +300,23 @@ def validate_files(packages):
             path_type = path_parts[0].lower() if len(path_parts) > 0 else ''
             sub_path = '/'.join(path_parts[1:]) if len(path_parts) > 1 else ''
 
-
-            type_mapping = {
-                "checkpoints": "checkpoints",
-                "loras": "loras",
-                "controlnet": "controlnet",
-                "embeddings": "embeddings",
-                "vae_approx": "vae_approx",
-                "vae": "vae",
-                "upscale_models": "upscale_models",
-                "inpaint": "inpaint",
-                "clip": "clip",
-                "clip_vision": "clip_vision",
-                "fooocus_expansion": "prompt_expansion/fooocus_expansion",
-                "llms": "llms",
-                "safety_checker": "safety_checker",
-                "unet": "unet",
-                "rembg": "rembg",
-                "layer_model": "layer_model",
-                "diffusers": "diffusers",
-                "ipadapter": "ipadapter",
-                "pulid": "pulid",
-                "insightface": "insightface",
-                "style_models": "style_models",
-                "configs": "configs",
-                "prompt_expansion":"prompt_expansion"
-            }
-            search_dirs = path_mapping.get(type_mapping.get(path_type, ''), [])
-
+            search_dirs = sorted(
+                path_mapping.get(path_type, []),
+                key=lambda x: (
+                    0 if "SimpleModels" in x else
+                    1 if any(part == "models" for part in x.split(os.sep)) else
+                    2,
+                    x
+                )
+            )
             if not search_dirs:
-                simplemodels_default = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__)), "SimpleModels"))
+                simplemodels_default = os.path.join(root, "SimpleModels")
                 search_dirs = [os.path.join(simplemodels_default, path_type)]
+                print(simplemodels_default)
 
             found = False
             actual_dir = None
 
-            # 遍历所有可能的目录
             for base_dir in search_dirs:
                 full_path = os.path.join(base_dir, sub_path) if sub_path else os.path.join(base_dir, os.path.basename(expected_path))
                 if os.path.exists(full_path):
@@ -505,7 +490,7 @@ def delete_partial_files():
         else:
             print(f"{Fore.RED}△删除操作已取消{Style.RESET_ALL}")
     else:
-        print(f">>>未找到需要删除的临时文件<<<")
+        print(f">>>未找到需要删除的临时/损坏文件<<<")
 
 def delete_specific_image_files():
     """
@@ -581,7 +566,7 @@ def delete_log_files():
         for file_path in files_to_delete:
             print(f"- {file_path}")
 
-        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")  # 打印可清理空间
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")
 
         confirm = input(f"{Fore.GREEN}△是否确认删除这些日志文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
@@ -599,7 +584,6 @@ def delete_log_files():
 
 def download_file_with_resume(link, file_path, position, result_queue, max_retries=5, lock=None):
     partial_file_path = file_path + ".partial"
-
     retries = 0
     while retries < max_retries:
         try:
@@ -691,18 +675,31 @@ def auto_download_missing_files_with_retry(max_threads=5):
         relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
         path_type = relative_path_without_prefix.split('/')[0].lower()
 
-        target_base_dir = path_mapping.get(path_type, [None])[0]
+        sorted_base_dir = sorted(
+                path_mapping.get(path_type, []),
+                key=lambda x: (
+                    0 if "SimpleModels" in x else
+                    1 if any(part == "models" for part in x.split(os.sep)) else
+                    2,
+                    x
+                )
+            )
+
+        target_base_dir = None
+        for base_dir in sorted_base_dir:
+            if os.path.exists(base_dir):
+                target_base_dir = base_dir
+                break
         if not target_base_dir:
             print(f"{Fore.RED}×无法找到路径类型 '{path_type}' 的配置，跳过下载: {relative_path}{Style.RESET_ALL}")
             continue
 
         file_name = os.path.basename(relative_path)
-        file_sub_dir = os.path.dirname(relative_path).replace(path_type, "").strip('/')
+        file_sub_dir = os.path.dirname(relative_path_without_prefix).replace(path_type, "").strip('/')
         save_dir = os.path.join(target_base_dir, file_sub_dir)
         file_path = os.path.join(save_dir, file_name)
-
-        thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position, result_queue, 5, lock))
         print(link)
+        thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position, result_queue, 5, lock))
         threads.append(thread)
         active_threads += 1
         thread.start()
@@ -1532,7 +1529,7 @@ def main():
     print_colored("★★★★★★★★★★★★★★★★★★检测已结束执行自动下载模块★★★★★★★★★★★★★★★★★★", Fore.CYAN)
 
 if __name__ == "__main__":
-    main()  # 执行初始化
+    main()
     print()
     while True:
         print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
