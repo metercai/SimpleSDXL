@@ -869,3 +869,74 @@ div.prose.tokenCounter {
 .thumbnails.scroll-hide {
   flex-wrap: wrap !important;
 }
+
+/* 外部容器 */
+#style_visual_container {
+  padding: 8px !important;     /* 外容器内边距 */
+  margin: 8px !important;       /* 外容器外边距 */
+}
+/* 网格布局 */
+.style_grid {
+  gap: 0px !important;
+  row-gap: 0px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 关键修改 */
+  min-width: 0; /* 关键修改 */
+}
+/* 单元样式 */
+.style_item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0px !important;  /* 图片与复选框间距 */
+  padding: 4px !important;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  min-width: 0;
+}
+/* 图片样式 */
+.style_item img {
+  width: 100% !important;
+  height: 80px !important;  /* 固定图片高度 */
+  object-fit: cover;
+  margin-bottom: 0 !important;  /* 去除默认间距 */
+}
+.compact-img {
+  height: 80px !important;     /* 图片高度 */
+  min-height: 80px !important;
+}
+/* 移除所有内部边框 */
+.style_item,
+.style_item img,
+.compact-cb {
+  border: none !important;
+}
+.compact-cb {
+  margin-top: 0px !important;  /* 复选框上边距 */
+  padding: 0 !important;
+}
+/* 滚动容器 */
+#scroll_container {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+/* 复选框容器 */
+.checkbox_wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0px !important;  /* 图标与文字间距 */
+  margin-top: -7px !important;  /* 上移复选框 */
+}
+/* 复选框标签文字 */
+.checkbox_label {
+  font-size: 4px !important;
+  line-height: 1.2 !important;  /* 压缩行高 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.style-button {
+  font-size: 10px !important; /* 确保按钮字体大小 */
+  padding: 0px 0px !important; /* 调整内边距 */
+  width: 100px; /* 调整宽度 */
+  height: 30px; /* 调整高度 */
+}
