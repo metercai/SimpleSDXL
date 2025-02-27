@@ -475,7 +475,7 @@ def delete_partial_files():
 
         for root, _, files in os.walk(model_dir):
             for file in files:
-                if ".partial" in file or file.endswith(".corrupted"):
+                if ".partial" in file or ".corrupted" in file:
                     file_path = os.path.join(root, file)
                     files_found = True
                     files_to_delete.append(file_path)
