@@ -246,8 +246,8 @@ class EarlyReturnException(BaseException):
 
 
 def worker():
-    global async_tasks
-    global worker_processing
+    global async_tasks, worker_processing, pending_tasks
+
 
     import os
     import traceback
@@ -1918,7 +1918,6 @@ def worker():
                 time.sleep(0.01)
                 continue
             with processing_lock:
-                global worker_processing
                 worker_processing = task.task_id
 
             logger.info(f'Got async_tasks: {task.task_id}')
@@ -1935,7 +1934,6 @@ def worker():
             finally:
                 async_tasks.task_done()
                 with processing_lock:
-                    global pending_tasks
                     pending_tasks -= 1
                     worker_processing = None
                 if pid in modules.patch.patch_settings:
@@ -1949,19 +1947,19 @@ def worker():
     logger.info("Unexpected exit in worker thread")
 
 def add_task(task):
+    global pending_tasks, async_tasks
     async_tasks.put(task)
     with processing_lock:
-        global pending_tasks
         pending_tasks += 1
 
 def get_task_size():
+    global pending_tasks
     with processing_lock:
-        global pending_tasks
         return pending_tasks
 
 def get_processing_id():
+    global worker_processing
     with processing_lock:
-        global worker_processing
         return worker_processing
 
 threading.Thread(target=worker, daemon=True).start()
