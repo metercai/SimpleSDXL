@@ -1579,11 +1579,11 @@ def worker():
                     input_images.set_image('i2i_inpaint_mask', canvas_mask)
                 if async_task.scene_steps is not None:
                     async_task.steps = async_task.scene_steps
-                    all_steps = async_task.steps * async_task.image_number
+                    #all_steps = async_task.steps * async_task.image_number
                     async_task.params_backend['display_steps'] = async_task.steps
                 if async_task.task_method.lower().endswith('_cn'):
                     async_task.steps = async_task.steps * 3
-                    all_steps = async_task.steps * async_task.image_number
+                    #all_steps = async_task.steps * async_task.image_number
                 async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
@@ -1664,7 +1664,7 @@ def worker():
                         else:
                             async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
                         async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width'])) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']))
-                        all_steps = async_task.steps * async_task.image_number
+                        #all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
                         async_task.params_backend['i2i_uov_hires_fix_blurred'] = i2i_uov_hires_fix_blurred
@@ -1703,10 +1703,13 @@ def worker():
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
                     else:
                         async_task.params_backend['display_steps'] = async_task.steps
-                    all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+                    #all_steps = async_task.params_backend['display_steps'] * async_task.image_number
                 elif async_task.task_class == 'Kolors':
                     async_task.params_backend['display_steps'] = async_task.steps + 1
-                    all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+                    #all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+            if 'display_steps' not in async_task.params_backend:
+                async_task.params_backend['display_steps'] = 30 if async_task.steps==-1 else async_task.steps
+            all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             async_task.params_backend['input_images'] = input_images
 
         ldm_patched.modules.model_management.print_memory_info("begin to process_task")

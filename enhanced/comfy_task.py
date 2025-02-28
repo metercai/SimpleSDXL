@@ -124,7 +124,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     if task_name == 'default':
         if task_method == default_method_names[1]:
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
-            return ComfyTask(default_method_list[task_method], comfy_params)
+            return ComfyTask(default_method_list[task_method], comfy_params, steps=total_steps)
         else:
             if input_images is None or not  input_images.exists('input_image'):
                 raise ValueError("input_images cannot be None for this method")
@@ -139,7 +139,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                         "light_source_text_switch": True,
                         "light_source_text": iclight_source_text[options["iclight_source_radio"]]
                         })
-                return ComfyTask(default_method_list[task_method], comfy_params, input_images)
+                return ComfyTask(default_method_list[task_method], comfy_params, input_images, steps=total_steps)
             else:
                 width, height = fixed_width_height(default_params["width"], default_params["height"], 64)
                 comfy_params.update_params({
@@ -169,7 +169,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     elif task_name in ['HyDiT']:
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_hydit_model()
-        return ComfyTask(task_method, comfy_params)
+        return ComfyTask(task_method, comfy_params, steps=total_steps)
     
     elif task_name == 'Flux':
         base_model = default_params['base_model']
