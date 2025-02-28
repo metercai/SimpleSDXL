@@ -46,6 +46,7 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
+user_admin_sid = '' 
 
 def get_preset_name_list(user_session, ua_hash):
     presets_list = shared.token.get_local_vars("user_presets", "", user_session, ua_hash)
@@ -220,6 +221,8 @@ function(system_params) {
 '''
 
 def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, request: gr.Request):
+    global user_admin_sid
+
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
@@ -246,7 +249,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
         user_did = shared.token.get_guest_did()
         user_session = sstoken
         state_params.update({"__session": user_session})
-        logger.info(f'New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+        logger.info(f'New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
     else:
         #logger.info(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
         user_session = state_params["__session"]
@@ -258,10 +261,13 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
             user_session = sstoken
             state_params.update({"__session": user_session})
             logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
-            logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+            logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
         else:
             state_params.update({"sstoken": ''})
-            logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host} , ua_session={ua_session}')
+            logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+    shared.token.log_register(state_params["__session"])
+    if shared.token.is_admin(user_did):
+        user_admin_sid = state_params["__session"]
     state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
     state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' else False})
@@ -713,8 +719,13 @@ identity_introduce = '''
 '''
 
 def update_after_identity(state):
+    global user_admin_sid
+
     results = refresh_nav_bars(state)
     results += update_after_identity_sub(state)
+    if not shared.token.is_admin(state["user"].get_did()):
+        user_admin_sid = state["__session"]
+
     return results
 
 def update_after_identity_sub(state):
@@ -723,7 +734,7 @@ def update_after_identity_sub(state):
     max_catalog = state["__max_catalog"]
     nickname = state["user"].get_nickname()
     user_did = state["user"].get_did()
-    logger.info(f'Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), ua_session({state["ua_session"]})')
+    logger.info(f'Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), session({state["__session"]})')
     output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})

@@ -338,11 +338,11 @@ def check_vcode(vcode):
     return True
 
 self_contact = '''
-特性说明:<br>
+软件特点:<br>
 <b>SimpAI</b>，开源的中文 AI 创意生图平台，简洁、高效而稳定。<br>
 <b>SimpAI</b>，开放架构，支持SDXL/SD1.5/Flux/可图等多种开源模型，丰富的控图方式，真正“所想即所得，创意无边界”。<br>
-<b>SimpAI</b>，采用本地部署，可保障数据的安全与可控；可按需加载多种场景预置包，使用简单，非常贴合实际场景。<br>
-<b>SimpAI</b>，引入分布式身份管理机制，让本地部署的节点具有多用户服务和多节点组网能力，具备企业级服务的特性。<br>
+<b>SimpAI</b>，程序和模型本地部署，保障数据安全与可控；按需加载不同的场景预置包，贴合实际需求，操作简洁、高效。<br>
+<b>SimpAI</b>，引入分布式身份管理机制，让本地部署的节点具有多用户服务和多节点组网能力，具备了企业级服务的特性。<br>
 <br>
 使用技巧:<br>
 Wiki: <a target= "_blank" href="http://simpai.cn">http://simpai.cn</a><br>
