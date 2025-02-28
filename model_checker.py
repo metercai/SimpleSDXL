@@ -671,9 +671,15 @@ def auto_download_missing_files_with_retry(max_threads=5):
 
     for position, line in enumerate(links):
         link, size = line.strip().split(',')
-        relative_path = link.replace("https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/", "").strip()
-        relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
-        path_type = relative_path_without_prefix.split('/')[0].lower()
+        original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
+        if link.startswith(original_repo):
+            relative_path = link.replace(original_repo, "", 1).strip()
+            relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
+            path_type = relative_path_without_prefix.split('/')[0].lower()
+        else:
+            relative_path = link.replace("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", "", 1).strip()
+            relative_path_without_prefix = link.split("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", 1)[-1].strip()
+            path_type = "inpaint"
 
         sorted_base_dir = sorted(
                 path_mapping.get(path_type, []),
