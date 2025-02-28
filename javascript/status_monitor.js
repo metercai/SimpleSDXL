@@ -1,6 +1,6 @@
 (function() {
     // ==================== 配置常量 ====================
-    const CHECK_INTERVAL = 1000;         // 检测间隔毫秒
+    const CHECK_INTERVAL = 2000;         // 检测间隔毫秒
     const MAX_RETRY_COUNT = 3;
 
     // ==================== 状态管理 ====================
@@ -131,20 +131,21 @@
             color: #f56565;
         }
 
-        /* 显存和内存使用信息 */
         .vram-usage, .ram-usage, .online-users-badge, .online-nodes-badge {
             margin-top: 4px;
             font-size: 11px;
         }
-        .light .vram-usage, .light .ram-usage, .light .online-users-badge, .online-nodes-badge {
+        .light .vram-usage, .light .ram-usage, .light .online-users-badge, .light .online-nodes-badge {
             background: #f0f0f0;
             padding: 1px 6px;
             border-radius: 8px;
+	    color: var(--neutral-400);
         }
-        .dark .vram-usage, .dark .ram-usage, .dark .online-users-badge, .online-nodes-badge {
+        .dark .vram-usage, .dark .ram-usage, .dark .online-users-badge, .dark .online-nodes-badge {
             background: #2d3748;
             padding: 1px 6px;
             border-radius: 8px;
+	    color: var(--neutral-500);
         }
     `;
 
