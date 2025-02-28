@@ -46,22 +46,7 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
-#online_users = OnlineUsers(time_period=10, cache_update_interval=1)
-#user_list = set()
 user_admin_sid = '' 
-
-def get_cookie_value(cookie_string, key):
-    pattern = rf'{key}=([^;]+)'
-    match = re.search(pattern, cookie_string)
-    if match:
-        return match.group(1)
-
-    return None
-
-def get_online_users(sid):
-    shared.token.log_access(sid)
-    online_users_number = shared.token.get_online_users_number()
-    return online_users_number
 
 def get_preset_name_list(user_session, ua_hash):
     presets_list = shared.token.get_local_vars("user_presets", "", user_session, ua_hash)

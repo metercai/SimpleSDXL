@@ -3,6 +3,7 @@ import random
 import os
 import json
 import time
+import re
 import anyio
 import shared
 import modules.config
@@ -45,19 +46,29 @@ logger = logging.getLogger(__name__)
 
 START_TIMESTAMP = time.time()
 
-def get_task(*args):
-    args = list(args)
-    args.pop(0)
-    return worker.AsyncTask(args=args)
+def get_cookie_value(cookie_string, key):
+    pattern = rf'{key}=([^;]+)'
+    match = re.search(pattern, cookie_string)
+    if match:
+        return match.group(1)
+    return None
 
 def get_start_timestamp(request: gr.Request):
     global START_TIMESTAMP
 
-    sid = topbar.get_cookie_value(request.headers["cookie"], "aitoken")
+    if "cookie" in request.headers:
+        sid = get_cookie_value(request.headers["cookie"], "aitoken")
+        shared.token.log_access(sid)
+    online_users = shared.token.get_online_users_number()
     qsize = worker.get_task_size()
     vram_ram_info = model_management.get_vram_ram_used()
     domain_online_nodes, domain_online_users = shared.token.get_online_nodes_users()
-    return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{topbar.get_online_users(sid)},{domain_online_users},{domain_online_nodes}'
+    return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{online_users},{domain_online_users},{domain_online_nodes}'
+
+def get_task(*args):
+    args = list(args)
+    args.pop(0)
+    return worker.AsyncTask(args=args)
 
 def generate_clicked(task: worker.AsyncTask, state):
     with model_management.interrupt_processing_mutex:
