@@ -225,6 +225,9 @@ class AsyncTask:
             self.params_backend.update({"vae_model": self.vae_name})
             self.params_backend.update({"is_custom_vae": True})
 
+        if 'display_step' in self.params_backend and self.overwrite_step!=-1:
+            self.params_backend.pop('display_step')
+            
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
