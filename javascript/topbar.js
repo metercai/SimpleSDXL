@@ -1,16 +1,3 @@
-const browser={
-    device: function(){
-           var u = navigator.userAgent;
-           // console.log(navigator);
-           return {
-                is_mobile: !!u.match(/AppleWebKit.*Mobile.*/),
-                is_pc: (u.indexOf('Macintosh') > -1 || u.indexOf('Windows NT') > -1),
-		is_wx_mini: (u.indexOf('miniProgram') > -1),
-            };
-         }(),
-    language: (navigator.browserLanguage || navigator.language).toLowerCase()
-}
-
 let webpath = 'file';
 let nickname = 'guest';
 let task_class_name = 'Fooocus';

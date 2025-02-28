@@ -238,6 +238,8 @@ class AsyncTask:
 
 async_tasks = queue.Queue()
 worker_processing = None
+processing_lock = threading.Lock()
+pending_tasks = 0
 
 class EarlyReturnException(BaseException):
     pass
@@ -1910,10 +1912,17 @@ def worker():
     last_active = time.time()
     while True:
         try:
-            task = async_tasks.get(block=True, timeout=0.5)
+            try:
+                task = async_tasks.get(block=True, timeout=0.5)
+            except queue.Empty:
+                time.sleep(0.01)
+                continue
+            with processing_lock:
+                global worker_processing
+                worker_processing = task.task_id
+
             logger.info(f'Got async_tasks: {task.task_id}')
             try:
-                worker_processing = task.task_id
                 handler(task)
                 if task.generate_image_grid:
                     build_image_wall(task)
@@ -1924,23 +1933,35 @@ def worker():
                 traceback.print_exc()
                 task.yields.append(['finish', task.results])
             finally:
-                worker_processing = None
+                async_tasks.task_done()
+                with processing_lock:
+                    global pending_tasks
+                    pending_tasks -= 1
+                    worker_processing = None
                 if pid in modules.patch.patch_settings:
                     del modules.patch.patch_settings[pid]
-            async_tasks.task_done()
-        except queue.Empty:
-            worker_processing = None
-            time.sleep(0.01)
         except Exception as e:
             logger.error(f"Worker loop error: {str(e)}", exc_info=True)
             time.sleep(1)
         if not get_echo_off() and time.time() - last_active > 10:
-            worker_processing = None
             logger.info("Worker is alive and waiting...")
             last_active = time.time()
     logger.info("Unexpected exit in worker thread")
 
-def is_worker_processing():
-    return worker_processing is not None
+def add_task(task):
+    async_tasks.put(task)
+    with processing_lock:
+        global pending_tasks
+        pending_tasks += 1
+
+def get_task_size():
+    with processing_lock:
+        global pending_tasks
+        return pending_tasks
+
+def get_processing_id():
+    with processing_lock:
+        global worker_processing
+        return worker_processing
 
 threading.Thread(target=worker, daemon=True).start()
