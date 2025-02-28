@@ -95,7 +95,7 @@
   },
   "315": {
     "inputs": {
-      "image": "upload_image_f55c7941c16c6f6add059e95cff1f20c.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -190,7 +190,7 @@
   },
   "351": {
     "inputs": {
-      "image": "upload_image_de7a15b44fc6001cb4a98883c94b1f5d.png",
+      "image": "welcome.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
