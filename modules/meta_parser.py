@@ -219,8 +219,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     # [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
     results.append(engine_class_display)
     results.append(get_layout_setting_choices_visible_inter(uov_method_list, modules.flags.disabled, 'uov_method', visible, inter))
-    results.append(get_layout_empty_visible_inter('layer_method', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
-    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter) if not shared.token.is_guest(state_params["user"].get_did()) else gr.update(interactive=False))
+    results.append(get_layout_empty_visible_inter('layer_method', visible, inter))
+    results.append(get_layout_empty_visible_inter('layer_input_image', visible, inter))
     results.append(get_layout_toggle_visible_inter('enhance_checkbox', visible, inter))
     results.append(get_layout_empty_visible_inter('enhance_input_image', visible, inter))
     results += get_layout_visible_inter_loras(visible, inter, modules.config.default_max_lora_number)
