@@ -366,7 +366,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 633053972513273,
+      "seed": 612891350702588,
       "steps": 20,
       "cfg": 3.5,
       "denoise": 1
@@ -394,7 +394,7 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 15,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -486,12 +486,12 @@
   "391": {
     "inputs": {
       "width": [
-        "393",
-        0
+        "398",
+        1
       ],
       "height": [
-        "393",
-        1
+        "398",
+        2
       ],
       "image": [
         "315",
@@ -516,7 +516,7 @@
         0
       ],
       "original": [
-        "391",
+        "315",
         0
       ],
       "mask": [
@@ -533,25 +533,13 @@
       "title": "Blend Inpaint"
     }
   },
-  "393": {
-    "inputs": {
-      "image": [
-        "315",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "🔧 Get Image Size"
-    }
-  },
   "396": {
     "inputs": {
       "noise_seed": [
         "370",
         6
       ],
-      "noise_strength": 0.2,
+      "noise_strength": 0.1,
       "normalize": "false",
       "latent": [
         "312",
@@ -565,6 +553,41 @@
     "class_type": "InjectLatentNoise+",
     "_meta": {
       "title": "🔧 Inject Latent Noise"
+    }
+  },
+  "397": {
+    "inputs": {
+      "invert_mask": false,
+      "detect": "min_bounding_rect",
+      "top_reserve": 200,
+      "bottom_reserve": 200,
+      "left_reserve": 200,
+      "right_reserve": 200,
+      "round_to_multiple": "32",
+      "image": [
+        "315",
+        0
+      ],
+      "mask": [
+        "350",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: CropByMask V2",
+    "_meta": {
+      "title": "LayerUtility: CropByMask V2"
+    }
+  },
+  "398": {
+    "inputs": {
+      "mask": [
+        "397",
+        1
+      ]
+    },
+    "class_type": "GetMaskSizeAndCount",
+    "_meta": {
+      "title": "Get Mask Size & Count"
     }
   }
 }
