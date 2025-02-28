@@ -50,10 +50,14 @@ def get_task(*args):
     args.pop(0)
     return worker.AsyncTask(args=args)
 
-def get_start_timestamp():
+def get_start_timestamp(request: gr.Request):
     global START_TIMESTAMP
-    qsize = worker.async_tasks.qsize() + (1 if worker.is_worker_processing() else 0)
-    return f'{START_TIMESTAMP},{qsize}'
+
+    sid = topbar.get_cookie_value(request.headers["cookie"], "aitoken")
+    qsize = worker.get_task_size()
+    vram_ram_info = model_management.get_vram_ram_used()
+    domain_online_nodes, domain_online_users = shared.token.get_online_nodes_users()
+    return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{topbar.get_online_users(sid)},{domain_online_users},{domain_online_nodes}'
 
 def generate_clicked(task: worker.AsyncTask, state):
     with model_management.interrupt_processing_mutex:
@@ -70,15 +74,15 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
-    worker.async_tasks.put(task)
+    worker.add_task(task)
     while True:
-        qsize = worker.async_tasks.qsize()
+        qsize = worker.get_task_size()
         yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中(No.{qsize})，请等待...')), \
             gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
             gr.update(visible=False, value=None), \
             gr.update(visible=False)
         time.sleep(0.1)
-        if worker.worker_processing == task.task_id:
+        if worker.get_processing_id() == task.task_id:
             break
     
     execution_start_time = time.perf_counter()

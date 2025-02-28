@@ -6,6 +6,7 @@ import torch
 import sys
 import gc
 import os
+import time
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
@@ -896,3 +897,16 @@ def print_memory_info(pos=None):
 def get_free_memory_by_nvml_for_nvidia():
     memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
     return memory_info.free
+
+last_time_get_vram_ram = 0.0
+vram_ram_info = (get_total_memory(get_torch_device()), psutil.virtual_memory().total, 0, 0)
+def get_vram_ram_used():
+    global last_time_get_vram_ram, vram_ram_info
+
+    current_time = time.time()
+    if current_time-last_time_get_vram_ram>1.0:
+        vram_memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
+        ram_memory_info = psutil.virtual_memory()
+        vram_ram_info = (vram_ram_info[0], vram_ram_info[1], vram_memory_info.used, ram_memory_info.used)
+    return vram_ram_info
+

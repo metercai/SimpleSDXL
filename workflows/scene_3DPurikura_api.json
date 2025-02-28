@@ -69,9 +69,9 @@
   },
   "862": {
     "inputs": {
-      "weight": 1.5,
-      "weight_faceidv2": 2.85,
-      "weight_type": "ease in-out",
+      "weight": 1.3,
+      "weight_faceidv2": 2.6,
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -115,7 +115,7 @@
   "881": {
     "inputs": {
       "images": [
-        "551",
+        "953",
         0
       ]
     },
@@ -127,7 +127,7 @@
   "884": {
     "inputs": {
       "lora_name": "StickersRedmond.safetensors",
-      "strength_model": 1.1,
+      "strength_model": 1.2,
       "strength_clip": 1,
       "model": [
         "751",
@@ -145,11 +145,11 @@
   },
   "886": {
     "inputs": {
-      "seed": 527538921225104,
-      "steps": 20,
-      "cfg": 2.5500000000000003,
-      "sampler_name": "dpmpp_sde_gpu",
-      "scheduler": "sgm_uniform",
+      "seed": 604935119098250,
+      "steps": 30,
+      "cfg": 5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
       "denoise": 1,
       "model": [
         "862",
@@ -217,7 +217,7 @@
   },
   "896": {
     "inputs": {
-      "text": "Sticker, Stickers, (extreme close-up portrait:1.1), tight framing, cut-out sticker with white outline, upper body shot emphasizing the neck and head, matching expression, svg, vector design, solo, an individual, cartoon, cartoon style, adorable 3D render, Cinema 4D render, deep gray background",
+      "text": "Stickers,Sticker,cut-out sticker with heavy white lines,shoulders-up close-up portrait,svg,vector design,solo,an individual",
       "clip": [
         "884",
         1
@@ -233,13 +233,82 @@
       "purge_cache": true,
       "purge_models": true,
       "anything": [
-        "551",
+        "953",
         0
       ]
     },
     "class_type": "LayerUtility: PurgeVRAM",
     "_meta": {
       "title": "LayerUtility: Purge VRAM"
+    }
+  },
+  "911": {
+    "inputs": {
+      "upscale_model": [
+        "912",
+        0
+      ],
+      "image": [
+        "551",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "912": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "913": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "lanczos",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "911",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "952": {
+    "inputs": {
+      "model": "u2net: general purpose",
+      "providers": "CPU"
+    },
+    "class_type": "RemBGSession+",
+    "_meta": {
+      "title": "🔧 RemBG Session"
+    }
+  },
+  "953": {
+    "inputs": {
+      "rembg_session": [
+        "952",
+        0
+      ],
+      "image": [
+        "913",
+        0
+      ]
+    },
+    "class_type": "ImageRemoveBackground+",
+    "_meta": {
+      "title": "🔧 Image Remove Background"
     }
   }
 }

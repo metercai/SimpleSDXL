@@ -12,20 +12,46 @@
         currentTheme: 'light'
     };
 
+    // ==================== 移动设备检测 ====================
+    function isMobileDevice() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        // 检测常见的移动设备标识符
+        return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+    }
+
+    // 如果是移动设备，则直接退出，不执行后续逻辑
+    if (isMobileDevice()) {
+        console.log("当前设备为移动设备，状态监控组件不显示。");
+        // return;
+    }
+
     // ==================== DOM 元素创建 ====================
     const statusContainer = document.createElement('div');
     statusContainer.id = 'gradio-status-monitor';
-    
+
     const statusIndicator = document.createElement('div');
     statusIndicator.className = 'status-indicator';
-    
-    const queueBadge = document.createElement('span');
-    queueBadge.className = 'queue-badge';
-    
+
     const reconnectBtn = document.createElement('button');
     reconnectBtn.className = 'reconnect-btn';
-    reconnectBtn.textContent = '重连';
+    reconnectBtn.textContent = ' 重连';
     reconnectBtn.onclick = () => window.location.reload();
+
+    // VRAM 占用百分比
+    const vramUsage = document.createElement('div');
+    vramUsage.className = 'vram-usage';
+
+    // RAM 占用百分比
+    const ramUsage = document.createElement('div');
+    ramUsage.className = 'ram-usage';
+
+    // 同时在线用户数
+    const onlineUsersBadge = document.createElement('div');
+    onlineUsersBadge.className = 'online-users-badge';
+
+    // 同时在线节点数
+    const onlineNodesBadge = document.createElement('div');
+    onlineNodesBadge.className = 'online-nodes-badge';
 
     // ==================== 样式配置 ====================
     const style = document.createElement('style');
@@ -36,6 +62,8 @@
             right: 3px;
             z-index: 9999;
             font-family: Arial, sans-serif;
+	    background: transparent; /* 设置背景为透明 */
+            pointer-events: none; /* 确保不阻挡页面交互 */
         }
 
         /* 亮色主题 */
@@ -43,12 +71,13 @@
             padding: 4px 8px;
             border-radius: 3px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-end; /* 右对齐 */
             font-size: 12px;
-            background: rgba(255,255,255,0.95);
-            border: 1px solid #ddd;
+	    background: transparent; /* 设置背景为透明 */
+            border: none;
             color: #333;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+	    box-shadow: none; /* 移除阴影 */
         }
         .light .status-connected { color: #2c7a2c; }
         .light .status-disconnected { color: #c53030; }
@@ -56,20 +85,23 @@
 
         /* 暗色主题 */
         .status-indicator.dark {
-	    padding: 4px 8px;
+            padding: 4px 8px;
             border-radius: 3px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-end; /* 右对齐 */
             font-size: 12px;
-            background: rgba(26,32,44,0.95);
+	    background: transparent; /* 设置背景为透明 */
             border-color: #4a5568;
             color: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+	    border: none;
+	    box-shadow: none; /* 移除阴影 */
         }
         .dark .status-connected { color: #48bb78; }
         .dark .status-disconnected { color: #f56565; }
         .dark .status-exception { color: #ecc94b; }
 
+        /* 第一行样式 */
         .queue-badge {
             margin-left: 6px;
             padding: 1px 6px;
@@ -79,12 +111,14 @@
         .light .queue-badge { background: #f0f0f0; }
         .dark .queue-badge { background: #2d3748; }
 
+        /* 重连按钮样式 */
         .reconnect-btn {
-            margin-left: 8px;
+	    margin-left: 8px;
             padding: 2px 8px;
             border-radius: 3px;
             cursor: pointer;
             font-size: 11px;
+	    pointer-events: auto;
         }
         .light .reconnect-btn {
             border: 1px solid #c53030;
@@ -95,6 +129,22 @@
             border: 1px solid #f56565;
             background: #2d1a1a;
             color: #f56565;
+        }
+
+        /* 显存和内存使用信息 */
+        .vram-usage, .ram-usage, .online-users-badge, .online-nodes-badge {
+            margin-top: 4px;
+            font-size: 11px;
+        }
+        .light .vram-usage, .light .ram-usage, .light .online-users-badge, .online-nodes-badge {
+            background: #f0f0f0;
+            padding: 1px 6px;
+            border-radius: 8px;
+        }
+        .dark .vram-usage, .dark .ram-usage, .dark .online-users-badge, .online-nodes-badge {
+            background: #2d3748;
+            padding: 1px 6px;
+            border-radius: 8px;
         }
     `;
 
@@ -122,20 +172,27 @@
             });
 
             if (!response.ok) throw new Error('请求失败');
-            
+
             const result = await response.json();
-            const [timestampStr, queueSizeStr] = result.data[0].split(',');
-            
+            const [timestampStr, queueSizeStr, vramTotalStr, ramTotalStr, vramUsedStr, ramUsedStr, onlineUsersStr, onlineDomainUsersStr, onlineNodesStr] = result.data[0].split(',');
+
             return {
                 timestamp: parseFloat(timestampStr),
-                queueSize: parseInt(queueSizeStr)
+                queueSize: parseInt(queueSizeStr),
+                ramUsed: parseInt(ramUsedStr),
+                ramTotal: parseInt(ramTotalStr),
+                vramUsed: parseInt(vramUsedStr),
+                vramTotal: parseInt(vramTotalStr),
+                onlineUsers: parseInt(onlineUsersStr),
+		onlineDomainUsers: parseInt(onlineDomainUsersStr),
+		onlineNodes: parseInt(onlineNodesStr),
             };
         } catch (error) {
             return null;
         }
     }
 
-    function updateStatusUI(statusType, queueSize) {
+    function updateStatusUI(statusType, queueSize, ramUsed, ramTotal, vramUsed, vramTotal, onlineUsers, onlineDomainUsers, onlineNodes) {
         statusIndicator.innerHTML = '';
         const statusMap = {
             connected: { text: '连接', class: 'status-connected' },
@@ -148,24 +205,53 @@
         const statusEl = document.createElement('span');
         statusEl.className = statusClass;
         statusEl.innerHTML = `● ${text}`;
-        statusIndicator.appendChild(statusEl);
+
+        // 队列数与状态显示在同一行
+        const firstRow = document.createElement('div');
+        firstRow.style.display = 'flex';
+        firstRow.style.alignItems = 'center';
+        firstRow.appendChild(statusEl);
+
+        if (statusType === 'connected') {
+	    const queueBadge = document.createElement('span');
+            queueBadge.className = 'queue-badge';
+            queueBadge.textContent = `队列: ${queueSize}`;
+            firstRow.appendChild(queueBadge);
+	} else if (statusType === 'exception') {
+	    firstRow.appendChild(reconnectBtn);
+	} else {
+            const retryText = document.createElement('span');
+            retryText.textContent = ` (${state.retryCount * CHECK_INTERVAL / 1000}s)`;
+            firstRow.appendChild(retryText);
+        }
+	    
+        statusIndicator.appendChild(firstRow);
 
         // 添加附加信息
-        if (statusType === 'connected') {
-            queueBadge.textContent = `队列: ${queueSize}`;
-            statusIndicator.appendChild(queueBadge);
-        } else if (statusType === 'exception') {
-            statusIndicator.appendChild(reconnectBtn);
-        } else {
-            const retryText = document.createElement('span');
-            retryText.textContent = ` (${state.retryCount*CHECK_INTERVAL/1000}s)`;
-            statusIndicator.appendChild(retryText);
+        if (statusType === 'connected' && !isMobileDevice()) {
+	    // 显示 VRAM 使用情况
+            const vramPercent = ((vramUsed / vramTotal) * 100).toFixed(1);
+            vramUsage.textContent = `显存: ${vramPercent}%`;
+            statusIndicator.appendChild(vramUsage);
+
+            // 显示 RAM 使用情况
+            const ramPercent = ((ramUsed / ramTotal) * 100).toFixed(1);
+            ramUsage.textContent = `内存: ${ramPercent}%`;
+            statusIndicator.appendChild(ramUsage);
+
+            // 显示在线用户数
+            onlineUsersBadge.textContent = `用户: ${onlineUsers}/${onlineDomainUsers}`;
+            statusIndicator.appendChild(onlineUsersBadge);
+
+	    // 显示在线节点数
+            onlineNodesBadge.textContent = `节点: ${onlineNodes}`;
+            statusIndicator.appendChild(onlineNodesBadge);
         }
     }
 
     async function performHealthCheck() {
         const statusData = await fetchAppStatus();
-        
+
         if (!statusData) {
             state.retryCount++;
             if (state.retryCount >= MAX_RETRY_COUNT) {
@@ -182,7 +268,17 @@
         }
 
         if (statusData.timestamp === state.initialTimestamp) {
-            updateStatusUI('connected', statusData.queueSize);
+            updateStatusUI(
+                'connected',
+                statusData.queueSize,
+                statusData.ramUsed,
+                statusData.ramTotal,
+                statusData.vramUsed,
+                statusData.vramTotal,
+                statusData.onlineUsers,
+		statusData.onlineDomainUsers,
+		statusData.onlineNodes,
+            );
         } else {
             updateStatusUI('exception');
         }
@@ -196,10 +292,10 @@
 
         // 注入样式
         document.head.appendChild(style);
-        
+
         // 组装 DOM
         statusContainer.appendChild(statusIndicator);
-        
+
         // 集成到 Gradio
         const gradioContainer = gradioApp();
         if (gradioContainer) {

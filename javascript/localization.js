@@ -3,6 +3,19 @@ var re_num = /^[.\d]+$/;
 var original_lines = {};
 var translated_lines = {};
 
+const browser={
+    device: function(){
+           var u = navigator.userAgent;
+           // console.log(navigator);
+           return {
+                is_mobile: !!u.match(/AppleWebKit.*Mobile.*/),
+                is_pc: (u.indexOf('Macintosh') > -1 || u.indexOf('Windows NT') > -1),
+		is_wx_mini: (u.indexOf('miniProgram') > -1),
+            };
+         }(),
+    language: (navigator.browserLanguage || navigator.language).toLowerCase()
+}
+
 function hasLocalization() {
     return window.localization && Object.keys(window.localization).length > 0;
 }
@@ -109,7 +122,7 @@ function refresh_finished_images_catalog_label(value) {
     var yyy = value.split(",")[1];
     var finished_label = nickname + translation + " - " + htmlDecode(translation_stat.replace(/xxx/g, xxx).replace(/yyy/g, yyy));
     const randomTip = getRandomTip();
-    if (randomTip) {
+    if (randomTip && !browser.device.is_mobile) {
 	var space_num = 56 - randomTip.length;
 	const spaces = space_num > 0 ? '&nbsp;'.repeat(space_num) : '';
         label.innerHTML = finished_label + spaces + randomTip; 
