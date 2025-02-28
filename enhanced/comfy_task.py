@@ -237,7 +237,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                         task_method = 'flux_base2_gguf'
                     comfy_params.delete_params(['base_model_dtype'])
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
-        return ComfyTask(task_method, comfy_params, input_images)
+        return ComfyTask(task_method, comfy_params, input_images, total_steps)
     elif task_name == 'SD15AIO' and '_aio' in task_method:
         total_steps = total_steps if total_steps else default_params["steps"]
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
