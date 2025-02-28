@@ -135,13 +135,25 @@
             margin-top: 4px;
             font-size: 11px;
         }
-        .light .vram-usage, .light .ram-usage, .light .online-users-badge, .light .online-nodes-badge {
+	.light .vram-usage {
+            background: #f0f0f0;
+            padding: 1px 6px;
+            border-radius: 8px;
+            color: var(--neutral-700);
+        }
+        .light .ram-usage, .light .online-users-badge, .light .online-nodes-badge {
             background: #f0f0f0;
             padding: 1px 6px;
             border-radius: 8px;
 	    color: var(--neutral-400);
         }
-        .dark .vram-usage, .dark .ram-usage, .dark .online-users-badge, .dark .online-nodes-badge {
+	.dark .vram-usage {
+            background: #2d3748;
+            padding: 1px 6px;
+            border-radius: 8px;
+            color: var(--neutral-300);
+        }
+        .dark .ram-usage, .dark .online-users-badge, .dark .online-nodes-badge {
             background: #2d3748;
             padding: 1px 6px;
             border-radius: 8px;
