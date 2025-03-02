@@ -868,6 +868,10 @@ div.prose.tokenCounter {
 
 .thumbnails.scroll-hide {
   flex-wrap: wrap !important;
+}
+.model-gallery .thumbnails.scroll-hide,
+.lora-gallery .thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
   transform: translateY(-10px); /* 向上位移10像素 */
   position: relative; /* 确保transform生效 */
   min-height: 80px;
