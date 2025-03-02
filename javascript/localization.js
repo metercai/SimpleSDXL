@@ -119,12 +119,16 @@ function refresh_style_layout() {
 
         const visibleUnselected = styleGridOriginalElements.filter(item => {
             const btn = item.querySelector('button');
-            const rawText = btn?.textContent || '';
-            const cleanText = rawText.replace(/\s+/g, '').trim(); // 移除所有空白字符
-            const lowerText = cleanText.toLowerCase();
+
+            const rawOriginalText = btn?.getAttribute('data-original-text') || '';
+            const rawTranslatedText = btn?.textContent || '';
+
+            const cleanOriginal = rawOriginalText.trim().toLowerCase();
+            const cleanTranslated = rawTranslatedText.trim().toLowerCase();
 
             return !selectedItems.some(selected => selected === item) &&
-            lowerText.includes(searchText)
+                   (cleanOriginal.includes(searchText) ||
+                    cleanTranslated.includes(searchText));
         });
 
         visibleUnselected.forEach(item => {
