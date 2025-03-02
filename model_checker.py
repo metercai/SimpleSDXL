@@ -11,8 +11,8 @@ import json
 from collections import defaultdict
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
 def load_model_paths():
+    global simplemodels_root
 
     config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
     path_mapping = {}
@@ -20,7 +20,11 @@ def load_model_paths():
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
-
+        models_root = config.get("path_models_root", None)
+        if models_root:
+            simplemodels_root = os.path.abspath(os.path.join(script_dir, models_root)) if not os.path.isabs(models_root) else models_root
+        else:
+            simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
         path_mapping = {
             "checkpoints": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
                         for p in config.get("path_checkpoints", [])],
@@ -256,7 +260,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.02.27{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.03.02{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -270,6 +274,8 @@ def get_unique_filename(file_path, extension=".corrupted"):
 
 def validate_files(packages):
     path_mapping = load_model_paths()
+    print_colored(f">>>>>>默认模型根目录为：{simplemodels_root}<<<<<<", Fore.YELLOW)
+    print()
     download_files = {}
     missing_package_names = []
     package_percentages = {}
