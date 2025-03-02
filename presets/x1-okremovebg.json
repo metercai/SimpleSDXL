@@ -28,12 +28,7 @@
                 "通用B":"",
                 "人像":""
 	    },
-        "image_preprocessor_method": {
-            "通用I":  [["-normalization"]],
-            "通用R":  [["-normalization"]],
-            "通用B":  [["-normalization"]],
-            "人像": [["-normalization"]]
-        },
+	    "image_preprocessor_method": [["-normalization"]],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "task_method": {
                 "通用I": "x1-onekeyremovebg1",
