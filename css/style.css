@@ -868,6 +868,9 @@ div.prose.tokenCounter {
 
 .thumbnails.scroll-hide {
   flex-wrap: wrap !important;
+  transform: translateY(-10px); /* 向上位移10像素 */
+  position: relative; /* 确保transform生效 */
+  min-height: 80px;
 }
 
 /* 外部容器 */
@@ -939,4 +942,27 @@ div.prose.tokenCounter {
   padding: 0px 0px !important; /* 调整内边距 */
   width: 100px; /* 调整宽度 */
   height: 30px; /* 调整高度 */
+}
+.lora-gallery img {
+  border-radius: 7px !important;
+  padding: 0px !important;
+}
+.lora-gallery button {
+  border-radius: 7px !important;
+  padding: -3px !important;
+}
+.model-gallery button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 7px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+.model-gallery img {
+  border-radius: 7px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.svelte-1b19cri.with-caption {
+  height: calc(100% - 120px) !important;
 }
