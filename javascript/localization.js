@@ -93,6 +93,57 @@ function refresh_style_localization() {
     processNode(document.querySelector('.style_selections'));
 }
 
+let styleGridOriginalElements = [];
+
+function refresh_style_layout() {
+    const container = document.querySelector(".style_grid");
+    if (container) {
+
+        if (styleGridOriginalElements.length === 0) {
+            styleGridOriginalElements = [...container.querySelectorAll('.style_item')];
+        }
+
+        const sortedStyles = Array.from(document.querySelectorAll('.style_selections input:checked'))
+            .map(cb => cb.nextElementSibling.textContent.trim());
+
+        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"]');
+        const searchText = searchBar?.value?.toLowerCase() || '';
+
+        const selectedItems = sortedStyles.map(name =>
+            styleGridOriginalElements.find(item => {
+                const btn = item.querySelector('button');
+                const btnText = btn?.textContent.trim();
+                return btnText === name;
+            })
+        ).filter(Boolean);
+
+        const visibleUnselected = styleGridOriginalElements.filter(item => {
+            const btn = item.querySelector('button');
+            const rawText = btn?.textContent || '';
+            const cleanText = rawText.replace(/\s+/g, '').trim(); // 移除所有空白字符
+            const lowerText = cleanText.toLowerCase();
+
+            return !selectedItems.some(selected => selected === item) &&
+            lowerText.includes(searchText)
+        });
+
+        visibleUnselected.forEach(item => {
+            const btnText = item.querySelector('button')?.textContent.trim();
+        });
+
+        const hiddenItems = styleGridOriginalElements.filter(item =>
+            ![...selectedItems, ...visibleUnselected].includes(item)
+        );
+
+        const finalOrder = [...selectedItems, ...visibleUnselected, ...hiddenItems];
+
+        container.innerHTML = '';
+        finalOrder.forEach(item => container.appendChild(item));
+    }
+    setTimeout(() => gradioApp().dispatchEvent(new Event('resize')), 50);
+}
+
+
 function refresh_scene_localization() {
     processNode(document.querySelector('.scene_aspect_ratio_selections'));
 }

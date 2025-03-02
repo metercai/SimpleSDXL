@@ -890,8 +890,6 @@ with shared.gradio_root:
                     style_names=legal_style_names,
                     default_selected=modules.config.default_styles
                 )
-                visual_columns = []
-                checkboxes = []
                 with gr.Row():
                     layout_toggle = gr.Checkbox(
                         label="Use Visual Layout",
@@ -918,7 +916,7 @@ with shared.gradio_root:
                             with gr.Row(elem_classes=["style_grid"]):
                                 style_images = []
                                 for style in legal_style_names:
-                                    with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]) as col:
+                                    with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
                                         img = gr.Image(
                                             value=None,
                                             show_label=False,
@@ -934,7 +932,6 @@ with shared.gradio_root:
                                             elem_classes=["style-button"],
                                             variant="secondary" if style not in modules.config.default_styles else "primary"
                                         )
-                                        visual_columns.append(col)
                                         buttons.append(button)
 
                                         style_state = gr.State(value=style)
@@ -952,20 +949,19 @@ with shared.gradio_root:
                                             inputs=[style_selections, style_state],
                                             outputs=[button, style_selections]
                                         )
-
                     has_loaded = gr.State(value=False)
                     def load_style_images(use_visual, loaded_flag):
                         if use_visual and not loaded_flag:
                             updates = []
                             for style in legal_style_names:
-                                img_path = f"sdxl_styles/samples/{style.lower().replace(' ', '_')}.jpg"
+                                img_path = os.path.join("sdxl_styles", "samples", f"{style.lower().replace(' ', '_')}.jpg")
                                 if not os.path.exists(img_path):
-                                    img_path = "sdxl_styles/samples/default_style.jpg"
-                                updates.append(gr.update(value=img_path))
+                                    img_path = os.path.join("sdxl_styles", "samples", "default_style.jpg")
+                                updates.append(gr.update(value=img_path, visible=True))
                             return updates + [True]
                         else:
-                            no_updates = [gr.update()] * len(legal_style_names)
-                            return no_updates + [loaded_flag]
+                            return [gr.update()] * len(legal_style_names) + [loaded_flag]
+
                     def toggle_layout(use_visual):
                         return [
                             gr.update(visible=not use_visual),
@@ -981,30 +977,47 @@ with shared.gradio_root:
                         outputs=style_images + [has_loaded]
                     )
 
-                    def sync_selections(*values):
-                        selected = [style for style, checked in zip(legal_style_names, values) if checked]
-                        return gr.update(value=selected)
-
                 def filter_styles(query, use_visual, selected_styles):
+                    query_lower = query.strip().lower()
+                    filtered_styles = [
+                        s for s in legal_style_names
+                        if (query_lower in s.lower()) or 
+                        (query_lower in style_sorter.localization_key(s).lower()) or 
+                        (s in selected_styles)
+                    ]
+                    sorted_styles = []
+                    for s in legal_style_names:
+                        if s in selected_styles and s in filtered_styles:
+                            sorted_styles.append(s)
+                    for s in legal_style_names:
+                        if s not in selected_styles and s in filtered_styles:
+                            sorted_styles.append(s)
+
                     updates = []
-                    query_lower = query.lower()
                     for style in legal_style_names:
-                        style_lower = style.lower()
-                        match_query = query_lower in style_lower
-                        is_selected = style in selected_styles
-                        visible = match_query or is_selected
+                        visible = style in filtered_styles
                         updates.append(gr.update(visible=visible))
-
-                    filtered_choices = [s for s in legal_style_names
-                                    if query_lower in s.lower() or s in selected_styles]
-                    updates.append(gr.update(choices=filtered_choices))
-
+                        updates.append(gr.update(visible=visible))
+                    updates.append(gr.update(choices=sorted_styles))
                     return updates
 
+
                 style_search_bar.change(
+                    fn=style_sorter.search_styles,
+                    inputs=[style_selections, style_search_bar],
+                    outputs=style_selections,
+                    queue=False,
+                    show_progress=False
+                ).then(
                     fn=filter_styles,
                     inputs=[style_search_bar, layout_toggle, style_selections],
-                    outputs=visual_columns + [style_selections]
+                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections]
+                ).then(
+                    lambda: None, 
+                    _js='()=>{refresh_style_localization();}'
+                ).then(
+                    lambda: None,
+                    _js='() => {refresh_style_layout(); }'
                 )
 
                 def update_button_variants(selected_styles):
@@ -1014,9 +1027,21 @@ with shared.gradio_root:
                     return [gr.update(variant=v) for v in variants]
 
                 style_selections.change(
+                    fn=style_sorter.sort_styles,
+                    inputs=style_selections,
+                    outputs=style_selections,
+                    queue=False
+                ).then(
+                    lambda: None,
+                    _js='()=>{refresh_style_localization();}'
+                )
+                style_selections.change(
                     fn=update_button_variants,
                     inputs=style_selections,
                     outputs=buttons
+                ).then(
+                    lambda: None,
+                    _js='() => {refresh_style_layout(); }'
                 )
 
                 prompt.change(
