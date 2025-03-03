@@ -898,7 +898,7 @@ div.prose.tokenCounter {
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   min-width: 0;
-  max-width: 95px!important;
+  max-width: 90px!important;
 }
 /* 图片样式 */
 .style_item img {
