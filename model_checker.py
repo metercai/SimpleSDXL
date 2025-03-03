@@ -1441,7 +1441,7 @@ packages = {
         ],
         "download_links": [
         "【选配】基于FluxAIO扩展包扩展",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
         ]
     },
         "clothing_plus_package": {
