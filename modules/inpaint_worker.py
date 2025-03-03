@@ -249,12 +249,12 @@ class InpaintWorker:
         bg = self.image.copy().astype(np.float32)
         
         mask_height, mask_width = self.mask.shape[:2]     
-        kernel_size = int(min(mask_height, mask_width) * 0.10)
+        kernel_size = int(min(mask_height, mask_width) * 0.02)
         kernel_size = kernel_size + 1 if kernel_size % 2 == 0 else kernel_size
         kernel = np.ones((kernel_size, kernel_size), np.uint8)
         dilated_mask = cv2.dilate(self.mask, kernel, iterations=1)
         
-        blur_kernel_size = int(min(mask_height, mask_width) * 0.10)
+        blur_kernel_size = int(min(mask_height, mask_width) * 0.05)
         blur_kernel_size = blur_kernel_size + 1 if blur_kernel_size % 2 == 0 else blur_kernel_size
         sigma = blur_kernel_size / 5
 
