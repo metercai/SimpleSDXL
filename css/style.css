@@ -894,10 +894,11 @@ div.prose.tokenCounter {
   display: flex !important;
   flex-direction: column !important;
   gap: 0px !important;  /* 图片与复选框间距 */
-  padding: 4px !important;
+  padding: 2px !important;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   min-width: 0;
+  max-width: 95px!important;
 }
 /* 图片样式 */
 .style_item img {
@@ -916,16 +917,7 @@ div.prose.tokenCounter {
 .compact-cb {
   border: none !important;
 }
-.compact-cb {
-  margin-top: 0px !important;  /* 复选框上边距 */
-  padding: 0 !important;
-}
-/* 滚动容器 */
-#scroll_container {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding-right: 8px;
-}
+
 /* 复选框容器 */
 .checkbox_wrapper {
   display: flex !important;

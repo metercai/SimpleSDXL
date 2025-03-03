@@ -910,45 +910,44 @@ with shared.gradio_root:
                                                     elem_classes=['style_selections'])
                 buttons = []
 
-                with gr.Column(visible=False) as visual_layout_container:
-                    with gr.Blocks(elem_id="scroll_container"):
-                        with gr.Blocks(elem_id="style_visual_container"):
-                            with gr.Row(elem_classes=["style_grid"]):
-                                style_images = []
-                                for style in legal_style_names:
-                                    with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
-                                        img = gr.Image(
-                                            value=None,
-                                            show_label=False,
-                                            height=80,
-                                            interactive=False,
-                                            show_download_button=False,
-                                            elem_classes=["compact-img"]
-                                        )
-                                        style_images.append(img)
+                with gr.Column(visible=False,elem_id="scrollable-box") as visual_layout_container:
+                    with gr.Blocks(elem_id="style_visual_container"):
+                        with gr.Row(elem_classes=["style_grid"]):
+                            style_images = []
+                            for style in legal_style_names:
+                                with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
+                                    img = gr.Image(
+                                        value=None,
+                                        show_label=False,
+                                        height=80,
+                                        interactive=False,
+                                        show_download_button=False,
+                                        elem_classes=["compact-img"]
+                                    )
+                                    style_images.append(img)
 
-                                        button = gr.Button(
-                                            value=style,
-                                            elem_classes=["style-button"],
-                                            variant="secondary" if style not in modules.config.default_styles else "primary"
-                                        )
-                                        buttons.append(button)
+                                    button = gr.Button(
+                                        value=style,
+                                        elem_classes=["style-button"],
+                                        variant="secondary" if style not in modules.config.default_styles else "primary"
+                                    )
+                                    buttons.append(button)
 
-                                        style_state = gr.State(value=style)
+                                    style_state = gr.State(value=style)
 
-                                        def toggle_style(selected_styles, current_style):
-                                            if current_style in selected_styles:
-                                                selected_styles.remove(current_style)
-                                                return gr.update(variant="secondary"), selected_styles
-                                            else:
-                                                selected_styles.append(current_style)
-                                                return gr.update(variant="primary"), selected_styles
+                                    def toggle_style(selected_styles, current_style):
+                                        if current_style in selected_styles:
+                                            selected_styles.remove(current_style)
+                                            return gr.update(variant="secondary"), selected_styles
+                                        else:
+                                            selected_styles.append(current_style)
+                                            return gr.update(variant="primary"), selected_styles
 
-                                        button.click(
-                                            fn=toggle_style,
-                                            inputs=[style_selections, style_state],
-                                            outputs=[button, style_selections]
-                                        )
+                                    button.click(
+                                        fn=toggle_style,
+                                        inputs=[style_selections, style_state],
+                                        outputs=[button, style_selections]
+                                    )
                     has_loaded = gr.State(value=False)
                     def load_style_images(use_visual, loaded_flag):
                         if use_visual and not loaded_flag:
