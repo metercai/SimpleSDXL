@@ -904,10 +904,11 @@ with shared.gradio_root:
                                                 label='Search Styles',
                                                 scale = 5)
                 style_selections = gr.CheckboxGroup(show_label=False, container=False,
-                                                    choices=copy.deepcopy(style_sorter.all_styles),
-                                                    value=copy.deepcopy(modules.config.default_styles),
+                                                    choices=style_sorter.all_styles.copy(),
+                                                    value=modules.config.default_styles.copy(),
                                                     label='Selected Styles',
                                                     elem_classes=['style_selections'])
+                gradio_receiver_style_selections = gr.Textbox(elem_id='gradio_receiver_style_selections', visible=False)
                 buttons = []
 
                 with gr.Column(visible=False,elem_id="scrollable-box") as visual_layout_container:
@@ -1025,15 +1026,12 @@ with shared.gradio_root:
                         variants.append("primary" if style in selected_styles else "secondary")
                     return [gr.update(variant=v) for v in variants]
 
-                style_selections.change(
-                    fn=style_sorter.sort_styles,
-                    inputs=style_selections,
-                    outputs=style_selections,
-                    queue=False
-                ).then(
-                    lambda: None,
-                    _js='()=>{refresh_style_localization();}'
-                )
+                gradio_receiver_style_selections.input(style_sorter.sort_styles,
+                                                       inputs=style_selections,
+                                                       outputs=style_selections,
+                                                       queue=False,
+                                                       show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}')
                 style_selections.change(
                     fn=update_button_variants,
                     inputs=style_selections,
