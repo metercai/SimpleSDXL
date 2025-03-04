@@ -52,15 +52,27 @@ function getTranslation(text) {
 
 function processTextNode(node) {
     var text = node.textContent.trim();
-
     if (!canBeTranslated(node, text)) return;
 
     var tl = getTranslation(text);
+
+    // 新增反向查找逻辑以修复自定义风格悬浮图错位的问题
+    let originalText = text;
+    if (tl === undefined) {
+        for (const [en, cn] of Object.entries(localization)) {
+            if (cn === text) {
+                originalText = en;
+                break;
+            }
+        }
+    }
+
     if (tl !== undefined) {
         node.textContent = tl;
-        if (text && node.parentElement) {
-          node.parentElement.setAttribute("data-original-text", text);
-        }
+    }
+
+    if (originalText && node.parentElement) {
+        node.parentElement.setAttribute("data-original-text", originalText);
     }
 }
 
@@ -106,8 +118,8 @@ function refresh_style_layout() {
         const sortedStyles = Array.from(document.querySelectorAll('.style_selections input:checked'))
             .map(cb => cb.nextElementSibling.textContent.trim());
 
-        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"], textarea[data-testid="textbox"][placeholder*="search styles"]');
-        const searchText = (searchBar?.value?.trim() || '').toLowerCase();
+        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"]');
+        const searchText = searchBar?.value?.toLowerCase() || '';
 
         const selectedItems = sortedStyles.map(name =>
             styleGridOriginalElements.find(item => {
