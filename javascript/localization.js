@@ -118,8 +118,8 @@ function refresh_style_layout() {
         const sortedStyles = Array.from(document.querySelectorAll('.style_selections input:checked'))
             .map(cb => cb.nextElementSibling.textContent.trim());
 
-        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"]');
-        const searchText = searchBar?.value?.toLowerCase() || '';
+        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"], textarea[data-testid="textbox"][placeholder*="search styles"]');
+        const searchText = (searchBar?.value?.trim() || '').toLowerCase();
 
         const selectedItems = sortedStyles.map(name =>
             styleGridOriginalElements.find(item => {
