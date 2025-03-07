@@ -60,7 +60,8 @@
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
-        "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,"
+        "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
+        "controlnet,illustriousXL_controlnet_tile_v2.5.safetensors,5004167832,0,"
     ]
 }
 
