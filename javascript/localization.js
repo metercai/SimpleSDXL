@@ -294,3 +294,87 @@ document.addEventListener("DOMContentLoaded", function() {
         })).observe(gradioApp(), {childList: true});
     }
 });
+
+(() => {
+    // 基础配置
+    const config = {
+        containerSelector: '#component-393.style_grid',
+        loadButtonId: '#load_more_btn',
+        triggerValue: 1000,  // 触发加载的滚动位置
+        debug: true          // 启用调试日志
+    };
+
+    // 状态跟踪
+    let isLoading = false;
+    let scrollHandler = null;
+
+    // 核心初始化
+    function init() {
+        const container = document.querySelector(config.containerSelector);
+        if (!container) {
+            console.error('容器未找到:', config.containerSelector);
+            return;
+        }
+
+        // 设置必要样式
+        container.style.overflowY = 'auto';
+        container.style.height = '60vh';
+
+        // 绑定滚动事件
+        scrollHandler = throttle(() => {
+            if (isLoading) return;
+
+            const scrollTop = container.scrollTop;
+            if (config.debug) console.log('当前滚动位置:', scrollTop);
+
+            if (scrollTop >= config.triggerValue) {
+                triggerLoad();
+            }
+        }, 200);
+
+        container.addEventListener('scroll', scrollHandler);
+    }
+
+    // 触发加载
+    function triggerLoad() {
+        const btn = document.querySelector(config.loadButtonId);
+        if (!btn) {
+            console.error('加载按钮未找到:', config.loadButtonId);
+            return;
+        }
+
+        isLoading = true;
+        console.log('触发加载 (滚动值:', config.triggerValue, ')');
+        btn.click();
+
+        // 1秒冷却
+        setTimeout(() => {
+            isLoading = false;
+        }, 1000);
+    }
+
+    // 简单节流
+    function throttle(fn, delay) {
+        let last = 0;
+        return (...args) => {
+            const now = Date.now();
+            if (now - last >= delay) {
+                fn(...args);
+                last = now;
+            }
+        };
+    }
+
+    // 自动初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.querySelector('.layout_toggle input:checked')) {
+            setTimeout(init, 500);
+        }
+    });
+
+    // 暴露接口
+    window.ScrollLoader = {
+        init,
+        setThreshold: (value) => config.triggerValue = value
+    };
+})();

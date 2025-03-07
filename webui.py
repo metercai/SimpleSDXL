@@ -891,9 +891,9 @@ with shared.gradio_root:
                     default_selected=modules.config.default_styles
                 )
                 with gr.Row():
-                    with gr.Column(scale=1, min_width=130):
+                    with gr.Column(scale=1, min_width=80):
                         layout_toggle = gr.Checkbox(
-                            label="Use Visual Layout",
+                            label="Use Visual",
                             value=False,
                             container=False,
                             elem_classes=["layout_toggle"],
@@ -903,6 +903,7 @@ with shared.gradio_root:
                             "Load More",
                             variant="secondary",
                             elem_classes='load_more_btn',
+                            elem_id='load_more_btn',
                             visible=False,
                             scale=0
                         )
@@ -966,7 +967,7 @@ with shared.gradio_root:
 
                 has_loaded = gr.State(value=0)
                 filtered_sorted_styles = gr.State(value=legal_style_names.copy())
-                BATCH_SIZE = 150
+                BATCH_SIZE = 100
 
                 def load_style_images(use_visual, loaded_count, query):
                     if not use_visual:
@@ -1009,7 +1010,7 @@ with shared.gradio_root:
                         gr.update(visible=not use_visual),
                         gr.update(visible=use_visual),
                         new_loaded,
-                        gr.update(visible=use_visual and not all_loaded)
+                        gr.update(visible=False)
                     ]
                 def filter_styles(query, use_visual, selected_styles):
                     query_lower = query.strip().lower()
@@ -1063,7 +1064,20 @@ with shared.gradio_root:
                     outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
                     queue=False,
                     show_progress=False
+                ).then(
+                    None,
+                    inputs=[layout_toggle],
+                    _js="""
+                    (useVisual) => {
+                        if(useVisual) {
+                            setTimeout(() => ScrollLoader.init(), 300);
+                        } else {
+                            ScrollLoader.cleanup();
+                        }
+                    }
+                    """
                 )
+
                 style_search_bar.change(
                     fn=style_sorter.search_styles,
                     inputs=[style_selections, style_search_bar],

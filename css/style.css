@@ -970,4 +970,11 @@ div.prose.tokenCounter {
   margin: 2px 0 !important;
   margin-top: -12px!important;
   min-width: 130px!important;
+  display: none !important;
+}
+#component-393.style_grid {
+  overflow-y: auto !important;
+  height: 100vh !important;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
 }
