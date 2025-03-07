@@ -962,3 +962,12 @@ div.prose.tokenCounter {
 .svelte-1b19cri.with-caption {
   height: calc(100% - 120px) !important;
 }
+
+.load_more_btn.svelte-cmf5ev {
+  font-size: 12px !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+  margin: 2px 0 !important;
+  margin-top: -12px!important;
+  min-width: 130px!important;
+}
