@@ -1300,7 +1300,7 @@
   },
   "1043": {
     "inputs": {
-      "value": 3
+      "value": 1
     },
     "class_type": "easy int",
     "_meta": {
