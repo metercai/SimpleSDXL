@@ -1513,7 +1513,8 @@ packages = {
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
-            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099)
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("controlnet/illustriousXL_controlnet_tile_v2.5.safetensors", 5004167832),
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
