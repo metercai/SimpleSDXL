@@ -974,7 +974,7 @@ div.prose.tokenCounter {
 }
 #component-393.style_grid {
   overflow-y: auto !important;
-  height: 100vh !important;
+  height: 1000px !important;
   scrollbar-width: thin;
   scroll-behavior: smooth;
 }
