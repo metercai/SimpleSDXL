@@ -974,7 +974,22 @@ div.prose.tokenCounter {
 }
 #component-393.style_grid {
   overflow-y: auto !important;
-  height: 1000px !important;
   scrollbar-width: thin;
   scroll-behavior: smooth;
+}
+#component-393.style_grid.svelte-15lo0d8.stretch {
+  max-height: 100% !important;
+  height: 100% !important;
+  flex: 0 1 auto !important;
+  min-height: 300px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+.tab-nav.scroll-hide.svelte-kqij2n {
+  position: sticky !important;  /* 改为粘性定位 */
+  top: 0;
+  z-index: 999;
+  background: var(--background-fill-primary);
 }
