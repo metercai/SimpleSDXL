@@ -655,7 +655,46 @@ def remove_link_from_downloadlist(link):
         for line in lines:
             if link.strip() not in line.strip():
                 f.write(line)
+def trigger_manual_download():
+    """手动触发指定文件下载"""
+    path_mapping = load_model_paths()
 
+    for link in MANUAL_DOWNLOAD_LIST:
+        if "SimpleModels/" in link:
+            path_part = link.split("SimpleModels/", 1)[1]
+            path_parts = path_part.split('/')
+            path_type = path_parts[0].lower()
+            rel_path = '/'.join(path_parts[1:])
+        else:
+            continue
+
+        sorted_base_dir = sorted(
+            path_mapping.get(path_type, []),
+            key=lambda x: (
+                0 if "SimpleModels" in x else
+                1 if any(part == "models" for part in x.split(os.sep)) else 2,
+                x
+            )
+        )
+
+        target_base_dir = None
+        for base_dir in sorted_base_dir:
+            if os.path.exists(base_dir):
+                target_base_dir = base_dir
+                break
+        if not target_base_dir:
+            continue
+
+        file_name = os.path.basename(link)
+        save_path = os.path.join(target_base_dir, rel_path)
+
+        if os.path.exists(save_path):
+            print(f"{Fore.YELLOW}△文件已存在: {save_path}{Style.RESET_ALL}")
+            continue
+
+        print(f"{Fore.CYAN}△开始下载: {file_name}{Style.RESET_ALL}")
+        result_queue = queue.Queue()
+        download_file_with_resume(link, save_path, 0, result_queue)
 def auto_download_missing_files_with_retry(max_threads=5):
     if not os.path.exists("downloadlist.txt"):
         print("未找到 'downloadlist.txt' 文件。")
@@ -1522,6 +1561,45 @@ packages = {
         ]
     }
 }
+MANUAL_DOWNLOAD_LIST = [
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/animaPencilXL_v500.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-hyp8-Q5_K_M.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/hunyuan_dit_1.2.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/kolors_unet_fp16.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/LEOSAM_HelloWorldXL_70.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/playground-v2.5-1024px.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/ponyDiffusionV6XL.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/realisticStockPhoto_v20.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_large.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3_medium_incl_clips_t5xxlfp8.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/comfyui_portrait_lora64.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/comfyui_subject_lora16.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/fill_remove.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/FilmVelvia3.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux_graffiti_v1.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-canny-dev-lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-depth-dev-lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-turbo.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/Hyper-SDXL-8steps-lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/ip-adapter-faceid-plusv2_sd15_lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/ip-adapter-faceid-plusv2_sdxl_lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/kolors_crayonsketch_e10.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sd_xl_offset_example-lora_1.0.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sdxl_hyper_sd_4step_lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sdxl_lightning_4step_lora.jpg",
+    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/StickersRedmond.jpg"
+]
+
 def main():
     print()
     print_colored("★★★★★★★★★★★★★★★★★★欢迎使用SimpleAI模型检测器★★★★★★★★★★★★★★★★★★", Fore.CYAN)
@@ -1549,8 +1627,9 @@ if __name__ == "__main__":
         print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
         print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
-        print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
-        
+        print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻")
+        print(f">>>输入【{Fore.YELLOW}S{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------下载模型预览图<<<     备注：只下载checkpoints和lora预览图")
+
         user_input = input("请选择操作(不需要括号):")
 
         if user_input == "":
@@ -1600,6 +1679,8 @@ if __name__ == "__main__":
         elif user_input.lower() == "r":
             print("重新检测文件...")
             validate_files(packages)
-
+        elif user_input.lower() == "s":
+            print("下载预览图...")
+            trigger_manual_download()
         else:
             print(f"{Fore.RED}△无效的输入，请输入回车或有效的包体编号（不需要括号）。{Style.RESET_ALL}")
