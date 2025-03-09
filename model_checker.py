@@ -273,6 +273,7 @@ def get_unique_filename(file_path, extension=".corrupted"):
     return base
 
 def validate_files(packages):
+    cleanup()
     path_mapping = load_model_paths()
     print_colored(f">>>>>>默认模型根目录为：{simplemodels_root}<<<<<<", Fore.YELLOW)
     print()
