@@ -690,7 +690,7 @@ def trigger_manual_download():
         save_path = os.path.join(target_base_dir, rel_path)
 
         if os.path.exists(save_path):
-            print(f"{Fore.YELLOW}△文件已存在: {save_path}{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}△文件已存在，跳过下载: {save_path}{Style.RESET_ALL}")
             continue
 
         print(f"{Fore.CYAN}△开始下载: {file_name}{Style.RESET_ALL}")
@@ -1562,43 +1562,54 @@ packages = {
         ]
     }
 }
+
+MANUAL_DOWNLOAD_MAP = {
+    "checkpoints": [
+        "animaPencilXL_v500.jpg",
+        "flux1-dev.jpg",
+        "flux1-dev-fp8.jpg",
+        "flux1-fill-dev_fp8.jpg",
+        "flux1-fill-dev-hyp8-Q4_K_S.jpg",
+        "flux-hyp8-Q5_K_M.jpg",
+        "hunyuan_dit_1.2.jpg",
+        "juggernautXL_juggXIByRundiffusion.jpg",
+        "kolors_unet_fp16.jpg",
+        "LEOSAM_HelloWorldXL_70.jpg",
+        "miaomiaoHarem_v15b.jpg",
+        "playground-v2.5-1024px.jpg",
+        "ponyDiffusionV6XL.jpg",
+        "realisticStockPhoto_v20.jpg",
+        "realisticVisionV60B1_v51VAE.jpg",
+        "sd3.5_large.jpg",
+        "sd3.5_medium_incl_clips_t5xxlfp8scaled.jpg",
+        "sd3_medium_incl_clips_t5xxlfp8.jpg",
+        "SDXL_Yamers_Cartoon_Arcadia.jpg"
+    ],
+    "loras": [
+        "comfyui_portrait_lora64.jpg",
+        "comfyui_subject_lora16.jpg",
+        "fill_remove.jpg",
+        "FilmVelvia3.jpg",
+        "flux_graffiti_v1.jpg",
+        "flux1-canny-dev-lora.jpg",
+        "flux1-depth-dev-lora.jpg",
+        "flux1-turbo.jpg",
+        "Hyper-SDXL-8steps-lora.jpg",
+        "ip-adapter-faceid-plusv2_sd15_lora.jpg",
+        "ip-adapter-faceid-plusv2_sdxl_lora.jpg",
+        "kolors_crayonsketch_e10.jpg",
+        "sd_xl_offset_example-lora_1.0.jpg",
+        "SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
+        "sdxl_hyper_sd_4step_lora.jpg",
+        "sdxl_lightning_4step_lora.jpg",
+        "StickersRedmond.jpg"
+    ]
+}
+
 MANUAL_DOWNLOAD_LIST = [
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/animaPencilXL_v500.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev-hyp8-Q4_K_S.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-hyp8-Q5_K_M.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/hunyuan_dit_1.2.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/juggernautXL_juggXIByRundiffusion.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/kolors_unet_fp16.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/LEOSAM_HelloWorldXL_70.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/playground-v2.5-1024px.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/ponyDiffusionV6XL.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/realisticStockPhoto_v20.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/realisticVisionV60B1_v51VAE.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_large.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3_medium_incl_clips_t5xxlfp8.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/SDXL_Yamers_Cartoon_Arcadia.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/comfyui_portrait_lora64.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/comfyui_subject_lora16.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/fill_remove.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/FilmVelvia3.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux_graffiti_v1.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-canny-dev-lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-depth-dev-lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/flux1-turbo.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/Hyper-SDXL-8steps-lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/ip-adapter-faceid-plusv2_sd15_lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/ip-adapter-faceid-plusv2_sdxl_lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/kolors_crayonsketch_e10.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sd_xl_offset_example-lora_1.0.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sdxl_hyper_sd_4step_lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/sdxl_lightning_4step_lora.jpg",
-    "https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/loras/StickersRedmond.jpg"
+    f"https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/{category}/{filename}"
+    for category, files in MANUAL_DOWNLOAD_MAP.items() 
+    for filename in files
 ]
 
 def main():
