@@ -57,12 +57,18 @@ onUiLoaded(async() => {
     function applyZoomAndPan(elemId) {
         const targetElement = gradioApp().querySelector(elemId);
 
-        if (!targetElement) {
-            console.log("Element not found");
-            return;
+        // 清理旧事件监听
+        if (targetElement._moveHandler) {
+            gradioApp().removeEventListener("mousemove", targetElement._moveHandler);
         }
-
         targetElement.style.transformOrigin = "0 0";
+        // 创建新的独立处理器
+        targetElement._moveHandler = (e) => {
+            if (e.target.closest(elemId)) {
+                handleMoveByKey.call({ elemId, targetElement }, e);
+            }
+        };
+        gradioApp().addEventListener("mousemove", targetElement._moveHandler);
 
         elemData[elemId] = {
             zoom: 1,
@@ -188,20 +194,36 @@ onUiLoaded(async() => {
             }
 
             targetElement.style.width = "";
+            const canvasLabels = gradioApp().querySelectorAll(
+                `${elemId} div[data-testid="block-label"][data-original-text="Upload and canvas"],
+                ${elemId} div[data-testid="block-label"][data-original-text="Upload prompt image"]`
+            );
+            canvasLabels.forEach(label => label.style.display = '');
         }
 
         // Toggle the zIndex of the target element between two values, allowing it to overlap or be overlapped by other elements
         function toggleOverlap(forced = "") {
-            const zIndex1 = "0";
-            const zIndex2 = "998";
+            const baseZIndex = 1005; // 基础层级
+            const activeIncrement = 1; // 激活时增加的层级
+
+            // 自动提升当前激活画布层级
+            const allCanvases = ['#inpaint_canvas', '#inpaint_mask_canvas', '#scene_canvas'];
+            allCanvases.forEach(selector => {
+                if (selector !== elemId) {
+                    const otherCanvas = gradioApp().querySelector(selector);
+                    if (otherCanvas) otherCanvas.style.zIndex = baseZIndex - 1;
+                }
+            });
 
             targetElement.style.zIndex =
-                targetElement.style.zIndex !== zIndex2 ? zIndex2 : zIndex1;
+                targetElement.style.zIndex !== String(baseZIndex + activeIncrement)
+                ? String(baseZIndex + activeIncrement)
+                : String(baseZIndex - 1);
 
             if (forced === "off") {
-                targetElement.style.zIndex = zIndex1;
+                targetElement.style.zIndex = String(baseZIndex - 1);
             } else if (forced === "on") {
-                targetElement.style.zIndex = zIndex2;
+                targetElement.style.zIndex = String(baseZIndex + activeIncrement);
             }
         }
 
@@ -361,6 +383,7 @@ onUiLoaded(async() => {
             const removeButton = document.querySelector(`${activeElement} button[aria-label="Remove Image"]`);
             const useBrushButton = document.querySelector(`${activeElement} button[aria-label="Use brush"]`);
             const BrushRadius = document.querySelector(`${activeElement} input[aria-label="Brush radius"]`)
+            const tooltip = document.querySelector(`${activeElement} .canvas-tooltip`);
 
             if (buttonsVisible) {
                 if (undoButton) undoButton.style.display = 'none';
@@ -368,12 +391,14 @@ onUiLoaded(async() => {
                 if (removeButton) removeButton.style.display = 'none';
                 if (useBrushButton) useBrushButton.style.display = 'none';
                 if (BrushRadius) BrushRadius.style.display = 'none';
+                if (tooltip) tooltip.style.display = 'none';
             } else {
                 if (undoButton) undoButton.style.display = '';
                 if (clearButton) clearButton.style.display = '';
                 if (removeButton) removeButton.style.display = '';
                 if (useBrushButton) useBrushButton.style.display = '';
                 if (BrushRadius) BrushRadius.style.display = '';
+                if (tooltip) tooltip.style.display = '';
             }
 
             buttonsVisible = !buttonsVisible;
@@ -445,6 +470,11 @@ onUiLoaded(async() => {
 
             fullScreenMode = true;
             toggleOverlap("on");
+            const canvasLabels = gradioApp().querySelectorAll(
+                `${elemId} div[data-testid="block-label"][data-original-text="Upload and canvas"], 
+                ${elemId} div[data-testid="block-label"][data-original-text="Upload prompt image"]`
+            );
+            canvasLabels.forEach(label => label.style.display = 'none');
         }
 
         // Handle keydown events
@@ -607,7 +637,7 @@ onUiLoaded(async() => {
 
         // Detect zoom level and update the pan speed.
         function updatePanPosition(movementX, movementY) {
-            let panSpeed = 2;
+            let panSpeed = 1;
 
             if (elemData[elemId].zoomLevel > 8) {
                 panSpeed = 3.5;
@@ -624,14 +654,19 @@ onUiLoaded(async() => {
         }
 
         function handleMoveByKey(e) {
-            if (isMoving && elemId === activeElement) {
-                updatePanPosition(e.movementX, e.movementY);
-                targetElement.style.pointerEvents = "none";
-                targetElement.style.overflow = "visible";
-            } else {
+            // 移除事件阻断方法，改用精准条件判断
+            if (!isMoving || elemId !== activeElement) {
                 targetElement.style.pointerEvents = "auto";
+                return;
             }
+
+            // 添加安全范围检查
+            if (Math.abs(e.movementX) > 100 || Math.abs(e.movementY) > 100) return;
+
+            updatePanPosition(e.movementX, e.movementY);
+            targetElement.style.overflow = "visible";
         }
+
 
         // Prevents sticking to the mouse
         window.onblur = function() {
@@ -664,7 +699,7 @@ onUiLoaded(async() => {
             targetElement.isZoomed = false;
         });
 
-        gradioApp().addEventListener("mousemove", handleMoveByKey);
+        // gradioApp().addEventListener("mousemove", handleMoveByKey);
     }
 
     applyZoomAndPan("#inpaint_canvas");

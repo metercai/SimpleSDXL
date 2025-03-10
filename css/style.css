@@ -993,3 +993,10 @@ div.prose.tokenCounter {
   z-index: 999;
   background: var(--background-fill-primary);
 }
+#component-9.svelte-iyf88w {  /* 父容器样式修正 */
+  overflow: visible !important;
+  contain: none !important;
+  min-width: initial !important;
+  max-width: none !important;
+  position: relative;
+}
