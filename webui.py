@@ -407,7 +407,13 @@ with shared.gradio_root:
                 state_prompt_history = gr.State([])
                 with gr.Accordion(label='Prompt History', visible=False, open=True) as prompt_history:
                     history_prompts = gr.Dataset(components=[prompt],label='Click to reuse:',samples=[[p] for p in state_prompt_history.value[-5:]],type='index')
-                history_prompts.click(lambda x, y: y[x] if isinstance(x, int) and x < len(y) else "",inputs=[history_prompts, state_prompt_history],outputs=prompt,show_progress=False,queue=False)
+                history_prompts.click(
+                    lambda x, y: y[x] if 0 <= x < len(y) else "",
+                    inputs=[history_prompts, state_prompt_history],
+                    outputs=prompt,
+                    show_progress=False,
+                    queue=False
+                )
 
                 with gr.Accordion(label='Wildcards & Batch Prompts', visible=False, open=True) as prompt_wildcards:
                     wildcards_list = gr.Dataset(components=[prompt], type='index', label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=True, samples_per_page=28)
@@ -1768,12 +1774,26 @@ with shared.gradio_root:
         prompt.change(parse_meta, inputs=[prompt, state_topbar, scene_input_image1, state_is_generating], outputs=[prompt, generate_button, load_parameter_button, prompt_panel_checkbox], queue=False, show_progress=False)      
         translator_button.click(lambda x, y: minicpm.translate(x, y), inputs=[prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
 
-
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
                 logger.info('Could not find metadata in the image!')
             return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
+
+        def update_prompt_history(task, existing_history):
+            MAX_HISTORY = 5
+            if not task or not hasattr(task, 'final_prompts'):
+                return existing_history[-MAX_HISTORY:]
+
+            new_unique_prompts = []
+            for p in task.final_prompts:
+                if p not in new_unique_prompts:
+                    new_unique_prompts.append(p)
+            for p in new_unique_prompts:
+                while p in existing_history:
+                    existing_history.remove(p)
+            updated_history = existing_history + new_unique_prompts
+            return updated_history[-MAX_HISTORY:]
 
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
@@ -1792,10 +1812,8 @@ with shared.gradio_root:
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed') \
-            .then(lambda task, h: (h + list({p: None for p in task.final_prompts}.keys()))
-                  if task and hasattr(task, 'final_prompts') and isinstance(task.final_prompts, list)
-                  else h,inputs=[currentTask, state_prompt_history],outputs=state_prompt_history) \
-            .then(lambda h: gr.Dataset.update(samples=[[item] for item in h[-5:]] if h and len(h) > 0 else []),inputs=state_prompt_history,outputs=history_prompts,queue=False)
+            .then(fn=update_prompt_history,inputs=[currentTask, state_prompt_history],outputs=state_prompt_history) \
+            .then(lambda h: gr.Dataset.update(samples=[[v] for v in h]),inputs=state_prompt_history,outputs=history_prompts)
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
             if os.path.exists(notification_file):
