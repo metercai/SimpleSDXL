@@ -1308,15 +1308,15 @@ with shared.gradio_root:
                     base_preview_btn.click(
                         fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
                         inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
-                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
+                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False
                     )
 
                     refiner_preview_btn.click(
                         fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
                         inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
-                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn]
+                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False
                     )
-                    model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery])
+                    model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery], show_progress=False, queue=False)
                     refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
                                                info='Use 0.4 for SD1.5 realistic models; '
                                                     'or 0.667 for SD1.5 anime models; '
@@ -1346,8 +1346,8 @@ with shared.gradio_root:
                             lora_galleries.append(lora_gallery)
 
                     for i in range(len(modules.config.default_loras)):
-                        lora_galleries[i].select(fn=on_lora_gallery_select, inputs=[lora_current_previews[i], gr.State(i)], outputs=[lora_models[i]])
-                        lora_preview_btns[i].click(fn=lambda current_visible, idx=i: show_lora_gallery(current_visible, idx), inputs=[lora_gallery_visible[i]], outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]])
+                        lora_galleries[i].select(fn=on_lora_gallery_select, inputs=[lora_current_previews[i], gr.State(i)], outputs=[lora_models[i]], show_progress=False, queue=False)
+                        lora_preview_btns[i].click(fn=lambda current_visible, idx=i: show_lora_gallery(current_visible, idx), inputs=[lora_gallery_visible[i]], outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]], show_progress=False, queue=False)
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 #with gr.Row():
