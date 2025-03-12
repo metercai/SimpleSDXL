@@ -28,7 +28,7 @@ class AsyncTask:
         self.last_stop = False
         self.processing = False
         self.task_id = str(uuid.uuid4())
-
+        self.final_prompts = []
         self.performance_loras = []
 
         if len(args) == 0:
@@ -1404,7 +1404,9 @@ def worker():
                                                          base_model_additional_loras, async_task.image_number,
                                                          async_task.disable_seed_increment, use_expansion, use_style,
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
-        
+            async_task.final_prompts = [task.get('prompt', async_task.prompt) for task in tasks]
+        else:
+            async_task.final_prompts = [async_task.prompt] * async_task.image_number
         if async_task.task_class in flags.comfy_classes:
             logger.info(f'[TaskEngine] Enable Comfyd backend.')
             # if "flux_aio" in async_task.task_method and \
@@ -1532,7 +1534,8 @@ def worker():
 
         preparation_steps = current_progress
         total_count = async_task.image_number
-
+        # for task in tasks:
+        #     async_task.final_prompts.append(task['log_positive_prompt'])
         def callback(step, x0, x, total_steps, y):
             if step == 0:
                 async_task.callback_steps = 0
