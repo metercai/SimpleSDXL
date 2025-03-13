@@ -945,7 +945,7 @@ with shared.gradio_root:
 
                 with gr.Column(visible=False, elem_id="scrollable-box") as visual_layout_container:
                     with gr.Blocks(elem_id="style_visual_container"):
-                        with gr.Row(elem_classes=["style_grid"]):
+                        with gr.Row(elem_classes=["style_grid"], elem_id="style_grid"):
                             style_images = []
                             for style in legal_style_names:
                                 with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):

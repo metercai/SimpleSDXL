@@ -959,11 +959,11 @@ div.prose.tokenCounter {
   margin: 0 !important;
   padding: 0 !important;
 }
-.svelte-1b19cri.with-caption {
+.with-caption {
   height: calc(100% - 120px) !important;
 }
 
-.load_more_btn.svelte-cmf5ev {
+.load_more_btn{
   font-size: 12px !important;
   min-height: 24px !important;
   padding: 0 8px !important;
@@ -972,12 +972,13 @@ div.prose.tokenCounter {
   min-width: 130px!important;
   display: none !important;
 }
-#component-393.style_grid {
+#style_grid.style_grid {
   overflow-y: auto !important;
   scrollbar-width: thin;
   scroll-behavior: smooth;
 }
-#component-393.style_grid.svelte-15lo0d8.stretch {
+
+#style_grid.style_grid.stretch {
   max-height: 100% !important;
   height: 100% !important;
   flex: 0 1 auto !important;
@@ -987,13 +988,13 @@ div.prose.tokenCounter {
   bottom: 0;
   width: 100%;
 }
-.tab-nav.scroll-hide.svelte-kqij2n {
-  position: sticky !important;  /* 改为粘性定位 */
+.tab-nav.scroll-hide {
+  position: sticky !important;
   top: 0;
   z-index: 999;
   background: var(--background-fill-primary);
 }
-#component-9.svelte-iyf88w {  /* 父容器样式修正 */
+#component-9 {
   overflow: visible !important;
   contain: none !important;
   min-width: initial !important;
@@ -1001,7 +1002,7 @@ div.prose.tokenCounter {
   position: relative;
 }
 /* 新增按钮容器高度设置 */
-button.gallery-item.svelte-13hsdno {
+button.gallery-item {
   max-height: 68px; /* 或任意需要的固定高度 */
   display: flex;  /* 启用flex布局 */
 }

@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
 (() => {
     // 基础配置
     const config = {
-        containerSelector: '#component-393.style_grid',
+        containerSelector: '#style_grid.style_grid',
         loadButtonId: '#load_more_btn',
         triggerValue: 1000,  // 触发加载的滚动位置
         debug: true          // 启用调试日志
