@@ -908,8 +908,16 @@ div.prose.tokenCounter {
   margin-bottom: 0 !important;  /* 去除默认间距 */
 }
 .compact-img {
-  height: 80px !important;     /* 图片高度 */
+  height: 80px !important;
   min-height: 80px !important;
+  transition: transform 0.1s ease; /* 添加过渡动画 */
+  transform-origin: center bottom; /* 设置缩放中心 */
+  cursor: pointer;
+}
+
+.compact-img:hover {
+  transform: scale(1.1); /* 悬停时放大1.1倍 */
+  z-index: 1006; /* 确保放大图片在上层 */
 }
 /* 移除所有内部边框 */
 .style_item,
