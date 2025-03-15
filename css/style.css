@@ -865,13 +865,13 @@ div.prose.tokenCounter {
   background: var(--button-secondary-background-fill, lightgray);
   color: var(--button-hover-text-color, #000);
 }
-.tab-nav.scroll-hide.svelte-kqij2n {
-  position: sticky !important;  /* 改为粘性定位 */
+.tab-nav.scroll-hide {
+  position: sticky !important;
   top: 0;
   z-index: 999;
   background: var(--background-fill-primary);
 }
-#component-9.svelte-iyf88w {  /* 父容器样式修正 */
+#component-9 {
   overflow: visible !important;
   contain: none !important;
   min-width: initial !important;
