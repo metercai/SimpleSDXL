@@ -1289,7 +1289,7 @@
         "122",
         6
       ],
-      "noise_strength": 0.2,
+      "noise_strength": 0.05,
       "normalize": "false",
       "latent": [
         "274",
