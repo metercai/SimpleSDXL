@@ -64,7 +64,7 @@ def get_wildcards_samples(path="root"):
                 if len(weight_range.strip())>0:
                     wildcards_weight_range.update({wildcard: weight_range})
             else:
-                wildcards_template({f'{wildcard}/{word}': template})
+                wildcards_template.update({f'{wildcard}/{word}': template})
                 if len(weight_range.strip())>0:
                     wildcards_weight_range.update({f'{wildcard}/{word}': weight_range})
         words = [x.split("|")[0] for x in words]
