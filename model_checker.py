@@ -11,8 +11,8 @@ import json
 from collections import defaultdict
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
 def load_model_paths():
+    global simplemodels_root
 
     config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
     path_mapping = {}
@@ -20,7 +20,11 @@ def load_model_paths():
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
-
+        models_root = config.get("path_models_root", None)
+        if models_root:
+            simplemodels_root = os.path.abspath(os.path.join(script_dir, models_root)) if not os.path.isabs(models_root) else models_root
+        else:
+            simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
         path_mapping = {
             "checkpoints": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
                         for p in config.get("path_checkpoints", [])],
@@ -256,7 +260,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.02.27{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.03.02{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -269,7 +273,10 @@ def get_unique_filename(file_path, extension=".corrupted"):
     return base
 
 def validate_files(packages):
+    cleanup()
     path_mapping = load_model_paths()
+    print_colored(f">>>>>>默认模型根目录为：{simplemodels_root}<<<<<<", Fore.YELLOW)
+    print()
     download_files = {}
     missing_package_names = []
     package_percentages = {}
@@ -649,7 +656,46 @@ def remove_link_from_downloadlist(link):
         for line in lines:
             if link.strip() not in line.strip():
                 f.write(line)
+def trigger_manual_download():
+    """手动触发指定文件下载"""
+    path_mapping = load_model_paths()
 
+    for link in MANUAL_DOWNLOAD_LIST:
+        if "SimpleModels/" in link:
+            path_part = link.split("SimpleModels/", 1)[1]
+            path_parts = path_part.split('/')
+            path_type = path_parts[0].lower()
+            rel_path = '/'.join(path_parts[1:])
+        else:
+            continue
+
+        sorted_base_dir = sorted(
+            path_mapping.get(path_type, []),
+            key=lambda x: (
+                0 if "SimpleModels" in x else
+                1 if any(part == "models" for part in x.split(os.sep)) else 2,
+                x
+            )
+        )
+
+        target_base_dir = None
+        for base_dir in sorted_base_dir:
+            if os.path.exists(base_dir):
+                target_base_dir = base_dir
+                break
+        if not target_base_dir:
+            continue
+
+        file_name = os.path.basename(link)
+        save_path = os.path.join(target_base_dir, rel_path)
+
+        if os.path.exists(save_path):
+            print(f"{Fore.GREEN}△文件已存在，跳过下载: {save_path}{Style.RESET_ALL}")
+            continue
+
+        print(f"{Fore.CYAN}△开始下载: {file_name}{Style.RESET_ALL}")
+        result_queue = queue.Queue()
+        download_file_with_resume(link, save_path, 0, result_queue)
 def auto_download_missing_files_with_retry(max_threads=5):
     if not os.path.exists("downloadlist.txt"):
         print("未找到 'downloadlist.txt' 文件。")
@@ -1435,7 +1481,7 @@ packages = {
         ],
         "download_links": [
         "【选配】基于FluxAIO扩展包扩展",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux-dev-fp8.safetensors"
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
         ]
     },
         "clothing_plus_package": {
@@ -1507,7 +1553,8 @@ packages = {
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
-            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099)
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("controlnet/illustriousXL_controlnet_tile_v2.5.safetensors", 5004167832),
         ],
         "download_links": [
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
@@ -1515,6 +1562,56 @@ packages = {
         ]
     }
 }
+
+MANUAL_DOWNLOAD_MAP = {
+    "checkpoints": [
+        "animaPencilXL_v500.jpg",
+        "flux1-dev.jpg",
+        "flux1-dev-fp8.jpg",
+        "flux1-fill-dev_fp8.jpg",
+        "flux1-fill-dev-hyp8-Q4_K_S.jpg",
+        "flux-hyp8-Q5_K_M.jpg",
+        "hunyuan_dit_1.2.jpg",
+        "juggernautXL_juggXIByRundiffusion.jpg",
+        "kolors_unet_fp16.jpg",
+        "LEOSAM_HelloWorldXL_70.jpg",
+        "miaomiaoHarem_v15b.jpg",
+        "playground-v2.5-1024px.jpg",
+        "ponyDiffusionV6XL.jpg",
+        "realisticStockPhoto_v20.jpg",
+        "realisticVisionV60B1_v51VAE.jpg",
+        "sd3.5_large.jpg",
+        "sd3.5_medium_incl_clips_t5xxlfp8scaled.jpg",
+        "sd3_medium_incl_clips_t5xxlfp8.jpg",
+        "SDXL_Yamers_Cartoon_Arcadia.jpg"
+    ],
+    "loras": [
+        "comfyui_portrait_lora64.jpg",
+        "comfyui_subject_lora16.jpg",
+        "fill_remove.jpg",
+        "FilmVelvia3.jpg",
+        "flux_graffiti_v1.jpg",
+        "flux1-canny-dev-lora.jpg",
+        "flux1-depth-dev-lora.jpg",
+        "flux1-turbo.jpg",
+        "Hyper-SDXL-8steps-lora.jpg",
+        "ip-adapter-faceid-plusv2_sd15_lora.jpg",
+        "ip-adapter-faceid-plusv2_sdxl_lora.jpg",
+        "kolors_crayonsketch_e10.jpg",
+        "sd_xl_offset_example-lora_1.0.jpg",
+        "SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
+        "sdxl_hyper_sd_4step_lora.jpg",
+        "sdxl_lightning_4step_lora.jpg",
+        "StickersRedmond.jpg"
+    ]
+}
+
+MANUAL_DOWNLOAD_LIST = [
+    f"https://hf-mirror.com/windecay/SimpleSDXL2/resolve/main/SimpleModels/{category}/{filename}"
+    for category, files in MANUAL_DOWNLOAD_MAP.items() 
+    for filename in files
+]
+
 def main():
     print()
     print_colored("★★★★★★★★★★★★★★★★★★欢迎使用SimpleAI模型检测器★★★★★★★★★★★★★★★★★★", Fore.CYAN)
@@ -1542,8 +1639,9 @@ if __name__ == "__main__":
         print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
         print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
-        print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻。")
-        
+        print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻")
+        print(f">>>输入【{Fore.YELLOW}S{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------下载模型预览图<<<     备注：只下载checkpoints和lora预览图")
+
         user_input = input("请选择操作(不需要括号):")
 
         if user_input == "":
@@ -1593,6 +1691,8 @@ if __name__ == "__main__":
         elif user_input.lower() == "r":
             print("重新检测文件...")
             validate_files(packages)
-
+        elif user_input.lower() == "s":
+            print("下载预览图...")
+            trigger_manual_download()
         else:
             print(f"{Fore.RED}△无效的输入，请输入回车或有效的包体编号（不需要括号）。{Style.RESET_ALL}")
