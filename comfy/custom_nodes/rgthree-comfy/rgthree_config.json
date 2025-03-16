@@ -1,0 +1,24 @@
+{
+  "features": {
+    "comfy_top_bar_menu": {
+      "enabled": false
+    },
+    "group_header_fast_toggle": {
+      "enabled": false
+    },
+    "import_individual_nodes": {
+      "enabled": false
+    },
+    "menu_auto_nest": {
+      "subdirs": false
+    },
+    "menu_bookmarks": {
+      "enabled": false
+    },
+    "menu_queue_selected_nodes": false,
+    "patch_recursive_execution": false,
+    "progress_bar": {
+      "enabled": false
+    }
+  }
+}
