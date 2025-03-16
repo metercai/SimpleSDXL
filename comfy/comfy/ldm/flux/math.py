@@ -5,8 +5,15 @@ from torch import Tensor
 from comfy.ldm.modules.attention import optimized_attention
 import comfy.model_management
 
+
 def attention(q: Tensor, k: Tensor, v: Tensor, pe: Tensor, mask=None) -> Tensor:
-    q, k = apply_rope(q, k, pe)
+    q_shape = q.shape
+    k_shape = k.shape
+
+    q = q.float().reshape(*q.shape[:-1], -1, 1, 2)
+    k = k.float().reshape(*k.shape[:-1], -1, 1, 2)
+    q = (pe[..., 0] * q[..., 0] + pe[..., 1] * q[..., 1]).reshape(*q_shape).type_as(v)
+    k = (pe[..., 0] * k[..., 0] + pe[..., 1] * k[..., 1]).reshape(*k_shape).type_as(v)
 
     heads = q.shape[1]
     x = optimized_attention(q, k, v, heads, skip_reshape=True, mask=mask)
@@ -15,7 +22,7 @@ def attention(q: Tensor, k: Tensor, v: Tensor, pe: Tensor, mask=None) -> Tensor:
 
 def rope(pos: Tensor, dim: int, theta: int) -> Tensor:
     assert dim % 2 == 0
-    if comfy.model_management.is_device_mps(pos.device) or comfy.model_management.is_intel_xpu():
+    if comfy.model_management.is_device_mps(pos.device) or comfy.model_management.is_intel_xpu() or comfy.model_management.is_directml_enabled():
         device = torch.device("cpu")
     else:
         device = pos.device
