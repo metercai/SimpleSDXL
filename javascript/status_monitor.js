@@ -9,7 +9,10 @@
         currentQueueSize: 0,
         retryCount: 0,
         isConnected: false,
-        currentTheme: 'light'
+        currentTheme: 'light',
+        isDragging: false,
+        offsetX: 0,
+        offsetY: 0
     };
 
     // ==================== 移动设备检测 ====================
@@ -62,8 +65,14 @@
             right: 3px;
             z-index: 9999;
             font-family: Arial, sans-serif;
-	    background: transparent; /* 设置背景为透明 */
-            pointer-events: none; /* 确保不阻挡页面交互 */
+            background: transparent; /* 设置背景为透明 */
+            pointer-events: auto; /* 修改为auto以支持拖拽 */
+            cursor: grab; /* 显示可拖拽的手型光标 */
+        }
+        
+        #gradio-status-monitor.dragging {
+            cursor: grabbing; /* 拖拽时显示抓取状态的光标 */
+            opacity: 0.8;
         }
 
         /* 亮色主题 */
@@ -253,12 +262,18 @@
             statusIndicator.appendChild(ramUsage);
 
             // 显示在线用户数
-            onlineUsersBadge.textContent = `用户: ${onlineUsers}/${onlineDomainUsers}`;
+            if (onlineDomainUsers===0) {
+		onlineUsersBadge.textContent = `用户: ${onlineUsers}`;
+	    } else {
+		onlineUsersBadge.textContent = `用户: ${onlineUsers}/${onlineDomainUsers}`;
+	    }
             statusIndicator.appendChild(onlineUsersBadge);
 
 	    // 显示在线节点数
-            onlineNodesBadge.textContent = `节点: ${onlineNodes}`;
-            statusIndicator.appendChild(onlineNodesBadge);
+	    if (onlineNodes!=0) {
+                onlineNodesBadge.textContent = `节点: ${onlineNodes}`;
+                statusIndicator.appendChild(onlineNodesBadge);
+	    }
         }
     }
 
@@ -297,6 +312,169 @@
         }
     }
 
+    // ==================== 浏览器检测 ====================
+    function detectBrowser() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('chrome') > -1) return 'chrome';
+        if (userAgent.indexOf('safari') > -1 && userAgent.indexOf('chrome') === -1) return 'safari';
+        if (userAgent.indexOf('firefox') > -1) return 'firefox';
+        if (userAgent.indexOf('edge') > -1) return 'edge';
+        return 'unknown';
+    }
+
+    // ==================== 拖拽功能 ====================
+    function initDragFeature() {
+        const browser = detectBrowser();
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        
+        // 标准鼠标拖拽事件
+        statusContainer.addEventListener('mousedown', startDrag);
+        
+        // 触摸设备支持
+        statusContainer.addEventListener('touchstart', startTouchDrag, { passive: false });
+        
+        // 为 Chrome 和 Edge 在 Mac 上添加 Pointer Events 支持
+        if ((browser === 'chrome' || browser === 'edge') && isMac) {
+            statusContainer.addEventListener('pointerdown', startPointerDrag);
+        }
+        
+        function startDrag(e) {
+            // 只响应左键 (button === 0)
+            if (e.button === 0) {
+                e.preventDefault();
+                state.isDragging = true;
+                
+                // 获取当前位置
+                const rect = statusContainer.getBoundingClientRect();
+                state.offsetX = e.clientX - rect.left;
+                state.offsetY = e.clientY - rect.top;
+                
+                statusContainer.classList.add('dragging');
+                
+                // 添加临时事件监听器
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+            }
+        }
+        
+        function startPointerDrag(e) {
+            // 只响应主指针（通常是左键或触控板点击）
+            if (e.isPrimary && (e.pointerType === 'mouse' || e.pointerType === 'touch')) {
+                e.preventDefault();
+                state.isDragging = true;
+                
+                // 获取当前位置
+                const rect = statusContainer.getBoundingClientRect();
+                state.offsetX = e.clientX - rect.left;
+                state.offsetY = e.clientY - rect.top;
+                
+                statusContainer.classList.add('dragging');
+                
+                // 添加临时事件监听器
+                document.addEventListener('pointermove', doPointerDrag);
+                document.addEventListener('pointerup', stopPointerDrag);
+                document.addEventListener('pointercancel', stopPointerDrag);
+            }
+        }
+        
+        function startTouchDrag(e) {
+            if (e.touches && e.touches.length === 1) {
+                e.preventDefault();
+                state.isDragging = true;
+                
+                // 获取当前位置
+                const rect = statusContainer.getBoundingClientRect();
+                state.offsetX = e.touches[0].clientX - rect.left;
+                state.offsetY = e.touches[0].clientY - rect.top;
+                
+                statusContainer.classList.add('dragging');
+                
+                // 添加临时事件监听器
+                document.addEventListener('touchmove', doTouchDrag, { passive: false });
+                document.addEventListener('touchend', stopTouchDrag);
+                document.addEventListener('touchcancel', stopTouchDrag);
+            }
+        }
+        
+        function doDrag(e) {
+            if (state.isDragging) {
+                e.preventDefault();
+                moveElement(e.clientX, e.clientY);
+            }
+        }
+        
+        function doPointerDrag(e) {
+            if (state.isDragging) {
+                e.preventDefault();
+                moveElement(e.clientX, e.clientY);
+            }
+        }
+        
+        function doTouchDrag(e) {
+            if (state.isDragging && e.touches && e.touches.length === 1) {
+                e.preventDefault(); // 阻止页面滚动
+                moveElement(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }
+        
+        // 统一移动元素的函数，增加边界保护
+        function moveElement(clientX, clientY) {
+            // 计算新位置
+            const newLeft = clientX - state.offsetX;
+            const newTop = clientY - state.offsetY;
+            
+            // 获取元素实际尺寸
+            const rect = statusContainer.getBoundingClientRect();
+            const elementWidth = rect.width;
+            const elementHeight = rect.height;
+            
+            // 确保不超出视口边界，并留出余量防止变形
+            const safeMargin = 3; // 安全边距，防止元素变形
+            const maxX = window.innerWidth - elementWidth - safeMargin;
+            const maxY = window.innerHeight - elementHeight - safeMargin;
+            
+            statusContainer.style.left = `${Math.max(safeMargin, Math.min(maxX, newLeft))}px`;
+            statusContainer.style.top = `${Math.max(safeMargin, Math.min(maxY, newTop))}px`;
+            statusContainer.style.right = 'auto'; // 取消右侧定位
+            statusContainer.style.bottom = 'auto'; // 取消底部定位
+        }
+        
+        function stopDrag() {
+            if (state.isDragging) {
+                state.isDragging = false;
+                statusContainer.classList.remove('dragging');
+                
+                // 移除临时事件监听器
+                document.removeEventListener('mousemove', doDrag);
+                document.removeEventListener('mouseup', stopDrag);
+            }
+        }
+        
+        function stopPointerDrag() {
+            if (state.isDragging) {
+                state.isDragging = false;
+                statusContainer.classList.remove('dragging');
+                
+                // 移除临时事件监听器
+                document.removeEventListener('pointermove', doPointerDrag);
+                document.removeEventListener('pointerup', stopPointerDrag);
+                document.removeEventListener('pointercancel', stopPointerDrag);
+            }
+        }
+        
+        function stopTouchDrag() {
+            if (state.isDragging) {
+                state.isDragging = false;
+                statusContainer.classList.remove('dragging');
+                
+                // 移除临时事件监听器
+                document.removeEventListener('touchmove', doTouchDrag);
+                document.removeEventListener('touchend', stopTouchDrag);
+                document.removeEventListener('touchcancel', stopTouchDrag);
+            }
+        }
+    }
+
     // ==================== 初始化 ====================
     function initializeMonitor() {
         // 检测并应用主题
@@ -313,6 +491,9 @@
         const gradioContainer = gradioApp();
         if (gradioContainer) {
             gradioContainer.appendChild(statusContainer);
+            
+            // 初始化拖拽功能
+            initDragFeature();
         }
 
         // 启动检测
@@ -327,3 +508,4 @@
         window.addEventListener('load', initializeMonitor);
     }
 })();
+
