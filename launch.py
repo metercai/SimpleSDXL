@@ -57,11 +57,11 @@ def check_base_environment():
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
             run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
 
-    extra_pkg = 'pynvml'
-    extra_pkg_name = 'nvidia-ml-py'
-    if not is_installed(extra_pkg):
-        pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
-        run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
+    extra_pkgs = [('pynvml', 'nvidia-ml-py'), ('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14'), ('av', 'av')]
+    for (extra_pkg, extra_pkg_name) in extra_pkgs:
+        if not is_installed(extra_pkg):
+            pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
+            run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
         logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
