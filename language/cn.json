@@ -33,7 +33,7 @@
   "Before First Enhancement": "前置整图增强",
   "After Last Enhancement": "后置整图增强",
   "Upscale or Variation :": "放大或变化",
-  "Prompt": "整图增强提示词",
+  "Prompt.": "整图增强提示词",
   "Choose which prompt to use for Upscale or Variation.": "整图增强(放大/变化)时的提示词",
   "Original Prompts": "原始提示词",
   "Last Filled Enhancement Prompts": "最近一次的局部增强提示词",
