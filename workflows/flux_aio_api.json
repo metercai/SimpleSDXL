@@ -1309,7 +1309,7 @@
   },
   "1075": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -1318,7 +1318,7 @@
   },
   "1079": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -1327,7 +1327,7 @@
   },
   "1080": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -1336,7 +1336,7 @@
   },
   "1081": {
     "inputs": {
-      "value": 0.7
+      "value": 0.7000000000000001
     },
     "class_type": "easy float",
     "_meta": {
@@ -2222,10 +2222,10 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 327897120317951,
+      "seed": 612333832087632,
       "steps": 12,
       "cfg": 3.5,
-      "denoise": 0
+      "denoise": 0.5
     },
     "class_type": "Co_Input_Zho",
     "_meta": {
@@ -2398,7 +2398,7 @@
       "decay_factor": 1,
       "fill_holes": false,
       "mask": [
-        "2751",
+        "1894",
         0
       ]
     },
@@ -2441,7 +2441,7 @@
         0
       ],
       "pixels": [
-        "2747",
+        "1002",
         0
       ],
       "mask": [
@@ -3392,26 +3392,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "Int"
-    }
-  },
-  "2314": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2786",
-        0
-      ],
-      "on_false": [
-        "2534",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "2354": {
@@ -4882,115 +4862,6 @@
       "title": "lora_4"
     }
   },
-  "2533": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2538",
-        0
-      ],
-      "b": [
-        "2537",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2534": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2535",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2535": {
-    "inputs": {
-      "value": "a*b/16",
-      "a": [
-        "2538",
-        1
-      ],
-      "b": [
-        "2537",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2536": {
-    "inputs": {
-      "value": "a*16",
-      "a": [
-        "2533",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2537": {
-    "inputs": {
-      "value": "(1048576/a/b)**0.5",
-      "a": [
-        "2538",
-        0
-      ],
-      "b": [
-        "2538",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2538": {
-    "inputs": {
-      "image": [
-        "1002",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "🔧 Get Image Size"
-    }
-  },
-  "2539": {
-    "inputs": {
-      "boolean": [
-        "2310",
-        0
-      ],
-      "on_true": [
-        "2785",
-        0
-      ],
-      "on_false": [
-        "2536",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "2542": {
     "inputs": {
       "image": [
@@ -5693,12 +5564,12 @@
     "inputs": {
       "comparison": "a <= b",
       "a": [
-        "2539",
+        "2542",
         0
       ],
       "b": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy compare",
@@ -5713,12 +5584,12 @@
         0
       ],
       "on_true": [
-        "2539",
+        "2542",
         0
       ],
       "on_false": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy ifElse",
@@ -5959,7 +5830,7 @@
         0
       ],
       "on_false": [
-        "2539",
+        "2542",
         0
       ]
     },
@@ -5979,8 +5850,8 @@
         0
       ],
       "on_false": [
-        "2314",
-        0
+        "2542",
+        1
       ]
     },
     "class_type": "easy ifElse",
@@ -6174,79 +6045,6 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
-    }
-  },
-  "2747": {
-    "inputs": {
-      "width": [
-        "2539",
-        0
-      ],
-      "height": [
-        "2314",
-        0
-      ],
-      "interpolation": "bicubic",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "1002",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2749": {
-    "inputs": {
-      "mask": [
-        "1894",
-        0
-      ]
-    },
-    "class_type": "MaskToImage",
-    "_meta": {
-      "title": "Convert Mask to Image"
-    }
-  },
-  "2750": {
-    "inputs": {
-      "width": [
-        "2539",
-        0
-      ],
-      "height": [
-        "2314",
-        0
-      ],
-      "interpolation": "bicubic",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2749",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2751": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "2750",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
     }
   },
   "2752": {
@@ -6452,32 +6250,6 @@
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
-    }
-  },
-  "2785": {
-    "inputs": {
-      "value": "a",
-      "a": [
-        "2542",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "2786": {
-    "inputs": {
-      "value": "a",
-      "a": [
-        "2542",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "2789": {

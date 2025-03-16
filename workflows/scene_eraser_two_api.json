@@ -558,7 +558,7 @@
   "397": {
     "inputs": {
       "invert_mask": false,
-      "detect": "min_bounding_rect",
+      "detect": "mask_area",
       "top_reserve": 200,
       "bottom_reserve": 200,
       "left_reserve": 200,

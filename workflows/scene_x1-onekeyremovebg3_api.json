@@ -73,7 +73,7 @@
   },
   "50": {
     "inputs": {
-      "detect": "min_bounding_rect",
+      "detect": "mask_area",
       "x_adjust": 0,
       "y_adjust": 0,
       "scale_adjust": 1.1,
