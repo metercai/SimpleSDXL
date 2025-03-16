@@ -204,7 +204,7 @@ onUiLoaded(async() => {
 
         // Toggle the zIndex of the target element between two values, allowing it to overlap or be overlapped by other elements
         function toggleOverlap(forced = "") {
-            const baseZIndex = 1005; // 基础层级
+            const baseZIndex = 1000; // 基础层级
             const activeIncrement = 1; // 激活时增加的层级
 
             // 自动提升当前激活画布层级
