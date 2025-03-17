@@ -33,6 +33,8 @@ os.environ["translators_default_region"] = "China"
 if "GRADIO_SERVER_PORT" not in os.environ:
     os.environ["GRADIO_SERVER_PORT"] = "7865"
 
+os.environ["RUST_LOG"] = 'off'
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
