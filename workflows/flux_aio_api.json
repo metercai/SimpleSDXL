@@ -235,8 +235,7 @@
   },
   "287": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -670,8 +669,7 @@
   },
   "702": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -680,8 +678,7 @@
   },
   "703": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -690,8 +687,7 @@
   },
   "704": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -700,8 +696,7 @@
   },
   "705": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -1234,8 +1229,7 @@
   },
   "1002": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -1244,8 +1238,7 @@
   },
   "1003": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -6238,10 +6231,13 @@
   "2783": {
     "inputs": {
       "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": 1,
-      "start": 0.8,
+      "residual_diff_threshold": [
+        "2795",
+        0
+      ],
+      "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 1,
       "model": [
         "2096",
         0
