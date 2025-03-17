@@ -40,7 +40,7 @@
   "309": {
     "inputs": {
       "lora_name": "fill_remove.safetensors",
-      "strength_model": 1.0000000000000002,
+      "strength_model": 1.2000000000000002,
       "model": [
         "334",
         0
@@ -100,18 +100,6 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_inpaint_image"
-    }
-  },
-  "316": {
-    "inputs": {
-      "model": [
-        "356",
-        0
-      ]
-    },
-    "class_type": "DifferentialDiffusion",
-    "_meta": {
-      "title": "Differential Diffusion"
     }
   },
   "334": {
@@ -222,7 +210,7 @@
   },
   "354": {
     "inputs": {
-      "kernel": 1,
+      "kernel": 5,
       "sigma": 10,
       "inpaint": [
         "384",
@@ -277,7 +265,7 @@
   },
   "359": {
     "inputs": {
-      "add_noise": "disable",
+      "add_noise": "enable",
       "noise_seed": [
         "369",
         0
@@ -288,9 +276,9 @@
       "scheduler": "simple",
       "start_at_step": 0,
       "end_at_step": 8,
-      "return_with_leftover_noise": "enable",
+      "return_with_leftover_noise": "disable",
       "model": [
-        "316",
+        "356",
         0
       ],
       "positive": [
@@ -318,12 +306,12 @@
         "369",
         0
       ],
-      "steps": 20,
+      "steps": 30,
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "start_at_step": 8,
-      "end_at_step": 20,
+      "start_at_step": 18,
+      "end_at_step": 30,
       "return_with_leftover_noise": "disable",
       "model": [
         "366",
@@ -338,7 +326,7 @@
         1
       ],
       "latent_image": [
-        "368",
+        "390",
         0
       ]
     },
@@ -358,7 +346,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 2,
       "model": [
-        "334",
+        "422",
         0
       ]
     },
@@ -399,31 +387,9 @@
       "title": "Differential Diffusion"
     }
   },
-  "368": {
-    "inputs": {
-      "noise_seed": [
-        "369",
-        0
-      ],
-      "noise_strength": 0.05,
-      "normalize": "false",
-      "latent": [
-        "359",
-        0
-      ],
-      "mask": [
-        "350",
-        0
-      ]
-    },
-    "class_type": "InjectLatentNoise+",
-    "_meta": {
-      "title": "🔧 Inject Latent Noise"
-    }
-  },
   "369": {
     "inputs": {
-      "seed": 375774697233020
+      "seed": 496598693435251
     },
     "class_type": "easy seed",
     "_meta": {
@@ -540,7 +506,7 @@
       ],
       "keep_proportions": false,
       "mask": [
-        "364",
+        "399",
         0
       ]
     },
@@ -559,6 +525,134 @@
     "class_type": "GetMaskSizeAndCount",
     "_meta": {
       "title": "Get Mask Size & Count"
+    }
+  },
+  "390": {
+    "inputs": {
+      "samples": [
+        "359",
+        0
+      ],
+      "mask": [
+        "392",
+        0
+      ]
+    },
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Set Latent Noise Mask"
+    }
+  },
+  "392": {
+    "inputs": {
+      "amount": 10,
+      "device": "auto",
+      "mask": [
+        "364",
+        0
+      ]
+    },
+    "class_type": "MaskBlur+",
+    "_meta": {
+      "title": "🔧 Mask Blur"
+    }
+  },
+  "399": {
+    "inputs": {
+      "expand": [
+        "414",
+        0
+      ],
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": [
+        "416",
+        1
+      ],
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "364",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "412": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "382",
+        1
+      ],
+      "b": [
+        "382",
+        2
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "413": {
+    "inputs": {
+      "boolean": [
+        "412",
+        0
+      ],
+      "on_true": [
+        "382",
+        1
+      ],
+      "on_false": [
+        "382",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "414": {
+    "inputs": {
+      "value": "a*0.02",
+      "a": [
+        "413",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "416": {
+    "inputs": {
+      "value": "a*0.015",
+      "a": [
+        "413",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "422": {
+    "inputs": {
+      "unet_name": "flux-hyp8-Q5_K_M.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "base_model"
     }
   }
 }
