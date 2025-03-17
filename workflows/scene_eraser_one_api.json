@@ -40,7 +40,7 @@
   "309": {
     "inputs": {
       "lora_name": "fill_remove.safetensors",
-      "strength_model": 1.2,
+      "strength_model": 1.0000000000000002,
       "model": [
         "334",
         0
@@ -80,12 +80,12 @@
         0
       ],
       "pixels": [
-        "353",
+        "382",
         0
       ],
       "mask": [
-        "353",
-        1
+        "364",
+        0
       ]
     },
     "class_type": "InpaintModelConditioning",
@@ -95,8 +95,7 @@
   },
   "315": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -139,7 +138,7 @@
   },
   "343": {
     "inputs": {
-      "purge_cache": false,
+      "purge_cache": true,
       "purge_models": true,
       "anything": [
         "301",
@@ -190,8 +189,7 @@
   },
   "351": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -213,7 +211,7 @@
         0
       ],
       "mask": [
-        "364",
+        "350",
         0
       ]
     },
@@ -227,7 +225,7 @@
       "kernel": 1,
       "sigma": 10,
       "inpaint": [
-        "301",
+        "384",
         0
       ],
       "original": [
@@ -235,8 +233,8 @@
         0
       ],
       "mask": [
-        "353",
-        1
+        "385",
+        0
       ],
       "origin": [
         "353",
@@ -270,7 +268,7 @@
   },
   "357": {
     "inputs": {
-      "value": 0.12
+      "value": 0
     },
     "class_type": "easy float",
     "_meta": {
@@ -279,18 +277,18 @@
   },
   "359": {
     "inputs": {
-      "add_noise": "enable",
+      "add_noise": "disable",
       "noise_seed": [
         "369",
         0
       ],
-      "steps": 20,
+      "steps": 80,
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
       "start_at_step": 0,
-      "end_at_step": 10,
-      "return_with_leftover_noise": "disable",
+      "end_at_step": 8,
+      "return_with_leftover_noise": "enable",
       "model": [
         "316",
         0
@@ -324,7 +322,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "start_at_step": 10,
+      "start_at_step": 8,
       "end_at_step": 20,
       "return_with_leftover_noise": "disable",
       "model": [
@@ -375,12 +373,12 @@
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 5,
+      "blur_radius": 10,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
       "mask": [
-        "350",
+        "383",
         0
       ]
     },
@@ -407,7 +405,7 @@
         "369",
         0
       ],
-      "noise_strength": 0.3,
+      "noise_strength": 0.05,
       "normalize": "false",
       "latent": [
         "359",
@@ -425,7 +423,7 @@
   },
   "369": {
     "inputs": {
-      "seed": 1005154796750475
+      "seed": 375774697233020
     },
     "class_type": "easy seed",
     "_meta": {
@@ -467,16 +465,100 @@
       "title": "Get Mask Size & Count"
     }
   },
-  "381": {
+  "382": {
     "inputs": {
-      "images": [
-        "379",
+      "width": 1280,
+      "height": 1280,
+      "interpolation": "lanczos",
+      "method": "keep proportion",
+      "condition": "downscale if bigger",
+      "multiple_of": 0,
+      "image": [
+        "353",
         0
       ]
     },
-    "class_type": "PreviewImage",
+    "class_type": "ImageResize+",
     "_meta": {
-      "title": "Preview Image"
+      "title": "🔧 Image Resize"
+    }
+  },
+  "383": {
+    "inputs": {
+      "width": [
+        "382",
+        1
+      ],
+      "height": [
+        "382",
+        2
+      ],
+      "keep_proportions": false,
+      "mask": [
+        "353",
+        1
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
+    }
+  },
+  "384": {
+    "inputs": {
+      "width": [
+        "386",
+        1
+      ],
+      "height": [
+        "386",
+        2
+      ],
+      "interpolation": "lanczos",
+      "method": "stretch",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "301",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "385": {
+    "inputs": {
+      "width": [
+        "386",
+        1
+      ],
+      "height": [
+        "386",
+        2
+      ],
+      "keep_proportions": false,
+      "mask": [
+        "364",
+        0
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
+    }
+  },
+  "386": {
+    "inputs": {
+      "mask": [
+        "353",
+        1
+      ]
+    },
+    "class_type": "GetMaskSizeAndCount",
+    "_meta": {
+      "title": "Get Mask Size & Count"
     }
   }
 }
