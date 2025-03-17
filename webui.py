@@ -57,11 +57,18 @@ def get_start_timestamp(request: gr.Request):
 
     if "cookie" in request.headers:
         sid = get_cookie_value(request.headers["cookie"], "aitoken")
-        shared.token.log_access(sid)
+        if sid:
+            shared.token.log_access(sid)
+            node_all, usesr_all, new_msg = shared.token.get_global_status(sid,0)
     online_users = shared.token.get_online_users_number()
     qsize = worker.get_task_size()
     vram_ram_info = model_management.get_vram_ram_used()
     domain_online_nodes, domain_online_users = shared.token.get_online_nodes_users()
+    new_msg_number = shared.token.get_global_msg_number()
+    #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
+    if new_msg_number>0:
+        print(f'new messages: {shared.token.get_global_msg_all()}')
+
     return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{online_users},{domain_online_users},{domain_online_nodes}'
 
 def get_task(*args):
@@ -84,16 +91,32 @@ def generate_clicked(task: worker.AsyncTask, state):
             gr.update(visible=False)
         return
 
+    MAX_WAIT_TIME = 480
+    POLL_INTERVAL = 0.1
+
     worker.add_task(task)
+    MAX_LOOP_NUM = worker.get_task_size()
+    last_update_time = time.time()
+    loop_num = 0
+    ready_flag = False
     while True:
-        qsize = worker.get_task_size()
-        yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中(No.{qsize})，请等待...')), \
-            gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
-            gr.update(visible=False, value=None), \
-            gr.update(visible=False)
-        time.sleep(0.1)
-        if worker.get_processing_id() == task.task_id:
-            break
+        current_time = time.time()
+        if (current_time - MAX_WAIT_TIME*loop_num - last_update_time) < MAX_WAIT_TIME:
+            qsize = worker.get_task_size()
+            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中({qsize})，请等待...')), \
+                gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
+                gr.update(visible=False, value=None), \
+                gr.update(visible=False)
+            if worker.get_processing_id() == task.task_id:
+                ready_flag = True
+                break
+        else:
+            loop_num += 1
+            if loop_num > MAX_LOOP_NUM:
+                print(f'ready to restart worker thread...')
+                worker.restart(task)
+                break
+        time.sleep(POLL_INTERVAL)
     
     execution_start_time = time.perf_counter()
     finished = False
@@ -103,7 +126,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
-        if current_time - last_update_time > MAX_WAIT_TIME:
+        if current_time - last_update_time > MAX_WAIT_TIME or not ready_flag:
             yield gr.update(visible=True, value=modules.html.make_progress_html(0, '生图任务已超时!')), \
                 gr.update(visible=True), \
                 gr.update(visible=False), \
@@ -644,7 +667,7 @@ with shared.gradio_root:
                                                                         info='Use before to enhance small details and after to enhance large areas.',
                                                                         choices=flags.enhancement_uov_processing_order,
                                                                         value=modules.config.default_enhance_uov_processing_order)
-                                                    enhance_uov_prompt_type = gr.Radio(label='Prompt',
+                                                    enhance_uov_prompt_type = gr.Radio(label='Prompt.',
                                                                    info='Choose which prompt to use for Upscale or Variation.',
                                                                    choices=flags.enhancement_uov_prompt_types,
                                                                    value=modules.config.default_enhance_uov_prompt_type,

@@ -239,11 +239,6 @@ class AsyncTask:
             self.scene_frontend = self.params_backend.pop('scene_frontend')
 
 
-async_tasks = queue.Queue()
-worker_processing = None
-processing_lock = threading.Lock()
-pending_tasks = 0
-
 class EarlyReturnException(BaseException):
     pass
 
@@ -410,11 +405,13 @@ def worker():
                 comfyd.modify_variable({"reserved_vram": reserved_vram})
             default_params.update(params_backend)
             try:
+                logger.info(f"ready to get register_cert for {async_task.user_did}")
                 user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:
                     callback = None
+                logger.info(f"ready to process_flow for {comfy_task.name}")
                 imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
                 if inpaint_worker.current_task is not None:
                     imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
@@ -911,12 +908,14 @@ def worker():
                         placeholder_replaced = True
                     positive_basic_workloads = positive_basic_workloads + p
                     negative_basic_workloads = negative_basic_workloads + n
+                    logger.info(f'use_style: {s}, positive:{p}, negative:{n}')
 
                 if not placeholder_replaced:
                     positive_basic_workloads = [task_prompt] + positive_basic_workloads
             else:
                 positive_basic_workloads.append(task_prompt)
-
+            
+            logger.info(f'prompt after use_style: {positive_basic_workloads}')
             negative_basic_workloads.append(task_negative_prompt)  # Always use independent workload for negative.
 
             positive_basic_workloads = positive_basic_workloads + task_extra_positive_prompts
@@ -1969,4 +1968,49 @@ def get_processing_id():
     with processing_lock:
         return worker_processing
 
-threading.Thread(target=worker, daemon=True).start()
+def restart(task):
+    global thread, async_tasks, restart_lock
+
+    if not restart_lock.acquire(blocking=False):
+        print("另一个线程正在执行重启操作，跳过此次重启请求")
+        return
+
+    try:
+        if hasattr(thread, '_restarting') and thread._restarting:
+            print("线程已经在重启过程中，跳过此次重启请求")
+            return
+            
+        thread._restarting = True
+        
+        if thread.is_alive():
+            print("Thread is unresponsive! Restarting...")
+            stop_event.set()
+            thread.join(timeout=2)
+            stop_event.clear()
+        else:
+            print("Thread is not alive! Restarting...")
+        
+        initialize_worker_resources()
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
+        
+        thread._restarting = False
+    finally:
+        restart_lock.release()
+
+def initialize_worker_resources():
+    global async_tasks, worker_processing, processing_lock, pending_tasks
+    async_tasks = queue.Queue()  
+    worker_processing = None  
+    processing_lock = threading.Lock()
+    pending_tasks = 0
+
+async_tasks = queue.Queue()
+worker_processing = None
+processing_lock = threading.Lock()
+pending_tasks = 0
+restart_lock = threading.Lock()
+stop_event = threading.Event()
+
+thread = threading.Thread(target=worker, daemon=True)
+thread.start()
