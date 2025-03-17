@@ -1,8 +1,0 @@
-address.upstream_nodes = ['/dns4/p2p.token.tm/tcp/2316/p2p/12D3KooWFapNfD5a27mFPoBexKyAi4E1RTP4ifpfmNKBV8tsBL4X']
-pubsub_topics = ['system', 'online']
-metrics_path = '/metrics' 
-discovery_interval = 30
-node_status_interval = 60
-broadcast_interval = 70
-request_interval = 80
-req_resp.request_timeout = 60

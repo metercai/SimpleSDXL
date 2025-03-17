@@ -66,6 +66,7 @@ def get_start_timestamp(request: gr.Request):
     vram_ram_info = model_management.get_vram_ram_used()
     domain_online_nodes, domain_online_users = shared.token.get_online_nodes_users()
     new_msg_number = shared.token.get_global_msg_number()
+    #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
     if new_msg_number>0:
         print(f'new messages: {shared.token.get_global_msg_all()}')
 
