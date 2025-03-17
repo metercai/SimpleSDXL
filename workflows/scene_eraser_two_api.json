@@ -220,7 +220,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "denoise": 0.4000000000000001,
+      "denoise": 0.5000000000000001,
       "model": [
         "384",
         0
@@ -471,7 +471,7 @@
   },
   "392": {
     "inputs": {
-      "kernel": 1,
+      "kernel": 5,
       "sigma": 10,
       "inpaint": [
         "406",
@@ -546,7 +546,7 @@
         "362",
         0
       ],
-      "return_with_leftover_noise": "enable",
+      "return_with_leftover_noise": "disable",
       "model": [
         "375",
         0
@@ -644,37 +644,13 @@
       ],
       "keep_proportions": false,
       "mask": [
-        "376",
+        "430",
         0
       ]
     },
     "class_type": "ResizeMask",
     "_meta": {
       "title": "Resize Mask"
-    }
-  },
-  "416": {
-    "inputs": {
-      "images": [
-        "406",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
-  "419": {
-    "inputs": {
-      "images": [
-        "391",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   },
   "427": {
@@ -687,6 +663,95 @@
     "class_type": "GetMaskSizeAndCount",
     "_meta": {
       "title": "Get Mask Size & Count"
+    }
+  },
+  "430": {
+    "inputs": {
+      "expand": [
+        "433",
+        0
+      ],
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": [
+        "436",
+        1
+      ],
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "376",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "431": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "405",
+        1
+      ],
+      "b": [
+        "405",
+        2
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "432": {
+    "inputs": {
+      "boolean": [
+        "431",
+        0
+      ],
+      "on_true": [
+        "405",
+        1
+      ],
+      "on_false": [
+        "405",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "433": {
+    "inputs": {
+      "value": "a*0.02",
+      "a": [
+        "432",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "436": {
+    "inputs": {
+      "value": "a*0.015",
+      "a": [
+        "432",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
