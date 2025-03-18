@@ -94,13 +94,15 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
     prompt_prompt = m_prompts.get(scene_theme, '')
     if prompt_prompt and img is not None:
         prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
-        if MiniCPM.get_enable() and 'tags' not in prompt_prompt:
+        if MiniCPM.get_enable() and 'tags' not in prompt_prompt and 'photo' not in prompt_prompt:
             describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
         else:
-            from extras.interrogate import default_interrogator as default_interrogator_photo
-            describe_prompt += default_interrogator_photo(img)
-            from extras.wd14tagger import default_interrogator as default_interrogator_anime
-            describe_prompt += default_interrogator_anime(img)
+            if not MiniCPM.get_enable() or 'photo' in prompt_prompt:
+                from extras.interrogate import default_interrogator as default_interrogator_photo
+                describe_prompt += default_interrogator_photo(img)
+            if not MiniCPM.get_enable() or 'tags' in prompt_prompt:
+                from extras.wd14tagger import default_interrogator as default_interrogator_anime
+                describe_prompt += default_interrogator_anime(img)
     return describe_prompt, img_is_ok
 
 def switch_scene_theme_select(state):
