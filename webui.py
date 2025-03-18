@@ -27,6 +27,7 @@ from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 from modules.util import is_json, HWC3, resize_image
 from modules.meta_parser import switch_scene_theme, switch_scene_theme_select, switch_scene_theme_ready_to_gen, get_welcome_image, describe_prompt_for_scene, get_auto_candidate
+
 import comfy.comfy_version as comfy_version
 import enhanced.gallery as gallery_util
 import enhanced.topbar  as topbar
@@ -446,9 +447,6 @@ with shared.gradio_root:
                     wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, wildcard_tag_name_selection, words_in_wildcard], show_progress=False, queue=False)
                     wildcard_tag_name_selection.click(wildcards.add_word_to_prompt, inputs=[wildcards_list, wildcard_tag_name_selection, prompt], outputs=prompt, show_progress=False, queue=False)
                     wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, wildcard_tag_name_selection, prompt_history, history_prompts]
-                    wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, wildcard_tag_name_selection, words_in_wildcard], show_progress=False, queue=False)
-                    wildcard_tag_name_selection.click(wildcards.add_word_to_prompt, inputs=[wildcards_list, wildcard_tag_name_selection, prompt], outputs=prompt, show_progress=False, queue=False)
-                    wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, wildcard_tag_name_selection]
                     wildcards_array_show =lambda x: [gr.update(visible=True)] * 2 + [gr.Dataset.update(visible=True, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=True, samples=wildcards.get_words_of_wildcard_samples(x))]
                     wildcards_array_hidden = [gr.update(visible=False)] * 2 + [gr.Dataset.update(visible=False, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=False, samples=wildcards.get_words_of_wildcard_samples())]
                     wildcards_array_hold = [gr.update()] * 4
@@ -925,43 +923,32 @@ with shared.gradio_root:
             with gr.Tab(label='Styles', elem_classes=['style_selections_tab']):
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
-                    default_selected=modules.config.default_styles
-                )
+                    default_selected=modules.config.default_styles)
                 with gr.Row():
                     with gr.Column(scale=1, min_width=80):
-                        layout_toggle = gr.Checkbox(
-                            label="Use Visual",
-                            value=False,
-                            container=False,
-                            elem_classes=["layout_toggle"],
-                            scale=0
-                        )
-                        load_more_btn = gr.Button(
-                            "Load More",
-                            variant="secondary",
-                            elem_classes='load_more_btn',
-                            elem_id='load_more_btn',
-                            visible=False,
-                            scale=0
-                        )
+                        layout_toggle = gr.Checkbox(label="Use Visual",
+                                                    value=False,
+                                                    container=False,
+                                                    elem_classes=["layout_toggle"],
+                                                    scale=0)
+                        load_more_btn = gr.Button("Load More",
+                                                  variant="secondary",
+                                                  elem_classes='load_more_btn',
+                                                  elem_id='load_more_btn',
+                                                  visible=False,
+                                                  scale=0)
                     with gr.Column(scale=5):
-                        style_search_bar = gr.Textbox(
-                            show_label=False,
-                            container=False,
-                            placeholder="\U0001F50E Type here to search styles ...",
-                            value="",
-                            label='Search Styles',
-                            scale=5
-                        )
+                        style_search_bar = gr.Textbox(show_label=False, container=False,
+                                                    placeholder="\U0001F50E Type here to search styles ...",
+                                                    value="",
+                                                    label='Search Styles',
+                                                    scale=5)
 
-                style_selections = gr.CheckboxGroup(
-                    show_label=False,
-                    container=False,
-                    choices=style_sorter.all_styles.copy(),
-                    value=modules.config.default_styles.copy(),
-                    label='Selected Styles',
-                    elem_classes=['style_selections']
-                )
+                style_selections = gr.CheckboxGroup(show_label=False, container=False,
+                                                    choices=copy.deepcopy(style_sorter.all_styles),
+                                                    value=copy.deepcopy(modules.config.default_styles),
+                                                    label='Selected Styles',
+                                                    elem_classes=['style_selections'])
                 gradio_receiver_style_selections = gr.Textbox(elem_id='gradio_receiver_style_selections', visible=False)
                 buttons = []
                 load_more_trigger = gr.Button(visible=False, elem_id="load_more_trigger")
@@ -972,35 +959,26 @@ with shared.gradio_root:
                             style_images = []
                             for style in legal_style_names:
                                 with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
-                                    img = gr.Image(
-                                        value=None,
-                                        show_label=False,
-                                        height=80,
-                                        interactive=False,
-                                        show_download_button=False,
-                                        elem_classes=["compact-img"],
-                                        visible=False
-                                    )
+                                    img = gr.Image(value=None,
+                                                   show_label=False,
+                                                   height=80,
+                                                   interactive=False,
+                                                   show_download_button=False,
+                                                   elem_classes=["compact-img"],
+                                                   visible=False)
                                     style_images.append(img)
 
-                                    button = gr.Button(
-                                        value=style,
-                                        elem_classes=["style-button"],
-                                        variant="secondary" if style not in modules.config.default_styles else "primary"
-                                    )
+                                    button = gr.Button(value=style,
+                                                       elem_classes=["style-button"],
+                                                       variant="secondary" if style not in modules.config.default_styles else "primary")
                                     buttons.append(button)
-
                                     style_state = gr.State(value=style)
 
-                                    button.click(
-                                        fn=lambda selected_styles, current_style: (
-                                            (gr.update(variant="secondary"), [s for s in selected_styles if s != current_style])
-                                            if current_style in selected_styles
-                                            else (gr.update(variant="primary"), selected_styles + [current_style])
-                                        ),
+                                    button.click(fn=lambda selected_styles, current_style: ((gr.update(variant="secondary"), [s for s in selected_styles if s != current_style])
+                                        if current_style in selected_styles
+                                        else (gr.update(variant="primary"), selected_styles + [current_style])),
                                         inputs=[style_selections, style_state],
-                                        outputs=[button, style_selections]
-                                    )
+                                        outputs=[button, style_selections])
 
                 has_loaded = gr.State(value=0)
                 filtered_sorted_styles = gr.State(value=legal_style_names.copy())
@@ -1010,10 +988,9 @@ with shared.gradio_root:
                     if not use_visual:
                         return [gr.update(visible=False)] * len(legal_style_names) + [loaded_count] + [gr.update(visible=False)]
                     filter_result = filter_styles(
-                        query=query,
-                        use_visual=use_visual,
-                        selected_styles=style_selections.value
-                    )
+                                    query=query,
+                                    use_visual=use_visual,
+                                    selected_styles=style_selections.value)
                     sorted_styles = filter_result[-1]
 
                     start = loaded_count
@@ -1041,25 +1018,18 @@ with shared.gradio_root:
                     return updates + [int(new_loaded_count)] + [gr.update(visible=not all_loaded)]
 
                 def toggle_layout(use_visual, current_loaded):
-                    new_loaded = 0 if use_visual and current_loaded == 0 else current_loaded
-                    all_loaded = new_loaded >= len(filtered_sorted_styles.value)
-                    return [
-                        gr.update(visible=not use_visual),
-                        gr.update(visible=use_visual),
-                        new_loaded,
-                        gr.update(visible=False)
-                    ]
+                                  new_loaded = 0 if use_visual and current_loaded == 0 else current_loaded
+                                  return [gr.update(visible=not use_visual),gr.update(visible=use_visual),new_loaded,gr.update(visible=False)]
+
                 def filter_styles(query, use_visual, selected_styles):
                     query_lower = query.strip().lower()
                     global has_loaded
                     if not has_loaded.value == 0:
                         has_loaded.value = 0
-                    filtered_styles = [
-                        s for s in filtered_sorted_styles.value
-                        if (query_lower in s.lower()) or 
-                        (query_lower in style_sorter.localization_key(s).lower()) or 
-                        (s in selected_styles)
-                    ]
+                    filtered_styles = [s for s in filtered_sorted_styles.value
+                                       if (query_lower in s.lower()) or
+                                       (query_lower in style_sorter.localization_key(s).lower()) or
+                                       (s in selected_styles)]
                     sorted_styles = []
                     for s in legal_style_names:
                         if s in selected_styles and s in filtered_styles:
@@ -1075,104 +1045,79 @@ with shared.gradio_root:
                         updates.append(gr.update(visible=visible))
                     updates.append(gr.update(choices=sorted_styles))
                     return updates + [gr.update(choices=sorted_styles)] + [sorted_styles]
+
                 def update_button_variants(selected_styles):
                     variants = []
                     for style in legal_style_names:
                         variants.append("primary" if style in selected_styles else "secondary")
                     return [gr.update(variant=v) for v in variants]
-                layout_toggle.change(
-                    fn=toggle_layout,
-                    inputs=[layout_toggle, has_loaded],
-                    outputs=[style_selections, visual_layout_container, has_loaded, load_more_btn],
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    lambda: None,
-                    _js='() => {refresh_style_layout(); }'
-                ).then(
-                    fn=load_style_images,
-                    inputs=[layout_toggle, has_loaded, style_search_bar],
-                    outputs=style_images + [has_loaded],
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    fn=filter_styles,
-                    inputs=[style_search_bar, layout_toggle, style_selections],
-                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    None,
-                    inputs=[layout_toggle],
-                    _js="""
-                    (useVisual) => {
-                        if(useVisual) {
-                            setTimeout(() => ScrollLoader.init(), 300);
-                        } else {
-                            ScrollLoader.cleanup();
-                        }
-                    }
-                    """
-                )
 
-                style_search_bar.change(
-                    fn=style_sorter.search_styles,
-                    inputs=[style_selections, style_search_bar],
-                    outputs=style_selections,
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    fn=filter_styles,
-                    inputs=[style_search_bar, layout_toggle, style_selections],
-                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    fn=load_style_images,
-                    inputs=[layout_toggle, has_loaded, style_search_bar],
-                    outputs=style_images + [has_loaded],
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    lambda: None,
-                    _js='()=>{refresh_style_localization(); refresh_style_layout();}'
-                )
+                layout_toggle.change(toggle_layout,
+                                    inputs=[layout_toggle, has_loaded],
+                                    outputs=[style_selections, visual_layout_container, has_loaded, load_more_btn],
+                                    queue=False,
+                                    show_progress=False).then(
+                    lambda: None,_js='() => {refresh_style_layout(); }').then(
+                                    load_style_images,
+                                    inputs=[layout_toggle, has_loaded, style_search_bar],
+                                    outputs=style_images + [has_loaded],
+                                    queue=False,
+                                    show_progress=False).then(
+                                    filter_styles,
+                                    inputs=[style_search_bar, layout_toggle, style_selections],
+                                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
+                                    queue=False,
+                                    show_progress=False).then(
+                    None,inputs=[layout_toggle],_js="""
+                                    (useVisual) => {
+                                        if(useVisual) {
+                                            setTimeout(() => ScrollLoader.init(), 300);
+                                        } else {
+                                            ScrollLoader.cleanup();
+                                        }
+                                    }
+                                    """)
 
+                style_search_bar.change(style_sorter.search_styles,
+                                        inputs=[style_selections, style_search_bar],
+                                        outputs=style_selections,
+                                        queue=False,
+                                        show_progress=False).then(
+                                        filter_styles,
+                                        inputs=[style_search_bar, layout_toggle, style_selections],
+                                        outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
+                                        queue=False,
+                                        show_progress=False).then(
+                                        load_style_images,
+                                        inputs=[layout_toggle, has_loaded, style_search_bar],
+                                        outputs=style_images + [has_loaded],
+                                        queue=False,
+                                        show_progress=False).then(
+                    lambda: None,_js='()=>{refresh_style_localization(); refresh_style_layout();}')
 
-                gradio_receiver_style_selections.input(
-                    style_sorter.sort_styles,
-                    inputs=style_selections,
-                    outputs=style_selections,
-                    queue=False,
-                    show_progress=False
-                ).then(
-                    fn=filter_styles,
-                    inputs=[style_search_bar, layout_toggle, style_selections],
-                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections],                                queue=False,
-                    show_progress=False
-                ).then(
-                    lambda: None, _js='()=>{refresh_style_localization();}'
-                )
-                style_selections.change(
-                    fn=update_button_variants,
-                    inputs=style_selections,
-                    outputs=buttons
-                ).then(
-                    lambda: None,
-                    _js='() => {refresh_style_layout(); }'
-                )
-                load_more_btn.click(
-                    fn=load_style_images,
-                    inputs=[layout_toggle, has_loaded, style_search_bar],
-                    outputs=style_images + [has_loaded] + [load_more_btn],
-                    queue=False,
-                    show_progress=False
-                )
-                prompt.change(
-                    lambda x,y: calculateTokenCounter(x,y),
-                    inputs=[prompt, style_selections],
-                    outputs=prompt_token_counter
-                )
+                gradio_receiver_style_selections.input(style_sorter.sort_styles,
+                                                       inputs=style_selections,
+                                                       outputs=style_selections,
+                                                       queue=False,
+                                                       show_progress=False).then(
+                                                       filter_styles,
+                                                       inputs=[style_search_bar, layout_toggle, style_selections],
+                                                       outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections],                                queue=False,
+                                                       show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}')
+
+                style_selections.change(update_button_variants,
+                                        inputs=style_selections,
+                                        outputs=buttons).then(
+                    lambda: None,_js='() => {refresh_style_layout(); }')
+
+                load_more_btn.click(load_style_images,
+                                    inputs=[layout_toggle, has_loaded, style_search_bar],
+                                    outputs=style_images + [has_loaded] + [load_more_btn],
+                                    queue=False,
+                                    show_progress=False)
+
+                prompt.change(lambda x,y: calculateTokenCounter(x,y), inputs=[prompt, style_selections], outputs=prompt_token_counter)
 
             with gr.Tab(label='Models', elem_id="scrollable-box"):
                 gallery_visible = gr.State(value=False)
@@ -1192,12 +1137,10 @@ with shared.gradio_root:
                             config = config[0]
                         config["path_checkpoints"] = [
                             os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
-                            for p in config.get("path_checkpoints", default_paths["path_checkpoints"])
-                        ]
+                            for p in config.get("path_checkpoints", default_paths["path_checkpoints"])]
                         config["path_loras"] = [
                             os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
-                            for p in config.get("path_loras", default_paths["path_loras"])
-                        ]
+                            for p in config.get("path_loras", default_paths["path_loras"])]
                         return config
                     except Exception as e:
                         print(f"Error loading config: {e}, using default paths")
@@ -1207,8 +1150,7 @@ with shared.gradio_root:
                     config = load_config_paths()
                     allowed_models = {
                         os.path.normpath(path).lower().replace('/', '\\')
-                        for path in modules.config.model_filenames
-                    }
+                        for path in modules.config.model_filenames}
                     previews = []
                     for model_dir in config.get("path_checkpoints", []):
                         if not os.path.exists(model_dir):
@@ -1273,52 +1215,42 @@ with shared.gradio_root:
                     return previews
 
                 def show_model_gallery(current_visible, current_active_target, target_type, state_params):
-                    refresh_files_clicked(state_params)
-                    if current_active_target != target_type:
-                        new_visible = True
-                    else:
-                        new_visible = not current_visible
-                    if new_visible:
-                        previews = get_model_previews()
-                        return [
-                            gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),
-                            new_visible,
-                            previews,
-                            target_type,
-                            gr.Button.update(variant="primary" if target_type == "base" else "secondary"),
-                            gr.Button.update(variant="primary" if target_type == "refiner" else "secondary")
-                        ]
-                    else:
-                        return [
-                            gr.Gallery.update(visible=False, value=[]),
-                            new_visible,
-                            [],
-                            current_active_target,
-                            gr.Button.update(variant="secondary"),
-                            gr.Button.update(variant="secondary")
-                        ]
+                                       refresh_files_clicked(state_params)
+                                       if current_active_target != target_type:
+                                           new_visible = True
+                                       else:
+                                           new_visible = not current_visible
+                                       if new_visible:
+                                           previews = get_model_previews()
+                                           return [gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
+                                                   gr.Button.update(variant="primary" if target_type == "base" else "secondary"),
+                                                   gr.Button.update(variant="primary" if target_type == "refiner" else "secondary")]
+                                       else:
+                                           return [gr.Gallery.update(visible=False, value=[]),new_visible,[],current_active_target,
+                                                   gr.Button.update(variant="secondary"),
+                                                   gr.Button.update(variant="secondary")]
 
                 def show_lora_gallery(current_visible, index):
-                    new_visible = not current_visible
-                    previews = get_lora_previews()
-                    lora_current_previews[index].value = previews
-                    return (gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible), new_visible, previews, gr.Button.update(variant="primary" if new_visible else "secondary"))
+                                      new_visible = not current_visible
+                                      previews = get_lora_previews()
+                                      lora_current_previews[index].value = previews
+                                      return (gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible), new_visible, previews, gr.Button.update(variant="primary" if new_visible else "secondary"))
 
                 def on_gallery_select(evt: gr.SelectData, previews, target_type):
-                    if previews and evt.index < len(previews):
-                        selected_path = previews[evt.index][1].replace('/', '\\')
-                        if target_type == "base":
-                            return [gr.Dropdown.update(value=selected_path), gr.Dropdown.update(), gr.Gallery.update()]
-                        elif target_type == "refiner":
-                            return [gr.Dropdown.update(), gr.Dropdown.update(value=selected_path), gr.Gallery.update()]
-                    return [gr.Dropdown(), gr.Dropdown(), gr.Gallery.update()]
+                                      if previews and evt.index < len(previews):
+                                          selected_path = previews[evt.index][1].replace('/', '\\')
+                                          if target_type == "base":
+                                              return [gr.Dropdown.update(value=selected_path), gr.Dropdown.update(), gr.Gallery.update()]
+                                          elif target_type == "refiner":
+                                              return [gr.Dropdown.update(), gr.Dropdown.update(value=selected_path), gr.Gallery.update()]
+                                      return [gr.Dropdown(), gr.Dropdown(), gr.Gallery.update()]
 
                 def on_lora_gallery_select(evt: gr.SelectData, previews, index):
-                    if previews and isinstance(previews, list):
-                        if evt.index < len(previews):
-                            selected_path = previews[evt.index][1].replace('/', '\\')
-                            return gr.Dropdown.update(value=selected_path)
-                    return gr.Dropdown.update(value='None')
+                                           if previews and isinstance(previews, list):
+                                               if evt.index < len(previews):
+                                                   selected_path = previews[evt.index][1].replace('/', '\\')
+                                                   return gr.Dropdown.update(value=selected_path)
+                                           return gr.Dropdown.update(value='None')
 
                 with gr.Group():
                     with gr.Row():
@@ -1328,18 +1260,14 @@ with shared.gradio_root:
                         base_preview_btn = gr.Button("🖼️ Base Model", variant="secondary")
                         refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary")
                     model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
-                    base_preview_btn.click(
-                        fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
-                        inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
-                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False
-                    )
+                    base_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                                           inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
+                                           outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False)
 
-                    refiner_preview_btn.click(
-                        fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
-                        inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
-                        outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False
-                    )
-                    model_gallery.select(fn=on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery], show_progress=False, queue=False)
+                    refiner_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                                              inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
+                                              outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False)
+                    model_gallery.select(on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery], show_progress=False, queue=False)
                     refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
                                                info='Use 0.4 for SD1.5 realistic models; '
                                                     'or 0.667 for SD1.5 anime models; '
@@ -1357,11 +1285,17 @@ with shared.gradio_root:
                     lora_models = []
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
-                            lora_enabled = gr.Checkbox(label='Enable', value=enabled, elem_classes=['lora_enable', 'min_check'], min_width=40)
-                            lora_preview_btn = gr.Button(f"🖼️", variant="secondary", elem_id=f"lora_preview_btn_{i}", scale=1, min_width=20)
+                            lora_enabled = gr.Checkbox(label='Enable', value=enabled,
+                                                       elem_classes=['lora_enable', 'min_check'], min_width=40)
+                            lora_preview_btn = gr.Button(f"🖼️", variant="secondary",
+                                                         elem_id=f"lora_preview_btn_{i}", scale=1, min_width=20)
                             lora_preview_btns.append(lora_preview_btn)
-                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}', choices=['None'] + modules.config.lora_filenames, value=filename, elem_classes='lora_model', scale=5)
-                            lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight, maximum=modules.config.default_loras_max_weight, step=0.01, value=weight, elem_classes='lora_weight', scale=5)
+                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
+                                                     choices=['None'] + modules.config.lora_filenames, value=filename,
+                                                     elem_classes='lora_model', scale=5)
+                            lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
+                                                    maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
+                                                    elem_classes='lora_weight', scale=5)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
                             lora_models.append(lora_model)
                         with gr.Row():
@@ -1369,8 +1303,13 @@ with shared.gradio_root:
                             lora_galleries.append(lora_gallery)
 
                     for i in range(len(modules.config.default_loras)):
-                        lora_galleries[i].select(fn=on_lora_gallery_select, inputs=[lora_current_previews[i], gr.State(i)], outputs=[lora_models[i]], show_progress=False, queue=False)
-                        lora_preview_btns[i].click(fn=lambda current_visible, idx=i: show_lora_gallery(current_visible, idx), inputs=[lora_gallery_visible[i]], outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]], show_progress=False, queue=False)
+                        lora_galleries[i].select(on_lora_gallery_select,
+                                                 inputs=[lora_current_previews[i], gr.State(i)],
+                                                 outputs=[lora_models[i]], show_progress=False, queue=False)
+                        lora_preview_btns[i].click(fn=lambda current_visible,
+                                                   idx=i: show_lora_gallery(current_visible, idx),
+                                                   inputs=[lora_gallery_visible[i]],
+                                                   outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]], show_progress=False, queue=False)
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 #with gr.Row():
@@ -1641,7 +1580,12 @@ with shared.gradio_root:
             input_image_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=x), gr.update(choices=flags.Performance.list()), gr.update(), 
                 gr.update()] + [gr.update(interactive=True)]*18, inputs=input_image_checkbox,
                 outputs=[image_input_panel, engine_class_display] + layout_image_tab, queue=False, show_progress=False, _js=switch_js)
-            prompt_panel_checkbox.change(lambda x: [gr.update(visible=x, open=x if x else True), gr.update(visible=x)], inputs=prompt_panel_checkbox, outputs=[prompt_wildcards, prompt_history], queue=False, show_progress=False, _js=switch_js).then(lambda x,y: wildcards_array_show(y['wildcard_in_wildcards']) if x else wildcards_array_hidden, inputs=[prompt_panel_checkbox, state_topbar], outputs=wildcards_array, queue=False, show_progress=False)
+            prompt_panel_checkbox.change(lambda x: [gr.update(visible=x, open=x if x else True), gr.update(visible=x)],
+                                         inputs=prompt_panel_checkbox, outputs=[prompt_wildcards, prompt_history], queue=False, show_progress=False,
+                                         _js=switch_js).then(
+                                         lambda x,y: wildcards_array_show(y['wildcard_in_wildcards']) if x else wildcards_array_hidden,
+                                         inputs=[prompt_panel_checkbox, state_topbar],
+                                         outputs=wildcards_array, queue=False, show_progress=False)
 
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
             comfyd_active_checkbox.change(lambda x: comfyd.active(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
