@@ -68,7 +68,7 @@ def get_start_timestamp(request: gr.Request):
     #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
     if new_msg_number>0:
         print(f'new messages: {shared.token.get_global_msg_all()}')
-
+    domain_online_nodes, domain_online_users = 0, 0
     return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{online_users},{domain_online_users},{domain_online_nodes}'
 
 def get_task(*args):
