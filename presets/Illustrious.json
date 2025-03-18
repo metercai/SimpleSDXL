@@ -1,13 +1,4 @@
 {
-    "default_engine": {
-        "backend_engine": "Comfy",
-        "disvisible": ["backend_selection", "performance_selection"],
-        "disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "refiner_model"],
-        "available_aspect_ratios_selection": "SDXL",
-        "backend_params": {
-                "task_method": "il_v_pre"
-                }
-        },
     "default_model": "miaomiaoHarem_v15b.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
@@ -43,11 +34,12 @@
         "Illustrious"
     ],
     "default_aspect_ratio": "768*1344",
-    "default_overwrite_step": 30,
+    "default_overwrite_step": -1,
+    "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
+    "default_save_metadata_to_images": true,
     "model_list": [
         "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,"
     ]
 }
-
