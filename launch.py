@@ -33,8 +33,6 @@ os.environ["translators_default_region"] = "China"
 if "GRADIO_SERVER_PORT" not in os.environ:
     os.environ["GRADIO_SERVER_PORT"] = "7865"
 
-os.environ["RUST_LOG"] = 'off'
-
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -260,10 +258,17 @@ def reset_env_args():
 ready_checker()
 
 shared.token, shared.sysinfo = check_base_environment()
-shared.upstream_did = shared.token.get_upstream_did()
 
 prepare_environment()
 shared.args = ini_args()
+
+if shared.args.enable_p2p:
+    os.environ["RUST_LOG"] = 'debug'
+    shared.upstream_did = shared.token.get_p2p_upstream_did()
+    print(f'in p2p ...')
+else:
+    os.environ["RUST_LOG"] = 'off'
+    shared.upstream_did = shared.token.get_upstream_did()
 
 shared.upstream_did = '' if shared.args.node_type is not None and shared.args.node_type!='online' else shared.upstream_did
 logger.info(f'local_did/本地标识: {shared.token.get_sys_did()}, upstream_did/上游标识: {shared.upstream_did if shared.upstream_did else "no upstream node"}')
