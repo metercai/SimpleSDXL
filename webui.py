@@ -452,7 +452,7 @@ with shared.gradio_root:
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
             
             #with gr.Row():
-            engine_class_display = gr.HTML(visible=True, value="SDXL", elem_classes=["engineClass"], elem_id='engine_class')
+            engine_class_display = gr.HTML(visible=False, value="SDXL", elem_classes=["engineClass"], elem_id='engine_class')
             with gr.Row(visible=modules.config.default_image_prompt_checkbox) as image_input_panel:
                 with gr.Tabs(selected=modules.config.default_selected_image_input_tab_id, elem_id='image_input_tabs'):
                     with gr.Tab(label='Image Prompt', id='ip_tab', elem_id='ip_tab') as ip_tab:
