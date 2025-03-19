@@ -120,12 +120,12 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     #print(f'task_name:{task_name}, task_method:{task_method}')
     total_steps = default_params.pop("display_steps", None)
     comfy_params = ComfyTaskParams(default_params, user_did)
-    comfy_params.update_mapping_rule("is_custom_vae", "easy boolean:is_custom_vae:value")
+    #comfy_params.update_mapping_rule("is_custom_vae", "easy boolean:is_custom_vae:value")
     if task_name == 'default':
         if task_method == default_method_names[1]:
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})
             return ComfyTask(default_method_list[task_method], comfy_params, steps=total_steps)
-        else:
+        elif task_method == default_method_names[0]:
             if input_images is None or not  input_images.exists('input_image'):
                 raise ValueError("input_images cannot be None for this method")
             if 'iclight_enable' in options and options["iclight_enable"]:
@@ -149,7 +149,10 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                     })
                 comfy_params.delete_params(['denoise'])
                 return ComfyTask('layerdiffuse_cond', comfy_params, input_images, 60)
-
+        else:
+            total_steps = total_steps if total_steps else default_params["steps"]
+            return ComfyTask(task_method, comfy_params, input_images, total_steps)
+    
     elif task_name == 'SD3x':
         if not modelsinfo.exists_model(catalog="checkpoints", model_path=default_params["base_model"]):
             config.downloading_sd3_medium_model()
