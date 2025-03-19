@@ -175,8 +175,9 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     assert isinstance(presetdata_dict, dict)
     enginedata_dict = presetdata_dict.get('engine', {})
     is_scene_frontend = 'scene_frontend' in enginedata_dict
-    template_engine = get_taskclass_by_fullname(presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine', 
-        task_class_mapping[enginedata_dict.get('backend_engine', 'Fooocus')])))
+    engine_display_str = presetdata_dict.get('Backend Engine', presetdata_dict.get('backend_engine',
+        task_class_mapping[enginedata_dict.get('backend_engine', 'Fooocus')]))
+    template_engine = get_taskclass_by_fullname(engine_display_str)
     default_params = default_class_params[template_engine]
     visible = enginedata_dict.get('disvisible', default_params.get('disvisible', default_class_params['Fooocus']['disvisible']))
     inter = enginedata_dict.get('disinteractive', default_params.get('disinteractive', default_class_params['Fooocus']['disinteractive']))
@@ -185,6 +186,8 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     uov_method_list = enginedata_dict.get('available_uov_method', default_params.get('available_uov_method', default_class_params['Fooocus']['available_uov_method']))
 
     params_backend  = enginedata_dict.get('backend_params', modules.flags.get_engine_default_backend_params(template_engine))
+    if ':' in engine_display_str:
+        params_backend.update(dict(task_method=engine_display_str.split(':')[1]))
     params_backend.update(dict(
             nickname=state_params["user"].get_nickname(),
             user_did=state_params["user"].get_did(),
