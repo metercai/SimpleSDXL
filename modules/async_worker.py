@@ -405,13 +405,13 @@ def worker():
                 comfyd.modify_variable({"reserved_vram": reserved_vram})
             default_params.update(params_backend)
             try:
-                logger.info(f"ready to get register_cert for {async_task.user_did}")
+                #logger.info(f"ready to get register_cert for {async_task.user_did}")
                 user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:
                     callback = None
-                logger.info(f"ready to process_flow for {comfy_task.name}")
+                #logger.info(f"ready to process_flow for {comfy_task.name}")
                 imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
                 if inpaint_worker.current_task is not None:
                     imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
@@ -547,7 +547,7 @@ def worker():
                                          async_task.steps, async_task.base_model_name, async_task.refiner_model_name,
                                          loras, async_task.vae_name, '')
             
-            d.append(('Backend Engine', 'backend_engine', async_task.task_class_full))
+            d.append(('Backend Engine', 'backend_engine', f'{async_task.task_class_full}:{async_task.task_method}' if async_task.task_method else async_task.task_class_full))
             d.append(('Metadata Scheme', 'metadata_scheme',
                       async_task.metadata_scheme.value if async_task.save_metadata_to_images else async_task.save_metadata_to_images))
             if not shared.token.is_guest(async_task.user_did):
@@ -1405,7 +1405,7 @@ def worker():
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
         
         if async_task.task_class in flags.comfy_classes:
-            logger.info(f'[TaskEngine] Enable Comfyd backend.')
+            logger.info(f'Enable Comfyd backend.')
             # if "flux_aio" in async_task.task_method and \
             #     (((async_task.current_tab in ['uov', 'inpaint', 'ip'] \
             #             and len(async_task.cn_tasks[flags.cn_pose]) > 0 \

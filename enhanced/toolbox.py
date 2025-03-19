@@ -234,6 +234,11 @@ def reset_params_by_image_meta(metadata, state_params, is_generating, inpaint_mo
     metadata_parser = meta_parser.get_metadata_parser(metadata_scheme)
     parsed_parameters = metadata_parser.to_json(metadata)
 
+    #config_preset = config.try_get_preset_content(state_params["__preset"], state_params["user"].get_did())
+    #preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
+    #if "engine" in preset_prepared:
+    #    parsed_parameters.update({"engine": preset_prepared["engine"]})
+    
     results = meta_parser.switch_layout_template(parsed_parameters, state_params)
     results += meta_parser.load_parameter_button_click(parsed_parameters, is_generating, inpaint_mode)
 

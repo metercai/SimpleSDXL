@@ -236,6 +236,8 @@ task_class_mapping = {
             'Flux'   : 'Flux.1',
             }
 def get_taskclass_by_fullname(fullname):
+    if ':' in fullname:
+        fullname = fullname.split(':')[0]
     for taskclass, fname in task_class_mapping.items():
         if fname == fullname:
             return taskclass
@@ -259,7 +261,9 @@ default_class_params = {
         'available_aspect_ratios_selection': 'SDXL',
         'available_sampler_name': comfy_sampler_list,
         'available_scheduler_name': comfy_scheduler_list,
-        'backend_params': {},
+        'backend_params': {
+            "task_method": "il_v_pre_aio",
+            },
         },
     'Kolors': {
         'disvisible': ["backend_selection", "performance_selection"],
@@ -301,8 +305,6 @@ default_class_params = {
         'available_uov_method': uov_list_flux,
         'backend_params': {
             "task_method": "flux_base",
-            "clip_model": "auto",
-            "base_model_dtype": "auto",
             },
         },
     }
