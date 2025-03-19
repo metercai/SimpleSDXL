@@ -569,6 +569,7 @@ div.prose.tokenCounter {
   color: var(--neutral-100);
   background-color: var(--secondary-400);
   border-radius: var(--radius-md);
+  z-index: 1001;
   /*font-size: 1.6em !important; */
 }
 
@@ -869,7 +870,7 @@ div.prose.tokenCounter {
 .tab-nav.scroll-hide {
   position: sticky !important;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
   background: var(--background-fill-primary);
 }
 
