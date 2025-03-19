@@ -69,7 +69,7 @@ def get_start_timestamp(request: gr.Request):
     #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
     if new_msg_number>0:
         print(f'new messages: {shared.token.get_global_msg_all()}')
-    domain_online_nodes, domain_online_users = 0, 0
+    #domain_online_nodes, domain_online_users = 0, 0
     return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{online_users},{domain_online_users},{domain_online_nodes}'
 
 def get_task(*args):
@@ -452,7 +452,7 @@ with shared.gradio_root:
                 prompt_info_button.click(toolbox.toggle_prompt_info, inputs=state_topbar, outputs=[prompt_info_box, state_topbar], show_progress=False)
             
             #with gr.Row():
-            engine_class_display = gr.HTML(visible=False, value="SDXL", elem_classes=["engineClass"], elem_id='engine_class')
+            engine_class_display = gr.HTML(visible=True, value="SDXL", elem_classes=["engineClass"], elem_id='engine_class')
             with gr.Row(visible=modules.config.default_image_prompt_checkbox) as image_input_panel:
                 with gr.Tabs(selected=modules.config.default_selected_image_input_tab_id, elem_id='image_input_tabs'):
                     with gr.Tab(label='Image Prompt', id='ip_tab', elem_id='ip_tab') as ip_tab:
