@@ -872,6 +872,7 @@ div.prose.tokenCounter {
   z-index: 1000;
   background: var(--background-fill-primary);
 }
+
 #component-9 {
   overflow: visible !important;
   contain: none !important;

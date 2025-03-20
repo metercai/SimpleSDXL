@@ -12,15 +12,12 @@ from .utils.image import generate_gradient_image, LightPosition
 from nodes import MAX_RESOLUTION
 from comfy.model_patcher import ModelPatcher
 from comfy import lora
-import comfy.model_management as model_management
+import model_management
 import logging
-
-from load_file_from_url import load_file_from_url, load_model_for_iclight
 
 class LoadAndApplyICLightUnet:
     @classmethod
     def INPUT_TYPES(s):
-        load_model_for_iclight()
         return {
             "required": {
                 "model": ("MODEL",),
@@ -116,6 +113,10 @@ class ICLight:
 
         process_image_in = lambda image: image
         out['c_concat'] = comfy.conds.CONDNoiseShape(process_image_in(image))
+
+        cross_attn = kwargs.get("cross_attn", None)
+        if cross_attn is not None:
+            out['c_crossattn'] = comfy.conds.CONDCrossAttn(cross_attn)
         
         adm = self.encode_adm(**kwargs)
         if adm is not None:

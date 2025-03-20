@@ -671,7 +671,7 @@ class PromptServer():
                         if len(json_data["client_id"])!=32 or not hexstr.match(json_data["client_id"]):
                             if "user_cert" in json_data:
                                 pass #print(f'user_did: {json_data["client_id"]}, user_cert: {json_data["user_cert"]}')
-                            return web.json_response({"error": "no cert or invalid cert", "node_errors": []}, status=400)
+                            return web.json_response({"error": f'no cert or invalid cert for client:{json_data["client_id"]}', "node_errors": []}, status=400)
                 if valid[0]:
                     prompt_id = str(uuid.uuid4())
                     outputs_to_execute = valid[2]
