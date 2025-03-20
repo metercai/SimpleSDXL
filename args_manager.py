@@ -55,6 +55,9 @@ args_parser.parser.add_argument("--disable-comfyd", action='store_true',
 
 args_parser.parser.add_argument("--reserve-vram", type=float, default=None, help="Set the amount of vram in GB you want to reserve for use by your OS/other software. By default some amount is reverved depending on your OS.")
 
+args_parser.parser.add_argument("--enable-p2p", action='store_true',
+                                help="enable the p2p mode module at launch", default=False)
+
 args_parser.parser.set_defaults(
     disable_cuda_malloc=True,
     in_browser=True,
