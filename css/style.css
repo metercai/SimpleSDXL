@@ -1002,6 +1002,15 @@ div.prose.tokenCounter {
   bottom: 0;
   width: 100%;
 }
+/* 新增移动端适配 */
+@media (max-width: 768px) {
+  #style_grid.style_grid.stretch {
+    min-height: 200px; /* 降低最小高度 */
+    position: relative; /* 改为相对定位 */
+    height: 60vh !important; /* 使用视口单位 */
+    max-height: 70vh !important;
+  }
+}
 .tab-nav.scroll-hide {
   position: sticky !important;
   top: 0;
