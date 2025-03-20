@@ -627,7 +627,13 @@ def update_navbar_from_mystore(selected_preset, state):
         logger.info(f'Withdraw the preset/回撤预置包: {selected_preset}.')
     else:
         if len(nav_array) >= shared.BUTTON_NUM:
-            return results + results2
+            if state["__preset"] not in nav_array:
+                return results + results2
+            position = nav_array.index(state["__preset"])
+            if position+1 == shared.BUTTON_NUM:
+                nav_array = nav_array[:-2] + nav_array[-1:]
+            else:
+                nav_array = nav_array[:-1]
         nav_array.append(selected_preset)
         logger.info(f'Launch the preset/启用预置包: {selected_preset}.')
     nav_name_list = ','.join(nav_array)
