@@ -872,6 +872,14 @@ div.prose.tokenCounter {
   top: 0;
   z-index: 1000;
   background: var(--background-fill-primary);
+  display: flex !important;
+  flex-wrap: nowrap;
+}
+.tab-nav.scroll-hide > button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 30px;
+  justify-content: center !important;
 }
 #finished_images_catalog {
   border-radius: 0 0 8px 8px !important;
