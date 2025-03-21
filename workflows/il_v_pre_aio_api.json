@@ -282,11 +282,11 @@
         0
       ],
       "positive": [
-        "2951",
+        "2952",
         0
       ],
       "negative": [
-        "2952",
+        "2951",
         0
       ],
       "latent_image": [
@@ -4665,11 +4665,11 @@
         0
       ],
       "positive": [
-        "2951",
+        "2952",
         0
       ],
       "negative": [
-        "2952",
+        "2951",
         0
       ],
       "latent_image": [
@@ -4982,7 +4982,7 @@
     "inputs": {
       "preprocessor": "TTPlanet_TileSimple_Preprocessor",
       "resolution": [
-        "2938",
+        "2955",
         0
       ],
       "image": [
@@ -4993,21 +4993,6 @@
     "class_type": "AIO_Preprocessor",
     "_meta": {
       "title": "AIO Aux Preprocessor"
-    }
-  },
-  "2938": {
-    "inputs": {
-      "image_gen_width": 512,
-      "image_gen_height": 512,
-      "resize_mode": "Just Resize",
-      "original_image": [
-        "287",
-        0
-      ]
-    },
-    "class_type": "PixelPerfectResolution",
-    "_meta": {
-      "title": "Pixel Perfect Resolution"
     }
   },
   "2940": {
@@ -5148,7 +5133,7 @@
       ],
       "on_true": [
         "2942",
-        0
+        1
       ],
       "on_false": [
         "2954",
@@ -5168,7 +5153,7 @@
       ],
       "on_true": [
         "2942",
-        1
+        0
       ],
       "on_false": [
         "2954",
@@ -5227,6 +5212,19 @@
     "class_type": "InpaintModelConditioning",
     "_meta": {
       "title": "InpaintModelConditioning"
+    }
+  },
+  "2955": {
+    "inputs": {
+      "resize_mode": "Just Resize",
+      "image": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "easy imagePixelPerfect",
+    "_meta": {
+      "title": "ImagePixelPerfect"
     }
   }
 }
