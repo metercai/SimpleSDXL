@@ -1,8 +1,7 @@
 {
   "30": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -87,7 +86,7 @@
       "detail_method": "GuidedFilter",
       "detail_erode": 6,
       "detail_dilate": 6,
-      "black_point": 0.01,
+      "black_point": 0.010000000000000002,
       "white_point": 0.99,
       "process_detail": true,
       "device": "cuda",
@@ -104,8 +103,7 @@
   },
   "56": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -130,7 +128,7 @@
       "detect": "mask_area",
       "x_adjust": 0,
       "y_adjust": 0,
-      "scale_adjust": 1.1,
+      "scale_adjust": 1.1000000000000003,
       "mask": [
         "111",
         0
@@ -202,7 +200,7 @@
       "kernel": 1,
       "sigma": 10,
       "inpaint": [
-        "52",
+        "116",
         0
       ],
       "original": [
@@ -226,7 +224,7 @@
   "81": {
     "inputs": {
       "image": [
-        "30",
+        "92",
         0
       ],
       "alpha": [
@@ -374,6 +372,53 @@
     "class_type": "GrowMaskWithBlur",
     "_meta": {
       "title": "Grow Mask With Blur"
+    }
+  },
+  "112": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "52",
+        0
+      ],
+      "mask": [
+        "52",
+        1
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "116": {
+    "inputs": {
+      "RGB_image": [
+        "112",
+        0
+      ],
+      "mask": [
+        "52",
+        1
+      ]
+    },
+    "class_type": "LayerUtility: ImageCombineAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageCombineAlpha"
+    }
+  },
+  "120": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "75",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
     }
   }
 }
