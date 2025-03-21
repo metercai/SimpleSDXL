@@ -508,8 +508,8 @@ iframe::-webkit-scrollbar {
     padding: 0px;
     white-space: nowrap;
     overflow: hidden;
+    border-radius: 5px 5px 0 0 !important;
 }
-
 #presetPreviewOverlay {
     opacity: 0;
     pointer-events: none;
