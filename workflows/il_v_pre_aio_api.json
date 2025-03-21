@@ -5069,27 +5069,6 @@
       "title": "Load ControlNet Model"
     }
   },
-  "2944": {
-    "inputs": {
-      "grow_mask_by": 20,
-      "pixels": [
-        "2941",
-        0
-      ],
-      "vae": [
-        "2932",
-        0
-      ],
-      "mask": [
-        "1894",
-        0
-      ]
-    },
-    "class_type": "VAEEncodeForInpaint",
-    "_meta": {
-      "title": "VAE Encode (for Inpainting)"
-    }
-  },
   "2947": {
     "inputs": {
       "value": ""
@@ -5172,7 +5151,7 @@
         0
       ],
       "on_true": [
-        "2944",
+        "2956",
         0
       ],
       "on_false": [
@@ -5225,6 +5204,22 @@
     "class_type": "easy imagePixelPerfect",
     "_meta": {
       "title": "ImagePixelPerfect"
+    }
+  },
+  "2956": {
+    "inputs": {
+      "pixels": [
+        "2941",
+        0
+      ],
+      "vae": [
+        "2932",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
     }
   }
 }
