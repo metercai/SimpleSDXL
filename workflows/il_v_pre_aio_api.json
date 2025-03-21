@@ -5205,21 +5205,5 @@
     "_meta": {
       "title": "ImagePixelPerfect"
     }
-  },
-  "2956": {
-    "inputs": {
-      "pixels": [
-        "2941",
-        0
-      ],
-      "vae": [
-        "2932",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
   }
 }
