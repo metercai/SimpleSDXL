@@ -5,7 +5,6 @@ import json
 import time
 import re
 import anyio
-import modules.sdxl_styles
 import shared
 import modules.config
 import fooocus_version
@@ -1057,7 +1056,7 @@ with shared.gradio_root:
                                     outputs=[style_selections, visual_layout_container, has_loaded, load_more_btn],
                                     queue=False,
                                     show_progress=False).then(
-                    lambda: None,_js='() => {refresh_style_layout(); }').then(
+                    lambda: None, _js='() => {refresh_style_layout(); }').then(
                                     load_style_images,
                                     inputs=[layout_toggle, has_loaded, style_search_bar],
                                     outputs=style_images + [has_loaded],
@@ -1068,6 +1067,7 @@ with shared.gradio_root:
                                     outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
                                     queue=False,
                                     show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}').then(
                     None,inputs=[layout_toggle],_js="""
                                     (useVisual) => {
                                         if(useVisual) {
@@ -1102,7 +1102,7 @@ with shared.gradio_root:
                                                        show_progress=False).then(
                                                        filter_styles,
                                                        inputs=[style_search_bar, layout_toggle, style_selections],
-                                                       outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections],                                queue=False,
+                                                       outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections],queue=False,
                                                        show_progress=False).then(
                     lambda: None, _js='()=>{refresh_style_localization();}')
 
