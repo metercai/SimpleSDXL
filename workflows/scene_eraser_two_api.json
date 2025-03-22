@@ -352,11 +352,11 @@
   },
   "376": {
     "inputs": {
-      "expand": 20,
+      "expand": 10,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -573,7 +573,7 @@
     "inputs": {
       "width": 1280,
       "height": 1280,
-      "interpolation": "nearest",
+      "interpolation": "lanczos",
       "method": "stretch",
       "condition": "downscale if bigger",
       "multiple_of": 0,

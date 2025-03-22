@@ -357,11 +357,11 @@
   },
   "364": {
     "inputs": {
-      "expand": 20,
+      "expand": 10,
       "incremental_expandrate": 0,
       "tapered_corners": true,
       "flip_input": false,
-      "blur_radius": 10,
+      "blur_radius": 5,
       "lerp_alpha": 1,
       "decay_factor": 1,
       "fill_holes": false,
@@ -389,7 +389,7 @@
   },
   "369": {
     "inputs": {
-      "seed": 496598693435251
+      "seed": 1034834470000144
     },
     "class_type": "easy seed",
     "_meta": {
