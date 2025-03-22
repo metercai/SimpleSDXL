@@ -5,6 +5,7 @@ import json
 import time
 import re
 import anyio
+import modules.sdxl_styles
 import shared
 import modules.config
 import fooocus_version
@@ -958,14 +959,13 @@ with shared.gradio_root:
                         with gr.Row(elem_classes=["style_grid"], elem_id="style_grid"):
                             style_images = []
                             for style in legal_style_names:
+                                style_data = modules.sdxl_styles.get_style_config(style)
                                 with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
-                                    img = gr.Image(value=None,
-                                                   show_label=False,
-                                                   height=80,
-                                                   interactive=False,
-                                                   show_download_button=False,
-                                                   elem_classes=["compact-img"],
-                                                   visible=False)
+                                    gr.Textbox(visible=False,
+                                        elem_id=f"style_data_{style}",value=json.dumps(style_data),
+                                        elem_classes=["style_data_input"],interactive=False,).style(container=False, render=False)
+                                    img = gr.Image(value=None,show_label=False,height=80,interactive=False,show_download_button=False,
+                                        elem_classes=["compact-img"],visible=False)
                                     style_images.append(img)
 
                                     button = gr.Button(value=style,

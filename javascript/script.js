@@ -221,6 +221,70 @@ function initStylePreviewOverlay() {
         overlay.style.top = `${e.clientY}px`;
         overlay.className = e.clientY > window.innerHeight / 2 ? "lower-half" : "upper-half";
     });
+    // 新增文本悬浮层
+    const textOverlay = document.createElement('div');
+    textOverlay.id = 'styleTextOverlay';
+    Object.assign(textOverlay.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '8px',
+        borderRadius: '4px',
+        pointerEvents: 'none',
+        display: 'none',
+        zIndex: 9999,
+        maxWidth: '320px',
+        backdropFilter: 'blur(3px)'
+    });
+    document.body.appendChild(textOverlay);
+
+    document.addEventListener('mouseover', function(e) {
+        const container = e.target.closest('.style_item');
+        if (!container) {
+            textOverlay.style.display = 'none';
+            return;
+        }
+
+        const dataInput = container.querySelector('.style_data_input textarea');
+        if (!dataInput) {
+            console.log('Data input not found in:', container);
+            return;
+        }
+
+        try {
+            const styleData = JSON.parse(dataInput.value || '{}');
+            textOverlay.innerHTML = `
+                <div style="font-weight:bold; margin-bottom: 6px; font-size: 14px">${styleData.name || ''}</div>
+                ${styleData.prompt ? `<div style="color:#ddd;font-size:12px;margin:4px 0">Prompt: ${styleData.prompt}</div>` : ''}
+                ${styleData.negative_prompt ? `<div style="color:#888;font-size:12px">Negative: ${styleData.negative_prompt}</div>` : ''}
+            `;
+            textOverlay.style.display = 'block';
+        } catch (e) {
+            console.error('Error parsing style data:', e);
+            textOverlay.style.display = 'none';
+        }
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (textOverlay.style.display === 'block') {
+            textOverlay.style.left = `${e.clientX + 15}px`;
+            textOverlay.style.top = `${e.clientY + 15}px`;
+
+            const rect = textOverlay.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                textOverlay.style.left = `${window.innerWidth - rect.width - 5}px`;
+            }
+            if (rect.bottom > window.innerHeight) {
+                textOverlay.style.top = `${window.innerHeight - rect.height - 5}px`;
+            }
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (!e.relatedTarget || !e.relatedTarget.closest('.style_item')) {
+            textOverlay.style.display = 'none';
+        }
+    });
 }
 
 /**

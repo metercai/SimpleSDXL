@@ -98,3 +98,10 @@ def apply_arrays(text, index):
     
     return text
 
+def get_style_config(style_name: str) -> dict:
+    prompt, negative_prompt = styles.get(style_name, ('', ''))
+    return {
+        'name': style_name,
+        'prompt': prompt,
+        'negative_prompt': negative_prompt
+    }
