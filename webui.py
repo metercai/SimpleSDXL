@@ -1286,7 +1286,7 @@ with shared.gradio_root:
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
                             lora_enabled = gr.Checkbox(label='Enable', value=enabled,
-                                                       elem_classes=['lora_enable', 'min_check'], min_width=40)
+                                                       elem_classes=['lora_enable', 'min_check'],scale=1.21, min_width=40)
                             lora_preview_btn = gr.Button(f"🖼️", variant="secondary",
                                                          elem_id=f"lora_preview_btn_{i}", scale=1, min_width=20)
                             lora_preview_btns.append(lora_preview_btn)
