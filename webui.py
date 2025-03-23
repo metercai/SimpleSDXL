@@ -1750,9 +1750,8 @@ with shared.gradio_root:
 
             new_unique_prompts = []
             for p in task.final_prompts:
-                if p[0].strip() or p[1].strip():
-                    if p not in new_unique_prompts:
-                        new_unique_prompts.append(p)
+                if p and p.strip() and p not in new_unique_prompts:
+                    new_unique_prompts.append(p)
             for p in new_unique_prompts:
                 while p in existing_history:
                     existing_history.remove(p)
