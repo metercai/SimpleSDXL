@@ -431,13 +431,9 @@ with shared.gradio_root:
                 state_prompt_history = gr.State([])
                 with gr.Accordion(label='Prompt History', visible=False, open=True) as prompt_history:
                     history_prompts = gr.Dataset(components=[prompt],label='Click to reuse:',samples=[[p] for p in state_prompt_history.value[-5:]],type='index')
-                history_prompts.click(
-                    lambda x, y: y[x] if 0 <= x < len(y) else "",
-                    inputs=[history_prompts, state_prompt_history],
-                    outputs=prompt,
-                    show_progress=False,
-                    queue=False
-                )
+                history_prompts.click(lambda x, y: y[x] if 0 <= x < len(y) else "",
+                                      inputs=[history_prompts, state_prompt_history],
+                                      outputs=prompt,show_progress=False,queue=False)
 
                 with gr.Accordion(label='Wildcards & Batch Prompts', visible=False, open=True) as prompt_wildcards:
                     wildcards_list = gr.Dataset(components=[prompt], type='index', label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=True, samples_per_page=28)
@@ -446,7 +442,7 @@ with shared.gradio_root:
 
                     wildcards_list.click(wildcards.add_wildcards_and_array_to_prompt, inputs=[wildcards_list, prompt, state_topbar], outputs=[prompt, wildcard_tag_name_selection, words_in_wildcard], show_progress=False, queue=False)
                     wildcard_tag_name_selection.click(wildcards.add_word_to_prompt, inputs=[wildcards_list, wildcard_tag_name_selection, prompt], outputs=prompt, show_progress=False, queue=False)
-                    wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, wildcard_tag_name_selection, prompt_history, history_prompts]
+                    wildcards_array = [prompt_wildcards, words_in_wildcard, wildcards_list, wildcard_tag_name_selection]
                     wildcards_array_show =lambda x: [gr.update(visible=True)] * 2 + [gr.Dataset.update(visible=True, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=True, samples=wildcards.get_words_of_wildcard_samples(x))]
                     wildcards_array_hidden = [gr.update(visible=False)] * 2 + [gr.Dataset.update(visible=False, samples=wildcards.get_wildcards_samples()), gr.Dataset.update(visible=False, samples=wildcards.get_words_of_wildcard_samples())]
                     wildcards_array_hold = [gr.update()] * 4
@@ -1754,8 +1750,9 @@ with shared.gradio_root:
 
             new_unique_prompts = []
             for p in task.final_prompts:
-                if p not in new_unique_prompts:
-                    new_unique_prompts.append(p)
+                if p[0].strip() or p[1].strip():
+                    if p not in new_unique_prompts:
+                        new_unique_prompts.append(p)
             for p in new_unique_prompts:
                 while p in existing_history:
                     existing_history.remove(p)
