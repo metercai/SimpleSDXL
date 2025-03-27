@@ -47,14 +47,30 @@ def reset_simpleai_args():
         os.makedirs(comfyd_output)
     if not os.path.exists(comfyd_intput):
         os.makedirs(comfyd_intput)
-    comfyd_intput_default_image = os.path.join(comfyd_intput, 'welcome.png')
-    if not os.path.exists(comfyd_intput_default_image):
-        default_image_path = os.path.join(shared.root, 'presets/welcome/welcome.png')
-        shutil.copy(default_image_path, comfyd_intput)
+    sync_intput_reserved()
     args_comfyd += [["--output-directory", comfyd_output], ["--temp-directory", shared.temp_path], ["--input-directory", comfyd_intput]]
-    #args_comfyd += [["--fast"]] if 'RTX 40' in shared.sysinfo['gpu_name'] else []
     comfyd.comfyd_args = args_comfyd
     return
+
+def sync_intput_reserved():
+    comfyd_images_path = os.path.join(shared.path_userhome, 'guest_user')
+    comfyd_intput = os.path.join(comfyd_images_path, 'comfyd_inputs')
+    comfyd_intput_reserved = os.path.join(shared.root, 'presets/input_reserved')
+    image_extensions = {'.jpg', '.png', '.jpeg', '.webp'}
+
+    default_image_path = os.path.join(shared.root, 'presets/welcome/welcome.png')
+    if not os.path.exists(os.path.join(comfyd_intput, 'welcome.png')):
+        shutil.copy(default_image_path, comfyd_intput)
+    if not os.path.exists(os.path.join(comfyd_intput_reserved, 'welcome.png')):
+        shutil.copy(default_image_path, comfyd_intput_reserved)
+    for file in os.listdir(comfyd_intput_reserved):
+        source_path = os.path.join(comfyd_intput_reserved, file)
+        if os.path.isfile(source_path):
+            ext = os.path.splitext(file)[1].lower()
+            if ext in image_extensions:
+                target_path = os.path.join(comfyd_intput, file)
+                if not os.path.exists(target_path):
+                    shutil.copy2(source_path, target_path)
 
 
 def get_path_in_user_dir(filename, user_did=None, catalog=None):
@@ -79,20 +95,40 @@ def get_path_in_user_dir(filename, user_did=None, catalog=None):
         return path_file
     return None
 
-def start_fast_comfyd(fast):
+def start_fast_comfyd(fast, state):
     if fast:
         comfyd.start(args_patch=[["--fast"]], force=True)
     else:
         comfyd.start(args_patch=[[]], force=True)
+    ads.set_admin_default_value('fast_comfyd_checkbox', fast, state)
 
-def change_advanced_logs(advanced_logs):
+def change_advanced_logs(advanced_logs, state):
     if advanced_logs:
         utils.echo_off = False
     else:
         utils.echo_off = True
+    ads.set_admin_default_value('advanced_logs', advanced_logs, state)
 
 def get_echo_off():
     return utils.echo_off
+
+
+def toggle_p2p(x, state):
+    if x:
+        if shared.upstream_did and ':P2P' not in shared.upstream_did:
+            shared.token.p2p_start()
+        else:
+            shared.upstream_did = shared.token.get_p2p_upstream_did()
+        if shared.upstream_did:
+            shared.upstream_did = f'{shared.upstream_did}:P2P'
+    else:
+        if shared.upstream_did and ':P2P' in shared.upstream_did:
+            result = shared.token.p2p_stop()
+            shared.upstream_did = shared.upstream_did.split(':')[0]
+    ads.set_admin_default_value('p2p_active_checkbox', x, state)
+    return [gr.update(interactive=x)] * 2
+
+
 
 
 identity_note = '您的昵称+手机号组成您的可信身份，昵称支持汉字。绑定身份即激活"我的预置"导航等高级服务。用身份二维码导入既安全又快捷。首个绑定身份者为系统管理员。'
@@ -100,7 +136,7 @@ identity_note_1 = '您的身份已绑定当前浏览器和本机节点。若要�
 identity_note_0 = '孤岛节点只有游客和本机管理员身份。用"导出身份"可直接导出本地管理员身份二维码，身份口令见后台日志。'
 
 upstream_tooltip = "请查看后台日志，排除错误后" if shared.upstream_did else "无法连接上游节点，请检查网络环境"
-upstream_status_text = "<b>On</b>" if shared.upstream_did else "<b>Off</b>"
+upstream_status_text = "<b>On-P2P</b>" if shared.upstream_did and ':P2P' in shared.upstream_did else "<b>On</b>" if shared.upstream_did else "<b>Off</b>"
 is_export_qr = lambda x: not shared.token.is_guest(x) or shared.token.get_node_mode()!='online'
 
 note1_0 = '请按提示输入创建身份时预设的身份口令，确认身份后完成绑定。'
@@ -339,10 +375,10 @@ def check_vcode(vcode):
 
 self_contact = '''
 软件特点:<br>
-<b>SimpAI</b>，开源的中文 AI 创意生图平台，简洁、高效而稳定。<br>
-<b>SimpAI</b>，开放架构，支持SDXL/SD1.5/Flux/可图等多种开源模型，丰富的控图方式，真正“所想即所得，创意无边界”。<br>
-<b>SimpAI</b>，程序和模型本地部署，保障数据安全与可控；按需加载不同的场景预置包，贴合实际需求，操作简洁、高效。<br>
-<b>SimpAI</b>，引入分布式身份管理机制，让本地部署的节点具有多用户服务和多节点组网能力，具备了企业级服务的特性。<br>
+<b>SimpAI</b>，开源 AI 创意生图平台，简洁、高效和稳定。<br>
+<b>SimpAI</b>，开放架构，支持SDXL/Flux/可图等多种开源模型，控图方式丰富，真正“所想即所得，创意无边界”。<br>
+<b>SimpAI</b>，程序和模型本地部署，保障数据安全与可控；按需加载场景预置包，贴合实际需求，操作简洁高效。<br>
+<b>SimpAI</b>，引入分布式身份管理，让本地部署节点具有多用户服务和多节点组网能力，具备企业级服务的特性。<br>
 <br>
 使用技巧:<br>
 Wiki: <a target= "_blank" href="http://simpai.cn">http://simpai.cn</a><br>
