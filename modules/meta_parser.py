@@ -206,7 +206,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     results.append(get_layout_visible_inter('performance_selection', visible, inter))
     results.append(get_layout_choices_visible_inter(scheduler_list, 'scheduler_name', visible, inter))
     results.append(get_layout_choices_visible_inter(sampler_list, 'sampler_name', visible, inter))
-    if task_method and '_aio' in task_method:
+    if task_method and not is_scene_frontend and '_aio' in task_method:
         results.append(get_layout_visible_inter('input_image_checkbox', visible, inter))
     else:
         results.append(get_layout_toggle_visible_inter('input_image_checkbox', visible, inter))
