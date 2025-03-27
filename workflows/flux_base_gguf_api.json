@@ -1,8 +1,8 @@
 {
   "5": {
     "inputs": {
-      "width": 1024,
-      "height": 1024,
+      "width": 512,
+      "height": 512,
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -13,7 +13,7 @@
   "8": {
     "inputs": {
       "samples": [
-        "13",
+        "43",
         0
       ],
       "vae": [
@@ -37,7 +37,7 @@
   },
   "11": {
     "inputs": {
-      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name1": "clip_l.safetensors",
       "clip_name2": "clip_l.safetensors",
       "type": "flux",
       "device": "default"
@@ -45,93 +45,6 @@
     "class_type": "DualCLIPLoader",
     "_meta": {
       "title": "clip_model"
-    }
-  },
-  "12": {
-    "inputs": {
-      "unet_name": "flux1-dev.safetensors",
-      "weight_dtype": "default"
-    },
-    "class_type": "UNETLoader",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
-  "13": {
-    "inputs": {
-      "noise": [
-        "25",
-        0
-      ],
-      "guider": [
-        "22",
-        0
-      ],
-      "sampler": [
-        "16",
-        0
-      ],
-      "sigmas": [
-        "17",
-        0
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
-    },
-    "class_type": "SamplerCustomAdvanced",
-    "_meta": {
-      "title": "SamplerCustomAdvanced"
-    }
-  },
-  "16": {
-    "inputs": {
-      "sampler_name": "euler"
-    },
-    "class_type": "KSamplerSelect",
-    "_meta": {
-      "title": "sampler_select"
-    }
-  },
-  "17": {
-    "inputs": {
-      "scheduler": "simple",
-      "steps": 20,
-      "denoise": 1,
-      "model": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "BasicScheduler",
-    "_meta": {
-      "title": "scheduler_select"
-    }
-  },
-  "22": {
-    "inputs": {
-      "model": [
-        "38",
-        0
-      ],
-      "conditioning": [
-        "28",
-        0
-      ]
-    },
-    "class_type": "BasicGuider",
-    "_meta": {
-      "title": "BasicGuider"
-    }
-  },
-  "25": {
-    "inputs": {
-      "noise_seed": 931669617070486
-    },
-    "class_type": "RandomNoise",
-    "_meta": {
-      "title": "noise_seed"
     }
   },
   "27": {
@@ -149,8 +62,11 @@
   "28": {
     "inputs": {
       "clip_l": "",
-      "t5xxl": "a bottle with a rainbow galaxy inside it on top of a wooden table on a table in the middle of a modern kitchen",
-      "guidance": 3.5,
+      "t5xxl": "",
+      "guidance": [
+        "72",
+        8
+      ],
       "clip": [
         "11",
         0
@@ -161,28 +77,14 @@
       "title": "prompt"
     }
   },
-  "29": {
-    "inputs": {
-      "ckpt_name": "flux1-schnell-bnb-nf4.safetensors"
-    },
-    "class_type": "CheckpointLoaderNF4",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
-  "30": {
-    "inputs": {
-      "ckpt_name": "flux1-dev-fp8.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
   "31": {
     "inputs": {
-      "lora_name": "art_lora.safetensors",
-      "strength_model": 1
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "36",
+        0
+      ]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
@@ -191,14 +93,402 @@
   },
   "36": {
     "inputs": {
-      "unet_name": "flux1-dev-Q8_0.gguf"
+      "unet_name": "flux-hyp8-Q5_K_M.gguf"
     },
     "class_type": "UnetLoaderGGUF",
     "_meta": {
       "title": "base_model"
     }
   },
-  "37": {
+  "40": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_2"
+    }
+  },
+  "42": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "73",
+        0
+      ],
+      "steps": [
+        "61",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "49",
+        3
+      ],
+      "scheduler": [
+        "49",
+        4
+      ],
+      "start_at_step": [
+        "59",
+        0
+      ],
+      "end_at_step": [
+        "61",
+        0
+      ],
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "69",
+        0
+      ],
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "45",
+        0
+      ],
+      "latent_image": [
+        "68",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "second_sampler"
+    }
+  },
+  "43": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "74",
+        0
+      ],
+      "steps": [
+        "62",
+        0
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "49",
+        3
+      ],
+      "scheduler": [
+        "49",
+        4
+      ],
+      "start_at_step": [
+        "61",
+        0
+      ],
+      "end_at_step": [
+        "62",
+        0
+      ],
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "69",
+        0
+      ],
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "45",
+        0
+      ],
+      "latent_image": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "third_sampler"
+    }
+  },
+  "45": {
+    "inputs": {
+      "conditioning": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "条件零化"
+    }
+  },
+  "46": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_3"
+    }
+  },
+  "49": {
+    "inputs": {
+      "steps_total": 12,
+      "refiner_step": 1,
+      "cfg": 3.5,
+      "sampler_name": "euler",
+      "scheduler": "simple"
+    },
+    "class_type": "KSampler Config (rgthree)",
+    "_meta": {
+      "title": "ksampler_config"
+    }
+  },
+  "50": {
+    "inputs": {
+      "value": "a/3",
+      "a": [
+        "72",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "52": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "63",
+        1
+      ],
+      "b": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "56": {
+    "inputs": {
+      "boolean": [
+        "52",
+        0
+      ],
+      "on_true": [
+        "57",
+        0
+      ],
+      "on_false": [
+        "58",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "57": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "58": {
+    "inputs": {
+      "value": 0
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "59": {
+    "inputs": {
+      "value": "a+b",
+      "a": [
+        "50",
+        0
+      ],
+      "b": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "61": {
+    "inputs": {
+      "value": "a*2",
+      "a": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "62": {
+    "inputs": {
+      "value": "a*3",
+      "a": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "63": {
+    "inputs": {
+      "value": "a-b",
+      "a": [
+        "50",
+        1
+      ],
+      "b": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "64": {
+    "inputs": {
+      "value": 0.33000000000000007
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "Float"
+    }
+  },
+  "66": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "46",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_4"
+    }
+  },
+  "67": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "66",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_5"
+    }
+  },
+  "68": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": [
+        "72",
+        6
+      ],
+      "steps": [
+        "72",
+        7
+      ],
+      "cfg": 1,
+      "sampler_name": [
+        "49",
+        3
+      ],
+      "scheduler": [
+        "49",
+        4
+      ],
+      "start_at_step": 0,
+      "end_at_step": [
+        "59",
+        0
+      ],
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "69",
+        0
+      ],
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "45",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "KSampler (Advanced)"
+    }
+  },
+  "69": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": [
+        "70",
+        0
+      ],
+      "start": 0,
+      "end": 0.7000000000000002,
+      "max_consecutive_cache_hits": 1,
+      "model": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "70": {
     "inputs": {
       "value": 0
     },
@@ -207,24 +497,49 @@
       "title": "wavespeed_strength"
     }
   },
-  "38": {
+  "72": {
     "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "37",
-        0
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": -1,
-      "model": [
-        "36",
-        0
+      "clip_skip": -1,
+      "width": 512,
+      "height": 512,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 0,
+      "steps": 12,
+      "cfg": 3.5,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "73": {
+    "inputs": {
+      "value": "a/2",
+      "a": [
+        "72",
+        6
       ]
     },
-    "class_type": "ApplyFBCacheOnModel",
+    "class_type": "SimpleMath+",
     "_meta": {
-      "title": "Apply First Block Cache"
+      "title": "🔧 Simple Math"
+    }
+  },
+  "74": {
+    "inputs": {
+      "value": "a/3",
+      "a": [
+        "72",
+        6
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
