@@ -126,6 +126,21 @@ def get_admin_default(admin_key):
         admin_value = None
     return admin_value
 
+def get_user_default(user_key, state, config_default=None):
+    user_value = shared.token.get_local_vars(user_key, 'None', state["__session"], state["ua_hash"]).strip()
+    if user_value is None or user_value=="None":
+        if config_default:
+            user_value = config_default
+        else:
+            if user_key in default:
+                user_value = default[user_key]
+            else:
+                user_value = None
+    return user_value
+
+set_admin_default_value = lambda x,y,s: shared.token.set_local_admin_vars(x, str(y), s["__session"], s["ua_hash"])
+set_user_default_value = lambda x,y,s: shared.token.set_local_vars(x, str(y), s["__session"], s["ua_hash"])
+
 def init_all_params_index(lora_number, disable_metadata):
     global all_args, max_lora_number, flag_disable_metadata
     

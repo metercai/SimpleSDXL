@@ -409,6 +409,8 @@ def worker():
                 user_cert = shared.token.get_register_cert(async_task.user_did)
                 if user_cert == "Unknown":
                     raise ValueError(f"User cert is not found: {async_task.user_did}")
+                if not shared.token.is_registered(async_task.user_did):
+                    raise ValueError(f"User is not registered: {async_task.user_did}")
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:

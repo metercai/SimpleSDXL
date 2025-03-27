@@ -59,6 +59,7 @@ output_directory = os.path.join(base_path, "output")
 temp_directory = os.path.join(base_path, "temp")
 input_directory = os.path.join(base_path, "input")
 user_directory = os.path.join(base_path, "user")
+input_directory_reserved = os.path.join(base_path, "input")
 
 filename_list_cache: dict[str, tuple[list[str], dict[str, float], float]] = {}
 
@@ -134,12 +135,28 @@ def get_input_directory() -> str:
     return input_directory
 
 def get_user_directory() -> str:
+    global user_directory
     return user_directory
 
 def set_user_directory(user_dir: str) -> None:
     global user_directory
     user_directory = user_dir
 
+def get_input_directory_reserved() -> str:
+    global input_directory_reserved
+    return input_directory_reserved
+
+def set_input_directory_reserved(reserved_dir: str) -> None:
+    global input_directory_reserved
+    input_directory_reserved = reserved_dir
+
+def get_input_directory_files() -> list[str]:
+    global input_directory, input_directory_reserved
+    files_input = [f for f in os.listdir(input_directory) if os.path.isfile(os.path.join(input_directory, f))]
+    #files_reserved = [f for f in os.listdir(input_directory_reserved) if os.path.isfile(os.path.join(input_directory_reserved, f))]
+    #print(f'files_reserved:{files_reserved}')
+    #files_input = list(set(files_input + files_reserved))
+    return files_input
 
 #NOTE: used in http server so don't put folders that should not be accessed remotely
 def get_directory_by_type(type_name: str) -> str | None:
@@ -183,6 +200,9 @@ def annotated_filepath(name: str) -> tuple[str, str | None]:
     elif name.endswith("[input]"):
         base_dir = get_input_directory()
         name = name[:-8]
+        filepath = os.path.join(base_dir, name)
+        if not os.path.exists(filepath):
+            base_dir = get_input_directory_reserved()
     elif name.endswith("[temp]"):
         base_dir = get_temp_directory()
         name = name[:-7]
@@ -200,7 +220,6 @@ def get_annotated_filepath(name: str, default_dir: str | None=None) -> str:
             base_dir = default_dir
         else:
             base_dir = get_input_directory()  # fallback path
-
     return os.path.join(base_dir, name)
 
 
