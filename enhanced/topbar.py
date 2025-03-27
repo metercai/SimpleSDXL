@@ -32,7 +32,7 @@ from datetime import datetime
 from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
 from modules.private_logger import get_current_html_path
 from modules.meta_parser import get_welcome_image, describe_prompt_for_scene
-from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog
+from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog, sync_intput_reserved
 from enhanced.minicpm import minicpm
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode, gen_ua_session
 
@@ -220,24 +220,14 @@ function(system_params) {
 }
 '''
 
-def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, request: gr.Request):
+def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, request: gr.Request):
     global user_admin_sid
 
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
-    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
+    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox]
     #logger.info(f'admin_currunt_value: {admin_currunt_value}')
 
-    if "__lang" not in state_params.keys():
-        if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
-            args_manager.args.language = 'cn'
-        else:
-            logger.info(f'no accept-language in request.headers:{request.headers}')
-        state_params.update({"__lang": args_manager.args.language}) 
-    if "__theme" not in state_params.keys():
-        state_params.update({"__theme": args_manager.args.theme})
-    if "__preset" not in state_params.keys():
-        state_params.update({"__preset": config.preset})
     user_agent = request.headers["user-agent"]
     ua_hash = hashlib.sha256(user_agent.encode('utf-8')).hexdigest()
     ua_session = gen_ua_session(request.client["host"], str(request.client["port"]), request.headers["user-agent"])
@@ -272,6 +262,16 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     state_params.update({"sys_did":  shared.token.get_sys_did()})
     state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' else False})
 
+    if "__lang" not in state_params.keys():
+        if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
+            args_manager.args.language = 'cn'
+        else:
+            logger.info(f'no accept-language in request.headers:{request.headers}')
+        state_params.update({"__lang": ads.get_user_default("__lang", state_params, args_manager.args.language)})
+    if "__theme" not in state_params.keys():
+        state_params.update({"__theme": ads.get_user_default("__theme", state_params, args_manager.args.theme)})
+    if "__preset" not in state_params.keys():
+        state_params.update({"__preset": config.preset})
     if "__is_mobile" not in state_params.keys():
         state_params.update({"__is_mobile": True if user_agent.find("Mobile")>0 and user_agent.find("AppleWebKit")>0 else False})
     if "__webpath" not in state_params.keys():
@@ -290,13 +290,14 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     state_params.update({"bar_button": config.preset})
     state_params.update({"preset_store": False})
     state_params.update({"engine": 'Fooocus'})
-    state_params.update({"upstream": shared.upstream_did})
     results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     preset = 'default'
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
     results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
+    results += [ads.get_user_default("backfill_prompt", state_params, config.default_backfill_prompt)]
+    results += [ads.get_user_default("translation_methods", state_params, config.default_translation_methods)]
     results += get_all_admin_default(admin_currunt_value)
 
     return results
@@ -564,6 +565,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     results += meta_parser.load_parameter_button_click(preset_prepared, is_generating, inpaint_mode)
     results += update_after_identity_sub(state_params)
 
+    sync_intput_reserved()
     ldm_patched.modules.model_management.print_memory_info("after switched preset")
     return results
 
@@ -665,7 +667,7 @@ def update_topbar_js_params(state):
         user_name=state["user"].get_nickname(),
         user_did=state["user"].get_did(),
         user_role='guest' if shared.token.is_guest(state["user"].get_did()) else 'admin' if shared.token.is_admin(state["user"].get_did()) else 'member',
-        upstream=state["upstream"],
+        upstream=shared.upstream_did,
         task_class_name=state["engine"],
         preset_store=state["preset_store"],
         __message=state["__message"],
@@ -735,7 +737,7 @@ def update_after_identity(state):
     return results
 
 def update_after_identity_sub(state):
-    #[gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params]
+    #[gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, configure_panel, admin_panel, p2p_panel, admin_link, system_params] + ip_types
     max_per_page = state["__max_per_page"]
     max_catalog = state["__max_catalog"]
     nickname = state["user"].get_nickname()
@@ -758,9 +760,10 @@ def update_after_identity_sub(state):
     results += [gr.Dataset.update(samples=get_preset_samples(user_did))]
     results += [update_history_link(user_did, state["local_access"])]
     results += [gr.update(visible=shared.token.is_guest(user_did))]
+    results += [gr.update(visible=not shared.token.is_guest(user_did))]
+    results += [gr.update(visible=shared.token.is_admin(user_did))]
     results += [gr.update(visible=shared.token.is_admin(user_did))]
     results += [gr.update(value=update_comfyd_url(user_did))]
-    results += [gr.update(visible=not shared.token.is_guest(user_did))]
     results += update_topbar_js_params(state)
     ip_list = modules.flags.ip_list if state["engine"] in ['Fooocus', 'Flux', 'Kolors', 'Comfy']  else modules.flags.ip_list[:-1]
     ip_list = (ip_list[:3] + ip_list[-1:]) if state["engine"]=='Comfy' and state["task_method"] == 'il_v_pre_aio' else ip_list
@@ -809,14 +812,12 @@ def update_upscale_size_of_image(image, uov_method):
 
 
 def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength):
-    set_admin_default_value = lambda x,y,s: shared.token.set_local_vars(f'admin_{x}', str(y), s["__session"], s["ua_hash"])
-    
-    set_admin_default_value('comfyd_active_checkbox', comfyd_active_checkbox, state)
-    set_admin_default_value('fast_comfyd_checkbox', fast_comfyd_checkbox, state)
-    set_admin_default_value('reserved_vram', reserved_vram, state)
-    set_admin_default_value('minicpm_checkbox', minicpm_checkbox, state)
-    set_admin_default_value('advanced_logs', advanced_logs, state)
-    set_admin_default_value('wavespeed_strength', wavespeed_strength, state)
+    ads.set_admin_default_value('comfyd_active_checkbox', comfyd_active_checkbox, state)
+    ads.set_admin_default_value('fast_comfyd_checkbox', fast_comfyd_checkbox, state)
+    ads.set_admin_default_value('reserved_vram', reserved_vram, state)
+    ads.set_admin_default_value('minicpm_checkbox', minicpm_checkbox, state)
+    ads.set_admin_default_value('advanced_logs', advanced_logs, state)
+    ads.set_admin_default_value('wavespeed_strength', wavespeed_strength, state)
 
     current_time = datetime.now().strftime("%H:%M:%S")
     admin_save_title = 'Save default of system' if state["__lang"]!='cn' else '保存系统默认值'
@@ -825,7 +826,7 @@ def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, r
 
 
 def get_all_admin_default(currunt_value):
-    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength']
+    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength', 'p2p_active_checkbox']
     result = []
     for i, admin_key in enumerate(admin_keys): 
         admin_value = ads.get_admin_default(admin_key)

@@ -206,7 +206,11 @@ function refresh_identity_center_label(role, upstream) {
     if (role=="admin") {
 	display_name = nickname + ", admin";
     }
-    let display_upstream = upstream ? "On" : "Off";
+    let display_upstream = upstream
+        ? upstream.includes(":P2P")
+            ? "On-P2P"
+            : "On"
+        : "Off";
     label.textContent = translation + "(" + display_name + ") - " + display_upstream;
 }
 
