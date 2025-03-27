@@ -937,6 +937,8 @@ allow_missing_preset_key = [
     "instruction",
     "reference",
     "previous_default_models",
+    "default_backfill_prompt",
+    "default_translation_methods",
     ]
 
 REWRITE_PRESET = False

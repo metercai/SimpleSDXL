@@ -60,7 +60,7 @@ def get_start_timestamp(request: gr.Request):
         sid = get_cookie_value(request.headers["cookie"], "aitoken")
         if sid:
             shared.token.log_access(sid)
-            node_all, usesr_all, new_msg = shared.token.get_global_status(sid,0)
+            #node_all, usesr_all, new_msg = shared.token.get_global_status(sid,0)
     online_users = shared.token.get_online_users_number()
     qsize = worker.get_task_size()
     vram_ram_info = model_management.get_vram_ram_used()
@@ -69,7 +69,8 @@ def get_start_timestamp(request: gr.Request):
     #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
     if new_msg_number>0:
         print(f'new messages: {shared.token.get_global_msg_all()}')
-    #domain_online_nodes, domain_online_users = 0, 0
+    if not ads.get_admin_default('p2p_active_checkbox'):
+        domain_online_nodes, domain_online_users = 0, 0
     return f'{START_TIMESTAMP},{qsize},{vram_ram_info[0]},{vram_ram_info[1]},{vram_ram_info[2]},{vram_ram_info[3]},{online_users},{domain_online_users},{domain_online_nodes}'
 
 def get_task(*args):
@@ -522,9 +523,9 @@ with shared.gradio_root:
                                         hires_fix_blurred = gr.Slider(label='Blurred', minimum=0.0, maximum=1.0, step=0.001, value=0.0, min_width=20)
                         uov_input_image.upload(topbar.update_upscale_size_of_image, inputs=[uov_input_image, uov_method], outputs=uov_image_size, show_progress=False, queue=False)
                         uov_method.change(topbar.update_size_and_hires_fix, inputs=[uov_input_image, uov_method, params_backend, hires_fix_stop, hires_fix_weight, hires_fix_blurred], outputs=[uov_image_size, uov_hires_fix, overwrite_vary_strength, overwrite_upscale_strength], show_progress=False, queue=False)
-                        hires_fix_stop.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_s',x,y), inputs=[hires_fix_stop, params_backend])
-                        hires_fix_weight.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_w',x,y), inputs=[hires_fix_weight, params_backend])
-                        hires_fix_blurred.change(lambda x,y: sync_params_backend('i2i_uov_hires_fix_blurred',x,y), inputs=[hires_fix_blurred, params_backend])
+                        hires_fix_stop.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_s',x,y,z), inputs=[hires_fix_stop, params_backend, state_topbar])
+                        hires_fix_weight.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_w',x,y,z), inputs=[hires_fix_weight, params_backend, state_topbar])
+                        hires_fix_blurred.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_blurred',x,y,z), inputs=[hires_fix_blurred, params_backend, state_topbar])
                         gr.HTML('* Powered by Fooocus upscale engine, <a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Documentation</a>, and Comfyd workflow engine from ComfyUI.')
                     
                     with gr.Tab(label='Inpaint or Outpaint', id='inpaint_tab', elem_id='inpaint_tab') as inpaint_tab:
@@ -1156,56 +1157,25 @@ with shared.gradio_root:
                 refresh_files.click(refresh_files_clicked, [state_topbar], refresh_files_output + lora_ctrls,
                                     queue=False, show_progress=False)
 
-            with gr.Tab(label='Service', elem_id="scrollable-box"):
+            with gr.Tab(label='Gallery', elem_id="scrollable-box"):
                 with gr.Row():
-                    language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']))
-                    background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True)
-                with gr.Group():
-                    binding_id_button = gr.Button(value='IdentityCenter', visible=True, elem_id="identity_center")
-                    identity_introduce = gr.HTML(visible=True, value=topbar.identity_introduce, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
-                    with gr.Group(visible=False) as admin_panel:
-                        with gr.Row():
-                            admin_link = gr.HTML(elem_classes=["htmlcontent"])
-                            admin_mgr_link = gr.HTML(value='')
-                        with gr.Row():
-                            admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
-                            admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
-                        with gr.Row():
-                            comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
-                            fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
-                        with gr.Row():
-                            advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
-                            minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
-                        with gr.Row():
-                            reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
-                            wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
-                    with gr.Group(visible=False) as user_panel:
-                        prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
-                        mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
-                        image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
-                        backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                        translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                    gallery_id_button = gr.Button(value='GalleryCenter(under construction...)', visible=True, elem_id="gallery_center")
 
-                        def sync_params_backend(key, v, params):
-                            params.update({key:v})
-                            logger.debug(f'sync_params_backend: {key}:{v}')
-                            return params
-
-                        def toggle_minicpm(x):
-                            MiniCPM.set_enable(x)
-                            return gr.update(visible=not x), gr.update(visible=x), gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
-
-                        translation_methods.change(lambda x,y: sync_params_backend('translation_methods',x,y), inputs=[translation_methods, params_backend])
-                        fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=fast_comfyd_checkbox)
-                        minicpm_checkbox.change(toggle_minicpm, inputs=minicpm_checkbox, outputs=[describe_apply_styles, describe_output_tags, describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
-                        reserved_vram.change(lambda x,y: sync_params_backend('reserved_vram',x,y), inputs=[reserved_vram, params_backend])
-                        advanced_logs.change(simpleai.change_advanced_logs, inputs=advanced_logs)
-                        wavespeed_strength.change(lambda x,y: sync_params_backend('wavespeed_strength',x,y), inputs=[wavespeed_strength, params_backend])
-
-                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength]
-                        admin_save_button.click(topbar.admin_save_to_default, inputs=[state_topbar] + admin_ctrls, outputs=admin_save_button, queue=False, show_progress=False)
-                        admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
-
+            with gr.Tab(label='Identity', elem_id="scrollable-box"):
+                binding_id_button = gr.Button(value='IdentityCenter', visible=True, elem_id="identity_center")
+                identity_introduce = gr.HTML(visible=True, value=topbar.identity_introduce, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
+                with gr.Column() as configure_panel:
+                    with gr.Tab(label='Application') as user_panel:
+                        with gr.Row():
+                            language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']), container=False)
+                            background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True, container=False)
+                        with gr.Group():
+                            mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
+                            prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
+                            image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
+                            backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
+                            translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
+                                
                         # custom plugin "OneButtonPrompt"
                         import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
                         run_event = gr.Number(visible=False, value=0)
@@ -1213,12 +1183,76 @@ with shared.gradio_root:
                         with gr.Tab(label="SuperPrompter"):
                             #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
                             super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
+                    with gr.Tab(label='Local System'):
+                        with gr.Group() as admin_panel:
+                            with gr.Row():
+                                admin_link = gr.HTML(elem_classes=["htmlcontent"])
+                                admin_mgr_link = gr.HTML(value='')
+                            with gr.Group():
+                                with gr.Row():
+                                    #admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
+                                    admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
+                                with gr.Row():
+                                    comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
+                                    fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
+                                with gr.Row():
+                                    minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
+                                    advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
+                                with gr.Row():
+                                    reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
+                                    wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
 
-            with gr.Tab(label='Contact', elem_id="scrollable-box"):
-                with gr.Row():
-                    simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
-                with gr.Row():
-                    gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Comfyd {comfy_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+                    with gr.Tab(label='P2P Network'):
+                        with gr.Group() as p2p_panel:
+                            p2p_active_checkbox = gr.Checkbox(label='Enable P2P network', value=ads.get_admin_default('p2p_active_checkbox'))
+                            p2p_remote_checkbox = gr.Checkbox(label='Enable remote process', value=ads.get_admin_default('p2p_remote_checkbox'), interactive=False)
+                            with gr.Row():
+                                p2p_node_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='identity_input2')
+                            with gr.Row():
+                                p2p_out_did_btn = gr.Button(value="Set remote node", size="sm", min_width=30)
+                                p2p_in_did_btn = gr.Button(value="Set accessible identity", size="sm", min_width=30)
+                            
+                            with gr.Row():
+                                p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["title_right"])
+                                p2p_out_did_list = gr.Markdown(elem_classes=["htmlcontent"])
+                            with gr.Row():
+                                p2p_in_did_title = gr.HTML(value="Accessible identity:", elem_classes=["title_right"])
+                                p2p_in_did_list = gr.HTML(elem_classes=["htmlcontent"])
+                            
+                            p2p_out_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
+                            p2p_in_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_in_did_list, queue=False, show_progress=False)
+
+                    with gr.Tab(label='Contact'):
+                        with gr.Row():
+                            simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
+                        with gr.Row():
+                            gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Comfyd {comfy_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+
+                        def sync_params_backend(key, v, params, state):
+                            params.update({key:v})
+                            logger.debug(f'sync_params_backend: {key}:{v}')
+                            if not key.startwiths("i2i_uov"):
+                                ads.set_user_default_value(key, v, state) 
+                            return params
+
+                        def toggle_minicpm(x, state):
+                            MiniCPM.set_enable(x)
+                            ads.set_admin_default_value('minicpm_checkbox', x, state) 
+                            return gr.update(visible=not x), gr.update(visible=x), gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
+
+                        translation_methods.change(lambda x,y,z: sync_params_backend('translation_methods',x,y,z), inputs=[translation_methods, params_backend, state_topbar])
+                        backfill_prompt.change(lambda x,y: ads.set_user_default_value("backfill_prompt", x, y), inputs=[backfill_prompt, state_topbar])
+                        fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=[fast_comfyd_checkbox, state_topbar])
+                        minicpm_checkbox.change(toggle_minicpm, inputs=[minicpm_checkbox, state_topbar], outputs=[describe_apply_styles, describe_output_tags, describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
+                        reserved_vram.change(lambda x,y,z: sync_params_backend('reserved_vram',x,y,z), inputs=[reserved_vram, params_backend, state_topbar])
+                        advanced_logs.change(simpleai.change_advanced_logs, inputs=[advanced_logs, state_topbar])
+                        wavespeed_strength.change(lambda x,y,z: sync_params_backend('wavespeed_strength',x,y,z), inputs=[wavespeed_strength, params_backend, state_topbar])
+
+                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox]
+                        #admin_save_button.click(topbar.admin_save_to_default, inputs=[state_topbar] + admin_ctrls, outputs=admin_save_button, queue=False, show_progress=False)
+                        admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
+
+
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
             layout_image_tab = [performance_selection, style_selections, image_number, freeu_enabled, refiner_model, refiner_switch] + lora_ctrls
@@ -1255,8 +1289,12 @@ with shared.gradio_root:
             scene_params = [scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number, scene_mask_color]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
-            language_ui.select(lambda x,y: y.update({'__lang': x}), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
-            background_theme.select(lambda x,y: y.update({'__theme': x}), inputs=[background_theme, state_topbar]).then(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
+            def sync_state_params(key, value, state):
+                state.update({key: value})
+                ads.set_user_local_vars(key, value, state)
+
+            language_ui.select(lambda x,y: sync_state_params('__lang', modules.config.language_radio_revert(x), y), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
+            background_theme.select(lambda x,y: sync_state_params('__theme', x, y), inputs=[background_theme, state_topbar]).then(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
 
             gallery_index.select(gallery_util.select_index, inputs=[gallery_index, image_tools_checkbox, state_topbar], outputs=[gallery, image_toolbox, progress_window, progress_gallery, prompt_info_box, params_note_box, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button, identity_dialog], show_progress=False)
             gallery.select(gallery_util.select_gallery, inputs=[gallery_index, state_topbar, backfill_prompt], outputs=[prompt_info_box, prompt, negative_prompt, params_note_info, params_note_input_name, params_note_regen_button, params_note_preset_button], show_progress=False)
@@ -1573,7 +1611,7 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
 
     
-    after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, admin_panel, admin_link, user_panel, system_params] + ip_types
+    after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, configure_panel, admin_panel, p2p_panel, admin_link, system_params] + ip_types
     identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
@@ -1584,6 +1622,10 @@ with shared.gradio_root:
         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
+
+    p2p_active_checkbox.change(simpleai.toggle_p2p, inputs=[p2p_active_checkbox, state_topbar], outputs=[p2p_out_did_btn, p2p_in_did_btn]) \
+                        .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
+                        .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
 
     reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
@@ -1600,7 +1642,7 @@ with shared.gradio_root:
 
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction] + admin_ctrls, show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction, backfill_prompt, translation_methods] + admin_ctrls, show_progress=False) \
                       .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
                       .then(topbar.sync_message, inputs=state_topbar) \
@@ -1625,81 +1667,13 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd:
     comfyd.active(True)
-
-def create_analysis_page():
-    with gr.Blocks(title="分析中心", css=topbar.css) as analysis_page:
-        state_topbar = gr.State({})
-        with gr.Row():
-            gr.Markdown("## 数据分析中心")
-        with gr.Tabs():
-            with gr.Tab(label="文本分析"):
-                text_input = gr.Textbox(label="输入待分析文本", lines=5)
-                analyze_btn = gr.Button("开始分析")
-                wordcloud = gr.Image(label="词云图")
-
-                def generate_wordcloud(text):
-                    from wordcloud import WordCloud
-                    import matplotlib.pyplot as plt
-                    import io
-
-                    wc = WordCloud().generate(text)
-                    plt.imshow(wc)
-                    plt.axis("off")
-
-                    buf = io.BytesIO()
-                    plt.savefig(buf, format='png')
-                    buf.seek(0)
-                    return buf
-
-                analyze_btn.click(
-                    generate_wordcloud,
-                    inputs=text_input,
-                    outputs=wordcloud
-                )
-
-            with gr.Tab(label="文件分析"):
-                file_input = gr.File(label="上传数据文件")
-                report_btn = gr.Button("生成报告")
-                report_view = gr.HTML()
-
-                # 示例报告生成函数
-                def generate_report(file):
-                    return f"<div style='padding:20px'><h3>{file.name} 分析报告</h3>...</div>"
-
-                report_btn.click(
-                    generate_report,
-                    inputs=file_input,
-                    outputs=report_view
-                )
-
-        return analysis_page
-
-def launch_app():
-    main_app = shared.gradio_root
-    analysis_app = create_analysis_page()
-
-    # 组合应用
-    combined_app = gr.App(
-        title="AI Art Studio Pro",
-        pages=[
-            {"path": "/", "app": main_app},
-            {"path": "/analysis", "app": analysis_app}
-        ]
-    )
-
-    combined_app.launch(
-        inbrowser=args_manager.args.in_browser,
-        server_name=args_manager.args.listen,
-        server_port=args_manager.args.port,
-        share=args_manager.args.share,
-        root_path=args_manager.args.webroot,
-        auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
-        allowed_paths=[modules.config.path_outputs],
-        blocked_paths=[constants.AUTH_FILENAME]
-    )
-
-#if __name__ == "__main__":
-#    launch_app()
+if ads.get_admin_default('p2p_active_checkbox'):
+    if shared.upstream_did:
+        shared.token.p2p_start()
+    else:
+        shared.upstream_did = shared.token.get_p2p_upstream_did()
+    if shared.upstream_did:
+        shared.upstream_did = f'{shared.upstream_did}:P2P'
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

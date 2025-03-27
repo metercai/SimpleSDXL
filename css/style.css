@@ -575,7 +575,7 @@ div.prose.tokenCounter {
 
 .identityIntroduce {
   width: auto;
-  padding: 8px 6px 8px 10px;
+  padding: 4px 3px 4px 6px;
   opacity: 1;
   border-radius: var(--radius-md);
 }
@@ -585,6 +585,11 @@ div.prose.tokenCounter {
   padding: 4px 8px;
   opacity: 1;
   border-radius: var(--radius-md);
+}
+
+.title_right {
+  text-align: right;
+  margin-right: 10px;
 }
 
 .toolbox {
