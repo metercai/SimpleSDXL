@@ -158,8 +158,7 @@
   },
   "55": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -168,8 +167,7 @@
   },
   "56": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -222,7 +220,7 @@
   "64": {
     "inputs": {
       "image": [
-        "55",
+        "67",
         0
       ],
       "alpha": [
@@ -253,7 +251,7 @@
       "kernel": 1,
       "sigma": 10,
       "inpaint": [
-        "57",
+        "99",
         0
       ],
       "original": [
@@ -380,6 +378,40 @@
     "class_type": "GrowMaskWithBlur",
     "_meta": {
       "title": "Grow Mask With Blur"
+    }
+  },
+  "98": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "57",
+        0
+      ],
+      "mask": [
+        "57",
+        1
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "99": {
+    "inputs": {
+      "RGB_image": [
+        "98",
+        0
+      ],
+      "mask": [
+        "57",
+        1
+      ]
+    },
+    "class_type": "LayerUtility: ImageCombineAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageCombineAlpha"
     }
   }
 }

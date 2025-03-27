@@ -104,7 +104,7 @@ inpaint_engine_versions = {
     "sd15_aio": ['powerpaint', 'None'],
     "kolors_aio": ['kolors_inpainting', 'None'],
     "flux_aio": ['Q4', 'fp8', 'None'],
-    "il_v_pre_aio": ['None'],
+    "il_v_pre_aio": ['NoobAI_Inpainting','None'],
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",

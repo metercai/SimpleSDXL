@@ -500,6 +500,7 @@ iframe::-webkit-scrollbar {
     top: 1px;
     white-space: nowrap;
     overflow: hidden;
+    border-radius: 5px !important;
 }
 
 .bar_button {
@@ -507,8 +508,8 @@ iframe::-webkit-scrollbar {
     padding: 0px;
     white-space: nowrap;
     overflow: hidden;
+    border-radius: 5px 5px 0 0 !important;
 }
-
 #presetPreviewOverlay {
     opacity: 0;
     pointer-events: none;
@@ -523,7 +524,7 @@ iframe::-webkit-scrollbar {
     background-position: center;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 5px;
-    z-index: 100;
+    z-index: 1000;
     transition: transform 0.1s ease, opacity 0.3s ease;
 }
 
@@ -531,7 +532,7 @@ iframe::-webkit-scrollbar {
   background-color: #fff8;
   font-family: monospace;
   text-align: center;
-  border-radius-top: 5px;
+  border-radius: 5px 5px 0 0 !important;
   font-size: 12px;
   max-width: 128px;
   overflow: hidden;
@@ -608,7 +609,7 @@ div.prose.tokenCounter {
     top: 31px;
     left: 0px;
     width: 100%;
-    z-index: 21;
+    z-index: 999;
     text-align: left;
     padding: 10px;
     background-color: darkslategray;
@@ -876,6 +877,20 @@ div.prose.tokenCounter {
   top: 0;
   z-index: 1000;
   background: var(--background-fill-primary);
+  display: flex !important;
+  flex-wrap: nowrap;
+}
+.tab-nav.scroll-hide > button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 30px;
+  justify-content: center !important;
+}
+#finished_images_catalog {
+  border-radius: 0 0 8px 8px !important;
+}
+.styler {
+  border-radius: 5px 5px 5px 5px !important;
 }
 
 #component-9 {
