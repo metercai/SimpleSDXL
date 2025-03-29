@@ -960,7 +960,7 @@ with shared.gradio_root:
                                 with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
                                     gr.Textbox(visible=False,
                                         elem_id=f"style_data_{style}",value=json.dumps(style_data),
-                                        elem_classes=["style_data_input"],interactive=False,).style(container=False, render=False)
+                                        elem_classes=["style_data_input"],interactive=False,)
                                     img = gr.Image(value=None,show_label=False,height=80,interactive=False,show_download_button=False,
                                         elem_classes=["compact-img"],visible=False)
                                     style_images.append(img)
@@ -1284,16 +1284,16 @@ with shared.gradio_root:
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
                             lora_enabled = gr.Checkbox(label='Enable', value=enabled,
-                                                       elem_classes=['lora_enable', 'min_check'],scale=1.21, min_width=40)
+                                                       elem_classes=['lora_enable', 'min_check'],scale=6, min_width=40)
                             lora_preview_btn = gr.Button(f"🖼️", variant="secondary",
-                                                         elem_id=f"lora_preview_btn_{i}", scale=1, min_width=20)
+                                                         elem_id=f"lora_preview_btn_{i}", scale=5, min_width=20)
                             lora_preview_btns.append(lora_preview_btn)
                             lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
                                                      choices=['None'] + modules.config.lora_filenames, value=filename,
-                                                     elem_classes='lora_model', scale=5)
+                                                     elem_classes='lora_model', scale=25)
                             lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
                                                     maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
-                                                    elem_classes='lora_weight', scale=5)
+                                                    elem_classes='lora_weight', scale=25)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
                             lora_models.append(lora_model)
                         with gr.Row():
