@@ -325,7 +325,7 @@ function initStylePreviewOverlay() {
             }
 
             if (styleData.negative_prompt && negativePrompt) {
-                negativePrompt.value = styleData.negative_prompt;
+                negativePrompt.value += styleData.negative_prompt;
                 negativePrompt.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
