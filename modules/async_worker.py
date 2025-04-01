@@ -29,6 +29,8 @@ class AsyncTask:
         self.processing = False
         self.task_id = str(uuid.uuid4())
         self.final_prompts = []
+        self.remote_task = False
+
         self.performance_loras = []
 
         if len(args) == 0:
@@ -285,6 +287,7 @@ def worker():
     import copy
     import cv2
     import re
+    import json
     import modules.default_pipeline as pipeline
     import modules.core as core
     import modules.flags as flags
@@ -299,10 +302,11 @@ def worker():
     import enhanced.wildcards as wildcards
     import enhanced.version as version
     import enhanced.translator as translator
-    
+    import enhanced.all_parameters as ads
+
     from extras.censor import default_censor
     from modules.sdxl_styles import apply_style, get_random_style, fooocus_expansion, apply_arrays, random_style_name
-    from modules.private_logger import log
+    from modules.private_logger import log, p2p_log
     from extras.expansion import safe_str
     from modules.util import (remove_empty_str, HWC3, resize_image, get_image_shape_ceil, set_image_shape_ceil,
                               get_shape_ceil, resample_image, erode_or_dilate, parse_lora_references_from_prompt,
@@ -310,7 +314,9 @@ def worker():
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
     from modules.meta_parser import get_metadata_parser
-    from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline, get_echo_off
+    from modules.model_loader import is_models_file_absent
+
+    from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline, get_echo_off, p2p_task
     from enhanced.comfy_task import get_comfy_task, default_kolors_base_model_name
     from enhanced.all_parameters import default as default_params
     from enhanced.minicpm import MiniCPM
@@ -339,11 +345,19 @@ def worker():
         logger.info(e)
     ldm_patched.modules.model_management.print_memory_info("worker init")
 
-    def progressbar(async_task, number, text):
-        logger.info(f'{text}')
-        async_task.yields.append(['preview', (number, text, None)])
+    def progressbar(async_task, number, text, img=None):
+        if async_task.remote_task:
+            p2p_task.call_remote_progress(async_task, number, text, img)
+            return
+        if img is None:
+            logger.info(f'{text}')
+        async_task.yields.append(['preview', (number, text, img)])
 
     def yield_result(async_task, imgs, progressbar_index, black_out_nsfw, censor=True, do_not_show_finished_images=False):
+        if async_task.remote_task:
+            p2p_task.call_remote_result(async_task, imgs, progressbar_index, black_out_nsfw, censor, do_not_show_finished_images)
+            return
+        
         if not isinstance(imgs, list):
             imgs = [imgs]
 
@@ -402,13 +416,36 @@ def worker():
         # must use deep copy otherwise gradio is super laggy. Do not use list.append() .
         async_task.results = async_task.results + [wall]
         return
+    
+    def stop_processing(async_task, processing_start_time, status="Finished"):
+        async_task.processing = False
+        processing_time = time.perf_counter() - processing_start_time
+        if status=="Finished":
+            logger.info(f'Processing time (total): {processing_time:.2f} seconds')
+        else:
+            if processing_start_time==0:
+                logger.info(f'Processing stop, status:{status}')
+            else:
+                logger.info(f'Processing time (total): {processing_time:.2f} seconds, status:{status}')
+        if async_task.task_class in flags.comfy_classes:
+            if async_task.comfyd_active_checkbox:
+                comfyd.finished()
+            else:
+                comfyd.stop()
+        if async_task.remote_task:
+            p2p_task.call_remote_stop(async_task, processing_start_time, status)
+        return
+
+    def interrupt_processing():
+        comfyd.interrupt()
+        ldm_patched.modules.model_management.interrupt_current_processing()
 
     def process_task(all_steps, async_task, callback, controlnet_canny_path, controlnet_cpds_path, controlnet_pose_path, current_task_id,
                      denoising_strength, final_scheduler_name, goals, initial_latent, steps, switch, positive_cond,
                      negative_cond, task, loras, tiled, use_expansion, width, height, base_progress, preparation_steps,
                      total_count, show_intermediate_results, persist_image=True):
         if async_task.last_stop is not False:
-            ldm_patched.modules.model_management.interrupt_current_processing()
+            interrupt_processing()
         
         if async_task.task_class in flags.comfy_classes:
             default_params = dict(
@@ -494,7 +531,12 @@ def worker():
             progressbar(async_task, current_progress, '检测NSFW ...')
             imgs = default_censor(imgs)
         progressbar(async_task, current_progress, f'保存已生成图片 {current_task_id + 1}/{total_count} ...')
-        img_paths = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
+        result_all = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
+        img_paths = []
+        for (result_path, result_img, result_log) in result_all:
+            img_paths.append(result_path)
+            if async_task.remote_task:
+                p2p_task.call_remote_save_and_log(async_task, result_img, result_log)
         yield_result(async_task, img_paths, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
         
@@ -510,6 +552,9 @@ def worker():
             async_task.controlnet_softness,
             async_task.adaptive_cfg
         )
+
+    def p2p_save_and_log(async_task, result_img, result_log):
+        p2p_log(result_img, result_log, async_task.output_format, async_task.user_did)
 
     def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image=True) -> list:
         img_paths = []
@@ -585,7 +630,8 @@ def worker():
                 d.append(('User', 'created_by', f'{async_task.user_did}'))
 
             d.append(('Version', 'version', f'{version.branch}_{version.get_simplesdxl_ver()}'))
-            img_paths.append(log(x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did))
+            paths, image, log_item = log(x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did, async_task.remote_task)
+            img_paths.append((paths, image, log_item))
 
         return img_paths
 
@@ -1333,11 +1379,18 @@ def worker():
     @torch.no_grad()
     @torch.inference_mode()
     def handler(async_task: AsyncTask):
+        remote_process = True if ads.get_admin_default("p2p_remote_process").lower() == 'out' else False
         preparation_start_time = time.perf_counter()
         async_task.processing = True
+        logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}{", remote_process" if remote_process else ""}')
+        if remote_process:
+            p2p_task.request_p2p_task(shared.token, async_task, yield_result, progressbar)
+            while not async_task.processing:
+                time.sleep(2)
+            return
+        if is_models_file_absent(async_task.task_name):
+            stop_processing(async_task.async_task, 0, "Model absent")
         ldm_patched.modules.model_management.print_memory_info("begin at handler")
-        logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
-        
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
         async_task.uov_method = async_task.uov_method.casefold()
@@ -1554,9 +1607,9 @@ def worker():
         logger.info(f'Using {final_scheduler_name} scheduler.')
 
         if async_task.task_class in ['Fooocus']:
-            async_task.yields.append(['preview', (current_progress, '模型移动到GPU ...', None)])
+            progressbar(async_task, current_progress, '模型移动到GPU ...')
         else:
-            async_task.yields.append(['preview', (current_progress, f'{async_task.task_class} 生图 ...', None)])
+            progressbar(async_task, current_progress, f'{async_task.task_class} 生图 ...')
 
         processing_start_time = time.perf_counter()
 
@@ -1569,8 +1622,7 @@ def worker():
                 async_task.callback_steps = 0
             async_task.callback_steps += (100 - preparation_steps) / float(all_steps)
             percentage = int(current_progress + async_task.callback_steps)
-            async_task.yields.append(['preview', (
-                percentage, f'采样步数 {step + 1}/{total_steps}, 图片 {current_task_id + 1}/{total_count} ...', y)])
+            progressbar(async_task, percentage, f'采样步数 {step + 1}/{total_steps}, 图片 {current_task_id + 1}/{total_count} ...', y)
 
         def callback_comfytask(step, total_steps, y):
             if step == 1:
@@ -1581,8 +1633,7 @@ def worker():
             if async_task.task_method in ('il_v_pre', 'il_v_pre_aio') and step % 2 != 1 and step <= 30:
                 return
             percentage = int(current_progress + async_task.callback_steps)
-            async_task.yields.append(['preview', (
-                percentage, f'采样步数 {step}/{total_steps}, 图片 {current_task_id + 1}/{total_count} ...', y)])
+            progressbar(async_task, percentage, f'采样步数 {step}/{total_steps}, 图片 {current_task_id + 1}/{total_count} ...', y)
 
         callback_function = callback
         i2i_uov_hires_fix_blurred = async_task.params_backend.pop('hires_fix_blurred', 0.0)
@@ -1873,7 +1924,7 @@ def worker():
                     mask = 255 - mask
 
                 if async_task.debugging_enhance_masks_checkbox:
-                    async_task.yields.append(['preview', (current_progress, 'Loading ...', mask)])
+                    progressbar(async_task, current_progress, 'Loading ...', mask) 
                     yield_result(async_task, mask, current_progress, async_task.black_out_nsfw, False,
                                  async_task.disable_intermediate_results)
                     async_task.enhance_stats[index] += 1
@@ -1946,6 +1997,11 @@ def worker():
         stop_processing(async_task, processing_start_time)
         return
 
+    worker.yield_result = yield_result
+    worker.progressbar = progressbar
+    worker.p2p_save_and_log = p2p_save_and_log
+    worker.stop_processing = stop_processing
+
     last_active = time.time()
     while True:
         try:
@@ -1970,6 +2026,7 @@ def worker():
                 task.yields.append(['finish', task.results])
             finally:
                 async_tasks.task_done()
+                p2p_task.gc_p2p_task()
                 with processing_lock:
                     pending_tasks -= 1
                     worker_processing = None

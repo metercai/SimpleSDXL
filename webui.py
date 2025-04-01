@@ -38,7 +38,7 @@ import enhanced.wildcards as wildcards
 import enhanced.simpleai as simpleai
 import enhanced.comfy_task as comfy_task
 import enhanced.all_parameters as ads
-from enhanced.simpleai import comfyd 
+from enhanced.simpleai import comfyd, p2p_task 
 from enhanced.minicpm import MiniCPM, minicpm
 
 import logging
@@ -124,11 +124,12 @@ def generate_clicked(task: worker.AsyncTask, state):
     finished = False
     MAX_WAIT_TIME = 480
     POLL_INTERVAL = 0.08
+    in_progress = False
 
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
-        if current_time - last_update_time > MAX_WAIT_TIME or not ready_flag:
+        if (current_time - last_update_time > MAX_WAIT_TIME and in_progress) or not ready_flag:
             yield gr.update(visible=True, value=modules.html.make_progress_html(0, '生图任务已超时!')), \
                 gr.update(visible=True), \
                 gr.update(visible=False), \
@@ -137,14 +138,14 @@ def generate_clicked(task: worker.AsyncTask, state):
             task.last_stop = 'stop'
             if (task.processing):
                 logger.error("Send interrupt flag to process and comfyd")
-                comfyd.interrupt()
-                model_management.interrupt_current_processing()
+                worker.interrupt_processing()
             break
 
         time.sleep(POLL_INTERVAL)
         
         if len(task.yields) > 0:
             flag, product = task.yields.pop(0)
+            in_progress = True
             if flag == 'preview':
                 last_update_time = current_time
 
@@ -271,6 +272,10 @@ title = f'{version.branch}创意生图应用平台'
 
 shared.gradio_root = gr.Blocks(title=title).queue(concurrency_count=5)
 
+get_local_url = f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}'
+logo_imag_path = os.path.abspath(f'./presets/image/simpai_logo.jpg')
+logo_imag_url = f'/file={logo_imag_path}'
+
 with shared.gradio_root:
     state_topbar = gr.State({})
     params_backend = gr.State({'translation_methods': modules.config.default_translation_methods})
@@ -362,19 +367,19 @@ with shared.gradio_root:
                 
                     identity_input = [identity_nick_input, identity_areacode, identity_tele_input, identity_qr]
                     identity_input_info = [input_id_info, state_topbar]
-                    identity_crtl = [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
-                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_areacode, identity_tele_input], outputs=identity_crtl + [input_id_info], show_progress=False)
-                    identity_change_button.click(simpleai.change_identity,  outputs=identity_crtl + identity_input, show_progress=False)
-                    identity_verify_button.click(simpleai.verify_identity, inputs=identity_input_info + [identity_vcode_input], outputs=identity_crtl, show_progress=False)
-                    identity_phrases_set_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'set'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info], show_progress=False)
+                    identity_ctrls = [identity_note_info, input_identity, input_id_display, identity_vcode_input, identity_verify_button, identity_phrase_input, identity_phrases_set_button, identity_phrases_confirm_button, identity_confirm_button, identity_unbind_button]
+                    identity_bind_button.click(simpleai.bind_identity, inputs=[identity_nick_input, identity_areacode, identity_tele_input], outputs=identity_ctrls + [input_id_info], show_progress=False)
+                    identity_change_button.click(simpleai.change_identity,  outputs=identity_ctrls + identity_input, show_progress=False)
+                    identity_verify_button.click(simpleai.verify_identity, inputs=identity_input_info + [identity_vcode_input], outputs=identity_ctrls, show_progress=False)
+                    identity_phrases_set_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'set'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_ctrls + [current_id_info], show_progress=False)
                     identity_export_btn.click(topbar.export_identity, inputs=state_topbar, outputs=system_params, show_progress=False) \
                         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
                         .then(fn=lambda x: '' if 'user_qr' not in x else x.pop('user_qr'), inputs=state_topbar,  show_progress=False)
 
-                    identity_qr.upload(simpleai.trigger_input_identity, inputs=identity_qr, outputs=identity_crtl + [input_id_info], show_progress=False, queue=False)
+                    identity_qr.upload(simpleai.trigger_input_identity, inputs=identity_qr, outputs=identity_ctrls + [input_id_info], show_progress=False, queue=False)
                 
                 nav_bars = [bar_store_button] + bar_buttons
-                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_crtl + identity_input, show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
+                bar_store_button.click(topbar.toggle_preset_store, inputs=state_topbar, outputs=[preset_store, system_params, identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_ctrls + identity_input, show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 preset_store_list.click(topbar.update_navbar_from_mystore, inputs=[preset_store_list, state_topbar], outputs=nav_bars + [system_params], show_progress=False).then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
                 
                 with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
@@ -416,15 +421,13 @@ with shared.gradio_root:
                         def stop_clicked(currentTask):
                             currentTask.last_stop = 'stop'
                             if (currentTask.processing):
-                                comfyd.interrupt()
-                                model_management.interrupt_current_processing()
+                                worker.interrupt_processing()
                             return currentTask
 
                         def skip_clicked(currentTask):
                             currentTask.last_stop = 'skip'
                             if (currentTask.processing):
-                                comfyd.interrupt()
-                                model_management.interrupt_current_processing()
+                                worker.interrupt_processing()
                             return currentTask
 
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
@@ -530,9 +533,9 @@ with shared.gradio_root:
                                         hires_fix_blurred = gr.Slider(label='Blurred', minimum=0.0, maximum=1.0, step=0.001, value=0.0, min_width=20)
                         uov_input_image.upload(topbar.update_upscale_size_of_image, inputs=[uov_input_image, uov_method], outputs=uov_image_size, show_progress=False, queue=False)
                         uov_method.change(topbar.update_size_and_hires_fix, inputs=[uov_input_image, uov_method, params_backend, hires_fix_stop, hires_fix_weight, hires_fix_blurred], outputs=[uov_image_size, uov_hires_fix, overwrite_vary_strength, overwrite_upscale_strength], show_progress=False, queue=False)
-                        hires_fix_stop.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_s',x,y,z), inputs=[hires_fix_stop, params_backend, state_topbar])
-                        hires_fix_weight.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_w',x,y,z), inputs=[hires_fix_weight, params_backend, state_topbar])
-                        hires_fix_blurred.change(lambda x,y,z: sync_params_backend('i2i_uov_hires_fix_blurred',x,y,z), inputs=[hires_fix_blurred, params_backend, state_topbar])
+                        hires_fix_stop.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_s',x,y,z), inputs=[hires_fix_stop, params_backend, state_topbar])
+                        hires_fix_weight.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_w',x,y,z), inputs=[hires_fix_weight, params_backend, state_topbar])
+                        hires_fix_blurred.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_blurred',x,y,z), inputs=[hires_fix_blurred, params_backend, state_topbar])
                         gr.HTML('* Powered by Fooocus upscale engine, <a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Documentation</a>, and Comfyd workflow engine from ComfyUI.')
                     
                     with gr.Tab(label='Inpaint or Outpaint', id='inpaint_tab', elem_id='inpaint_tab') as inpaint_tab:
@@ -825,8 +828,8 @@ with shared.gradio_root:
                                                 choices=modules.config.available_presets,
                                                 value=args_manager.args.preset if args_manager.args.preset else "initial",
                                                 visible=False, interactive=True)
-                with gr.Group():
-                    performance_selection = gr.Radio(label='Performance',
+                with gr.Tab(label="General"):
+                    performance_selection = gr.Radio(label='Performance', container=False, 
                                                  choices=flags.Performance.list(),
                                                  value=modules.config.default_performance)
                     image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
@@ -836,37 +839,138 @@ with shared.gradio_root:
                         aspect_ratios_selections = []
                         for template in flags.aspect_ratios_templates:
                             aspect_ratios_selections.append(gr.Radio(label='aspect ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
+                    with gr.Group():
+                        image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
+                        with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
+                            aspect_ratios_selection = gr.Textbox(value='', visible=False) 
+                            aspect_ratios_selections = []
+                            for template in flags.aspect_ratios_templates:
+                                aspect_ratios_selections.append(gr.Radio(label='aspect ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
                         
-                        for aspect_ratios_select in aspect_ratios_selections:
-                            aspect_ratios_select.change(lambda x: x, inputs=aspect_ratios_select, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                        overwrite_width = gr.Slider(label='Forced Overwrite of Generating Width',
+                            for aspect_ratios_select in aspect_ratios_selections:
+                                aspect_ratios_select.change(lambda x: x, inputs=aspect_ratios_select, outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                            overwrite_width = gr.Slider(label='Forced Overwrite of Generating Width',
                                                     minimum=-1, maximum=2048, step=1, value=-1,
                                                     info='Set as -1 to disable. For developer debugging. '
                                                          'Results will be worse for non-standard numbers that SDXL is not trained on.')
-                        overwrite_height = gr.Slider(label='Forced Overwrite of Generating Height',
+                            overwrite_height = gr.Slider(label='Forced Overwrite of Generating Height',
                                                      minimum=-1, maximum=2048, step=1, value=-1)
-                        def overwrite_aspect_ratios(width, height):
-                            if width>0 and height>0:
-                                return flags.add_ratio(f'{width}*{height}')
-                            return gr.update()
-                        overwrite_width.change(overwrite_aspect_ratios, inputs=[overwrite_width, overwrite_height], outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                        overwrite_height.change(overwrite_aspect_ratios, inputs=[overwrite_width, overwrite_height], outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
-                    output_format = gr.Radio(label='Output Format',
+                            def overwrite_aspect_ratios(width, height):
+                                if width>0 and height>0:
+                                    return flags.add_ratio(f'{width}*{height}')
+                                return gr.update()
+                            overwrite_width.change(overwrite_aspect_ratios, inputs=[overwrite_width, overwrite_height], outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                            overwrite_height.change(overwrite_aspect_ratios, inputs=[overwrite_width, overwrite_height], outputs=aspect_ratios_selection, queue=False, show_progress=False).then(lambda x: None, inputs=aspect_ratios_select, queue=False, show_progress=False, _js='(x)=>{refresh_aspect_ratios_label(x);}')
+                        output_format = gr.Radio(label='Output Format',
                                          choices=flags.OutputFormat.list(),
                                          value=modules.config.default_output_format)
                        
-                    negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
-                                             info='Describing what you do not want to see.', lines=2,
-                                             elem_id='negative_prompt',
-                                             value=modules.config.default_prompt_negative)
-                    seed_random = gr.Checkbox(label='Random', value=True)
-                    image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
+                        negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.", lines=2,
+                                             elem_id='negative_prompt', value=modules.config.default_prompt_negative)
+                        seed_random = gr.Checkbox(label='Random', value=True)
+                        image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
 
-                def random_checked(r):
-                    return gr.update(visible=not r)
+                    def reversed_checked(r):
+                        return gr.update(visible=not r)
 
-                seed_random.change(random_checked, inputs=[seed_random], outputs=[image_seed],
+                    seed_random.change(reversed_checked, inputs=[seed_random], outputs=[image_seed],
                                    queue=False, show_progress=False)
+                with gr.Tab(label="Advanced"):
+                    with gr.Group():
+                        guidance_scale = gr.Slider(label='Guidance Scale', minimum=0.01, maximum=30.0, step=0.01,
+                                            value=modules.config.default_cfg_scale,
+                                            info='Higher value means style is cleaner, vivider, and more artistic.')
+                        overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
+                                                   minimum=-1, maximum=200, step=1,
+                                                   value=modules.config.default_overwrite_step,
+                                                   info='Set as -1 to disable. For developer debugging.')
+                        with gr.Row():
+                            sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
+                                                   value=modules.config.default_sampler)
+                            scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
+                                                     value=modules.config.default_scheduler)
+                        with gr.Row():
+                            vae_name = gr.Dropdown(label='VAE', choices=[modules.flags.default_vae] + modules.config.vae_filenames,
+                                                     value=modules.config.default_vae, show_label=True)
+                            clip_skip = gr.Slider(label='CLIP Skip', minimum=1, maximum=flags.clip_skip_max, step=1,
+                                                 value=modules.config.default_clip_skip)
+                    sdxl_adv_checkbox = gr.Checkbox(label='SDXL advanced setting', value=False,  container=False)
+                    with gr.Group(visible=False) as sdxl_adv_pannel: 
+                        with gr.Row():
+                            sharpness = gr.Slider(label='Image Sharpness', minimum=0.0, maximum=30.0, step=0.001,
+                                      value=modules.config.default_sample_sharpness)
+                            adaptive_cfg = gr.Slider(label='CFG Mimicking from TSNR', minimum=1.0, maximum=30.0, step=0.01,
+                                                 value=modules.config.default_cfg_tsnr)
+                        with gr.Row():
+                            refiner_swap_method = gr.Dropdown(label='Refiner swap method', value=flags.refiner_swap_method,
+                                                          choices=['joint', 'separate', 'vae'])
+                            overwrite_switch = gr.Slider(label='Forced Overwrite of Refiner Switch Step',
+                                                     minimum=-1, maximum=200, step=1,
+                                                     value=modules.config.default_overwrite_switch)
+                        with gr.Row():
+                            adm_scaler_positive = gr.Slider(label='Positive ADM Guidance Scaler', minimum=0.1, maximum=3.0, step=0.001, value=1.5)
+                            adm_scaler_negative = gr.Slider(label='Negative ADM Guidance Scaler', minimum=0.1, maximum=3.0, step=0.001, value=0.8)
+                            adm_scaler_end = gr.Slider(label='ADM Guidance End At Step', minimum=0.0, maximum=1.0, step=0.001, value=0.3)
+                    def toggle_checked(r):
+                        return gr.update(visible=r)
+
+                    sdxl_adv_checkbox.change(toggle_checked, inputs=[sdxl_adv_checkbox], outputs=[sdxl_adv_pannel], queue=False, show_progress=False)
+
+                with gr.Tab(label='Control'):
+                    debugging_cn_preprocessor = gr.Checkbox(label='Debug Preprocessors', value=False,
+                                                                info='See the results from preprocessors.')
+                    skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
+                                                               info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
+                    controlnet_softness = gr.Slider(label='Softness of ControlNet', minimum=0.0, maximum=1.0,
+                                                        step=0.001, value=0.25,
+                                                        info='Similar to the Control Mode in A1111 (use 0.0 to disable). ')
+                    canny_low_threshold = gr.Slider(label='Canny Low Threshold', minimum=1, maximum=255,
+                                                            step=1, value=64)
+                    canny_high_threshold = gr.Slider(label='Canny High Threshold', minimum=1, maximum=255,
+                                                             step=1, value=128)
+                with gr.Tab(label='Inpaint'):
+                    with gr.Group():
+                        inpaint_engine = gr.Dropdown(label='Inpaint Engine',
+                                    value=modules.config.default_inpaint_engine_version,
+                                    choices=flags.inpaint_engine_versions["SDXL"])
+                        with gr.Row():
+                            debugging_inpaint_preprocessor = gr.Checkbox(label='Debug Inpaint Preprocessing', value=False)
+                            inpaint_disable_initial_latent = gr.Checkbox(label='Disable initial latent in inpaint', value=False)    
+                        with gr.Row():
+                            debugging_enhance_masks_checkbox = gr.Checkbox(label='Debug Enhance Masks', value=False)
+                            debugging_dino = gr.Checkbox(label='Debug GroundingDINO', value=False)
+                        inpaint_erode_or_dilate = gr.Slider(label='Mask Erode or Dilate',
+                                                            minimum=-64, maximum=64, step=1, value=0,
+                                                            info='Positive value will make white area in the mask larger, '
+                                                                 'negative value will make white area smaller. '
+                                                                 '(default is 0, always processed before any mask invert)')
+                        dino_erode_or_dilate = gr.Slider(label='GroundingDINO Box Erode or Dilate',
+                                                         minimum=-64, maximum=64, step=1, value=0,
+                                                         info='Positive value will make white area in the mask larger, '
+                                                              'negative value will make white area smaller. '
+                                                              '(default is 0, processed before SAM)')
+                        inpaint_mask_color = gr.ColorPicker(label='Inpaint brush color', value='#FFFFFF', elem_id='inpaint_brush_color')
+
+                    inpaint_ctrls = [debugging_inpaint_preprocessor, inpaint_disable_initial_latent, inpaint_engine,
+                                         inpaint_strength, inpaint_respective_field,
+                                         inpaint_advanced_masking_checkbox, invert_mask_checkbox, inpaint_erode_or_dilate]
+
+                    inpaint_advanced_masking_checkbox.change(lambda x: [gr.update(visible=x)] * 2,
+                                                                 inputs=inpaint_advanced_masking_checkbox,
+                                                                 outputs=[inpaint_mask_image, inpaint_mask_generation_col],
+                                                                 queue=False, show_progress=False)
+
+                    inpaint_mask_color.change(lambda x: gr.update(brush_color=x), inputs=inpaint_mask_color,
+                                                  outputs=inpaint_input_image,
+                                                  queue=False, show_progress=False)
+
+                with gr.Tab(label='FreeU'):
+                        freeu_enabled = gr.Checkbox(label='Enabled', value=False)
+                        freeu_b1 = gr.Slider(label='B1', minimum=0, maximum=2, step=0.01, value=1.01)
+                        freeu_b2 = gr.Slider(label='B2', minimum=0, maximum=2, step=0.01, value=1.02)
+                        freeu_s1 = gr.Slider(label='S1', minimum=0, maximum=4, step=0.01, value=0.99)
+                        freeu_s2 = gr.Slider(label='S2', minimum=0, maximum=4, step=0.01, value=0.95)
+                        freeu_ctrls = [freeu_enabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2]
 
                 history_link = gr.HTML()
                 
@@ -917,7 +1021,13 @@ with shared.gradio_root:
 
                         metadata_input_image.upload(trigger_metadata_preview, inputs=metadata_input_image,
                                                 outputs=[metadata_json, metadata_import_button], queue=False, show_progress=True)
-
+                    # custom plugin "OneButtonPrompt"
+                    with gr.Tab(label="OneButtonPrompt"):
+                        import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
+                        run_event = gr.Number(visible=False, value=0)
+                        ui_onebutton.ui_onebutton(prompt, run_event, random_button)
+                        super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
+                    
             with gr.Tab(label='Styles', elem_classes=['style_selections_tab']):
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
@@ -1319,155 +1429,6 @@ with shared.gradio_root:
                 #sync_model_info.change(lambda x: (gr.update(visible=x), gr.update(visible=x),  gr.update(visible=x)), inputs=sync_model_info, outputs=[info_sync_texts, info_sync_button, info_progress], queue=False, show_progress=False)
                 #info_sync_button.click(toolbox.sync_model_info_click, inputs=models_infos, outputs=models_infos, queue=False, show_progress=False)
 
-            with gr.Tab(label='Advanced', elem_id="scrollable-box"):
-                guidance_scale = gr.Slider(label='Guidance Scale', minimum=0.01, maximum=30.0, step=0.01,
-                                           value=modules.config.default_cfg_scale,
-                                           info='Higher value means style is cleaner, vivider, and more artistic.')
-                overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
-                                                   minimum=-1, maximum=200, step=1,
-                                                   value=modules.config.default_overwrite_step,
-                                                   info='Set as -1 to disable. For developer debugging.')
-                sharpness = gr.Slider(label='Image Sharpness', minimum=0.0, maximum=30.0, step=0.001,
-                                      value=modules.config.default_sample_sharpness,
-                                      info='Higher value means image and texture are sharper.')
-                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/117" target="_blank">\U0001F4D4 Documentation</a>')
-                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=modules.config.default_developer_debug_mode_checkbox, container=False)
-
-                with gr.Column(visible=modules.config.default_developer_debug_mode_checkbox) as dev_tools:
-                    with gr.Tab(label='Debug Tools'):
-                        sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
-                                                   value=modules.config.default_sampler)
-                        scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
-                                                     value=modules.config.default_scheduler)
-                        adm_scaler_positive = gr.Slider(label='Positive ADM Guidance Scaler', minimum=0.1, maximum=3.0,
-                                                        step=0.001, value=1.5, info='The scaler multiplied to positive ADM (use 1.0 to disable). ')
-                        adm_scaler_negative = gr.Slider(label='Negative ADM Guidance Scaler', minimum=0.1, maximum=3.0,
-                                                        step=0.001, value=0.8, info='The scaler multiplied to negative ADM (use 1.0 to disable). ')
-                        adm_scaler_end = gr.Slider(label='ADM Guidance End At Step', minimum=0.0, maximum=1.0,
-                                                   step=0.001, value=0.3,
-                                                   info='When to end the guidance from positive/negative ADM. ')
-
-                        refiner_swap_method = gr.Dropdown(label='Refiner swap method', value=flags.refiner_swap_method,
-                                                          choices=['joint', 'separate', 'vae'])
-
-                        adaptive_cfg = gr.Slider(label='CFG Mimicking from TSNR', minimum=1.0, maximum=30.0, step=0.01,
-                                                 value=modules.config.default_cfg_tsnr,
-                                                 info='Enabling Fooocus\'s implementation of CFG mimicking for TSNR '
-                                                      '(effective when real CFG > mimicked CFG).')
-                        clip_skip = gr.Slider(label='CLIP Skip', minimum=1, maximum=flags.clip_skip_max, step=1,
-                                                 value=modules.config.default_clip_skip,
-                                                 info='Bypass CLIP layers to avoid overfitting (use 1 to not skip any layers, 2 is recommended).')
-                        vae_name = gr.Dropdown(label='VAE', choices=[modules.flags.default_vae] + modules.config.vae_filenames,
-                                                     value=modules.config.default_vae, show_label=True)
-
-                        generate_image_grid = gr.Checkbox(label='Generate Image Grid for Each Batch',
-                                                          info='(Experimental) This may cause performance problems on some computers and certain internet conditions.',
-                                                          value=False)
-                        overwrite_switch = gr.Slider(label='Forced Overwrite of Refiner Switch Step',
-                                                     minimum=-1, maximum=200, step=1,
-                                                     value=modules.config.default_overwrite_switch,
-                                                     info='Set as -1 to disable. For developer debugging.')
-
-                        disable_preview = gr.Checkbox(label='Disable Preview', value=modules.config.default_black_out_nsfw,
-                                                      interactive=not modules.config.default_black_out_nsfw,
-                                                      info='Disable preview during generation.')
-                        disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results',
-                                                      value=flags.Performance.has_restricted_features(modules.config.default_performance),
-                                                      info='Disable intermediate results during generation, only show final gallery.')
-
-                        disable_seed_increment = gr.Checkbox(label='Disable seed increment',
-                                                             info='Disable automatic seed increment when image number is > 1.',
-                                                             value=False)
-                        read_wildcards_in_order = gr.Checkbox(label="Read wildcards in order", value=False, visible=False)
-
-                        black_out_nsfw = gr.Checkbox(label='Black Out NSFW', value=modules.config.default_black_out_nsfw,
-                                                     interactive=not modules.config.default_black_out_nsfw,
-                                                     info='Use black image if NSFW is detected.')
-
-                        black_out_nsfw.change(lambda x: gr.update(value=x, interactive=not x),
-                                              inputs=black_out_nsfw, outputs=disable_preview, queue=False,
-                                              show_progress=False)
-
-                        if not args_manager.args.disable_image_log:
-                            save_final_enhanced_image_only = gr.Checkbox(label='Save only final enhanced image',
-                                                                         value=modules.config.default_save_only_final_enhanced_image)
-
-                        if not args_manager.args.disable_metadata:
-                            save_metadata_to_images = gr.Checkbox(label='Save Metadata to Images', value=modules.config.default_save_metadata_to_images,
-                                                                  info='Adds parameters to generated images allowing manual regeneration.')
-                            metadata_scheme = gr.Radio(label='Metadata Scheme', choices=flags.metadata_scheme, value=modules.config.default_metadata_scheme,
-                                                       info='Image Prompt parameters are not included. Use png and a1111 for compatibility with Civitai.',
-                                                       visible=modules.config.default_save_metadata_to_images)
-
-                            save_metadata_to_images.change(lambda x: [gr.update(visible=x)], inputs=[save_metadata_to_images], outputs=[metadata_scheme], queue=False, show_progress=False)
-
-                    with gr.Tab(label='Control'):
-                        debugging_cn_preprocessor = gr.Checkbox(label='Debug Preprocessors', value=False,
-                                                                info='See the results from preprocessors.')
-                        skipping_cn_preprocessor = gr.Checkbox(label='Skip Preprocessors', value=False,
-                                                               info='Do not preprocess images. (Inputs are already canny/depth/cropped-face/etc.)')
-
-
-                        controlnet_softness = gr.Slider(label='Softness of ControlNet', minimum=0.0, maximum=1.0,
-                                                        step=0.001, value=0.25,
-                                                        info='Similar to the Control Mode in A1111 (use 0.0 to disable). ')
-
-                        with gr.Tab(label='Canny'):
-                            canny_low_threshold = gr.Slider(label='Canny Low Threshold', minimum=1, maximum=255,
-                                                            step=1, value=64)
-                            canny_high_threshold = gr.Slider(label='Canny High Threshold', minimum=1, maximum=255,
-                                                             step=1, value=128)
-
-                    with gr.Tab(label='Inpaint'):
-                        debugging_inpaint_preprocessor = gr.Checkbox(label='Debug Inpaint Preprocessing', value=False)
-                        debugging_enhance_masks_checkbox = gr.Checkbox(label='Debug Enhance Masks', value=False,
-                                                                       info='Show enhance masks in preview and final results')
-                        debugging_dino = gr.Checkbox(label='Debug GroundingDINO', value=False,
-                                                     info='Use GroundingDINO boxes instead of more detailed SAM masks')
-                        inpaint_disable_initial_latent = gr.Checkbox(label='Disable initial latent in inpaint', value=False)
-                        inpaint_engine = gr.Dropdown(label='Inpaint Engine',
-                                                     value=modules.config.default_inpaint_engine_version,
-                                                     choices=flags.inpaint_engine_versions["SDXL"],
-                                                     info='Version of Fooocus inpaint model. If set, use performance Quality or Speed (no performance LoRAs) for best results.')
-                        inpaint_erode_or_dilate = gr.Slider(label='Mask Erode or Dilate',
-                                                            minimum=-64, maximum=64, step=1, value=0,
-                                                            info='Positive value will make white area in the mask larger, '
-                                                                 'negative value will make white area smaller. '
-                                                                 '(default is 0, always processed before any mask invert)')
-                        dino_erode_or_dilate = gr.Slider(label='GroundingDINO Box Erode or Dilate',
-                                                         minimum=-64, maximum=64, step=1, value=0,
-                                                         info='Positive value will make white area in the mask larger, '
-                                                              'negative value will make white area smaller. '
-                                                              '(default is 0, processed before SAM)')
-
-                        inpaint_mask_color = gr.ColorPicker(label='Inpaint brush color', value='#FFFFFF', elem_id='inpaint_brush_color')
-
-                        inpaint_ctrls = [debugging_inpaint_preprocessor, inpaint_disable_initial_latent, inpaint_engine,
-                                         inpaint_strength, inpaint_respective_field,
-                                         inpaint_advanced_masking_checkbox, invert_mask_checkbox, inpaint_erode_or_dilate]
-
-                        inpaint_advanced_masking_checkbox.change(lambda x: [gr.update(visible=x)] * 2,
-                                                                 inputs=inpaint_advanced_masking_checkbox,
-                                                                 outputs=[inpaint_mask_image, inpaint_mask_generation_col],
-                                                                 queue=False, show_progress=False)
-
-                        inpaint_mask_color.change(lambda x: gr.update(brush_color=x), inputs=inpaint_mask_color,
-                                                  outputs=inpaint_input_image,
-                                                  queue=False, show_progress=False)
-
-                    with gr.Tab(label='FreeU'):
-                        freeu_enabled = gr.Checkbox(label='Enabled', value=False)
-                        freeu_b1 = gr.Slider(label='B1', minimum=0, maximum=2, step=0.01, value=1.01)
-                        freeu_b2 = gr.Slider(label='B2', minimum=0, maximum=2, step=0.01, value=1.02)
-                        freeu_s1 = gr.Slider(label='S1', minimum=0, maximum=4, step=0.01, value=0.99)
-                        freeu_s2 = gr.Slider(label='S2', minimum=0, maximum=4, step=0.01, value=0.95)
-                        freeu_ctrls = [freeu_enabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2]
-
-                def dev_mode_checked(r):
-                    return gr.update(visible=r)
-
-                dev_mode.change(dev_mode_checked, inputs=[dev_mode], outputs=[dev_tools],
-                                queue=False, show_progress=False)
 
                 def refresh_files_clicked(state_params):
                     engine = state_params.get('engine', 'Fooocus')
@@ -1502,19 +1463,38 @@ with shared.gradio_root:
                             language_ui = gr.Radio(label='Language of UI', choices=['En', '中文'], value=modules.flags.language_radio(args_manager.args.language), interactive=(args_manager.args.language in ['default', 'cn', 'en']), container=False)
                             background_theme = gr.Radio(label='Theme of background', choices=['light', 'dark'], value=args_manager.args.theme, interactive=True, container=False)
                         with gr.Group():
-                            mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'http://{args_manager.args.listen}:{args_manager.args.port}{args_manager.args.webroot}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
+                            mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'{get_local_url}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
                             prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
+                            backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt)
+                            disable_preview = gr.Checkbox(label='Disable Preview', value=modules.config.default_black_out_nsfw,
+                                                      interactive=not modules.config.default_black_out_nsfw)
+                            disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results',
+                                                      value=flags.Performance.has_restricted_features(modules.config.default_performance))
+                            disable_seed_increment = gr.Checkbox(label='Disable seed increment', value=False)
+                            save_final_enhanced_image_only = gr.Checkbox(label='Save only final enhanced image', visible=not args_manager.args.disable_image_log,
+                                                                         value=modules.config.default_save_only_final_enhanced_image)
+                            read_wildcards_in_order = gr.Checkbox(label="Read wildcards in order", value=False, visible=False)
+                            translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods)
+
+                        with gr.Group():
                             image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
-                            backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt, interactive=True, info='Extract and backfill prompt and negative prompt while switching historical gallery images.')
-                            translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods, info='\'Model\' requires more GPU/CPU and \'APIs\' rely on third.')
-                                
-                        # custom plugin "OneButtonPrompt"
-                        import custom.OneButtonPrompt.ui_onebutton as ui_onebutton
-                        run_event = gr.Number(visible=False, value=0)
-                        ui_onebutton.ui_onebutton(prompt, run_event, random_button)
-                        with gr.Tab(label="SuperPrompter"):
-                            #super_prompter = gr.Button(value="<<SuperPrompt", size="sm", min_width = 70)
-                            super_prompter_prompt = gr.Textbox(label='Prompt prefix', value='Expand the following prompt to add more detail:', lines=1)
+                            generate_image_grid = gr.Checkbox(label='Generate Image Grid for Each Batch',
+                                                        info='(Experimental) This may cause performance problems on some computers and certain internet conditions.', value=False)
+                            black_out_nsfw = gr.Checkbox(label='Black Out NSFW', value=modules.config.default_black_out_nsfw,
+                                                     interactive=not modules.config.default_black_out_nsfw,
+                                                     info='Use black image if NSFW is detected.')
+
+                            black_out_nsfw.change(lambda x: gr.update(value=x, interactive=not x),
+                                              inputs=black_out_nsfw, outputs=disable_preview, queue=False,
+                                              show_progress=False)
+                            save_metadata_to_images = gr.Checkbox(label='Save Metadata to Images', value=modules.config.default_save_metadata_to_images,
+                                                                  info='Adds parameters to generated images allowing manual regeneration.')
+                            metadata_scheme = gr.Radio(label='Metadata Scheme', choices=flags.metadata_scheme, value=modules.config.default_metadata_scheme,
+                                                       info='Image Prompt parameters are not included. Use png and a1111 for compatibility with Civitai.',
+                                                       visible=modules.config.default_save_metadata_to_images)
+                            save_metadata_to_images.change(toggle_checked, inputs=[save_metadata_to_images], outputs=[metadata_scheme], queue=False, show_progress=False)
+
+
                     with gr.Tab(label='Local System'):
                         with gr.Group() as admin_panel:
                             with gr.Row():
@@ -1522,7 +1502,6 @@ with shared.gradio_root:
                                 admin_mgr_link = gr.HTML(value='')
                             with gr.Group():
                                 with gr.Row():
-                                    #admin_save_button = gr.Button(value='Save default of system', size="sm", min_width=70)
                                     admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
                                 with gr.Row():
                                     comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
@@ -1537,12 +1516,11 @@ with shared.gradio_root:
                     with gr.Tab(label='P2P Network'):
                         with gr.Group() as p2p_panel:
                             p2p_active_checkbox = gr.Checkbox(label='Enable P2P network', value=ads.get_admin_default('p2p_active_checkbox'))
-                            p2p_remote_checkbox = gr.Checkbox(label='Enable remote process', value=ads.get_admin_default('p2p_remote_checkbox'), interactive=False)
                             with gr.Row():
                                 p2p_node_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='identity_input2')
                             with gr.Row():
-                                p2p_out_did_btn = gr.Button(value="Set remote node", size="sm", min_width=30)
-                                p2p_in_did_btn = gr.Button(value="Set accessible identity", size="sm", min_width=30)
+                                p2p_out_did_btn = gr.Button(value="Set remote node", size="sm", min_width=30, interactive=True if ads.get_admin_default('p2p_remote_process')=='Disable' else False)
+                                p2p_in_did_btn = gr.Button(value="Set accessible identity", size="sm", min_width=30, interactive=True if ads.get_admin_default('p2p_remote_process')=='Disable' else False)
                             
                             with gr.Row():
                                 p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["title_right"])
@@ -1550,39 +1528,59 @@ with shared.gradio_root:
                             with gr.Row():
                                 p2p_in_did_title = gr.HTML(value="Accessible identity:", elem_classes=["title_right"])
                                 p2p_in_did_list = gr.HTML(elem_classes=["htmlcontent"])
-                            
+                            p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'in', 'out'], value=ads.get_admin_default('p2p_remote_process'), interactive=False) 
                             p2p_out_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
                             p2p_in_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_in_did_list, queue=False, show_progress=False)
+                            p2p_out_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_out_did_list", x, y), inputs=[p2p_out_did_list, state_topbar])
+                            p2p_in_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_in_did_list", x, y), inputs=[p2p_in_did_list, state_topbar])
+                            
+                            def toggle_p2p_remote_process(remote_process_status, state):
+                                if remote_process_status:
+                                    p2p_task.init_p2p_task(worker, model_management, shared.token)
+                                ds.set_admin_default_value("p2p_remote_process", x, y)
+                                return [gr.update(interactive=not remote_process_status)]*2
 
-                    with gr.Tab(label='Contact'):
-                        with gr.Row():
-                            simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
-                        with gr.Row():
-                            gr.Markdown(value=f'<b>系统信息</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Comfyd {comfy_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
+                            p2p_remote_process.change(toggle_p2p_remote_process, inputs=[p2p_remote_process, state_topbar], outputs=[p2p_out_did_btn, p2p_in_did_btn], queue=False, show_progress=False)
 
-                        def sync_params_backend(key, v, params, state):
-                            params.update({key:v})
-                            logger.debug(f'sync_params_backend: {key}:{v}')
-                            if not key.startwiths("i2i_uov"):
-                                ads.set_user_default_value(key, v, state) 
-                            return params
+            with gr.Tab(label='Contact', elem_id="scrollable-box"):
+                with gr.Row():
+                    simpleai_contact = gr.HTML(visible=True, value=simpleai.self_contact, elem_classes=["identityIntroduce"], elem_id='identity_introduce')
+                with gr.Row():
+                    gr.Markdown(value=f'<b>系统版本</b>({version.get_simplesdxl_short_ver()})<br>OS: {shared.sysinfo["os_name"]}, {shared.sysinfo["cpu_arch"]}, {shared.sysinfo["cuda"]}, Torch{shared.sysinfo["torch_version"]}, XF{shared.sysinfo["xformers_version"]}<br>Ver: {version.branch} {version.simplesdxl_ver} / Comfyd {comfy_version.version}<br>PyHash: {shared.sysinfo["pyhash"]}, UIHash: {shared.sysinfo["uihash"]}')
 
-                        def toggle_minicpm(x, state):
-                            MiniCPM.set_enable(x)
-                            ads.set_admin_default_value('minicpm_checkbox', x, state) 
-                            return gr.update(visible=not x), gr.update(visible=x), gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
+        
+                def sync_state_params(key, value, state):
+                    state.update({key: value})
+                    ads.set_user_local_vars(key, value, state)
 
-                        translation_methods.change(lambda x,y,z: sync_params_backend('translation_methods',x,y,z), inputs=[translation_methods, params_backend, state_topbar])
-                        backfill_prompt.change(lambda x,y: ads.set_user_default_value("backfill_prompt", x, y), inputs=[backfill_prompt, state_topbar])
-                        fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=[fast_comfyd_checkbox, state_topbar])
-                        minicpm_checkbox.change(toggle_minicpm, inputs=[minicpm_checkbox, state_topbar], outputs=[describe_apply_styles, describe_output_tags, describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
-                        reserved_vram.change(lambda x,y,z: sync_params_backend('reserved_vram',x,y,z), inputs=[reserved_vram, params_backend, state_topbar])
-                        advanced_logs.change(simpleai.change_advanced_logs, inputs=[advanced_logs, state_topbar])
-                        wavespeed_strength.change(lambda x,y,z: sync_params_backend('wavespeed_strength',x,y,z), inputs=[wavespeed_strength, params_backend, state_topbar])
+                def sync_backend_params(key, v, params, state):
+                    params.update({key:v})
+                    logger.debug(f'sync_backend_params: {key}:{v}')
+                    if not key.startwiths("i2i_uov"):
+                        ads.set_user_default_value(key, v, state) 
+                    return params
 
-                        admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox]
-                        #admin_save_button.click(topbar.admin_save_to_default, inputs=[state_topbar] + admin_ctrls, outputs=admin_save_button, queue=False, show_progress=False)
-                        admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
+                def toggle_minicpm(x, state):
+                    MiniCPM.set_enable(x)
+                    ads.set_admin_default_value('minicpm_checkbox', x, state) 
+                    return gr.update(visible=not x), gr.update(visible=x), gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
+
+                translation_methods.change(lambda x,y,z: sync_backend_params('translation_methods',x,y,z), inputs=[translation_methods, params_backend, state_topbar])
+                backfill_prompt.change(lambda x,y: ads.set_user_default_value("backfill_prompt", x, y), inputs=[backfill_prompt, state_topbar])
+                disable_preview.change(lambda x,y: ads.set_user_default_value("disable_preview", x, y), inputs=[disable_preview, state_topbar])
+                disable_intermediate_results.change(lambda x,y: ads.set_user_default_value("disable_intermediate_results", x, y), inputs=[disable_intermediate_results, state_topbar])
+                disable_seed_increment.change(lambda x,y: ads.set_user_default_value("disable_seed_increment", x, y), inputs=[disable_seed_increment, state_topbar])
+                save_final_enhanced_image_only.change(lambda x,y: ads.set_user_default_value("save_final_enhanced_image_only", x, y), inputs=[save_final_enhanced_image_only, state_topbar])
+
+                fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=[fast_comfyd_checkbox, state_topbar])
+                minicpm_checkbox.change(toggle_minicpm, inputs=[minicpm_checkbox, state_topbar], outputs=[describe_apply_styles, describe_output_tags, describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
+                reserved_vram.change(lambda x,y,z: sync_backend_params('reserved_vram',x,y,z), inputs=[reserved_vram, params_backend, state_topbar])
+                advanced_logs.change(simpleai.change_advanced_logs, inputs=[advanced_logs, state_topbar])
+                wavespeed_strength.change(lambda x,y,z: sync_backend_params('wavespeed_strength',x,y,z), inputs=[wavespeed_strength, params_backend, state_topbar])
+                admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
+
+                admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
+                user_app_ctrls = [backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, translation_methods, generate_image_grid, black_out_nsfw, save_metadata_to_images, metadata_scheme]
 
 
 
@@ -1626,9 +1624,6 @@ with shared.gradio_root:
             scene_params = [scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number, scene_mask_color]
             ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
-            def sync_state_params(key, value, state):
-                state.update({key: value})
-                ads.set_user_local_vars(key, value, state)
 
             language_ui.select(lambda x,y: sync_state_params('__lang', modules.config.language_radio_revert(x), y), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
             background_theme.select(lambda x,y: sync_state_params('__theme', x, y), inputs=[background_theme, state_topbar]).then(None, inputs=background_theme, _js="(x) => set_theme_by_ui(x)")
@@ -1800,9 +1795,9 @@ with shared.gradio_root:
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
         reset_preset_func = [output_format, inpaint_advanced_masking_checkbox, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint, backfill_prompt, translation_methods, input_image_checkbox]
-        scene_frontend_ctrl = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme] + [generate_button, load_parameter_button]
+        scene_frontend_ctrls = [prompt_internal_panel, disable_intermediate_results, image_tools_checkbox, scene_panel, scene_theme] + [generate_button, load_parameter_button]
 
-        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs, queue=False, show_progress=True) \
+        metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating, state_topbar], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrls + load_data_outputs, queue=False, show_progress=True) \
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
@@ -1946,7 +1941,9 @@ with shared.gradio_root:
             uov_input_image.upload(trigger_auto_describe, inputs=[describe_methods, uov_input_image, prompt, describe_apply_styles, describe_output_tags, describe_output_chinese], outputs=[prompt, style_selections], show_progress=True, queue=True) \
                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
                 .then(lambda: None, _js='()=>{refresh_style_localization();}')
-
+            inpaint_input_image.upload(trigger_auto_describe, inputs=[describe_methods, inpaint_input_image, prompt, describe_apply_styles, describe_output_tags, describe_output_chinese], outputs=[prompt, style_selections], show_progress=True, queue=True) \
+                .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
+                .then(lambda: None, _js='()=>{refresh_style_localization();}')
             enhance_input_image.upload(lambda: gr.update(value=True), outputs=enhance_checkbox, queue=False, show_progress=False) \
                 .then(trigger_auto_describe, inputs=[describe_methods, enhance_input_image, prompt, describe_apply_styles, describe_output_tags, describe_output_chinese], outputs=[prompt, style_selections], show_progress=True, queue=True) \
                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
@@ -1957,7 +1954,7 @@ with shared.gradio_root:
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}')
     
     prompt_regen_button.click(toolbox.toggle_note_box_regen, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_regen_button, params_note_box], show_progress=False)
-    params_note_regen_button.click(toolbox.reset_image_params, inputs=[state_topbar, state_is_generating, inpaint_mode], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + [params_note_regen_button, params_note_box], show_progress=False)
+    params_note_regen_button.click(toolbox.reset_image_params, inputs=[state_topbar, state_is_generating, inpaint_mode], outputs=reset_preset_layout + reset_preset_func + scene_frontend_ctrls + load_data_outputs + [params_note_regen_button, params_note_box], show_progress=False)
 
     prompt_preset_button.click(toolbox.toggle_note_box_preset, inputs=model_check + [state_topbar], outputs=[params_note_info, params_note_input_name, params_note_preset_button, params_note_box], show_progress=False)
     params_note_preset_button.click(toolbox.save_preset, inputs=[params_note_input_name, params_backend, state_topbar] + reset_preset_func + load_data_outputs, outputs=[params_note_input_name, params_note_preset_button, params_note_box, preset_store_list] + nav_bars + [system_params], show_progress=False) \
@@ -1965,22 +1962,22 @@ with shared.gradio_root:
 
     
     after_identity = [gallery_index, index_radio, gallery_index_stat, layer_method, layer_input_image, preset_store, preset_store_list, history_link, identity_introduce, configure_panel, admin_panel, p2p_panel, admin_link, system_params] + ip_types
-    identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
-        .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
+    identity_phrases_confirm_button.click(lambda a, b, c: simpleai.set_phrases(a,b,c,'confirm'), inputs=identity_input_info + [identity_phrase_input], outputs=identity_ctrls + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
+        .then(topbar.update_after_identity_all, inputs=state_topbar, outputs=nav_bars + after_identity + user_app_ctrls, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
-        .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
+    identity_confirm_button.click(simpleai.confirm_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_ctrls + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
+        .then(topbar.update_after_identity_all, inputs=state_topbar, outputs=nav_bars + after_identity + user_app_ctrls, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_crtl + identity_input + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
-        .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
+    identity_unbind_button.click(simpleai.unbind_identity, inputs=identity_input_info + [identity_phrase_input], outputs=identity_ctrls + identity_input + [current_id_info, current_upstream_status, identity_export_btn], show_progress=False) \
+        .then(topbar.update_after_identity_all, inputs=state_topbar, outputs=nav_bars + after_identity + user_app_ctrls, show_progress=False) \
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
-    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_crtl + identity_input, show_progress=False)
+    binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_ctrls + identity_input, show_progress=False)
 
-    p2p_active_checkbox.change(simpleai.toggle_p2p, inputs=[p2p_active_checkbox, state_topbar], outputs=[p2p_out_did_btn, p2p_in_did_btn]) \
+    p2p_active_checkbox.change(simpleai.toggle_p2p, inputs=[p2p_active_checkbox, state_topbar], outputs=[p2p_remote_process]) \
                         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
                         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
 
-    reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrl + load_data_outputs + after_identity
+    reset_layout_params = nav_bars + reset_preset_layout + reset_preset_func + scene_frontend_ctrls + load_data_outputs + after_identity
     topbar.reset_layout_num = len(reset_layout_params) - len(nav_bars) - len(after_identity)
     reset_preset_inputs = [prompt, negative_prompt, state_topbar, state_is_generating, inpaint_mode, comfyd_active_checkbox]
 
@@ -2000,7 +1997,7 @@ with shared.gradio_root:
                     outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn] + lora_galleries + lora_gallery_visible + lora_current_previews + lora_preview_btns)
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
-                      .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction, backfill_prompt, translation_methods] + admin_ctrls, show_progress=False) \
+                      .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction] + user_app_ctrls + admin_ctrls, show_progress=False) \
                       .then(topbar.reset_layout_params, inputs=reset_preset_inputs, outputs=reset_layout_params, show_progress=False) \
                       .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}') \
                       .then(topbar.sync_message, inputs=state_topbar) \
@@ -2032,6 +2029,8 @@ if ads.get_admin_default('p2p_active_checkbox'):
         shared.upstream_did = shared.token.get_p2p_upstream_did()
     if shared.upstream_did:
         shared.upstream_did = f'{shared.upstream_did}:P2P'
+if ads.get_admin_default('p2p_remote_process'):
+    p2p_task.init_p2p_task(worker, model_management, shared.token)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,
