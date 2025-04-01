@@ -285,6 +285,22 @@ function initStylePreviewOverlay() {
             textOverlay.style.display = 'none';
         }
     });
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.style-button')) return;
+        const container = e.target.closest('.style_item');
+        if (!container) return;
+        const styleButton = container.querySelector('.style-button');
+        if (styleButton) {
+            e.stopPropagation();
+            const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: e.clientX,
+                clientY: e.clientY
+            });
+            styleButton.dispatchEvent(clickEvent);
+        }
+    });
     document.addEventListener('contextmenu', function(e) {
         const container = e.target.closest('.style_item');
         if (!container) return;
