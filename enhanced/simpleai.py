@@ -5,13 +5,16 @@ import re
 import gradio as gr
 import shared
 import cv2
+import args_manager
 import modules.util as util
 import enhanced.all_parameters as ads
+import simpleai_base.p2p_task as p2p_task
+from build_launcher import is_win32_standalone_build
 from simpleai_base import simpleai_base, utils, comfyd, torch_version, xformers_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
-from build_launcher import is_win32_standalone_build
+
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
@@ -126,7 +129,8 @@ def toggle_p2p(x, state):
             result = shared.token.p2p_stop()
             shared.upstream_did = shared.upstream_did.split(':')[0]
     ads.set_admin_default_value('p2p_active_checkbox', x, state)
-    return [gr.update(interactive=x)] * 2
+
+    return gr.update(interactive=False, value='Disable')
 
 
 
@@ -373,6 +377,11 @@ def check_vcode(vcode):
         return False
     return True
 
+get_local_url = f'{args_manager.args.webroot}'
+logo_img_path = os.path.abspath(f'./presets/image/simpai_logo.jpg')
+logo_img_url = f'{get_local_url}/file={logo_img_path}'
+logo_img_html = f'<div align=center><a target= "_blank" href="http://simpai.cn"><img width=149 src={logo_img_url}></a></div><br>'
+
 self_contact = '''
 软件特点:<br>
 <b>SimpAI</b>，开源 AI 创意生图平台，简洁、高效和稳定。<br>
@@ -389,3 +398,5 @@ QQ群: 938075852<br>
 商务合作:<br>
 邮箱: 925457@qq.com
 '''
+
+self_contact = logo_img_html + self_contact

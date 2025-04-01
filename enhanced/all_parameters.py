@@ -107,36 +107,47 @@ default = {
     'reserved_vram': 0,
     'minicpm_checkbox': False,
     'advanced_logs': False,
-    'wavespeed_strength': 0.12
+    'wavespeed_strength': 0.12,
+    'p2p_active_checkbox': False,
+    'p2p_remote_process': 'Disable',
+    'p2p_in_did_list': '',
+    'p2p_out_did_list': '',
     }
 
+bool_map = {
+    "true": True,
+    "false": False
+}
+float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
+
+def convert_value(value):
+    global bool_map, float_pattern
+    
+    if value.lower() in bool_map:
+        value = bool_map[value.lower()]
+    elif value.isdigit() or ((value.startswith('-') or value.startswith('+')) and value[1:].isdigit()):
+        value = int(value)
+    elif re.match(float_pattern, value):
+        value = float(value)
+    elif value == 'None' or value == 'Unknown':
+        value = None
+    return value
 
 def get_admin_default(admin_key):
-    bool_map = {
-        "true": True,
-        "false": False
-    }
-    float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
     admin_value = shared.token.get_local_admin_vars(admin_key).strip()
-    if admin_value.lower() in bool_map:
-        admin_value = bool_map[admin_value.lower()]
-    elif re.match(float_pattern, admin_value):
-        admin_value = float(admin_value)
-    elif admin_value == 'None' or admin_value == 'Unknown':
-        admin_value = None
-    return admin_value
+    return convert_value(admin_value)
 
 def get_user_default(user_key, state, config_default=None):
     user_value = shared.token.get_local_vars(user_key, 'None', state["__session"], state["ua_hash"]).strip()
-    if user_value is None or user_value=="None":
-        if config_default:
-            user_value = config_default
+    if user_value is None or user_value=="None" or user_value=="Unknown":
+        if config_default is not None:
+            user_value = str(config_default)
         else:
             if user_key in default:
-                user_value = default[user_key]
+                user_value = str(default[user_key])
             else:
-                user_value = None
-    return user_value
+                user_value = 'None'
+    return convert_value(user_value)
 
 set_admin_default_value = lambda x,y,s: shared.token.set_local_admin_vars(x, str(y), s["__session"], s["ua_hash"])
 set_user_default_value = lambda x,y,s: shared.token.set_local_vars(x, str(y), s["__session"], s["ua_hash"])

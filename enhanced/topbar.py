@@ -29,7 +29,7 @@ from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
 
 from datetime import datetime
-from modules.model_loader import load_file_from_url, presets_model_list, refresh_model_list, check_models_exists, download_model_files
+from modules.model_loader import load_file_from_url, is_models_file_absent, refresh_model_list, download_model_files
 from modules.private_logger import get_current_html_path
 from modules.meta_parser import get_welcome_image, describe_prompt_for_scene
 from enhanced.simpleai import comfyd, get_path_in_user_dir, toggle_identity_dialog, sync_intput_reserved
@@ -46,7 +46,7 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
-user_admin_sid = '' 
+#user_admin_sid = '' 
 
 def get_preset_name_list(user_session, ua_hash):
     presets_list = shared.token.get_local_vars("user_presets", "", user_session, ua_hash)
@@ -114,25 +114,6 @@ def get_preset_samples(user_did=None):
     else:
         preset_samples['guest'] = presets
     return presets
-
-def is_models_file_absent(preset_name, user_did=None):
-    if preset_name in presets_model_list:
-        if check_models_exists(preset_name, user_did):
-            return False
-        else:
-            return True
-    preset_path = os.path.abspath(f'./presets/{preset_name}.json')
-    if os.path.exists(preset_path):
-        with open(preset_path, "r", encoding="utf-8") as json_file:
-            config_preset = json.load(json_file)
-        if config_preset["default_model"] and config_preset["default_model"] != 'None':
-            if 'Flux' in preset_name and config_preset["default_model"]== 'auto':
-                config_preset["default_model"] = comfy_task.get_default_base_Flux_name('+' in preset_name)
-            model_key = f'checkpoints/{config_preset["default_model"]}'
-            return not shared.modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_model"])
-        if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
-           return not shared.modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_refiner"])
-    return False
 
 
 def get_system_message():
@@ -220,12 +201,12 @@ function(system_params) {
 }
 '''
 
-def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, request: gr.Request):
-    global user_admin_sid
+def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list, request: gr.Request):
+    #global user_admin_sid
 
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
-    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox]
+    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
     #logger.info(f'admin_currunt_value: {admin_currunt_value}')
 
     user_agent = request.headers["user-agent"]
@@ -257,10 +238,10 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
             logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
     shared.token.log_register(state_params["__session"])
     if shared.token.is_admin(user_did):
-        user_admin_sid = state_params["__session"]
+        pass #user_admin_sid = state_params["__session"]
     state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
-    state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' else False})
+    state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' or request.client.host=='127.0.0.1' else False})
 
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
@@ -296,8 +277,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     preset_url = get_preset_inc_url(preset)
     state_params.update({"__preset_url":preset_url})
     results += [gr.update(visible=True if 'blank.inc.html' not in preset_url else False)]
-    results += [ads.get_user_default("backfill_prompt", state_params, config.default_backfill_prompt)]
-    results += [ads.get_user_default("translation_methods", state_params, config.default_translation_methods)]
+    results += get_all_user_default(state_params)
     results += get_all_admin_default(admin_currunt_value)
 
     return results
@@ -695,9 +675,9 @@ def export_identity(state):
 def update_history_link(user_did, local_access):
     log_link = '' if args_manager.args.disable_image_log else f'<a href="file={get_current_html_path(None, user_did)}" target="_blank">\U0001F4DA History Log</a>'
     image_dir = ''.join(os.path.dirname(get_current_html_path(None, user_did)).split('/')[-3:-2])
-    user_dir_name = '用户目录' # if shared.sysinfo["location"] == 'CN' else 'User Directory'
+    user_dir_name = '存图目录' # if shared.sysinfo["location"] == 'CN' else 'Save Directory'
     if local_access:
-        log_link = f'{log_link}<br>\U0001F4D4 {user_dir_name}: {image_dir}'
+        log_link = f'\U0001F4D4 {user_dir_name}: <u>{image_dir}</u><br>{log_link}'
     return gr.update(value=log_link) 
 
 def update_comfyd_url(user_did):
@@ -726,13 +706,18 @@ identity_introduce = '''
 在多方协作下共同保障隐私安全、身份可信及跨节点互认。以此构建"和而不同"的开源社区生态。详细说明>> <br>
 '''
 
+def update_after_identity_all(state):
+    results = update_after_identity(state)
+    results += get_all_user_default(state)
+    return results
+
 def update_after_identity(state):
-    global user_admin_sid
+    #global user_admin_sid
 
     results = refresh_nav_bars(state)
     results += update_after_identity_sub(state)
     if not shared.token.is_admin(state["user"].get_did()):
-        user_admin_sid = state["__session"]
+        pass #user_admin_sid = state["__session"]
 
     return results
 
@@ -810,23 +795,23 @@ def update_upscale_size_of_image(image, uov_method):
 
     return f'{W} x {H} | {width} x {height}'
 
-
-def admin_save_to_default(state, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength):
-    ads.set_admin_default_value('comfyd_active_checkbox', comfyd_active_checkbox, state)
-    ads.set_admin_default_value('fast_comfyd_checkbox', fast_comfyd_checkbox, state)
-    ads.set_admin_default_value('reserved_vram', reserved_vram, state)
-    ads.set_admin_default_value('minicpm_checkbox', minicpm_checkbox, state)
-    ads.set_admin_default_value('advanced_logs', advanced_logs, state)
-    ads.set_admin_default_value('wavespeed_strength', wavespeed_strength, state)
-
-    current_time = datetime.now().strftime("%H:%M:%S")
-    admin_save_title = 'Save default of system' if state["__lang"]!='cn' else '保存系统默认值'
-    logger.info(f'Save admin config to default: {current_time}')
-    return f'{admin_save_title}({current_time})'
-
+def get_all_user_default(state):
+    #[backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, translation_methods, generate_image_grid, black_out_nsfw, save_metadata_to_images, metadata_scheme]
+    results = [ads.get_user_default("backfill_prompt", state, config.default_backfill_prompt)]
+    results += [ads.get_user_default("image_tools_checkbox", state, True)]
+    results += [ads.get_user_default("disable_preview", state, False)]
+    results += [ads.get_user_default("disable_intermediate_results", state, False)]
+    results += [ads.get_user_default("disable_seed_increment", state, False)]
+    results += [ads.get_user_default("save_final_enhanced_image_only", state, False)]
+    results += [ads.get_user_default("translation_methods", state, config.default_translation_methods)]
+    results += [ads.get_user_default("generate_image_grid", state, False)]
+    results += [ads.get_user_default("black_out_nsfw", state, False)]
+    results += [ads.get_user_default("save_metadata_to_images", state, True)]
+    results += [ads.get_user_default("metadata_scheme", state, "simple")]
+    return results
 
 def get_all_admin_default(currunt_value):
-    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength', 'p2p_active_checkbox']
+    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength', 'p2p_active_checkbox', "p2p_remote_process", "p2p_in_did_list", "p2p_out_did_list"]
     result = []
     for i, admin_key in enumerate(admin_keys): 
         admin_value = ads.get_admin_default(admin_key)

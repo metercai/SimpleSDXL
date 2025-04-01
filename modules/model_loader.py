@@ -167,6 +167,28 @@ def check_models_exists(preset, user_did=None):
         return True
     return False
 
+def is_models_file_absent(preset_name, user_did=None):
+    global presets_model_list
+
+    if preset_name in presets_model_list:
+        if check_models_exists(preset_name, user_did):
+            return False
+        else:
+            return True
+    preset_path = os.path.abspath(f'./presets/{preset_name}.json')
+    if os.path.exists(preset_path):
+        with open(preset_path, "r", encoding="utf-8") as json_file:
+            config_preset = json.load(json_file)
+        if config_preset["default_model"] and config_preset["default_model"] != 'None':
+            if 'Flux' in preset_name and config_preset["default_model"]== 'auto':
+                config_preset["default_model"] = comfy_task.get_default_base_Flux_name('+' in preset_name)
+            model_key = f'checkpoints/{config_preset["default_model"]}'
+            return not shared.modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_model"])
+        if config_preset["default_refiner"] and config_preset["default_refiner"] != 'None':
+           return not shared.modelsinfo.exists_model(catalog="checkpoints", model_path=config_preset["default_refiner"])
+    return False
+
+
 default_download_url_prefix = 'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels'
 def download_model_files(preset, user_did=None, async_task=False):
     from modules.config import path_models_root, model_cata_map
