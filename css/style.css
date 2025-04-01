@@ -883,8 +883,8 @@ div.prose.tokenCounter {
 .tab-nav.scroll-hide > button {
   white-space: nowrap;
   text-overflow: ellipsis;
-  min-width: 30px;
-  justify-content: center !important;
+  min-width: 50px;
+  padding: 4px 8px;
 }
 #finished_images_catalog {
   border-radius: 0 0 8px 8px !important;
