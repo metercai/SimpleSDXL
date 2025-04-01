@@ -821,7 +821,10 @@ def get_all_admin_default(currunt_value):
         if admin_value == currunt_value[i]:
             result.append(gr.update())
         else:
-            result.append(gr.update(interactive=True, value=admin_value))
+            if admin_key in ["p2p_in_did_list", "p2p_out_did_list"]:
+                result.append(gr.update(value=admin_value))
+            else:
+                result.append(gr.update(interactive=True, value=admin_value))
 
     return result
 
