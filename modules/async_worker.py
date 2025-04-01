@@ -1234,16 +1234,6 @@ def worker():
 
         return prompt
 
-    def stop_processing(async_task, processing_start_time):
-        async_task.processing = False
-        processing_time = time.perf_counter() - processing_start_time
-        logger.info(f'Processing time (total): {processing_time:.2f} seconds')
-        if async_task.task_class in flags.comfy_classes:
-            if async_task.comfyd_active_checkbox:
-                comfyd.finished()
-            else:
-                comfyd.stop()
-
     def process_enhance(all_steps, async_task, callback, controlnet_canny_path, controlnet_cpds_path, controlnet_pose_path, 
                         current_progress, current_task_id, denoising_strength, inpaint_disable_initial_latent,
                         inpaint_engine, inpaint_respective_field, inpaint_strength,
@@ -1361,7 +1351,7 @@ def worker():
                 time.sleep(2)
             return
         if is_models_file_absent(async_task.task_name):
-            stop_processing(async_task.async_task, 0, "Model absent")
+            stop_processing(async_task, 0, "Model absent")
         ldm_patched.modules.model_management.print_memory_info("begin at handler")
         async_task.outpaint_selections = [o.lower() for o in async_task.outpaint_selections]
         base_model_additional_loras = []
@@ -1972,6 +1962,7 @@ def worker():
     worker.progressbar = progressbar
     worker.p2p_save_and_log = p2p_save_and_log
     worker.stop_processing = stop_processing
+    worker.interrupt_processing = interrupt_processing
 
     last_active = time.time()
     while True:
