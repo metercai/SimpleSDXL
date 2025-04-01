@@ -421,13 +421,13 @@ with shared.gradio_root:
                         def stop_clicked(currentTask):
                             currentTask.last_stop = 'stop'
                             if (currentTask.processing):
-                                worker.interrupt_processing()
+                                worker.worker.interrupt_processing()
                             return currentTask
 
                         def skip_clicked(currentTask):
                             currentTask.last_stop = 'skip'
                             if (currentTask.processing):
-                                worker.interrupt_processing()
+                                worker.worker.interrupt_processing()
                             return currentTask
 
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
