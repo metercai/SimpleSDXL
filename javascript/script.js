@@ -285,6 +285,39 @@ function initStylePreviewOverlay() {
             textOverlay.style.display = 'none';
         }
     });
+    document.addEventListener('contextmenu', function(e) {
+        const container = e.target.closest('.style_item');
+        if (!container) return;
+
+        e.preventDefault();
+
+        if (e.button !== 2) return;
+
+        const dataInput = container.querySelector('.style_data_input textarea');
+        if (!dataInput) return;
+
+        try {
+            const styleData = JSON.parse(dataInput.value || '{}');
+            const positivePrompt = gradioApp().querySelector('#positive_prompt textarea');
+            const negativePrompt = gradioApp().querySelector('#negative_prompt textarea');
+
+            if (styleData.prompt && positivePrompt) {
+                const currentPrompt = (positivePrompt.value || '').trim();
+                const newPrompt = styleData.prompt.replace('{prompt}', currentPrompt);
+                positivePrompt.value = newPrompt;
+                positivePrompt.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            if (styleData.negative_prompt && negativePrompt) {
+                negativePrompt.value = styleData.negative_prompt;
+                negativePrompt.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            e.stopPropagation();
+        } catch (error) {
+            console.error('Error handling style click:', error);
+        }
+    });
 }
 
 /**
