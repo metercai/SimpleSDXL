@@ -588,11 +588,6 @@ div.prose.tokenCounter {
   border-radius: var(--radius-md);
 }
 
-.title_right {
-  text-align: right;
-  margin-right: 10px;
-}
-
 .toolbox {
     height: auto;
     position: absolute;
@@ -1049,4 +1044,15 @@ div.prose.tokenCounter {
 button.gallery-item {
   max-height: 68px; /* 或任意需要的固定高度 */
   display: flex;  /* 启用flex布局 */
+}
+
+.p2p_title {
+  padding: 8px 12px;
+  top: 4px !important;
+}
+
+.p2p_input1 {
+    padding: 0px 0px !important;
+    height: 42px;
+    min-width: min(250px, 100%) !important;
 }

@@ -1510,31 +1510,32 @@ with shared.gradio_root:
                     with gr.Tab(label='P2P Network'):
                         with gr.Group() as p2p_panel:
                             p2p_active_checkbox = gr.Checkbox(label='Enable P2P network', value=ads.get_admin_default('p2p_active_checkbox'))
-                            with gr.Row():
-                                p2p_node_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='identity_input2')
-                            with gr.Row():
-                                p2p_out_did_btn = gr.Button(value="Set remote node", size="sm", min_width=30, interactive=True if ads.get_admin_default('p2p_remote_process')=='Disable' else False)
-                                p2p_in_did_btn = gr.Button(value="Set accessible identity", size="sm", min_width=30, interactive=True if ads.get_admin_default('p2p_remote_process')=='Disable' else False)
-                            
-                            with gr.Row():
-                                p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["title_right"])
+                            p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'out', 'in'], value=ads.get_admin_default('p2p_remote_process'), interactive=False)
+                            with gr.Group(visible=False) as p2p_out:
+                                p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["p2p_title"])
+                                with gr.Row():    
+                                    p2p_out_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
+                                    p2p_out_did_btn = gr.Button(value="Add", size="sm", min_width=30)
                                 p2p_out_did_list = gr.Markdown(elem_classes=["htmlcontent"])
-                            with gr.Row():
-                                p2p_in_did_title = gr.HTML(value="Accessible identity:", elem_classes=["title_right"])
-                                p2p_in_did_list = gr.HTML(elem_classes=["htmlcontent"])
-                            p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'in', 'out'], value=ads.get_admin_default('p2p_remote_process'), interactive=False) 
-                            p2p_out_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
-                            p2p_in_did_btn.click(lambda x: x, inputs=p2p_node_did_input, outputs=p2p_in_did_list, queue=False, show_progress=False)
+                            with gr.Group(visible=False) as p2p_in:
+                                p2p_in_did_title = gr.Markdown(value="Accessible identity:", elem_classes=["p2p_title"])
+                                with gr.Row():
+                                    p2p_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
+                                    p2p_in_did_btn = gr.Button(value="Add", size="sm", min_width=30)
+                                p2p_in_did_list = gr.Markdown(elem_classes=["htmlcontent"])
+
+                            p2p_out_did_btn.click(lambda x: x, inputs=p2p_out_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
+                            p2p_in_did_btn.click(lambda x: x, inputs=p2p_in_did_input, outputs=p2p_in_did_list, queue=False, show_progress=False)
                             p2p_out_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_out_did_list", x, y), inputs=[p2p_out_did_list, state_topbar])
                             p2p_in_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_in_did_list", x, y), inputs=[p2p_in_did_list, state_topbar])
                             
                             def toggle_p2p_remote_process(remote_process_status, state):
                                 if remote_process_status:
                                     p2p_task.init_p2p_task(worker, model_management, shared.token)
-                                ds.set_admin_default_value("p2p_remote_process", x, y)
-                                return [gr.update(interactive=not remote_process_status)]*2
+                                ads.set_admin_default_value("p2p_remote_process", remote_process_status, state)
+                                return [gr.update(visible=True if remote_process_status=='out' else False), gr.update(visible=True if remote_process_status=='in' else False)]
 
-                            p2p_remote_process.change(toggle_p2p_remote_process, inputs=[p2p_remote_process, state_topbar], outputs=[p2p_out_did_btn, p2p_in_did_btn], queue=False, show_progress=False)
+                            p2p_remote_process.change(toggle_p2p_remote_process, inputs=[p2p_remote_process, state_topbar], outputs=[p2p_out, p2p_in], queue=False, show_progress=False)
 
             with gr.Tab(label='Contact', elem_id="scrollable-box"):
                 with gr.Row():
@@ -1927,6 +1928,8 @@ with shared.gradio_root:
 
         if args_manager.args.enable_auto_describe_image:
             def trigger_auto_describe(mode, img, prompt, apply_styles, output_tags, output_chinese):
+                if isinstance(img, dict):
+                    img = img['image']
                 # keep prompt if not empty
                 if prompt == '':
                     return trigger_describe(mode, img, apply_styles, output_tags, output_chinese)
