@@ -24,6 +24,12 @@
         "换装++": "clothing4",
         "换装+++": "clothing6"
 	    },
+        "prompt": {
+            "换装": "keep the feature from the left picture.",
+            "换装+": "keep the feature from the left picture.",
+            "换装++": "keep the feature from the left picture.",
+            "换装+++": "keep the feature from the left picture."
+        },
         "image_preprocessor_method": {
             "换装":  [[""]],
             "换装+":  [[""]],
@@ -63,7 +69,7 @@
             1.0
         ]
     ],
-    "default_cfg_scale": 30,
+    "default_cfg_scale": 50,
     "default_sample_sharpness": 2,
     "default_sampler": "euler",
     "default_scheduler": "simple",
