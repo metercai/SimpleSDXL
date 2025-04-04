@@ -174,7 +174,7 @@ def prepare_environment():
 
 def ini_args():
     import args_manager
-    if is_win32_standalone_build and args_manager.args.disable_backend:
+    if not platform.system() == "Darwin" and args_manager.args.disable_backend:
         args_manager.args.always_cpu = 2
     return args_manager.args
 
