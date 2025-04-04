@@ -397,7 +397,7 @@ default_engine = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, dict),
     expected_type=dict
 )
-backend_engine = default_engine.get("backend_engine", "Fooocus")
+backend_engine = "Remote" if args_manager.args.disable_backend else default_engine.get("backend_engine", "Fooocus")
 
 default_base_model_name = default_model = get_config_item_or_set_default(
     key='default_model',

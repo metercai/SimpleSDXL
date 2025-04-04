@@ -1,6 +1,7 @@
 import threading
 import queue
 
+import args_manager
 from extras.inpaint_mask import generate_mask_from_image, SAMOptions
 from modules.patch import PatchSettings, patch_settings, patch_all
 import modules.config
@@ -1346,7 +1347,8 @@ def worker():
         async_task.processing = True
         logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}{", remote_process" if remote_process else ""}')
         if remote_process:
-            p2p_task.request_p2p_task(shared.token, async_task, yield_result, progressbar)
+            p2p_task.request_p2p_task(async_task)
+            print(f'[P2P] Remote process request sent')
             while not async_task.processing:
                 time.sleep(2)
             return
@@ -1981,7 +1983,7 @@ def worker():
                 if task.generate_image_grid:
                     build_image_wall(task)
                 task.yields.append(['finish', task.results])
-                if task.task_class not in flags.comfy_classes:
+                if task.task_class not in flags.comfy_classes and not args_manager.args.disable_backend:
                     pipeline.prepare_text_encoder(async_call=True)
             except:
                 traceback.print_exc()
