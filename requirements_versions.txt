@@ -19,14 +19,16 @@ numba
 numpy==1.26.4 #
 opencv-contrib-python==4.8.0.74
 opencv-contrib-python-headless==4.10.0.84 #
+opencv-python==4.7.0.72
+opencv-python-headless==4.9.0.80
 open-clip-torch>=2.17.1
 omegaconf==2.3.0 #
 onnx==1.12.0
-onnxruntime==1.18.1 #
-onnxruntime-gpu
+onnxruntime==1.20.1 #
+onnxruntime-gpu==1.20.1
 onnx-graphsurgeon==0.3.27
 peft==0.10.0
-Pillow==10.4.0 #
+Pillow #==10.4.0 #
 pixeloe
 polygraphy==0.47.1
 protobuf==3.19.0
@@ -47,3 +49,22 @@ translators==5.8.9
 websocket-client
 ./enhanced/libs/rembg-2.0.57-py3-none-any.whl
 ./enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
+cpm_kernels
+lark-parser
+gguf
+blend_modes
+#mediapipe
+svglib
+fvcore
+yacs
+trimesh[easy]
+albumentations
+wget
+typer_config
+rich
+#google-generativeai
+ultralytics>=8.2.0
+blind-watermark
+qrcode
+pyzbar
+transparent-background
