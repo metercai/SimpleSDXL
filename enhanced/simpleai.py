@@ -99,11 +99,14 @@ def get_path_in_user_dir(filename, user_did=None, catalog=None):
     return None
 
 def start_fast_comfyd(fast, state):
+    if args_manager.args.disable_backend or args_manager.args.disable_comfyd:
+        return
     if fast:
         comfyd.start(args_patch=[["--fast"]], force=True)
     else:
         comfyd.start(args_patch=[[]], force=True)
     ads.set_admin_default_value('fast_comfyd_checkbox', fast, state)
+    return
 
 def change_advanced_logs(advanced_logs, state):
     if advanced_logs:
