@@ -170,6 +170,8 @@ def check_models_exists(preset, user_did=None):
 def is_models_file_absent(preset_name, user_did=None):
     global presets_model_list
 
+    if shared.args.disable_backend:
+        return False
     if preset_name in presets_model_list:
         if check_models_exists(preset_name, user_did):
             return False
@@ -194,6 +196,8 @@ def download_model_files(preset, user_did=None, async_task=False):
     from modules.config import path_models_root, model_cata_map
     global presets_model_list, default_download_url_prefix, download_queue
     
+    if shared.args.disable_backend:
+        return False
     if preset.endswith('.'):
         if user_did is None:
             return False

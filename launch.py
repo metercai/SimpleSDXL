@@ -84,7 +84,7 @@ def check_base_environment():
     logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
     #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, exe_dir: {sysinfo["exe_dir"]}, exe_name:{sysinfo["exe_name"]}')
 
-    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
+    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960 and not shared.args.disable_backend:
         logger.info(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
         logger.info(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量(RAM+SWAP)大于40G。')
         logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
@@ -161,6 +161,9 @@ def prepare_environment():
                 run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
         if is_win32_standalone_build:
             run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
+        elif platform.system() == "Darwin":
+            requirements_file = "requirements_macos.txt"
+            run_pip(f"install -r \"{requirements_file}\"", "requirements")
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
@@ -171,6 +174,8 @@ def prepare_environment():
 
 def ini_args():
     import args_manager
+    if is_win32_standalone_build and args_manager.args.disable_backend:
+        args_manager.args.always_cpu = 2
     return args_manager.args
 
 
@@ -254,13 +259,12 @@ def reset_env_args():
     from enhanced.simpleai import reset_simpleai_args
     reset_simpleai_args()
 
-
 ready_checker()
-
+shared.args = ini_args()
 shared.token, shared.sysinfo = check_base_environment()
 
 prepare_environment()
-shared.args = ini_args()
+
 
 os.environ["RUST_LOG"] = 'off'
 shared.upstream_did = shared.token.get_upstream_did()
@@ -279,7 +283,7 @@ if shared.args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(shared.args.gpu_device_id)
     logger.info("Set device to:", shared.args.gpu_device_id)
 
-if shared.sysinfo["gpu_memory"]<4000:
+if shared.sysinfo["gpu_memory"]<4000 and not shared.args.disable_backend:
     logger.info(f'The GPU memory capacity of the system is too small to run the latest models such as Flux, SD3m, Kolors, and HyDiT properly, and the Comfyd engine will be automatically disabled.')
     logger.info(f'系统GPU显存容量太小，无法正常运行Flux, SD3m, Kolors和HyDiT等最新模型，将自动禁用Comfyd引擎。请知晓，尽早升级硬件。')
     logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
@@ -323,9 +327,10 @@ logger.info(f'Env_ready_code: {env_ready_code}')
 #    print(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
 #    sys.exit(0)
 
-config.default_base_model_name, config.checkpoint_downloads = download_models(
-    config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
-    config.embeddings_downloads, config.lora_downloads, config.vae_downloads)
+if not shared.args.disable_backend:
+    config.default_base_model_name, config.checkpoint_downloads = download_models(
+        config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
+        config.embeddings_downloads, config.lora_downloads, config.vae_downloads)
 
 config.update_files()
 init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenames, config.paths_loras)
