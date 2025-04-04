@@ -905,8 +905,12 @@ def get_vram_ram_used():
 
     current_time = time.time()
     if current_time-last_time_get_vram_ram>1.0:
-        vram_memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
+        if is_nvidia():
+            vram_memory_info, pid_used_vram = get_vram_info_by_nvml_for_nvidia()
+            vram_used = vram_memory_info.used
+        else:
+            vram_used = 0
         ram_memory_info = psutil.virtual_memory()
-        vram_ram_info = (vram_ram_info[0], vram_ram_info[1], vram_memory_info.used, ram_memory_info.used)
+        vram_ram_info = (vram_ram_info[0], vram_ram_info[1], vram_used, ram_memory_info.used)
     return vram_ram_info
 

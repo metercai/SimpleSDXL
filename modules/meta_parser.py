@@ -89,20 +89,21 @@ def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
         return '', img_is_ok
     if is_chinese(additional_prompt) and not state['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
         additional_prompt = minicpm.translate(additional_prompt, 'Slim Model')
-    describe_prompt = describe_prompt.format(additional_prompt=additional_prompt)
+    describe_prompts = [describe_prompt.format(additional_prompt=additional_prompt)]
     m_prompts = state['scene_frontend'].get('multimodal_prompt', {})
     prompt_prompt = m_prompts.get(scene_theme, '')
     if prompt_prompt and img is not None:
         prompt_prompt = prompt_prompt.format(additional_prompt=additional_prompt)
         if MiniCPM.get_enable() and 'tags' not in prompt_prompt and 'photo' not in prompt_prompt:
-            describe_prompt += minicpm.interrogate(img, prompt=prompt_prompt)
+            describe_prompts.append(minicpm.interrogate(img, prompt=prompt_prompt))
         else:
             if not MiniCPM.get_enable() or 'photo' in prompt_prompt:
                 from extras.interrogate import default_interrogator as default_interrogator_photo
-                describe_prompt += default_interrogator_photo(img)
+                describe_prompts.append(default_interrogator_photo(img))
             if not MiniCPM.get_enable() or 'tags' in prompt_prompt:
                 from extras.wd14tagger import default_interrogator as default_interrogator_anime
-                describe_prompt += default_interrogator_anime(img)
+                describe_prompts.append(default_interrogator_anime(img))
+    describe_prompt=', '.join(describe_prompts)
     return describe_prompt, img_is_ok
 
 def switch_scene_theme_select(state):
