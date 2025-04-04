@@ -302,6 +302,39 @@ function initStylePreviewOverlay() {
         }
     });
     document.addEventListener('contextmenu', function(e) {
+        const modelDropdown = e.target.closest(
+            '#model_dropdown_base, #model_dropdown_refiner, [id^="lora_dropdown"]'
+        );
+        if (modelDropdown) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let buttonId;
+            switch(modelDropdown.id) {
+                case 'model_dropdown_base':
+                    buttonId = 'base_preview_btn';
+                    break;
+                case 'model_dropdown_refiner':
+                    buttonId = 'refiner_preview_btn';
+                    break;
+                default:
+                    if (modelDropdown.id.startsWith('lora_dropdown')) {
+                        const indexMatch = modelDropdown.id.match(/lora_dropdown_(\d+)$/);
+                        if (indexMatch) {
+                            buttonId = `lora_preview_btn_${indexMatch[1]}`;
+                        } else {
+                            console.warn('LORA ID格式异常:', modelDropdown.id);
+                        }
+                    }
+                }
+
+            const btn = gradioApp().querySelector(`#${buttonId}`);
+            if (btn) {
+                const event = new MouseEvent('click', { bubbles: true });
+                btn.dispatchEvent(event);
+            }
+            return;
+        }
         const container = e.target.closest('.style_item');
         if (!container) return;
 
@@ -374,3 +407,128 @@ function htmlDecode(input) {
   var doc = new DOMParser().parseFromString(input, "text/html");
   return doc.documentElement.textContent;
 }
+
+(function() {
+    let previewOverlay = null;
+
+    function createPreviewOverlay() {
+        if (!previewOverlay) {
+            previewOverlay = document.createElement('div');
+            Object.assign(previewOverlay.style, {
+                position: 'fixed',
+                pointerEvents: 'none',
+                zIndex: 9999,
+                maxWidth: '320px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                transition: 'opacity 0.2s',
+                opacity: 0
+            });
+            gradioApp().appendChild(previewOverlay);
+        }
+    }
+
+    function initModelPreviews() {
+        createPreviewOverlay();
+
+        const baseDropdown = gradioApp().getElementById('model_dropdown_base');
+        if (baseDropdown) initDropdownPreview(baseDropdown, 'checkpoints');
+
+        const refinerDropdown = gradioApp().getElementById('model_dropdown_refiner');
+        if (refinerDropdown) initDropdownPreview(refinerDropdown, 'checkpoints');
+
+        const loraDropdowns = gradioApp().querySelectorAll('[id^="lora_dropdown"]');
+        loraDropdowns.forEach(dropdown => initDropdownPreview(dropdown, 'loras'));
+    }
+
+    function initDropdownPreview(dropdown, folder) {
+        const pathMeta = document.querySelector(`meta[name='${folder}-paths']`).getAttribute("content");
+        const basePaths = pathMeta.split(',').map(p => p.split('?')[0].replace(/\\/g, '/'));
+        const handleMouseOver = (e) => {
+            const option = e.target.closest('li.item[role="button"]');
+            if (!option) return;
+
+            const modelPath = option.dataset.value
+                .replace(/\.[^/.]+$/, "")
+                .replace(/\\/g, '/');
+
+            const img = new Image();
+            img.style.maxWidth = '150px';
+            img.style.display = 'block';
+            const extensions = ['jpg', 'jpeg', 'png', 'webp'];
+            let currentPath = 0;
+            let currentExtension = 0;
+
+            const tryNextPath = () => {
+                if (currentPath >= basePaths.length) {
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => {
+                        previewOverlay.innerHTML = '';
+                        previewOverlay.appendChild(fallbackImg);
+                        previewOverlay.style.opacity = '1';
+                    };
+                    fallbackImg.src = '/file=presets/samples/noimage.jpg';
+                    return;
+                }
+
+                const tryNextFormat = () => {
+                    if (currentExtension >= extensions.length) {
+                        currentPath++;
+                        currentExtension = 0;
+                        tryNextPath();
+                        return;
+                    }
+
+                    const testImg = new Image();
+                    testImg.onerror = () => {
+                        currentExtension++;
+                        tryNextFormat();
+                    };
+                    testImg.onload = () => {
+                        img.src = testImg.src;
+                        previewOverlay.innerHTML = '';
+                        previewOverlay.appendChild(img);
+                        previewOverlay.style.opacity = '1';
+                    };
+                    testImg.src = `${basePaths[currentPath]}/${modelPath}.${extensions[currentExtension]}?${Date.now()}`;
+                };
+
+                tryNextFormat();
+            };
+
+            tryNextPath();
+
+            img.onload = () => {
+                previewOverlay.innerHTML = '';
+                previewOverlay.appendChild(img);
+                previewOverlay.style.opacity = '1';
+            };
+        };
+
+        const handleMouseMove = (e) => {
+            previewOverlay.style.left = `${e.clientX + 15}px`;
+            previewOverlay.style.top = `${e.clientY + 15}px`;
+        };
+
+        const handleMouseOut = (e) => {
+            if (!e.relatedTarget?.closest('li.item')) {
+                previewOverlay.style.opacity = '0';
+            }
+        };
+
+        dropdown.addEventListener('mouseover', handleMouseOver);
+        dropdown.addEventListener('mousemove', handleMouseMove);
+        dropdown.addEventListener('mouseout', handleMouseOut);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const observer = new MutationObserver((mutations) => {
+            if (document.getElementById('model_dropdown_base') || document.getElementById('lora_dropdown')) {
+                initModelPreviews();
+                observer.disconnect();
+            }
+        });
+        observer.observe(gradioApp(), { childList: true, subtree: true });
+    });
+})();

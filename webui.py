@@ -1356,11 +1356,13 @@ with shared.gradio_root:
 
                 with gr.Group():
                     with gr.Row():
-                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
-                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
+                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True,
+                                                 elem_id="model_dropdown_base",elem_classes="model-dropdown",interactive=True)
+                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True,
+                                                 elem_id="model_dropdown_refiner",elem_classes="model-dropdown",interactive=True)
                     with gr.Row():
-                        base_preview_btn = gr.Button("🖼️ Base Model", variant="secondary")
-                        refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary")
+                        base_preview_btn = gr.Button( "🖼️ Base Model", variant="secondary", visible=False,elem_id="base_preview_btn")
+                        refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary", visible=False,elem_id="refiner_preview_btn")
                     model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
                     base_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
                                            inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
@@ -1388,16 +1390,16 @@ with shared.gradio_root:
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
                             lora_enabled = gr.Checkbox(label='Enable', value=enabled,
-                                                       elem_classes=['lora_enable', 'min_check'],scale=6, min_width=40)
+                                                       elem_classes=['lora_enable', 'min_check'],scale=1, min_width=40)
                             lora_preview_btn = gr.Button(f"🖼️", variant="secondary",
-                                                         elem_id=f"lora_preview_btn_{i}", scale=5, min_width=20)
+                                                         elem_id=f"lora_preview_btn_{i}", visible=False)
                             lora_preview_btns.append(lora_preview_btn)
                             lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
                                                      choices=['None'] + modules.config.lora_filenames, value=filename,
-                                                     elem_classes='lora_model', scale=25)
+                                                     elem_classes='lora_model', scale=5, elem_id=f"lora_dropdown_{i}")
                             lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
                                                     maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
-                                                    elem_classes='lora_weight', scale=25)
+                                                    elem_classes='lora_weight', scale=5)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
                             lora_models.append(lora_model)
                         with gr.Row():
@@ -2036,7 +2038,11 @@ shared.gradio_root.launch(
     share=args_manager.args.share,
     root_path=args_manager.args.webroot,
     auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
-    allowed_paths=[modules.config.path_userhome],
+    allowed_paths=[
+        modules.config.path_userhome,
+        modules.config.get_path_models_root(),
+        *modules.config.paths_checkpoints,
+        *modules.config.paths_loras
+    ],
     blocked_paths=[constants.AUTH_FILENAME]
 )
-
