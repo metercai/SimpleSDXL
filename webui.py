@@ -1366,11 +1366,12 @@ with shared.gradio_root:
                     model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
                     base_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
                                            inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
-                                           outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False)
-
+                                           outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False) \
+                                           .then(fn=None,_js='''(galleryVisible, activeTarget) => {highlightModelDropdown("base");}''')
                     refiner_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
                                               inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
-                                              outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False)
+                                              outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False) \
+                                           .then(fn=None,_js='''(galleryVisible, activeTarget) => {highlightModelDropdown("refiner");}''')
                     model_gallery.select(on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery], show_progress=False, queue=False)
                     refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
                                                info='Use 0.4 for SD1.5 realistic models; '

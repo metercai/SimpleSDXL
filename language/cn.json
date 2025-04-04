@@ -83,7 +83,7 @@
   "* Powered by Fooocus upscale engine,": "* 由Fooocus放大引擎支持, ",
 
   "Models": "模型",
-  "Base Model (SDXL only)": "基础模型",
+  "Base Model (SDXL only)": "基础模型（右键展开）",
   "Refiner (SDXL or SD 1.5)": "精炼模型",
   "None": "无",
   "LoRAs (SDXL or SD 1.5)": "LoRAs局部模型",
