@@ -31,7 +31,7 @@ peft==0.10.0
 Pillow #==10.4.0 #
 pixeloe
 polygraphy==0.47.1
-protobuf==3.19.0
+protobuf==4.25.3 #3.19.0
 psutil==6.0.0 #
 pytorch_lightning==2.3.3 #
 pyyaml==6.0.1 #
