@@ -20,6 +20,10 @@
 		"换装": "clothing",
         "换装+": "clothing5"
 	    },
+        "prompt": {
+            "换装": "keep the feature from the left picture.",
+            "换装+": "keep the feature from the left picture."
+        },
         "scene_steps": {
             "换装": 20,
             "换装+": 20
@@ -51,7 +55,7 @@
             1.0
         ]
     ],
-    "default_cfg_scale": 30,
+    "default_cfg_scale": 50,
     "default_sample_sharpness": 2,
     "default_sampler": "euler",
     "default_scheduler": "simple",
