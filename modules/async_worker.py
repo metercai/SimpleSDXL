@@ -353,14 +353,12 @@ def worker():
         return
 
     def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
-        print('in image_log')
         paths, image, log_item = log(img, metadata, metadata_parser, output_format, task, persist_image, user_did, remote_task)
         async_task.img_paths.append(paths)
         if remote_task:
             p2p_task.call_remote_save_and_log(async_task, image, log_item)
 
     def p2p_save_and_log(async_task, result_img, result_log):
-        print('in p2p_save_and_log')
         paths = p2p_log(result_img, result_log, async_task.output_format, persist_image=True, user_did=async_task.user_did)
         async_task.img_paths.append(paths)
     
@@ -1970,7 +1968,7 @@ def worker():
 
     worker.yield_result = yield_result
     worker.progressbar = progressbar
-    worker.p2p_save_and_log = p2p_save_and_log
+    worker.p2p_save_and_log = p2p_image_log
     worker.stop_processing = stop_processing
     worker.interrupt_processing = interrupt_processing
 
@@ -2074,3 +2072,4 @@ stop_event = threading.Event()
 
 thread = threading.Thread(target=worker, daemon=True)
 thread.start()
+
