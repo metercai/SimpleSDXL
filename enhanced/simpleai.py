@@ -133,7 +133,7 @@ def toggle_p2p(x, state):
             shared.upstream_did = shared.upstream_did.split(':')[0]
     ads.set_admin_default_value('p2p_active_checkbox', x, state)
 
-    return gr.update(interactive=False, value='Disable')
+    return gr.update(interactive=x, value='Disable')
 
 
 
