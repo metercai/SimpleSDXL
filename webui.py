@@ -124,6 +124,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.08
     in_progress = False
 
+    print(f"Start generating...")
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
@@ -136,7 +137,7 @@ def generate_clicked(task: worker.AsyncTask, state):
             task.last_stop = 'stop'
             if (task.processing):
                 logger.error("Send interrupt flag to process and comfyd")
-                worker.interrupt_processing()
+                worker.worker.interrupt_processing()
             break
 
         time.sleep(POLL_INTERVAL)
@@ -1217,7 +1218,7 @@ with shared.gradio_root:
                 def sync_backend_params(key, v, params, state):
                     params.update({key:v})
                     logger.debug(f'sync_backend_params: {key}:{v}')
-                    if not key.startwiths("i2i_uov"):
+                    if not key.startswith("i2i_uov"):
                         ads.set_user_default_value(key, v, state) 
                     return params
 
