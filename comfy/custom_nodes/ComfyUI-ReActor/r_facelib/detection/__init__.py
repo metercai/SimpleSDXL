@@ -10,7 +10,9 @@ from r_facelib.detection.yolov5face.models.common import Conv
 
 from .retinaface.retinaface import RetinaFace
 from .yolov5face.face_detector import YoloDetector
-
+import folder_paths
+models_dir = folder_paths.models_dir
+FACE_MODELS_PATH = os.path.join(models_dir, "controlnet")
 
 def init_detection_model(model_name, half=False, device='cuda'):
     if 'retinaface' in model_name:
@@ -33,7 +35,7 @@ def init_retinaface_model(model_name, half=False, device='cuda'):
     else:
         raise NotImplementedError(f'{model_name} is not implemented.')
 
-    model_path = load_file_from_url(url=model_url, model_dir='../../models/facedetection', progress=True, file_name=None)
+    model_path = load_file_from_url(url=model_url, model_dir=FACE_MODELS_PATH, progress=True, file_name=None)
     load_net = torch.load(model_path, map_location=lambda storage, loc: storage)
     # remove unnecessary 'module.'
     for k, v in deepcopy(load_net).items():
@@ -58,7 +60,7 @@ def init_yolov5face_model(model_name, device='cuda'):
     else:
         raise NotImplementedError(f'{model_name} is not implemented.')
     
-    model_path = load_file_from_url(url=model_url, model_dir='../../models/facedetection', progress=True, file_name=None)
+    model_path = load_file_from_url(url=model_url, model_dir=FACE_MODELS_PATH, progress=True, file_name=None)
     load_net = torch.load(model_path, map_location=lambda storage, loc: storage)
     model.detector.load_state_dict(load_net, strict=True)
     model.detector.eval()

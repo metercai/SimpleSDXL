@@ -63,6 +63,12 @@ def check_base_environment():
             pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
             run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
+    update_pkgs = [('protobuf', '4.25.3'), ('onnx', '1.14.0')]
+    for (update_pkg_name, update_pkg_version) in update_pkgs:
+        if not is_installed_version(update_pkg_name, update_pkg_version):
+            pkg_command = f'pip install -U {update_pkg_name} -i {index_url}'
+            run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
+
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
         logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
         logger.info(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
