@@ -1178,13 +1178,13 @@ with shared.gradio_root:
                         with gr.Group() as p2p_panel:
                             p2p_active_checkbox = gr.Checkbox(label='Enable P2P network', value=ads.get_admin_default('p2p_active_checkbox'))
                             p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'out', 'in'], value=ads.get_admin_default('p2p_remote_process'), interactive=ads.get_admin_default('p2p_active_checkbox'))
-                            with gr.Group(visible=False) as p2p_out:
+                            with gr.Group(visible=True if ads.get_admin_default('p2p_remote_process')=='out' else False) as p2p_out:
                                 p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["p2p_title"])
                                 with gr.Row():    
                                     p2p_out_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
                                     p2p_out_did_btn = gr.Button(value="Add", size="sm", min_width=30)
                                 p2p_out_did_list = gr.Markdown(elem_classes=["htmlcontent"])
-                            with gr.Group(visible=False) as p2p_in:
+                            with gr.Group(visible=True if ads.get_admin_default('p2p_remote_process')=='in' else False) as p2p_in:
                                 p2p_in_did_title = gr.Markdown(value="Accessible identity:", elem_classes=["p2p_title"])
                                 with gr.Row():
                                     p2p_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
