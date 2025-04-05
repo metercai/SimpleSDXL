@@ -243,8 +243,6 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
-        else:
-            logger.info(f'no accept-language in request.headers:{request.headers}')
         state_params.update({"__lang": ads.get_user_default("__lang", state_params, args_manager.args.language)})
     if "__theme" not in state_params.keys():
         state_params.update({"__theme": ads.get_user_default("__theme", state_params, args_manager.args.theme)})

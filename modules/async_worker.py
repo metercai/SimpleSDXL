@@ -10,7 +10,10 @@ patch_all()
 
 
 class AsyncTask:
-    def __init__(self, args):
+    def __init__(self, args, task_id=None):
+        self.args = args
+        self.yields = []
+        self.results = []
         from modules.flags import Performance, MetadataScheme, ip_list, disabled, task_class_mapping, default_vae
         from modules.util import get_enabled_loras
         from modules.config import default_max_lora_number
@@ -28,8 +31,9 @@ class AsyncTask:
         self.results = []
         self.last_stop = False
         self.processing = False
-        self.task_id = str(uuid.uuid4())
+        self.task_id = str(uuid.uuid4()) if task_id is None else task_id
         self.remote_task = False
+        self.img_paths = []
 
         self.performance_loras = []
 
@@ -286,7 +290,7 @@ def worker():
                               apply_wildcards)
     from modules.upscaler import perform_upscale
     from modules.flags import Performance
-    from modules.meta_parser import get_metadata_parser
+    from modules.meta_parser import get_metadata_parser, MetadataParser
     from modules.model_loader import is_models_file_absent
 
     from enhanced.simpleai import comfyd, comfyclient_pipeline as comfypipeline, get_echo_off, p2p_task
@@ -330,7 +334,9 @@ def worker():
         if async_task.remote_task:
             p2p_task.call_remote_result(async_task, imgs, progressbar_index, black_out_nsfw, censor, do_not_show_finished_images)
             return
-        
+        if imgs is None:
+            imgs = async_task.img_paths
+            async_task.img_paths = []
         if not isinstance(imgs, list):
             imgs = [imgs]
 
@@ -345,6 +351,41 @@ def worker():
 
         async_task.yields.append(['results', async_task.results])
         return
+
+    def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
+        print('in image_log')
+        paths, image, log_item = log(img, metadata, metadata_parser, output_format, task, persist_image, user_did, remote_task)
+        async_task.img_paths.append(paths)
+        if remote_task:
+            p2p_task.call_remote_save_and_log(async_task, image, log_item)
+
+    def p2p_save_and_log(async_task, result_img, result_log):
+        print('in p2p_save_and_log')
+        paths = p2p_log(result_img, result_log, async_task.output_format, persist_image=True, user_did=async_task.user_did)
+        async_task.img_paths.append(paths)
+    
+    def stop_processing(async_task, processing_start_time, status="Finished"):
+        async_task.processing = False
+        processing_time = time.perf_counter() - processing_start_time
+        if status=="Finished":
+            logger.info(f'Processing time (total): {processing_time:.2f} seconds')
+        else:
+            if processing_start_time==0:
+                logger.info(f'Processing stop, status:{status}')
+            else:
+                logger.info(f'Processing time (total): {processing_time:.2f} seconds, status:{status}')
+        if async_task.task_class in flags.comfy_classes:
+            if async_task.comfyd_active_checkbox:
+                comfyd.finished()
+            else:
+                comfyd.stop()
+        if async_task.remote_task:
+            p2p_task.call_remote_stop(async_task, processing_start_time, status)
+        return
+
+    def interrupt_processing():
+        comfyd.interrupt()
+        ldm_patched.modules.model_management.interrupt_current_processing()
 
     def build_image_wall(async_task):
         results = []
@@ -389,29 +430,6 @@ def worker():
         # must use deep copy otherwise gradio is super laggy. Do not use list.append() .
         async_task.results = async_task.results + [wall]
         return
-    
-    def stop_processing(async_task, processing_start_time, status="Finished"):
-        async_task.processing = False
-        processing_time = time.perf_counter() - processing_start_time
-        if status=="Finished":
-            logger.info(f'Processing time (total): {processing_time:.2f} seconds')
-        else:
-            if processing_start_time==0:
-                logger.info(f'Processing stop, status:{status}')
-            else:
-                logger.info(f'Processing time (total): {processing_time:.2f} seconds, status:{status}')
-        if async_task.task_class in flags.comfy_classes:
-            if async_task.comfyd_active_checkbox:
-                comfyd.finished()
-            else:
-                comfyd.stop()
-        if async_task.remote_task:
-            p2p_task.call_remote_stop(async_task, processing_start_time, status)
-        return
-
-    def interrupt_processing():
-        comfyd.interrupt()
-        ldm_patched.modules.model_management.interrupt_current_processing()
 
     def process_task(all_steps, async_task, callback, controlnet_canny_path, controlnet_cpds_path, controlnet_pose_path, current_task_id,
                      denoising_strength, final_scheduler_name, goals, initial_latent, steps, switch, positive_cond,
@@ -504,17 +522,12 @@ def worker():
             progressbar(async_task, current_progress, '检测NSFW ...')
             imgs = default_censor(imgs)
         progressbar(async_task, current_progress, f'保存已生成图片 {current_task_id + 1}/{total_count} ...')
-        result_all = save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
-        img_paths = []
-        for (result_path, result_img, result_log) in result_all:
-            img_paths.append(result_path)
-            if async_task.remote_task:
-                p2p_task.call_remote_save_and_log(async_task, result_img, result_log)
-        yield_result(async_task, img_paths, current_progress, async_task.black_out_nsfw, False,
+        save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image)
+        yield_result(async_task, None, current_progress, async_task.black_out_nsfw, False,
                      do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
         
         logger.info(f'The process_task end.')
-        return imgs, img_paths, current_progress
+        return imgs, async_task.img_paths, current_progress
 
     def apply_patch_settings(async_task):
         patch_settings[pid] = PatchSettings(
@@ -526,11 +539,7 @@ def worker():
             async_task.adaptive_cfg
         )
 
-    def p2p_save_and_log(async_task, result_img, result_log):
-        p2p_log(result_img, result_log, async_task.output_format, async_task.user_did)
-
-    def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image=True) -> list:
-        img_paths = []
+    def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image=True):
         for x in imgs:
             scene_task = None
             if hasattr(async_task, 'scene_frontend'):
@@ -590,7 +599,7 @@ def worker():
             if async_task.save_metadata_to_images:
                 styles_name = task['styles'] if not use_expansion else [fooocus_expansion] + task['styles']
                 styles_definition = {k: modules.sdxl_styles.styles[k] for k in styles_name if k and k not in ['Fooocus V2', 'Fooocus Enhance', 'Fooocus Sharp', 'Fooocus Masterpiece', 'Fooocus Photograph', 'Fooocus Negative', 'Fooocus Cinematic']}
-                metadata_parser = modules.meta_parser.get_metadata_parser(async_task.metadata_scheme)
+                metadata_parser = get_metadata_parser(async_task.metadata_scheme)
                 metadata_parser.set_data(task['log_positive_prompt'], task['positive'],
                                          task['log_negative_prompt'], task['negative'],
                                          async_task.steps, async_task.base_model_name, async_task.refiner_model_name,
@@ -603,10 +612,9 @@ def worker():
                 d.append(('User', 'created_by', f'{async_task.user_did}'))
 
             d.append(('Version', 'version', f'{version.branch}_{version.get_simplesdxl_ver()}'))
-            paths, image, log_item = log(x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did, async_task.remote_task)
-            img_paths.append((paths, image, log_item))
-
-        return img_paths
+            image_log(async_task, x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did, async_task.remote_task)
+            
+        return
 
     def apply_control_nets(async_task, height, ip_adapter_face_path, ip_adapter_path, width, current_progress):
         for task in async_task.cn_tasks[flags.cn_canny]:
@@ -1261,8 +1269,8 @@ def worker():
                     progressbar(async_task, current_progress, '检测NSFW ...')
                     img = default_censor(img)
                 progressbar(async_task, current_progress, f'保存已生成图片 {current_task_id + 1}/{total_count} ...')
-                uov_image_path = log(img, d, output_format=async_task.output_format, persist_image=persist_image, user_did=async_task.user_did)
-                yield_result(async_task, uov_image_path, current_progress, async_task.black_out_nsfw, False,
+                image_log(async_task, img, d, output_format=async_task.output_format, persist_image=persist_image, user_did=async_task.user_did, remote_task=async_task.remote_task)
+                yield_result(async_task, None, current_progress, async_task.black_out_nsfw, False,
                              do_not_show_finished_images=not show_intermediate_results or async_task.disable_intermediate_results)
                 return current_progress, img, prompt, negative_prompt
 
@@ -1347,9 +1355,9 @@ def worker():
         async_task.processing = True
         logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}{", remote_process" if remote_process else ""}')
         if remote_process:
-            p2p_task.request_p2p_task(async_task)
-            print(f'[P2P] Remote process request sent')
-            while not async_task.processing:
+            qsize = p2p_task.request_p2p_task(async_task)
+            print(f'[P2P] Remote process request: task_id={async_task.task_id}, qsize={qsize}')
+            while async_task.processing:
                 time.sleep(2)
             return
         if is_models_file_absent(async_task.task_name):
@@ -1490,8 +1498,8 @@ def worker():
                     progressbar(async_task, 100, '检测NSFW ...')
                     async_task.uov_input_image = default_censor(async_task.uov_input_image)
                 progressbar(async_task, 100, '保存已生成图片 ...')
-                uov_input_image_path = log(async_task.uov_input_image, d, output_format=async_task.output_format, user_did=async_task.user_did)
-                yield_result(async_task, uov_input_image_path, 100, async_task.black_out_nsfw, False,
+                image_log(async_task, async_task.uov_input_image, d, output_format=async_task.output_format, user_did=async_task.user_did, remote_task=async_task.remote_task)
+                yield_result(async_task, None, 100, async_task.black_out_nsfw, False,
                              do_not_show_finished_images=True)
                 return
         
