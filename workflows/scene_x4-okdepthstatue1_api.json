@@ -1,7 +1,7 @@
 {
   "1": {
     "inputs": {
-      "image": "Camera_XHS_17263025590301040g2sg3174gb70bk4905ng5.jpg"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
