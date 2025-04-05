@@ -1968,7 +1968,7 @@ def worker():
 
     worker.yield_result = yield_result
     worker.progressbar = progressbar
-    worker.p2p_save_and_log = p2p_image_log
+    worker.p2p_save_and_log = p2p_save_and_log
     worker.stop_processing = stop_processing
     worker.interrupt_processing = interrupt_processing
 
