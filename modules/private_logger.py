@@ -126,7 +126,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
         img_byte_result.seek(0)
 
     if args_manager.args.disable_image_log:
-        return local_temp_filename, img_byte_result, ''
+        return local_temp_filename, img_byte_result.getvalue(), ''
 
 
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
@@ -177,10 +177,10 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     
         log_ext(local_temp_filename)
 
-    return local_temp_filename, img_byte_result, item
+    return local_temp_filename, img_byte_result.getvalue(), item
 
 
-def p2p_log(result_img, result_log, output_format, user_did=None):
+def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=None):
     global css_styles, js
 
     if not user_did:
@@ -193,7 +193,7 @@ def p2p_log(result_img, result_log, output_format, user_did=None):
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
 
     with open(local_temp_filename, "wb") as f:
-        f.write(result_img.getvalue())
+        f.write(result_img)
 
     if args_manager.args.disable_image_log:
         return local_temp_filename

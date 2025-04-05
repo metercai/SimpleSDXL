@@ -44,7 +44,7 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.21"
-    REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
+    REINSTALL_BASE = False #True #False if '_dev' not in version.get_branch() else True
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
         "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
@@ -154,6 +154,8 @@ def prepare_environment():
             elif platform.system() == "Linux":
                 run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.28.post1")
 
+    if platform.system() == "Darwin":
+        requirements_file = "requirements_macos.txt"
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
             for p in met_diff.keys():
@@ -161,9 +163,6 @@ def prepare_environment():
                 run(f'"{python}" -m pip uninstall -y {p}=={met_diff[p]}')
         if is_win32_standalone_build:
             run_pip(f"install -r \"{requirements_file}\" -t {target_path_win}", "requirements")
-        elif platform.system() == "Darwin":
-            requirements_file = "requirements_macos.txt"
-            run_pip(f"install -r \"{requirements_file}\"", "requirements")
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
