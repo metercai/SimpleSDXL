@@ -587,6 +587,10 @@ def load_models_gpu(models, memory_required=0, force_patch_weights=False, minimu
     models_to_load = []
 
     for x in models:
+        
+        if hasattr(x, "model") and x.model.__class__.__name__ == "FluxClipModel_":
+            continue
+        
         loaded_model = LoadedModel(x)
         try:
             loaded_model_index = current_loaded_models.index(loaded_model)
