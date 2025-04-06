@@ -1561,6 +1561,39 @@ packages = {
         "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
         ]
+    },
+            "StyleTransfer_package": {
+        "id": 23,
+        "name": "[23]风格转绘扩展包",
+        "note": "多种图像风格转绘|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
+            ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
+            ("checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
+            ("loras/SDXL_claymate.safetensors", 912561180),
+            ("loras/SDXL_crayon.safetensors", 340776492),
+            ("loras/SDXL_cute.safetensors", 681244276),
+            ("loras/SDXL_ghibli.safetensors", 681268820),
+            ("loras/SDXL_inkpainting.safetensors", 228466036),
+            ("loras/SDXL_oilpainting.safetensors", 202694420),
+            ("loras/SDXL_papercut.safetensors", 456489140),
+            ("loras/SDXL_watercolor.safetensors", 228458788),
+            ("loras/Illustrious_pixelart.safetensors", 228504612),
+            ("loras/noob_pvc.safetensors", 607394012),
+            ("loras/SDXL_lineart.safetensors", 170540028),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
+            ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
+            ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
+            ("insightface/models/buffalo_l/genderage.onnx", 1322532),
+            ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860)
+        ],
+        "download_links": [
+        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
     }
 }
 
@@ -1603,7 +1636,18 @@ MANUAL_DOWNLOAD_MAP = {
         "SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
         "sdxl_hyper_sd_4step_lora.jpg",
         "sdxl_lightning_4step_lora.jpg",
-        "StickersRedmond.jpg"
+        "StickersRedmond.jpg",
+        "Illustrious_pixelart.jpg",
+        "noob_pvc.jpg",
+        "SDXL_claymate.jpg", 
+        "SDXL_crayon.jpg",
+        "SDXL_cute.jpg",
+        "SDXL_ghibli.jpg",
+        "SDXL_inkpainting.jpg",
+        "SDXL_lineart.jpg",
+        "SDXL_oilpainting.jpg",
+        "SDXL_papercut.jpg",
+        "SDXL_watercolor.jpg"
     ]
 }
 
