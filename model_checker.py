@@ -1384,7 +1384,7 @@ packages = {
             ("loras/StickersRedmond.safetensors", 170540036)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x1-okremovebg_package": {
@@ -1398,7 +1398,7 @@ packages = {
             ("rembg/Portrait.safetensors", 884878856)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x2-okimagerepair_package": {
@@ -1418,7 +1418,7 @@ packages = {
             ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x3-swapface_package": {
@@ -1446,7 +1446,7 @@ packages = {
             ("loras/comfyui_portrait_lora64.safetensors",612742344)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "Flux_aio_plus_package": {
@@ -1558,11 +1558,11 @@ packages = {
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
         ]
     },
-            "StyleTransfer_package": {
+        "StyleTransfer_package": {
         "id": 23,
         "name": "[23]风格转绘扩展包",
         "note": "多种图像风格转绘|显存需求：★★★ 速度：★★★",
@@ -1594,7 +1594,25 @@ packages = {
             ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "okdepthstatue_package": {
+        "id": 24,
+        "name": "[24]深度图、雕像扩展包",
+        "note": "深度图、白瓷雕像风格扩展|显存需求：★★ 速度：★★★★★",
+        "files": [
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("controlnet/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth", 1341395338),
+            ("controlnet/lllyasviel/Annotators/sk_model.pth", 17173511),
+            ("controlnet/lllyasviel/Annotators/sk_model2.pth", 17173511),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427)
+        ],
+        "download_links": [
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     }
 }
