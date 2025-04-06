@@ -636,7 +636,7 @@
   },
   "96": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.safetensors"
+      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
@@ -654,7 +654,7 @@
   },
   "98": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.safetensors"
+      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
