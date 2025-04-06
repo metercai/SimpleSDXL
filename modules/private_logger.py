@@ -251,3 +251,4 @@ def log_ext(file_name):
 
     logger.info(f'Image generated with advanced params log at: {log_name}')
     return 
+
