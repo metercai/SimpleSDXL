@@ -95,14 +95,14 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.1
 
     worker.add_task(task)
-    MAX_LOOP_NUM = worker.get_task_size()
+    qsize = worker.get_task_size()
+    MAX_LOOP_NUM = qsize
     last_update_time = time.time()
     loop_num = 0
     ready_flag = False
-    while True:
+    while qsize>1:
         current_time = time.time()
         if (current_time - MAX_WAIT_TIME*loop_num - last_update_time) < MAX_WAIT_TIME:
-            qsize = worker.get_task_size()
             yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中({qsize})，请等待...')), \
                 gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
                 gr.update(visible=False, value=None), \
@@ -117,9 +117,11 @@ def generate_clicked(task: worker.AsyncTask, state):
                 worker.restart(task)
                 break
         time.sleep(POLL_INTERVAL)
+        qsize = worker.get_task_size()
     
     execution_start_time = time.perf_counter()
     finished = False
+    ready_flag = True if qsize==1 else ready_flag
     MAX_WAIT_TIME = 480
     POLL_INTERVAL = 0.08
     in_progress = False

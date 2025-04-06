@@ -364,7 +364,7 @@ def worker():
     
     def stop_processing(async_task, processing_start_time, status="Finished"):
         async_task.processing = False
-        processing_time = time.perf_counter() - processing_start_time
+        processing_time = (int(time.time() * 1000) - processing_start_time)/1000.0
         if status=="Finished":
             logger.info(f'Processing time (total): {processing_time:.2f} seconds')
         else:
@@ -1359,7 +1359,6 @@ def worker():
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
-                return
             while async_task.processing:
                 time.sleep(2)
             return
@@ -1587,7 +1586,7 @@ def worker():
         else:
             progressbar(async_task, current_progress, f'{async_task.task_class} 生图 ...')
 
-        processing_start_time = time.perf_counter()
+        processing_start_time = int(time.time() * 1000)
 
         preparation_steps = current_progress
         total_count = async_task.image_number
