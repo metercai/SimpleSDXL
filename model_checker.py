@@ -1582,6 +1582,8 @@ packages = {
             ("loras/noob_pvc.safetensors", 607394012),
             ("loras/SDXL_lineart.safetensors", 170540028),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("controlnet/lllyasviel/Annotators/sk_model.pth", 17173511),
+            ("controlnet/lllyasviel/Annotators/sk_model2.pth", 17173511),
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
