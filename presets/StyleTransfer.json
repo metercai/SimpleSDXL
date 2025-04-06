@@ -6,7 +6,7 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["黏土","手办","像素","Q版","萌系","油画","水彩","水墨","纸艺","吉卜力","蜡笔"],
+	    "theme": ["黏土","手办","像素","Q版","萌系","油画","水彩","水墨","纸艺","吉卜力","蜡笔","线稿"],
 	    "theme_title": "选择不同的转绘风格",
             "disvisible": ["scene_additional_prompt", "scene_aspect_ratio", "scene_canvas_image"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
@@ -21,7 +21,8 @@
                 "水墨": "inkpainting",
                 "纸艺": "papercut",
                 "吉卜力": "ghibli",
-                "蜡笔": "crayon"
+                "蜡笔": "crayon",
+                "线稿": "lineart"
 	    },
         "prompt": {
             "黏土": "claymation,",
@@ -34,7 +35,8 @@
             "水墨": "inkpainting,",
             "纸艺": "papercutting,",
             "吉卜力": "ghibli,",
-            "蜡笔": "crayon,"
+            "蜡笔": "crayon,",
+            "线稿": "lineart,"
         },
         "additional_prompt_title_2": "是否使用人脸识别：0为不使用，1为使用",
         "additional_prompt_2": {
@@ -48,7 +50,8 @@
             "水墨": "0",
             "纸艺": "0",
             "吉卜力": "0",
-            "蜡笔": "0"
+            "蜡笔": "0",
+            "线稿": "0"
         },
         "multimodal_prompt": {
             "黏土": "photo,tags",
@@ -61,7 +64,8 @@
             "水墨": "photo,tags",
             "纸艺": "photo,tags",
             "吉卜力": "photo,tags",
-            "蜡笔": "photo,tags"
+            "蜡笔": "photo,tags",
+            "线稿": "photo,tags"
         },
         "scene_steps": {
             "黏土": 30,
@@ -74,7 +78,8 @@
             "水墨": 30,
             "纸艺": 30,
             "吉卜力": 30,
-            "蜡笔": 30
+            "蜡笔": 30,
+            "线稿": 30
             }
     	}
     },
