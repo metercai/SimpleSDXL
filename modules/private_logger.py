@@ -193,7 +193,6 @@ def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=path_outputs, extension=output_format)
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
     
-    print(f'local_temp_filename: {local_temp_filename}')
     with open(local_temp_filename, "wb") as f:
         f.write(result_img)
 
