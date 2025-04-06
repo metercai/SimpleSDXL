@@ -1,0 +1,592 @@
+{
+  "10": {
+    "inputs": {
+      "image": "welcome.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "11": {
+    "inputs": {
+      "ckpt_name": "SDXL_Yamers_Cartoon_Arcadia.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "12": {
+    "inputs": {
+      "pixels": [
+        "10",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "16": {
+    "inputs": {
+      "text": [
+        "33",
+        0
+      ],
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "17": {
+    "inputs": {
+      "text": "3D,realistic photo,realistic lighting,deformed, bad anatomy, disfigured, poorly drawn face, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, disconnected head, malformed hands, long neck, mutated hands and fingers, bad hands, missing fingers, cropped, worst quality, low quality, mutation, poorly drawn, huge calf, bad hands, fused hand, missing hand, disappearing arms, disappearing thigh, disappearing calf, disappearing legs, missing fingers, fused fingers, abnormal eye proportion, Abnormal hands, abnormal legs, abnormal feet, abnormal fingers,impressionist, noisy, blurry, soft, deformed, ugly, text, ",
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "20": {
+    "inputs": {
+      "lora_name": "SDXL_crayon.safetensors",
+      "strength_model": 1.0000000000000002,
+      "model": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "32": {
+    "inputs": {
+      "value": "crayon,animation style, masterpiece, high score,2D"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "33": {
+    "inputs": {
+      "inputcount": 2,
+      "string_1": [
+        "32",
+        0
+      ],
+      "string_2": [
+        "77",
+        0
+      ],
+      "delimiter": " ",
+      "return_list": false,
+      "Update inputs": null
+    },
+    "class_type": "JoinStringMulti",
+    "_meta": {
+      "title": "Join String Multi"
+    }
+  },
+  "34": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 512,
+      "height": 512,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 613686114762143,
+      "steps": 30,
+      "cfg": 2,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "37": {
+    "inputs": {
+      "images": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  },
+  "44": {
+    "inputs": {
+      "seed": [
+        "34",
+        6
+      ],
+      "steps": [
+        "61",
+        0
+      ],
+      "cfg": [
+        "34",
+        8
+      ],
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "62",
+        0
+      ],
+      "positive": [
+        "65",
+        0
+      ],
+      "negative": [
+        "65",
+        1
+      ],
+      "latent_image": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "47": {
+    "inputs": {
+      "samples": [
+        "44",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "50": {
+    "inputs": {
+      "samples": [
+        "58",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "53": {
+    "inputs": {
+      "pixels": [
+        "54",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "54": {
+    "inputs": {
+      "width": [
+        "56",
+        0
+      ],
+      "height": [
+        "57",
+        0
+      ],
+      "interpolation": "lanczos",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "55": {
+    "inputs": {
+      "image": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "56": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "55",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "57": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "55",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "58": {
+    "inputs": {
+      "seed": [
+        "34",
+        6
+      ],
+      "steps": [
+        "59",
+        0
+      ],
+      "cfg": [
+        "34",
+        8
+      ],
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 0.25000000000000006,
+      "model": [
+        "62",
+        0
+      ],
+      "positive": [
+        "16",
+        0
+      ],
+      "negative": [
+        "17",
+        0
+      ],
+      "latent_image": [
+        "53",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "59": {
+    "inputs": {
+      "value": "a*0.4",
+      "a": [
+        "34",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "60": {
+    "inputs": {
+      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
+      "strength_model": 0.5,
+      "model": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "61": {
+    "inputs": {
+      "value": "a*0.6",
+      "a": [
+        "34",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "62": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 0,
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "60",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "Apply First Block Cache"
+    }
+  },
+  "63": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "64": {
+    "inputs": {
+      "type": "tile",
+      "control_net": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "65": {
+    "inputs": {
+      "strength": 0.3500000000000001,
+      "start_percent": 0,
+      "end_percent": 0.5000000000000001,
+      "positive": [
+        "16",
+        0
+      ],
+      "negative": [
+        "17",
+        0
+      ],
+      "control_net": [
+        "64",
+        0
+      ],
+      "image": [
+        "66",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "66": {
+    "inputs": {
+      "preprocessor": "TTPlanet_TileSimple_Preprocessor",
+      "resolution": [
+        "67",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "AIO Aux Preprocessor"
+    }
+  },
+  "67": {
+    "inputs": {
+      "resize_mode": "Just Resize",
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "easy imagePixelPerfect",
+    "_meta": {
+      "title": "ImagePixelPerfect"
+    }
+  },
+  "70": {
+    "inputs": {
+      "boolean": [
+        "75",
+        0
+      ],
+      "on_true": [
+        "74",
+        0
+      ],
+      "on_false": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "71": {
+    "inputs": {
+      "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "72": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapterModelLoader"
+    }
+  },
+  "73": {
+    "inputs": {
+      "provider": "CPU",
+      "model_name": "buffalo_l"
+    },
+    "class_type": "IPAdapterInsightFaceLoader",
+    "_meta": {
+      "title": "IPAdapterInsightFaceLoader"
+    }
+  },
+  "74": {
+    "inputs": {
+      "weight": 1.0000000000000002,
+      "weight_faceidv2": 1.0000000000000002,
+      "weight_type": "ease in-out",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "K+V",
+      "model": [
+        "11",
+        0
+      ],
+      "ipadapter": [
+        "72",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ],
+      "clip_vision": [
+        "71",
+        0
+      ],
+      "insightface": [
+        "73",
+        0
+      ]
+    },
+    "class_type": "IPAdapterFaceID",
+    "_meta": {
+      "title": "IPAdapterFaceID"
+    }
+  },
+  "75": {
+    "inputs": {
+      "a": [
+        "76",
+        0
+      ],
+      "b": "1",
+      "operation": "a == b",
+      "case_sensitive": true
+    },
+    "class_type": "easy mathString",
+    "_meta": {
+      "title": "Math String"
+    }
+  },
+  "76": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "additional_prompt"
+    }
+  },
+  "77": {
+    "inputs": {
+      "prompt": [
+        "34",
+        4
+      ],
+      "find1": "realistic",
+      "replace1": "anime",
+      "find2": "3D",
+      "replace2": "2D",
+      "find3": "photo",
+      "replace3": "painting"
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  }
+}
