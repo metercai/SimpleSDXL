@@ -1,0 +1,648 @@
+{
+  "10": {
+    "inputs": {
+      "image": "welcome.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "11": {
+    "inputs": {
+      "ckpt_name": "miaomiaoHarem_v15b.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "12": {
+    "inputs": {
+      "pixels": [
+        "10",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "16": {
+    "inputs": {
+      "text": [
+        "33",
+        0
+      ],
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "17": {
+    "inputs": {
+      "text": "bokeh, sloppy, messy, blurry, noisy, highly detailed, ultra textured, photo, realistic,",
+      "clip": [
+        "11",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "25": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 0,
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "72",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "32": {
+    "inputs": {
+      "value": "Pixel style,(pixel art:1.5),blocky, pixel art style, 8-bit graphics"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "33": {
+    "inputs": {
+      "inputcount": 2,
+      "string_1": [
+        "32",
+        0
+      ],
+      "string_2": [
+        "92",
+        0
+      ],
+      "delimiter": " ",
+      "return_list": false,
+      "Update inputs": null
+    },
+    "class_type": "JoinStringMulti",
+    "_meta": {
+      "title": "Join String Multi"
+    }
+  },
+  "34": {
+    "inputs": {
+      "clip_skip": -1,
+      "width": 512,
+      "height": 512,
+      "swap": false,
+      "batch_size": 1,
+      "positive": "",
+      "negative": "",
+      "seed": 534131755002927,
+      "steps": 30,
+      "cfg": 3,
+      "denoise": 1
+    },
+    "class_type": "Co_Input_Zho",
+    "_meta": {
+      "title": "i2i_overall_input"
+    }
+  },
+  "37": {
+    "inputs": {
+      "images": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "SaveImageWebsocket"
+    }
+  },
+  "39": {
+    "inputs": {
+      "opacity": 50,
+      "image": [
+        "50",
+        0
+      ],
+      "color_ref_image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
+    }
+  },
+  "44": {
+    "inputs": {
+      "seed": [
+        "34",
+        6
+      ],
+      "steps": [
+        "61",
+        0
+      ],
+      "cfg": [
+        "34",
+        8
+      ],
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
+      "denoise": 0.25,
+      "model": [
+        "25",
+        0
+      ],
+      "positive": [
+        "16",
+        0
+      ],
+      "negative": [
+        "17",
+        0
+      ],
+      "latent_image": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "47": {
+    "inputs": {
+      "samples": [
+        "44",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "50": {
+    "inputs": {
+      "samples": [
+        "58",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "58": {
+    "inputs": {
+      "seed": [
+        "34",
+        6
+      ],
+      "steps": [
+        "59",
+        0
+      ],
+      "cfg": [
+        "34",
+        8
+      ],
+      "sampler_name": "euler_ancestral",
+      "scheduler": "sgm_uniform",
+      "denoise": 0.15,
+      "model": [
+        "77",
+        0
+      ],
+      "positive": [
+        "16",
+        0
+      ],
+      "negative": [
+        "17",
+        0
+      ],
+      "latent_image": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "59": {
+    "inputs": {
+      "value": "a*0.4",
+      "a": [
+        "34",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "61": {
+    "inputs": {
+      "value": "a*0.6",
+      "a": [
+        "34",
+        7
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "63": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": 256,
+      "height": 256,
+      "crop": "disabled",
+      "image": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "64": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": [
+        "83",
+        0
+      ],
+      "height": [
+        "84",
+        0
+      ],
+      "crop": "disabled",
+      "image": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "65": {
+    "inputs": {
+      "image": [
+        "73",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "67": {
+    "inputs": {
+      "lora_name": "Illustrious_pixelart.safetensors",
+      "strength_model": 1,
+      "model": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "72": {
+    "inputs": {
+      "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
+      "strength_model": 0.5,
+      "model": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "73": {
+    "inputs": {
+      "samples": [
+        "44",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "74": {
+    "inputs": {
+      "pixels": [
+        "64",
+        0
+      ],
+      "vae": [
+        "11",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "75": {
+    "inputs": {
+      "preset": "PLUS (high strength)",
+      "lora_strength": 0.6,
+      "provider": "CUDA",
+      "weight": 1.0000000000000002,
+      "weight_faceidv2": 1,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "cache_mode": "all",
+      "use_tiled": false,
+      "use_batch": false,
+      "sharpening": 0,
+      "layer_weights": "3:3,6:0",
+      "model": [
+        "72",
+        0
+      ],
+      "image": [
+        "80",
+        0
+      ]
+    },
+    "class_type": "easy ipadapterApplyADV",
+    "_meta": {
+      "title": "Easy Apply IPAdapter (Advanced)"
+    }
+  },
+  "77": {
+    "inputs": {
+      "object_to_patch": "diffusion_model",
+      "residual_diff_threshold": 0,
+      "start": 0,
+      "end": 1,
+      "max_consecutive_cache_hits": 2,
+      "model": [
+        "75",
+        0
+      ]
+    },
+    "class_type": "ApplyFBCacheOnModel",
+    "_meta": {
+      "title": "wavespeed_strength"
+    }
+  },
+  "78": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "width": 128,
+      "height": 128,
+      "crop": "center",
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "80": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": 224,
+      "height": 224,
+      "crop": "center",
+      "image": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Upscale Image"
+    }
+  },
+  "82": {
+    "inputs": {
+      "images": [
+        "80",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "83": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "84": {
+    "inputs": {
+      "value": "a*1.5",
+      "a": [
+        "65",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "85": {
+    "inputs": {
+      "boolean": [
+        "90",
+        0
+      ],
+      "on_true": [
+        "89",
+        0
+      ],
+      "on_false": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "86": {
+    "inputs": {
+      "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIPVisionLoader"
+    }
+  },
+  "87": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapterModelLoader"
+    }
+  },
+  "88": {
+    "inputs": {
+      "provider": "CPU",
+      "model_name": "buffalo_l"
+    },
+    "class_type": "IPAdapterInsightFaceLoader",
+    "_meta": {
+      "title": "IPAdapterInsightFaceLoader"
+    }
+  },
+  "89": {
+    "inputs": {
+      "weight": 1.0000000000000002,
+      "weight_faceidv2": 1.0000000000000002,
+      "weight_type": "ease in-out",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "K+V",
+      "model": [
+        "11",
+        0
+      ],
+      "ipadapter": [
+        "87",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ],
+      "clip_vision": [
+        "86",
+        0
+      ],
+      "insightface": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "IPAdapterFaceID",
+    "_meta": {
+      "title": "IPAdapterFaceID"
+    }
+  },
+  "90": {
+    "inputs": {
+      "a": [
+        "91",
+        0
+      ],
+      "b": "1",
+      "operation": "a == b",
+      "case_sensitive": true
+    },
+    "class_type": "easy mathString",
+    "_meta": {
+      "title": "Math String"
+    }
+  },
+  "91": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "additional_prompt"
+    }
+  },
+  "92": {
+    "inputs": {
+      "prompt": [
+        "34",
+        4
+      ],
+      "find1": "realistic",
+      "replace1": "anime",
+      "find2": "3D",
+      "replace2": "2D",
+      "find3": "photo",
+      "replace3": "painting"
+    },
+    "class_type": "easy promptReplace",
+    "_meta": {
+      "title": "PromptReplace"
+    }
+  }
+}
