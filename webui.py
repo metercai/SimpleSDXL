@@ -113,7 +113,7 @@ def generate_clicked(task: worker.AsyncTask, state):
         else:
             loop_num += 1
             if loop_num > MAX_LOOP_NUM:
-                print(f'ready to restart worker thread...')
+                logger.info(f'ready to restart worker thread...')
                 worker.restart(task)
                 break
         time.sleep(POLL_INTERVAL)
@@ -124,7 +124,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.08
     in_progress = False
 
-    print(f"Start generating...")
+    logger.info(f"Start generating...")
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
