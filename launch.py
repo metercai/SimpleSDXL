@@ -63,7 +63,7 @@ def check_base_environment():
             pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
             run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
-    update_pkgs = []
+    update_pkgs = [('protobuf', '4.25.3'), ('onnx', '1.14.0')]
     for (update_pkg_name, update_pkg_version) in update_pkgs:
         if not is_installed_version(update_pkg_name, update_pkg_version):
             pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
