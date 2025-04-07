@@ -364,6 +364,7 @@ def worker():
     
     def stop_processing(async_task, processing_start_time, status="Finished"):
         async_task.processing = False
+        async_task.img_paths = []
         processing_time = (int(time.time() * 1000) - processing_start_time)/1000.0
         if status=="Finished":
             logger.info(f'Processing time (total): {processing_time:.2f} seconds')
