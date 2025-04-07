@@ -33,9 +33,9 @@ def ready_checker():
     if not is_win32_standalone_build:
         return
     
-    for filename in os.listdir(win32.root):
+    for filename in os.listdir(win32_root):
         if '2.5(1214)' in filename and filename.endswith(".bat"):
             source_file = os.path.join(shared.root, filename)
-            target_file = os.path.join(win32.root, filename)
+            target_file = os.path.join(win32_root, filename)
             os.remove(target_file)
             #shutil.copy2(source_file, target_file)
