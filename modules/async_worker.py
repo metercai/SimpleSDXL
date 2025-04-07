@@ -192,6 +192,7 @@ class AsyncTask:
         self.task_class = self.params_backend.pop('backend_engine', 'Fooocus')
         self.task_name = self.params_backend.pop('preset', 'default')
         self.task_method = self.params_backend.pop('task_method', 'text2image')
+        self.preset = self.task_name
         if 'layer' in self.current_tab and self.task_class == 'Fooocus' and self.input_image_checkbox:
             self.task_class = 'Comfy'
             self.task_name = 'default'
@@ -243,7 +244,6 @@ class AsyncTask:
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt')
             self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
-
 
 class EarlyReturnException(BaseException):
     pass
@@ -1364,7 +1364,7 @@ def worker():
             while async_task.processing:
                 time.sleep(2)
             return
-        if is_models_file_absent(async_task.task_name):
+        if is_models_file_absent(async_task.preset):
             stop_processing(async_task, 0, "Model absent")
             return
         ldm_patched.modules.model_management.print_memory_info("begin at handler")
