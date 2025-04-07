@@ -414,7 +414,7 @@ def validate_files(packages):
 
             missing_size_gb = total_size_gb * (1 - (percentage / 100))
             print(f"- {package_name} - 总大小：{total_size_gb:.2f}GB，完整度：{percentage:.2f}%，尚需下载：{missing_size_gb:.2f}GB")
-
+    # 新增基础包自动下载逻辑
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
 
     if sorted_download_files:
@@ -429,7 +429,19 @@ def validate_files(packages):
                 
                 f2.write(f"{link}\n")
         print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<<<<<<<<<<<<<<<<<<<{Style.RESET_ALL}")
+    if "[1]基础模型包" in missing_package_names:
+        package_id = 1
+        selected_package = None
+        for package_name, package_info in packages.items():
+            if package_info["id"] == package_id:
+                selected_package = package_info
+                break
 
+        if selected_package:
+            get_download_links_for_package({package_name: selected_package}, "downloadlist.txt")
+
+        print(f"\n{Fore.CYAN}△检测到基础包不完整，自动触发下载流程...{Style.RESET_ALL}")
+        auto_download_missing_files_with_retry(max_threads=5)
 def delete_partial_files():
     try:
         path_mapping = load_model_paths()
