@@ -38,4 +38,8 @@ def ready_checker():
             source_file = os.path.join(shared.root, filename)
             target_file = os.path.join(win32_root, filename)
             os.remove(target_file)
-            #shutil.copy2(source_file, target_file)
+    for filename in os.listdir(shared.root):
+        if 'checker' in filename and filename.endswith(".bat"):
+            source_file = os.path.join(shared.root, filename)
+            target_file = os.path.join(win32_root, filename)
+            shutil.copy2(source_file, target_file)
