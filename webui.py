@@ -100,14 +100,14 @@ def generate_clicked(task: worker.AsyncTask, state):
     last_update_time = time.time()
     loop_num = 0
     ready_flag = False
-    while qsize>1:
+    while qsize>0:
         current_time = time.time()
         if (current_time - MAX_WAIT_TIME*loop_num - last_update_time) < MAX_WAIT_TIME:
-            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中({qsize})，请等待...')), \
+            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务已进入队列中({qsize})，请等待...')), \
                 gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
                 gr.update(visible=False, value=None), \
                 gr.update(visible=False)
-            if worker.get_processing_id() == task.task_id:
+            if qsize==1 or worker.get_processing_id() == task.task_id:
                 ready_flag = True
                 break
         else:
