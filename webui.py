@@ -56,17 +56,15 @@ def get_cookie_value(cookie_string, key):
 def get_start_timestamp(request: gr.Request):
     global START_TIMESTAMP
 
+    online_users, domain_online_nodes, domain_online_users, new_msg_number = 0, 0, 0, 0
     if "cookie" in request.headers:
         sid = get_cookie_value(request.headers["cookie"], "aitoken")
         if sid:
-            shared.token.log_access(sid)
+            online_users, domain_online_nodes, domain_online_users, new_msg_number = shared.token.log_access(sid)
             #node_all, usesr_all, new_msg = shared.token.get_global_status(sid,0)
-    online_users = shared.token.get_online_users_number()
+        
     qsize = worker.get_task_size()
     vram_ram_info = model_management.get_vram_ram_used()
-    domain_online_nodes, domain_online_users = shared.token.get_online_nodes_users()
-    new_msg_number = shared.token.get_global_msg_number()
-    #print(f'node_all({node_all}), usesr_all({usesr_all}), domain_online_nodes({domain_online_nodes}), domain_online_users({domain_online_users})')
     if new_msg_number>0:
         print(f'new messages: {shared.token.get_global_msg_all()}')
     if not ads.get_admin_default('p2p_active_checkbox'):
@@ -97,35 +95,38 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.1
 
     worker.add_task(task)
-    MAX_LOOP_NUM = worker.get_task_size()
+    qsize = worker.get_task_size()
+    MAX_LOOP_NUM = qsize
     last_update_time = time.time()
     loop_num = 0
     ready_flag = False
-    while True:
+    while qsize>0:
         current_time = time.time()
         if (current_time - MAX_WAIT_TIME*loop_num - last_update_time) < MAX_WAIT_TIME:
-            qsize = worker.get_task_size()
-            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务排队中({qsize})，请等待...')), \
+            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务已进入队列中({qsize})，请等待...')), \
                 gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
                 gr.update(visible=False, value=None), \
                 gr.update(visible=False)
-            if worker.get_processing_id() == task.task_id:
+            if qsize==1 or worker.get_processing_id() == task.task_id:
                 ready_flag = True
                 break
         else:
             loop_num += 1
             if loop_num > MAX_LOOP_NUM:
-                print(f'ready to restart worker thread...')
+                logger.info(f'ready to restart worker thread...')
                 worker.restart(task)
                 break
         time.sleep(POLL_INTERVAL)
+        qsize = worker.get_task_size()
     
     execution_start_time = time.perf_counter()
     finished = False
+    ready_flag = True if qsize==1 else ready_flag
     MAX_WAIT_TIME = 480
     POLL_INTERVAL = 0.08
     in_progress = False
 
+    logger.info(f"Start generating...")
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
@@ -138,7 +139,7 @@ def generate_clicked(task: worker.AsyncTask, state):
             task.last_stop = 'stop'
             if (task.processing):
                 logger.error("Send interrupt flag to process and comfyd")
-                worker.interrupt_processing()
+                worker.worker.interrupt_processing()
             break
 
         time.sleep(POLL_INTERVAL)
@@ -1501,7 +1502,7 @@ with shared.gradio_root:
                                 with gr.Row():
                                     admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
                                 with gr.Row():
-                                    comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd, info='Enabling will improve execution speed.')
+                                    comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd and not args_manager.args.disable_backend, info='Enabling will improve execution speed.')
                                     fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
                                 with gr.Row():
                                     minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
@@ -1513,14 +1514,14 @@ with shared.gradio_root:
                     with gr.Tab(label='P2P Network'):
                         with gr.Group() as p2p_panel:
                             p2p_active_checkbox = gr.Checkbox(label='Enable P2P network', value=ads.get_admin_default('p2p_active_checkbox'))
-                            p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'out', 'in'], value=ads.get_admin_default('p2p_remote_process'), interactive=False)
-                            with gr.Group(visible=False) as p2p_out:
+                            p2p_remote_process = gr.Radio(label='Remote process', choices=['Disable', 'out', 'in'], value=ads.get_admin_default('p2p_remote_process'), interactive=ads.get_admin_default('p2p_active_checkbox'))
+                            with gr.Group(visible=True if ads.get_admin_default('p2p_remote_process')=='out' else False) as p2p_out:
                                 p2p_out_did_title = gr.Markdown(value="Remote node:", elem_classes=["p2p_title"])
                                 with gr.Row():    
                                     p2p_out_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
                                     p2p_out_did_btn = gr.Button(value="Add", size="sm", min_width=30)
                                 p2p_out_did_list = gr.Markdown(elem_classes=["htmlcontent"])
-                            with gr.Group(visible=False) as p2p_in:
+                            with gr.Group(visible=True if ads.get_admin_default('p2p_remote_process')=='in' else False) as p2p_in:
                                 p2p_in_did_title = gr.Markdown(value="Accessible identity:", elem_classes=["p2p_title"])
                                 with gr.Row():
                                     p2p_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
@@ -1533,8 +1534,8 @@ with shared.gradio_root:
                             p2p_in_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_in_did_list", x, y), inputs=[p2p_in_did_list, state_topbar])
                             
                             def toggle_p2p_remote_process(remote_process_status, state):
-                                if remote_process_status:
-                                    p2p_task.init_p2p_task(worker, model_management, shared.token)
+                                if remote_process_status!='Disable':
+                                    p2p_task.init_p2p_task(worker, model_management, shared.token, minicpm)
                                 ads.set_admin_default_value("p2p_remote_process", remote_process_status, state)
                                 return [gr.update(visible=True if remote_process_status=='out' else False), gr.update(visible=True if remote_process_status=='in' else False)]
 
@@ -1554,7 +1555,7 @@ with shared.gradio_root:
                 def sync_backend_params(key, v, params, state):
                     params.update({key:v})
                     logger.debug(f'sync_backend_params: {key}:{v}')
-                    if not key.startwiths("i2i_uov"):
+                    if not key.startswith("i2i_uov"):
                         ads.set_user_default_value(key, v, state) 
                     return params
 
@@ -1614,8 +1615,13 @@ with shared.gradio_root:
                                          inputs=[prompt_panel_checkbox, state_topbar],
                                          outputs=wildcards_array, queue=False, show_progress=False)
 
+            def toggle_comfyd_checked(x):
+                if not args_manager.args.disable_backend:
+                    comfyd.active(x)
+                return
+
             image_tools_checkbox.change(lambda x,y: gr.update(visible=x) if "gallery_state" in y and y["gallery_state"] == 'finished_index' else gr.update(visible=False), inputs=[image_tools_checkbox,state_topbar], outputs=image_toolbox, queue=False, show_progress=False)
-            comfyd_active_checkbox.change(lambda x: comfyd.active(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
+            comfyd_active_checkbox.change(lambda x: toggle_comfyd_checked(x), inputs=comfyd_active_checkbox, queue=False, show_progress=False)
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
@@ -2020,7 +2026,8 @@ httpx_logger.setLevel(logging.WARNING)
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd:
+if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd and not args_manager.args.disable_backend:
+    print(f'disable_comfyd: {args_manager.args.disable_comfyd}, disable_backend: {args_manager.args.disable_backend}')
     comfyd.active(True)
 if ads.get_admin_default('p2p_active_checkbox'):
     if shared.upstream_did:
@@ -2030,7 +2037,7 @@ if ads.get_admin_default('p2p_active_checkbox'):
     if shared.upstream_did:
         shared.upstream_did = f'{shared.upstream_did}:P2P'
 if ads.get_admin_default('p2p_remote_process'):
-    p2p_task.init_p2p_task(worker, model_management, shared.token)
+    p2p_task.init_p2p_task(worker, model_management, shared.token, minicpm)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

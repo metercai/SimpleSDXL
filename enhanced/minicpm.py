@@ -3,6 +3,7 @@ import gc
 import torch
 import shared
 import threading
+import numpy as np
 import modules.config as config
 import enhanced.translator as translator
 import enhanced.superprompter as superprompter
@@ -85,9 +86,21 @@ class MiniCPM:
         gc.collect()
         ldm_patched.modules.model_management.print_memory_info("after free minicpm model")
     
+    def inference(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
+        if ads.get_admin_default('p2p_remote_process').lower()=='out':
+            if isinstance(image, np.ndarray):
+                image = p2p_task.ndarray_to_webp_bytes(image)
+            args = (image, prompt, max_tokens, temperature, top_p, top_k, repetition_penalty, seed)
+            task = p2p_task.AsyncTask(method="minicpm_inference", args=args)
+            p2p_task.request_p2p_task(task)
+            result = task.wait(30)
+            return result[0]
+        else:
+            return self.inference_local(image, prompt, max_tokens, temperature, top_p, top_k, repetition_penalty, seed)
+
     @torch.no_grad()
     @torch.inference_mode()
-    def inference(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
+    def inference_local(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
         comfyd.stop()
         pipeline.free_everything()
         ldm_patched.modules.model_management.print_vram_info_by_nvml("before minicpm inference")
@@ -152,6 +165,7 @@ class MiniCPM:
             return self.inference(None, prompt=f'{MiniCPM.prompt_translator_cn}{input_text_cn}')
         else:
             return input_text_cn
-
+       
 minicpm = MiniCPM()
 default_interrogator = minicpm.interrogate
+

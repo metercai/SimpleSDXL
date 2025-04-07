@@ -126,7 +126,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
         img_byte_result.seek(0)
 
     if args_manager.args.disable_image_log:
-        return local_temp_filename, img_byte_result, ''
+        return local_temp_filename, img_byte_result.getvalue(), ''
 
 
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
@@ -145,9 +145,10 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
                 middle_part = existing_split[0]
 
     div_name = only_name.replace('.', '_')
-    item = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
-    item += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
-    item += "<td><table class='metadata'>"
+    item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
+    item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
+    
+    item = "<td><table class='metadata'>"
     for label, key, value in metadata:
         value_txt = str(value).replace('\n', ' </br> ')
         item += f"<tr><td class='label'>{label}</td><td class='value'>{value_txt}</td></tr>\n"
@@ -165,7 +166,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     item += "</td>"
     item += "</tr></table></div>\n\n"
 
-    middle_part = item + middle_part
+    middle_part = item_head + item + middle_part
 
     if not remote_task:
         with open(html_name, 'w', encoding='utf-8') as f:
@@ -177,10 +178,10 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     
         log_ext(local_temp_filename)
 
-    return local_temp_filename, img_byte_result, item
+    return local_temp_filename, img_byte_result.getvalue(), item
 
 
-def p2p_log(result_img, result_log, output_format, user_did=None):
+def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=None):
     global css_styles, js
 
     if not user_did:
@@ -191,13 +192,12 @@ def p2p_log(result_img, result_log, output_format, user_did=None):
     output_format = output_format if output_format else modules.config.default_output_format
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=path_outputs, extension=output_format)
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
-
+    
     with open(local_temp_filename, "wb") as f:
-        f.write(result_img.getvalue())
+        f.write(result_img)
 
     if args_manager.args.disable_image_log:
         return local_temp_filename
-
 
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
 
@@ -213,7 +213,12 @@ def p2p_log(result_img, result_log, output_format, user_did=None):
                 middle_part = existing_split[1]
             else:
                 middle_part = existing_split[0]
-    middle_part = result_log + middle_part
+    
+    div_name = only_name.replace('.', '_')
+    item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
+    item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
+    
+    middle_part = item_head + result_log + middle_part
 
     with open(html_name, 'w', encoding='utf-8') as f:
         f.write(begin_part + middle_part + end_part)
@@ -246,3 +251,4 @@ def log_ext(file_name):
 
     logger.info(f'Image generated with advanced params log at: {log_name}')
     return 
+

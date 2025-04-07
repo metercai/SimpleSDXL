@@ -46,7 +46,6 @@ if os.path.exists(enhanced_config):
 else:
     config_ext.update({'fooocus_line': '# 2.1.852', 'simplesdxl_line': '# 2023-12-20'})
 
-#user_admin_sid = '' 
 
 def get_preset_name_list(user_session, ua_hash):
     presets_list = shared.token.get_local_vars("user_presets", "", user_session, ua_hash)
@@ -202,8 +201,6 @@ function(system_params) {
 '''
 
 def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list, request: gr.Request):
-    #global user_admin_sid
-
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
     admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
@@ -246,8 +243,6 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     if "__lang" not in state_params.keys():
         if 'accept-language' in request.headers and 'zh-CN' in request.headers['accept-language']:
             args_manager.args.language = 'cn'
-        else:
-            logger.info(f'no accept-language in request.headers:{request.headers}')
         state_params.update({"__lang": ads.get_user_default("__lang", state_params, args_manager.args.language)})
     if "__theme" not in state_params.keys():
         state_params.update({"__theme": ads.get_user_default("__theme", state_params, args_manager.args.theme)})
@@ -824,6 +819,8 @@ def get_all_admin_default(currunt_value):
             if admin_key in ["p2p_in_did_list", "p2p_out_did_list"]:
                 result.append(gr.update(value=admin_value))
             else:
+                if admin_key == 'comfyd_active_checkbox':
+                    admin_value = 'False' if args_manager.args.disable_comfyd or args_manager.args.disable_backend else admin_value
                 result.append(gr.update(interactive=True, value=admin_value))
 
     return result

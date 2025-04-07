@@ -172,8 +172,7 @@
   },
   "88": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -182,8 +181,7 @@
   },
   "89": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -201,8 +199,7 @@
   },
   "110": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -261,7 +258,7 @@
   "118": {
     "inputs": {
       "downsampling_factor": 1.5,
-      "downsampling_function": "bilinear",
+      "downsampling_function": "area",
       "mode": "autocrop with mask",
       "weight": 1,
       "autocrop_margin": 0.05,
@@ -665,7 +662,7 @@
   "197": {
     "inputs": {
       "downsampling_factor": 1.5,
-      "downsampling_function": "bilinear",
+      "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
       "autocrop_margin": 0.05,
@@ -825,7 +822,7 @@
   "207": {
     "inputs": {
       "downsampling_factor": 1.5,
-      "downsampling_function": "bilinear",
+      "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
       "autocrop_margin": 0.05,
