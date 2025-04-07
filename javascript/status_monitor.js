@@ -61,7 +61,7 @@
     style.textContent = `
         #gradio-status-monitor {
             position: fixed;
-            top: 3px;
+            top: 18px;
             right: 3px;
             z-index: 9999;
             font-family: Arial, sans-serif;
