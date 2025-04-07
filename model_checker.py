@@ -1384,7 +1384,7 @@ packages = {
             ("loras/StickersRedmond.safetensors", 170540036)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x1-okremovebg_package": {
@@ -1398,7 +1398,7 @@ packages = {
             ("rembg/Portrait.safetensors", 884878856)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x2-okimagerepair_package": {
@@ -1415,10 +1415,15 @@ packages = {
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("controlnet/detection_Resnet50_Final.pth", 109497761),
+            ("controlnet/facerestore_models/codeformer-v0.1.0.pth", 376637898),
+            ("controlnet/facerestore_models/GFPGANv1.4.pth", 348632874),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "x3-swapface_package": {
@@ -1446,7 +1451,7 @@ packages = {
             ("loras/comfyui_portrait_lora64.safetensors",612742344)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "Flux_aio_plus_package": {
@@ -1558,8 +1563,61 @@ packages = {
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832)
         ],
         "download_links": [
-        "【选配】模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
+        ]
+    },
+        "StyleTransfer_package": {
+        "id": 23,
+        "name": "[23]风格转绘扩展包",
+        "note": "多种图像风格转绘|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
+            ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
+            ("checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
+            ("loras/SDXL_claymate.safetensors", 912561180),
+            ("loras/SDXL_crayon.safetensors", 340776492),
+            ("loras/SDXL_cute.safetensors", 681244276),
+            ("loras/SDXL_ghibli.safetensors", 681268820),
+            ("loras/SDXL_inkpainting.safetensors", 228466036),
+            ("loras/SDXL_oilpainting.safetensors", 202694420),
+            ("loras/SDXL_papercut.safetensors", 456489140),
+            ("loras/SDXL_watercolor.safetensors", 228458788),
+            ("loras/Illustrious_pixelart.safetensors", 228504612),
+            ("loras/noob_pvc.safetensors", 607394012),
+            ("loras/SDXL_lineart.safetensors", 170540028),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("controlnet/lllyasviel/Annotators/sk_model.pth", 17173511),
+            ("controlnet/lllyasviel/Annotators/sk_model2.pth", 17173511),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
+            ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
+            ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
+            ("insightface/models/buffalo_l/genderage.onnx", 1322532),
+            ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860)
+        ],
+        "download_links": [
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "okdepthstatue_package": {
+        "id": 24,
+        "name": "[24]深度图、雕像扩展包",
+        "note": "深度图、白瓷雕像风格扩展|显存需求：★★ 速度：★★★★★",
+        "files": [
+            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
+            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
+            ("controlnet/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth", 1341395338),
+            ("controlnet/lllyasviel/Annotators/sk_model.pth", 17173511),
+            ("controlnet/lllyasviel/Annotators/sk_model2.pth", 17173511),
+            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427)
+        ],
+        "download_links": [
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
     }
 }
@@ -1603,7 +1661,18 @@ MANUAL_DOWNLOAD_MAP = {
         "SDXL_FILM_PHOTOGRAPHY_STYLE_V1.jpg",
         "sdxl_hyper_sd_4step_lora.jpg",
         "sdxl_lightning_4step_lora.jpg",
-        "StickersRedmond.jpg"
+        "StickersRedmond.jpg",
+        "Illustrious_pixelart.jpg",
+        "noob_pvc.jpg",
+        "SDXL_claymate.jpg", 
+        "SDXL_crayon.jpg",
+        "SDXL_cute.jpg",
+        "SDXL_ghibli.jpg",
+        "SDXL_inkpainting.jpg",
+        "SDXL_lineart.jpg",
+        "SDXL_oilpainting.jpg",
+        "SDXL_papercut.jpg",
+        "SDXL_watercolor.jpg"
     ]
 }
 
