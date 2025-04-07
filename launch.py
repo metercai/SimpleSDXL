@@ -66,7 +66,7 @@ def check_base_environment():
     update_pkgs = [('protobuf', '4.25.3'), ('onnx', '1.14.0')]
     for (update_pkg_name, update_pkg_version) in update_pkgs:
         if not is_installed_version(update_pkg_name, update_pkg_version):
-            pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'  # 添加 ==指定版本号
+            pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
             run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
 
     if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
