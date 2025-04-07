@@ -1199,8 +1199,8 @@ with shared.gradio_root:
                             p2p_in_did_list.change(lambda x,y: ads.set_admin_default_value("p2p_in_did_list", x, y), inputs=[p2p_in_did_list, state_topbar])
                             
                             def toggle_p2p_remote_process(remote_process_status, state):
-                                if remote_process_status:
-                                    p2p_task.init_p2p_task(worker, model_management, shared.token)
+                                if remote_process_status!='Disable':
+                                    p2p_task.init_p2p_task(worker, model_management, shared.token, minicpm)
                                 ads.set_admin_default_value("p2p_remote_process", remote_process_status, state)
                                 return [gr.update(visible=True if remote_process_status=='out' else False), gr.update(visible=True if remote_process_status=='in' else False)]
 
@@ -1676,7 +1676,7 @@ if ads.get_admin_default('p2p_active_checkbox'):
     if shared.upstream_did:
         shared.upstream_did = f'{shared.upstream_did}:P2P'
 if ads.get_admin_default('p2p_remote_process'):
-    p2p_task.init_p2p_task(worker, model_management, shared.token)
+    p2p_task.init_p2p_task(worker, model_management, shared.token, minicpm)
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,

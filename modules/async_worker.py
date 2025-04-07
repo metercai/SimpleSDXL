@@ -1353,6 +1353,7 @@ def worker():
         async_task.processing = True
         logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}{", remote_process" if remote_process else ""}')
         if remote_process:
+            async_task.method = 'generate_image'
             qsize = p2p_task.request_p2p_task(async_task)
             if qsize != "error":
                 logger.info(f'Remote process request: task_id={async_task.task_id}, qsize={qsize}')
