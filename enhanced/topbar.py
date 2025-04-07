@@ -645,7 +645,7 @@ def update_topbar_js_params(state):
         upstream=shared.upstream_did,
         task_class_name=state["engine"],
         preset_store=state["preset_store"],
-        __message=state["__message"],
+        __message='' if "__message" not in state else state["__message"],
         __webpath=state["__webpath"],
         __lang=state["__lang"],
         __preset_url=state["__preset_url"],
