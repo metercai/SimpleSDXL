@@ -696,6 +696,7 @@ def trigger_manual_download():
         print(f"{Fore.CYAN}△开始下载: {file_name}{Style.RESET_ALL}")
         result_queue = queue.Queue()
         download_file_with_resume(link, save_path, 0, result_queue)
+
 def auto_download_missing_files_with_retry(max_threads=5):
     if not os.path.exists("downloadlist.txt"):
         print("未找到 'downloadlist.txt' 文件。")
@@ -709,61 +710,70 @@ def auto_download_missing_files_with_retry(max_threads=5):
         return
 
     path_mapping = load_model_paths()
-
     result_queue = queue.Queue()
-    threads = []
-    active_threads = 0
     lock = threading.Lock()
 
+    task_queue = queue.Queue()
     for position, line in enumerate(links):
-        link, size = line.strip().split(',')
-        original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
-        if link.startswith(original_repo):
-            relative_path = link.replace(original_repo, "", 1).strip()
-            relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
-            path_type = relative_path_without_prefix.split('/')[0].lower()
-        else:
-            relative_path = link.replace("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", "", 1).strip()
-            relative_path_without_prefix = link.split("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", 1)[-1].strip()
-            path_type = "inpaint"
+        task_queue.put((position, line.strip()))
 
-        sorted_base_dir = sorted(
-                path_mapping.get(path_type, []),
-                key=lambda x: (
-                    0 if "SimpleModels" in x else
-                    1 if any(part == "models" for part in x.split(os.sep)) else
-                    2,
-                    x
+    def worker():
+        while not task_queue.empty():
+            try:
+                position, line = task_queue.get_nowait()
+                link, size = line.split(',')
+                original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
+                if link.startswith(original_repo):
+                    relative_path = link.replace(original_repo, "", 1).strip()
+                    relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
+                    path_type = relative_path_without_prefix.split('/')[0].lower()
+                else:
+                    relative_path = link.replace("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", "", 1).strip()
+                    relative_path_without_prefix = link.split("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", 1)[-1].strip()
+                    path_type = "inpaint"
+
+                sorted_base_dir = sorted(
+                    path_mapping.get(path_type, []),
+                    key=lambda x: (
+                        0 if "SimpleModels" in x else
+                        1 if any(part == "models" for part in x.split(os.sep)) else
+                        2,
+                        x
+                    )
                 )
-            )
 
-        target_base_dir = None
-        for base_dir in sorted_base_dir:
-            if os.path.exists(base_dir):
-                target_base_dir = base_dir
+                target_base_dir = None
+                for base_dir in sorted_base_dir:
+                    if os.path.exists(base_dir):
+                        target_base_dir = base_dir
+                        break
+                if not target_base_dir:
+                    print(f"{Fore.RED}×无法找到路径类型 '{path_type}' 的配置，跳过下载: {relative_path}{Style.RESET_ALL}")
+                    continue
+
+                file_name = os.path.basename(relative_path)
+                file_sub_dir = os.path.dirname(relative_path_without_prefix).replace(path_type, "").strip('/')
+                save_dir = os.path.join(target_base_dir, file_sub_dir)
+                file_path = os.path.join(save_dir, file_name)
+
+                thread = threading.Thread(
+                    target=download_file_with_resume,
+                    args=(link, file_path, position, result_queue, 5, lock)
+                )
+                thread.start()
+                thread.join()
+
+                task_queue.task_done()
+            except queue.Empty:
                 break
-        if not target_base_dir:
-            print(f"{Fore.RED}×无法找到路径类型 '{path_type}' 的配置，跳过下载: {relative_path}{Style.RESET_ALL}")
-            continue
 
-        file_name = os.path.basename(relative_path)
-        file_sub_dir = os.path.dirname(relative_path_without_prefix).replace(path_type, "").strip('/')
-        save_dir = os.path.join(target_base_dir, file_sub_dir)
-        file_path = os.path.join(save_dir, file_name)
-        print(link)
-        thread = threading.Thread(target=download_file_with_resume, args=(link, file_path, position, result_queue, 5, lock))
-        threads.append(thread)
-        active_threads += 1
-        thread.start()
+    threads = []
+    for _ in range(max_threads):
+        t = threading.Thread(target=worker)
+        t.start()
+        threads.append(t)
 
-        if active_threads >= max_threads:
-            for t in threads:
-                t.join()
-            threads = []
-            active_threads = 0
-
-    for thread in threads:
-        thread.join()
+    task_queue.join()
 
     success_count = 0
     fail_count = 0
@@ -798,16 +808,23 @@ def get_download_links_for_package(packages, download_list_path):
         existing_links = [line.strip().split(",")[0] for line in f.readlines()]
 
     valid_files = []
+    with open(download_list_path, "r") as f:
+        existing_lines = [line.strip() for line in f.readlines()]
 
-    for package_name, package_info in packages.items():
-        for file_path, file_size in package_info["files"]:
-            if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
-            else:
-                link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file_path}"
+    for line in existing_lines:
+        existing_link = line.split(",")[0]
+        for package_name, package_info in packages.items():
+            for file_path, file_size in package_info["files"]:
+                if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
+                    generated_link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
+                else:
+                    generated_link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file_path}"
 
-            if link in existing_links:
-                valid_files.append((link, file_size))
+                if generated_link == existing_link:
+                    valid_files.append((generated_link, file_size))
+                    break
+
+    valid_files = sorted(valid_files, key=lambda x: x[1])
 
     with open(download_list_path, "w") as f:
         for link, size in valid_files:
