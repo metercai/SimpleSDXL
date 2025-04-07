@@ -3,6 +3,7 @@ import gc
 import torch
 import shared
 import threading
+import numpy as np
 import modules.config as config
 import enhanced.translator as translator
 import enhanced.superprompter as superprompter
