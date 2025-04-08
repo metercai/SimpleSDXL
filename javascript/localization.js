@@ -304,13 +304,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const config = {
         containerSelector: '#style_grid.style_grid',
         loadButtonId: '#load_more_btn',
-        triggerValue: 1000,  // 触发加载的滚动位置
-        debug: true          // 启用调试日志
+        triggerValue: 1000,
+        debug: false,
+        get maxLoadTimes() {  // 改为动态计算属性
+            const totalStyles = document.querySelectorAll('.style_item').length;
+            return Math.ceil(totalStyles / 100);
+        }
     };
+
 
     // 状态跟踪
     let isLoading = false;
     let scrollHandler = null;
+    let currentLoadCount = 0;  // 新增当前加载计数器
 
     // 核心初始化
     function init() {
@@ -319,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('容器未找到:', config.containerSelector);
             return;
         }
-
+        currentLoadCount = 0;
         // 设置必要样式
         container.style.overflowY = 'auto';
         container.style.height = '60vh';
@@ -341,6 +347,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 触发加载
     function triggerLoad() {
+        currentLoadCount++;
+        if (currentLoadCount >= config.maxLoadTimes) {
+            const container = document.querySelector(config.containerSelector);
+            container.removeEventListener('scroll', scrollHandler);
+            document.querySelector(config.loadButtonId).style.display = 'none';
+            return;
+        }
         const btn = document.querySelector(config.loadButtonId);
         if (!btn) {
             console.error('加载按钮未找到:', config.loadButtonId);
@@ -348,7 +361,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         isLoading = true;
-        console.log('触发加载 (滚动值:', config.triggerValue, ')');
+        if (config.debug) console.log('触发加载 (滚动值:', config.triggerValue, ')');
         btn.click();
 
         // 1秒冷却
