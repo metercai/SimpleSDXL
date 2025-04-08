@@ -221,6 +221,152 @@ function initStylePreviewOverlay() {
         overlay.style.top = `${e.clientY}px`;
         overlay.className = e.clientY > window.innerHeight / 2 ? "lower-half" : "upper-half";
     });
+    // 新增文本悬浮层
+    const textOverlay = document.createElement('div');
+    textOverlay.id = 'styleTextOverlay';
+    Object.assign(textOverlay.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '8px',
+        borderRadius: '4px',
+        pointerEvents: 'none',
+        display: 'none',
+        zIndex: 9999,
+        maxWidth: '320px',
+        backdropFilter: 'blur(3px)'
+    });
+    document.body.appendChild(textOverlay);
+
+    document.addEventListener('mouseover', function(e) {
+        const container = e.target.closest('.style_item');
+        if (!container) {
+            textOverlay.style.display = 'none';
+            return;
+        }
+
+        const dataInput = container.querySelector('.style_data_input textarea');
+        if (!dataInput) {
+            console.log('Data input not found in:', container);
+            return;
+        }
+
+        try {
+            const styleData = JSON.parse(dataInput.value || '{}');
+            textOverlay.innerHTML = `
+                <div style="font-weight:bold; margin-bottom: 6px; font-size: 14px">${styleData.name || ''}</div>
+                ${styleData.prompt ? `<div style="color:#ddd;font-size:12px;margin:4px 0">Prompt: ${styleData.prompt}</div>` : ''}
+                ${styleData.negative_prompt ? `<div style="color:#888;font-size:12px">Negative: ${styleData.negative_prompt}</div>` : ''}
+            `;
+            textOverlay.style.display = 'block';
+        } catch (e) {
+            console.error('Error parsing style data:', e);
+            textOverlay.style.display = 'none';
+        }
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (textOverlay.style.display === 'block') {
+            textOverlay.style.left = `${e.clientX + 15}px`;
+            textOverlay.style.top = `${e.clientY + 15}px`;
+
+            const rect = textOverlay.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                textOverlay.style.left = `${window.innerWidth - rect.width - 5}px`;
+            }
+            if (rect.bottom > window.innerHeight) {
+                textOverlay.style.top = `${window.innerHeight - rect.height - 5}px`;
+            }
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        if (!e.relatedTarget || !e.relatedTarget.closest('.style_item')) {
+            textOverlay.style.display = 'none';
+        }
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.style-button')) return;
+        const container = e.target.closest('.style_item');
+        if (!container) return;
+        const styleButton = container.querySelector('.style-button');
+        if (styleButton) {
+            e.stopPropagation();
+            const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: e.clientX,
+                clientY: e.clientY
+            });
+            styleButton.dispatchEvent(clickEvent);
+        }
+    });
+    document.addEventListener('contextmenu', function(e) {
+        const modelDropdown = e.target.closest(
+            '#model_dropdown_base, #model_dropdown_refiner, [id^="lora_dropdown"]'
+        );
+        if (modelDropdown) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let buttonId;
+            switch(modelDropdown.id) {
+                case 'model_dropdown_base':
+                    buttonId = 'base_preview_btn';
+                    break;
+                case 'model_dropdown_refiner':
+                    buttonId = 'refiner_preview_btn';
+                    break;
+                default:
+                    if (modelDropdown.id.startsWith('lora_dropdown')) {
+                        const indexMatch = modelDropdown.id.match(/lora_dropdown_(\d+)$/);
+                        if (indexMatch) {
+                            buttonId = `lora_preview_btn_${indexMatch[1]}`;
+                        } else {
+                            console.warn('LORA ID格式异常:', modelDropdown.id);
+                        }
+                    }
+                }
+
+            const btn = gradioApp().querySelector(`#${buttonId}`);
+            if (btn) {
+                const event = new MouseEvent('click', { bubbles: true });
+                btn.dispatchEvent(event);
+            }
+            return;
+        }
+        const container = e.target.closest('.style_item');
+        if (!container) return;
+
+        e.preventDefault();
+
+        if (e.button !== 2) return;
+
+        const dataInput = container.querySelector('.style_data_input textarea');
+        if (!dataInput) return;
+
+        try {
+            const styleData = JSON.parse(dataInput.value || '{}');
+            const positivePrompt = gradioApp().querySelector('#positive_prompt textarea');
+            const negativePrompt = gradioApp().querySelector('#negative_prompt textarea');
+
+            if (styleData.prompt && positivePrompt) {
+                const currentPrompt = (positivePrompt.value || '').trim();
+                const newPrompt = styleData.prompt.replace('{prompt}', currentPrompt);
+                positivePrompt.value = newPrompt;
+                positivePrompt.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            if (styleData.negative_prompt && negativePrompt) {
+                negativePrompt.value += styleData.negative_prompt;
+                negativePrompt.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            e.stopPropagation();
+        } catch (error) {
+            console.error('Error handling style click:', error);
+        }
+    });
 }
 
 /**
@@ -260,4 +406,158 @@ function set_theme(theme) {
 function htmlDecode(input) {
   var doc = new DOMParser().parseFromString(input, "text/html");
   return doc.documentElement.textContent;
+}
+
+(function() {
+    let previewOverlay = null;
+
+    function createPreviewOverlay() {
+        if (!previewOverlay) {
+            previewOverlay = document.createElement('div');
+            Object.assign(previewOverlay.style, {
+                position: 'fixed',
+                pointerEvents: 'none',
+                zIndex: 9999,
+                maxWidth: '320px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                transition: 'opacity 0.2s',
+                opacity: 0
+            });
+            gradioApp().appendChild(previewOverlay);
+        }
+    }
+
+    function initModelPreviews() {
+        createPreviewOverlay();
+
+        const baseDropdown = gradioApp().getElementById('model_dropdown_base');
+        if (baseDropdown) initDropdownPreview(baseDropdown, 'checkpoints');
+
+        const refinerDropdown = gradioApp().getElementById('model_dropdown_refiner');
+        if (refinerDropdown) initDropdownPreview(refinerDropdown, 'checkpoints');
+
+        const loraDropdowns = gradioApp().querySelectorAll('[id^="lora_dropdown"]');
+        loraDropdowns.forEach(dropdown => initDropdownPreview(dropdown, 'loras'));
+    }
+
+    function initDropdownPreview(dropdown, folder) {
+        const pathMeta = document.querySelector(`meta[name='${folder}-paths']`).getAttribute("content");
+        const basePaths = pathMeta.split(',').map(p => p.split('?')[0].replace(/\\/g, '/'));
+        const handleMouseOver = (e) => {
+            const option = e.target.closest('li.item[role="button"]');
+            if (!option) return;
+
+            const modelPath = option.dataset.value
+            .replace(/\.[^/.]+$/, "")
+            .replace(/\\/g, '/');
+
+        if (modelPath.toLowerCase() === 'none') {
+            previewOverlay.style.opacity = '0';
+            return;
+        }
+
+        const img = new Image();
+            img.style.maxWidth = '150px';
+            img.style.display = 'block';
+            const extensions = ['jpg', 'jpeg', 'png', 'webp'];
+            let currentPath = 0;
+            let currentExtension = 0;
+
+            const tryNextPath = () => {
+                if (currentPath >= basePaths.length) {
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => {
+                        previewOverlay.innerHTML = '';
+                        previewOverlay.appendChild(fallbackImg);
+                        previewOverlay.style.opacity = '1';
+                    };
+                    fallbackImg.src = '/file=presets/samples/noimage.jpg';
+                    return;
+                }
+
+                const tryNextFormat = () => {
+                    if (currentExtension >= extensions.length) {
+                        currentPath++;
+                        currentExtension = 0;
+                        tryNextPath();
+                        return;
+                    }
+
+                    const testImg = new Image();
+                    testImg.onerror = () => {
+                        currentExtension++;
+                        tryNextFormat();
+                    };
+                    testImg.onload = () => {
+                        img.src = testImg.src;
+                        previewOverlay.innerHTML = '';
+                        previewOverlay.appendChild(img);
+                        previewOverlay.style.opacity = '1';
+                    };
+                    testImg.src = `${basePaths[currentPath]}/${modelPath}.${extensions[currentExtension]}?${Date.now()}`;
+                };
+
+                tryNextFormat();
+            };
+
+            tryNextPath();
+
+            img.onload = () => {
+                previewOverlay.innerHTML = '';
+                previewOverlay.appendChild(img);
+                previewOverlay.style.opacity = '1';
+            };
+        };
+
+        const handleMouseMove = (e) => {
+            previewOverlay.style.left = `${e.clientX + 15}px`;
+            previewOverlay.style.top = `${e.clientY + 15}px`;
+        };
+
+        const handleMouseOut = (e) => {
+            if (!e.relatedTarget?.closest('li.item')) {
+                previewOverlay.style.opacity = '0';
+            }
+        };
+
+        dropdown.addEventListener('mouseover', handleMouseOver);
+        dropdown.addEventListener('mousemove', handleMouseMove);
+        dropdown.addEventListener('mouseout', handleMouseOut);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const observer = new MutationObserver((mutations) => {
+            if (document.getElementById('model_dropdown_base') || document.getElementById('lora_dropdown')) {
+                initModelPreviews();
+                observer.disconnect();
+            }
+        });
+        observer.observe(gradioApp(), { childList: true, subtree: true });
+    });
+})();
+
+window.highlightModelDropdown = function(activeTarget) {
+    const baseDropdown = document.getElementById('model_dropdown_base');
+    const refinerDropdown = document.getElementById('model_dropdown_refiner');
+
+    const dropdowns = [baseDropdown, refinerDropdown].filter(Boolean);
+
+    dropdowns.forEach(dropdown => {
+        dropdown.style.removeProperty('--block-border-width');
+        dropdown.style.removeProperty('--border-color-primary');
+    });
+
+    let activeDropdown;
+    if (activeTarget === 'base' && baseDropdown) {
+        activeDropdown = baseDropdown;
+    } else if (activeTarget === 'refiner' && refinerDropdown) {
+        activeDropdown = refinerDropdown;
+    }
+
+    if (activeDropdown) {
+        activeDropdown.style.setProperty('--block-border-width', '2px');
+        activeDropdown.style.setProperty('--border-color-primary', '#005CC8');
+    }
 }

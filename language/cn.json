@@ -13,6 +13,8 @@
   "total: xxx images and yyy pages": "总计: xxx 张图片，yyy 页",
   "Input Image": "图像输入",
   "Prompt Panel": "提示面板",
+  "Prompt History": "历史提示词",
+  "Click to reuse:": "点击使用：",
   "Advanced": "高级",
   "Upscale or Variation": "放大与变化",
   "Upscale  or  Variation": "整图增强",
@@ -56,6 +58,7 @@
   "Quality": "质量",
   "Aspect Ratios": "图片尺寸",
   "aspect ratios": "尺寸|宽高比",
+  "Random Aspect Ratio": "随机尺寸",
   "Exquisite": "精细",
   "Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)": "竖屏(9:16), 肖像(4:5), 照片(4:3), 风景(3:2), 宽屏(16:9), 电影(21:9)",
   "Image Number": "出图数量",
@@ -80,7 +83,7 @@
   "* Powered by Fooocus upscale engine,": "* 由Fooocus放大引擎支持, ",
 
   "Models": "模型",
-  "Base Model (SDXL only)": "基础模型",
+  "Base Model (SDXL only)": "基础模型（右键展开）",
   "Refiner (SDXL or SD 1.5)": "精炼模型",
   "None": "无",
   "LoRAs (SDXL or SD 1.5)": "LoRAs局部模型",
@@ -652,7 +655,8 @@
     "Filter out following properties (comma seperated). Example film grain, purple, cat": "过滤掉以下属性（用逗号分隔）。例如：film grain, purple, cat（胶片颗粒感、紫色、猫）",
 
     "Leo Dragonyear": "LEO-龙年贺春",
-
+    "Use Visual":"可视化",
+    "Load More":"加载更多",
     "Image Style": "图片风格",
     "Fooocus V2": "Fooocus V2",
     "Fooocus Enhance": "Fooocus-增强",

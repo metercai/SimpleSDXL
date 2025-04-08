@@ -433,6 +433,12 @@ with shared.gradio_root:
 
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                         skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
+                state_prompt_history = gr.State([])
+                with gr.Accordion(label='Prompt History', visible=False, open=True) as prompt_history:
+                    history_prompts = gr.Dataset(components=[prompt],label='Click to reuse:',samples=[[p] for p in state_prompt_history.value[-5:]],type='index')
+                history_prompts.click(lambda x, y: y[x] if 0 <= x < len(y) else "",
+                                      inputs=[history_prompts, state_prompt_history],
+                                      outputs=prompt,show_progress=False,queue=False)
 
                 with gr.Accordion(label='Wildcards & Batch Prompts', visible=False, open=True) as prompt_wildcards:
                     wildcards_list = gr.Dataset(components=[prompt], type='index', label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=True, samples_per_page=28)
@@ -830,6 +836,7 @@ with shared.gradio_root:
                         image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
                         with gr.Accordion(label='Aspect Ratios', open=False, elem_id='aspect_ratios_accordion') as aspect_ratios_accordion:
                             aspect_ratios_selection = gr.Textbox(value='', visible=False) 
+                            random_aspect_ratio_checkbox = gr.Checkbox(label='Random Aspect Ratio', value=False)
                             aspect_ratios_selections = []
                             for template in flags.aspect_ratios_templates:
                                 aspect_ratios_selections.append(gr.Radio(label='aspect ratios', choices=flags.available_aspect_ratios_list[template], value=flags.default_aspect_ratios[template], visible= template=='SDXL', info='Vertical(9:16), Portrait(4:5), Photo(4:3), Landscape(3:2), Widescreen(16:9), Cinematic(21:9)', elem_classes='aspect_ratios'))
@@ -1019,42 +1026,353 @@ with shared.gradio_root:
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
                     default_selected=modules.config.default_styles)
+                with gr.Row():
+                    with gr.Column(scale=1, min_width=80):
+                        layout_toggle = gr.Checkbox(label="Use Visual",
+                                                    value=False,
+                                                    container=False,
+                                                    elem_classes=["layout_toggle"],
+                                                    scale=0)
+                        load_more_btn = gr.Button("Load More",
+                                                  variant="secondary",
+                                                  elem_classes='load_more_btn',
+                                                  elem_id='load_more_btn',
+                                                  visible=False,
+                                                  scale=0)
+                    with gr.Column(scale=5):
+                        style_search_bar = gr.Textbox(show_label=False, container=False,
+                                                    placeholder="\U0001F50E Type here to search styles ...",
+                                                    value="",
+                                                    label='Search Styles',
+                                                    scale=5)
 
-                style_search_bar = gr.Textbox(show_label=False, container=False,
-                                              placeholder="\U0001F50E Type here to search styles ...",
-                                              value="",
-                                              label='Search Styles')
                 style_selections = gr.CheckboxGroup(show_label=False, container=False,
                                                     choices=copy.deepcopy(style_sorter.all_styles),
                                                     value=copy.deepcopy(modules.config.default_styles),
                                                     label='Selected Styles',
                                                     elem_classes=['style_selections'])
                 gradio_receiver_style_selections = gr.Textbox(elem_id='gradio_receiver_style_selections', visible=False)
+                buttons = []
+                load_more_trigger = gr.Button(visible=False, elem_id="load_more_trigger")
 
-                shared.gradio_root.load(lambda: gr.update(choices=copy.deepcopy(style_sorter.all_styles)),
-                                        outputs=style_selections)
+                with gr.Column(visible=False, elem_id="scrollable-box") as visual_layout_container:
+                    with gr.Blocks(elem_id="style_visual_container"):
+                        with gr.Row(elem_classes=["style_grid"], elem_id="style_grid"):
+                            style_images = []
+                            for style in legal_style_names:
+                                style_data = modules.sdxl_styles.get_style_config(style)
+                                with gr.Column(scale=1, min_width=80, elem_classes=["style_item"]):
+                                    gr.Textbox(visible=False,
+                                        elem_id=f"style_data_{style}",value=json.dumps(style_data),
+                                        elem_classes=["style_data_input"],interactive=False,)
+                                    img = gr.Image(value=None,show_label=False,height=80,interactive=False,show_download_button=False,
+                                        elem_classes=["compact-img"],visible=False)
+                                    style_images.append(img)
+
+                                    button = gr.Button(value=style,
+                                                       elem_classes=["style-button"],
+                                                       variant="secondary" if style not in modules.config.default_styles else "primary")
+                                    buttons.append(button)
+                                    style_state = gr.State(value=style)
+
+                                    button.click(fn=lambda selected_styles, current_style: ((gr.update(variant="secondary"), [s for s in selected_styles if s != current_style])
+                                        if current_style in selected_styles
+                                        else (gr.update(variant="primary"), selected_styles + [current_style])),
+                                        inputs=[style_selections, style_state],
+                                        outputs=[button, style_selections])
+
+                has_loaded = gr.State(value=0)
+                filtered_sorted_styles = gr.State(value=legal_style_names.copy())
+                BATCH_SIZE = 100
+
+                def load_style_images(use_visual, loaded_count, query):
+                    if not use_visual:
+                        return [gr.update(visible=False)] * len(legal_style_names) + [loaded_count] + [gr.update(visible=False)]
+                    filter_result = filter_styles(
+                                    query=query,
+                                    use_visual=use_visual,
+                                    selected_styles=style_selections.value)
+                    sorted_styles = filter_result[-1]
+
+                    start = loaded_count
+                    end = min(start + BATCH_SIZE, len(sorted_styles))
+
+                    updates = [gr.update(visible=None)] * len(legal_style_names)
+                    visible_count = 0
+
+                    for idx_in_sorted in range(0, end):
+                        if idx_in_sorted >= len(sorted_styles):
+                            continue
+
+                        style_name = sorted_styles[idx_in_sorted]
+                        try:
+                            original_idx = legal_style_names.index(style_name)
+                        except ValueError:
+                            continue
+                        img_path = os.path.join("sdxl_styles", "samples", f"{style_name.lower().replace(' ', '_')}.jpg")
+                        if not os.path.exists(img_path):
+                            img_path = os.path.join("sdxl_styles", "samples", "default_style.jpg")
+                        updates[original_idx] = gr.update(value=img_path, visible=True)
+                        visible_count += 1
+                    new_loaded_count = end if end < len(sorted_styles) else len(sorted_styles)
+                    all_loaded = new_loaded_count >= len(sorted_styles)
+                    return updates + [int(new_loaded_count)] + [gr.update(visible=not all_loaded)]
+
+                def toggle_layout(use_visual, current_loaded):
+                                  new_loaded = 0 if use_visual and current_loaded == 0 else current_loaded
+                                  return [gr.update(visible=not use_visual),gr.update(visible=use_visual),new_loaded,gr.update(visible=False)]
+
+                def filter_styles(query, use_visual, selected_styles):
+                    query_lower = query.strip().lower()
+                    global has_loaded
+                    if not has_loaded.value == 0:
+                        has_loaded.value = 0
+                    filtered_styles = [s for s in filtered_sorted_styles.value
+                                       if (query_lower in s.lower()) or
+                                       (query_lower in style_sorter.localization_key(s).lower()) or
+                                       (s in selected_styles)]
+                    sorted_styles = []
+                    for s in legal_style_names:
+                        if s in selected_styles and s in filtered_styles:
+                            sorted_styles.append(s)
+                    for s in legal_style_names:
+                        if s not in selected_styles and s in filtered_styles:
+                            sorted_styles.append(s)
+
+                    updates = []
+                    for style in legal_style_names:
+                        visible = style in filtered_styles
+                        updates.append(gr.update(visible=visible))
+                        updates.append(gr.update(visible=visible))
+                    updates.append(gr.update(choices=sorted_styles))
+                    return updates + [gr.update(choices=sorted_styles)] + [sorted_styles]
+
+                def update_button_variants(selected_styles):
+                    variants = []
+                    for style in legal_style_names:
+                        variants.append("primary" if style in selected_styles else "secondary")
+                    return [gr.update(variant=v) for v in variants]
+
+                layout_toggle.change(toggle_layout,
+                                    inputs=[layout_toggle, has_loaded],
+                                    outputs=[style_selections, visual_layout_container, has_loaded, load_more_btn],
+                                    queue=False,
+                                    show_progress=False).then(
+                    lambda: None, _js='() => {refresh_style_layout(); }').then(
+                                    load_style_images,
+                                    inputs=[layout_toggle, has_loaded, style_search_bar],
+                                    outputs=style_images + [has_loaded],
+                                    queue=False,
+                                    show_progress=False).then(
+                                    filter_styles,
+                                    inputs=[style_search_bar, layout_toggle, style_selections],
+                                    outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
+                                    queue=False,
+                                    show_progress=False).then(
+                    lambda: None, _js='()=>{refresh_style_localization();}').then(
+                    None,inputs=[layout_toggle],_js="""
+                                    (useVisual) => {
+                                        if(useVisual) {
+                                            setTimeout(() => ScrollLoader.init(), 300);
+                                        } else {
+                                            ScrollLoader.cleanup();
+                                        }
+                                    }
+                                    """)
 
                 style_search_bar.change(style_sorter.search_styles,
                                         inputs=[style_selections, style_search_bar],
                                         outputs=style_selections,
                                         queue=False,
                                         show_progress=False).then(
-                    lambda: None, _js='()=>{refresh_style_localization();}')
+                                        filter_styles,
+                                        inputs=[style_search_bar, layout_toggle, style_selections],
+                                        outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections] + [filtered_sorted_styles],
+                                        queue=False,
+                                        show_progress=False).then(
+                                        load_style_images,
+                                        inputs=[layout_toggle, has_loaded, style_search_bar],
+                                        outputs=style_images + [has_loaded],
+                                        queue=False,
+                                        show_progress=False).then(
+                    lambda: None,_js='()=>{refresh_style_localization(); refresh_style_layout();}')
 
                 gradio_receiver_style_selections.input(style_sorter.sort_styles,
                                                        inputs=style_selections,
                                                        outputs=style_selections,
                                                        queue=False,
                                                        show_progress=False).then(
+                                                       filter_styles,
+                                                       inputs=[style_search_bar, layout_toggle, style_selections],
+                                                       outputs=[comp for pair in zip(style_images, buttons) for comp in pair] + [style_selections],queue=False,
+                                                       show_progress=False).then(
                     lambda: None, _js='()=>{refresh_style_localization();}')
+
+                style_selections.change(update_button_variants,
+                                        inputs=style_selections,
+                                        outputs=buttons).then(
+                    lambda: None,_js='() => {refresh_style_layout(); }')
+
+                load_more_btn.click(load_style_images,
+                                    inputs=[layout_toggle, has_loaded, style_search_bar],
+                                    outputs=style_images + [has_loaded] + [load_more_btn],
+                                    queue=False,
+                                    show_progress=False)
+
                 prompt.change(lambda x,y: calculateTokenCounter(x,y), inputs=[prompt, style_selections], outputs=prompt_token_counter)
 
             with gr.Tab(label='Models', elem_id="scrollable-box"):
+                gallery_visible = gr.State(value=False)
+                current_previews = gr.State(value=[])
+                active_target = gr.State(value="base")
+                lora_gallery_visible = [gr.State(value=False) for _ in range(len(modules.config.default_loras))]
+                lora_current_previews = [gr.State(value=[]) for _ in range(len(modules.config.default_loras))]
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+
+                def load_config_paths():
+                    config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
+                    default_paths = { "path_checkpoints": [], "path_loras": [] }
+                    try:
+                        with open(config_path, 'r', encoding='utf-8') as f:
+                            config = json.load(f)
+                        if isinstance(config, list) and len(config) > 0:
+                            config = config[0]
+                        config["path_checkpoints"] = [
+                            os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                            for p in config.get("path_checkpoints", default_paths["path_checkpoints"])]
+                        config["path_loras"] = [
+                            os.path.normpath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
+                            for p in config.get("path_loras", default_paths["path_loras"])]
+                        return config
+                    except Exception as e:
+                        print(f"Error loading config: {e}, using default paths")
+                        return default_paths
+
+                def get_model_previews():
+                    config = load_config_paths()
+                    allowed_models = {
+                        os.path.normpath(path).lower().replace('/', '\\')
+                        for path in modules.config.model_filenames}
+                    previews = []
+                    for model_dir in config.get("path_checkpoints", []):
+                        if not os.path.exists(model_dir):
+                            continue
+                        for root, dirs, files in os.walk(model_dir):
+                            model_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+                            for model_file in model_files:
+                                full_path = os.path.normpath(os.path.join(root, model_file))
+                                relative_model_path = os.path.relpath(full_path, model_dir).replace('/', '\\').lower()
+                                filename_only = model_file.lower()
+                                if filename_only not in allowed_models and relative_model_path not in allowed_models:
+                                    continue
+                                relative_path = os.path.relpath(root, model_dir).replace('/', '\\')
+                                base_name = os.path.splitext(model_file)[0]
+                                model_full_path = os.path.normpath(os.path.join(root, model_file))
+                                image_path = None
+                                for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                    possible_path = os.path.join(root, f"{base_name}{ext}")
+                                    if os.path.exists(possible_path):
+                                        image_path = possible_path
+                                        break
+                                if not image_path and relative_path != ".":
+                                    parent_dir = os.path.dirname(root)
+                                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                        possible_path = os.path.join(parent_dir, f"{base_name}{ext}")
+                                        if os.path.exists(possible_path):
+                                            image_path = possible_path
+                                            break
+                                image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                                display_name = f"{relative_path}\{model_file}" if relative_path != "." else model_file
+                                previews.append((image_path, display_name, model_full_path))
+                    return previews
+
+                def get_lora_previews():
+                    config = load_config_paths()
+                    previews = []
+                    for lora_dir in config.get("path_loras", []):
+                        if not os.path.exists(lora_dir):
+                            continue
+                        for root, dirs, files in os.walk(lora_dir):
+                            lora_files = [f for f in files if f.lower().endswith(('.safetensors', '.ckpt', '.pt', '.gguf'))]
+                            for lora_file in lora_files:
+                                relative_path = os.path.relpath(root, lora_dir).replace('/', '\\')
+                                base_name = os.path.splitext(lora_file)[0]
+                                lora_full_path = os.path.normpath(os.path.join(root, lora_file))
+                                image_path = None
+                                for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                    possible_path = os.path.normpath(os.path.join(root, f"{base_name}{ext}"))
+                                    if os.path.exists(possible_path):
+                                        image_path = possible_path
+                                        break
+                                if not image_path and relative_path != ".":
+                                    parent_dir = os.path.dirname(root)
+                                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                                        possible_path = os.path.normpath(os.path.join(parent_dir, f"{base_name}{ext}"))
+                                        if os.path.exists(possible_path):
+                                            image_path = possible_path
+                                            break
+                                image_path = image_path or os.path.normpath(os.path.join(script_dir, "presets", "samples", "noimage.jpg"))
+                                display_name = f"{relative_path}\{lora_file}" if relative_path != "." else lora_file
+                                previews.append((image_path, display_name, lora_full_path))
+                    return previews
+
+                def show_model_gallery(current_visible, current_active_target, target_type, state_params):
+                                       refresh_files_clicked(state_params)
+                                       if current_active_target != target_type:
+                                           new_visible = True
+                                       else:
+                                           new_visible = not current_visible
+                                       if new_visible:
+                                           previews = get_model_previews()
+                                           return [gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible),new_visible,previews,target_type,
+                                                   gr.Button.update(variant="primary" if target_type == "base" else "secondary"),
+                                                   gr.Button.update(variant="primary" if target_type == "refiner" else "secondary")]
+                                       else:
+                                           return [gr.Gallery.update(visible=False, value=[]),new_visible,[],current_active_target,
+                                                   gr.Button.update(variant="secondary"),
+                                                   gr.Button.update(variant="secondary")]
+
+                def show_lora_gallery(current_visible, index):
+                                      new_visible = not current_visible
+                                      previews = get_lora_previews()
+                                      lora_current_previews[index].value = previews
+                                      return (gr.Gallery.update(value=[(p[0], p[1]) for p in previews], visible=new_visible), new_visible, previews, gr.Button.update(variant="primary" if new_visible else "secondary"))
+
+                def on_gallery_select(evt: gr.SelectData, previews, target_type):
+                                      if previews and evt.index < len(previews):
+                                          selected_path = previews[evt.index][1].replace('/', '\\')
+                                          if target_type == "base":
+                                              return [gr.Dropdown.update(value=selected_path), gr.Dropdown.update(), gr.Gallery.update()]
+                                          elif target_type == "refiner":
+                                              return [gr.Dropdown.update(), gr.Dropdown.update(value=selected_path), gr.Gallery.update()]
+                                      return [gr.Dropdown(), gr.Dropdown(), gr.Gallery.update()]
+
+                def on_lora_gallery_select(evt: gr.SelectData, previews, index):
+                                           if previews and isinstance(previews, list):
+                                               if evt.index < len(previews):
+                                                   selected_path = previews[evt.index][1].replace('/', '\\')
+                                                   return gr.Dropdown.update(value=selected_path)
+                                           return gr.Dropdown.update(value='None')
+
                 with gr.Group():
                     with gr.Row():
-                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
-                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
-
+                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True,
+                                                 elem_id="model_dropdown_base",elem_classes="model-dropdown",interactive=True)
+                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True,
+                                                 elem_id="model_dropdown_refiner",elem_classes="model-dropdown",interactive=True)
+                    with gr.Row():
+                        base_preview_btn = gr.Button( "🖼️ Base Model", variant="secondary", visible=False,elem_id="base_preview_btn")
+                        refiner_preview_btn = gr.Button("🖼️ Refiner", variant="secondary", visible=False,elem_id="refiner_preview_btn")
+                    model_gallery = gr.Gallery(label="Model Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="model-gallery")
+                    base_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                                           inputs=[gallery_visible, active_target, gr.State("base"), state_topbar],
+                                           outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False) \
+                                           .then(fn=None,_js='''(galleryVisible, activeTarget) => {highlightModelDropdown("base");}''')
+                    refiner_preview_btn.click(fn=lambda cv, cat, tt, sp: show_model_gallery(cv, cat, tt, sp),
+                                              inputs=[gallery_visible, active_target, gr.State("refiner"), state_topbar],
+                                              outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn], show_progress=False, queue=False) \
+                                           .then(fn=None,_js='''(galleryVisible, activeTarget) => {highlightModelDropdown("refiner");}''')
+                    model_gallery.select(on_gallery_select, inputs=[current_previews, active_target], outputs=[base_model, refiner_model, model_gallery], show_progress=False, queue=False)
                     refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
                                                info='Use 0.4 for SD1.5 realistic models; '
                                                     'or 0.667 for SD1.5 anime models; '
@@ -1065,22 +1383,38 @@ with shared.gradio_root:
 
                     refiner_model.change(lambda x: gr.update(visible=x != 'None'),
                                          inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
-
                 with gr.Group():
                     lora_ctrls = []
-
+                    lora_galleries = []
+                    lora_preview_btns = []
+                    lora_models = []
                     for i, (enabled, filename, weight) in enumerate(modules.config.default_loras):
                         with gr.Row():
                             lora_enabled = gr.Checkbox(label='Enable', value=enabled,
-                                                       elem_classes=['lora_enable', 'min_check'], scale=1)
+                                                       elem_classes=['lora_enable', 'min_check'],scale=1, min_width=40)
+                            lora_preview_btn = gr.Button(f"🖼️", variant="secondary",
+                                                         elem_id=f"lora_preview_btn_{i}", visible=False)
+                            lora_preview_btns.append(lora_preview_btn)
                             lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
                                                      choices=['None'] + modules.config.lora_filenames, value=filename,
-                                                     elem_classes='lora_model', scale=5)
+                                                     elem_classes='lora_model', scale=5, elem_id=f"lora_dropdown_{i}")
                             lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
                                                     maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
                                                     elem_classes='lora_weight', scale=5)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
+                            lora_models.append(lora_model)
+                        with gr.Row():
+                            lora_gallery = gr.Gallery(label=f"LoRA {i + 1} Previews", columns=4, rows=2, height="auto", visible=False, elem_classes="lora-gallery")
+                            lora_galleries.append(lora_gallery)
 
+                    for i in range(len(modules.config.default_loras)):
+                        lora_galleries[i].select(on_lora_gallery_select,
+                                                 inputs=[lora_current_previews[i], gr.State(i)],
+                                                 outputs=[lora_models[i]], show_progress=False, queue=False)
+                        lora_preview_btns[i].click(fn=lambda current_visible,
+                                                   idx=i: show_lora_gallery(current_visible, idx),
+                                                   inputs=[lora_gallery_visible[i]],
+                                                   outputs=[lora_galleries[i], lora_gallery_visible[i], lora_current_previews[i], lora_preview_btns[i]], show_progress=False, queue=False)
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 #with gr.Row():
@@ -1273,7 +1607,12 @@ with shared.gradio_root:
             input_image_checkbox.change(lambda x: [gr.update(visible=x), gr.update(visible=x), gr.update(choices=flags.Performance.list()), gr.update(), 
                 gr.update()] + [gr.update(interactive=True)]*18, inputs=input_image_checkbox,
                 outputs=[image_input_panel, engine_class_display] + layout_image_tab, queue=False, show_progress=False, _js=switch_js)
-            prompt_panel_checkbox.change(lambda x: gr.update(visible=x, open=x if x else True), inputs=prompt_panel_checkbox, outputs=prompt_wildcards, queue=False, show_progress=False, _js=switch_js).then(lambda x,y: wildcards_array_show(y['wildcard_in_wildcards']) if x else wildcards_array_hidden, inputs=[prompt_panel_checkbox, state_topbar], outputs=wildcards_array, queue=False, show_progress=False)
+            prompt_panel_checkbox.change(lambda x: [gr.update(visible=x, open=x if x else True), gr.update(visible=x)],
+                                         inputs=prompt_panel_checkbox, outputs=[prompt_wildcards, prompt_history], queue=False, show_progress=False,
+                                         _js=switch_js).then(
+                                         lambda x,y: wildcards_array_show(y['wildcard_in_wildcards']) if x else wildcards_array_hidden,
+                                         inputs=[prompt_panel_checkbox, state_topbar],
+                                         outputs=wildcards_array, queue=False, show_progress=False)
 
             def toggle_comfyd_checked(x):
                 if not args_manager.args.disable_backend:
@@ -1387,7 +1726,7 @@ with shared.gradio_root:
         ctrls = [currentTask, generate_image_grid]
         ctrls += [
             prompt, negative_prompt, style_selections,
-            performance_selection, aspect_ratios_selection, image_number, output_format, image_seed,
+            performance_selection, aspect_ratios_selection, random_aspect_ratio_checkbox, image_number, output_format, image_seed,
             read_wildcards_in_order, sharpness, guidance_scale
         ]
 
@@ -1435,12 +1774,26 @@ with shared.gradio_root:
         prompt.change(parse_meta, inputs=[prompt, state_topbar, scene_input_image1, state_is_generating], outputs=[prompt, generate_button, load_parameter_button, prompt_panel_checkbox], queue=False, show_progress=False)      
         translator_button.click(lambda x, y: minicpm.translate(x, y), inputs=[prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
 
-
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
             if parameters is None:
                 logger.info('Could not find metadata in the image!')
             return toolbox.reset_params_by_image_meta(parameters, state_params, state_is_generating, inpaint_mode)
+
+        def update_prompt_history(task, existing_history):
+            MAX_HISTORY = 5
+            if not task or not hasattr(task, 'final_prompts'):
+                return existing_history[-MAX_HISTORY:]
+
+            new_unique_prompts = []
+            for p in task.final_prompts:
+                if p and p.strip() and p not in new_unique_prompts:
+                    new_unique_prompts.append(p)
+            for p in new_unique_prompts:
+                while p in existing_history:
+                    existing_history.remove(p)
+            updated_history = existing_history + new_unique_prompts
+            return updated_history[-MAX_HISTORY:]
 
         image_input_panel_ctrls = [engine_class_display, uov_method, layer_method, layer_input_image, enhance_checkbox, enhance_input_image]
         reset_preset_layout = [params_backend, advanced_checkbox, performance_selection, scheduler_name, sampler_name, input_image_checkbox, prompt_panel_checkbox, enhance_checkbox, base_model, refiner_model, overwrite_step, guidance_scale, negative_prompt, preset_instruction, identity_dialog] + image_input_panel_ctrls + lora_ctrls
@@ -1458,7 +1811,9 @@ with shared.gradio_root:
             .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
-            .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
+            .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed') \
+            .then(fn=update_prompt_history,inputs=[currentTask, state_prompt_history],outputs=state_prompt_history) \
+            .then(lambda h: gr.Dataset.update(samples=[[v] for v in h]),inputs=state_prompt_history,outputs=history_prompts)
 
         for notification_file in ['notification.ogg', 'notification.mp3']:
             if os.path.exists(notification_file):
@@ -1638,8 +1993,13 @@ with shared.gradio_root:
                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
                .then(lambda: None, _js='()=>{refresh_scene_localization();}') \
                .then(inpaint_mode_change, inputs=[inpaint_mode, inpaint_engine_state, outpaint_selections, state_topbar], outputs=[inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field], show_progress=False, queue=False) \
-               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
-
+               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)  \
+               .then(fn=lambda: [gr.update(visible=False),False,[],"base",gr.update(variant="secondary"),gr.update(variant="secondary")]
+                     + [gr.update(visible=False) for _ in lora_galleries]
+                     + [False for _ in lora_gallery_visible]
+                     + [[] for _ in lora_current_previews]
+                     + [gr.update(variant="secondary") for _ in lora_preview_btns],
+                    outputs=[model_gallery, gallery_visible, current_previews, active_target, base_preview_btn, refiner_preview_btn] + lora_galleries + lora_gallery_visible + lora_current_previews + lora_preview_btns)
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \
                       .then(topbar.init_nav_bars, inputs=[state_topbar] + admin_ctrls, outputs=[progress_window, language_ui, background_theme, preset_instruction] + user_app_ctrls + admin_ctrls, show_progress=False) \
@@ -1685,7 +2045,11 @@ shared.gradio_root.launch(
     share=args_manager.args.share,
     root_path=args_manager.args.webroot,
     auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
-    allowed_paths=[modules.config.path_userhome],
+    allowed_paths=[
+        modules.config.path_userhome,
+        modules.config.get_path_models_root(),
+        *modules.config.paths_checkpoints,
+        *modules.config.paths_loras
+    ],
     blocked_paths=[constants.AUTH_FILENAME]
 )
-

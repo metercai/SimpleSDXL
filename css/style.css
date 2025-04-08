@@ -850,15 +850,17 @@ div.prose.tokenCounter {
   width: 20px;
   height: 24px;
   position: absolute;
-  right: 4px;
-  top: 4px;
+  right: 1px;
+  top: 1px;
   opacity: 0.1;
   visibility: visible;
   z-index: 10;
+  transform: scale(0.5);
+  transform-origin: right top;
+  transition: transform 0.05s linear !important;
 }
 
-.prompt-container:hover .clear-prompt-btn,
-.clear-prompt-btn:hover {
+.prompt-container:hover .clear-prompt-btn {
   opacity: 0.6;
   visibility: visible;
 }
@@ -866,6 +868,149 @@ div.prose.tokenCounter {
 .clear-prompt-btn:hover {
   background: var(--button-secondary-background-fill, lightgray);
   color: var(--button-hover-text-color, #000);
+  opacity: 0.6;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
+}
+.model-gallery .thumbnails.scroll-hide,
+.lora-gallery .thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
+  transform: translateY(-10px); /* 向上位移10像素 */
+  position: relative; /* 确保transform生效 */
+  min-height: 80px;
+}
+
+/* 外部容器 */
+#style_visual_container {
+  padding: 8px !important;     /* 外容器内边距 */
+  margin: 8px !important;       /* 外容器外边距 */
+}
+/* 网格布局 */
+.style_grid {
+  gap: 0px !important;
+  row-gap: 0px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 关键修改 */
+  min-width: 0; /* 关键修改 */
+}
+/* 单元样式 */
+.style_item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0px !important;  /* 图片与复选框间距 */
+  padding: 2px !important;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  min-width: 0;
+  max-width: 90px!important;
+}
+/* 图片样式 */
+.style_item img {
+  width: 100% !important;
+  height: 80px !important;  /* 固定图片高度 */
+  object-fit: cover;
+  margin-bottom: 0 !important;  /* 去除默认间距 */
+}
+.compact-img {
+  height: 80px !important;
+  min-height: 80px !important;
+  transition: transform 0.1s ease; /* 添加过渡动画 */
+  transform-origin: center bottom; /* 设置缩放中心 */
+  cursor: pointer;
+}
+
+.compact-img:hover {
+  transform: scale(1.1); /* 悬停时放大1.1倍 */
+  z-index: 1006; /* 确保放大图片在上层 */
+}
+/* 移除所有内部边框 */
+.style_item,
+.style_item img,
+.compact-cb {
+  border: none !important;
+}
+
+/* 复选框容器 */
+.checkbox_wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0px !important;  /* 图标与文字间距 */
+  margin-top: -7px !important;  /* 上移复选框 */
+}
+/* 复选框标签文字 */
+.checkbox_label {
+  font-size: 4px !important;
+  line-height: 1.2 !important;  /* 压缩行高 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.style-button {
+  font-size: 10px !important; /* 确保按钮字体大小 */
+  padding: 0px 0px !important; /* 调整内边距 */
+  width: 100px; /* 调整宽度 */
+  height: 30px; /* 调整高度 */
+}
+.lora-gallery img {
+  border-radius: 7px !important;
+  padding: 0px !important;
+}
+.lora-gallery button {
+  border-radius: 7px !important;
+  padding: -3px !important;
+}
+.model-gallery button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 7px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+.model-gallery img {
+  border-radius: 7px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.with-caption {
+  height: calc(100% - 120px) !important;
+}
+
+.load_more_btn{
+  font-size: 12px !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+  margin: 2px 0 !important;
+  margin-top: -12px!important;
+  min-width: 130px!important;
+  display: none !important;
+}
+#style_grid.style_grid {
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+#style_grid.style_grid.stretch {
+  max-height: 100% !important;
+  height: 100% !important;
+  flex: 0 1 auto !important;
+  min-height: 300px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+/* 新增移动端适配 */
+@media (max-width: 768px) {
+  #style_grid.style_grid.stretch {
+    min-height: 200px; /* 降低最小高度 */
+    position: relative; /* 改为相对定位 */
+    height: 60vh !important; /* 使用视口单位 */
+    max-height: 70vh !important;
+  }
 }
 .tab-nav.scroll-hide {
   position: sticky !important;
@@ -894,6 +1039,11 @@ div.prose.tokenCounter {
   min-width: initial !important;
   max-width: none !important;
   position: relative;
+}
+/* 新增按钮容器高度设置 */
+button.gallery-item {
+  max-height: 68px; /* 或任意需要的固定高度 */
+  display: flex;  /* 启用flex布局 */
 }
 
 .p2p_title {
