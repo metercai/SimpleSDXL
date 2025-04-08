@@ -1493,7 +1493,7 @@ def worker():
                                                          base_model_additional_loras, async_task.image_number,
                                                          async_task.disable_seed_increment, use_expansion, use_style,
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
-
+        
         if async_task.task_class in flags.comfy_classes:
             logger.info(f'Enable Comfyd backend.')
             # if "flux_aio" in async_task.task_method and \
