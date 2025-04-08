@@ -47,15 +47,26 @@ def check_base_environment():
     REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
     base_file = {
         "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
-        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl'
+        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
+        "Darwin_arm64": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-macosx_11_0_arm64.whl',
+        'Darwin_x86_64': f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-macosx_10_12_x86_64.whl'
         }
+    platform_os = platform.system()
+    if platform.system() == 'Darwin':
+        if platform.machine() == 'arm64':
+            platform_os = 'Darwin_arm64'
+        else:
+            platform_os = 'Darwin_x86_64'
+    else:
+        platform_os = platform.system()
+
     if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
+        run(f'"{python}" -m pip install {base_file[platform_os]}', f'Install {base_pkg} {ver_required}')
     else:
         version_installed = importlib.metadata.version(base_pkg)
         if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
             run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_file[platform.system()]}', f'Install {base_pkg} {ver_required}')
+            run(f'"{python}" -m pip install {base_file[platform_os]}', f'Install {base_pkg} {ver_required}')
 
     extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14')]
     for (extra_pkg, extra_pkg_name) in extra_pkgs:
@@ -88,7 +99,7 @@ def check_base_environment():
     sysinfo = json.loads(token.get_sysinfo().to_json())
     sysinfo.update(dict(did=token.get_sys_did()))
     logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
-    #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, exe_dir: {sysinfo["exe_dir"]}, exe_name:{sysinfo["exe_name"]}')
+    #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, sys_name: {sysinfo["root_name"]}, dev_name:{sysinfo["host_name"]}')
 
     if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960 and not shared.args.disable_backend:
         logger.info(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
