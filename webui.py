@@ -103,7 +103,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     while qsize>0:
         current_time = time.time()
         if (current_time - MAX_WAIT_TIME*loop_num - last_update_time) < MAX_WAIT_TIME:
-            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务已进入队列中({qsize})，请等待...')), \
+            yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务已入队列({qsize})，请等待...')), \
                 gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
                 gr.update(visible=False, value=None), \
                 gr.update(visible=False)
@@ -126,7 +126,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     POLL_INTERVAL = 0.08
     in_progress = False
 
-    logger.info(f"Start generating...")
+    logger.info(f"Start generating..., qsize={qsize}")
     last_update_time = time.time()
     while not finished:
         current_time = time.time()
@@ -269,7 +269,7 @@ def enhance_inpaint_mode_change(mode, inpaint_engine_version, state):
 
 reload_javascript()
 
-title = f'{version.branch}创意生图应用平台'
+title = f'{version.branch}-让创作如此轻松! Make creation a breeze!'
 
 shared.gradio_root = gr.Blocks(title=title).queue(concurrency_count=5)
 
