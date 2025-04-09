@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-marigold"
+description = "This is a wrapper node for Marigold depth estimation: [https://github.com/prs-eth/Marigold](https://github.com/kijai/ComfyUI-Marigold). Currently using the same diffusers pipeline as in the original implementation, so in addition to the custom node, you need the model in diffusers format.\nNOTE: See details in repo to install."
+version = "1.0.0"
+license = "GPL-3.0"
+dependencies = ["accelerate>=0.22.0", "diffusers>=0.28.0", "matplotlib", "scipy", "torch>=2.0.1", "transformers>=4.32.1", "huggingface-hub"]
+
+[project.urls]
+Repository = "https://github.com/kijai/ComfyUI-Marigold"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "kijai"
+DisplayName = "ComfyUI-Marigold"
+Icon = ""
