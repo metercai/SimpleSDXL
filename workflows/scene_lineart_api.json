@@ -67,7 +67,7 @@
       "lora_name": "SDXL_lineart.safetensors",
       "strength_model": 1.2000000000000002,
       "model": [
-        "68",
+        "72",
         0
       ]
     },
@@ -169,7 +169,7 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.3500000000000001,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
@@ -318,7 +318,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.25,
+      "denoise": 0.15000000000000002,
       "model": [
         "25",
         0
@@ -466,26 +466,6 @@
       "title": "Load ControlNet Model"
     }
   },
-  "68": {
-    "inputs": {
-      "boolean": [
-        "73",
-        0
-      ],
-      "on_true": [
-        "72",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "69": {
     "inputs": {
       "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
@@ -516,9 +496,15 @@
   },
   "72": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "85",
+        1
+      ],
+      "weight_faceidv2": [
+        "85",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -547,21 +533,6 @@
     "class_type": "IPAdapterFaceID",
     "_meta": {
       "title": "IPAdapterFaceID"
-    }
-  },
-  "73": {
-    "inputs": {
-      "a": [
-        "74",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
     }
   },
   "74": {
@@ -616,6 +587,19 @@
     "class_type": "LayerColor: BrightnessContrastV2",
     "_meta": {
       "title": "LayerColor: Brightness Contrast V2"
+    }
+  },
+  "85": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

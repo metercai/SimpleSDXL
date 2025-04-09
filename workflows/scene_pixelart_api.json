@@ -10,7 +10,7 @@
   },
   "11": {
     "inputs": {
-      "ckpt_name": "miaomiaoHarem_v15b.safetensors"
+      "ckpt_name": "SDXL_Yamers_Cartoon_Arcadia.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -76,12 +76,12 @@
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "wavespeed_strength"
+      "title": "Apply First Block Cache"
     }
   },
   "32": {
     "inputs": {
-      "value": "Pixel style,(pixel art:1.5),blocky, pixel art style, 8-bit graphics"
+      "value": "Pixel style,(pixel art:1.2),blocky, pixel art style, 8-bit graphics"
     },
     "class_type": "easy string",
     "_meta": {
@@ -117,7 +117,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 534131755002927,
+      "seed": 396448254398912,
       "steps": 30,
       "cfg": 3,
       "denoise": 1
@@ -172,7 +172,7 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.25,
+      "denoise": 0.15000000000000002,
       "model": [
         "25",
         0
@@ -241,9 +241,9 @@
         "34",
         8
       ],
-      "sampler_name": "euler_ancestral",
+      "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.15,
+      "denoise": 0.30000000000000004,
       "model": [
         "77",
         0
@@ -342,26 +342,12 @@
       "title": "🔧 Get Image Size"
     }
   },
-  "67": {
-    "inputs": {
-      "lora_name": "Illustrious_pixelart.safetensors",
-      "strength_model": 1,
-      "model": [
-        "85",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
   "72": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "67",
+        "89",
         0
       ]
     },
@@ -402,37 +388,6 @@
       "title": "VAE Encode"
     }
   },
-  "75": {
-    "inputs": {
-      "preset": "PLUS (high strength)",
-      "lora_strength": 0.6,
-      "provider": "CUDA",
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "3:3,6:0",
-      "model": [
-        "72",
-        0
-      ],
-      "image": [
-        "80",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
   "77": {
     "inputs": {
       "object_to_patch": "diffusion_model",
@@ -441,13 +396,13 @@
       "end": 1,
       "max_consecutive_cache_hits": 2,
       "model": [
-        "75",
+        "72",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "wavespeed_strength"
+      "title": "Apply First Block Cache"
     }
   },
   "78": {
@@ -482,21 +437,9 @@
       "title": "Upscale Image"
     }
   },
-  "82": {
-    "inputs": {
-      "images": [
-        "80",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "83": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.2",
       "a": [
         "65",
         0
@@ -509,7 +452,7 @@
   },
   "84": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.2",
       "a": [
         "65",
         1
@@ -518,26 +461,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "85": {
-    "inputs": {
-      "boolean": [
-        "90",
-        0
-      ],
-      "on_true": [
-        "89",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "86": {
@@ -570,9 +493,15 @@
   },
   "89": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "96",
+        1
+      ],
+      "weight_faceidv2": [
+        "96",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -586,7 +515,7 @@
         0
       ],
       "image": [
-        "10",
+        "80",
         0
       ],
       "clip_vision": [
@@ -601,21 +530,6 @@
     "class_type": "IPAdapterFaceID",
     "_meta": {
       "title": "IPAdapterFaceID"
-    }
-  },
-  "90": {
-    "inputs": {
-      "a": [
-        "91",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
     }
   },
   "91": {
@@ -643,6 +557,19 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "96": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "91",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

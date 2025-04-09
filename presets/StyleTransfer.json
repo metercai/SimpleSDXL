@@ -38,7 +38,7 @@
             "蜡笔": "crayon,",
             "线稿": "lineart,"
         },
-        "additional_prompt_title_2": "是否使用人脸识别：0为不使用，1为使用",
+        "additional_prompt_title_2": "面部权重，默认0为关闭，可以输入0.0~2.0之间的数字,无脸会报错",
         "additional_prompt_2": {
             "黏土": "0",
             "手办": "0",
@@ -133,7 +133,6 @@
         "loras,SDXL_oilpainting.safetensors,202694420,0,",
         "loras,SDXL_papercut.safetensors,456489140,0,",
         "loras,SDXL_watercolor.safetensors,228458788,0,",
-        "loras,Illustrious_pixelart.safetensors,228504612,0,",
         "loras,noob_pvc.safetensors,607394012,0,",
         "loras,SDXL_lineart.safetensors,170540028,0,",
         "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,",
@@ -142,6 +141,7 @@
         "controlnet,lllyasviel/Annotators/ControlNetHED.pth,29444406,0,",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "ipadapter,ip-adapter-faceid-plusv2_sdxl.bin,1487555181,0,",
+        "ipadapter,noob_ip_adapter.bin,1396798350,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
         "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
         "insightface,models/buffalo_l/2d106det.onnx,5030888,0,",

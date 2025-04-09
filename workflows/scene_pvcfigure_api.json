@@ -67,7 +67,7 @@
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "63",
+        "67",
         0
       ]
     },
@@ -90,7 +90,7 @@
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "wavespeed_strength"
+      "title": "Apply First Block Cache"
     }
   },
   "32": {
@@ -335,7 +335,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.5000000000000001,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
@@ -398,26 +398,6 @@
       "title": "LoraLoaderModelOnly"
     }
   },
-  "63": {
-    "inputs": {
-      "boolean": [
-        "68",
-        0
-      ],
-      "on_true": [
-        "67",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "64": {
     "inputs": {
       "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
@@ -429,7 +409,7 @@
   },
   "65": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+      "ipadapter_file": "noob_ip_adapter.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
@@ -448,9 +428,15 @@
   },
   "67": {
     "inputs": {
-      "weight": 0.5000000000000001,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "74",
+        1
+      ],
+      "weight_faceidv2": [
+        "74",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -481,21 +467,6 @@
       "title": "IPAdapterFaceID"
     }
   },
-  "68": {
-    "inputs": {
-      "a": [
-        "69",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
-    }
-  },
   "69": {
     "inputs": {
       "value": "0"
@@ -503,6 +474,19 @@
     "class_type": "easy string",
     "_meta": {
       "title": "additional_prompt"
+    }
+  },
+  "74": {
+    "inputs": {
+      "value": "a+0.5",
+      "a": [
+        "69",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

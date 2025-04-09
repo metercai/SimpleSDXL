@@ -67,7 +67,7 @@
       "lora_name": "SDXL_oilpainting.safetensors",
       "strength_model": 1.25,
       "model": [
-        "73",
+        "74",
         0
       ]
     },
@@ -318,7 +318,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.5000000000000001,
+      "denoise": 0.3500000000000001,
       "model": [
         "63",
         0
@@ -477,21 +477,6 @@
       "title": "ImagePixelPerfect"
     }
   },
-  "71": {
-    "inputs": {
-      "a": [
-        "72",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
-    }
-  },
   "72": {
     "inputs": {
       "value": "0"
@@ -501,31 +486,17 @@
       "title": "additional_prompt"
     }
   },
-  "73": {
-    "inputs": {
-      "boolean": [
-        "71",
-        0
-      ],
-      "on_true": [
-        "74",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "74": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "85",
+        1
+      ],
+      "weight_faceidv2": [
+        "85",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -650,6 +621,19 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "85": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "72",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

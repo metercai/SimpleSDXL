@@ -67,7 +67,7 @@
       "lora_name": "SDXL_claymate.safetensors",
       "strength_model": 1,
       "model": [
-        "62",
+        "66",
         0
       ]
     },
@@ -131,7 +131,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 1012162994385554,
+      "seed": 616558957146265,
       "steps": 20,
       "cfg": 2,
       "denoise": 1
@@ -398,26 +398,6 @@
       "title": "🔧 Simple Math"
     }
   },
-  "62": {
-    "inputs": {
-      "boolean": [
-        "67",
-        0
-      ],
-      "on_true": [
-        "66",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "63": {
     "inputs": {
       "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
@@ -448,9 +428,15 @@
   },
   "66": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "82",
+        1
+      ],
+      "weight_faceidv2": [
+        "82",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -481,21 +467,6 @@
       "title": "IPAdapterFaceID"
     }
   },
-  "67": {
-    "inputs": {
-      "a": [
-        "68",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
-    }
-  },
   "68": {
     "inputs": {
       "value": "0"
@@ -521,6 +492,19 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "82": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "68",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

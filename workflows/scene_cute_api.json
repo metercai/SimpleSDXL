@@ -355,7 +355,7 @@
       "lora_name": "SDXL_cute.safetensors",
       "strength_model": 1.0000000000000002,
       "model": [
-        "90",
+        "94",
         0
       ]
     },
@@ -412,26 +412,6 @@
       "title": "Apply First Block Cache"
     }
   },
-  "90": {
-    "inputs": {
-      "boolean": [
-        "95",
-        0
-      ],
-      "on_true": [
-        "94",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "91": {
     "inputs": {
       "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
@@ -462,9 +442,15 @@
   },
   "94": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "102",
+        1
+      ],
+      "weight_faceidv2": [
+        "102",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -495,21 +481,6 @@
       "title": "IPAdapterFaceID"
     }
   },
-  "95": {
-    "inputs": {
-      "a": [
-        "96",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
-    }
-  },
   "96": {
     "inputs": {
       "value": "0"
@@ -535,6 +506,19 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "102": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "96",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
