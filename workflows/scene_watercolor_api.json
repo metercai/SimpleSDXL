@@ -67,7 +67,7 @@
       "lora_name": "SDXL_watercolor.safetensors",
       "strength_model": 1.25,
       "model": [
-        "82",
+        "93",
         0
       ]
     },
@@ -603,6 +603,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "92": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "93": {
+    "inputs": {
+      "boolean": [
+        "94",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "82",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "94": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "84",
+        0
+      ],
+      "b": [
+        "92",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

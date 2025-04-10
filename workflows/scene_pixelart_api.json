@@ -117,7 +117,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 396448254398912,
+      "seed": 576868125627099,
       "steps": 30,
       "cfg": 3,
       "denoise": 1
@@ -172,7 +172,7 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.15000000000000002,
+      "denoise": 0.5000000000000001,
       "model": [
         "25",
         0
@@ -294,9 +294,9 @@
   },
   "63": {
     "inputs": {
-      "upscale_method": "nearest-exact",
-      "width": 256,
-      "height": 256,
+      "upscale_method": "lanczos",
+      "width": 128,
+      "height": 128,
       "crop": "disabled",
       "image": [
         "47",
@@ -321,7 +321,7 @@
       ],
       "crop": "disabled",
       "image": [
-        "63",
+        "106",
         0
       ]
     },
@@ -347,7 +347,7 @@
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "89",
+        "101",
         0
       ]
     },
@@ -570,6 +570,89 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "100": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "101": {
+    "inputs": {
+      "boolean": [
+        "102",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "102": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "91",
+        0
+      ],
+      "b": [
+        "100",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "104": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "105": {
+    "inputs": {
+      "type": "tile",
+      "control_net": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "106": {
+    "inputs": {
+      "brightness": 1,
+      "contrast": 1.2000000000000002,
+      "saturation": 1,
+      "image": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "LayerColor: BrightnessContrastV2",
+    "_meta": {
+      "title": "LayerColor: Brightness Contrast V2"
     }
   }
 }

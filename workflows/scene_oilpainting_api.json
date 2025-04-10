@@ -67,7 +67,7 @@
       "lora_name": "SDXL_oilpainting.safetensors",
       "strength_model": 1.25,
       "model": [
-        "74",
+        "87",
         0
       ]
     },
@@ -634,6 +634,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "86": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "87": {
+    "inputs": {
+      "boolean": [
+        "88",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "88": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "72",
+        0
+      ],
+      "b": [
+        "86",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

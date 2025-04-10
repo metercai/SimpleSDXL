@@ -67,7 +67,7 @@
       "lora_name": "SDXL_papercut.safetensors",
       "strength_model": 1.2500000000000002,
       "model": [
-        "79",
+        "96",
         0
       ]
     },
@@ -368,7 +368,7 @@
     "inputs": {
       "strength": 0.20000000000000004,
       "start_percent": 0,
-      "end_percent": 0.5000000000000001,
+      "end_percent": 0.8000000000000002,
       "positive": [
         "16",
         0
@@ -709,6 +709,52 @@
     "class_type": "CLIPVisionLoader",
     "_meta": {
       "title": "Load CLIP Vision"
+    }
+  },
+  "95": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "96": {
+    "inputs": {
+      "boolean": [
+        "97",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "79",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "97": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "81",
+        0
+      ],
+      "b": [
+        "95",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

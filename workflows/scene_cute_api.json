@@ -355,7 +355,7 @@
       "lora_name": "SDXL_cute.safetensors",
       "strength_model": 1.0000000000000002,
       "model": [
-        "94",
+        "104",
         0
       ]
     },
@@ -519,6 +519,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "103": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "104": {
+    "inputs": {
+      "boolean": [
+        "105",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "105": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "96",
+        0
+      ],
+      "b": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

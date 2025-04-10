@@ -67,7 +67,7 @@
       "lora_name": "SDXL_ghibli.safetensors",
       "strength_model": 1.5000000000000002,
       "model": [
-        "74",
+        "86",
         0
       ]
     },
@@ -621,6 +621,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "85": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "86": {
+    "inputs": {
+      "boolean": [
+        "87",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "87": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "76",
+        0
+      ],
+      "b": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

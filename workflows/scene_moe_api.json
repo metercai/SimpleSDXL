@@ -332,7 +332,7 @@
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "83",
+        "94",
         0
       ]
     },
@@ -652,6 +652,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "93": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "94": {
+    "inputs": {
+      "boolean": [
+        "95",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "83",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "95": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "85",
+        0
+      ],
+      "b": [
+        "93",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }

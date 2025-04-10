@@ -67,7 +67,7 @@
       "lora_name": "SDXL_claymate.safetensors",
       "strength_model": 1,
       "model": [
-        "66",
+        "84",
         0
       ]
     },
@@ -131,7 +131,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 616558957146265,
+      "seed": 413308367041560,
       "steps": 20,
       "cfg": 2,
       "denoise": 1
@@ -505,6 +505,52 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "84": {
+    "inputs": {
+      "boolean": [
+        "87",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "66",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "87": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "68",
+        0
+      ],
+      "b": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "89": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
     }
   }
 }
