@@ -85,23 +85,6 @@
       "title": "Load Image"
     }
   },
-  "74": {
-    "inputs": {
-      "preprocessor": "DepthAnythingV2Preprocessor",
-      "resolution": [
-        "147",
-        0
-      ],
-      "image": [
-        "78",
-        0
-      ]
-    },
-    "class_type": "AIO_Preprocessor",
-    "_meta": {
-      "title": "AIO Aux Preprocessor"
-    }
-  },
   "78": {
     "inputs": {
       "samples": [
@@ -466,60 +449,29 @@
       "title": "AIO Aux Preprocessor"
     }
   },
-  "145": {
+  "136": {
     "inputs": {
       "images": [
-        "148",
+        "120",
         0
       ]
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "result_image1"
+      "title": "result_image4"
     }
   },
-  "146": {
+  "143": {
     "inputs": {
       "filename_prefix": "OneKeyDepth_EXR",
       "images": [
-        "148",
+        "120",
         0
       ]
     },
     "class_type": "SaveImageOpenEXR",
     "_meta": {
       "title": "SaveImageOpenEXR"
-    }
-  },
-  "147": {
-    "inputs": {
-      "side": "Shortest",
-      "image": [
-        "78",
-        0
-      ]
-    },
-    "class_type": "easy imageSizeBySide",
-    "_meta": {
-      "title": "ImageSize (Side)"
-    }
-  },
-  "148": {
-    "inputs": {
-      "min": [
-        "155",
-        0
-      ],
-      "max": 1.0000000000000002,
-      "clamp": true,
-      "image": [
-        "74",
-        0
-      ]
-    },
-    "class_type": "RemapImageRange",
-    "_meta": {
-      "title": "Remap Image Range"
     }
   },
   "149": {
