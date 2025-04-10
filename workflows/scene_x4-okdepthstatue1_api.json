@@ -124,13 +124,167 @@
   "86": {
     "inputs": {
       "images": [
-        "3",
+        "99",
         0
       ]
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
       "title": "result_image4"
+    }
+  },
+  "99": {
+    "inputs": {
+      "min": [
+        "126",
+        0
+      ],
+      "max": 1.0000000000000002,
+      "clamp": true,
+      "image": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "RemapImageRange",
+    "_meta": {
+      "title": "Remap Image Range"
+    }
+  },
+  "100": {
+    "inputs": {
+      "filename_prefix": "OneKeyDepth_EXR",
+      "images": [
+        "99",
+        0
+      ]
+    },
+    "class_type": "SaveImageOpenEXR",
+    "_meta": {
+      "title": "SaveImageOpenEXR"
+    }
+  },
+  "106": {
+    "inputs": {
+      "boolean": [
+        "118",
+        0
+      ],
+      "on_true": [
+        "128",
+        0
+      ],
+      "on_false": [
+        "124",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "114": {
+    "inputs": {
+      "value": -10.000000000000002
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "min depth value"
+    }
+  },
+  "118": {
+    "inputs": {
+      "operator": ">=",
+      "a": [
+        "128",
+        0
+      ],
+      "b": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: BooleanOperator",
+    "_meta": {
+      "title": "LayerUtility: Boolean Operator"
+    }
+  },
+  "119": {
+    "inputs": {
+      "value": 1.0000000000000002
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "max depth value"
+    }
+  },
+  "123": {
+    "inputs": {
+      "operator": "<=",
+      "a": [
+        "106",
+        0
+      ],
+      "b": [
+        "119",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: BooleanOperator",
+    "_meta": {
+      "title": "LayerUtility: Boolean Operator"
+    }
+  },
+  "124": {
+    "inputs": {
+      "value": -0.30000000000000004
+    },
+    "class_type": "easy float",
+    "_meta": {
+      "title": "default depth value"
+    }
+  },
+  "126": {
+    "inputs": {
+      "boolean": [
+        "123",
+        0
+      ],
+      "on_true": [
+        "106",
+        0
+      ],
+      "on_false": [
+        "124",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "128": {
+    "inputs": {
+      "output_type": "float",
+      "*": [
+        "130",
+        0
+      ]
+    },
+    "class_type": "easy convertAnything",
+    "_meta": {
+      "title": "Convert Any"
+    }
+  },
+  "130": {
+    "inputs": {
+      "value": "-0.5"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "additional_prompt"
     }
   }
 }
