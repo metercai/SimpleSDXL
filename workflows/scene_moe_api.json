@@ -104,8 +104,8 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 799333163879024,
-      "steps": 20,
+      "seed": 67305882747426,
+      "steps": 30,
       "cfg": 3,
       "denoise": 1
     },
@@ -332,7 +332,7 @@
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "79",
+        "94",
         0
       ]
     },
@@ -436,9 +436,9 @@
   },
   "72": {
     "inputs": {
-      "strength": 0.25,
+      "strength": 0.5000000000000001,
       "start_percent": 0.4,
-      "end_percent": 0.7000000000000001,
+      "end_percent": 0.8000000000000002,
       "positive": [
         "63",
         0
@@ -476,37 +476,6 @@
     "class_type": "easy imagePixelPerfect",
     "_meta": {
       "title": "ImagePixelPerfect"
-    }
-  },
-  "74": {
-    "inputs": {
-      "preset": "PLUS (high strength)",
-      "lora_strength": 0.6,
-      "provider": "CUDA",
-      "weight": 1,
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "3:3,6:0",
-      "model": [
-        "60",
-        0
-      ],
-      "image": [
-        "10",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
     }
   },
   "75": {
@@ -567,33 +536,13 @@
       "end": 1,
       "max_consecutive_cache_hits": 2,
       "model": [
-        "74",
+        "60",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
-    }
-  },
-  "79": {
-    "inputs": {
-      "boolean": [
-        "84",
-        0
-      ],
-      "on_true": [
-        "83",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "80": {
@@ -607,7 +556,7 @@
   },
   "81": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+      "ipadapter_file": "noob_ip_adapter.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
@@ -626,9 +575,15 @@
   },
   "83": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "90",
+        1
+      ],
+      "weight_faceidv2": [
+        "90",
+        1
+      ],
+      "weight_type": "strong middle",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -659,21 +614,6 @@
       "title": "IPAdapterFaceID"
     }
   },
-  "84": {
-    "inputs": {
-      "a": [
-        "85",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
-    }
-  },
   "85": {
     "inputs": {
       "value": "0"
@@ -699,6 +639,65 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "90": {
+    "inputs": {
+      "value": "a+0.5",
+      "a": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "93": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "94": {
+    "inputs": {
+      "boolean": [
+        "95",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "83",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "95": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "85",
+        0
+      ],
+      "b": [
+        "93",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }
