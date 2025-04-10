@@ -54,18 +54,18 @@
             "线稿": "0"
         },
         "multimodal_prompt": {
-            "黏土": "photo,tags",
-            "手办": "photo,tags",
-            "像素": "photo,tags",
-            "Q版": "photo,tags",
-            "萌系": "photo,tags",
-            "油画": "photo,tags",
-            "水彩": "photo,tags",
-            "水墨": "photo,tags",
-            "纸艺": "photo,tags",
-            "吉卜力": "photo,tags",
-            "蜡笔": "photo,tags",
-            "线稿": "photo,tags"
+            "黏土": "tags",
+            "手办": "tags",
+            "像素": "tags",
+            "Q版": "tags",
+            "萌系": "tags",
+            "油画": "tags",
+            "水彩": "tags",
+            "水墨": "tags",
+            "纸艺": "tags",
+            "吉卜力": "tags",
+            "蜡笔": "tags",
+            "线稿": "tags"
         },
         "scene_steps": {
             "黏土": 30,
