@@ -591,7 +591,7 @@ def worker():
                           str((async_task.freeu_b1, async_task.freeu_b2, async_task.freeu_s1, async_task.freeu_s2))))
 
             for li, (n, w) in enumerate(loras):
-                if n != 'None' and async_task.task_class in ['Fooocus', 'Kolors', 'Flux']:
+                if n != 'None':
                     d.append((f'LoRA {li + 1}', f'lora_combined_{li + 1}', f'{n} : {w}'))
 
             metadata_parser = None
