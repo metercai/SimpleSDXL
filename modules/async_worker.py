@@ -1349,15 +1349,17 @@ def worker():
     @torch.no_grad()
     @torch.inference_mode()
     def handler(async_task: AsyncTask):
-        remote_process = True if ads.get_admin_default("p2p_remote_process").lower() == 'out' else False
+        logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}')
+        p2p_remote_process = ads.get_admin_default("p2p_remote_process")
+        remote_process = True if p2p_remote_process is not None and p2p_remote_process.lower() == 'out' else False
         preparation_start_time = time.perf_counter()
         async_task.processing = True
-        logger.info(f'Task_class:{async_task.task_class}, Task_name:{async_task.task_name}, Task_method:{async_task.task_method}{", remote_process" if remote_process else ""}')
         if remote_process:
             async_task.method = 'generate_image'
+            logger.info(f'Start to remote generate image request...')
             qsize = p2p_task.request_p2p_task(async_task)
             if qsize != "error":
-                logger.info(f'Remote process request: task_id={async_task.task_id}, qsize={qsize}')
+                logger.info(f'Waiting the remote response: task_id={async_task.task_id}, qsize={qsize}')
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
@@ -1480,6 +1482,7 @@ def worker():
         else:
             logger.info(f'Enable Fooocus backend.')
             comfyd.stop()
+            pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path, controlnet_pose_path])
 
         if len(goals) > 0:
             current_progress += 1

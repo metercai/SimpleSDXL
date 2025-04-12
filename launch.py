@@ -45,11 +45,16 @@ def check_base_environment():
     base_pkg = "simpleai_base"
     ver_required = "0.3.21"
     REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
+    base_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main"
+    base_branch = "release"
+    if '--dev' in (sys.argv):
+        base_branch = 'dev'
     base_file = {
-        "Windows": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
-        "Linux": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
-        "Darwin_arm64": f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-macosx_11_0_arm64.whl',
-        'Darwin_x86_64': f'enhanced/libs/simpleai_base-{ver_required}-cp310-cp310-macosx_10_12_x86_64.whl'
+        "Windows": f'{base_url}/libs/{base_branch}/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
+        "Linux": f'{base_url}/libs/{base_branch}/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
+        "Darwin_arm64": f'{base_url}/libs/{base_branch}libs/simpleai_base-{ver_required}-cp310-cp310-macosx_11_0_arm64.whl',
+        'Darwin_x86_64': f'{base_url}/libs/{base_branch}libs/simpleai_base-{ver_required}-cp310-cp310-macosx_10_12_x86_64.whl'
+
         }
     platform_os = platform.system()
     if platform.system() == 'Darwin':

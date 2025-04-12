@@ -10,6 +10,7 @@ __pycache__
 *.partial
 *.onnx
 *.swp
+!/comfy/custom_nodes/ComfyUI-Marigold/empty_text_embed.pt
 sorted_styles.json
 /hash_cache.txt
 /input
