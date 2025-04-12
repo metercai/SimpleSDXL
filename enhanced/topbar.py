@@ -735,7 +735,7 @@ def update_after_identity_sub(state):
 
     results = [gr.update(choices=output_list, value=None), gr.update(visible=len(output_list)>0, open=False)]
     results += [state['__finished_nums_pages']]
-    results += [gr.update(interactive=True if state["engine"]=='Fooocus' and not shared.token.is_guest(user_did) else False)] *2
+    results += [gr.update(interactive=True if state["engine"]=='Fooocus' else False)] *2
     results += [gr.update(visible=False if 'preset_store' not in state else state['preset_store'])]
     results += [gr.Dataset.update(samples=get_preset_samples(user_did))]
     results += [update_history_link(user_did, state["local_access"])]
