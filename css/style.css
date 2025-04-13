@@ -906,3 +906,9 @@ div.prose.tokenCounter {
     height: 42px;
     min-width: min(250px, 100%) !important;
 }
+
+.web_input1 {
+  padding: 0px 0px !important;
+  height: 42px;
+  min-width: min(200px, 100%) !important;
+}

@@ -230,12 +230,22 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
             state_params.update({"__session": user_session})
             logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
             logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+            user = shared.token.get_user_context(user_did)
         else:
-            state_params.update({"sstoken": ''})
-            logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+            user = shared.token.get_user_context(user_did)
+            if user.get_nickname().startswith('guest_'):
+                sstoken = shared.token.get_guest_sstoken(ua_hash)
+                state_params.update({"sstoken": sstoken})
+                user_did = shared.token.get_guest_did()
+                user_session = sstoken
+                state_params.update({"__session": user_session})
+                logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
+                logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+                user = shared.token.get_user_context(user_did)
+            else:
+                state_params.update({"sstoken": ''})
+                logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
     shared.token.log_register(state_params["__session"])
-    if shared.token.is_admin(user_did):
-        pass #user_admin_sid = state_params["__session"]
     state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
     state_params.update({"local_access":  True if request.client.host == shared.args.listen or shared.args.listen=='127.0.0.1' or request.client.host=='127.0.0.1' else False})

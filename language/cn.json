@@ -424,9 +424,14 @@
   "in": "算力共享",
   "out": "远程调用",
   "Add": "添加",
-  "Remote node:": "生图节点:",
-  "Accessible identity:": "用户节点:",
+  "Del": "删除",
+  "Remote node:": "生图节点设置:",
+  "Accessible identity:": "用户节点设置",
   "Type did here.": "输入标识",
+  "Send ping to:": "发送测试消息:",
+  "Send": "发送",
+  "Type did:text here.": "输入标识与内容，用冒号分隔",
+
 
   "Enable Comfyd always active": "启用Comfyd服务常驻",
   "Enabling will improve execution speed.": "服务常驻会提高执行速度",
@@ -440,6 +445,8 @@
   "Save default of system": "保存系统默认值",
   "Sync presets nav to guest": "同步预置导航给游客",
   "wavespeed_strength": "Wave加速强度",
+  "Accessed Users:": "可访问用户:",
+  "Switch": "切换",
 
   "Contact": "联系",
 

@@ -133,9 +133,18 @@ def toggle_p2p(x, state):
             shared.upstream_did = shared.upstream_did.split(':')[0]
     ads.set_admin_default_value('p2p_active_checkbox', x, state)
 
-    return gr.update(interactive=x, value='Disable')
+    return gr.update(interactive=x, value='Disable'), gr.update(interactive=x)
 
-
+def ping_test(target, state):
+    if ads.get_admin_default('p2p_active_checkbox'):
+        target_did = target.split(':')[0]
+        if ':' in target:
+            args = target.split(':')[1]
+        else:
+            args = 'hello!'
+        task = p2p_task.AsyncTask(method="remote_ping", args=args, target_did=target_did)
+        return p2p_task.request_p2p_task(task)
+    return "p2p not active"
 
 
 identity_note = '您的昵称+手机号组成您的可信身份，昵称支持汉字。绑定身份即激活"我的预置"导航等高级服务。用身份二维码导入既安全又快捷。首个绑定身份者为系统管理员。'

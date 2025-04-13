@@ -1157,22 +1157,32 @@ with shared.gradio_root:
 
 
                     with gr.Tab(label='Local System'):
-                        with gr.Group() as admin_panel:
-                            with gr.Row():
-                                admin_link = gr.HTML(elem_classes=["htmlcontent"])
-                                admin_mgr_link = gr.HTML(value='')
+                        with gr.Column() as admin_panel:
                             with gr.Group():
-                                with gr.Row():
-                                    admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
-                                with gr.Row():
-                                    comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd and not args_manager.args.disable_backend, info='Enabling will improve execution speed.')
-                                    fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
-                                with gr.Row():
-                                    minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
-                                    advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
-                                with gr.Row():
-                                    reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
-                                    wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
+                                with gr.Row(visible=True if not args_manager.args.disable_backend else False):
+                                    admin_link = gr.HTML(elem_classes=["htmlcontent"])
+                                    admin_mgr_link = gr.HTML(value='')
+                                with gr.Group():
+                                    with gr.Row(visible=True if not args_manager.args.disable_backend else False):
+                                        admin_sync_button = gr.Button(value='Sync presets nav to guest', size="sm", min_width=70)
+                                    with gr.Row(visible=True if not args_manager.args.disable_backend else False):
+                                        comfyd_active_checkbox = gr.Checkbox(label='Enable Comfyd always active', value=ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd and not args_manager.args.disable_backend, info='Enabling will improve execution speed.')
+                                        fast_comfyd_checkbox = gr.Checkbox(label='Enable optimizations for Comfyd', value=ads.get_admin_default('fast_comfyd_checkbox'), info='Effective for some Nvidia cards.')
+                                    with gr.Row():
+                                        minicpm_checkbox = gr.Checkbox(label='Enable MiniCPMv26', value=ads.get_admin_default('minicpm_checkbox'), info='Enable it for describe, translate and expand.')
+                                        advanced_logs = gr.Checkbox(label='Enable advanced logs', value=ads.get_admin_default('advanced_logs'), info='Enabling with more infomation in logs.')
+                                    with gr.Row(visible=True if not args_manager.args.disable_backend else False):
+                                        reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
+                                        wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
+                            with gr.Row():
+                                with gr.Group():
+                                    web_in_did_title = gr.Markdown(value="Accessed Users:", elem_classes=["p2p_title"])
+                                    with gr.Row():
+                                        web_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='web_input1')
+                                        web_in_did_add_btn = gr.Button(value="Add", size="sm", min_width=30)
+                                        web_in_did_del_btn = gr.Button(value="Del", size="sm", min_width=30)
+                                        web_in_did_switch_btn = gr.Button(value="Switch", size="sm", min_width=30)
+                                    web_in_did_list = gr.Markdown(elem_classes=["htmlcontent"])
 
                     with gr.Tab(label='P2P Network'):
                         with gr.Group() as p2p_panel:
@@ -1190,6 +1200,12 @@ with shared.gradio_root:
                                     p2p_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
                                     p2p_in_did_btn = gr.Button(value="Add", size="sm", min_width=30)
                                 p2p_in_did_list = gr.Markdown(elem_classes=["htmlcontent"])
+                            with gr.Group(visible=True if shared.token.get_p2p_is_debug() else False) as p2p_ping:
+                                p2p_ping_title = gr.Markdown(value="Send ping to:", elem_classes=["p2p_title"])
+                                with gr.Row():
+                                    p2p_ping_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did:text here.", min_width=60, elem_classes='p2p_input1')
+                                    p2p_ping_btn = gr.Button(value="Send", size="sm", min_width=30)
+                                p2p_ping_result = gr.Markdown(elem_classes=["htmlcontent"])
 
                             p2p_out_did_btn.click(lambda x: x, inputs=p2p_out_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
                             p2p_in_did_btn.click(lambda x: x, inputs=p2p_in_did_input, outputs=p2p_in_did_list, queue=False, show_progress=False)
@@ -1203,6 +1219,7 @@ with shared.gradio_root:
                                 return [gr.update(visible=True if remote_process_status=='out' else False), gr.update(visible=True if remote_process_status=='in' else False)]
 
                             p2p_remote_process.change(toggle_p2p_remote_process, inputs=[p2p_remote_process, state_topbar], outputs=[p2p_out, p2p_in], queue=False, show_progress=False)
+                            p2p_ping_btn.click(simpleai.ping_test, inputs=[p2p_ping_input, state_topbar], outputs=p2p_ping_result, queue=False, show_progress=False)
 
             with gr.Tab(label='Contact', elem_id="scrollable-box"):
                 with gr.Row():
@@ -1621,7 +1638,7 @@ with shared.gradio_root:
         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
     binding_id_button.click(simpleai.toggle_identity_dialog, inputs=state_topbar, outputs=[identity_dialog, current_id_info, current_upstream_status, identity_export_btn] + identity_ctrls + identity_input, show_progress=False)
 
-    p2p_active_checkbox.change(simpleai.toggle_p2p, inputs=[p2p_active_checkbox, state_topbar], outputs=[p2p_remote_process]) \
+    p2p_active_checkbox.change(simpleai.toggle_p2p, inputs=[p2p_active_checkbox, state_topbar], outputs=[p2p_remote_process, p2p_ping_btn]) \
                         .then(topbar.update_after_identity, inputs=state_topbar, outputs=nav_bars + after_identity, show_progress=False) \
                         .then(fn=lambda x: None, inputs=system_params, _js='(x)=>{refresh_topbar_status_js(x);}')
 
