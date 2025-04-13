@@ -67,7 +67,7 @@
       "lora_name": "SDXL_ghibli.safetensors",
       "strength_model": 1.5000000000000002,
       "model": [
-        "86",
+        "89",
         0
       ]
     },
@@ -114,7 +114,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 340481259786879,
+      "seed": 617553987503141,
       "steps": 30,
       "cfg": 2,
       "denoise": 1
@@ -301,7 +301,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.7000000000000002,
+      "denoise": 0.5000000000000001,
       "model": [
         "62",
         0
@@ -667,6 +667,54 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
+    }
+  },
+  "88": {
+    "inputs": {
+      "image": "ghibi.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "89": {
+    "inputs": {
+      "weight": 0.5000000000000001,
+      "style_boost": 2.0000000000000004,
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "86",
+        0
+      ],
+      "ipadapter": [
+        "90",
+        0
+      ],
+      "image": [
+        "88",
+        0
+      ],
+      "clip_vision": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "IPAdapterPreciseStyleTransfer",
+    "_meta": {
+      "title": "IPAdapter Precise Style Transfer"
+    }
+  },
+  "90": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapter Model Loader"
     }
   }
 }

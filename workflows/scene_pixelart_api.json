@@ -10,7 +10,7 @@
   },
   "11": {
     "inputs": {
-      "ckpt_name": "SDXL_Yamers_Cartoon_Arcadia.safetensors"
+      "ckpt_name": "miaomiaoHarem_v15b.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -76,12 +76,12 @@
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "Apply First Block Cache"
+      "title": "wavespeed_strength"
     }
   },
   "32": {
     "inputs": {
-      "value": "Pixel style,(pixel art:1.2),blocky, pixel art style, 8-bit graphics"
+      "value": "Pixel style,(pixel art:1.5),blocky, pixel art style, 8-bit graphics"
     },
     "class_type": "easy string",
     "_meta": {
@@ -117,7 +117,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 576868125627099,
+      "seed": 1066357942961378,
       "steps": 30,
       "cfg": 3,
       "denoise": 1
@@ -172,7 +172,7 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.5000000000000001,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
@@ -241,11 +241,11 @@
         "34",
         8
       ],
-      "sampler_name": "euler",
+      "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.30000000000000004,
+      "denoise": 0.15000000000000002,
       "model": [
-        "77",
+        "67",
         0
       ],
       "positive": [
@@ -295,8 +295,8 @@
   "63": {
     "inputs": {
       "upscale_method": "lanczos",
-      "width": 128,
-      "height": 128,
+      "width": 192,
+      "height": 192,
       "crop": "disabled",
       "image": [
         "47",
@@ -321,7 +321,7 @@
       ],
       "crop": "disabled",
       "image": [
-        "106",
+        "63",
         0
       ]
     },
@@ -342,12 +342,26 @@
       "title": "🔧 Get Image Size"
     }
   },
+  "67": {
+    "inputs": {
+      "lora_name": "Illustrious_pixelart.safetensors",
+      "strength_model": 1.0000000000000002,
+      "model": [
+        "77",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
   "72": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 0.5,
+      "strength_model": 0.5000000000000001,
       "model": [
-        "101",
+        "93",
         0
       ]
     },
@@ -402,7 +416,7 @@
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
-      "title": "Apply First Block Cache"
+      "title": "wavespeed_strength"
     }
   },
   "78": {
@@ -474,62 +488,26 @@
   },
   "87": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+      "ipadapter_file": "noob_ip_adapter.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
       "title": "IPAdapterModelLoader"
     }
   },
-  "88": {
+  "90": {
     "inputs": {
-      "provider": "CPU",
-      "model_name": "buffalo_l"
+      "a": [
+        "91",
+        0
+      ],
+      "b": "1",
+      "operation": "a == b",
+      "case_sensitive": true
     },
-    "class_type": "IPAdapterInsightFaceLoader",
+    "class_type": "easy mathString",
     "_meta": {
-      "title": "IPAdapterInsightFaceLoader"
-    }
-  },
-  "89": {
-    "inputs": {
-      "weight": [
-        "96",
-        1
-      ],
-      "weight_faceidv2": [
-        "96",
-        1
-      ],
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "K+V",
-      "model": [
-        "11",
-        0
-      ],
-      "ipadapter": [
-        "87",
-        0
-      ],
-      "image": [
-        "80",
-        0
-      ],
-      "clip_vision": [
-        "86",
-        0
-      ],
-      "insightface": [
-        "88",
-        0
-      ]
-    },
-    "class_type": "IPAdapterFaceID",
-    "_meta": {
-      "title": "IPAdapterFaceID"
+      "title": "Math String"
     }
   },
   "91": {
@@ -559,9 +537,42 @@
       "title": "PromptReplace"
     }
   },
-  "96": {
+  "93": {
     "inputs": {
-      "value": "a",
+      "weight": [
+        "94",
+        1
+      ],
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "11",
+        0
+      ],
+      "ipadapter": [
+        "87",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ],
+      "clip_vision": [
+        "86",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "94": {
+    "inputs": {
+      "value": "a+0.5",
       "a": [
         "91",
         0
@@ -570,89 +581,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "100": {
-    "inputs": {
-      "value": "0"
-    },
-    "class_type": "easy string",
-    "_meta": {
-      "title": "String"
-    }
-  },
-  "101": {
-    "inputs": {
-      "boolean": [
-        "102",
-        0
-      ],
-      "on_true": [
-        "11",
-        0
-      ],
-      "on_false": [
-        "89",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "102": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "91",
-        0
-      ],
-      "b": [
-        "100",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "104": {
-    "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "105": {
-    "inputs": {
-      "type": "tile",
-      "control_net": [
-        "104",
-        0
-      ]
-    },
-    "class_type": "SetUnionControlNetType",
-    "_meta": {
-      "title": "SetUnionControlNetType"
-    }
-  },
-  "106": {
-    "inputs": {
-      "brightness": 1,
-      "contrast": 1.2000000000000002,
-      "saturation": 1,
-      "image": [
-        "63",
-        0
-      ]
-    },
-    "class_type": "LayerColor: BrightnessContrastV2",
-    "_meta": {
-      "title": "LayerColor: Brightness Contrast V2"
     }
   }
 }

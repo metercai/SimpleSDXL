@@ -1613,6 +1613,7 @@ packages = {
             ("loras/SDXL_oilpainting.safetensors", 202694420),
             ("loras/SDXL_papercut.safetensors", 456489140),
             ("loras/SDXL_watercolor.safetensors", 228458788),
+            ("loras/Illustrious_pixelart.safetensors", 228504612),
             ("loras/noob_pvc.safetensors", 607394012),
             ("loras/SDXL_lineart.safetensors", 170540028),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),

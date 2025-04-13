@@ -133,6 +133,7 @@
         "loras,SDXL_oilpainting.safetensors,202694420,0,",
         "loras,SDXL_papercut.safetensors,456489140,0,",
         "loras,SDXL_watercolor.safetensors,228458788,0,",
+        "loras,Illustrious_pixelart.safetensors,228504612,0,",
         "loras,noob_pvc.safetensors,607394012,0,",
         "loras,SDXL_lineart.safetensors,170540028,0,",
         "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,",
