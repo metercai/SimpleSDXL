@@ -44,8 +44,8 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.21"
-    REINSTALL_BASE = False #True #False if '_dev' not in version.get_branch() else True
-    base_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main"
+    REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
+    base_url = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main"
     base_branch = "release"
     if '--dev' in (sys.argv):
         base_branch = 'dev'
