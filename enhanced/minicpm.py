@@ -18,7 +18,7 @@ from PIL import Image
 from transformers import AutoTokenizer, AutoModel
 from modules.model_loader import download_diffusers_model
 from modules.util import HWC3, resize_image, is_chinese
-from enhanced.simpleai import comfyd
+from enhanced.simpleai import comfyd, p2p_task
 
 class MiniCPM:  
     model = "MiniCPMv2_6-prompt-generator" # "MiniCPM-V-2_6-int4"
@@ -85,7 +85,7 @@ class MiniCPM:
         ldm_patched.modules.model_management.print_memory_info("after free minicpm model")
     
     def inference(self, image, prompt, max_tokens=2048, temperature=0.7, top_p=0.8, top_k=100, repetition_penalty=1.05, seed=-1):
-        if ads.get_admin_default('p2p_remote_process').lower()=='out':
+        if ads.get_admin_default('p2p_active_checkbox') and ads.get_admin_default('p2p_remote_process').lower()=='out':
             if isinstance(image, np.ndarray):
                 image = p2p_task.ndarray_to_webp_bytes(image)
             args = (image, prompt, max_tokens, temperature, top_p, top_k, repetition_penalty, seed)
