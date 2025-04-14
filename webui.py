@@ -1209,7 +1209,7 @@ with shared.gradio_root:
                                 p2p_ping_title = gr.Markdown(value="Send ping to:", elem_classes=["p2p_title"])
                                 with gr.Row():
                                     p2p_ping_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did:text here.", min_width=60, elem_classes='p2p_input1')
-                                    p2p_ping_btn = gr.Button(value="Send", size="sm", min_width=30, interactive=True if shared.token.get_p2p_is_debug() else False)
+                                    p2p_ping_btn = gr.Button(value="Send", size="sm", min_width=30)
                                 p2p_ping_result = gr.Markdown(elem_classes=["htmlcontent"])
 
                             p2p_out_did_btn.click(lambda x: x, inputs=p2p_out_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
