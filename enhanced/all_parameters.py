@@ -120,6 +120,8 @@ bool_map = {
 }
 float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
 
+cache_vars = {}
+
 def convert_value(value):
     global bool_map, float_pattern
     
@@ -134,10 +136,17 @@ def convert_value(value):
     return value
 
 def get_admin_default(admin_key):
-    admin_value = shared.token.get_local_admin_vars(admin_key).strip()
-    return convert_value(admin_value)
+    cache_key = f'admin_{admin_key}'
+    if cache_key in cache_vars:
+        return cache_vars[cache_key]
+    admin_value = convert_value(shared.token.get_local_admin_vars(admin_key).strip())
+    cache_vars[cache_key] = admin_value
+    return admin_value
 
 def get_user_default(user_key, state, config_default=None):
+    cache_key = f'{state["__session"]}_{user_key}'
+    if cache_key in cache_vars:
+        return cache_vars[cache_key]
     user_value = shared.token.get_local_vars(user_key, 'None', state["__session"], state["ua_hash"]).strip()
     if user_value is None or user_value=="None" or user_value=="Unknown":
         if config_default is not None:
@@ -147,10 +156,19 @@ def get_user_default(user_key, state, config_default=None):
                 user_value = str(default[user_key])
             else:
                 user_value = 'None'
-    return convert_value(user_value)
+    user_value = convert_value(user_value)
+    cache_vars[cache_key] = user_value
+    return user_value
 
-set_admin_default_value = lambda x,y,s: shared.token.set_local_admin_vars(x, str(y), s["__session"], s["ua_hash"])
-set_user_default_value = lambda x,y,s: shared.token.set_local_vars(x, str(y), s["__session"], s["ua_hash"])
+def set_admin_default_value(key, value, state):
+    cache_key = f'admin_{key}'
+    cache_vars[cache_key] = value
+    shared.token.set_local_admin_vars(key, str(value), state["__session"], state["ua_hash"])
+
+def set_user_default_value(key, value, state):
+    cache_key = f'{state["__session"]}_{key}'
+    cache_vars[cache_key] = value
+    shared.token.set_local_vars(key, str(value), state["__session"], state["ua_hash"])
 
 def init_all_params_index(lora_number, disable_metadata):
     global all_args, max_lora_number, flag_disable_metadata

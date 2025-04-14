@@ -135,9 +135,14 @@ def generate_clicked(task: worker.AsyncTask, state):
                 gr.update(visible=False)
             logger.error(f"Task timeout after {MAX_WAIT_TIME} seconds")
             task.last_stop = 'stop'
+            worker.worker.stop_processing(task, 0, 'timeout')
             if (task.processing):
                 logger.error("Send interrupt flag to process and comfyd")
                 worker.worker.interrupt_processing()
+            yield gr.update(visible=False), \
+                gr.update(visible=True), \
+                gr.update(visible=False), \
+                gr.update(visible=False)
             break
 
         time.sleep(POLL_INTERVAL)
@@ -1174,7 +1179,7 @@ with shared.gradio_root:
                                     with gr.Row(visible=True if not args_manager.args.disable_backend else False):
                                         reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
                                         wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
-                            with gr.Row():
+                            with gr.Row(visible=False):
                                 with gr.Group():
                                     web_in_did_title = gr.Markdown(value="Accessed Users:", elem_classes=["p2p_title"])
                                     with gr.Row():
@@ -1200,11 +1205,11 @@ with shared.gradio_root:
                                     p2p_in_did_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did here.", min_width=60, elem_classes='p2p_input1')
                                     p2p_in_did_btn = gr.Button(value="Add", size="sm", min_width=30)
                                 p2p_in_did_list = gr.Markdown(elem_classes=["htmlcontent"])
-                            with gr.Group(visible=True if shared.token.get_p2p_is_debug() else False) as p2p_ping:
+                            with gr.Group() as p2p_ping:
                                 p2p_ping_title = gr.Markdown(value="Send ping to:", elem_classes=["p2p_title"])
                                 with gr.Row():
                                     p2p_ping_input = gr.Textbox(max_lines=1, container=False, placeholder="Type did:text here.", min_width=60, elem_classes='p2p_input1')
-                                    p2p_ping_btn = gr.Button(value="Send", size="sm", min_width=30)
+                                    p2p_ping_btn = gr.Button(value="Send", size="sm", min_width=30, interactive=True if shared.token.get_p2p_is_debug() else False)
                                 p2p_ping_result = gr.Markdown(elem_classes=["htmlcontent"])
 
                             p2p_out_did_btn.click(lambda x: x, inputs=p2p_out_did_input, outputs=p2p_out_did_list, queue=False, show_progress=False)
