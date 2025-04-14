@@ -38,7 +38,7 @@
             "蜡笔": "crayon,",
             "线稿": "lineart,"
         },
-        "additional_prompt_title_2": "是否使用人脸识别：0为不使用，1为使用",
+        "additional_prompt_title_2": "面部权重，默认0为关闭，可以输入0.0~2.0之间的数字,无脸会报错",
         "additional_prompt_2": {
             "黏土": "0",
             "手办": "0",
@@ -54,18 +54,18 @@
             "线稿": "0"
         },
         "multimodal_prompt": {
-            "黏土": "photo,tags",
-            "手办": "photo,tags",
-            "像素": "photo,tags",
-            "Q版": "photo,tags",
-            "萌系": "photo,tags",
-            "油画": "photo,tags",
-            "水彩": "photo,tags",
-            "水墨": "photo,tags",
-            "纸艺": "photo,tags",
-            "吉卜力": "photo,tags",
-            "蜡笔": "photo,tags",
-            "线稿": "photo,tags"
+            "黏土": "tags",
+            "手办": "tags",
+            "像素": "tags",
+            "Q版": "tags",
+            "萌系": "tags",
+            "油画": "tags",
+            "水彩": "tags",
+            "水墨": "tags",
+            "纸艺": "tags",
+            "吉卜力": "tags",
+            "蜡笔": "tags",
+            "线稿": "tags"
         },
         "scene_steps": {
             "黏土": 30,
@@ -142,6 +142,8 @@
         "controlnet,lllyasviel/Annotators/ControlNetHED.pth,29444406,0,",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "ipadapter,ip-adapter-faceid-plusv2_sdxl.bin,1487555181,0,",
+        "ipadapter,noob_ip_adapter.bin,1396798350,0,",
+        "ipadapter,ip-adapter-plus_sdxl_vit-h.bin,1013454427,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
         "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
         "insightface,models/buffalo_l/2d106det.onnx,5030888,0,",
