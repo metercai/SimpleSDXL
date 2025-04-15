@@ -10,7 +10,10 @@ __pycache__
 *.partial
 *.onnx
 *.swp
+*.whl
 !/comfy/custom_nodes/ComfyUI-Marigold/empty_text_embed.pt
+!/enhanced/libs/rembg-2.0.57-py3-none-any.whl
+!/enhanced/libs/groundingdino_py-0.4.1-py2.py3-none-any.whl
 sorted_styles.json
 /hash_cache.txt
 /input

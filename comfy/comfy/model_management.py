@@ -59,6 +59,8 @@ except:
     pass
 
 lowvram_available = True
+nvml_initialized = False
+
 if args.deterministic:
     logging.info("Using deterministic algorithms for pytorch")
     torch.use_deterministic_algorithms(True, warn_only=True)
@@ -203,9 +205,12 @@ def get_vram_info_by_nvml_for_nvidia():
         nvmlShutdown,
         NVMLError,
     )
+    global nvml_initialized
 
     try:
-        nvmlInit()
+        if not nvml_initialized:
+            nvmlInit()
+            nvml_initialized = True
         if torch.cuda.is_available():
             current_device_index = torch.cuda.current_device()
         else:
@@ -217,7 +222,7 @@ def get_vram_info_by_nvml_for_nvidia():
         for proc in processes:
             if proc.pid == os.getpid():
                 pid_used_vram = proc.usedGpuMemory
-        nvmlShutdown()
+        #nvmlShutdown()
         return memory_info, pid_used_vram
     except NVMLError as error:
         print(f"NVML error: {error}")
@@ -1083,7 +1088,10 @@ def get_free_memory(dev=None, torch_free_too=False):
             mem_reserved = stats['reserved_bytes.all.current']
             mem_free_cuda, _ = torch.cuda.mem_get_info(dev)
             mem_free_torch = mem_reserved - mem_active
-            mem_free_total = get_free_memory_by_nvml_for_nvidia() #mem_free_cuda + mem_free_torch
+            if is_nvidia():
+                mem_free_total = get_free_memory_by_nvml_for_nvidia()
+            else:
+                mem_free_total = mem_free_cuda + mem_free_torch
             #print(f'Comfyd VRAM mem_free_total:{mem_free_total}, old:{mem_free_cuda + mem_free_torch}')
 
     if torch_free_too:
