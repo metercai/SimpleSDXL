@@ -110,7 +110,9 @@ def cleanup():
     if os.path.exists("downloadlist.txt"):
         os.remove("downloadlist.txt")
         print("已删除 'downloadlist.txt' 文件。")
-
+    if os.path.exists("缺失模型下载链接.txt"):
+        os.remove("缺失模型下载链接.txt")
+        print("已删除 '缺失模型下载链接.txt' 文件。")
 atexit.register(cleanup)
 
 init(autoreset=True)
