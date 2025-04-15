@@ -563,7 +563,7 @@
     "inputs": {
       "brightness": 1,
       "contrast": 1.3000000000000003,
-      "saturation": 1,
+      "saturation": 0,
       "image": [
         "50",
         0
