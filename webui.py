@@ -1179,7 +1179,7 @@ with shared.gradio_root:
                                     with gr.Row(visible=True if not args_manager.args.disable_backend else False):
                                         reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
                                         wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
-                            with gr.Row(visible=False):
+                            with gr.Row(visible=True):
                                 with gr.Group():
                                     web_in_did_title = gr.Markdown(value="Accessed Users:", elem_classes=["p2p_title"])
                                     with gr.Row():
