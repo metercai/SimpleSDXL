@@ -99,3 +99,4 @@ comfy/user/
 /patch_pyhash.py*
 /logs/
 /enhanced/llmsd.py
+p2pconfig.toml
