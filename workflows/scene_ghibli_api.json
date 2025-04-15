@@ -51,7 +51,7 @@
   },
   "17": {
     "inputs": {
-      "text": "3D,realistic photo,realistic lighting,deformed, bad anatomy, disfigured, poorly drawn face, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, disconnected head, malformed hands, long neck, mutated hands and fingers, bad hands, missing fingers, cropped, worst quality, low quality, mutation, poorly drawn, huge calf, bad hands, fused hand, missing hand, disappearing arms, disappearing thigh, disappearing calf, disappearing legs, missing fingers, fused fingers, abnormal eye proportion, Abnormal hands, abnormal legs, abnormal feet, abnormal fingers,impressionist, noisy, blurry, soft, deformed, ugly, text, ",
+      "text": "green grass,green tree,(3D:1.2),(realistic:1.2),photo,realistic lighting,deformed, bad anatomy, disfigured, poorly drawn face, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, disconnected head, malformed hands, long neck, mutated hands and fingers, bad hands, missing fingers, cropped, worst quality, low quality, mutation, poorly drawn, huge calf, bad hands, fused hand, missing hand, disappearing arms, disappearing thigh, disappearing calf, disappearing legs, missing fingers, fused fingers, abnormal eye proportion, Abnormal hands, abnormal legs, abnormal feet, abnormal fingers,impressionist, noisy, blurry, soft, deformed, ugly, text, nsfw",
       "clip": [
         "11",
         1
@@ -114,7 +114,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 617553987503141,
+      "seed": 147618726118652,
       "steps": 30,
       "cfg": 2,
       "denoise": 1
