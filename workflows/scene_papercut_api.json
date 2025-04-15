@@ -51,7 +51,7 @@
   },
   "17": {
     "inputs": {
-      "text": "realistic,photo,bokeh,deformed, bad anatomy, disfigured, poorly drawn face, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, disconnected head, malformed hands, long neck, mutated hands and fingers, bad hands, missing fingers, cropped, worst quality, low quality, mutation, poorly drawn, huge calf, bad hands, fused hand, missing hand, disappearing arms, disappearing thigh, disappearing calf, disappearing legs, missing fingers, fused fingers, abnormal eye proportion, Abnormal hands, abnormal legs, abnormal feet, abnormal fingers,impressionist, noisy, blurry, soft, deformed, ugly, text, 2D, flat, noisy, blurry, painting, drawing, photo, deformed",
+      "text": "realistic,photo,bokeh,deformed, bad anatomy, disfigured, poorly drawn face, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, disconnected head, malformed hands, long neck, mutated hands and fingers, bad hands, missing fingers, cropped, worst quality, low quality, mutation, poorly drawn, huge calf, bad hands, fused hand, missing hand, disappearing arms, disappearing thigh, disappearing calf, disappearing legs, missing fingers, fused fingers, abnormal eye proportion, Abnormal hands, abnormal legs, abnormal feet, abnormal fingers,impressionist, noisy, blurry, soft, deformed, ugly, text, 2D, flat, noisy, blurry, painting,",
       "clip": [
         "11",
         1
@@ -65,7 +65,7 @@
   "20": {
     "inputs": {
       "lora_name": "SDXL_papercut.safetensors",
-      "strength_model": 1.2500000000000002,
+      "strength_model": 1.0000000000000002,
       "model": [
         "96",
         0
@@ -114,7 +114,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 455625340899819,
+      "seed": 829439800529882,
       "steps": 30,
       "cfg": 2,
       "denoise": 1
@@ -151,7 +151,7 @@
         8
       ],
       "sampler_name": "euler_ancestral",
-      "scheduler": "sgm_uniform",
+      "scheduler": "karras",
       "denoise": 1,
       "model": [
         "74",
@@ -366,7 +366,7 @@
   },
   "63": {
     "inputs": {
-      "strength": 0.20000000000000004,
+      "strength": 0.4000000000000001,
       "start_percent": 0,
       "end_percent": 0.8000000000000002,
       "positive": [
@@ -397,7 +397,7 @@
   },
   "64": {
     "inputs": {
-      "type": "tile",
+      "type": "canny/lineart/anime_lineart/mlsd",
       "control_net": [
         "67",
         0
@@ -410,7 +410,7 @@
   },
   "65": {
     "inputs": {
-      "preprocessor": "TTPlanet_TileSimple_Preprocessor",
+      "preprocessor": "LineArtPreprocessor",
       "resolution": [
         "70",
         0
@@ -577,7 +577,7 @@
   },
   "83": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.2",
       "a": [
         "55",
         0
@@ -590,7 +590,7 @@
   },
   "84": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.2",
       "a": [
         "55",
         1
@@ -665,12 +665,12 @@
   },
   "92": {
     "inputs": {
-      "weight": 1,
-      "style_boost": 1,
+      "weight": 0.30000000000000004,
+      "style_boost": 2.0000000000000004,
       "combine_embeds": "concat",
-      "start_at": 0,
+      "start_at": 0.3500000000000001,
       "end_at": 1,
-      "embeds_scaling": "V only",
+      "embeds_scaling": "K+mean(V) w/ C penalty",
       "model": [
         "60",
         0
