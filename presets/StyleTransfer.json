@@ -143,7 +143,7 @@
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "ipadapter,ip-adapter-faceid-plusv2_sdxl.bin,1487555181,0,",
         "ipadapter,noob_ip_adapter.bin,1396798350,0,",
-        "ipadapter,ip-adapter-plus_sdxl_vit-h.bin,1013454427,0,",
+        "controlnet,ip-adapter-plus_sdxl_vit-h.bin,1013454427,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
         "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
         "insightface,models/buffalo_l/2d106det.onnx,5030888,0,",
