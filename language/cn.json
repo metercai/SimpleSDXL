@@ -148,7 +148,7 @@
   "FreeU": "FreeU",
   "Enabled": "启用",
   "Extreme Speed": "极速",
-  "\uD83D\uDD0E Type here to search styles ...": "\uD83D\uDD0E 输入关键词搜索风格...",
+  "\uD83D\uDD0E Type here to search styles ...": "\uD83D\uDD0E 输入关键词搜索风格(右键发送提示词）",
   "Type negative prompt here.": "在这里输入负向提示词。",
   "Enhance": "启用增强修图(包含在新图片生成后自动增强修图)",
   "Enhance+": "增强修图",
@@ -631,7 +631,7 @@
     "photograph": "摄影",
     "octane render": "Octane 渲染",
     "digital art": "数字艺术",
-    "concept art": "概念艺术",
+    "concept art": "概念美术",
     "painting": "绘画",
     "portrait": "肖像画",
     "anime key visual": "动漫关键视觉",
@@ -659,7 +659,7 @@
     "Filter out following properties (comma seperated). Example film grain, purple, cat": "过滤掉以下属性（用逗号分隔）。例如：film grain, purple, cat（胶片颗粒感、紫色、猫）",
 
     "Leo Dragonyear": "LEO-龙年贺春",
-
+    "Use Visual":"可视化",
     "Image Style": "图片风格",
     "Fooocus V2": "Fooocus V2",
     "Fooocus Enhance": "Fooocus-增强",

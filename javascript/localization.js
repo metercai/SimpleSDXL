@@ -52,15 +52,27 @@ function getTranslation(text) {
 
 function processTextNode(node) {
     var text = node.textContent.trim();
-
     if (!canBeTranslated(node, text)) return;
 
     var tl = getTranslation(text);
+
+    // 新增反向查找逻辑以修复自定义风格悬浮图错位的问题
+    let originalText = text;
+    if (tl === undefined) {
+        for (const [en, cn] of Object.entries(localization)) {
+            if (cn === text) {
+                originalText = en;
+                break;
+            }
+        }
+    }
+
     if (tl !== undefined) {
         node.textContent = tl;
-        if (text && node.parentElement) {
-          node.parentElement.setAttribute("data-original-text", text);
-        }
+    }
+
+    if (originalText && node.parentElement) {
+        node.parentElement.setAttribute("data-original-text", originalText);
     }
 }
 
@@ -92,6 +104,81 @@ function processNode(node) {
 function refresh_style_localization() {
     processNode(document.querySelector('.style_selections'));
 }
+
+let styleGridOriginalElements = [];
+
+function refresh_style_layout() {
+    const container = document.querySelector(".style_grid");
+    if (container) {
+
+        if (styleGridOriginalElements.length === 0) {
+            styleGridOriginalElements = [...container.querySelectorAll('.style_item')];
+        }
+
+        const sortedStyles = Array.from(document.querySelectorAll('.style_selections input:checked'))
+            .map(cb => cb.nextElementSibling.textContent.trim());
+
+        const searchBar = gradioApp().querySelector('textarea[data-testid="textbox"][placeholder*="搜索风格"], textarea[data-testid="textbox"][placeholder*="search styles"]');
+        const searchText = (searchBar?.value?.trim() || '').toLowerCase();
+
+        const selectedItems = sortedStyles.map(name =>
+            styleGridOriginalElements.find(item => {
+                const btn = item.querySelector('button');
+                const btnText = btn?.textContent.trim();
+                return btnText === name;
+            })
+        ).filter(Boolean);
+
+        const visibleUnselected = styleGridOriginalElements.filter(item => {
+            const btn = item.querySelector('button');
+
+            const rawOriginalText = btn?.getAttribute('data-original-text') || '';
+            const rawTranslatedText = btn?.textContent || '';
+
+            const cleanOriginal = rawOriginalText.trim().toLowerCase();
+            const cleanTranslated = rawTranslatedText.trim().toLowerCase();
+
+            return !selectedItems.some(selected => selected === item) &&
+                   (cleanOriginal.includes(searchText) ||
+                    cleanTranslated.includes(searchText));
+        });
+
+        visibleUnselected.forEach(item => {
+            const btnText = item.querySelector('button')?.textContent.trim();
+        });
+
+        const hiddenItems = styleGridOriginalElements.filter(item =>
+            ![...selectedItems, ...visibleUnselected].includes(item)
+        );
+
+        const finalOrder = [...selectedItems, ...visibleUnselected, ...hiddenItems];
+
+        container.innerHTML = '';
+        finalOrder.forEach(item => container.appendChild(item));
+    }
+        document.querySelectorAll('.style-button').forEach(button => {
+            const rawName = button.getAttribute('data-original-text') || button.textContent.trim();
+            const styleName = rawName
+                .toLowerCase()
+                .replace(/ /g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+
+            const imagePath = `file=sdxl_styles/samples/${styleName}.jpg`;
+
+            const img = new Image();
+            img.onload = () => {
+                button.style.backgroundImage = `url(${imagePath})`;
+            };
+            img.onerror = () => {
+                button.style.backgroundImage = "url('file=sdxl_styles/samples/default_style.jpg')";
+            };
+            img.src = imagePath;
+
+            button.style.backgroundSize = 'cover';
+        });
+    setTimeout(() => gradioApp().dispatchEvent(new Event('resize')), 50);
+}
+
 
 function refresh_scene_localization() {
     processNode(document.querySelector('.scene_aspect_ratio_selections'));

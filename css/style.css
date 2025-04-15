@@ -850,15 +850,17 @@ div.prose.tokenCounter {
   width: 20px;
   height: 24px;
   position: absolute;
-  right: 4px;
-  top: 4px;
+  right: 1px;
+  top: 1px;
   opacity: 0.1;
   visibility: visible;
   z-index: 10;
+  transform: scale(0.5);
+  transform-origin: right top;
+  transition: transform 0.05s linear !important;
 }
 
-.prompt-container:hover .clear-prompt-btn,
-.clear-prompt-btn:hover {
+.prompt-container:hover .clear-prompt-btn {
   opacity: 0.6;
   visibility: visible;
 }
@@ -866,7 +868,81 @@ div.prose.tokenCounter {
 .clear-prompt-btn:hover {
   background: var(--button-secondary-background-fill, lightgray);
   color: var(--button-hover-text-color, #000);
+  opacity: 0.6;
+  visibility: visible;
+  transform: scale(1);
 }
+
+.thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
+}
+.model-gallery .thumbnails.scroll-hide,
+.lora-gallery .thumbnails.scroll-hide {
+  flex-wrap: wrap !important;
+  transform: translateY(-10px); /* 向上位移10像素 */
+  position: relative; /* 确保transform生效 */
+  min-height: 80px;
+}
+
+/* 外部容器 */
+#style_visual_container {
+  padding: 8px !important;     /* 外容器内边距 */
+  margin: 8px !important;       /* 外容器外边距 */
+}
+/* 网格布局 */
+.style_grid {
+  gap: 0px !important;
+  row-gap: 0px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 关键修改 */
+  min-width: 0; /* 关键修改 */
+}
+/* 单元样式 */
+.style_item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0px !important;  /* 图片与复选框间距 */
+  padding: 2px !important;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  min-width: 0;
+  max-width: 90px!important;
+  overflow: visible !important;  /* 解除溢出限制 */
+}
+
+.style-button {
+  font-size: 10px !important;
+  padding: 0px 0px !important;
+  width: 80px;
+  height: 80px;
+  color: white !important; /* 新增文字颜色 */
+  text-shadow:
+    1px 1px 2px black,
+    -1px -1px 2px black,
+    1px -1px 2px black,
+    -1px 1px 2px black; /* 添加四向阴影增强可读性 */
+    display: flex !important;
+    align-items: flex-end !important; /* 文字垂直靠下 */
+    justify-content: center !important; /* 文字水平居中 */
+    padding-bottom: 8px !important; /* 底部留白 */
+}
+
+.style-button:hover {
+  transform: scale(1.1);
+}
+/* 移除所有内部边框 */
+.style_item,
+.style_item img,
+.compact-cb {
+  border: none !important;
+}
+button.style-button.primary {
+  border: 3px solid #fa9600 !important;
+  box-shadow: 0 0 12px rgba(255,69,0,0.6) !important;
+  transform: scale(1.05);
+  z-index: 1;
+  animation: border-pulse 0.8s infinite alternate;
+}
+
 .tab-nav.scroll-hide {
   position: sticky !important;
   top: 0;
