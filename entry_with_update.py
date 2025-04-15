@@ -83,6 +83,7 @@ try:
                 try:
                     ref_name = f'refs/heads/{branch_name}'
                     repo.references.create(ref_name, remote_commit.id, True)
+                    print(f'{branch_name_display}: Force Sync Remote Updates, {local_commit_short} -> {remote_commit_short}')
                 except Exception as alt_error:
                     print(f'Warning: Failed to update the reference, but the file has been updated. - {str(alt_error)}')
         except Exception as reset_error:
