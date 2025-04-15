@@ -423,7 +423,8 @@ def validate_files(packages):
                 if file == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file}"
+                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file.split('SimpleModels/')[-1]}"
+
                 
                 f1.write(f"{link},{size}\n")
                 
@@ -1622,6 +1623,8 @@ packages = {
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("ipadapter/noob_ip_adapter.bin", 1396798350),
+            ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
             ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
             ("insightface/models/buffalo_l/det_10g.onnx", 16923827),

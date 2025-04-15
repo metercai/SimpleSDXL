@@ -117,7 +117,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 534131755002927,
+      "seed": 1066357942961378,
       "steps": 30,
       "cfg": 3,
       "denoise": 1
@@ -172,7 +172,7 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.25,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
@@ -243,9 +243,9 @@
       ],
       "sampler_name": "euler_ancestral",
       "scheduler": "sgm_uniform",
-      "denoise": 0.15,
+      "denoise": 0.15000000000000002,
       "model": [
-        "77",
+        "67",
         0
       ],
       "positive": [
@@ -294,9 +294,9 @@
   },
   "63": {
     "inputs": {
-      "upscale_method": "nearest-exact",
-      "width": 256,
-      "height": 256,
+      "upscale_method": "lanczos",
+      "width": 192,
+      "height": 192,
       "crop": "disabled",
       "image": [
         "47",
@@ -345,9 +345,9 @@
   "67": {
     "inputs": {
       "lora_name": "Illustrious_pixelart.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
-        "85",
+        "77",
         0
       ]
     },
@@ -359,9 +359,9 @@
   "72": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 0.5,
+      "strength_model": 0.5000000000000001,
       "model": [
-        "67",
+        "93",
         0
       ]
     },
@@ -402,37 +402,6 @@
       "title": "VAE Encode"
     }
   },
-  "75": {
-    "inputs": {
-      "preset": "PLUS (high strength)",
-      "lora_strength": 0.6,
-      "provider": "CUDA",
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "3:3,6:0",
-      "model": [
-        "72",
-        0
-      ],
-      "image": [
-        "80",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
   "77": {
     "inputs": {
       "object_to_patch": "diffusion_model",
@@ -441,7 +410,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 2,
       "model": [
-        "75",
+        "72",
         0
       ]
     },
@@ -482,21 +451,9 @@
       "title": "Upscale Image"
     }
   },
-  "82": {
-    "inputs": {
-      "images": [
-        "80",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "83": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.0",
       "a": [
         "65",
         0
@@ -509,7 +466,7 @@
   },
   "84": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.0",
       "a": [
         "65",
         1
@@ -518,26 +475,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "85": {
-    "inputs": {
-      "boolean": [
-        "90",
-        0
-      ],
-      "on_true": [
-        "89",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "86": {
@@ -551,56 +488,11 @@
   },
   "87": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-faceid-plusv2_sdxl.bin"
+      "ipadapter_file": "noob_ip_adapter.bin"
     },
     "class_type": "IPAdapterModelLoader",
     "_meta": {
       "title": "IPAdapterModelLoader"
-    }
-  },
-  "88": {
-    "inputs": {
-      "provider": "CPU",
-      "model_name": "buffalo_l"
-    },
-    "class_type": "IPAdapterInsightFaceLoader",
-    "_meta": {
-      "title": "IPAdapterInsightFaceLoader"
-    }
-  },
-  "89": {
-    "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "K+V",
-      "model": [
-        "11",
-        0
-      ],
-      "ipadapter": [
-        "87",
-        0
-      ],
-      "image": [
-        "10",
-        0
-      ],
-      "clip_vision": [
-        "86",
-        0
-      ],
-      "insightface": [
-        "88",
-        0
-      ]
-    },
-    "class_type": "IPAdapterFaceID",
-    "_meta": {
-      "title": "IPAdapterFaceID"
     }
   },
   "90": {
@@ -643,6 +535,52 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "93": {
+    "inputs": {
+      "weight": [
+        "94",
+        1
+      ],
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "11",
+        0
+      ],
+      "ipadapter": [
+        "87",
+        0
+      ],
+      "image": [
+        "10",
+        0
+      ],
+      "clip_vision": [
+        "86",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "94": {
+    "inputs": {
+      "value": "a+0.5",
+      "a": [
+        "91",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }

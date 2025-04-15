@@ -67,7 +67,7 @@
       "lora_name": "SDXL_papercut.safetensors",
       "strength_model": 1.2500000000000002,
       "model": [
-        "75",
+        "96",
         0
       ]
     },
@@ -368,7 +368,7 @@
     "inputs": {
       "strength": 0.20000000000000004,
       "start_percent": 0,
-      "end_percent": 0.5000000000000001,
+      "end_percent": 0.8000000000000002,
       "positive": [
         "16",
         0
@@ -447,37 +447,6 @@
       "title": "ImagePixelPerfect"
     }
   },
-  "72": {
-    "inputs": {
-      "preset": "PLUS (high strength)",
-      "lora_strength": 0.6,
-      "provider": "CUDA",
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1,
-      "weight_type": "style transfer precise",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": 1,
-      "embeds_scaling": "K+V",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "3:3,6:0",
-      "model": [
-        "60",
-        0
-      ],
-      "image": [
-        "73",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
   "73": {
     "inputs": {
       "image": "papercut.png"
@@ -495,33 +464,13 @@
       "end": 1,
       "max_consecutive_cache_hits": 2,
       "model": [
-        "72",
+        "92",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
-    }
-  },
-  "75": {
-    "inputs": {
-      "boolean": [
-        "80",
-        0
-      ],
-      "on_true": [
-        "79",
-        0
-      ],
-      "on_false": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "76": {
@@ -554,9 +503,15 @@
   },
   "79": {
     "inputs": {
-      "weight": 1.0000000000000002,
-      "weight_faceidv2": 1.0000000000000002,
-      "weight_type": "ease in-out",
+      "weight": [
+        "90",
+        1
+      ],
+      "weight_faceidv2": [
+        "90",
+        1
+      ],
+      "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
@@ -585,21 +540,6 @@
     "class_type": "IPAdapterFaceID",
     "_meta": {
       "title": "IPAdapterFaceID"
-    }
-  },
-  "80": {
-    "inputs": {
-      "a": [
-        "81",
-        0
-      ],
-      "b": "1",
-      "operation": "a == b",
-      "case_sensitive": true
-    },
-    "class_type": "easy mathString",
-    "_meta": {
-      "title": "Math String"
     }
   },
   "81": {
@@ -708,6 +648,113 @@
     "class_type": "ControlNetApplyAdvanced",
     "_meta": {
       "title": "Apply ControlNet"
+    }
+  },
+  "90": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "92": {
+    "inputs": {
+      "weight": 1,
+      "style_boost": 1,
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "60",
+        0
+      ],
+      "ipadapter": [
+        "93",
+        0
+      ],
+      "image": [
+        "73",
+        0
+      ],
+      "clip_vision": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "IPAdapterPreciseStyleTransfer",
+    "_meta": {
+      "title": "IPAdapter Precise Style Transfer"
+    }
+  },
+  "93": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.bin"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapter Model Loader"
+    }
+  },
+  "94": {
+    "inputs": {
+      "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "95": {
+    "inputs": {
+      "value": "0"
+    },
+    "class_type": "easy string",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "96": {
+    "inputs": {
+      "boolean": [
+        "97",
+        0
+      ],
+      "on_true": [
+        "11",
+        0
+      ],
+      "on_false": [
+        "79",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "97": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "81",
+        0
+      ],
+      "b": [
+        "95",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
     }
   }
 }
