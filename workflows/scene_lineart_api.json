@@ -318,7 +318,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.4000000000000001,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
@@ -561,8 +561,8 @@
   },
   "81": {
     "inputs": {
-      "brightness": 1,
-      "contrast": 1.3000000000000003,
+      "brightness": 1.0000000000000002,
+      "contrast": 1.5000000000000002,
       "saturation": 0,
       "image": [
         "50",
