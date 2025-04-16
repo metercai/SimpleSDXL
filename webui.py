@@ -1,13 +1,9 @@
 import gradio as gr
-import random
 import os
-import json
 import time
 import re
-import anyio
 import shared
 import modules.config
-import fooocus_version
 import modules.html
 import modules.async_worker as worker
 import modules.constants as constants
@@ -22,10 +18,9 @@ import ldm_patched.modules.model_management as model_management
 from extras.inpaint_mask import SAMOptions
 from PIL import Image
 from modules.sdxl_styles import legal_style_names, fooocus_expansion
-from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
-from modules.util import is_json, HWC3, resize_image
+from modules.util import resize_image
 from modules.meta_parser import switch_scene_theme, switch_scene_theme_select, switch_scene_theme_ready_to_gen, get_welcome_image, describe_prompt_for_scene, get_auto_candidate
 
 import comfy.comfy_version as comfy_version
@@ -72,6 +67,7 @@ def get_start_timestamp(request: gr.Request):
 def get_task(*args):
     args = list(args)
     args.pop(0)
+    args = ads.normalization(args, modules.config.default_max_lora_number, modules.config.default_controlnet_image_count, modules.config.default_enhance_tabs)
     return worker.AsyncTask(args=args)
 
 def generate_clicked(task: worker.AsyncTask, state):
@@ -282,7 +278,7 @@ logo_imag_url = f'/file={logo_imag_path}'
 
 with shared.gradio_root:
     state_topbar = gr.State({})
-    params_backend = gr.State({'translation_methods': modules.config.default_translation_methods})
+    params_backend = gr.State({})
     system_params = gr.JSON({}, visible=False)
     gallery_index_stat = gr.Textbox(value='', visible=False)
     currentTask = gr.State(worker.AsyncTask(args=[]))
@@ -484,17 +480,15 @@ with shared.gradio_root:
                                             ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=modules.config.default_ip_stop_ats[image_count])
                                             ip_stops.append(ip_stop)
                                             ip_ctrls.append(ip_stop)
-
                                             ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=modules.config.default_ip_weights[image_count])
                                             ip_weights.append(ip_weight)
                                             ip_ctrls.append(ip_weight)
-
                                         ip_type = gr.Radio(label='Type', choices=flags.ip_list, value=modules.config.default_ip_types[image_count], container=False)
                                         ip_types.append(ip_type)
                                         ip_ctrls.append(ip_type)
-
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
+
 
                         gr.HTML('* Powered by Fooocus Image Mixture Engine (v1.0.1), <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Documentation</a>, and Comfyd workflow engine from ComfyUI.')
 
@@ -530,9 +524,9 @@ with shared.gradio_root:
                                         hires_fix_blurred = gr.Slider(label='Blurred', minimum=0.0, maximum=1.0, step=0.001, value=0.0, min_width=20)
                         uov_input_image.upload(topbar.update_upscale_size_of_image, inputs=[uov_input_image, uov_method], outputs=uov_image_size, show_progress=False, queue=False)
                         uov_method.change(topbar.update_size_and_hires_fix, inputs=[uov_input_image, uov_method, params_backend, hires_fix_stop, hires_fix_weight, hires_fix_blurred], outputs=[uov_image_size, uov_hires_fix, overwrite_vary_strength, overwrite_upscale_strength], show_progress=False, queue=False)
-                        hires_fix_stop.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_s',x,y,z), inputs=[hires_fix_stop, params_backend, state_topbar])
-                        hires_fix_weight.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_w',x,y,z), inputs=[hires_fix_weight, params_backend, state_topbar])
-                        hires_fix_blurred.change(lambda x,y,z: sync_backend_params('i2i_uov_hires_fix_blurred',x,y,z), inputs=[hires_fix_blurred, params_backend, state_topbar])
+                        hires_fix_stop.change(lambda x,y,z: sync_backend_params('hires_fix_s',x,y,z), inputs=[hires_fix_stop, params_backend, state_topbar])
+                        hires_fix_weight.change(lambda x,y,z: sync_backend_params('hires_fix_w',x,y,z), inputs=[hires_fix_weight, params_backend, state_topbar])
+                        hires_fix_blurred.change(lambda x,y,z: sync_backend_params('hires_fix_blurred',x,y,z), inputs=[hires_fix_blurred, params_backend, state_topbar])
                         gr.HTML('* Powered by Fooocus upscale engine, <a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Documentation</a>, and Comfyd workflow engine from ComfyUI.')
                     
                     with gr.Tab(label='Inpaint or Outpaint', id='inpaint_tab', elem_id='inpaint_tab') as inpaint_tab:
@@ -1140,7 +1134,6 @@ with shared.gradio_root:
                             save_final_enhanced_image_only = gr.Checkbox(label='Save only final enhanced image', visible=not args_manager.args.disable_image_log,
                                                                          value=modules.config.default_save_only_final_enhanced_image)
                             read_wildcards_in_order = gr.Checkbox(label="Read wildcards in order", value=False, visible=False)
-                            translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=modules.config.default_translation_methods)
 
                         with gr.Group():
                             image_tools_checkbox = gr.Checkbox(label='Enable ParamsTools', value=True, info='Management of published image sets, located in the middle toolbox on the right side of the image set.')
@@ -1179,6 +1172,9 @@ with shared.gradio_root:
                                     with gr.Row(visible=True if not args_manager.args.disable_backend else False):
                                         reserved_vram = gr.Slider(label='Reserved VRAM(GB)', minimum=0, maximum=6, step=0.1, value=ads.get_admin_default('reserved_vram'))
                                         wavespeed_strength = gr.Slider(label='wavespeed_strength', minimum=0, maximum=1, step=0.01, value=ads.get_admin_default('wavespeed_strength'))
+                                    with gr.Row(visible=True if not args_manager.args.disable_backend else False):
+                                        translation_methods = gr.Radio(label='Translation methods', choices=modules.flags.translation_methods, value=ads.get_admin_default('translation_methods'))
+
                             with gr.Row(visible=True):
                                 with gr.Group():
                                     web_in_did_title = gr.Markdown(value="Accessed Users:", elem_classes=["p2p_title"])
@@ -1240,7 +1236,7 @@ with shared.gradio_root:
                 def sync_backend_params(key, v, params, state):
                     params.update({key:v})
                     logger.debug(f'sync_backend_params: {key}:{v}')
-                    if not key.startswith("i2i_uov"):
+                    if not key.startswith("hires_fix"):
                         ads.set_user_default_value(key, v, state) 
                     return params
 
@@ -1249,8 +1245,8 @@ with shared.gradio_root:
                     ads.set_admin_default_value('minicpm_checkbox', x, state) 
                     return gr.update(visible=not x), gr.update(visible=x), gr.update(visible=x), gr.update(visible=not x), gr.update(visible=x)
 
-                translation_methods.change(lambda x,y,z: sync_backend_params('translation_methods',x,y,z), inputs=[translation_methods, params_backend, state_topbar])
-                backfill_prompt.change(lambda x,y: ads.set_user_default_value("backfill_prompt", x, y), inputs=[backfill_prompt, state_topbar])
+                translation_methods.change(lambda x,y: ads.set_admin_default_value('translation_methods',x,y), inputs=[translation_methods, state_topbar])
+                backfill_prompt.change(lambda x,y: ads.set_user_default_value("backfill_prompt",x,y), inputs=[backfill_prompt, state_topbar])
                 disable_preview.change(lambda x,y: ads.set_user_default_value("disable_preview", x, y), inputs=[disable_preview, state_topbar])
                 disable_intermediate_results.change(lambda x,y: ads.set_user_default_value("disable_intermediate_results", x, y), inputs=[disable_intermediate_results, state_topbar])
                 disable_seed_increment.change(lambda x,y: ads.set_user_default_value("disable_seed_increment", x, y), inputs=[disable_seed_increment, state_topbar])
@@ -1258,14 +1254,13 @@ with shared.gradio_root:
 
                 fast_comfyd_checkbox.change(simpleai.start_fast_comfyd, inputs=[fast_comfyd_checkbox, state_topbar])
                 minicpm_checkbox.change(toggle_minicpm, inputs=[minicpm_checkbox, state_topbar], outputs=[describe_apply_styles, describe_output_tags, describe_output_chinese, describe_methods, describe_prompt], queue=False, show_progress=False)
-                reserved_vram.change(lambda x,y,z: sync_backend_params('reserved_vram',x,y,z), inputs=[reserved_vram, params_backend, state_topbar])
+                reserved_vram.change(lambda x,y: ads.set_admin_default_value('reserved_vram',x,y), inputs=[reserved_vram, state_topbar])
                 advanced_logs.change(simpleai.change_advanced_logs, inputs=[advanced_logs, state_topbar])
-                wavespeed_strength.change(lambda x,y,z: sync_backend_params('wavespeed_strength',x,y,z), inputs=[wavespeed_strength, params_backend, state_topbar])
+                wavespeed_strength.change(lambda x,y: ads.set_admin_default_value('wavespeed_strength',x,y), inputs=[wavespeed_strength, state_topbar])
                 admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
 
-                admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
-                user_app_ctrls = [backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, translation_methods, generate_image_grid, black_out_nsfw, save_metadata_to_images, metadata_scheme]
-
+                admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, translation_methods, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
+                user_app_ctrls = [backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, generate_image_grid, black_out_nsfw, save_metadata_to_images, metadata_scheme]
 
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
@@ -1306,7 +1301,6 @@ with shared.gradio_root:
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
             scene_params = [scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number, scene_mask_color]
-            ehps = [backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength]
             
 
             language_ui.select(lambda x,y: sync_state_params('__lang', modules.config.language_radio_revert(x), y), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1426,15 +1420,10 @@ with shared.gradio_root:
         ctrls += freeu_ctrls
         ctrls += inpaint_ctrls
         ctrls += [params_backend]
-
-        if not args_manager.args.disable_image_log:
-            ctrls += [save_final_enhanced_image_only]
-
-        if not args_manager.args.disable_metadata:
-            ctrls += [save_metadata_to_images, metadata_scheme]
-
+        ctrls += [save_final_enhanced_image_only if not args_manager.args.disable_image_log else None]
+        ctrls += [save_metadata_to_images if not args_manager.args.disable_metadata else None]
+        ctrls += [metadata_scheme if not args_manager.args.disable_metadata else None]
         ctrls += ip_ctrls
-        
         ctrls += [debugging_dino, dino_erode_or_dilate, debugging_enhance_masks_checkbox,
                   enhance_input_image, enhance_checkbox, enhance_uov_method, enhance_uov_processing_order,
                   enhance_uov_prompt_type]
@@ -1472,7 +1461,7 @@ with shared.gradio_root:
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
         protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
-        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, seed_random, image_seed, params_backend] + ehps + scene_params[:-1], outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box, image_seed] + protections + [preset_store, identity_dialog], show_progress=False) \
+        generate_button.click(topbar.process_before_generation, inputs=[state_topbar, seed_random, image_seed, params_backend] + scene_params[:-1], outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box, image_seed] + protections + [preset_store, identity_dialog], show_progress=False) \
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
@@ -1686,7 +1675,6 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 if ads.get_admin_default('comfyd_active_checkbox') and not args_manager.args.disable_comfyd and not args_manager.args.disable_backend:
-    print(f'disable_comfyd: {args_manager.args.disable_comfyd}, disable_backend: {args_manager.args.disable_backend}')
     comfyd.active(True)
 if ads.get_admin_default('p2p_active_checkbox'):
     if shared.upstream_did:
