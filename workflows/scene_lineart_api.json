@@ -131,7 +131,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 522288127595904,
+      "seed": 1087929995659389,
       "steps": 30,
       "cfg": 2,
       "denoise": 1
@@ -318,18 +318,18 @@
       ],
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": 0.15000000000000002,
+      "denoise": 0.25000000000000006,
       "model": [
         "25",
         0
       ],
       "positive": [
-        "16",
+        "63",
         0
       ],
       "negative": [
-        "17",
-        0
+        "63",
+        1
       ],
       "latent_image": [
         "53",
@@ -429,7 +429,7 @@
     "inputs": {
       "preprocessor": "LineArtPreprocessor",
       "resolution": [
-        "66",
+        "89",
         0
       ],
       "image": [
@@ -440,21 +440,6 @@
     "class_type": "AIO_Preprocessor",
     "_meta": {
       "title": "AIO Aux Preprocessor"
-    }
-  },
-  "66": {
-    "inputs": {
-      "image_gen_width": 512,
-      "image_gen_height": 512,
-      "resize_mode": "Just Resize",
-      "original_image": [
-        "10",
-        0
-      ]
-    },
-    "class_type": "PixelPerfectResolution",
-    "_meta": {
-      "title": "Pixel Perfect Resolution"
     }
   },
   "67": {
@@ -576,9 +561,9 @@
   },
   "81": {
     "inputs": {
-      "brightness": 1,
-      "contrast": 1.2500000000000002,
-      "saturation": 1,
+      "brightness": 1.0000000000000002,
+      "contrast": 1.5000000000000002,
+      "saturation": 0,
       "image": [
         "50",
         0
@@ -646,6 +631,19 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
+    }
+  },
+  "89": {
+    "inputs": {
+      "resize_mode": "Just Resize",
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "easy imagePixelPerfect",
+    "_meta": {
+      "title": "ImagePixelPerfect"
     }
   }
 }
