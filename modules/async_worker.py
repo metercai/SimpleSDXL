@@ -19,6 +19,7 @@ class AsyncTask:
         import uuid
         import args_manager
         import re
+        import time
         import shared
         import enhanced.all_parameters as ads
 
@@ -32,6 +33,7 @@ class AsyncTask:
         self.task_id = str(uuid.uuid4()) if task_id is None else task_id
         self.remote_task = False
         self.img_paths = []
+        self.lasttime = time.time()
 
         self.performance_loras = []
 
@@ -290,6 +292,7 @@ def worker():
         if img is None:
             logger.info(f'{text}')
         async_task.yields.append(['preview', (number, text, img)])
+        async_task.lasttime = time.time()
 
     def yield_result(async_task, imgs, progressbar_index, black_out_nsfw, censor=True, do_not_show_finished_images=False):
         if async_task.remote_task:
@@ -306,6 +309,7 @@ def worker():
             imgs = default_censor(imgs)
 
         async_task.results = async_task.results + imgs
+        async_task.lasttime = time.time()
 
         if do_not_show_finished_images:
             return
@@ -316,6 +320,7 @@ def worker():
     def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
         paths, image, log_item = log(img, metadata, metadata_parser, output_format, task, persist_image, user_did, remote_task)
         async_task.img_paths.append(paths)
+        async_task.lasttime = time.time()
         if remote_task:
             p2p_task.call_remote_save_and_log(async_task, image, log_item)
 
@@ -1324,7 +1329,14 @@ def worker():
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
+            timeout = 40  # 
+            async_task.lasttime = time.time()
             while async_task.processing:
+                if time.time() - async_task.lasttime > timeout:
+                    logger.warning(f"远程任务处理超时 (ID: {async_task.task_id})，已经等待 {timeout} 秒没有响应")
+                    async_task.processing = False
+                    stop_processing(async_task, 0, "远程处理请求超时！")
+                    break
                 time.sleep(2)
             return
         if is_models_file_absent(async_task.preset):

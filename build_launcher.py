@@ -53,7 +53,6 @@ def download_if_updated(url, save_path):
         local_mtime_str = datetime.fromtimestamp(local_mtime).strftime('%a, %d %b %Y %H:%M:%S GMT')
     else:
         local_mtime = None
-
     try:
         response = requests.head(url, allow_redirects=True)
         response.raise_for_status()  # 检查请求是否成功
@@ -78,7 +77,7 @@ def download_if_updated(url, save_path):
             with open(save_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-        print(f"The lib file updated to: {save_path}")
+        print(f"Downloaded the lastest lib file and save to: {save_path}")
     except requests.exceptions.RequestException as e:
         print(f"Update lib file: {e}")
         return False
