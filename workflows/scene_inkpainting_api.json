@@ -383,7 +383,7 @@
   },
   "63": {
     "inputs": {
-      "strength": 1,
+      "strength": 1.0000000000000002,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
@@ -414,7 +414,7 @@
   },
   "64": {
     "inputs": {
-      "type": "hed/pidi/scribble/ted",
+      "type": "canny/lineart/anime_lineart/mlsd",
       "control_net": [
         "67",
         0
@@ -427,9 +427,9 @@
   },
   "65": {
     "inputs": {
-      "preprocessor": "FakeScribblePreprocessor",
+      "preprocessor": "LineArtPreprocessor",
       "resolution": [
-        "66",
+        "86",
         0
       ],
       "image": [
@@ -440,21 +440,6 @@
     "class_type": "AIO_Preprocessor",
     "_meta": {
       "title": "AIO Aux Preprocessor"
-    }
-  },
-  "66": {
-    "inputs": {
-      "image_gen_width": 512,
-      "image_gen_height": 512,
-      "resize_mode": "Just Resize",
-      "original_image": [
-        "10",
-        0
-      ]
-    },
-    "class_type": "PixelPerfectResolution",
-    "_meta": {
-      "title": "Pixel Perfect Resolution"
     }
   },
   "67": {
@@ -669,6 +654,19 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
+    }
+  },
+  "86": {
+    "inputs": {
+      "resize_mode": "Just Resize",
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "easy imagePixelPerfect",
+    "_meta": {
+      "title": "ImagePixelPerfect"
     }
   }
 }
