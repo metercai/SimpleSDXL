@@ -68,7 +68,7 @@ def check_base_environment():
 
     base_path = os.path.abspath(os.path.join(root, f'enhanced/libs/{base_file[platform_os]}'))
     base_url = f'{base_url}/{base_file[platform_os]}'
-    if REINSTALL_BASE or download_if_updated(base_url, base_path):
+    if download_if_updated(base_url, base_path) or REINSTALL_BASE:
         if not is_installed(base_pkg):
             run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
         else:
