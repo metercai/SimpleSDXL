@@ -16,13 +16,12 @@ class AsyncTask:
         self.results = []
         from modules.flags import Performance, MetadataScheme, ip_list, disabled, task_class_mapping, default_vae
         from modules.util import get_enabled_loras
-        from modules.config import default_max_lora_number
         import uuid
         import args_manager
         import re
+        import time
         import shared
-
-        from enhanced.simpleai import comfyd
+        import enhanced.all_parameters as ads
 
         normalize_lines = lambda text: re.sub(r'[\r\n]+', ' ', text)
 
@@ -34,6 +33,7 @@ class AsyncTask:
         self.task_id = str(uuid.uuid4()) if task_id is None else task_id
         self.remote_task = False
         self.img_paths = []
+        self.lasttime = time.time()
 
         self.performance_loras = []
 
@@ -60,8 +60,8 @@ class AsyncTask:
         self.base_model_name = args.pop()
         self.refiner_model_name = args.pop()
         self.refiner_switch = args.pop()
-        self.loras = get_enabled_loras([(bool(args.pop()), str(args.pop()), float(args.pop())) for _ in
-                                        range(default_max_lora_number)])
+        self.loras = get_enabled_loras([(bool(lora[0]), str(lora[1]), float(lora[2])) for lora in args.pop()])
+        
         self.input_image_checkbox = args.pop()
         self.current_tab = args.pop()
         self.uov_method = args.pop()
@@ -117,25 +117,22 @@ class AsyncTask:
         self.inpaint_erode_or_dilate = args.pop()
 
         self.params_backend = args.pop().copy()
-        self.backfill_prompt = self.params_backend.pop('backfill_prompt')
-        self.translation_methods = self.params_backend.pop('translation_methods')
-        self.comfyd_active_checkbox = self.params_backend.pop('comfyd_active_checkbox')
+        self.params_backend = ads.convert_dict(self.params_backend)
+        self.translation_methods = ads.get_admin_default('translation_methods')
         self.nickname = self.params_backend.pop('nickname')
         self.user_did = self.params_backend.pop('user_did')
 
-
-        self.save_final_enhanced_image_only = args.pop() if not args_manager.args.disable_image_log else False
-        self.save_metadata_to_images = args.pop() if not args_manager.args.disable_metadata else False
-        self.metadata_scheme = MetadataScheme(
-            args.pop()) if not args_manager.args.disable_metadata else MetadataScheme.FOOOCUS
+        self.save_final_enhanced_image_only = args.pop() 
+        self.save_final_enhanced_image_only = False if self.save_final_enhanced_image_only is None else self.save_final_enhanced_image_only
+        self.save_metadata_to_images = args.pop()
+        self.save_metadata_to_images = False if self.save_metadata_to_images is None else self.save_metadata_to_images
+        self.metadata_scheme = args.pop()
+        self.metadata_scheme = MetadataScheme.FOOOCUS if self.metadata_scheme is None else MetadataScheme(self.metadata_scheme)
 
         self.cn_tasks = {x: [] for x in ip_list}
         self.cn_task_num = 0
-        for _ in range(modules.config.default_controlnet_image_count):
-            cn_img = args.pop()
-            cn_stop = args.pop()
-            cn_weight = args.pop()
-            cn_type = args.pop()
+        for cn_item in args.pop():
+            (cn_img, cn_stop, cn_weight, cn_type) = cn_item
             if cn_img is not None:
                 self.cn_tasks[cn_type].append([cn_img, cn_stop, cn_weight])
                 self.cn_task_num += 1
@@ -149,42 +146,8 @@ class AsyncTask:
         self.enhance_uov_method = args.pop()
         self.enhance_uov_processing_order = args.pop()
         self.enhance_uov_prompt_type = args.pop()
-        self.enhance_ctrls = []
-        for _ in range(modules.config.default_enhance_tabs):
-            enhance_enabled = args.pop()
-            enhance_mask_dino_prompt_text = args.pop()
-            enhance_prompt = args.pop()
-            enhance_negative_prompt = args.pop()
-            enhance_mask_model = args.pop()
-            enhance_mask_cloth_category = args.pop()
-            enhance_mask_sam_model = args.pop()
-            enhance_mask_text_threshold = args.pop()
-            enhance_mask_box_threshold = args.pop()
-            enhance_mask_sam_max_detections = args.pop()
-            enhance_inpaint_disable_initial_latent = args.pop()
-            enhance_inpaint_engine = args.pop()
-            enhance_inpaint_strength = args.pop()
-            enhance_inpaint_respective_field = args.pop()
-            enhance_inpaint_erode_or_dilate = args.pop()
-            enhance_mask_invert = args.pop()
-            if enhance_enabled:
-                self.enhance_ctrls.append([
-                    enhance_mask_dino_prompt_text,
-                    enhance_prompt,
-                    enhance_negative_prompt,
-                    enhance_mask_model,
-                    enhance_mask_cloth_category,
-                    enhance_mask_sam_model,
-                    enhance_mask_text_threshold,
-                    enhance_mask_box_threshold,
-                    enhance_mask_sam_max_detections,
-                    enhance_inpaint_disable_initial_latent,
-                    enhance_inpaint_engine,
-                    enhance_inpaint_strength,
-                    enhance_inpaint_respective_field,
-                    enhance_inpaint_erode_or_dilate,
-                    enhance_mask_invert
-                ])
+        self.enhance_ctrls = args.pop()
+        
         self.should_enhance = self.enhance_checkbox and (self.enhance_uov_method != disabled.casefold() or len(self.enhance_ctrls) > 0)
         self.images_to_enhance_count = 0
         self.enhance_stats = {}
@@ -238,10 +201,10 @@ class AsyncTask:
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
-            self.scene_canvas_image = self.params_backend.pop('scene_canvas_image')
-            self.scene_input_image1 = self.params_backend.pop('scene_input_image1')
+            self.scene_canvas_image = self.params_backend.pop('scene_canvas_image', None)
+            self.scene_input_image1 = self.params_backend.pop('scene_input_image1', None)
             self.scene_theme = self.params_backend.pop('scene_theme')
-            self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt')
+            self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt', None)
             self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
 
@@ -329,6 +292,7 @@ def worker():
         if img is None:
             logger.info(f'{text}')
         async_task.yields.append(['preview', (number, text, img)])
+        async_task.lasttime = time.time()
 
     def yield_result(async_task, imgs, progressbar_index, black_out_nsfw, censor=True, do_not_show_finished_images=False):
         if async_task.remote_task:
@@ -345,6 +309,7 @@ def worker():
             imgs = default_censor(imgs)
 
         async_task.results = async_task.results + imgs
+        async_task.lasttime = time.time()
 
         if do_not_show_finished_images:
             return
@@ -355,6 +320,7 @@ def worker():
     def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
         paths, image, log_item = log(img, metadata, metadata_parser, output_format, task, persist_image, user_did, remote_task)
         async_task.img_paths.append(paths)
+        async_task.lasttime = time.time()
         if remote_task:
             p2p_task.call_remote_save_and_log(async_task, image, log_item)
 
@@ -374,7 +340,7 @@ def worker():
             else:
                 logger.info(f'Processing time (total): {processing_time:.2f} seconds, status:{status}')
         if async_task.task_class in flags.comfy_classes:
-            if async_task.comfyd_active_checkbox:
+            if ads.get_admin_default('comfyd_active_checkbox'):
                 comfyd.finished()
             else:
                 comfyd.stop()
@@ -1363,7 +1329,14 @@ def worker():
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
+            timeout = 40  # 
+            async_task.lasttime = time.time()
             while async_task.processing:
+                if time.time() - async_task.lasttime > timeout:
+                    logger.warning(f"远程任务处理超时 (ID: {async_task.task_id})，已经等待 {timeout} 秒没有响应")
+                    async_task.processing = False
+                    stop_processing(async_task, 0, "远程处理请求超时！")
+                    break
                 time.sleep(2)
             return
         if is_models_file_absent(async_task.preset):
@@ -1648,7 +1621,8 @@ def worker():
                 if async_task.task_method.lower().endswith('_cn'):
                     async_task.steps = async_task.steps * 3
                     #all_steps = async_task.steps * async_task.image_number
-                async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
+                if async_task.scene_additional_prompt:
+                    async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:

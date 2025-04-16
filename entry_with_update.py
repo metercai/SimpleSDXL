@@ -67,19 +67,31 @@ try:
     remote_commit = repo.revparse_single(remote_reference)
 
     merge_result, _ = repo.merge_analysis(remote_commit.id)
+    branch_name_display = branch_name if branch_name!="main" else "Fooocus"
+    local_commit_short = str(local_commit.id)[:7]
+    remote_commit_short = str(remote_commit.id)[:7]
 
     if merge_result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
-        print(f'{branch_name if branch_name!="main" else "Fooocus"}: Already up-to-date, {str(local_commit.id)[:7]}')
-    elif merge_result & pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
-        local_branch.set_target(remote_commit.id)
-        repo.head.set_target(remote_commit.id)
-        repo.checkout_tree(repo.get(remote_commit.id))
-        repo.reset(local_branch.target, pygit2.GIT_RESET_HARD)
-        print(f'{branch_name if branch_name!="main" else "Fooocus"}: Fast-forward merge, {str(local_commit.id)[:7]} <- {str(remote_commit.id)[:7]}')
-    elif merge_result & pygit2.GIT_MERGE_ANALYSIS_NORMAL:
-        print(f'{branch_name if branch_name!="main" else "Fooocus"}: Update failed - Did you modify any file? {str(local_commit.id)[:7]} <- {str(remote_commit.id)[:7]}')
+        print(f'{branch_name_display}: Already up-to-date, {local_commit_short}')
+    elif remote_commit.id != local_commit.id: 
+        try:
+            repo.reset(remote_commit.id, pygit2.GIT_RESET_HARD)
+            try:
+                local_branch.set_target(remote_commit.id)
+                print(f'{branch_name_display}: Force Sync Remote Updates, {local_commit_short} -> {remote_commit_short}')
+            except Exception as ref_error:
+                try:
+                    ref_name = f'refs/heads/{branch_name}'
+                    repo.references.create(ref_name, remote_commit.id, True)
+                    print(f'{branch_name_display}: Force Sync Remote Updates, {local_commit_short} -> {remote_commit_short}')
+                except Exception as alt_error:
+                    print(f'Warning: Failed to update the reference, but the file has been updated. - {str(alt_error)}')
+        except Exception as reset_error:
+            print(f'{branch_name_display}: Failed to Force Update - {str(reset_error)}')
+    else: 
+        print(f'{branch_name_display}: Update failed when {local_commit_short} <- {remote_commit_short}')
 except Exception as e:
-    print(f'{branch_name if branch_name!="main" else "Fooocus"}: Update failed.')
+    print(f'{branch_name_display}: Update failed.')
     print(str(e))
 
 

@@ -114,7 +114,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 180366251049198,
+      "seed": 1124319170435230,
       "steps": 30,
       "cfg": 2,
       "denoise": 1
@@ -383,9 +383,9 @@
   },
   "63": {
     "inputs": {
-      "strength": 0.5,
+      "strength": 1.0000000000000002,
       "start_percent": 0,
-      "end_percent": 0.8,
+      "end_percent": 0.9000000000000002,
       "positive": [
         "16",
         0
@@ -436,7 +436,7 @@
   },
   "66": {
     "inputs": {
-      "preprocessor": "LineArtPreprocessor",
+      "preprocessor": "CannyEdgePreprocessor",
       "resolution": [
         "85",
         0

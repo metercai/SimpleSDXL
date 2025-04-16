@@ -374,7 +374,6 @@ default_max_lora_number = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, int) and x >= 1
 )
 
-ads.init_all_params_index(default_max_lora_number, args_manager.args.disable_metadata)
 
 default_temp_path = os.path.join(tempfile.gettempdir(), 'fooocus')
 temp_path = init_temp_path(get_config_item_or_set_default(

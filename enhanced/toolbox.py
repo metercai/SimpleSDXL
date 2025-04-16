@@ -257,14 +257,6 @@ def reset_image_params(state_params, is_generating, inpaint_mode):
     return results + [gr.update(visible=False)] * 2
 
 
-def apply_enabled_loras(loras):
-        enabled_loras = []
-        for lora_enabled, lora_model, lora_weight in loras:
-            if lora_enabled:
-                enabled_loras.append([lora_model, lora_weight])
-
-        return enabled_loras
-
 def save_preset(*args):    
     args = list(args)
     
