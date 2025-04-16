@@ -1,57 +1,75 @@
 import re
 import shared
 
-all_args = {}
-max_lora_number = 5
-flag_disable_metadata = True
+bool_map = {
+    "true": True,
+    "false": False
+}
+float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
 
-def get_diff_from_default(mode, *ctrls):
-    global all_args, default, max_lora_number
+cache_vars = {}
 
-    ctrls = list(ctrls)
-    diff_dict = {}
-    exclude_args = ['uov_input_image', 'inpaint_input_image', 'inpaint_mask_image', 'metadata_scheme']
-    for key in all_args.keys():
-        if key not in exclude_args and key != 'loras' and key != 'ip_ctrls':
-            if key not in default.keys() or default[key] != ctrls[all_args[key]]:
-                diff_dict.update({key: ctrls[all_args[key]] })
-    loras = apply_enabled_loras([[bool(ctrls[all_args['loras']+i*3]), str(ctrls[all_args['loras']+1+i*3]), float(ctrls[all_args['loras']+2+i*3]) ] for i in range(max_lora_number)])
-    if len(loras)>0:
-        diff_dict.update({'loras':loras})
-    #ip_ctrls =  
+def convert_value(value):
+    global bool_map, float_pattern
+    
+    if value.lower() in bool_map:
+        value = bool_map[value.lower()]
+    elif value.isdigit() or ((value.startswith('-') or value.startswith('+')) and value[1:].isdigit()):
+        value = int(value)
+    elif re.match(float_pattern, value):
+        value = float(value)
+    elif value == 'None' or value == 'Unknown':
+        value = None
+    return value
 
-    if mode == 'log':
-        log_ext = {}
-        ads_params_for_log_list = ['adaptive_cfg', 'overwrite_step', 'overwrite_switch', 'inpaint_engine']
-        for k in diff_dict.keys():
-            if k in ads_params_for_log_list:
-                log_ext.update({k: diff_ads[k]})
-        diff_dict = log_ext
+def get_admin_default(admin_key):
+    global cache_vars, default
 
-    return diff_dict
+    cache_key = f'admin_{admin_key}'
+    if cache_key in cache_vars:
+        return cache_vars[cache_key]
+    admin_value = shared.token.get_local_admin_vars(admin_key).strip()
+    if admin_value is None or admin_value=="None" or admin_value=="Unknown":
+        if admin_key in default:
+            admin_value = str(default[admin_key])
+        else:
+            admin_value = 'None'
+    admin_value = convert_value(admin_value)
+    cache_vars[cache_key] = admin_value
+    return admin_value
 
-def apply_enabled_loras(loras):
-        enabled_loras = []
-        for lora_enabled, lora_model, lora_weight in loras:
-            if lora_enabled:
-                enabled_loras.append([lora_model, lora_weight])
+def get_user_default(user_key, state, config_default=None):
+    global cache_vars, default
 
-        return enabled_loras
+    cache_key = f'{state["__session"]}_{user_key}'
+    if cache_key in cache_vars:
+        return cache_vars[cache_key]
+    user_value = shared.token.get_local_vars(user_key, 'None', state["__session"], state["ua_hash"]).strip()
+    if user_value is None or user_value=="None" or user_value=="Unknown":
+        if config_default is not None:
+            user_value = str(config_default)
+        else:
+            if user_key in default:
+                user_value = str(default[user_key])
+            else:
+                user_value = 'None'
+    user_value = convert_value(user_value)
+    cache_vars[cache_key] = user_value
+    return user_value
 
-def get_dict_args(*ctrls):
-    global all_args, max_lora_number
+def set_admin_default_value(key, value, state):
+    global cache_vars
 
-    ctrls = list(ctrls)[0]
-    args_dict = {}
-    exclude_args = ['uov_input_image', 'inpaint_input_image', 'inpaint_mask_image', 'layer_mask_image', 'metadata_scheme']
-    for key in all_args.keys():
-        if key != 'loras' and key != 'ip_ctrls':
-            args_dict.update({key:ctrls[all_args[key]]})
-    loras = apply_enabled_loras([[bool(ctrls[all_args['loras']+i*3]), str(ctrls[all_args['loras']+1+i*3]), float(ctrls[all_args['loras']+2+i*3]) ] for i in range(max_lora_number)])
-    if len(loras)>0:
-        args_dict.update({'loras': loras})
-    return args_dict
+    cache_key = f'admin_{key}'
+    cache_vars[cache_key] = value
+    shared.token.set_local_admin_vars(key, str(value), state["__session"], state["ua_hash"])
 
+def set_user_default_value(key, value, state):
+    global cache_vars
+
+    cache_key = f'{state["__session"]}_{key}'
+    cache_vars[cache_key] = value
+    shared.token.set_local_vars(key, str(value), state["__session"], state["ua_hash"])
 
 default = {
     'disable_preview': False,
@@ -114,140 +132,170 @@ default = {
     'p2p_out_did_list': '',
     }
 
-bool_map = {
-    "true": True,
-    "false": False
-}
-float_pattern = r"^[+-]?\d*\.?\d+$|^[+-]?\d+\.?\d*$"
 
-cache_vars = {}
+all_args = [
+        'generate_image_grid',
+        'prompt',
+        'negative_prompt',
+        'style_selections',
+        'performance_selection',
+        'aspect_ratios_selection',
+        'image_number',
+        'output_format',
+        'image_seed',
+        'read_wildcards_in_order',
+        'sharpness',
+        'guidance_scale',
+        'base_model',
+        'refiner_model',
+        'refiner_switch',
+        'loras',
+        'input_image_checkbox',
+        'current_tab',
+        'uov_method',
+        'uov_input_image',
+        'outpaint_selections',
+        'inpaint_input_image',
+        'inpaint_additional_prompt',
+        'inpaint_mask_image',
+        'layer_methon',
+        'layer_input_image',
+        'iclight_enable',
+        'iclight_source_radio',
+        'disable_preview',
+        'disable_intermediate_results',
+        'disable_seed_increment',
+        'black_out_nsfw',
+        'adm_scaler_positive',
+        'adm_scaler_negative',
+        'adm_scaler_end',
+        'adaptive_cfg',
+        'clip_skip',
+        'sampler_name',
+        'scheduler_name',
+        'vae_name',
+        'overwrite_step',
+        'overwrite_switch',
+        'overwrite_width',
+        'overwrite_height',
+        'overwrite_vary_strength',
+        'overwrite_upscale_strength',
+        'mixing_image_prompt_and_vary_upscale',
+        'mixing_image_prompt_and_inpaint',
+        'debugging_cn_preprocessor',
+        'skipping_cn_preprocessor',
+        'canny_low_threshold',
+        'canny_high_threshold',
+        'refiner_swap_method',
+        'controlnet_softness',
+        'freeu_enabled',
+        'freeu_b1',
+        'freeu_b2', 
+        'freeu_s1', 
+        'freeu_s2',
+        'debugging_inpaint_preprocessor',
+        'inpaint_disable_initial_latent', 
+        'inpaint_engine', 
+        'inpaint_strength', 
+        'inpaint_respective_field', 
+        'inpaint_advanced_masking_checkbox', 
+        'invert_mask_checkbox', 
+        'inpaint_erode_or_dilate',
+        'params_backend',
+        'save_final_enhanced_image_only',
+        'save_metadata_to_images',
+        'metadata_scheme',
+        'ip_ctrls',
+        'debugging_dino', 
+        'dino_erode_or_dilate', 
+        'debugging_enhance_masks_checkbox',
+        'enhance_input_image',
+        'enhance_checkbox', 
+        'enhance_uov_method', 
+        'enhance_uov_processing_order',
+        'enhance_uov_prompt_type',
+        'enhance_ctrls'
+    ]
 
-def convert_value(value):
-    global bool_map, float_pattern
+backend_args = [
+        'backend_engine',
+        'preset',
+        'task_method',
+        'nickname',
+        'user_did',
+        'scene_frontend',
+        'scene_theme',
+        'scene_input_image1',
+        'scene_canvas_image',
+        'scene_canvas_mask',
+        'scene_additional_prompt',
+        'scene_steps',
+        'scene_aspect_ratio',
+        'scene_image_number',
+        'base_model_dtype',
+        'clip_model',
+        'llms_model',
+        'display_step',
+        'hires_fix_blurred',
+        'hires_fix_weight',
+        'hires_fix_stop',
+        'tiling',
+        'tiled_offset_x'
+        'tiled_offset_y'
+    ]
+
+def normalization(args, default_max_lora_number, default_controlnet_image_count, default_enhance_tabs):
+    args_norm = []
+    args_norm += args[:15]
+    index = 15
+
+    lora_list = [[bool(args[index + i * 3]), str(args[index + i * 3 + 1]), float(args[index + i * 3 + 2])] 
+                 for i in range(default_max_lora_number)]
+    args_norm.append(lora_list)
+    index += default_max_lora_number * 3
+
+    args_norm += args[index:index + 51]
+    index += 51
+
+    args_norm.append(normalization_backend(args[index]))
+    index += 1
+
+    args_norm += args[index:index + 3]
+    index += 3
+
+    controlnet_list = [[args[index + i * 4 + j] for j in range(4)] 
+                       for i in range(default_controlnet_image_count)]
+    args_norm.append(controlnet_list)
+    index += default_controlnet_image_count * 4
+
+    args_norm += args[index:index + 8]
+    index += 8
+
+    enhance_tabs_list = [[args[index + i * 16 + j] for j in range(16)] 
+                         for i in range(default_enhance_tabs)]
+    args_norm.append(enhance_tabs_list)
     
-    if value.lower() in bool_map:
-        value = bool_map[value.lower()]
-    elif value.isdigit() or ((value.startswith('-') or value.startswith('+')) and value[1:].isdigit()):
-        value = int(value)
-    elif re.match(float_pattern, value):
-        value = float(value)
-    elif value == 'None' or value == 'Unknown':
-        value = None
-    return value
+    return args_norm
 
-def get_admin_default(admin_key):
-    cache_key = f'admin_{admin_key}'
-    if cache_key in cache_vars:
-        return cache_vars[cache_key]
-    admin_value = convert_value(shared.token.get_local_admin_vars(admin_key).strip())
-    cache_vars[cache_key] = admin_value
-    return admin_value
+def normalization_backend(args):
+    global backend_args
 
-def get_user_default(user_key, state, config_default=None):
-    cache_key = f'{state["__session"]}_{user_key}'
-    if cache_key in cache_vars:
-        return cache_vars[cache_key]
-    user_value = shared.token.get_local_vars(user_key, 'None', state["__session"], state["ua_hash"]).strip()
-    if user_value is None or user_value=="None" or user_value=="Unknown":
-        if config_default is not None:
-            user_value = str(config_default)
-        else:
-            if user_key in default:
-                user_value = str(default[user_key])
-            else:
-                user_value = 'None'
-    user_value = convert_value(user_value)
-    cache_vars[cache_key] = user_value
-    return user_value
+    args_norm = [args[k] if k in args else None for k in backend_args]
+    if args_norm[8] is not None:
+        args_norm[8] = args['scene_canvas_image']['image']
+        args_norm[9] = args['scene_canvas_image']['mask']
 
-def set_admin_default_value(key, value, state):
-    cache_key = f'admin_{key}'
-    cache_vars[cache_key] = value
-    shared.token.set_local_admin_vars(key, str(value), state["__session"], state["ua_hash"])
+    #print(f'normalization_backend:{args_norm}')
+    return args_norm
 
-def set_user_default_value(key, value, state):
-    cache_key = f'{state["__session"]}_{key}'
-    cache_vars[cache_key] = value
-    shared.token.set_local_vars(key, str(value), state["__session"], state["ua_hash"])
+def convert_dict(args):
+    global backend_args
 
-def init_all_params_index(lora_number, disable_metadata):
-    global all_args, max_lora_number, flag_disable_metadata
-    
-    max_lora_number = lora_number
-    flag_disable_metadata = disable_metadata
-    c = 0
-    a = c + lora_number * 3
-    b = a + (0 if disable_metadata else 2) 
+    if len(backend_args) != len(args):
+        raise ValueError("args length mismatch: takes {len(backend_args)} arguments but {len(args)} were given.")
+    args_dict = {backend_args[i]: v for i, v in enumerate(args) if v is not None}
+    if 'scene_canvas_image' in args_dict and 'scene_canvas_mask' in args_dict:
+        args_dict['scene_canvas_image'] = { 'image': args_dict['scene_canvas_image'], 'mask': args_dict.pop('scene_canvas_mask') }
+    #print(f'convert_dict:{args_dict}')
+    return args_dict
 
-    all_args = {
-        'prompt': 0+c,
-        'negative_prompt': 1+c,
-        'style_selections': 2+c,
-        'performance_selection': 3+c,
-        'aspect_ratios_selection': 4+c,
-        'image_number': 5+c,
-        'output_format': 6+c,
-        'image_seed': 7+c,
-        'read_wildcards_in_order': 8+c,
-        'sharpness': 9+c,
-        'guidance_scale': 10+c,
-        'base_model': 11+c,
-        'refiner_model': 12+c,
-        'refiner_switch': 13+c,
-        'loras': 14+c,
-        'input_image_checkbox': 14+a,
-        'current_tab': 15+a,
-        'uov_method': 16+a,
-        'uov_input_image': 17+a,
-        'outpaint_selections': 18+a,
-        'inpaint_input_image': 19+a,
-        'inpaint_additional_prompt': 20+a,
-        'inpaint_mask_image': 21+a,
-        'layer_methon': 22+a,
-        'layer_input_image': 23+a,
-        'iclight_enable': 24+a,
-        'iclight_source_radio': 25+a,
-        'disable_preview': 26+a,
-        'disable_intermediate_results': 27+a,
-        'disable_seed_increment': 28+a,
-        'black_out_nsfw': 29+a,
-        'adm_scaler_positive': 30+a,
-        'adm_scaler_negative': 31+a,
-        'adm_scaler_end': 32+a,
-        'adaptive_cfg': 33+a,
-        'clip_skip': 34+a,
-        'sampler_name': 35+a,
-        'scheduler_name': 36+a,
-        'vae_name': 37+a,
-        'overwrite_step': 38+a,
-        'overwrite_switch': 39+a,
-        'overwrite_width': 40+a,
-        'overwrite_height': 41+a,
-        'overwrite_vary_strength': 42+a,
-        'overwrite_upscale_strength': 43+a,
-        'mixing_image_prompt_and_vary_upscale': 44+a,
-        'mixing_image_prompt_and_inpaint': 45+a,
-        'debugging_cn_preprocessor': 46+a,
-        'skipping_cn_preprocessor': 47+a,
-        'canny_low_threshold': 48+a,
-        'canny_high_threshold': 49+a,
-        'refiner_swap_method': 50+a,
-        'controlnet_softness': 51+a,
-        'freeu_enabled': 52+a,
-        'freeu_b1': 53+a,
-        'freeu_b2': 54+a, 
-        'freeu_s1': 55+a, 
-        'freeu_s2': 56+a,
-        'debugging_inpaint_preprocessor': 57+a,
-        'inpaint_disable_initial_latent': 58+a, 
-        'inpaint_engine': 59+a, 
-        'inpaint_strength': 60+a, 
-        'inpaint_respective_field': 61+a, 
-        'inpaint_advanced_masking_checkbox': 62+a, 
-        'invert_mask_checkbox': 63+a, 
-        'inpaint_erode_or_dilate': 64+a,
-        'params_backend': 65+a,
-        'save_metadata_to_images': 66+a,
-        'metadata_scheme': 67+a,
-        'ip_ctrls': 66+b,
-    }

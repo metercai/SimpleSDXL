@@ -200,10 +200,10 @@ function(system_params) {
 }
 '''
 
-def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list, request: gr.Request):
+def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, translation_methods, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list, request: gr.Request):
     #logger.info(f'request.headers:{request.headers}')
     #logger.info(f'request.client:{request.client}')
-    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
+    admin_currunt_value = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, translation_methods, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
     #logger.info(f'admin_currunt_value: {admin_currunt_value}')
 
     user_agent = request.headers["user-agent"]
@@ -338,21 +338,12 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
     return gr.update() if describe_prompt is None else describe_prompt
 
 
-def process_before_generation(state_params, seed_random, image_seed, backend_params, backfill_prompt, translation_methods, comfyd_active_checkbox, hires_fix_stop, hires_fix_weight, hires_fix_blurred, reserved_vram, wavespeed_strength, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, seed_random, image_seed, backend_params, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
-        translation_methods=translation_methods,
-        backfill_prompt=backfill_prompt,
-        comfyd_active_checkbox=comfyd_active_checkbox,
         preset=state_params["__preset"],
-        hires_fix_stop=hires_fix_stop,
-        hires_fix_weight=hires_fix_weight,
-        hires_fix_blurred=hires_fix_blurred,
-        reserved_vram=reserved_vram,
         ))
-    if wavespeed_strength>0:
-        backend_params.update(dict(wavespeed_strength=wavespeed_strength))
     
     if 'scene_frontend' in state_params:
         scene_additional_prompt = f'{scene_additional_prompt}{scene_additional_prompt_2}'
@@ -808,7 +799,6 @@ def get_all_user_default(state):
     results += [ads.get_user_default("disable_intermediate_results", state, False)]
     results += [ads.get_user_default("disable_seed_increment", state, False)]
     results += [ads.get_user_default("save_final_enhanced_image_only", state, False)]
-    results += [ads.get_user_default("translation_methods", state, config.default_translation_methods)]
     results += [ads.get_user_default("generate_image_grid", state, False)]
     results += [ads.get_user_default("black_out_nsfw", state, False)]
     results += [ads.get_user_default("save_metadata_to_images", state, True)]
@@ -816,7 +806,7 @@ def get_all_user_default(state):
     return results
 
 def get_all_admin_default(currunt_value):
-    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength', 'p2p_active_checkbox', "p2p_remote_process", "p2p_in_did_list", "p2p_out_did_list"]
+    admin_keys = ['comfyd_active_checkbox', 'fast_comfyd_checkbox', 'reserved_vram', 'minicpm_checkbox', 'advanced_logs', 'wavespeed_strength', 'translation_methods', 'p2p_active_checkbox', "p2p_remote_process", "p2p_in_did_list", "p2p_out_did_list"]
     result = []
     for i, admin_key in enumerate(admin_keys): 
         admin_value = ads.get_admin_default(admin_key)
@@ -831,6 +821,8 @@ def get_all_admin_default(currunt_value):
             else:
                 if admin_key == 'comfyd_active_checkbox':
                     admin_value = 'False' if args_manager.args.disable_comfyd or args_manager.args.disable_backend else admin_value
+                elif admin_key == 'translation_methods' and admin_value not in modules.flags.translation_methods:
+                    admin_value = config.default_translation_methods
                 result.append(gr.update(interactive=True, value=admin_value))
 
     return result

@@ -13,7 +13,7 @@ import enhanced.version as version
 import logging
 
 from pathlib import Path
-from build_launcher import build_launcher, ready_checker, is_win32_standalone_build, python_embeded_path
+from build_launcher import build_launcher, ready_checker, is_win32_standalone_build, python_embeded_path, download_if_updated
 from modules.launch_util import is_installed, is_installed_version, run, python, run_pip, requirements_met, delete_folder_content, git_clone, index_url, extra_index_url, target_path_install, met_diff
 from enhanced.logger import setup_logger, now_string, get_log_file
 
@@ -44,18 +44,18 @@ def check_base_environment():
 
     base_pkg = "simpleai_base"
     ver_required = "0.3.21"
-    REINSTALL_BASE = True #False if '_dev' not in version.get_branch() else True
-    base_url = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main"
-    #base_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main"
+    REINSTALL_BASE = True #if '_dev' not in version.get_branch() else True
     base_branch = "release"
     if '--dev' in (sys.argv):
         base_branch = 'dev'
+    #base_url = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/{base_branch}"
+    #base_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/{base_branch}"
+    base_url = f"https://edge.tokentm.net/pkg/simpleai_base/{base_branch}"
     base_file = {
-        "Windows": f'{base_url}/libs/{base_branch}/simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
-        "Linux": f'{base_url}/libs/{base_branch}/simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
-        "Darwin_arm64": f'{base_url}/libs/{base_branch}libs/simpleai_base-{ver_required}-cp310-cp310-macosx_11_0_arm64.whl',
-        'Darwin_x86_64': f'{base_url}/libs/{base_branch}libs/simpleai_base-{ver_required}-cp310-cp310-macosx_10_12_x86_64.whl'
-
+        "Windows": f'simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
+        "Linux": f'simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
+        "Darwin_arm64": f'simpleai_base-{ver_required}-cp310-cp310-macosx_11_0_arm64.whl',
+        'Darwin_x86_64': f'simpleai_base-{ver_required}-cp310-cp310-macosx_10_12_x86_64.whl'
         }
     platform_os = platform.system()
     if platform.system() == 'Darwin':
@@ -66,13 +66,16 @@ def check_base_environment():
     else:
         platform_os = platform.system()
 
-    if not is_installed(base_pkg):
-        run(f'"{python}" -m pip install {base_file[platform_os]}', f'Install {base_pkg} {ver_required}')
-    else:
-        version_installed = importlib.metadata.version(base_pkg)
-        if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
-            run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
-            run(f'"{python}" -m pip install {base_file[platform_os]}', f'Install {base_pkg} {ver_required}')
+    base_path = os.path.abspath(os.path.join(root, f'enhanced/libs/{base_file[platform_os]}'))
+    base_url = f'{base_url}/{base_file[platform_os]}'
+    if download_if_updated(base_url, base_path) or REINSTALL_BASE:
+        if not is_installed(base_pkg):
+            run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
+        else:
+            version_installed = importlib.metadata.version(base_pkg)
+            if REINSTALL_BASE or packaging.version.parse(ver_required) != packaging.version.parse(version_installed):
+                run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
+                run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
 
     extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14')]
     for (extra_pkg, extra_pkg_name) in extra_pkgs:
