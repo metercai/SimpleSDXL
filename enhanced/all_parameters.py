@@ -130,6 +130,7 @@ default = {
     'p2p_remote_process': 'Disable',
     'p2p_in_did_list': '',
     'p2p_out_did_list': '',
+    'style_preview_checkbox': True,
     }
 
 

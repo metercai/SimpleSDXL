@@ -792,14 +792,14 @@ def update_upscale_size_of_image(image, uov_method):
     return f'{W} x {H} | {width} x {height}'
 
 def get_all_user_default(state):
-    #[backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, layout_toggle]
+    #[backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, style_preview_checkbox]
     results = [ads.get_user_default("backfill_prompt", state, config.default_backfill_prompt)]
     results += [ads.get_user_default("image_tools_checkbox", state, True)]
     results += [ads.get_user_default("disable_preview", state, False)]
     results += [ads.get_user_default("disable_intermediate_results", state, False)]
     results += [ads.get_user_default("disable_seed_increment", state, False)]
     results += [ads.get_user_default("save_final_enhanced_image_only", state, False)]
-    results += [ads.get_user_default("layout_toggle", state, False)]
+    results += [ads.get_user_default("style_preview_checkbox", state)]
     return results
 
 def get_all_admin_default(currunt_value):
