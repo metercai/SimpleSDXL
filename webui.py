@@ -1018,12 +1018,6 @@ with shared.gradio_root:
                     style_names=legal_style_names,
                     default_selected=modules.config.default_styles)
                 with gr.Row():
-                    with gr.Column(scale=1, min_width=80):
-                        layout_toggle = gr.Checkbox(label="Use Visual",
-                                                    value=False,
-                                                    container=False,
-                                                    elem_classes=["layout_toggle"],
-                                                    scale=0)
                     with gr.Column(scale=5):
                         style_search_bar = gr.Textbox(show_label=False, container=False,
                                                     placeholder="\U0001F50E Type here to search styles ...",
@@ -1098,42 +1092,6 @@ with shared.gradio_root:
                     for style in legal_style_names:
                         variants.append("primary" if style in selected_styles else "secondary")
                     return [gr.update(variant=v,) for v in variants]
-
-                layout_toggle.change(toggle_layout,
-                                    inputs=[layout_toggle, has_loaded],
-                                    outputs=[style_selections, visual_layout_container, has_loaded],
-                                    queue=False,
-                                    show_progress=False).then(
-                    lambda: None, _js='() => {refresh_style_layout(); }').then(
-                                    filter_styles,
-                                    inputs=[style_search_bar, layout_toggle, style_selections],
-                                    outputs=buttons + [style_selections] + [filtered_sorted_styles],
-                                    queue=False,
-                                    show_progress=False).then(
-                    lambda: None, _js='()=>{refresh_style_localization();}')
-
-                style_search_bar.change(style_sorter.search_styles,
-                                        inputs=[style_selections, style_search_bar],
-                                        outputs=style_selections,
-                                        queue=False,
-                                        show_progress=False).then(
-                                        filter_styles,
-                                        inputs=[style_search_bar, layout_toggle, style_selections],
-                                        outputs=buttons + [style_selections] + [filtered_sorted_styles],
-                                        queue=False,
-                                        show_progress=False).then(
-                    lambda: None,_js='()=>{refresh_style_localization(); refresh_style_layout();}')
-
-                gradio_receiver_style_selections.input(style_sorter.sort_styles,
-                                                       inputs=style_selections,
-                                                       outputs=style_selections,
-                                                       queue=False,
-                                                       show_progress=False).then(
-                                                       filter_styles,
-                                                       inputs=[style_search_bar, layout_toggle, style_selections],
-                                                       outputs=buttons + [style_selections] + [filtered_sorted_styles],queue=False,
-                                                       show_progress=False).then(
-                    lambda: None, _js='()=>{refresh_style_localization();}')
 
                 style_selections.change(update_button_variants,
                                         inputs=style_selections,
@@ -1222,6 +1180,7 @@ with shared.gradio_root:
                             mobile_link = gr.HTML(elem_classes=["htmlcontent"], value=f'{get_local_url}/<div>Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.</div>')
                             prompt_preset_button = gr.Button(value='Save the current parameters as a preset package')
                             backfill_prompt = gr.Checkbox(label='Backfill prompt while switching images', value=modules.config.default_backfill_prompt)
+                            layout_toggle = gr.Checkbox(label="Enable visual style preview", value=True, elem_classes=["layout_toggle"], scale=0)
                             disable_preview = gr.Checkbox(label='Disable Preview', value=modules.config.default_black_out_nsfw,
                                                       interactive=not modules.config.default_black_out_nsfw)
                             disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results',
@@ -1248,7 +1207,42 @@ with shared.gradio_root:
                                                        info='Image Prompt parameters are not included. Use png and a1111 for compatibility with Civitai.',
                                                        visible=modules.config.default_save_metadata_to_images)
                             save_metadata_to_images.change(toggle_checked, inputs=[save_metadata_to_images], outputs=[metadata_scheme], queue=False, show_progress=False)
+                    layout_toggle.change(toggle_layout,
+                                    inputs=[layout_toggle, has_loaded],
+                                    outputs=[style_selections, visual_layout_container, has_loaded],
+                                    queue=False,
+                                    show_progress=False) \
+                                .then(lambda: None, _js='() => {refresh_style_layout(); }') \
+                                .then(filter_styles,
+                                    inputs=[style_search_bar, layout_toggle, style_selections],
+                                    outputs=buttons + [style_selections] + [filtered_sorted_styles],
+                                    queue=False,
+                                    show_progress=False) \
+                                .then(lambda x,y: ads.set_user_default_value("layout_toggle",x,y), inputs=[layout_toggle, state_topbar]) \
+                                .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
+                    style_search_bar.change(style_sorter.search_styles,
+                                        inputs=[style_selections, style_search_bar],
+                                        outputs=style_selections,
+                                        queue=False,
+                                        show_progress=False) \
+                                    .then(filter_styles,
+                                        inputs=[style_search_bar, layout_toggle, style_selections],
+                                        outputs=buttons + [style_selections] + [filtered_sorted_styles],
+                                        queue=False,
+                                        show_progress=False) \
+                                    .then(lambda: None,_js='()=>{refresh_style_localization(); refresh_style_layout();}')
+
+                    gradio_receiver_style_selections.input(style_sorter.sort_styles,
+                                                       inputs=style_selections,
+                                                       outputs=style_selections,
+                                                       queue=False,
+                                                       show_progress=False) \
+                                                    .then(filter_styles,
+                                                       inputs=[style_search_bar, layout_toggle, style_selections],
+                                                       outputs=buttons + [style_selections] + [filtered_sorted_styles],queue=False,
+                                                       show_progress=False) \
+                                                    .then(lambda: None, _js='()=>{refresh_style_localization();}')
 
                     with gr.Tab(label='Local System'):
                         with gr.Column() as admin_panel:
@@ -1327,7 +1321,7 @@ with shared.gradio_root:
         
                 def sync_state_params(key, value, state):
                     state.update({key: value})
-                    ads.set_user_local_vars(key, value, state)
+                    ads.set_user_default_value(key, value, state)
 
                 def sync_backend_params(key, v, params, state):
                     params.update({key:v})
@@ -1356,7 +1350,7 @@ with shared.gradio_root:
                 admin_sync_button.click(topbar.admin_sync_to_guest, inputs=[state_topbar], outputs=admin_sync_button, queue=False, show_progress=False)
 
                 admin_ctrls = [comfyd_active_checkbox, fast_comfyd_checkbox, reserved_vram, minicpm_checkbox, advanced_logs, wavespeed_strength, translation_methods, p2p_active_checkbox, p2p_remote_process, p2p_in_did_list, p2p_out_did_list]
-                user_app_ctrls = [backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, generate_image_grid, black_out_nsfw, save_metadata_to_images, metadata_scheme]
+                user_app_ctrls = [backfill_prompt, image_tools_checkbox, disable_preview, disable_intermediate_results, disable_seed_increment, save_final_enhanced_image_only, layout_toggle]
 
 
             iclight_enable.change(lambda x: [gr.update(interactive=x, value='' if not x else comfy_task.iclight_source_names[0]), gr.update(value=flags.add_ratio('1024*1024') if not x else modules.config.default_aspect_ratio)], inputs=iclight_enable, outputs=[iclight_source_radio, aspect_ratios_selections[0]], queue=False, show_progress=False)
