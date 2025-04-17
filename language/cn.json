@@ -225,7 +225,7 @@
   "Big Model": "大模型",
   "Third APIs": "三方接口",
   "'Model' requires more GPU/CPU and 'APIs' rely on third.": "本地模型要消耗更多GPU算力，在线接口会依赖于第三方。",
-  "Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.": "手机访问的局域网地址。在\"社区网络\"里开启P2P网络可远程生图。",
+  "Mobile phone access address within the LAN. If you want WAN access, consulting QQ group: 938075852.": "手机访问的内网地址。公网远程生图可参考wiki说明。",
   "Click and Entry embedded ComfyUI from here.": "点击进入内嵌的ComfyUI",
   "Inpaint Additional Prompt": "重绘附加提示词",
   "Additional Prompt Quick List": "重绘快捷提示词",
@@ -659,7 +659,7 @@
     "Filter out following properties (comma seperated). Example film grain, purple, cat": "过滤掉以下属性（用逗号分隔）。例如：film grain, purple, cat（胶片颗粒感、紫色、猫）",
 
     "Leo Dragonyear": "LEO-龙年贺春",
-    "Use Visual":"可视化",
+    "Enable visual style preview": "启用可视化风格预览",
     "Image Style": "图片风格",
     "Fooocus V2": "Fooocus V2",
     "Fooocus Enhance": "Fooocus-增强",
