@@ -154,7 +154,13 @@ function refresh_style_layout() {
         const finalOrder = [...selectedItems, ...visibleUnselected, ...hiddenItems];
 
         container.innerHTML = '';
-        finalOrder.forEach(item => container.appendChild(item));
+        finalOrder.forEach(item => {
+            const isHidden = hiddenItems.includes(item);
+            item.style.display = isHidden ? 'none' : 'block';
+            item.style.opacity = isHidden ? '0' : '1';
+            item.style.pointerEvents = isHidden ? 'none' : 'all';
+            container.appendChild(item);
+        });
     }
         document.querySelectorAll('.style-button').forEach(button => {
             const rawName = button.getAttribute('data-original-text') || button.textContent.trim();
