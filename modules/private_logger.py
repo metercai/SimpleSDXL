@@ -72,7 +72,7 @@ js = (
 )
 
 
-def log(img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
+def log(img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=None):
     global css_styles, js
 
     if not user_did:
@@ -102,27 +102,27 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
             pnginfo = None
         if output_format == OutputFormat.JPEG.value:
             local_temp_filename = local_temp_filename[:-4] + "png"
-        if not remote_task:
+        if remote_task is None:
             image.save(local_temp_filename, pnginfo=pnginfo)
         else:
             image.save(img_byte_result, format='PNG', pnginfo=pnginfo)
     elif output_format == OutputFormat.JPEG.value and image.mode != 'RGBA':
-        if not remote_task:
+        if remote_task is None:
             image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
         else:
             image.save(img_byte_result, format='JPEG', quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
     elif output_format == OutputFormat.WEBP.value:
-        if not remote_task:
+        if remote_task is None:
             image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
         else:
             image.save(img_byte_result, format='WEBP', quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
     else:
-        if not remote_task:
+        if remote_task is None:
             image.save(local_temp_filename)
         else:
             image.save(img_byte_result, format=output_format)
 
-    if remote_task:
+    if remote_task is not None:
         img_byte_result.seek(0)
 
     if args_manager.args.disable_image_log:
@@ -168,7 +168,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
 
     middle_part = item_head + item + middle_part
 
-    if not remote_task:
+    if remote_task is None:
         with open(html_name, 'w', encoding='utf-8') as f:
             f.write(begin_part + middle_part + end_part)
 

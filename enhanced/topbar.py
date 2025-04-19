@@ -217,7 +217,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
         user_did = shared.token.get_guest_did()
         user_session = sstoken
         state_params.update({"__session": user_session})
-        logger.info(f'New request/新身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+        logger.info(f'New request/新请求(无身份): {request.client.host}:{request.client.port} --> {request.headers.host}, session({user_session})')
     else:
         #logger.info(f'aitoken: {state_params["__session"]}, guest={shared.token.get_guest_did()}')
         user_session = state_params["__session"]
@@ -229,22 +229,15 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
             user_session = sstoken
             state_params.update({"__session": user_session})
             logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
-            logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+            logger.info(f'Reset request/重置请求(无效身份): {request.client.host}:{request.client.port} --> {request.headers.host}, session({user_session})')
             user = shared.token.get_user_context(user_did)
         else:
             user = shared.token.get_user_context(user_did)
+            state_params.update({"sstoken": ""})
             if user.get_nickname().startswith('guest_'):
-                sstoken = shared.token.get_guest_sstoken(ua_hash)
-                state_params.update({"sstoken": sstoken})
-                user_did = shared.token.get_guest_did()
-                user_session = sstoken
-                state_params.update({"__session": user_session})
-                logger.debug(f'user-agent:{request.headers["user-agent"]}, cookie:{request.headers["cookie"]}')
-                logger.info(f'Reset request/重置的请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
-                user = shared.token.get_user_context(user_did)
+                logger.info(f'Reset request/游客请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session({user_session})')
             else:
-                state_params.update({"sstoken": ''})
-                logger.info(f'Binded request/带身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session={user_session}')
+                logger.info(f'Binded request/含身份请求: {request.client.host}:{request.client.port} --> {request.headers.host}, session({user_session})')
     shared.token.log_register(state_params["__session"])
     state_params.update({"user": shared.token.get_user_context(user_did)})
     state_params.update({"sys_did":  shared.token.get_sys_did()})
@@ -374,7 +367,7 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
             ))
 
     state_params["absent_model"] = False
-    if is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
+    if not args_manager.args.disable_backend and is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
         gr.Info(preset_absent_model_note_info)
         state_params["absent_model"] = True
         if shared.token.is_admin(state_params["user"].get_did()):
@@ -472,7 +465,7 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
         return refresh_nav_bars(state_params) + [gr.update()] * reset_layout_num + update_after_identity_sub(state_params)
     preset = state_params["bar_button"] if '\u2B07' not in state_params["bar_button"] else state_params["bar_button"].replace('\u2B07', '')
     logger.info(f'Reset_context: preset={state_params["__preset"]}-->{preset}, theme={state_params["__theme"]}, lang={state_params["__lang"]}')
-    if '\u2B07' in state_params["bar_button"]:
+    if not args_manager.args.disable_backend and '\u2B07' in state_params["bar_button"]:
         gr.Info(preset_down_note_info)
         if shared.token.is_admin(state_params["user"].get_did()):
             download_model_files(preset, state_params["user"].get_did(), True)
@@ -708,12 +701,9 @@ def update_after_identity_all(state):
     return results
 
 def update_after_identity(state):
-    #global user_admin_sid
 
     results = refresh_nav_bars(state)
     results += update_after_identity_sub(state)
-    if not shared.token.is_admin(state["user"].get_did()):
-        pass #user_admin_sid = state["__session"]
 
     return results
 
