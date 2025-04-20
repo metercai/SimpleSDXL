@@ -737,6 +737,8 @@ def auto_download_missing_files_with_retry(max_threads=5):
             try:
                 position, line = task_queue.get_nowait()
                 link, size = line.split(',')
+                size_mb = int(size) / (1024 * 1024)
+                print(f"{Fore.CYAN}▶ 正在下载: {link} ({size_mb:.1f}MB){Style.RESET_ALL}")
                 original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
                 if link.startswith(original_repo):
                     relative_path = link.replace(original_repo, "", 1).strip()
