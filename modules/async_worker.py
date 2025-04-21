@@ -429,7 +429,7 @@ def worker():
             logger.info(f'reserved_vram={reserved_vram}, wavespeed_strength={wavespeed_strength}')
             default_params.update(params_backend)
             try:
-                #user_cert = shared.token.get_register_cert(async_task.user_did)
+                user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:

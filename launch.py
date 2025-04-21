@@ -77,7 +77,7 @@ def check_base_environment():
                 run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
                 run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
 
-    extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14'), ('imageio-ffmpeg', 'imageio-ffmpeg')]
+    extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14'), ('imageio_ffmpeg', 'imageio-ffmpeg')]
     for (extra_pkg, extra_pkg_name) in extra_pkgs:
         if not is_installed(extra_pkg):
             pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
