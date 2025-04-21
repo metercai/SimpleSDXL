@@ -1,0 +1,7 @@
+accelerate>=1.6.0
+diffusers>=0.33.1
+transformers>=4.46.2
+scipy>=1.12.0
+torchsde>=0.2.6
+einops
+safetensors

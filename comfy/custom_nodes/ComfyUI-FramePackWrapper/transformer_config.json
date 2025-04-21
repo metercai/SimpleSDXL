@@ -1,0 +1,28 @@
+{
+  "_class_name": "HunyuanVideoTransformer3DModelPacked",
+  "_diffusers_version": "0.33.0.dev0",
+  "_name_or_path": "hunyuanvideo-community/HunyuanVideo",
+  "attention_head_dim": 128,
+  "guidance_embeds": true,
+  "has_clean_x_embedder": true,
+  "has_image_proj": true,
+  "image_proj_dim": 1152,
+  "in_channels": 16,
+  "mlp_ratio": 4.0,
+  "num_attention_heads": 24,
+  "num_layers": 20,
+  "num_refiner_layers": 2,
+  "num_single_layers": 40,
+  "out_channels": 16,
+  "patch_size": 2,
+  "patch_size_t": 1,
+  "pooled_projection_dim": 768,
+  "qk_norm": "rms_norm",
+  "rope_axes_dim": [
+    16,
+    56,
+    56
+  ],
+  "rope_theta": 256.0,
+  "text_embed_dim": 4096
+}

@@ -77,13 +77,13 @@ def check_base_environment():
                 run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
                 run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
 
-    extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14')]
+    extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14'), ('imageio-ffmpeg', 'imageio-ffmpeg')]
     for (extra_pkg, extra_pkg_name) in extra_pkgs:
         if not is_installed(extra_pkg):
             pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
             run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
-    update_pkgs = [('protobuf', '4.25.3'), ('onnx', '1.14.0')]
+    update_pkgs = [('transformers', '4.47.1'), ('diffusers', '0.33.1'), ('accelerate', '1.6.0')]
     for (update_pkg_name, update_pkg_version) in update_pkgs:
         if not is_installed_version(update_pkg_name, update_pkg_version):
             pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
@@ -107,7 +107,7 @@ def check_base_environment():
     token = simpleai_base.init_local('SimpleSDXL')
     sysinfo = json.loads(token.get_sysinfo().to_json())
     sysinfo.update(dict(did=token.get_sys_did()))
-    logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}')
+    logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}, HOST: {sysinfo["host_type"]}')
     #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, sys_name: {sysinfo["root_name"]}, dev_name:{sysinfo["host_name"]}')
 
     if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960 and not shared.args.disable_backend:

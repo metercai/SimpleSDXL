@@ -31,7 +31,7 @@ class AsyncTask:
         self.last_stop = False
         self.processing = False
         self.task_id = str(uuid.uuid4()) if task_id is None else task_id
-        self.remote_task = False
+        self.remote_task = None
         self.img_paths = []
         self.lasttime = time.time()
 
@@ -286,7 +286,7 @@ def worker():
     ldm_patched.modules.model_management.print_memory_info("worker init")
 
     def progressbar(async_task, number, text, img=None):
-        if async_task.remote_task:
+        if async_task.remote_task is not None:
             p2p_task.call_remote_progress(async_task, number, text, img)
             return
         if img is None:
@@ -295,7 +295,7 @@ def worker():
         async_task.lasttime = time.time()
 
     def yield_result(async_task, imgs, progressbar_index, black_out_nsfw, censor=True, do_not_show_finished_images=False):
-        if async_task.remote_task:
+        if async_task.remote_task is not None:
             p2p_task.call_remote_result(async_task, imgs, progressbar_index, black_out_nsfw, censor, do_not_show_finished_images)
             return
         if imgs is None:
@@ -317,11 +317,11 @@ def worker():
         async_task.yields.append(['results', async_task.results])
         return
 
-    def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=False):
+    def image_log(async_task, img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=None):
         paths, image, log_item = log(img, metadata, metadata_parser, output_format, task, persist_image, user_did, remote_task)
         async_task.img_paths.append(paths)
         async_task.lasttime = time.time()
-        if remote_task:
+        if remote_task is not None:
             p2p_task.call_remote_save_and_log(async_task, image, log_item)
 
     def p2p_save_and_log(async_task, result_img, result_log):
@@ -344,7 +344,7 @@ def worker():
                 comfyd.finished()
             else:
                 comfyd.stop()
-        if async_task.remote_task:
+        if async_task.remote_task is not None:
             p2p_task.call_remote_stop(async_task, processing_start_time, status)
         return
 
@@ -420,23 +420,24 @@ def worker():
             params_backend = async_task.params_backend.copy()
             input_images = params_backend.pop('input_images', None)
             options = params_backend.pop('ui_options', {})
-            reserved_vram = params_backend.pop('reserved_vram', 0)
+            reserved_vram = ads.get_admin_default('reserved_vram')
             if reserved_vram > 0:
                 comfyd.modify_variable({"reserved_vram": reserved_vram})
+            wavespeed_strength = ads.get_admin_default('wavespeed_strength')
+            if wavespeed_strength > 0:
+                params_backend.update({"wavespeed_strength": wavespeed_strength})
+            logger.info(f'reserved_vram={reserved_vram}, wavespeed_strength={wavespeed_strength}')
             default_params.update(params_backend)
             try:
-                #logger.info(f"ready to get register_cert for {async_task.user_did}")
-                user_cert = shared.token.get_register_cert(async_task.user_did)
-                if user_cert == "Unknown":
-                    raise ValueError(f"User cert is not found: {async_task.user_did}")
-                if not shared.token.is_registered(async_task.user_did):
-                    raise ValueError(f"User is not registered: {async_task.user_did}")
+                #user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:
                     callback = None
-                #logger.info(f"ready to process_flow for {comfy_task.name}")
-                imgs = comfypipeline.process_flow(async_task.user_did, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps, user_cert=user_cert)
+                client_id = async_task.user_did
+                if async_task.remote_task is not None:
+                    client_id = async_task.remote_task
+                imgs = comfypipeline.process_flow(client_id, comfy_task.name, comfy_task.params, comfy_task.images, callback=callback, total_steps=comfy_task.steps)
                 if inpaint_worker.current_task is not None:
                     imgs = [inpaint_worker.current_task.post_process(x) for x in imgs]
             except ValueError as e:
@@ -575,7 +576,8 @@ def worker():
                       async_task.metadata_scheme.value if async_task.save_metadata_to_images else async_task.save_metadata_to_images))
             if not shared.token.is_guest(async_task.user_did):
                 d.append(('User', 'created_by', f'{async_task.user_did}'))
-
+            if async_task.remote_task is not None:
+                d.append(('Generator', 'generated_by', f'{async_task.remote_task}'))
             d.append(('Version', 'version', f'{version.branch}_{version.get_simplesdxl_ver()}'))
             image_log(async_task, x, d, metadata_parser, async_task.output_format, task, persist_image, async_task.user_did, async_task.remote_task)
             
