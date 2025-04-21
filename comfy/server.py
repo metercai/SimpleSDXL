@@ -42,6 +42,7 @@ import re
 class BinaryEventTypes:
     PREVIEW_IMAGE = 1
     UNENCODED_PREVIEW_IMAGE = 2
+    PREVIEW_VIDEO = 3
 
 async def send_socket_catch_exception(function, message):
     try:
@@ -666,11 +667,10 @@ class PromptServer():
 
                 if "client_id" in json_data:
                     extra_data["client_id"] = json_data["client_id"]
-                    if not validity_did(json_data["client_id"]):
-                        return web.json_response({"error": f'invalid client_id:{json_data["client_id"]}', "node_errors": []}, status=400)
-                    else:
-                        if not is_registered_did(json_data["client_id"]):
-                            return web.json_response({"error": f'invalid client:{json_data["client_id"]}', "node_errors": []}, status=400)
+                    pattern = r'^[0-9a-fA-F]{32}$'
+                    if not re.fullmatch(pattern, json_data["client_id"]):
+                        if not validity_did(json_data["client_id"]) or not is_registered_did(json_data["client_id"]):
+                            return web.json_response({"error": f'invalid client_id:{json_data["client_id"]}', "node_errors": []}, status=400)
 
                 if valid[0]:
                     prompt_id = str(uuid.uuid4())
@@ -777,6 +777,8 @@ class PromptServer():
     async def send(self, event, data, sid=None):
         if event == BinaryEventTypes.UNENCODED_PREVIEW_IMAGE:
             await self.send_image(data, sid=sid)
+        elif event == BinaryEventTypes.PREVIEW_VIDEO:
+            await self.send_video(data, sid=sid)
         elif isinstance(data, (bytes, bytearray)):
             await self.send_bytes(event, data, sid)
         else:
@@ -807,6 +809,8 @@ class PromptServer():
             type_num = 1
         elif image_type == "PNG":
             type_num = 2
+        elif image_type == "WEBP":
+            type_num = 3
 
         bytesIO = BytesIO()
         header = struct.pack(">I", type_num)
@@ -814,6 +818,24 @@ class PromptServer():
         image.save(bytesIO, format=image_type, quality=95, compress_level=1)
         preview_bytes = bytesIO.getvalue()
         await self.send_bytes(BinaryEventTypes.PREVIEW_IMAGE, preview_bytes, sid=sid)
+
+    async def send_video(self, video_data, sid=None):
+        video_type = video_data[0]
+        video = video_data[1]
+    
+        type_num = 10
+        if video_type == "WEBM":
+            type_num = 10
+        elif video_type == "MP4":
+            type_num = 11
+    
+        bytesIO = BytesIO()
+        header = struct.pack(">I", type_num)
+        bytesIO.write(header)
+        bytesIO.write(video)
+        video_bytes = bytesIO.getvalue()
+    
+        await self.send_bytes(BinaryEventTypes.PREVIEW_VIDEO, video_bytes, sid=sid)
 
     async def send_bytes(self, event, data, sid=None):
         message = self.encode_bytes(event, data)

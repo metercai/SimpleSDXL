@@ -1,0 +1,76 @@
+{ 
+    "default_engine": {
+            "backend_engine": "Comfy",
+            "disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "available_aspect_ratios_selection": "Flux",
+            "scene_frontend": {
+                "version": "m1.1",
+                "theme": ["FramePack"],
+                "theme_title": "FramePack图生视频",            
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_aspect_ratio","aspect_ratio" ],
+                "prompt": {
+                     "FramePack": "A dynamic video,"
+                },
+                "task_method": {
+                    "FramePack": "framepack"
+                },
+                "multimodal_prompt": {
+                    "FramePack": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options."
+                },
+                "additional_prompt_title_2": "生成时长",
+                "additional_prompt_2": {
+                    "FramePack":"3.0"
+                },
+                "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"]
+            }
+    },
+    "default_model": "FramePackI2V_HY_fp8_e4m3fn.safetensors",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 5.0,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_image_number": 1,
+    "default_overwrite_step":30,
+    "default_prompt": "",
+    "default_prompt_negative": "low quality, worst quality",
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,FramePackI2V_HY_fp8_e4m3fn.safetensors,16331849976,0,",
+        "clip,clip_l.safetensors,246144152,0,",
+        "clip,llava_llama3_fp8_scaled.safetensors,9091392483,0,",
+        "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
+        "vae,hunyuan_video_vae_bf16.safetensors,492984198,0,"
+        ]
+}
+

@@ -420,9 +420,13 @@ def worker():
             params_backend = async_task.params_backend.copy()
             input_images = params_backend.pop('input_images', None)
             options = params_backend.pop('ui_options', {})
-            reserved_vram = params_backend.pop('reserved_vram', 0)
+            reserved_vram = ads.get_admin_default('reserved_vram')
             if reserved_vram > 0:
                 comfyd.modify_variable({"reserved_vram": reserved_vram})
+            wavespeed_strength = ads.get_admin_default('wavespeed_strength')
+            if wavespeed_strength > 0:
+                params_backend.update({"wavespeed_strength": wavespeed_strength})
+            logger.info(f'reserved_vram={reserved_vram}, wavespeed_strength={wavespeed_strength}')
             default_params.update(params_backend)
             try:
                 #user_cert = shared.token.get_register_cert(async_task.user_did)

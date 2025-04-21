@@ -12,6 +12,7 @@ import simpleai_base.p2p_task as p2p_task
 from build_launcher import is_win32_standalone_build
 from simpleai_base import simpleai_base, utils, comfyd, torch_version, xformers_version, comfyclient_pipeline
 from simpleai_base.params_mapper import ComfyTaskParams
+from simpleai_base.comfyclient_pipeline import get_media_info
 from simpleai_base.models_info import ModelsInfo, sync_model_info
 from simpleai_base.simpleai_base import export_identity_qrcode_svg, import_identity_qrcode
 

@@ -5,6 +5,7 @@ import json
 import urllib.parse
 import enhanced.all_parameters as ads
 import shared
+import numpy as np
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -12,6 +13,7 @@ from io import BytesIO
 from modules.flags import OutputFormat
 from modules.meta_parser import MetadataParser, get_exif
 from modules.util import generate_temp_filename
+from enhanced.simpleai import get_media_info
 import logging
 from enhanced.logger import format_name
 logger = logging.getLogger(format_name(__name__))
@@ -38,7 +40,7 @@ css_styles = (
     ".metadata .label { width: 15%; } "
     ".metadata .value { width: 85%; font-weight: bold; } "
     ".metadata th, .metadata td { border: 1px solid #4d4d4d; padding: 4px; } "
-    ".image-container img { height: auto; max-width: 512px; display: block; padding-right:10px; } "
+    ".image-container img, .image-container video { height: auto; max-width: 512px; display: block; padding-right:10px; } "
     ".image-container div { text-align: center; padding: 4px; } "
     "hr { border-color: gray; } "
     "button { background-color: black; color: white; border: 1px solid grey; border-radius: 5px; padding: 5px 10px; text-align: center; display: inline-block; font-size: 16px; cursor: pointer; }"
@@ -71,9 +73,23 @@ js = (
     </script>"""
 )
 
+begin_part_html = lambda date_string: f"<!DOCTYPE html><html><head><title>Fooocus Log {date_string}</title>{css_styles}</head><body>{js}<p>Fooocus Log {date_string} (private)</p>\n<p>Metadata is embedded if enabled in the config or developer debug mode. You can find the information for each image in line Metadata Scheme.</p><!--fooocus-log-split-->\n\n"
+end_part = f'\n<!--fooocus-log-split--></body></html>'
+
+def item_head_html(only_name):
+    root, ext = os.path.splitext(only_name)
+    is_video = ext in ['mp4', 'webm']
+
+    div_name = only_name.replace('.', '_')
+    item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
+    if is_video:
+        item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><video src='{only_name}' controls width='512' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'></video></a><div>{only_name}</div></td>"
+    else:
+        item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
+    return item_head
 
 def log(img, metadata, metadata_parser: MetadataParser | None = None, output_format=None, task=None, persist_image=True, user_did=None, remote_task=None):
-    global css_styles, js
+    global css_styles, js, end_part
 
     if not user_did:
         user_did = shared.token.get_guest_did()
@@ -87,52 +103,65 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     parsed_parameters = metadata_parser.to_string(metadata.copy()) if metadata_parser is not None else ''
     metadata_scheme = metadata_parser.get_scheme().value if metadata_parser is not None else ''
 
-    image = Image.fromarray(img)
-    img_byte_result = BytesIO()
+    is_image = isinstance(img, np.ndarray)
+    if is_image:
+        image = Image.fromarray(img)
+        img_byte_result = BytesIO()
 
-    if output_format == OutputFormat.PNG.value or (image.mode == 'RGBA' and output_format == OutputFormat.JPEG.value):
-        if metadata_scheme == 'simple':
-            pnginfo = PngInfo()
-            pnginfo.add_text("Comment", parsed_parameters)
-        elif metadata_parser:
-            pnginfo = PngInfo()
-            pnginfo.add_text('parameters', parsed_parameters)
-            pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
+        if output_format == OutputFormat.PNG.value or (image.mode == 'RGBA' and output_format == OutputFormat.JPEG.value):
+            if metadata_scheme == 'simple':
+                pnginfo = PngInfo()
+                pnginfo.add_text("Comment", parsed_parameters)
+            elif metadata_parser:
+                pnginfo = PngInfo()
+                pnginfo.add_text('parameters', parsed_parameters)
+                pnginfo.add_text('fooocus_scheme', metadata_parser.get_scheme().value)
+            else:
+                pnginfo = None
+            if output_format == OutputFormat.JPEG.value:
+                local_temp_filename = local_temp_filename[:-4] + "png"
+            if remote_task is None:
+                image.save(local_temp_filename, pnginfo=pnginfo)
+            else:
+                image.save(img_byte_result, format='PNG', pnginfo=pnginfo)
+        elif output_format == OutputFormat.JPEG.value and image.mode != 'RGBA':
+            if remote_task is None:
+                image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
+            else:
+                image.save(img_byte_result, format='JPEG', quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
+        elif output_format == OutputFormat.WEBP.value:
+            if remote_task is None:
+                image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
+            else:
+                image.save(img_byte_result, format='WEBP', quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
         else:
-            pnginfo = None
-        if output_format == OutputFormat.JPEG.value:
-            local_temp_filename = local_temp_filename[:-4] + "png"
-        if remote_task is None:
-            image.save(local_temp_filename, pnginfo=pnginfo)
-        else:
-            image.save(img_byte_result, format='PNG', pnginfo=pnginfo)
-    elif output_format == OutputFormat.JPEG.value and image.mode != 'RGBA':
-        if remote_task is None:
-            image.save(local_temp_filename, quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
-        else:
-            image.save(img_byte_result, format='JPEG', quality=95, optimize=True, progressive=True, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
-    elif output_format == OutputFormat.WEBP.value:
-        if remote_task is None:
-            image.save(local_temp_filename, quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
-        else:
-            image.save(img_byte_result, format='WEBP', quality=95, lossless=False, exif=get_exif(parsed_parameters, metadata_scheme) if metadata_parser else Image.Exif())
+            if remote_task is None:
+                image.save(local_temp_filename)
+            else:
+                image.save(img_byte_result, format=output_format)
+
+        if remote_task is not None:
+            img_byte_result.seek(0)
+
+        img_result = img_byte_result.getvalue()
+
+        if args_manager.args.disable_image_log:
+            return local_temp_filename, img_result, ''
+    
     else:
+        media_type, format_name = get_media_info(img[:8])
+        local_temp_filename_root, _ = os.path.splitext(local_temp_filename)
+        local_temp_filename = f'{local_temp_filename_root}.{format_name}'
+        only_name_root, _ = os.path.splitext(only_name)
+        only_name = f'{only_name_root}.{format_name}'
         if remote_task is None:
-            image.save(local_temp_filename)
-        else:
-            image.save(img_byte_result, format=output_format)
+            with open(local_temp_filename, "wb") as f:
+                f.write(img[8:])
+        img_result = img
 
-    if remote_task is not None:
-        img_byte_result.seek(0)
-
-    if args_manager.args.disable_image_log:
-        return local_temp_filename, img_byte_result.getvalue(), ''
-
-
+    begin_part = begin_part_html(date_string)
+    
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
-
-    begin_part = f"<!DOCTYPE html><html><head><title>Fooocus Log {date_string}</title>{css_styles}</head><body>{js}<p>Fooocus Log {date_string} (private)</p>\n<p>Metadata is embedded if enabled in the config or developer debug mode. You can find the information for each image in line Metadata Scheme.</p><!--fooocus-log-split-->\n\n"
-    end_part = f'\n<!--fooocus-log-split--></body></html>'
 
     middle_part = log_cache.get(html_name, "")
 
@@ -144,9 +173,7 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
             else:
                 middle_part = existing_split[0]
 
-    div_name = only_name.replace('.', '_')
-    item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
-    item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
+    item_head = item_head_html(only_name)
     
     item = "<td><table class='metadata'>"
     for label, key, value in metadata:
@@ -178,11 +205,11 @@ def log(img, metadata, metadata_parser: MetadataParser | None = None, output_for
     
         log_ext(local_temp_filename)
 
-    return local_temp_filename, img_byte_result.getvalue(), item
+    return local_temp_filename, img_result, item
 
 
 def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=None):
-    global css_styles, js
+    global css_styles, js, end_part
 
     if not user_did:
         user_did = shared.token.get_guest_did()
@@ -193,16 +220,22 @@ def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=
     date_string, local_temp_filename, only_name = generate_temp_filename(folder=path_outputs, extension=output_format)
     os.makedirs(os.path.dirname(local_temp_filename), exist_ok=True)
     
+    media_type, format_name = get_media_info(result_img[:8])
+    if media_type=='video':
+        local_temp_filename_root, _ = os.path.splitext(local_temp_filename)
+        local_temp_filename = f'{local_temp_filename_root}.{format_name}'
+        only_name_root, _ = os.path.splitext(only_name)
+        only_name = f'{only_name_root}.{format_name}'
+        result_img = result_img[8:]
     with open(local_temp_filename, "wb") as f:
         f.write(result_img)
 
     if args_manager.args.disable_image_log:
         return local_temp_filename
 
+    begin_part = begin_part_html(date_string)
+    
     html_name = os.path.join(os.path.dirname(local_temp_filename), 'log.html')
-
-    begin_part = f"<!DOCTYPE html><html><head><title>Fooocus Log {date_string}</title>{css_styles}</head><body>{js}<p>Fooocus Log {date_string} (private)</p>\n<p>Metadata is embedded if enabled in the config or developer debug mode. You can find the information for each image in line Metadata Scheme.</p><!--fooocus-log-split-->\n\n"
-    end_part = f'\n<!--fooocus-log-split--></body></html>'
     
     middle_part = log_cache.get(html_name, "")
 
@@ -214,10 +247,8 @@ def p2p_log(result_img, result_log, output_format, persist_image=True, user_did=
             else:
                 middle_part = existing_split[0]
     
-    div_name = only_name.replace('.', '_')
-    item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"
-    item_head += f"<td><a href=\"{only_name}\" target=\"_blank\"><img src='{only_name}' onerror=\"this.closest('.image-container').style.display='none';\" loading='lazy'/></a><div>{only_name}</div></td>"
-    
+    item_head = item_head_html(only_name)
+
     middle_part = item_head + result_log + middle_part
 
     with open(html_name, 'w', encoding='utf-8') as f:
