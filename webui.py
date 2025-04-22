@@ -119,7 +119,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     execution_start_time = time.perf_counter()
     finished = False
     ready_flag = True if qsize==1 else ready_flag
-    MAX_WAIT_TIME = 480
+    MAX_WAIT_TIME = 480 if task.content_type == 'image' else 1800
     POLL_INTERVAL = 0.08
     in_progress = False
 

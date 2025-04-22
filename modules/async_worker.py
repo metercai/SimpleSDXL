@@ -199,6 +199,7 @@ class AsyncTask:
         if 'display_step' in self.params_backend and self.overwrite_step!=-1:
             self.params_backend.pop('display_step')
             
+        self.content_type = 'image'
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
@@ -209,6 +210,8 @@ class AsyncTask:
             self.scene_var_number = self.params_backend.pop('scene_var_number', None)
             self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
+            if self.scene_frontend.startswith('v'):
+                self.content_type = 'video'
 
 class EarlyReturnException(BaseException):
     pass
@@ -1333,7 +1336,7 @@ def worker():
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
-            timeout = 40  # 
+            timeout = 40 if async_task.content_type == 'image' else 300 # 
             async_task.lasttime = time.time()
             while async_task.processing:
                 if time.time() - async_task.lasttime > timeout:
