@@ -120,7 +120,7 @@ def switch_scene_theme_ready_to_gen(state, image_number, canvas_image, input_ima
     return describe_prompt if describe_prompt else gr.update(), gr.update(interactive=ready_to_gen and img_is_ok)
 
 
-def switch_scene_theme(state, image_number, canvas_image, input_image1, additional_prompt, additional_prompt_2, theme=None):
+def switch_scene_theme(state, image_number, canvas_image, input_image1, additional_prompt, additional_prompt_2, var_number, theme=None):
     scenes = state.get("scene_frontend",{})
     visible = scenes.get('disvisible', [])
     inter = scenes.get('disinteractive', [])
@@ -147,6 +147,11 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     title_2 = scenes.get('additional_prompt_title_2', '')
     additional_prompt_2_default = modules.flags.get_value_by_scene_theme(state, theme, 'additional_prompt_2', '')
     results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2 if ready_to_gen and switch_flag else additional_prompt_2_default, 'scene_additional_prompt_2', visible, inter))
+    var_number_title = scenes.get('var_number_title', 'Duration(s)')
+    var_number_max = scenes.get('var_number_max', 60)
+    var_number_default = modules.flags.get_value_by_scene_theme(state, theme, 'var_number', 3)
+    var_number = var_number if ready_to_gen and switch_flag else var_number_default
+    results.append(gr.update(label=var_number_title, value=var_number, maximum=var_number_max, visible='scene_var_number' not in visible, interactive='scene_var_number' not in inter))
     aspect_ratios = modules.flags.get_value_by_scene_theme(state, theme, 'aspect_ratio', [])
     if ready_to_gen and switch_flag:
         img = input_image1 if input_image_number==1 and 'scene_input_image1' not in visible else canvas_image['image']
@@ -303,7 +308,7 @@ def load_parameter_button_click(raw_metadata: dict | str, is_generating: bool, i
    
     preset = loaded_parameter_dict.get("preset", None)
     is_mobile = loaded_parameter_dict.get("is_mobile", False)
-    results = [gr.update(value=get_welcome_image(preset, is_mobile), visible=True), gr.update(visible=False), gr.update(visible=False), None] 
+    results = [gr.update(value=get_welcome_image(preset, is_mobile), visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), None] 
 
     get_image_number('image_number', 'Image Number', loaded_parameter_dict, results)
     get_str('prompt', 'Prompt', loaded_parameter_dict, results)

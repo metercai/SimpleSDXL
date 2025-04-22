@@ -206,6 +206,7 @@ class AsyncTask:
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1', None)
             self.scene_theme = self.params_backend.pop('scene_theme')
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt', None)
+            self.scene_var_number = self.params_backend.pop('scene_var_number', None)
             self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
 
@@ -1626,6 +1627,8 @@ def worker():
                     #all_steps = async_task.steps * async_task.image_number
                 if async_task.scene_additional_prompt:
                     async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
+                if async_task.scene_var_number:
+                    async_task.params_backend['var_number'] = async_task.scene_var_number
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:

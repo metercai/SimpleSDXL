@@ -155,6 +155,8 @@ def get_value_by_scene_theme(state, theme, key, default):
         return value.get(theme, next(iter(value.values()), default))
     return value
 
+scene_ui_all = ['theme', 'additional_promt', 'additional_promt_2', 'aspect_ratio', 'image_number', 'input_image1', 'canvas_image', 'var_number']
+
 
 translation_methods = ['Slim Model', 'Big Model', 'Third APIs']
 

@@ -78,11 +78,12 @@ def generate_clicked(task: worker.AsyncTask, state):
         return
     is_mobile = state["__is_mobile"]
 
-    # outputs=[progress_html, progress_window, progress_gallery, gallery]
+    # outputs=[progress_html, progress_window, progress_gallery, progress_video, gallery]
     if "absent_model" in state and state["absent_model"]:
         yield gr.update(visible=False), \
             gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
             gr.update(visible=False, value=None), \
+            gr.update(visible=False), \
             gr.update(visible=False)
         return
 
@@ -101,6 +102,7 @@ def generate_clicked(task: worker.AsyncTask, state):
             yield gr.update(visible=True, value=modules.html.make_progress_html(1, f'生图任务已入队列({qsize})，请等待...')), \
                 gr.update(visible=True, value=get_welcome_image(is_mobile=is_mobile, is_change=True)), \
                 gr.update(visible=False, value=None), \
+                gr.update(visible=False), \
                 gr.update(visible=False)
             if qsize==1 or worker.get_processing_id() == task.task_id:
                 ready_flag = True
@@ -129,6 +131,7 @@ def generate_clicked(task: worker.AsyncTask, state):
             yield gr.update(visible=True, value=modules.html.make_progress_html(0, '生图任务已超时!')), \
                 gr.update(visible=True), \
                 gr.update(visible=False), \
+                gr.update(visible=False), \
                 gr.update(visible=False)
             logger.error(f"Task timeout after {MAX_WAIT_TIME} seconds")
             task.last_stop = 'stop'
@@ -138,6 +141,7 @@ def generate_clicked(task: worker.AsyncTask, state):
                 worker.worker.interrupt_processing()
             yield gr.update(visible=False), \
                 gr.update(visible=True), \
+                gr.update(visible=False), \
                 gr.update(visible=False), \
                 gr.update(visible=False)
             break
@@ -161,6 +165,7 @@ def generate_clicked(task: worker.AsyncTask, state):
                 yield gr.update(visible=True, value=modules.html.make_progress_html(percentage, title)), \
                     gr.update(visible=True, value=image) if image is not None else gr.update(), \
                     gr.update(), \
+                    gr.update(visible=False), \
                     gr.update(visible=False)
             if flag == 'results':
                 last_update_time = current_time
@@ -168,14 +173,24 @@ def generate_clicked(task: worker.AsyncTask, state):
                 yield gr.update(visible=True), \
                     gr.update(visible=True), \
                     gr.update(visible=True, value=product), \
+                    gr.update(visible=False), \
                     gr.update(visible=False)
             if flag == 'finish':
                 if not args_manager.args.disable_enhance_output_sorting:
                     product = sort_enhance_images(product, task)
 
+                has_video = False
+                video_path = None
+                for path in product:
+                    if isinstance(path, str) and path.lower().endswith(('.mp4', '.webm')):
+                        has_video = True
+                        video_path = path
+                        break
+
                 yield gr.update(visible=False), \
                     gr.update(visible=False, value=get_welcome_image(is_mobile=is_mobile)), \
-                    gr.update(visible=True, value=product), \
+                    gr.update(visible=False if has_video else True, value=product), \
+                    gr.update(visible=True if has_video else False, value=video_path), \
                     gr.update(visible=False)
                 finished = True
 
@@ -303,6 +318,8 @@ with shared.gradio_root:
                                             elem_classes=['main_view'], value="presets/welcome/welcome.png", interactive=False, show_download_button=False)
                             progress_gallery = gr.Gallery(label='Finished Images', show_label=True, object_fit='contain', elem_id='finished_gallery',
                                               height=520, visible=False, elem_classes=['main_view', 'image_gallery'])
+                            progress_video = gr.Video(label='Generated Video', show_label=True, visible=False, height=768, 
+                                             elem_classes=['main_view', 'video_player'], elem_id='video_player', autoplay=True, show_share_button=False)
                             gallery = gr.Gallery(label='Gallery', show_label=True, object_fit='contain', visible=False, height=768,
                                  elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                  elem_id='final_gallery', preview=True )
@@ -313,6 +330,7 @@ with shared.gradio_root:
                         scene_canvas_image = grh.Image(label='Upload and canvas', show_label=True, source='upload', type='numpy', tool='sketch', height=250, brush_color="#70FF81", elem_id='scene_canvas')
                         scene_input_image1 = grh.Image(label='Upload prompt image', value=None, source='upload', type='numpy', show_label=True, height=300, show_download_button=False)
                         scene_additional_prompt_2 = gr.Textbox(label="Blessing words", show_label=True, max_lines=1, visible=False, elem_classes='scene_input_2')
+                        scene_var_number = gr.Slider(label='Duration(s)', minimum=1, maximum=60, step=1, value=3, visible=False)
                         scene_aspect_ratio = gr.Radio(choices=modules.flags.scene_aspect_ratios[:3], label="Aspect Ratios", value=modules.flags.scene_aspect_ratios[0], elem_classes=['scene_aspect_ratio_selections'])
                         with gr.Row():
                             scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
@@ -385,7 +403,7 @@ with shared.gradio_root:
                 
                 with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
                     gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
-                    gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, index_radio], show_progress=False)
+                    gallery_index.change(gallery_util.images_list_update, inputs=[gallery_index, state_topbar], outputs=[gallery, progress_video, index_radio], show_progress=False)
             with gr.Group():
                 with gr.Row():
                     with gr.Column(scale=12):
@@ -1390,7 +1408,7 @@ with shared.gradio_root:
             
             import enhanced.superprompter
             super_prompter.click(lambda x, y, z: minicpm.extended_prompt(x, y, z), inputs=[prompt, super_prompter_prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-            scene_params = [scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number, scene_mask_color]
+            scene_params = [scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_var_number, scene_aspect_ratio, scene_image_number, scene_mask_color]
             
 
             language_ui.select(lambda x,y: sync_state_params('__lang', modules.config.language_radio_revert(x), y), inputs=[language_ui, state_topbar]).then(None, inputs=language_ui, _js="(x) => set_language_by_ui(x)")
@@ -1404,7 +1422,7 @@ with shared.gradio_root:
             #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
 
-        load_data_outputs = [progress_window, progress_gallery, gallery, gallery_index, image_number, prompt, negative_prompt, style_selections,
+        load_data_outputs = [progress_window, progress_gallery, progress_video, gallery, gallery_index, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
                              overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
                              adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, clip_skip,
@@ -1554,7 +1572,7 @@ with shared.gradio_root:
         generate_button.click(topbar.process_before_generation, inputs=[state_topbar, seed_random, image_seed, params_backend] + scene_params[:-1], outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box, image_seed] + protections + [preset_store, identity_dialog], show_progress=False) \
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
-            .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, gallery]) \
+            .then(fn=generate_clicked, inputs=[currentTask, state_topbar], outputs=[progress_html, progress_window, progress_gallery, progress_video, gallery]) \
             .then(topbar.process_after_generation, inputs=state_topbar, outputs=[generate_button, stop_button, skip_button, state_is_generating, gallery_index, index_radio] + protections + [gallery_index_stat, history_link], show_progress=False) \
             .then(lambda x: None, inputs=gallery_index_stat, queue=False, show_progress=False, _js='(x)=>{refresh_finished_images_catalog_label(x);}') \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
@@ -1675,7 +1693,7 @@ with shared.gradio_root:
                         .then(lambda: None, _js='()=>{refresh_scene_localization();}')
 
         scene_theme.select(switch_scene_theme_select, inputs=state_topbar, queue=False, show_progress=False)
-        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_theme], outputs=scene_params[1:], queue=False, show_progress=False) \
+        scene_theme.change(switch_scene_theme, inputs=[state_topbar, image_number, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_var_number, scene_theme], outputs=scene_params[1:], queue=False, show_progress=False) \
                    .then(switch_scene_theme_ready_to_gen, inputs=[state_topbar, image_number, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_theme], outputs=[prompt, generate_button], queue=False, show_progress=True)
 
         if args_manager.args.enable_auto_describe_image:

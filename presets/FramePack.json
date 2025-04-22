@@ -8,7 +8,7 @@
                 "version": "m1.1",
                 "theme": ["FramePack"],
                 "theme_title": "FramePack图生视频",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_aspect_ratio","aspect_ratio" ],
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_aspect_ratio","aspect_ratio", "scene_var_number" ],
                 "prompt": {
                      "FramePack": "A dynamic video,"
                 },

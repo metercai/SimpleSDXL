@@ -331,7 +331,7 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
     return gr.update() if describe_prompt is None else describe_prompt
 
 
-def process_before_generation(state_params, seed_random, image_seed, backend_params, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, seed_random, image_seed, backend_params, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_var_number, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -339,8 +339,9 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
         ))
     
     if 'scene_frontend' in state_params:
+        scene_frontend = state_params['scene_frontend']
         scene_additional_prompt = f'{scene_additional_prompt}{scene_additional_prompt_2}'
-        if util.is_chinese(scene_additional_prompt) and not state_params['scene_frontend']['task_method'][scene_theme].lower().endswith('_cn'):
+        if util.is_chinese(scene_additional_prompt) and not scene_frontend['task_method'][scene_theme].lower().endswith('_cn'):
             scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         resize_image_flag = True
         preprocessor_methods = modules.flags.get_value_by_scene_theme(state_params, scene_theme, 'image_preprocessor_method', [])
@@ -355,17 +356,17 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
             scene_canvas_image['mask'] = scene_canvas_image['mask'][:, :, 0]
             scene_canvas_image['mask'] = util.resize_image(util.HWC3(scene_canvas_image['mask']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['mask']
         backend_params.update(dict(
-            task_method=f'scene_{state_params["scene_frontend"]["task_method"][scene_theme]}',
-            scene_frontend=state_params['scene_frontend']['version'],
+            task_method=f'scene_{scene_frontend["task_method"][scene_theme]}',
+            scene_frontend=scene_frontend['version'],
             scene_canvas_image=scene_canvas_image,
             scene_input_image1=scene_input_image1,
             scene_theme=scene_theme,
             scene_additional_prompt=scene_additional_prompt,
+            scene_var_number=None if 'var_number' not in scene_frontend else scene_var_number,
             scene_aspect_ratio=scene_aspect_ratio.split('|')[0] if '×' in scene_aspect_ratio else modules.flags.scene_aspect_ratios_size[scene_aspect_ratio],
             scene_image_number=scene_image_number,
-            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else state_params["scene_frontend"]['scene_steps'][scene_theme] if scene_theme in state_params["scene_frontend"]['scene_steps'] else None
+            scene_steps=None if 'scene_steps' not in state_params["scene_frontend"] else scene_frontend['scene_steps'][scene_theme] if scene_theme in scene_frontend['scene_steps'] else None
             ))
-
     state_params["absent_model"] = False
     if not args_manager.args.disable_backend and is_models_file_absent(state_params["__preset"], state_params["user"].get_did()):
         gr.Info(preset_absent_model_note_info)

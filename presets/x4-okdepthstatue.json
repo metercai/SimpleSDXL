@@ -8,7 +8,7 @@
 	    "version": "m1.1",
 	    "theme": ["深度图", "细节重绘深度图", "线稿转白瓷雕像", "照片转白瓷雕像"],
 	    "theme_title": "深度信息较少的线稿、动漫、艺术类图片，建议选线稿选项，会先生成雕像再生成深度图。信息较多的真实照片选其他选项，直接生成深度图，再生成雕像或重绘细节。EXR 专业格式文件保存在 SimpAI\\outputs\\users\\用户ID\\outputs\\ComfyUI 目录下，前缀 OneKeyDepth_EXR",
-            "disvisible": ["scene_additional_prompt", "scene_canvas_image", "scene_aspect_ratio"],  
+            "disvisible": ["scene_additional_prompt", "scene_canvas_image", "scene_aspect_ratio", "scene_var_number"],  
 	    "prompt": {
     		"深度图": "",
 	    	"细节重绘深度图": "",

@@ -8,7 +8,7 @@
 	    "version": "m1.1",
 	    "theme": ["通用I", "通用R","通用B","人像"],
 	    "theme_title": "选择不同的模型，抠图效果和耗时也有所不同，后两个框选效果更好",
-            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_image_number", "scene_input_image1"],
+            "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_image_number", "scene_input_image1", "scene_var_number"],
 	    "prompt": {
             "通用I": "使用 Inspyrenet 通用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
             "通用R": "使用 RMBG 通用模型，去除背景，并生成主体蒙版，和背景蒙版，一共三张图片",
