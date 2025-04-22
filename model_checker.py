@@ -737,6 +737,8 @@ def auto_download_missing_files_with_retry(max_threads=5):
             try:
                 position, line = task_queue.get_nowait()
                 link, size = line.split(',')
+                size_mb = int(size) / (1024 * 1024)
+                print(f"{Fore.CYAN}▶ 正在下载: {link} ({size_mb:.1f}MB){Style.RESET_ALL}")
                 original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
                 if link.startswith(original_repo):
                     relative_path = link.replace(original_repo, "", 1).strip()
@@ -1153,7 +1155,7 @@ packages = {
             ("clip/t5xxl_fp16.safetensors", 9787841024),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
+            ("controlnet/flux.1-dev_controlnet_union_pro_2.0.safetensors", 4281779224),
             ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
             ("controlnet/parsing_bisenet.pth", 53289463),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
@@ -1498,7 +1500,7 @@ packages = {
             ("clip/t5xxl_fp16.safetensors", 9787841024),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("controlnet/flux.1-dev_controlnet_union_pro.safetensors", 6603953920),
+            ("controlnet/flux.1-dev_controlnet_union_pro_2.0.safetensors", 4281779224),
             ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
             ("controlnet/parsing_bisenet.pth", 53289463),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
@@ -1653,6 +1655,23 @@ packages = {
         ],
         "download_links": [
         "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "Framepack_package": {
+        "id": 25,
+        "name": "[25]Framepack视频扩展包",
+        "note": "图像转视频功能支持|显存需求：★★★ 速度：★",
+        "files": [
+            ("checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors", 16331849976),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/llava_llama3_fp8_scaled.safetensors", 9091392483),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/hunyuan_video_vae_bf16.safetensors", 492984198)
+        ],
+        "download_links": [
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors",
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/llava_llama3_fp8_scaled.safetensors",
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
         ]
     }
 }
