@@ -311,10 +311,10 @@
   },
   "65": {
     "inputs": {
-      "format": "WEBM",
-      "codec": "vp9",
+      "format": "MP4",
+      "codec": "h265",
       "fps": 24,
-      "crf": 0,
+      "crf": 25,
       "images": [
         "44",
         0

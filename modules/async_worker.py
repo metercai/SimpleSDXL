@@ -147,6 +147,7 @@ class AsyncTask:
         self.enhance_uov_processing_order = args.pop()
         self.enhance_uov_prompt_type = args.pop()
         self.enhance_ctrls = args.pop()
+        self.enhance_ctrls = [ctrls[1:] for ctrls in self.enhance_ctrls if ctrls[0]]
         
         self.should_enhance = self.enhance_checkbox and (self.enhance_uov_method != disabled.casefold() or len(self.enhance_ctrls) > 0)
         self.images_to_enhance_count = 0
@@ -198,6 +199,7 @@ class AsyncTask:
         if 'display_step' in self.params_backend and self.overwrite_step!=-1:
             self.params_backend.pop('display_step')
             
+        self.content_type = 'image'
         if 'scene_frontend' in self.params_backend:
             self.aspect_ratios_selection = self.params_backend.pop('scene_aspect_ratio')
             self.image_number = self.params_backend.pop('scene_image_number')
@@ -205,8 +207,11 @@ class AsyncTask:
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1', None)
             self.scene_theme = self.params_backend.pop('scene_theme')
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt', None)
+            self.scene_var_number = self.params_backend.pop('scene_var_number', None)
             self.scene_steps = self.params_backend.pop('scene_steps', None)
             self.scene_frontend = self.params_backend.pop('scene_frontend')
+            if self.scene_frontend.startswith('v'):
+                self.content_type = 'video'
 
 class EarlyReturnException(BaseException):
     pass
@@ -429,7 +434,7 @@ def worker():
             logger.info(f'reserved_vram={reserved_vram}, wavespeed_strength={wavespeed_strength}')
             default_params.update(params_backend)
             try:
-                #user_cert = shared.token.get_register_cert(async_task.user_did)
+                user_cert = shared.token.get_register_cert(async_task.user_did)
                 comfy_task = get_comfy_task(async_task.user_did, async_task.task_name, async_task.task_method, 
                         default_params, input_images, options)
                 if async_task.disable_preview:
@@ -1331,7 +1336,7 @@ def worker():
             else:
                 logger.info(f'Remote process request: task_id={async_task.task_id}, error')
                 stop_processing(async_task, 0, "Remote process request error!")
-            timeout = 40  # 
+            timeout = 40 if async_task.content_type == 'image' else 300 # 
             async_task.lasttime = time.time()
             while async_task.processing:
                 if time.time() - async_task.lasttime > timeout:
@@ -1625,6 +1630,8 @@ def worker():
                     #all_steps = async_task.steps * async_task.image_number
                 if async_task.scene_additional_prompt:
                     async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
+                if async_task.scene_var_number:
+                    async_task.params_backend['var_number'] = async_task.scene_var_number
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:

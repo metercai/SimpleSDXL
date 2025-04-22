@@ -78,7 +78,7 @@ end_part = f'\n<!--fooocus-log-split--></body></html>'
 
 def item_head_html(only_name):
     root, ext = os.path.splitext(only_name)
-    is_video = ext in ['mp4', 'webm']
+    is_video = ext in ['.mp4', '.webm']
 
     div_name = only_name.replace('.', '_')
     item_head = f"<div id=\"{div_name}\" class=\"image-container\"><hr><table><tr>\n"

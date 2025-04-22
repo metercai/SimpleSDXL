@@ -6,7 +6,7 @@
       "available_aspect_ratios_selection": "Flux",
       "scene_frontend": {
           "version": "V1.0",
-          "disvisible": ["scene_aspect_ratio", "scene_additional_prompt", "scene_input_image1"],
+          "disvisible": ["scene_aspect_ratio", "scene_additional_prompt", "scene_input_image1", "scene_var_number"],
           "theme": ["橡皮擦", "魔法擦"],
           "prompt": {
               "橡皮擦": "Remove the selected objects from the image,  {additional_prompt} "

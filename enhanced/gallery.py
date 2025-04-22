@@ -22,7 +22,7 @@ images_prompt_keys = {} #[]
 images_ads = {}
 
 
-image_types = ['.png', '.jpg', '.jpeg', '.webp']
+image_types = ['.png', '.jpg', '.jpeg', '.webp'] #, '.webm', '.mp4']
 output_images_regex = re.compile(r'\d{4}-\d{2}-\d{2}')
 
 def refresh_output_list(max_per_page, max_catalog, user_did=None):
@@ -74,7 +74,7 @@ def images_list_update(choice, state_params):
     user_did = state_params["user"].get_did()
     images_gallery = get_images_from_gallery_index(choice, state_params["__max_per_page"], user_did)
     state_params.update({"prompt_info": [choice, 0]})
-    return gr.update(value=images_gallery), gr.update(open=False, visible=len(output_list)>0)
+    return gr.update(value=images_gallery), gr.update(visible=False), gr.update(open=False, visible=len(output_list)>0)
 
 
 def select_index(choice, image_tools_checkbox, state_params, evt: gr.SelectData):

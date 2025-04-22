@@ -8,7 +8,7 @@
 	    "version": "m1.1",
 	    "theme": ["黏土","手办","像素","Q版","萌系","油画","水彩","水墨","纸艺","吉卜力","蜡笔","线稿"],
 	    "theme_title": "选择不同的转绘风格",
-            "disvisible": ["scene_additional_prompt", "scene_aspect_ratio", "scene_canvas_image"],
+            "disvisible": ["scene_additional_prompt", "scene_aspect_ratio", "scene_canvas_image", "scene_var_number"],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "task_method": {
                 "黏土": "claymation",
