@@ -1656,6 +1656,23 @@ packages = {
         "download_links": [
         "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
         ]
+    },
+        "Framepack_package": {
+        "id": 25,
+        "name": "[25]Framepack视频扩展包",
+        "note": "图像转视频功能支持|显存需求：★★★ 速度：★",
+        "files": [
+            ("checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors", 16331849976),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/llava_llama3_fp8_scaled.safetensors", 9091392483),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/hunyuan_video_vae_bf16.safetensors", 492984198)
+        ],
+        "download_links": [
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors",
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/llava_llama3_fp8_scaled.safetensors",
+            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
+        ]
     }
 }
 
