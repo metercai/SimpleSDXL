@@ -6,23 +6,26 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "v1.1",
-                "theme": ["FramePack"],
-                "theme_title": "FramePack图生视频",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_aspect_ratio","aspect_ratio", "scene_var_number" ],
+                "theme": ["FramePack", "FramePack(HQ)"],
+                "theme_title": "FramePack图生视频 [HQ=关闭TeaCache加速]",            
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_additional_prompt_2"],
                 "prompt": {
-                     "FramePack": "A dynamic video,"
+                    "FramePack": "A high-quality dynamic video",
+                    "FramePack(HQ)": "A high-quality dynamic video"
                 },
                 "task_method": {
-                    "FramePack": "framepack"
+                    "FramePack": "framepack",
+                    "FramePack(HQ)": "framepack_hq"
                 },
                 "multimodal_prompt": {
-                    "FramePack": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options."
+                    "FramePack": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options.",
+                    "FramePack(HQ)": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options."
                 },
-                "additional_prompt_title_2": "生成时长",
-                "additional_prompt_2": {
-                    "FramePack":"3.0"
+                "var_number": {
+                    "FramePack":"3",
+                    "FramePack(HQ)":"3"
                 },
-                "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"]
+                "aspect_ratio" : ["640|1:1", "480|1:1", "320|1:1"]
             }
     },
     "default_model": "FramePackI2V_HY_fp8_e4m3fn.safetensors",
