@@ -50,7 +50,7 @@
         "checkpoints,flux1-dev-fp8.safetensors,11901525888,0,",
         "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
         "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
-	"controlnet,flux.1-dev_controlnet_union_pro.safetensors,6603953920,0,",
+	"controlnet,flux.1-dev_controlnet_union_pro_2.0.safetensors,4281779224,0,",
         "controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",
 	"pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,EVA02_CLIP_L_336_psz14_s6B.pt,856461210,0,",

@@ -349,6 +349,14 @@ function initStylePreviewOverlay() {
             const dataInput = container.querySelector('.style_data_input textarea');
             if (!dataInput) return;
 
+            const styleButton = container.querySelector('.style-button');
+            if (styleButton) {
+                styleButton.classList.add('disable-hover');
+                setTimeout(() => {
+                    styleButton.classList.remove('disable-hover');
+                }, 3000);
+            }
+
             handleStyleData(dataInput, e);
 
         } else if (styleLabel) {
@@ -383,11 +391,14 @@ style.textContent = `
     100% { box-shadow: inset 0 0 0 0px rgba(0, 150, 255, 0); }
 }
 .flash-border {
-    animation: flash 1.5s ease-in-out;
+    animation: flash 3s ease-in-out;
     position: relative;
     z-index: 3;
     pointer-events: none;
     overflow: visible !important;
+}.style-button.disable-hover {
+    transform: scale(1) !important;
+    transition: none !important;
 }`;
 document.head.appendChild(style);
 function handleStyleData(dataInput, e) {
@@ -396,7 +407,7 @@ function handleStyleData(dataInput, e) {
         targetElement.classList.add('flash-border');
         setTimeout(() => {
             targetElement.classList.remove('flash-border');
-        }, 1500);
+        }, 3000);
     }
     try {
         const styleData = JSON.parse(dataInput.value || '{}');
