@@ -316,7 +316,7 @@
   },
   "68": {
     "inputs": {
-      "value": 30
+      "value": 20
     },
     "class_type": "easy int",
     "_meta": {
