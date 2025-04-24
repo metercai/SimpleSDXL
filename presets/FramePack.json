@@ -8,7 +8,7 @@
                 "version": "v1.1",
                 "theme": ["FramePack", "FramePack(HQ)"],
                 "theme_title": "FramePack图生视频 [HQ=关闭TeaCache加速]",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "aspect_ratio_select_mode","image_preprocessor_method", "scene_additional_prompt_2"],
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_input_image2", "scene_additional_prompt_2"],
                 "prompt": {
                     "FramePack": "A high-quality dynamic video",
                     "FramePack(HQ)": "A high-quality dynamic video"
