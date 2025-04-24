@@ -197,7 +197,7 @@ class LoadFramePackModel:
         sd = load_torch_file(model_path, device=offload_device, safe_load=True)
         
         with init_empty_weights():
-            transformer = HunyuanVideoTransformer3DModelPacked(**config)
+            transformer = HunyuanVideoTransformer3DModelPacked(**config, attention_mode=attention_mode)
 
         params_to_keep = {"norm", "bias", "time_in", "vector_in", "guidance_in", "txt_in", "img_in"}
         if quantization == "fp8_e4m3fn" or quantization == "fp8_e4m3fn_fast" or quantization == "fp8_scaled":
@@ -244,7 +244,7 @@ class FramePackFindNearestBucket:
     def INPUT_TYPES(s):
         return {"required": {
             "image": ("IMAGE", {"tooltip": "Image to resize"}),
-            "base_resolution": ("INT", {"default": 640, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
+            "base_resolution": ("INT", {"default": 640, "min": 64, "max": 2048, "step": 16, "tooltip": "Width of the image to encode"}),
             },
         }
 
@@ -289,6 +289,10 @@ class FramePackSampler:
             },
             "optional": {
                 "start_latent": ("LATENT", {"tooltip": "init Latents to use for image2video"} ),
+                "end_latent": ("LATENT", {"tooltip": "end Latents to use for image2video"} ),
+                "end_image_embeds": ("CLIP_VISION_OUTPUT", {"tooltip": "end Image's clip embeds"} ),
+                "embed_interpolation": (["weighted_average", "linear"], {"default": 'linear', "tooltip": "Image embedding interpolation type. If linear, will smoothly interpolate with time, else it'll be weighted average with the specified weight."}),
+                "start_embed_strength": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Weighted average constant for image embed interpolation. If end image is not set, the embed's strength won't be affected"}),
                 "initial_samples": ("LATENT", {"tooltip": "init Latents to use for video2video"} ),
                 "denoise_strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
             }
@@ -299,8 +303,8 @@ class FramePackSampler:
     FUNCTION = "process"
     CATEGORY = "FramePackWrapper"
 
-    def process(self, model, shift, positive, negative, latent_window_size, use_teacache, total_second_length, teacache_rel_l1_thresh, image_embeds, steps, cfg, 
-                guidance_scale, seed, sampler, gpu_memory_preservation, start_latent=None, initial_samples=None, denoise_strength=1.0):
+    def process(self, model, shift, positive, negative, latent_window_size, use_teacache, total_second_length, teacache_rel_l1_thresh, image_embeds, steps, cfg,
+                guidance_scale, seed, sampler, gpu_memory_preservation, start_latent=None, end_latent=None, end_image_embeds=None, embed_interpolation="linear", start_embed_strength=1.0, initial_samples=None, denoise_strength=1.0):
         total_latent_sections = (total_second_length * 30) / (latent_window_size * 4)
         total_latent_sections = int(max(round(total_latent_sections), 1))
         print("total_latent_sections: ", total_latent_sections)
@@ -318,10 +322,19 @@ class FramePackSampler:
         start_latent = start_latent["samples"] * vae_scaling_factor
         if initial_samples is not None:
             initial_samples = initial_samples["samples"] * vae_scaling_factor
+        if end_latent is not None:
+            end_latent = end_latent["samples"] * vae_scaling_factor
+        has_end_image = end_latent is not None
         print("start_latent", start_latent.shape)
         B, C, T, H, W = start_latent.shape
 
-        image_encoder_last_hidden_state = image_embeds["last_hidden_state"].to(base_dtype).to(device)
+        start_image_encoder_last_hidden_state = image_embeds["last_hidden_state"].to(base_dtype).to(device)
+
+        if has_end_image:
+            assert end_image_embeds is not None
+            end_image_encoder_last_hidden_state = end_image_embeds["last_hidden_state"].to(base_dtype).to(device)
+        else:
+            end_image_encoder_last_hidden_state = torch.zeros_like(start_image_encoder_last_hidden_state)
 
         llama_vec = positive[0][0].to(base_dtype).to(device)
         clip_l_pooler = positive[0][1]["pooled_output"].to(base_dtype).to(device)
@@ -369,13 +382,24 @@ class FramePackSampler:
             # use `latent_paddings = list(reversed(range(total_latent_sections)))` to compare
             latent_paddings = [3] + [2] * (total_latent_sections - 3) + [1, 0]
             latent_paddings_list = latent_paddings.copy()
-            
-        for latent_padding in latent_paddings:
+
+        for i, latent_padding in enumerate(latent_paddings):
             print(f"latent_padding: {latent_padding}")
             is_last_section = latent_padding == 0
+            is_first_section = latent_padding == latent_paddings[0]
             latent_padding_size = latent_padding * latent_window_size
 
-            print(f'latent_padding_size = {latent_padding_size}, is_last_section = {is_last_section}')
+            if embed_interpolation == "linear":
+                if total_latent_sections <= 1:
+                    frac = 1.0  # Handle case with only one section
+                else:
+                    frac = 1 - i / (total_latent_sections - 1)  # going backwards
+            else:
+                frac = start_embed_strength if has_end_image else 1.0
+
+            image_encoder_last_hidden_state = start_image_encoder_last_hidden_state * frac + (1 - frac) * end_image_encoder_last_hidden_state
+
+            print(f'latent_padding_size = {latent_padding_size}, is_last_section = {is_last_section}, is_first_section = {is_first_section}')
 
             indices = torch.arange(0, sum([1, latent_padding_size, latent_window_size, 1, 2, 16])).unsqueeze(0)
             clean_latent_indices_pre, blank_indices, latent_indices, clean_latent_indices_post, clean_latent_2x_indices, clean_latent_4x_indices = indices.split([1, latent_padding_size, latent_window_size, 1, 2, 16], dim=1)
@@ -384,6 +408,11 @@ class FramePackSampler:
             clean_latents_pre = start_latent.to(history_latents)
             clean_latents_post, clean_latents_2x, clean_latents_4x = history_latents[:, :, :1 + 2 + 16, :, :].split([1, 2, 16], dim=2)
             clean_latents = torch.cat([clean_latents_pre, clean_latents_post], dim=2)
+
+            # Use end image latent for the first section if provided
+            if has_end_image and is_first_section:
+                clean_latents_post = end_latent.to(history_latents)
+                clean_latents = torch.cat([clean_latents_pre, clean_latents_post], dim=2)
 
             #vid2vid
             
@@ -455,7 +484,7 @@ class FramePackSampler:
             total_generated_latent_frames += int(generated_latents.shape[2])
             history_latents = torch.cat([generated_latents.to(history_latents), history_latents], dim=2)
 
-            real_history_latents = history_latents[:, :, :total_generated_latent_frames, :, :]            
+            real_history_latents = history_latents[:, :, :total_generated_latent_frames, :, :]
 
             if is_last_section:
                 break
