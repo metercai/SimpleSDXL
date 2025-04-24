@@ -8,7 +8,7 @@
                 "version": "m1.1",
                 "theme": ["3D大头贴"],
                 "theme_title": "由真人图一键转换为3D大头贴风格图",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_additional_prompt_2"],
+                "disvisible": ["scene_canvas_image", "scene_input_image2", "scene_additional_prompt", "scene_additional_prompt_2", "scene_var_number"],
                 "prompt": {
                      "3D大头贴": "Stickers,Sticker,cut-out sticker with heavy white lines,shoulders-up close-up portrait,svg,vector design,solo,an individual"
                 },

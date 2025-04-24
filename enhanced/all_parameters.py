@@ -226,9 +226,10 @@ backend_args = [
         'user_did',
         'scene_frontend',
         'scene_theme',
-        'scene_input_image1',
         'scene_canvas_image',
         'scene_canvas_mask',
+        'scene_input_image1',
+        'scene_input_image2',
         'scene_additional_prompt',
         'scene_steps',
         'scene_aspect_ratio',
@@ -283,9 +284,9 @@ def normalization_backend(args):
     global backend_args
 
     args_norm = [args[k] if k in args else None for k in backend_args]
-    if args_norm[8] is not None:
-        args_norm[8] = args['scene_canvas_image']['image']
-        args_norm[9] = args['scene_canvas_image']['mask']
+    if args_norm[7] is not None:
+        args_norm[7] = args['scene_canvas_image']['image']
+        args_norm[8] = args['scene_canvas_image']['mask']
 
     #print(f'normalization_backend:{args_norm}')
     return args_norm

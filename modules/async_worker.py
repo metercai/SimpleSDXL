@@ -205,6 +205,7 @@ class AsyncTask:
             self.image_number = self.params_backend.pop('scene_image_number')
             self.scene_canvas_image = self.params_backend.pop('scene_canvas_image', None)
             self.scene_input_image1 = self.params_backend.pop('scene_input_image1', None)
+            self.scene_input_image2 = self.params_backend.pop('scene_input_image2', None)
             self.scene_theme = self.params_backend.pop('scene_theme')
             self.scene_additional_prompt = self.params_backend.pop('scene_additional_prompt', None)
             self.scene_var_number = self.params_backend.pop('scene_var_number', None)
@@ -1616,6 +1617,8 @@ def worker():
                     input_images.set_image('i2i_ip_image1', async_task.scene_input_image1)
                     if "happy_cn" in async_task.task_method and preprocessors.openpose_have(async_task.scene_input_image1, ['face']):
                         async_task.params_backend['i2i_ip_fn1'] = 4
+                    if async_task.scene_input_image2 is not None:
+                        input_images.set_image('i2i_ip_image2', async_task.scene_input_image2)
                 if async_task.scene_canvas_image is not None:
                     canvas_image = async_task.scene_canvas_image['image']
                     canvas_mask = async_task.scene_canvas_image['mask']
@@ -1632,6 +1635,8 @@ def worker():
                     async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt
                 if async_task.scene_var_number:
                     async_task.params_backend['var_number'] = async_task.scene_var_number
+                    if async_task.content_type == 'video':
+                        async_task.params_backend['display_steps'] = async_task.steps * ((async_task.scene_var_number - 1) if async_task.scene_var_number>2 else async_task.scene_var_number)
             if "_aio" in async_task.task_method:
                 input_images = comfypipeline.ComfyInputImage([])
                 if '.gguf' in async_task.base_model_name:

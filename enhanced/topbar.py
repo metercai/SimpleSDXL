@@ -331,7 +331,7 @@ def avoid_empty_prompt_for_scene(prompt, state, img, scene_theme, additional_pro
     return gr.update() if describe_prompt is None else describe_prompt
 
 
-def process_before_generation(state_params, seed_random, image_seed, backend_params, scene_theme, scene_canvas_image, scene_input_image1, scene_additional_prompt, scene_additional_prompt_2, scene_var_number, scene_aspect_ratio, scene_image_number):
+def process_before_generation(state_params, seed_random, image_seed, backend_params, scene_theme, scene_canvas_image, scene_input_image1, scene_input_image2, scene_additional_prompt, scene_additional_prompt_2, scene_var_number, scene_aspect_ratio, scene_image_number):
     backend_params.update(dict(
         nickname=state_params["user"].get_nickname(),
         user_did=state_params["user"].get_did(),
@@ -351,6 +351,9 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
                     resize_image_flag = False
         if scene_input_image1 is not None:
             scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
+        if scene_input_image2 is not None:
+            scene_input_image2 = util.resize_image(util.HWC3(scene_input_image2), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image2
+
         if scene_canvas_image is not None:
             scene_canvas_image['image'] = util.resize_image(util.HWC3(scene_canvas_image['image']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
             scene_canvas_image['mask'] = scene_canvas_image['mask'][:, :, 0]
@@ -360,6 +363,7 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
             scene_frontend=scene_frontend['version'],
             scene_canvas_image=scene_canvas_image,
             scene_input_image1=scene_input_image1,
+            scene_input_image2=scene_input_image2,
             scene_theme=scene_theme,
             scene_additional_prompt=scene_additional_prompt,
             scene_var_number=None if 'var_number' not in scene_frontend else scene_var_number,
