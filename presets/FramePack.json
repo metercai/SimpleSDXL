@@ -25,6 +25,10 @@
                     "FramePack":"3",
                     "FramePack(HQ)":"3"
                 },
+                "scene_steps": {
+                    "FramePack": 20,
+                    "FramePack(HQ)": 20
+                },
                 "aspect_ratio" : ["640|1:1", "480|1:1", "320|1:1"]
             }
     },
