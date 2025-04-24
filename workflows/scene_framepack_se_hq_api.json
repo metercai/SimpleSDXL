@@ -60,7 +60,7 @@
   },
   "19": {
     "inputs": {
-      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -265,7 +265,7 @@
   },
   "68": {
     "inputs": {
-      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
