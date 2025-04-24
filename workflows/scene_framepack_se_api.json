@@ -1,0 +1,412 @@
+{
+  "12": {
+    "inputs": {
+      "vae_name": "hunyuan_video_vae_bf16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "13": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "llava_llama3_fp8_scaled.safetensors",
+      "type": "hunyuan_video",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "15": {
+    "inputs": {
+      "conditioning": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "17": {
+    "inputs": {
+      "crop": "center",
+      "clip_vision": [
+        "18",
+        0
+      ],
+      "image": [
+        "48",
+        0
+      ]
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP Vision Encode"
+    }
+  },
+  "18": {
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image1"
+    }
+  },
+  "20": {
+    "inputs": {
+      "pixels": [
+        "48",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "27": {
+    "inputs": {
+      "backend": "inductor",
+      "fullgraph": false,
+      "mode": "default",
+      "dynamic": false,
+      "dynamo_cache_size_limit": 64,
+      "compile_single_blocks": true,
+      "compile_double_blocks": true
+    },
+    "class_type": "FramePackTorchCompileSettings",
+    "_meta": {
+      "title": "Torch Compile Settings"
+    }
+  },
+  "33": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "76",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "44": {
+    "inputs": {
+      "image": [
+        "33",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "47": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "prompt"
+    }
+  },
+  "48": {
+    "inputs": {
+      "image": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "50": {
+    "inputs": {
+      "width": [
+        "51",
+        0
+      ],
+      "height": [
+        "51",
+        1
+      ],
+      "interpolation": "lanczos",
+      "method": "stretch",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "51": {
+    "inputs": {
+      "base_resolution": [
+        "66",
+        0
+      ],
+      "image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "FramePackFindNearestBucket",
+    "_meta": {
+      "title": "Find Nearest Bucket"
+    }
+  },
+  "52": {
+    "inputs": {
+      "model": "FramePackI2V_HY_fp8_e4m3fn.safetensors",
+      "base_precision": "bf16",
+      "quantization": "fp8_e4m3fn",
+      "attention_mode": "sdpa"
+    },
+    "class_type": "LoadFramePackModel",
+    "_meta": {
+      "title": "Load FramePackModel"
+    }
+  },
+  "59": {
+    "inputs": {
+      "seed": 318139923708655
+    },
+    "class_type": "easy seed",
+    "_meta": {
+      "title": "sync_seed"
+    }
+  },
+  "63": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "65": {
+    "inputs": {
+      "format": "MP4",
+      "codec": "h265",
+      "fps": 24.000000000000004,
+      "crf": 25,
+      "images": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "SaveVideoWebsocket",
+    "_meta": {
+      "title": "SaveVideoWebsocket"
+    }
+  },
+  "66": {
+    "inputs": {
+      "value": 640
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "aspect_ratios_width"
+    }
+  },
+  "67": {
+    "inputs": {
+      "value": 3
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "var_number"
+    }
+  },
+  "68": {
+    "inputs": {
+      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image2"
+    }
+  },
+  "70": {
+    "inputs": {
+      "width": [
+        "51",
+        0
+      ],
+      "height": [
+        "51",
+        1
+      ],
+      "interpolation": "lanczos",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "68",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "71": {
+    "inputs": {
+      "image": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "73": {
+    "inputs": {
+      "pixels": [
+        "71",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "74": {
+    "inputs": {
+      "crop": "center",
+      "clip_vision": [
+        "18",
+        0
+      ],
+      "image": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP Vision Encode"
+    }
+  },
+  "75": {
+    "inputs": {
+      "value": 20
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "main_steps"
+    }
+  },
+  "76": {
+    "inputs": {
+      "steps": [
+        "75",
+        0
+      ],
+      "use_teacache": true,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 4,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "17",
+        0
+      ],
+      "start_latent": [
+        "20",
+        0
+      ],
+      "end_latent": [
+        "73",
+        0
+      ],
+      "end_image_embeds": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  }
+}
