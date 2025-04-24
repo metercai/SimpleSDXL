@@ -278,7 +278,7 @@
         "68",
         0
       ],
-      "use_teacache": true,
+      "use_teacache": false,
       "teacache_rel_l1_thresh": 0.15,
       "cfg": 1,
       "guidance_scale": 10,
