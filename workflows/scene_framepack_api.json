@@ -292,7 +292,7 @@
         "63",
         1
       ],
-      "gpu_memory_preservation": 4,
+      "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
       "start_embed_strength": 0.5,
