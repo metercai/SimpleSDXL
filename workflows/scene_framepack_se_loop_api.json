@@ -232,7 +232,7 @@
   "65": {
     "inputs": {
       "format": "MP4",
-      "codec": "h265",
+      "codec": "h264",
       "fps": 30.000000000000007,
       "crf": 19,
       "images": [
