@@ -60,7 +60,7 @@
   },
   "19": {
     "inputs": {
-      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -233,8 +233,8 @@
     "inputs": {
       "format": "MP4",
       "codec": "h265",
-      "fps": 24.000000000000004,
-      "crf": 25,
+      "fps": 30.000000000000007,
+      "crf": 19,
       "images": [
         "44",
         0
@@ -265,7 +265,7 @@
   },
   "68": {
     "inputs": {
-      "image": "人脸修复-风格参考-肖像摄影3.jpg"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -370,7 +370,7 @@
         "63",
         1
       ],
-      "gpu_memory_preservation": 4,
+      "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
       "start_embed_strength": 0.5,
