@@ -236,7 +236,7 @@
       "fps": 30.000000000000007,
       "crf": 19,
       "images": [
-        "92",
+        "91",
         0
       ]
     },
@@ -570,22 +570,6 @@
     "inputs": {
       "image1": [
         "88",
-        0
-      ],
-      "image2": [
-        "88",
-        0
-      ]
-    },
-    "class_type": "ImageBatch",
-    "_meta": {
-      "title": "Batch Images"
-    }
-  },
-  "92": {
-    "inputs": {
-      "image1": [
-        "91",
         0
       ],
       "image2": [
