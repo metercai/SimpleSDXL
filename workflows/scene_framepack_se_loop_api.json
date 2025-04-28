@@ -209,7 +209,7 @@
   },
   "59": {
     "inputs": {
-      "seed": 842204699362047
+      "seed": 0
     },
     "class_type": "easy seed",
     "_meta": {
@@ -236,7 +236,7 @@
       "fps": 30.000000000000007,
       "crf": 19,
       "images": [
-        "88",
+        "92",
         0
       ]
     },
@@ -429,7 +429,7 @@
         "63",
         1
       ],
-      "gpu_memory_preservation": 4,
+      "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
       "start_embed_strength": 0.5,
@@ -558,6 +558,38 @@
       ],
       "image2": [
         "82",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "91": {
+    "inputs": {
+      "image1": [
+        "88",
+        0
+      ],
+      "image2": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "92": {
+    "inputs": {
+      "image1": [
+        "91",
+        0
+      ],
+      "image2": [
+        "88",
         0
       ]
     },
