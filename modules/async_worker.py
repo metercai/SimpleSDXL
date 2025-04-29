@@ -1628,8 +1628,8 @@ def worker():
                     async_task.steps = async_task.scene_steps
                     #all_steps = async_task.steps * async_task.image_number
                     async_task.params_backend['display_steps'] = async_task.steps
-                if async_task.task_method.lower().endswith('_cn'):
-                    async_task.steps = async_task.steps * 3
+                # if async_task.task_method.lower().endswith('_cn'):
+                #     async_task.steps = async_task.steps * 3
                     #all_steps = async_task.steps * async_task.image_number
                 if async_task.scene_additional_prompt:
                     async_task.params_backend['additional_prompt'] = async_task.scene_additional_prompt

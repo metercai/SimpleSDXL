@@ -90,7 +90,7 @@
       "mode": "default",
       "dynamic": false,
       "dynamo_cache_size_limit": 64,
-      "compile_single_blocks": true,
+      "compile_single_blocks": false,
       "compile_double_blocks": true
     },
     "class_type": "FramePackTorchCompileSettings",
@@ -209,7 +209,7 @@
   },
   "59": {
     "inputs": {
-      "seed": 318139923708655
+      "seed": 0
     },
     "class_type": "easy seed",
     "_meta": {
@@ -218,7 +218,7 @@
   },
   "63": {
     "inputs": {
-      "value": "a",
+      "value": "a/2",
       "a": [
         "67",
         0
@@ -236,7 +236,7 @@
       "fps": 30.000000000000007,
       "crf": 19,
       "images": [
-        "44",
+        "100",
         0
       ]
     },
@@ -356,7 +356,7 @@
         "75",
         0
       ],
-      "use_teacache": true,
+      "use_teacache": false,
       "teacache_rel_l1_thresh": 0.15,
       "cfg": 1,
       "guidance_scale": 10,
@@ -373,7 +373,7 @@
       "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
-      "start_embed_strength": 0.5,
+      "start_embed_strength": 0.5000000000000001,
       "denoise_strength": 1,
       "model": [
         "52",
@@ -407,6 +407,307 @@
     "class_type": "FramePackSampler",
     "_meta": {
       "title": "FramePackSampler"
+    }
+  },
+  "77": {
+    "inputs": {
+      "steps": [
+        "75",
+        0
+      ],
+      "use_teacache": false,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "97",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5000000000000001,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "74",
+        0
+      ],
+      "start_latent": [
+        "73",
+        0
+      ],
+      "end_latent": [
+        "20",
+        0
+      ],
+      "end_image_embeds": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "81": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "77",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "82": {
+    "inputs": {
+      "image": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "88": {
+    "inputs": {
+      "image1": [
+        "44",
+        0
+      ],
+      "image2": [
+        "82",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "91": {
+    "inputs": {
+      "image1": [
+        "88",
+        0
+      ],
+      "image2": [
+        "88",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "97": {
+    "inputs": {
+      "value": "a+65536",
+      "a": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "98": {
+    "inputs": {
+      "mask": [
+        "99",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "99": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "68",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "100": {
+    "inputs": {
+      "boolean": [
+        "98",
+        0
+      ],
+      "on_true": [
+        "104",
+        0
+      ],
+      "on_false": [
+        "91",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "101": {
+    "inputs": {
+      "steps": [
+        "75",
+        0
+      ],
+      "use_teacache": false,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "105",
+        1
+      ],
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5000000000000001,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "17",
+        0
+      ],
+      "start_latent": [
+        "20",
+        0
+      ],
+      "end_latent": [
+        "20",
+        0
+      ],
+      "end_image_embeds": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "102": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "101",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "103": {
+    "inputs": {
+      "image": [
+        "102",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "104": {
+    "inputs": {
+      "image1": [
+        "103",
+        0
+      ],
+      "image2": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "105": {
+    "inputs": {
+      "value": "a",
+      "a": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
     }
   }
 }
