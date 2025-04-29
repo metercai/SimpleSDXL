@@ -105,7 +105,7 @@
       "temporal_size": 64,
       "temporal_overlap": 8,
       "samples": [
-        "70",
+        "83",
         0
       ],
       "vae": [
@@ -272,57 +272,6 @@
       "title": "main_steps"
     }
   },
-  "70": {
-    "inputs": {
-      "steps": [
-        "68",
-        0
-      ],
-      "use_teacache": false,
-      "teacache_rel_l1_thresh": 0.15000000000000002,
-      "cfg": 1.0000000000000002,
-      "guidance_scale": 10.000000000000002,
-      "shift": 0,
-      "seed": [
-        "59",
-        0
-      ],
-      "latent_window_size": 9,
-      "total_second_length": [
-        "63",
-        1
-      ],
-      "gpu_memory_preservation": 5,
-      "sampler": "unipc_bh1",
-      "embed_interpolation": "linear",
-      "start_embed_strength": 0.5000000000000001,
-      "denoise_strength": 1,
-      "model": [
-        "52",
-        0
-      ],
-      "positive": [
-        "47",
-        0
-      ],
-      "negative": [
-        "15",
-        0
-      ],
-      "image_embeds": [
-        "17",
-        0
-      ],
-      "start_latent": [
-        "20",
-        0
-      ]
-    },
-    "class_type": "FramePackSampler",
-    "_meta": {
-      "title": "FramePackSampler"
-    }
-  },
   "71": {
     "inputs": {
       "image": "welcome.png"
@@ -408,7 +357,7 @@
         0
       ],
       "use_teacache": false,
-      "teacache_rel_l1_thresh": 0.15,
+      "teacache_rel_l1_thresh": 0.15000000000000002,
       "cfg": 1,
       "guidance_scale": 10,
       "shift": 0,
@@ -535,6 +484,57 @@
     "class_type": "ImageToMask",
     "_meta": {
       "title": "Convert Image to Mask"
+    }
+  },
+  "83": {
+    "inputs": {
+      "steps": [
+        "68",
+        0
+      ],
+      "use_teacache": false,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "17",
+        0
+      ],
+      "start_latent": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
     }
   }
 }
