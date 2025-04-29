@@ -233,7 +233,7 @@
     "inputs": {
       "format": "MP4",
       "codec": "h264",
-      "fps": 30.000000000000007,
+      "fps": 30,
       "crf": 19,
       "images": [
         "79",
@@ -357,7 +357,7 @@
         0
       ],
       "use_teacache": true,
-      "teacache_rel_l1_thresh": 0.15000000000000002,
+      "teacache_rel_l1_thresh": 0.15,
       "cfg": 1,
       "guidance_scale": 10,
       "shift": 0,
