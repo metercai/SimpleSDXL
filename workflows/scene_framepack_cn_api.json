@@ -105,7 +105,7 @@
       "temporal_size": 64,
       "temporal_overlap": 8,
       "samples": [
-        "76",
+        "70",
         0
       ],
       "vae": [
@@ -209,7 +209,7 @@
   },
   "59": {
     "inputs": {
-      "seed": 318139923708655
+      "seed": 0
     },
     "class_type": "easy seed",
     "_meta": {
@@ -236,7 +236,7 @@
       "fps": 30.000000000000007,
       "crf": 19,
       "images": [
-        "44",
+        "79",
         0
       ]
     },
@@ -265,6 +265,66 @@
   },
   "68": {
     "inputs": {
+      "value": 20
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "main_steps"
+    }
+  },
+  "70": {
+    "inputs": {
+      "steps": [
+        "68",
+        0
+      ],
+      "use_teacache": true,
+      "teacache_rel_l1_thresh": 0.15000000000000002,
+      "cfg": 1.0000000000000002,
+      "guidance_scale": 10.000000000000002,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5000000000000001,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "17",
+        0
+      ],
+      "start_latent": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "71": {
+    "inputs": {
       "image": "welcome.png"
     },
     "class_type": "LoadImage",
@@ -272,7 +332,7 @@
       "title": "i2i_ip_image2"
     }
   },
-  "70": {
+  "72": {
     "inputs": {
       "width": [
         "51",
@@ -287,7 +347,7 @@
       "condition": "always",
       "multiple_of": 0,
       "image": [
-        "68",
+        "71",
         0
       ]
     },
@@ -296,10 +356,10 @@
       "title": "🔧 Image Resize"
     }
   },
-  "71": {
+  "73": {
     "inputs": {
       "image": [
-        "70",
+        "72",
         0
       ]
     },
@@ -308,10 +368,27 @@
       "title": "Get Image Size & Count"
     }
   },
-  "73": {
+  "74": {
+    "inputs": {
+      "crop": "center",
+      "clip_vision": [
+        "18",
+        0
+      ],
+      "image": [
+        "73",
+        0
+      ]
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP Vision Encode"
+    }
+  },
+  "75": {
     "inputs": {
       "pixels": [
-        "71",
+        "73",
         0
       ],
       "vae": [
@@ -324,39 +401,13 @@
       "title": "VAE Encode"
     }
   },
-  "74": {
-    "inputs": {
-      "crop": "center",
-      "clip_vision": [
-        "18",
-        0
-      ],
-      "image": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "CLIPVisionEncode",
-    "_meta": {
-      "title": "CLIP Vision Encode"
-    }
-  },
-  "75": {
-    "inputs": {
-      "value": 20
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "main_steps"
-    }
-  },
   "76": {
     "inputs": {
       "steps": [
-        "75",
+        "68",
         0
       ],
-      "use_teacache": false,
+      "use_teacache": true,
       "teacache_rel_l1_thresh": 0.15,
       "cfg": 1,
       "guidance_scale": 10,
@@ -396,7 +447,7 @@
         0
       ],
       "end_latent": [
-        "73",
+        "75",
         0
       ],
       "end_image_embeds": [
@@ -407,6 +458,83 @@
     "class_type": "FramePackSampler",
     "_meta": {
       "title": "FramePackSampler"
+    }
+  },
+  "77": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "76",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "78": {
+    "inputs": {
+      "image": [
+        "77",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "79": {
+    "inputs": {
+      "boolean": [
+        "80",
+        0
+      ],
+      "on_true": [
+        "44",
+        0
+      ],
+      "on_false": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "80": {
+    "inputs": {
+      "mask": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "81": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
     }
   }
 }

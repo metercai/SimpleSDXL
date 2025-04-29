@@ -27,7 +27,11 @@
 	    "task_method": {
 		"graffiti": "happy",
 		"crayon": "happy_cn"
-	    }
+	    },
+        "scene_steps": {
+            "graffiti": 10,
+            "crayon": 30
+        }
     	}
     },
     "default_model": "flux-hyp8-Q5_K_M.gguf",
