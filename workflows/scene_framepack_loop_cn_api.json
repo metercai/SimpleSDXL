@@ -233,7 +233,7 @@
     "inputs": {
       "format": "MP4",
       "codec": "h264",
-      "fps": 30.000000000000007,
+      "fps": 30,
       "crf": 19,
       "images": [
         "100",
@@ -373,7 +373,7 @@
       "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
-      "start_embed_strength": 0.5000000000000001,
+      "start_embed_strength": 0.5,
       "denoise_strength": 1,
       "model": [
         "52",
@@ -432,7 +432,7 @@
       "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
-      "start_embed_strength": 0.5000000000000001,
+      "start_embed_strength": 0.5,
       "denoise_strength": 1,
       "model": [
         "52",
@@ -613,7 +613,7 @@
       "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
-      "start_embed_strength": 0.5000000000000001,
+      "start_embed_strength": 0.5,
       "denoise_strength": 1,
       "model": [
         "52",
