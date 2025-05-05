@@ -59,9 +59,12 @@ class MiniCPM:
                 download_diffusers_model('llms', MiniCPM.model, 2, MiniCPM.model_url)
             else:
                 return
+        import sys
+        from typing import List
+        sys.modules[__name__].__builtins__['List'] = List
         MODEL_PATH = os.path.join(config.paths_llms[0], MiniCPM.model)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True)
-        text_model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True,
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True, local_files_only=True)
+        text_model = AutoModel.from_pretrained(MODEL_PATH, trust_remote_code=True, low_cpu_mem_usage=True, local_files_only=True, 
                 attn_implementation="sdpa", torch_dtype=torch.bfloat16 if MiniCPM.bf16_support else torch.float16)
         text_model.eval()
         with MiniCPM.lock:

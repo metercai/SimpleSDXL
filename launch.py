@@ -77,30 +77,33 @@ def check_base_environment():
                 run(f'"{python}" -m pip uninstall -y {base_pkg}', f'Uninstall {base_pkg} {version_installed}')
                 run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
 
-    extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.12.14'), ('imageio_ffmpeg', 'imageio-ffmpeg')]
-    for (extra_pkg, extra_pkg_name) in extra_pkgs:
-        if not is_installed(extra_pkg):
-            pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
-            run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
+    if is_installed("sageattention"):
+        extra_pkgs = [('comfyui-frontend-package', 'comfyui_frontend_package==1.18.6'), ('comfyui-workflow-templates', 'comfyui_workflow_templates==0.1.3')]
+        for (extra_pkg, extra_pkg_name) in extra_pkgs:
+            if not is_installed(extra_pkg):
+                pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
+                run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
-    update_pkgs = [('transformers', '4.47.1'), ('diffusers', '0.33.1'), ('accelerate', '1.6.0'), ('av', '14.2.0')]
-    for (update_pkg_name, update_pkg_version) in update_pkgs:
-        if not is_installed_version(update_pkg_name, update_pkg_version):
-            pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
-            run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
+        update_pkgs = [('transformers', '4.47.1'), ('bitsandbytes', '0.45.5'), ('accelerate', '1.6.0'), ('av', '14.3.0')]
+        for (update_pkg_name, update_pkg_version) in update_pkgs:
+            if not is_installed_version(update_pkg_name, update_pkg_version):
+                pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
+                run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
 
-    if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
-        logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
-        logger.info(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
-        logger.info(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
-        logger.info(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
-        logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
-        sys.exit(0)
-    if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and (not is_installed("cpm_kernels") or not is_installed_version("bitsandbytes", "0.43.3")):
-        logger.info(f'运行环境中缺乏必要组件或组件版本不匹配, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
-        logger.info(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
-        logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
-        sys.exit(0)
+        if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
+            logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
+            logger.info(f'受组件安装限制，SimpleSDXL2新版本(增加对混元、可图和SD3支持)需要下载新的程序包和基本模型包。具体操作详见：https://hf-mirror.com/metercai/SimpleSDXL2/')
+            logger.info(f'If not updated, you can run the commit version using the following scripte: run_SimpleSDXL_commit.bat')
+            logger.info(f'如果不升级，可下载SimpleSDXL1的独立分支完全包(未来仅修bug不加功能): https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleSDXL1_win64_all.exe.7z; 也可点击run_SimpleSDXL_commit.bat继续运行旧版本(历史存档,无法修bug也不加功能)。')
+            logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+            sys.exit(0)
+        if platform.system() == 'Windows' and is_installed("facexlib") and is_installed("insightface") and (not is_installed("cpm_kernels") or not is_installed_version("bitsandbytes", "0.43.3")):
+            logger.info(f'运行环境中缺乏必要组件或组件版本不匹配, SimpleSDXL2的程序环境包已升级。请参照 https://hf-mirror.com/metercai/SimpleSDXL2/ 的指引, 下载安装最新程序环境包.')
+            logger.info(f'The program running environment lacks necessary components. The program environment package for SimpleSDXL2 has been upgraded. Please go to https://hf-mirror.com/metercai/SimpleSDXL2/ Download and install the latest program environment package.')
+            logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
+            sys.exit(0)
+    else:
+        logger.info(f'系统环境已升级, 请到 https://hf-mirror.com/metercai/SimpleSDXL2/ 下载最新版本进行升级: SimpAI_dev.exe.7z0505')
 
     from simpleai_base import simpleai_base
     logger.info("Checking ...")
@@ -129,19 +132,19 @@ def prepare_environment():
 
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-    torch_ver = '2.4.1'
-    torchvisio_ver = '0.19.1'
+    torch_ver = '2.7.0'
+    torchvisio_ver = '0.22.0'
     if shared.sysinfo['gpu_brand'] == 'NVIDIA':
-        torch_index_url = "https://download.pytorch.org/whl/cu124"
+        torch_index_url = "https://download.pytorch.org/whl/cu128"
     elif shared.sysinfo['gpu_brand'] == 'AMD':
         if platform.system() == "Windows":
             #pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
             #pip install torch-directml
             torch_index_url = "https://download.pytorch.org/whl/"
         else:
-            torch_index_url = "https://download.pytorch.org/whl/rocm6.2"
-            torch_ver = '2.4.1'
-            torchvisio_ver = '0.19.1'
+            torch_index_url = "https://download.pytorch.org/whl/rocm6.3"
+            torch_ver = '2.7.0'
+            torchvisio_ver = '0.22.0'
     elif shared.sysinfo['gpu_brand'] == 'INTEL':
         torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
     else:
@@ -164,13 +167,13 @@ def prepare_environment():
         run(f'"{python}" -m {torch_command}', "Installing torchaudio", "Couldn't install torchaudio", live=True)
 
     if TRY_INSTALL_XFORMERS:
-        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu124/xformers-0.0.28.post1-cp310-cp310-win_amd64.whl'
-        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu124/xformers-0.0.28.post1-cp310-cp310-manylinux_2_28_x86_64.whl'
+        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu128/xformers-0.0.30-cp310-cp310-win_amd64.whl'
+        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu128/xformers-0.0.30-cp310-cp310-manylinux_2_28_x86_64.whl'
         if not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.28.post1')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.30')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.28.post1", live=True)
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.30", live=True)
                 else:
                     print("Installation of xformers is not supported in this version of Python.")
                     print(
@@ -178,7 +181,7 @@ def prepare_environment():
                     if not is_installed("xformers"):
                         exit(0)
             elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.28.post1")
+                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.30")
 
     if platform.system() == "Darwin":
         requirements_file = "requirements_macos.txt"

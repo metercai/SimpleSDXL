@@ -48,6 +48,32 @@ cpu_state = CPUState.GPU
 
 total_vram = 0
 
+def get_supported_float8_types():
+    float8_types = []
+    try:
+        float8_types.append(torch.float8_e4m3fn)
+    except:
+        pass
+    try:
+        float8_types.append(torch.float8_e4m3fnuz)
+    except:
+        pass
+    try:
+        float8_types.append(torch.float8_e5m2)
+    except:
+        pass
+    try:
+        float8_types.append(torch.float8_e5m2fnuz)
+    except:
+        pass
+    try:
+        float8_types.append(torch.float8_e8m0fnu)
+    except:
+        pass
+    return float8_types
+
+FLOAT8_TYPES = get_supported_float8_types()
+
 xpu_available = False
 torch_version = ""
 try:
@@ -755,13 +781,12 @@ def unet_dtype(device=None, model_params=0, supported_dtypes=[torch.float16, tor
         return torch.float8_e4m3fn
     if args.fp8_e5m2_unet:
         return torch.float8_e5m2
+    if args.fp8_e8m0fnu_unet:
+        return torch.float8_e8m0fnu
 
     fp8_dtype = None
-    try:
-        if weight_dtype in [torch.float8_e4m3fn, torch.float8_e5m2]:
-            fp8_dtype = weight_dtype
-    except:
-        pass
+    if weight_dtype in FLOAT8_TYPES:
+        fp8_dtype = weight_dtype
 
     if fp8_dtype is not None:
         if supports_fp8_compute(device): #if fp8 compute is supported the casting is most likely not expensive
@@ -856,6 +881,8 @@ def text_encoder_dtype(device=None):
         return torch.float8_e5m2
     elif args.fp16_text_enc:
         return torch.float16
+    elif args.bf16_text_enc:
+        return torch.bfloat16
     elif args.fp32_text_enc:
         return torch.float32
 
@@ -968,15 +995,61 @@ def force_channels_last():
     #TODO
     return False
 
-def cast_to(weight, dtype=None, device=None, non_blocking=False, copy=False):
+
+STREAMS = {}
+NUM_STREAMS = 1
+if args.async_offload:
+    NUM_STREAMS = 2
+    logging.info("Using async weight offloading with {} streams".format(NUM_STREAMS))
+
+stream_counters = {}
+def get_offload_stream(device):
+    stream_counter = stream_counters.get(device, 0)
+    if NUM_STREAMS <= 1:
+        return None
+
+    if device in STREAMS:
+        ss = STREAMS[device]
+        s = ss[stream_counter]
+        stream_counter = (stream_counter + 1) % len(ss)
+        if is_device_cuda(device):
+            ss[stream_counter].wait_stream(torch.cuda.current_stream())
+        stream_counters[device] = stream_counter
+        return s
+    elif is_device_cuda(device):
+        ss = []
+        for k in range(NUM_STREAMS):
+            ss.append(torch.cuda.Stream(device=device, priority=0))
+        STREAMS[device] = ss
+        s = ss[stream_counter]
+        stream_counter = (stream_counter + 1) % len(ss)
+        stream_counters[device] = stream_counter
+        return s
+    return None
+
+def sync_stream(device, stream):
+    if stream is None:
+        return
+    if is_device_cuda(device):
+        torch.cuda.current_stream().wait_stream(stream)
+
+def cast_to(weight, dtype=None, device=None, non_blocking=False, copy=False, stream=None):
     if device is None or weight.device == device:
         if not copy:
             if dtype is None or weight.dtype == dtype:
                 return weight
+        if stream is not None:
+            with stream:
+                return weight.to(dtype=dtype, copy=copy)
         return weight.to(dtype=dtype, copy=copy)
 
-    r = torch.empty_like(weight, dtype=dtype, device=device)
-    r.copy_(weight, non_blocking=non_blocking)
+    if stream is not None:
+        with stream:
+            r = torch.empty_like(weight, dtype=dtype, device=device)
+            r.copy_(weight, non_blocking=non_blocking)
+    else:
+        r = torch.empty_like(weight, dtype=dtype, device=device)
+        r.copy_(weight, non_blocking=non_blocking)
     return r
 
 def cast_to_device(tensor, device, dtype, copy=False):
@@ -1272,6 +1345,8 @@ def soft_empty_cache(force=False):
         torch.xpu.empty_cache()
     elif is_ascend_npu():
         torch.npu.empty_cache()
+    elif is_mlu():
+        torch.mlu.empty_cache()
     elif torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
