@@ -1,0 +1,25 @@
+{
+  "model_class": "Flux",
+  "model_config": {
+    "axes_dim": [
+      16,
+      56,
+      56
+    ],
+    "context_in_dim": 4096,
+    "depth": 19,
+    "depth_single_blocks": 38,
+    "disable_unet_model_creation": true,
+    "guidance_embed": true,
+    "hidden_size": 3072,
+    "image_model": "flux",
+    "in_channels": 32,
+    "mlp_ratio": 4.0,
+    "num_heads": 24,
+    "out_channels": 16,
+    "patch_size": 2,
+    "qkv_bias": true,
+    "theta": 10000,
+    "vec_in_dim": 768
+  }
+}

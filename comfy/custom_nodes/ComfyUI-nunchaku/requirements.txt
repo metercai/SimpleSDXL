@@ -1,0 +1,5 @@
+diffusers>=0.32.2
+accelerate
+sentencepiece
+protobuf
+huggingface_hub
