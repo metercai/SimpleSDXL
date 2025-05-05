@@ -596,7 +596,7 @@
         0
       ],
       "on_true": [
-        "84",
+        "94",
         0
       ],
       "on_false": [
@@ -637,12 +637,12 @@
   "92": {
     "inputs": {
       "width": [
-        "66",
+        "51",
         0
       ],
       "height": [
-        "66",
-        0
+        "51",
+        1
       ],
       "length": 1,
       "batch_size": 1
@@ -650,6 +650,38 @@
     "class_type": "EmptyHunyuanLatentVideo",
     "_meta": {
       "title": "EmptyHunyuanLatentVideo"
+    }
+  },
+  "94": {
+    "inputs": {
+      "image": [
+        "95",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "95": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "84",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
     }
   }
 }
