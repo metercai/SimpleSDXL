@@ -105,7 +105,7 @@
       "temporal_size": 64,
       "temporal_overlap": 8,
       "samples": [
-        "70",
+        "83",
         0
       ],
       "vae": [
@@ -232,11 +232,11 @@
   "65": {
     "inputs": {
       "format": "MP4",
-      "codec": "h265",
-      "fps": 30.000000000000007,
+      "codec": "h264",
+      "fps": 30,
       "crf": 19,
       "images": [
-        "44",
+        "79",
         0
       ]
     },
@@ -272,7 +272,85 @@
       "title": "main_steps"
     }
   },
-  "70": {
+  "71": {
+    "inputs": {
+      "image": "welcome.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_ip_image2"
+    }
+  },
+  "72": {
+    "inputs": {
+      "width": [
+        "51",
+        0
+      ],
+      "height": [
+        "51",
+        1
+      ],
+      "interpolation": "lanczos",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "73": {
+    "inputs": {
+      "image": [
+        "72",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "74": {
+    "inputs": {
+      "crop": "center",
+      "clip_vision": [
+        "18",
+        0
+      ],
+      "image": [
+        "73",
+        0
+      ]
+    },
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP Vision Encode"
+    }
+  },
+  "75": {
+    "inputs": {
+      "pixels": [
+        "73",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "76": {
     "inputs": {
       "steps": [
         "68",
@@ -292,7 +370,143 @@
         "63",
         1
       ],
-      "gpu_memory_preservation": 4,
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "image_embeds": [
+        "17",
+        0
+      ],
+      "start_latent": [
+        "20",
+        0
+      ],
+      "end_latent": [
+        "75",
+        0
+      ],
+      "end_image_embeds": [
+        "74",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "77": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "76",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "78": {
+    "inputs": {
+      "image": [
+        "77",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "79": {
+    "inputs": {
+      "boolean": [
+        "80",
+        0
+      ],
+      "on_true": [
+        "44",
+        0
+      ],
+      "on_false": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "80": {
+    "inputs": {
+      "mask": [
+        "81",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "81": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "83": {
+    "inputs": {
+      "steps": [
+        "68",
+        0
+      ],
+      "use_teacache": true,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 5,
       "sampler": "unipc_bh1",
       "embed_interpolation": "linear",
       "start_embed_strength": 0.5,

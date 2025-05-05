@@ -6,28 +6,33 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "v1.1",
-                "theme": ["FramePack", "FramePack(HQ)"],
-                "theme_title": "FramePack图生视频 [HQ=关闭TeaCache加速]",            
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt", "scene_input_image2", "scene_additional_prompt_2"],
+                "theme": ["快速", "高质量", "循环"],
+                "theme_title": "图生视频 [尾帧可选]/[高质量=关闭加速]/[循环=首尾匹配]",
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2"],
                 "prompt": {
-                    "FramePack": "A high-quality dynamic video",
-                    "FramePack(HQ)": "A high-quality dynamic video"
+                    "快速": "高质量动态视频",
+                    "高质量": "高质量动态视频",
+                    "循环": "高质量动态视频"
                 },
                 "task_method": {
-                    "FramePack": "framepack",
-                    "FramePack(HQ)": "framepack_hq"
+                    "快速": "framepack_cn",
+                    "高质量": "framepack_hq_cn",
+                    "循环": "framepack_loop_cn"
                 },
                 "multimodal_prompt": {
-                    "FramePack": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options.",
-                    "FramePack(HQ)": "You are an assistant that writes short, motion-focused prompts for animating images.When the user sends an image, respond with a single, concise prompt describing visual motion (such as human activity, moving objects, or camera movements). Focus only on how the scene could come alive and become dynamic using brief phrases.Larger and more dynamic motions (like dancing, jumping, running, etc.) are preferred over smaller or more subtle ones (like standing still, sitting, etc.).Describe subject, then motion, then other things. For example: “The girl dances gracefully, with clear movements, full of charm.”,If there is something that can dance (like a man, girl, robot, etc.), then prefer to describe it as dancing.Stay in a loop: one image in, one motion prompt out. Do not explain, ask questions, or generate multiple options."
+                    "快速": "您是一名助手，负责撰写用于动画图像的简短、注重运动的提示。当用户发送图像时，请用一个简洁的提示来描述视觉运动（例如，人类活动、移动物体或相机运动）。只关注场景如何变得生动和动态，使用简短的短语。更大、更动态的运动（如跳舞、跳跃、奔跑等）比较小或更微妙的运动（如静止、坐着等）更受青睐。先描述主体，然后是运动，然后是其他事物。例如：“女孩优雅地跳舞，动作清楚，充满魅力。”如果有可以跳舞的东西（如男人、女孩、机器人等），则优先将其描述为跳舞。保持循环：一张图像输入，一条运动提示输出。不要解释、提问或生成多个选项。",
+                    "高质量": "您是一名助手，负责撰写用于动画图像的简短、注重运动的提示。当用户发送图像时，请用一个简洁的提示来描述视觉运动（例如，人类活动、移动物体或相机运动）。只关注场景如何变得生动和动态，使用简短的短语。更大、更动态的运动（如跳舞、跳跃、奔跑等）比较小或更微妙的运动（如静止、坐着等）更受青睐。先描述主体，然后是运动，然后是其他事物。例如：“女孩优雅地跳舞，动作清楚，充满魅力。”如果有可以跳舞的东西（如男人、女孩、机器人等），则优先将其描述为跳舞。保持循环：一张图像输入，一条运动提示输出。不要解释、提问或生成多个选项。",
+                    "循环": "您是一名助手，负责撰写用于动画图像的简短、注重运动的提示。当用户发送图像时，请用一个简洁的提示来描述视觉运动（例如，人类活动、移动物体或相机运动）。只关注场景如何变得生动和动态，使用简短的短语。更大、更动态的运动（如跳舞、跳跃、奔跑等）比较小或更微妙的运动（如静止、坐着等）更受青睐。先描述主体，然后是运动，然后是其他事物。例如：“女孩优雅地跳舞，动作清楚，充满魅力。”如果有可以跳舞的东西（如男人、女孩、机器人等），则优先将其描述为跳舞。保持循环：一张图像输入，一条运动提示输出。不要解释、提问或生成多个选项。"
                 },
                 "var_number": {
-                    "FramePack":3,
-                    "FramePack(HQ)":3
+                    "快速":3,
+                    "高质量":3,
+                    "循环":3
                 },
                 "scene_steps": {
-                    "FramePack": 20,
-                    "FramePack(HQ)": 20
+                    "快速": 20,
+                    "高质量": 20,
+                    "循环": 20
                 },
                 "aspect_ratio" : ["640|1:1", "480|1:1", "320|1:1"]
             }
