@@ -3,7 +3,7 @@ diffusers>=0.33.1 #0.29.0
 torchsde==0.2.6 #
 
 accelerate==1.6.0 #0.32.1
-av==14.3
+av==14.2
 bitsandbytes==0.45.5 #0.43.3
 colour-science
 cuda-python==11.7.1
