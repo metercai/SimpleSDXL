@@ -199,8 +199,13 @@
     "inputs": {
       "model": "FramePackI2V_HY_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
-      "quantization": "fp8_e4m3fn",
-      "attention_mode": "sdpa"
+      "quantization": "fp8_e4m3fn_fast",
+      "load_device": "offload_device",
+      "attention_mode": "sageattn",
+      "compile_args": [
+        "27",
+        0
+      ]
     },
     "class_type": "LoadFramePackModel",
     "_meta": {
@@ -387,12 +392,12 @@
         "15",
         0
       ],
-      "image_embeds": [
-        "17",
-        0
-      ],
       "start_latent": [
         "20",
+        0
+      ],
+      "image_embeds": [
+        "17",
         0
       ],
       "end_latent": [
@@ -448,7 +453,7 @@
         0
       ],
       "on_true": [
-        "44",
+        "85",
         0
       ],
       "on_false": [
@@ -523,18 +528,128 @@
         "15",
         0
       ],
-      "image_embeds": [
-        "17",
-        0
-      ],
       "start_latent": [
         "20",
+        0
+      ],
+      "image_embeds": [
+        "17",
         0
       ]
     },
     "class_type": "FramePackSampler",
     "_meta": {
       "title": "FramePackSampler"
+    }
+  },
+  "84": {
+    "inputs": {
+      "steps": [
+        "68",
+        0
+      ],
+      "use_teacache": true,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": [
+        "59",
+        0
+      ],
+      "latent_window_size": 9,
+      "total_second_length": [
+        "63",
+        1
+      ],
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "start_latent": [
+        "92",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "85": {
+    "inputs": {
+      "boolean": [
+        "87",
+        0
+      ],
+      "on_true": [
+        "84",
+        0
+      ],
+      "on_false": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "86": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "87": {
+    "inputs": {
+      "mask": [
+        "86",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "92": {
+    "inputs": {
+      "width": [
+        "66",
+        0
+      ],
+      "height": [
+        "66",
+        0
+      ],
+      "length": 1,
+      "batch_size": 1
+    },
+    "class_type": "EmptyHunyuanLatentVideo",
+    "_meta": {
+      "title": "EmptyHunyuanLatentVideo"
     }
   }
 }

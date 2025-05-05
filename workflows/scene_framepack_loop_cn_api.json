@@ -200,7 +200,12 @@
       "model": "FramePackI2V_HY_fp8_e4m3fn.safetensors",
       "base_precision": "bf16",
       "quantization": "fp8_e4m3fn",
-      "attention_mode": "sdpa"
+      "load_device": "offload_device",
+      "attention_mode": "sageattn",
+      "compile_args": [
+        "27",
+        0
+      ]
     },
     "class_type": "LoadFramePackModel",
     "_meta": {
@@ -387,12 +392,12 @@
         "15",
         0
       ],
-      "image_embeds": [
-        "17",
-        0
-      ],
       "start_latent": [
         "20",
+        0
+      ],
+      "image_embeds": [
+        "17",
         0
       ],
       "end_latent": [
@@ -446,12 +451,12 @@
         "15",
         0
       ],
-      "image_embeds": [
-        "74",
-        0
-      ],
       "start_latent": [
         "73",
+        0
+      ],
+      "image_embeds": [
+        "74",
         0
       ],
       "end_latent": [
@@ -577,7 +582,7 @@
         0
       ],
       "on_true": [
-        "104",
+        "108",
         0
       ],
       "on_false": [
@@ -627,12 +632,12 @@
         "15",
         0
       ],
-      "image_embeds": [
-        "17",
-        0
-      ],
       "start_latent": [
         "20",
+        0
+      ],
+      "image_embeds": [
+        "17",
         0
       ],
       "end_latent": [
@@ -708,6 +713,167 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "106": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "107": {
+    "inputs": {
+      "mask": [
+        "106",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "108": {
+    "inputs": {
+      "boolean": [
+        "107",
+        0
+      ],
+      "on_true": [
+        "110",
+        0
+      ],
+      "on_false": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "109": {
+    "inputs": {
+      "image": [
+        "112",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "110": {
+    "inputs": {
+      "image1": [
+        "109",
+        0
+      ],
+      "image2": [
+        "111",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "111": {
+    "inputs": {
+      "images": [
+        "109",
+        0
+      ]
+    },
+    "class_type": "ReverseImageBatch",
+    "_meta": {
+      "title": "Reverse Image Batch"
+    }
+  },
+  "112": {
+    "inputs": {
+      "tile_size": 128,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8,
+      "samples": [
+        "113",
+        0
+      ],
+      "vae": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "113": {
+    "inputs": {
+      "steps": 30,
+      "use_teacache": false,
+      "teacache_rel_l1_thresh": 0.15,
+      "cfg": 1,
+      "guidance_scale": 10,
+      "shift": 0,
+      "seed": 511586469107029,
+      "latent_window_size": 9,
+      "total_second_length": 5,
+      "gpu_memory_preservation": 5,
+      "sampler": "unipc_bh1",
+      "embed_interpolation": "linear",
+      "start_embed_strength": 0.5,
+      "denoise_strength": 1,
+      "model": [
+        "52",
+        0
+      ],
+      "positive": [
+        "47",
+        0
+      ],
+      "negative": [
+        "15",
+        0
+      ],
+      "start_latent": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "FramePackSampler",
+    "_meta": {
+      "title": "FramePackSampler"
+    }
+  },
+  "114": {
+    "inputs": {
+      "width": [
+        "66",
+        0
+      ],
+      "height": [
+        "66",
+        0
+      ],
+      "length": 1,
+      "batch_size": 1
+    },
+    "class_type": "EmptyHunyuanLatentVideo",
+    "_meta": {
+      "title": "EmptyHunyuanLatentVideo"
     }
   }
 }
