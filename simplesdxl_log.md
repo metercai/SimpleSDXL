@@ -1,3 +1,11 @@
+# 2025-05-05
+* 基础环境直升Pytorch2.7+cu128，需要提前安装cuda12.8以上的驱动；
+* 注意力计算加速包xformers升级到0.0.30，flash_attn升级到2.7.4.post1；
+* 新增4位量化注意力加速包sageattention和推理加速包nunchaku；
+* comfyd升级到5月5日最新版本：d9c80a8；
+* 新增ComfyUI-WanVideoWrapper，ComfyUI-Frame-Interpolation，ComfyUI-nunchaku节点，升级ComfyUI-FramePackWrapper节点。
+- 6gc0exFITy|BpOf6SwICM
+
 # 2025-04-06
 * 启用更新UI，将高级设置选项分解归类，与生图密切相关的前置到设置栏。其他的分为“应用设置”/“本地系统”/“社区网络”三类放到“我的”标签下，“本地系统”/“社区网络”需要管理员身份才可设置。
 * 将重要设置新增自动记忆功能，重启后默认退出的前的设置；新增显存、内存占比和同时本机在线数的状态条，状态条可自由拖动。
