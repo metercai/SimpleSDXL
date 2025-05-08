@@ -4180,6 +4180,8 @@
         2
       ],
       "keep_proportions": false,
+      "upscale_method": "nearest-exact",
+      "crop": "disabled",
       "mask": [
         "1989",
         0

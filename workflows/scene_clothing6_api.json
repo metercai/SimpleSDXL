@@ -1077,6 +1077,8 @@
         2
       ],
       "keep_proportions": false,
+      "upscale_method": "nearest-exact",
+      "crop": "disabled",
       "mask": [
         "254",
         0
@@ -1428,6 +1430,8 @@
         2
       ],
       "keep_proportions": false,
+      "upscale_method": "nearest-exact",
+      "crop": "disabled",
       "mask": [
         "259",
         1
