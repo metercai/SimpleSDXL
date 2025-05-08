@@ -1,6 +1,12 @@
 import os
-import ssl
 import sys
+
+root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(root)
+os.chdir(root)
+
+
+import ssl
 import json
 import importlib
 import packaging.version
@@ -21,10 +27,6 @@ setup_logger(log_level='INFO')
 logger = logging.getLogger(__name__)
 
 logger.debug('[System ARGV] ' + str(sys.argv))
-
-root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(root)
-os.chdir(root)
 
 os.environ["SIMPAI_LOG_FILE"] = get_log_file()
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"

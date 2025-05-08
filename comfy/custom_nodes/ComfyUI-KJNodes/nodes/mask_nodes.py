@@ -7,8 +7,9 @@ import numpy as np
 from contextlib import nullcontext
 import os
 
-import comfy.model_management as model_management
+import model_management
 from comfy.utils import ProgressBar
+from comfy.utils import common_upscale
 from nodes import MAX_RESOLUTION
 
 import folder_paths
@@ -527,7 +528,7 @@ class CreateFadeMask:
         return {
             "required": {
                  "invert": ("BOOLEAN", {"default": False}),
-                 "frames": ("INT", {"default": 2,"min": 2, "max": 255, "step": 1}),
+                 "frames": ("INT", {"default": 2,"min": 2, "max": 10000, "step": 1}),
                  "width": ("INT", {"default": 256,"min": 16, "max": 4096, "step": 1}),
                  "height": ("INT", {"default": 256,"min": 16, "max": 4096, "step": 1}),
                  "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out"],),
@@ -614,7 +615,7 @@ and interpolating from that to fully black at the 16th frame.
             "required": {
                  "points_string": ("STRING", {"default": "0:(0.0),\n7:(1.0),\n15:(0.0)\n", "multiline": True}),
                  "invert": ("BOOLEAN", {"default": False}),
-                 "frames": ("INT", {"default": 16,"min": 2, "max": 255, "step": 1}),
+                 "frames": ("INT", {"default": 16,"min": 2, "max": 10000, "step": 1}),
                  "width": ("INT", {"default": 512,"min": 1, "max": 4096, "step": 1}),
                  "height": ("INT", {"default": 512,"min": 1, "max": 4096, "step": 1}),
                  "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out"],),
@@ -1179,14 +1180,17 @@ Rounds the mask or batch of masks to a binary mask.
         return (mask,)
     
 class ResizeMask:
+    upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "lanczos"]
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
                 "mask": ("MASK",),
-                "width": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 8, "display": "number" }),
-                "height": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 8, "display": "number" }),
+                "width": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 1, "display": "number" }),
+                "height": ("INT", { "default": 512, "min": 0, "max": MAX_RESOLUTION, "step": 1, "display": "number" }),
                 "keep_proportions": ("BOOLEAN", { "default": False }),
+                "upscale_method": (s.upscale_methods,),
+                "crop": (["disabled","center"],),
             }
         }
 
@@ -1198,7 +1202,7 @@ class ResizeMask:
 Resizes the mask or batch of masks to the specified width and height.
 """
 
-    def resize(self, mask, width, height, keep_proportions):
+    def resize(self, mask, width, height, keep_proportions, upscale_method,crop):
         if keep_proportions:
             _, oh, ow = mask.shape
             width = ow if width == 0 else width
@@ -1207,7 +1211,7 @@ Resizes the mask or batch of masks to the specified width and height.
             width = round(ow*ratio)
             height = round(oh*ratio)
         outputs = mask.unsqueeze(1)
-        outputs = F.interpolate(outputs, size=(height, width), mode="nearest")
+        outputs = common_upscale(outputs, width, height, upscale_method, crop)
         outputs = outputs.squeeze(1)
 
         return(outputs, outputs.shape[2], outputs.shape[1],)
@@ -1247,3 +1251,147 @@ Sets new min and max values for the mask.
         scaled_mask = torch.clamp(scaled_mask, min=0.0, max=1.0)
         
         return (scaled_mask, )
+
+
+def get_mask_polygon(self, mask_np):
+    import cv2
+    """Helper function to get polygon points from mask"""
+    # Find contours
+    contours, _ = cv2.findContours(mask_np, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if not contours:
+        return None
+    
+    # Get the largest contour
+    largest_contour = max(contours, key=cv2.contourArea)
+    
+    # Approximate polygon
+    epsilon = 0.02 * cv2.arcLength(largest_contour, True)
+    polygon = cv2.approxPolyDP(largest_contour, epsilon, True)
+    
+    return polygon.squeeze()
+
+import cv2
+class SeparateMasks:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mask": ("MASK", ),
+                "size_threshold_width" : ("INT", {"default": 256, "min": 0.0, "max": 4096, "step": 1}),
+                "size_threshold_height" : ("INT", {"default": 256, "min": 0.0, "max": 4096, "step": 1}),
+                "mode": (["convex_polygons", "area"],),
+                "max_poly_points": ("INT", {"default": 8, "min": 3, "max": 32, "step": 1}),
+
+            },
+        }
+
+    RETURN_TYPES = ("MASK",)
+    RETURN_NAMES = ("mask",)
+    FUNCTION = "separate"
+    CATEGORY = "KJNodes/masking"
+    OUTPUT_NODE = True
+    DESCRIPTION = "Separates a mask into multiple masks based on the size of the connected components."
+
+    def polygon_to_mask(self, polygon, shape):
+        mask = np.zeros((shape[0], shape[1]), dtype=np.uint8)  # Fixed shape handling
+
+        if len(polygon.shape) == 2:  # Check if polygon points are valid
+            polygon = polygon.astype(np.int32)
+            cv2.fillPoly(mask, [polygon], 1)
+        return mask
+
+    def get_mask_polygon(self, mask_np, max_points):
+        contours, _ = cv2.findContours(mask_np, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            return None
+        
+        largest_contour = max(contours, key=cv2.contourArea)
+        hull = cv2.convexHull(largest_contour)
+        
+        # Initialize with smaller epsilon for more points
+        perimeter = cv2.arcLength(hull, True)
+        epsilon = perimeter * 0.01  # Start smaller
+        
+        min_eps = perimeter * 0.001  # Much smaller minimum
+        max_eps = perimeter * 0.2   # Smaller maximum
+        
+        best_approx = None
+        best_diff = float('inf')
+        max_iterations = 20
+        
+        #print(f"Target points: {max_points}, Perimeter: {perimeter}")
+        
+        for i in range(max_iterations):
+            curr_eps = (min_eps + max_eps) / 2
+            approx = cv2.approxPolyDP(hull, curr_eps, True)
+            points_diff = len(approx) - max_points
+            
+            #print(f"Iteration {i}: points={len(approx)}, eps={curr_eps:.4f}")
+            
+            if abs(points_diff) < best_diff:
+                best_approx = approx
+                best_diff = abs(points_diff)
+            
+            if len(approx) > max_points:
+                min_eps = curr_eps * 1.1  # More gradual adjustment
+            elif len(approx) < max_points:
+                max_eps = curr_eps * 0.9  # More gradual adjustment
+            else:
+                return approx.squeeze()
+            
+            if abs(max_eps - min_eps) < perimeter * 0.0001:  # Relative tolerance
+                break
+        
+        # If we didn't find exact match, return best approximation
+        return best_approx.squeeze() if best_approx is not None else hull.squeeze()
+
+    def separate(self, mask: torch.Tensor, size_threshold_width: int, size_threshold_height: int, max_poly_points: int, mode: str):
+        from scipy.ndimage import label, center_of_mass
+        import numpy as np
+        
+        B, H, W = mask.shape
+        separated = []
+
+        mask = mask.round()
+        
+        for b in range(B):
+            mask_np = mask[b].cpu().numpy().astype(np.uint8)
+            structure = np.ones((3, 3), dtype=np.int8)
+            labeled, ncomponents = label(mask_np, structure=structure)
+            pbar = ProgressBar(ncomponents)
+            
+            for component in range(1, ncomponents + 1):
+                component_mask_np = (labeled == component).astype(np.uint8)
+                
+                rows = np.any(component_mask_np, axis=1)
+                cols = np.any(component_mask_np, axis=0)
+                y_min, y_max = np.where(rows)[0][[0, -1]]
+                x_min, x_max = np.where(cols)[0][[0, -1]]
+                
+                width = x_max - x_min + 1
+                height = y_max - y_min + 1
+                centroid_x = (x_min + x_max) / 2  # Calculate x centroid
+                print(f"Component {component}: width={width}, height={height}, x_pos={centroid_x}")
+                
+                if width >= size_threshold_width and height >= size_threshold_height:
+                    if mode != "area":
+                        polygon = self.get_mask_polygon(component_mask_np, max_poly_points)
+                        if polygon is not None:
+                            poly_mask = self.polygon_to_mask(polygon, (H, W))
+                            poly_mask = torch.tensor(poly_mask, device=mask.device)
+                            separated.append((centroid_x, poly_mask))
+                    else:
+                        area_mask = torch.tensor(component_mask_np, device=mask.device)
+                        separated.append((centroid_x, area_mask))
+                pbar.update(1)
+        
+        if len(separated) > 0:
+            # Sort by x position and extract only the masks
+            separated.sort(key=lambda x: x[0])
+            separated = [x[1] for x in separated]
+            out_masks = torch.stack(separated, dim=0)
+            return out_masks,
+        else:
+            return torch.empty((1, 64, 64), device=mask.device),
+        

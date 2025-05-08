@@ -48,28 +48,53 @@ app.registerExtension({
 		}
 	},
 		async setup(app) {
-			const onChange = (value) => {
-				if (value) {
-					const valuesToAddToIn = ["GetNode"];
-					const valuesToAddToOut = ["SetNode"];
+			const updateSlots = (value) => {
+				const valuesToAddToIn = ["GetNode"];
+				const valuesToAddToOut = ["SetNode"];
+				// Remove entries if they exist
+				for (const arr of Object.values(LiteGraph.slot_types_default_in)) {
+					for (const valueToAdd of valuesToAddToIn) {
+						const idx = arr.indexOf(valueToAdd);
+						if (idx !== -1) {
+							arr.splice(idx, 1);
+						}
+					}
+				}
 			
+				for (const arr of Object.values(LiteGraph.slot_types_default_out)) {
+					for (const valueToAdd of valuesToAddToOut) {
+						const idx = arr.indexOf(valueToAdd);
+						if (idx !== -1) {
+							arr.splice(idx, 1);
+						}
+					}
+				}
+				if (value!="disabled") {
 					for (const arr of Object.values(LiteGraph.slot_types_default_in)) {
 						for (const valueToAdd of valuesToAddToIn) {
 							const idx = arr.indexOf(valueToAdd);
-							if (idx !== 0) {
+							if (idx !== -1) {
 								arr.splice(idx, 1);
 							}
-							arr.unshift(valueToAdd);
+							if (value === "top") {
+								arr.unshift(valueToAdd);
+							} else {
+								arr.push(valueToAdd);
+							}
 						}
 					}
 			
 					for (const arr of Object.values(LiteGraph.slot_types_default_out)) {
 						for (const valueToAdd of valuesToAddToOut) {
 							const idx = arr.indexOf(valueToAdd);
-							if (idx !== 0) {
+							if (idx !== -1) {
 								arr.splice(idx, 1);
 							}
-							arr.unshift(valueToAdd);
+							if (value === "top") {
+								arr.unshift(valueToAdd);
+							} else {
+								arr.push(valueToAdd);
+							}
 						}
 					}
 				}
@@ -77,33 +102,19 @@ app.registerExtension({
 			
 			app.ui.settings.addSetting({
 				id: "KJNodes.SetGetMenu",
-				name: "KJNodes: Make Set/Get -nodes defaults (turn off and reload to disable)",
-				defaultValue: false,
-				type: "boolean",
-				options: (value) => [
-					{
-						value: true,
-						text: "On",
-						selected: value === true,
-					},
-					{
-						value: false,
-						text: "Off",
-						selected: value === false,
-					},
-				],
-				onChange: onChange,
+				name: "KJNodes: Make Set/Get -nodes defaults",
+				tooltip: 'Adds Set/Get nodes to the top or bottom of the list of available node suggestions.',
+				options: ['disabled', 'top', 'bottom'],
+				defaultValue: 'disabled',
+				type: "combo",
+				onChange: updateSlots,
 				
 			});
 			app.ui.settings.addSetting({
-				id: "KJNodes.DisableMiddleClickDefault",
+				id: "KJNodes.MiddleClickDefault",
 				name: "KJNodes: Middle click default node adding",
 				defaultValue: false,
 				type: "boolean",
-				options: (value) => [
-					{ value: true, text: "On", selected: value === true },
-					{ value: false, text: "Off", selected: value === false },
-				],
 				onChange: (value) => {
 					LiteGraph.middle_click_slot_add_default_node = value;
 				},
@@ -111,42 +122,26 @@ app.registerExtension({
 			app.ui.settings.addSetting({
 				id: "KJNodes.nodeAutoColor",
 				name: "KJNodes: Automatically set node colors",
-				defaultValue: true,
 				type: "boolean",
-				options: (value) => [
-					{ value: true, text: "On", selected: value === true },
-					{ value: false, text: "Off", selected: value === false },
-				],
+				defaultValue: true,
 			});
 			app.ui.settings.addSetting({
 				id: "KJNodes.helpPopup",
 				name: "KJNodes: Help popups",
 				defaultValue: true,
 				type: "boolean",
-				options: (value) => [
-					{ value: true, text: "On", selected: value === true },
-					{ value: false, text: "Off", selected: value === false },
-				],
 			});
 			app.ui.settings.addSetting({
 				id: "KJNodes.disablePrefix",
 				name: "KJNodes: Disable automatic Set_ and Get_ prefix",
-				defaultValue: false,
+				defaultValue: true,
 				type: "boolean",
-				options: (value) => [
-					{ value: true, text: "On", selected: value === true },
-					{ value: false, text: "Off", selected: value === false },
-				],
 			});
 			app.ui.settings.addSetting({
 				id: "KJNodes.browserStatus",
 				name: "KJNodes: 🟢 Stoplight browser status icon 🔴",
 				defaultValue: false,
 				type: "boolean",
-				options: (value) => [
-					{ value: true, text: "On", selected: value === true },
-					{ value: false, text: "Off", selected: value === false },
-				],
 			});
 }
 });

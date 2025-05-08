@@ -311,8 +311,34 @@ def get_torch_device_name(device):
     else:
         return "CUDA {}: {}".format(device, torch.cuda.get_device_name(device))
 
+def get_compute_capability(device):
+    if not is_nvidia():
+        return ''
+
+    from cuda import cuda
+    err, = cuda.cuInit(0)
+    if err != cuda.CUresult.CUDA_SUCCESS:
+        return ''
+    err, device = cuda.cuDeviceGet(device)
+    if err != cuda.CUresult.CUDA_SUCCESS:
+        return ''
+    err1, major = cuda.cuDeviceGetAttribute(
+        cuda.CUdevice_attribute.CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
+        device
+    )
+    err2, minor = cuda.cuDeviceGetAttribute(
+        cuda.CUdevice_attribute.CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
+        device
+    )
+    if err1 != cuda.CUresult.CUDA_SUCCESS or err2 != cuda.CUresult.CUDA_SUCCESS:
+        return ''
+    return f'SM{major}{minor}'
+
+def get_current_compute_capability():
+    return get_compute_capability(torch.cuda.current_device())
+
 try:
-    logger.info(f"Device:{get_torch_device_name(get_torch_device())}")
+    logger.info(f"Device:{get_torch_device_name(get_torch_device())} : {get_current_compute_capability()}")
     import shared
     shared.torch_device = "{}".format(get_torch_device())
 except:
@@ -920,4 +946,3 @@ def get_vram_ram_used():
         ram_memory_info = psutil.virtual_memory()
         vram_ram_info = (vram_ram_info[0], vram_ram_info[1], vram_used, ram_memory_info.used)
     return vram_ram_info
-

@@ -28,16 +28,16 @@ function setColorAndBgColor(type) {
         this.bgcolor = colors.bgcolor;
     }
 }
-let isAlertShown = false;
 let disablePrefix = app.ui.settings.getSettingValue("KJNodes.disablePrefix")
 const LGraphNode = LiteGraph.LGraphNode
 
-function showAlertWithThrottle(message, delay) {
-    if (!isAlertShown) {
-        isAlertShown = true;
-        alert(message);
-        setTimeout(() => isAlertShown = false, delay);
-    }
+function showAlert(message) {
+  app.extensionManager.toast.add({
+    severity: 'warn',
+    summary: "KJ Get/Set",
+    detail: `${message}. Most likely you're missing custom nodes`,
+    life: 5000,
+  })
 }
 app.registerExtension({
 	name: "SetNode",
@@ -122,7 +122,7 @@ app.registerExtension({
 								setColorAndBgColor.call(this, type);	
 							}
 						} else {
-							alert("Error: Set node input undefined. Most likely you're missing custom nodes");
+                showAlert("node input undefined.")
 						}
 					}
 					if (link_info && node.graph && slotType == 2 && isChangeConnect) {
@@ -134,7 +134,7 @@ app.registerExtension({
 							this.outputs[0].type = type;
 							this.outputs[0].name = type;
 						} else {
-							alert("Error: Get Set node output undefined. Most likely you're missing custom nodes");
+							showAlert('node output undefined');
 						}
 					}
 					
@@ -327,6 +327,8 @@ app.registerExtension({
 
 						];
 				}
+				// Provide a default link object with necessary properties, to avoid errors as link can't be null anymore
+				const defaultLink = { type: 'default', color: this.slotColor };
 
 				for (const getter of this.currentGetters) {
 					if (!this.flags.collapsed) {
@@ -347,7 +349,7 @@ app.registerExtension({
 						ctx,
 						start_node_slotpos,
 						end_node_slotpos,
-						null,
+						defaultLink,
 						false,
 						null,
 						this.slotColor,
@@ -447,7 +449,7 @@ app.registerExtension({
 					if (this.outputs[0].type !== '*' && this.outputs[0].links) {
 						this.outputs[0].links.filter(linkId => {
 							const link = node.graph.links[linkId];
-							return link && (link.type !== this.outputs[0].type && link.type !== '*');
+							return link && (!link.type.split(",").includes(this.outputs[0].type) && link.type !== '*');
 						}).forEach(linkId => {
 							node.graph.removeLink(linkId);
 						});
@@ -485,7 +487,7 @@ app.registerExtension({
 					return link;
 				} else {
 					const errorMessage = "No SetNode found for " + this.widgets[0].value + "(" + this.type + ")";
-					showAlertWithThrottle(errorMessage, 5000);
+					showAlert(errorMessage);
 					//throw new Error(errorMessage);
 				}
 			}
@@ -528,6 +530,9 @@ app.registerExtension({
 			// }
 			_drawVirtualLink(lGraphCanvas, ctx) {
 				if (!this.currentSetter) return;
+
+				// Provide a default link object with necessary properties, to avoid errors as link can't be null anymore
+				const defaultLink = { type: 'default', color: this.slotColor };
 				
 				let start_node_slotpos = this.currentSetter.getConnectionPos(false, 0);
 				start_node_slotpos = [
@@ -539,7 +544,7 @@ app.registerExtension({
 					ctx,
 					start_node_slotpos,
 					end_node_slotpos,
-					null,
+					defaultLink,
 					false,
 					null,
 					this.slotColor

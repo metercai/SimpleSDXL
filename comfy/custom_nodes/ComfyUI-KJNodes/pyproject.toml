@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-kjnodes"
 description = "Various quality of life -nodes for ComfyUI, mostly just visual stuff to improve usability."
-version = "1.0.1"
+version = "1.1.0"
 license = {file = "LICENSE"}
 dependencies = ["librosa", "numpy", "pillow>=10.3.0", "scipy", "color-matcher", "matplotlib", "huggingface_hub"]
 
@@ -12,4 +12,4 @@ Repository = "https://github.com/kijai/ComfyUI-KJNodes"
 [tool.comfy]
 PublisherId = "kijai"
 DisplayName = "ComfyUI-KJNodes"
-Icon = ""
+Icon = "https://avatars.githubusercontent.com/u/40791699"

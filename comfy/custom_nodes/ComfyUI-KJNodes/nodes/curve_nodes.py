@@ -1,10 +1,13 @@
 import torch
 from torchvision import transforms
 import json
-from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter, ImageChops
 import numpy as np
-from ..utility.utility import pil2tensor
+from ..utility.utility import pil2tensor, tensor2pil
 import folder_paths
+import io
+import base64
+        
 from comfy.utils import common_upscale
 
 def plot_coordinates_to_tensor(coordinates, height, width, bbox_height, bbox_width, size_multiplier, prompt):
@@ -91,8 +94,10 @@ Plots coordinates to sequence of images using Matplotlib.
     def append(self, coordinates, text, width, height, bbox_width, bbox_height, size_multiplier=[1.0]):
         coordinates = json.loads(coordinates.replace("'", '"'))
         coordinates = [(coord['x'], coord['y']) for coord in coordinates]
-        batch_size = len(coordinates)    
-        if len(size_multiplier) != batch_size:
+        batch_size = len(coordinates)
+        if not size_multiplier or len(size_multiplier) != batch_size:
+            size_multiplier = [0] * batch_size
+        else:
             size_multiplier = size_multiplier * (batch_size // len(size_multiplier)) + size_multiplier[:batch_size % len(size_multiplier)]
 
         plot_image_tensor = plot_coordinates_to_tensor(coordinates, height, width, bbox_height, bbox_width, size_multiplier, text)
@@ -148,6 +153,7 @@ class SplineEditor:
             "optional": {
                 "min_value": ("FLOAT", {"default": 0.0, "min": -10000.0, "max": 10000.0, "step": 0.01}),
                 "max_value": ("FLOAT", {"default": 1.0, "min": -10000.0, "max": 10000.0, "step": 0.01}),
+                "bg_image": ("IMAGE", ),
             }
         }
 
@@ -194,7 +200,8 @@ output types:
 """
 
     def splinedata(self, mask_width, mask_height, coordinates, float_output_type, interpolation, 
-                   points_to_sample, sampling_method, points_store, tension, repeat_output, min_value=0.0, max_value=1.0):
+                   points_to_sample, sampling_method, points_store, tension, repeat_output, 
+                   min_value=0.0, max_value=1.0, bg_image=None):
         
         coordinates = json.loads(coordinates)
         normalized = []
@@ -224,7 +231,22 @@ output types:
         masks_out = torch.stack(mask_tensors)
         masks_out = masks_out.repeat(repeat_output, 1, 1, 1)
         masks_out = masks_out.mean(dim=-1)
-        return (masks_out, json.dumps(coordinates), out_floats, len(out_floats) , json.dumps(normalized))
+        if bg_image is None:
+            return (masks_out, json.dumps(coordinates), out_floats, len(out_floats) , json.dumps(normalized))
+        else:
+            transform = transforms.ToPILImage()
+            image = transform(bg_image[0].permute(2, 0, 1))
+            buffered = io.BytesIO()
+            image.save(buffered, format="JPEG", quality=75)
+
+            # Step 3: Encode the image bytes to a Base64 string
+            img_bytes = buffered.getvalue()
+            img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+        return {
+                "ui": {"bg_image": [img_base64]},
+                "result":(masks_out, json.dumps(coordinates), out_floats, len(out_floats) , json.dumps(normalized))
+                }
+     
 
 class CreateShapeMaskOnPath:
     
@@ -268,7 +290,9 @@ Locations are center locations.
         batch_size = len(coordinates)
         out = []
         color = "white"
-        if len(size_multiplier) != batch_size:
+        if not size_multiplier or len(size_multiplier) != batch_size:
+            size_multiplier = [0] * batch_size
+        else:
             size_multiplier = size_multiplier * (batch_size // len(size_multiplier)) + size_multiplier[:batch_size % len(size_multiplier)]
         for i, coord in enumerate(coordinates):
             image = Image.new("RGB", (frame_width, frame_height), "black")
@@ -331,8 +355,8 @@ Locations are center locations.
                 "coordinates": ("STRING", {"forceInput": True}),
                 "frame_width": ("INT", {"default": 512,"min": 16, "max": 4096, "step": 1}),
                 "frame_height": ("INT", {"default": 512,"min": 16, "max": 4096, "step": 1}),
-                "shape_width": ("INT", {"default": 128,"min": 8, "max": 4096, "step": 1}),
-                "shape_height": ("INT", {"default": 128,"min": 8, "max": 4096, "step": 1}),
+                "shape_width": ("INT", {"default": 128,"min": 2, "max": 4096, "step": 1}),
+                "shape_height": ("INT", {"default": 128,"min": 2, "max": 4096, "step": 1}),
                 "shape_color": ("STRING", {"default": 'white'}),
                 "bg_color": ("STRING", {"default": 'black'}),
                 "blur_radius": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 100, "step": 0.1}),
@@ -340,54 +364,85 @@ Locations are center locations.
         },
         "optional": {
             "size_multiplier": ("FLOAT", {"default": [1.0], "forceInput": True}),
+            "trailing": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}),
+            "border_width": ("INT", {"default": 0, "min": 0, "max": 100, "step": 1}),
+            "border_color": ("STRING", {"default": 'black'}),
         }
     } 
 
     def createshapemask(self, coordinates, frame_width, frame_height, shape_width, shape_height, shape_color, 
-                        bg_color, blur_radius, shape, intensity, size_multiplier=[1.0]):
+                        bg_color, blur_radius, shape, intensity, size_multiplier=[1.0], trailing=1.0, border_width=0, border_color='black'):
         # Define the number of images in the batch
-        coordinates = coordinates.replace("'", '"')
-        coordinates = json.loads(coordinates)
+        if len(coordinates) < 10:
+            coords_list = []
+            for coords in coordinates:
+                coords = json.loads(coords.replace("'", '"'))
+                coords_list.append(coords)
+        else:
+            coords = json.loads(coordinates.replace("'", '"'))
+            coords_list = [coords]
 
-        batch_size = len(coordinates)
+        batch_size = len(coords_list[0])
         images_list = []
         masks_list = []
 
-        if len(size_multiplier) != batch_size:
+        if not size_multiplier or len(size_multiplier) != batch_size:
+            size_multiplier = [1] * batch_size
+        else:
             size_multiplier = size_multiplier * (batch_size // len(size_multiplier)) + size_multiplier[:batch_size % len(size_multiplier)]
-        for i, coord in enumerate(coordinates):
+
+        previous_output = None
+
+        for i in range(batch_size):
             image = Image.new("RGB", (frame_width, frame_height), bg_color)
             draw = ImageDraw.Draw(image)
 
             # Calculate the size for this frame and ensure it's not less than 0
-            current_width = max(0, shape_width + i * size_multiplier[i])
-            current_height = max(0, shape_height + i * size_multiplier[i])
+            current_width = shape_width * size_multiplier[i]
+            current_height = shape_height * size_multiplier[i]
+            
+            for coords in coords_list:
+                location_x = coords[i]['x']
+                location_y = coords[i]['y']
+            
+                if shape == 'circle' or shape == 'square':
+                    # Define the bounding box for the shape
+                    left_up_point = (location_x - current_width // 2, location_y - current_height // 2)
+                    right_down_point = (location_x + current_width // 2, location_y + current_height // 2)
+                    two_points = [left_up_point, right_down_point]
 
-            location_x = coord['x']
-            location_y = coord['y']
-
-            if shape == 'circle' or shape == 'square':
-                # Define the bounding box for the shape
-                left_up_point = (location_x - current_width // 2, location_y - current_height // 2)
-                right_down_point = (location_x + current_width // 2, location_y + current_height // 2)
-                two_points = [left_up_point, right_down_point]
-
-                if shape == 'circle':
-                    draw.ellipse(two_points, fill=shape_color)
-                elif shape == 'square':
-                    draw.rectangle(two_points, fill=shape_color)
+                    if shape == 'circle':
+                        if border_width > 0:
+                            draw.ellipse(two_points, fill=shape_color, outline=border_color, width=border_width)
+                        else:
+                            draw.ellipse(two_points, fill=shape_color)
+                    elif shape == 'square':
+                        if border_width > 0:
+                            draw.rectangle(two_points, fill=shape_color, outline=border_color, width=border_width)
+                        else:
+                            draw.rectangle(two_points, fill=shape_color)
+                        
+                elif shape == 'triangle':
+                    # Define the points for the triangle
+                    left_up_point = (location_x - current_width // 2, location_y + current_height // 2) # bottom left
+                    right_down_point = (location_x + current_width // 2, location_y + current_height // 2) # bottom right
+                    top_point = (location_x, location_y - current_height // 2) # top point
                     
-            elif shape == 'triangle':
-                # Define the points for the triangle
-                left_up_point = (location_x - current_width // 2, location_y + current_height // 2) # bottom left
-                right_down_point = (location_x + current_width // 2, location_y + current_height // 2) # bottom right
-                top_point = (location_x, location_y - current_height // 2) # top point
-                draw.polygon([top_point, left_up_point, right_down_point], fill=shape_color)
+                    if border_width > 0:
+                        draw.polygon([top_point, left_up_point, right_down_point], fill=shape_color, outline=border_color, width=border_width)
+                    else:
+                        draw.polygon([top_point, left_up_point, right_down_point], fill=shape_color)
 
             if blur_radius != 0:
                     image = image.filter(ImageFilter.GaussianBlur(blur_radius))
-
+            # Blend the current image with the accumulated image
+            
             image = pil2tensor(image)
+            if trailing != 1.0 and previous_output is not None:
+                # Add the decayed previous output to the current frame
+                image += trailing * previous_output
+                image = image / image.max()
+            previous_output = image
             image = image * intensity
             mask = image[:, :, :, 0]
             masks_list.append(mask)
@@ -891,6 +946,25 @@ Creates a sigmas tensor from list of float values.
     def customsigmas(self, float_list):
         return torch.tensor(float_list, dtype=torch.float32),
 
+class SigmasToFloat:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required":
+                    {
+                     "sigmas": ("SIGMAS",),
+                     }
+                }
+    RETURN_TYPES = ("FLOAT",)
+    RETURN_NAMES = ("float",)
+    CATEGORY = "KJNodes/noise"
+    FUNCTION = "customsigmas"
+    DESCRIPTION = """
+Creates a float list from sigmas tensors.  
+
+"""
+    def customsigmas(self, sigmas):
+        return sigmas.tolist(),
+
 class GLIGENTextBoxApplyBatchCoords:
     @classmethod
     def INPUT_TYPES(s):
@@ -1019,8 +1093,10 @@ for example:
         batch_size = len(coordinates)
         # Initialize a list to hold the coordinates for the current ID
         id_coordinates = []
-        if len(size_multiplier) != batch_size:
-                size_multiplier = size_multiplier * (batch_size // len(size_multiplier)) + size_multiplier[:batch_size % len(size_multiplier)]
+        if not size_multiplier or len(size_multiplier) != batch_size:
+            size_multiplier = [0] * batch_size
+        else:
+            size_multiplier = size_multiplier * (batch_size // len(size_multiplier)) + size_multiplier[:batch_size % len(size_multiplier)]
         for i, coord in enumerate(coordinates):
             x = coord['x']
             y = coord['y']
@@ -1300,9 +1376,6 @@ you can clear the image from the context menu by right clicking on the canvas
 """
 
     def pointdata(self, points_store, bbox_store, width, height, coordinates, neg_coordinates, normalize, bboxes, bbox_format="xyxy", bg_image=None):
-        import io
-        import base64
-        
         coordinates = json.loads(coordinates)
         pos_coordinates = []
         for coord in coordinates:
@@ -1391,3 +1464,110 @@ you can clear the image from the context menu by right clicking on the canvas
                 "ui": {"bg_image": [img_base64]}, 
                 "result": (json.dumps(pos_coordinates), json.dumps(neg_coordinates), bboxes, mask_tensor, cropped_image)
             }
+
+class CutAndDragOnPath:
+    RETURN_TYPES = ("IMAGE", "MASK",)
+    RETURN_NAMES = ("image","mask", )
+    FUNCTION = "cutanddrag" 
+    CATEGORY = "KJNodes/image"
+    DESCRIPTION = """
+Cuts the masked area from the image, and drags it along the path. If inpaint is enabled, and no bg_image is provided, the cut area is filled using cv2 TELEA algorithm.
+"""
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "coordinates": ("STRING", {"forceInput": True}),
+                "mask": ("MASK",),
+                "frame_width": ("INT", {"default": 512,"min": 16, "max": 4096, "step": 1}),
+                "frame_height": ("INT", {"default": 512,"min": 16, "max": 4096, "step": 1}),
+                "inpaint": ("BOOLEAN", {"default": True}),
+        },
+        "optional": {
+            "bg_image": ("IMAGE",),
+        }
+    }
+
+    def cutanddrag(self, image, coordinates, mask, frame_width, frame_height, inpaint, bg_image=None):
+        # Parse coordinates
+        if len(coordinates) < 10:
+            coords_list = []
+            for coords in coordinates:
+                coords = json.loads(coords.replace("'", '"'))
+                coords_list.append(coords)
+        else:
+            coords = json.loads(coordinates.replace("'", '"'))
+            coords_list = [coords]
+
+        batch_size = len(coords_list[0])
+        images_list = []
+        masks_list = []
+
+        # Convert input image and mask to PIL
+        input_image = tensor2pil(image)[0]
+        input_mask = tensor2pil(mask)[0]
+
+        # Find masked region bounds
+        mask_array = np.array(input_mask)
+        y_indices, x_indices = np.where(mask_array > 0)
+        if len(x_indices) == 0 or len(y_indices) == 0:
+            return (image, mask)
+            
+        x_min, x_max = x_indices.min(), x_indices.max()
+        y_min, y_max = y_indices.min(), y_indices.max()
+        
+        # Cut out the masked region
+        cut_width = x_max - x_min
+        cut_height = y_max - y_min
+        cut_image = input_image.crop((x_min, y_min, x_max, y_max))
+        cut_mask = input_mask.crop((x_min, y_min, x_max, y_max))
+        
+        # Create inpainted background
+        if bg_image is None:
+            background = input_image.copy()
+            # Inpaint the cut area
+            if inpaint:
+                import cv2
+                border = 5 # Create small border around cut area for better inpainting
+                fill_mask = Image.new("L", background.size, 0)
+                draw = ImageDraw.Draw(fill_mask)
+                draw.rectangle([x_min-border, y_min-border, x_max+border, y_max+border], fill=255)
+                background = cv2.inpaint(
+                    np.array(background), 
+                    np.array(fill_mask), 
+                    inpaintRadius=3, 
+                    flags=cv2.INPAINT_TELEA
+                )
+                background = Image.fromarray(background)
+        else:
+            background = tensor2pil(bg_image)[0]
+        
+        # Create batch of images with cut region at different positions
+        for i in range(batch_size):
+            # Create new image
+            new_image = background.copy()
+            new_mask = Image.new("L", (frame_width, frame_height), 0)
+
+            # Get target position from coordinates
+            for coords in coords_list:
+                target_x = int(coords[i]['x'] - cut_width/2)
+                target_y = int(coords[i]['y'] - cut_height/2)
+
+                # Paste cut region at new position
+                new_image.paste(cut_image, (target_x, target_y), cut_mask)
+                new_mask.paste(cut_mask, (target_x, target_y))
+
+            # Convert to tensor and append
+            image_tensor = pil2tensor(new_image)
+            mask_tensor = pil2tensor(new_mask)
+            
+            images_list.append(image_tensor)
+            masks_list.append(mask_tensor)
+
+        # Stack tensors into batches
+        out_images = torch.cat(images_list, dim=0).cpu().float()
+        out_masks = torch.cat(masks_list, dim=0)
+
+        return (out_images, out_masks)

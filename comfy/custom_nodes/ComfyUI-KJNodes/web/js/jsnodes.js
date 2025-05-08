@@ -1,4 +1,5 @@
 import { app } from "../../../scripts/app.js";
+import { applyTextReplacements } from "../../../scripts/utils.js";
 
 app.registerExtension({
 	name: "KJNodes.jsnodes",
@@ -9,74 +10,85 @@ app.registerExtension({
 		switch (nodeData.name) {
 			case "ConditioningMultiCombine":
 				nodeType.prototype.onNodeCreated = function () {
-				this.cond_type = "CONDITIONING"
+				this._type = "CONDITIONING"
 				this.inputs_offset = nodeData.name.includes("selective")?1:0
 				this.addWidget("button", "Update inputs", null, () => {
 					if (!this.inputs) {
 						this.inputs = [];
 					}
 					const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
-					    if(target_number_of_inputs===this.inputs.length)return; // already set, do nothing
+					const num_inputs = this.inputs.filter(input => input.type === this._type).length
+					if(target_number_of_inputs===num_inputs)return; // already set, do nothing
 
-					    if(target_number_of_inputs < this.inputs.length){
-    						for(let i = this.inputs.length; i>=this.inputs_offset+target_number_of_inputs; i--)
-							      this.removeInput(i)
-					    }
-                        else{
-						    for(let i = this.inputs.length+1-this.inputs_offset; i <= target_number_of_inputs; ++i)
-						    	this.addInput(`conditioning_${i}`, this.cond_type)
-                        }
+					if(target_number_of_inputs < num_inputs){
+						const inputs_to_remove = num_inputs - target_number_of_inputs;
+						for(let i = 0; i < inputs_to_remove; i++) {
+							this.removeInput(this.inputs.length - 1);
+						}
+					}
+					else{
+						for(let i = num_inputs+1; i <= target_number_of_inputs; ++i)
+							this.addInput(`conditioning_${i}`, this._type)
+					}
 					});
 				}
 				break;
 			case "ImageBatchMulti":
 			case "ImageAddMulti":
 			case "ImageConcatMulti":
+			case "CrossFadeImagesMulti":
+			case "TransitionImagesMulti":
 				nodeType.prototype.onNodeCreated = function () {
 				this._type = "IMAGE"
-				this.inputs_offset = nodeData.name.includes("selective")?1:0
 				this.addWidget("button", "Update inputs", null, () => {
 					if (!this.inputs) {
 						this.inputs = [];
 					}
 					const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
-						if(target_number_of_inputs===this.inputs.length)return; // already set, do nothing
+					const num_inputs = this.inputs.filter(input => input.type === this._type).length
+					if(target_number_of_inputs===num_inputs)return; // already set, do nothing
 
-						if(target_number_of_inputs < this.inputs.length){
-							for(let i = this.inputs.length; i>=this.inputs_offset+target_number_of_inputs; i--)
-									this.removeInput(i)
+					if(target_number_of_inputs < num_inputs){
+						const inputs_to_remove = num_inputs - target_number_of_inputs;
+						for(let i = 0; i < inputs_to_remove; i++) {
+							this.removeInput(this.inputs.length - 1);
 						}
-						else{
-							for(let i = this.inputs.length+1-this.inputs_offset; i <= target_number_of_inputs; ++i)
-								this.addInput(`image_${i}`, this._type)
-						}
+					}
+					else{
+						for(let i = num_inputs+1; i <= target_number_of_inputs; ++i)
+							this.addInput(`image_${i}`, this._type)
+					}
+					
 					});
 				}
 				break;
 			case "MaskBatchMulti":
 				nodeType.prototype.onNodeCreated = function () {
 				this._type = "MASK"
-				this.inputs_offset = nodeData.name.includes("selective")?1:0
 				this.addWidget("button", "Update inputs", null, () => {
 					if (!this.inputs) {
 						this.inputs = [];
 					}
 					const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
-						if(target_number_of_inputs===this.inputs.length)return; // already set, do nothing
+					const num_inputs = this.inputs.filter(input => input.type === this._type).length
+					if(target_number_of_inputs===num_inputs)return; // already set, do nothing
 
-						if(target_number_of_inputs < this.inputs.length){
-							for(let i = this.inputs.length; i>=this.inputs_offset+target_number_of_inputs; i--)
-									this.removeInput(i)
+					if(target_number_of_inputs < num_inputs){
+						const inputs_to_remove = num_inputs - target_number_of_inputs;
+						for(let i = 0; i < inputs_to_remove; i++) {
+							this.removeInput(this.inputs.length - 1);
 						}
-						else{
-							for(let i = this.inputs.length+1-this.inputs_offset; i <= target_number_of_inputs; ++i)
-								this.addInput(`mask_${i}`, this._type)
-							}
-						});
+					}
+					else{
+						for(let i = num_inputs+1; i <= target_number_of_inputs; ++i)
+							this.addInput(`mask_${i}`, this._type)
+					}
+					});
 					}
 					break;
 			
 			case "FluxBlockLoraSelect":
+			case "HunyuanVideoBlockLoraSelect":
 				nodeType.prototype.onNodeCreated = function () {
 					this.addWidget("button", "Set all", null, () => {
 						const userInput = prompt("Enter the values to set for widgets (e.g., s0,1,2-7=2.0, d0,1,2-7=2.0, or 1.0):", "");
@@ -137,18 +149,18 @@ app.registerExtension({
 				const onGetMaskSizeConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
 					const v = onGetMaskSizeConnectInput? onGetMaskSizeConnectInput.apply(this, arguments): undefined
-					this.outputs[1]["name"] = "width"
-					this.outputs[2]["name"] = "height" 
-					this.outputs[3]["name"] = "count"
+					this.outputs[1]["label"] = "width"
+					this.outputs[2]["label"] = "height" 
+					this.outputs[3]["label"] = "count"
 					return v;
 				}
-				const onGetMaskSizeExecuted = nodeType.prototype.onExecuted;
+				const onGetMaskSizeExecuted = nodeType.prototype.onAfterExecuteNode;
 				nodeType.prototype.onExecuted = function(message) {
 					const r = onGetMaskSizeExecuted? onGetMaskSizeExecuted.apply(this,arguments): undefined
 					let values = message["text"].toString().split('x').map(Number);
-					this.outputs[1]["name"] = values[1] + " width"
-					this.outputs[2]["name"] = values[2] + " height" 
-					this.outputs[3]["name"] = values[0] + " count" 
+					this.outputs[1]["label"] = values[1] + " width"
+					this.outputs[2]["label"] = values[2] + " height" 
+					this.outputs[3]["label"] = values[0] + " count" 
 					return r
 				}
 				break;
@@ -156,19 +168,24 @@ app.registerExtension({
 			case "GetImageSizeAndCount":
 				const onGetImageSizeConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
+					console.log(this)
 					const v = onGetImageSizeConnectInput? onGetImageSizeConnectInput.apply(this, arguments): undefined
-					this.outputs[1]["name"] = "width"
-					this.outputs[2]["name"] = "height" 
-					this.outputs[3]["name"] = "count"
+					//console.log(this)
+					this.outputs[1]["label"] = "width"
+					this.outputs[2]["label"] = "height" 
+					this.outputs[3]["label"] = "count"
 					return v;
 				}
-				const onGetImageSizeExecuted = nodeType.prototype.onExecuted;
+				//const onGetImageSizeExecuted = nodeType.prototype.onExecuted;
+				const onGetImageSizeExecuted = nodeType.prototype.onAfterExecuteNode;
 				nodeType.prototype.onExecuted = function(message) {
+					console.log(this)
 					const r = onGetImageSizeExecuted? onGetImageSizeExecuted.apply(this,arguments): undefined
 					let values = message["text"].toString().split('x').map(Number);
-					this.outputs[1]["name"] = values[1] + " width"
-					this.outputs[2]["name"] = values[2] + " height" 
-					this.outputs[3]["name"] = values[0] + " count" 
+					console.log(values)
+					this.outputs[1]["label"] = values[1] + " width"
+					this.outputs[2]["label"] = values[2] + " height" 
+					this.outputs[3]["label"] = values[0] + " count" 
 					return r
 				}
 				break;
@@ -180,7 +197,7 @@ app.registerExtension({
 					this.title = "Preview Animation"
 					return v;
 				}
-				const onPreviewAnimationExecuted = nodeType.prototype.onExecuted;
+				const onPreviewAnimationExecuted = nodeType.prototype.onAfterExecuteNode;
 				nodeType.prototype.onExecuted = function(message) {
 					const r = onPreviewAnimationExecuted? onPreviewAnimationExecuted.apply(this,arguments): undefined
 					let values = message["text"].toString();
@@ -193,16 +210,16 @@ app.registerExtension({
 				const onVRAM_DebugConnectInput = nodeType.prototype.onConnectInput;
 				nodeType.prototype.onConnectInput = function (targetSlot, type, output, originNode, originSlot) {
 					const v = onVRAM_DebugConnectInput? onVRAM_DebugConnectInput.apply(this, arguments): undefined
-					this.outputs[3]["name"] = "freemem_before"
-					this.outputs[4]["name"] = "freemem_after" 
+					this.outputs[3]["label"] = "freemem_before"
+					this.outputs[4]["label"] = "freemem_after" 
 					return v;
 				}
-				const onVRAM_DebugExecuted = nodeType.prototype.onExecuted;
+				const onVRAM_DebugExecuted = nodeType.prototype.onAfterExecuteNode;
 				nodeType.prototype.onExecuted = function(message) {
 					const r = onVRAM_DebugExecuted? onVRAM_DebugExecuted.apply(this,arguments): undefined
 					let values = message["text"].toString().split('x');
-					this.outputs[3]["name"] = values[0] + "   freemem_before"
-					this.outputs[4]["name"] = values[1] + "      freemem_after" 
+					this.outputs[3]["label"] = values[0] + "   freemem_before"
+					this.outputs[4]["label"] = values[1] + "      freemem_after" 
 					return r
 				}
 				break;
@@ -213,20 +230,23 @@ app.registerExtension({
 					originalOnNodeCreated.apply(this, arguments);
 			
 					this._type = "STRING";
-					this.inputs_offset = nodeData.name.includes("selective") ? 1 : 0;
 					this.addWidget("button", "Update inputs", null, () => {
 						if (!this.inputs) {
 							this.inputs = [];
 						}
 						const target_number_of_inputs = this.widgets.find(w => w.name === "inputcount")["value"];
-						if (target_number_of_inputs === this.inputs.length) return; // already set, do nothing
+						const num_inputs = this.inputs.filter(input => input.name && input.name.toLowerCase().includes("string_")).length
+						if (target_number_of_inputs === num_inputs) return; // already set, do nothing
 			
-						if (target_number_of_inputs < this.inputs.length) {
-							for (let i = this.inputs.length; i >= this.inputs_offset + target_number_of_inputs; i--)
-								this.removeInput(i);
-						} else {
-							for (let i = this.inputs.length + 1 - this.inputs_offset; i <= target_number_of_inputs; ++i)
-								this.addInput(`string_${i}`, this._type);
+						if(target_number_of_inputs < num_inputs){
+							const inputs_to_remove = num_inputs - target_number_of_inputs;
+							for(let i = 0; i < inputs_to_remove; i++) {
+								this.removeInput(this.inputs.length - 1);
+							}
+						}
+						else{
+							for(let i = num_inputs+1; i <= target_number_of_inputs; ++i)
+								this.addInput(`string_${i}`, this._type)
 						}
 					});
 				}
@@ -332,6 +352,17 @@ app.registerExtension({
 					// Add stop button
 					this.addWidget("button", "Stop mic capture", null, stopMicrophoneCapture);
 				};
+			break;
+		case "SaveImageKJ":
+			const onNodeCreated = nodeType.prototype.onNodeCreated;
+			nodeType.prototype.onNodeCreated = function() {
+				const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : void 0;
+				const widget = this.widgets.find((w) => w.name === "filename_prefix");
+				widget.serializeValue = () => {
+				return applyTextReplacements(app, widget.value);
+				};
+				return r;
+			};
 			break;
 			
 		}	
