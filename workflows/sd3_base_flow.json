@@ -1,109 +1,9 @@
 {
-  "last_node_id": 59,
-  "last_link_id": 111,
+  "id": "c402acac-b485-4bb0-8c03-b70feddc7ded",
+  "revision": 0,
+  "last_node_id": 60,
+  "last_link_id": 117,
   "nodes": [
-    {
-      "id": 8,
-      "type": "VAEDecode",
-      "pos": [
-        1456,
-        55
-      ],
-      "size": {
-        "0": 210,
-        "1": 46
-      },
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "samples",
-          "type": "LATENT",
-          "link": 7
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 53,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            103
-          ],
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEDecode"
-      }
-    },
-    {
-      "id": 3,
-      "type": "KSampler",
-      "pos": [
-        1207,
-        140
-      ],
-      "size": {
-        "0": 315,
-        "1": 474
-      },
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 105,
-          "slot_index": 0
-        },
-        {
-          "name": "positive",
-          "type": "CONDITIONING",
-          "link": 21
-        },
-        {
-          "name": "negative",
-          "type": "CONDITIONING",
-          "link": 106
-        },
-        {
-          "name": "latent_image",
-          "type": "LATENT",
-          "link": 100
-        }
-      ],
-      "outputs": [
-        {
-          "name": "LATENT",
-          "type": "LATENT",
-          "links": [
-            7
-          ],
-          "slot_index": 0
-        }
-      ],
-      "title": "main_sampler",
-      "properties": {
-        "Node name for S&R": "KSampler"
-      },
-      "widgets_values": [
-        399455255596961,
-        "randomize",
-        28,
-        4.5,
-        "dpmpp_2m",
-        "sgm_uniform",
-        1
-      ]
-    },
     {
       "id": 51,
       "type": "Note",
@@ -112,12 +12,14 @@
         293
       ],
       "size": [
-        297.82352043809783,
-        132.0746203156748
+        297.8235168457031,
+        132.07461547851562
       ],
       "flags": {},
       "order": 0,
       "mode": 0,
+      "inputs": [],
+      "outputs": [],
       "properties": {
         "text": ""
       },
@@ -135,8 +37,8 @@
         100
       ],
       "size": [
-        305.2326422635824,
-        110.03564659419953
+        305.2326354980469,
+        110.03564453125
       ],
       "flags": {},
       "order": 4,
@@ -152,10 +54,10 @@
         {
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
             21
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "title": "prompt",
@@ -169,57 +71,18 @@
       "bgcolor": "#353"
     },
     {
-      "id": 55,
-      "type": "ModelSamplingSD3",
-      "pos": [
-        816,
-        93
-      ],
-      "size": [
-        213.69676763238522,
-        58
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 104
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            105
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ModelSamplingSD3"
-      },
-      "widgets_values": [
-        3
-      ]
-    },
-    {
       "id": 54,
       "type": "SaveImageWebsocket",
       "pos": [
         1611,
         153
       ],
-      "size": {
-        "0": 499.02288818359375,
-        "1": 634.6212768554688
-      },
+      "size": [
+        499.02288818359375,
+        634.6212768554688
+      ],
       "flags": {},
-      "order": 12,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -228,9 +91,11 @@
           "link": 103
         }
       ],
+      "outputs": [],
       "properties": {
         "Node name for S&R": "SaveImageWebsocket"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 40,
@@ -240,8 +105,8 @@
         304
       ],
       "size": [
-        302.31033182245415,
-        114.9745881531519
+        302.3103332519531,
+        114.9745864868164
       ],
       "flags": {},
       "order": 5,
@@ -257,12 +122,10 @@
         {
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
-            107,
-            109
-          ],
-          "shape": 3,
-          "slot_index": 0
+            115
+          ]
         }
       ],
       "title": "negative_prompt",
@@ -276,69 +139,28 @@
       "bgcolor": "#533"
     },
     {
-      "id": 56,
-      "type": "ConditioningCombine",
-      "pos": [
-        887,
-        202
-      ],
-      "size": [
-        239.97352466153984,
-        46
-      ],
-      "flags": {},
-      "order": 9,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning_1",
-          "type": "CONDITIONING",
-          "link": 110
-        },
-        {
-          "name": "conditioning_2",
-          "type": "CONDITIONING",
-          "link": 111
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            106
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ConditioningCombine"
-      }
-    },
-    {
       "id": 53,
       "type": "EmptySD3LatentImage",
       "pos": [
         412,
         571
       ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
+      "size": [
+        315,
+        106
+      ],
       "flags": {},
       "order": 1,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LATENT",
           "type": "LATENT",
+          "slot_index": 0,
           "links": [
             100
-          ],
-          "shape": 3,
-          "slot_index": 0
+          ]
         }
       ],
       "title": "aspect_ratios_size",
@@ -352,118 +174,103 @@
       ]
     },
     {
-      "id": 57,
-      "type": "ConditioningZeroOut",
+      "id": 8,
+      "type": "VAEDecode",
       "pos": [
-        603,
-        478
+        1154.91162109375,
+        15.824929237365723
       ],
       "size": [
-        221.6228134402793,
-        26
-      ],
-      "flags": {},
-      "order": 6,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 107
-        }
-      ],
-      "outputs": [
-        {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            108
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ConditioningZeroOut"
-      }
-    },
-    {
-      "id": 59,
-      "type": "ConditioningSetTimestepRange",
-      "pos": [
-        892,
-        323
-      ],
-      "size": [
-        235.1999969482422,
-        82
+        210,
+        46
       ],
       "flags": {},
       "order": 7,
       "mode": 0,
       "inputs": [
         {
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 109
+          "name": "samples",
+          "type": "LATENT",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 53
         }
       ],
       "outputs": [
         {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
           "links": [
-            111
-          ],
-          "shape": 3,
-          "slot_index": 0
+            103
+          ]
         }
       ],
       "properties": {
-        "Node name for S&R": "ConditioningSetTimestepRange"
+        "Node name for S&R": "VAEDecode"
       },
-      "widgets_values": [
-        0,
-        0.1
-      ]
+      "widgets_values": []
     },
     {
-      "id": 58,
-      "type": "ConditioningSetTimestepRange",
+      "id": 3,
+      "type": "KSampler",
       "pos": [
-        896,
-        463
+        983.1423950195312,
+        162.38575744628906
       ],
       "size": [
-        235.1999969482422,
-        82
+        315,
+        474
       ],
       "flags": {},
-      "order": 8,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
-          "name": "conditioning",
+          "name": "model",
+          "type": "MODEL",
+          "link": 117
+        },
+        {
+          "name": "positive",
           "type": "CONDITIONING",
-          "link": 108
+          "link": 21
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 115
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 100
         }
       ],
       "outputs": [
         {
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
           "links": [
-            110
-          ],
-          "shape": 3,
-          "slot_index": 0
+            7
+          ]
         }
       ],
+      "title": "main_sampler",
       "properties": {
-        "Node name for S&R": "ConditioningSetTimestepRange"
+        "Node name for S&R": "KSampler"
       },
       "widgets_values": [
-        0.1,
+        399455255596961,
+        "randomize",
+        28,
+        4.5,
+        "dpmpp_2m",
+        "sgm_uniform",
         1
       ]
     },
@@ -475,37 +282,38 @@
         101
       ],
       "size": [
-        304.52414337063794,
+        304.5241394042969,
         98
       ],
       "flags": {},
       "order": 2,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
-            104
-          ],
-          "slot_index": 0
+            116
+          ]
         },
         {
           "name": "CLIP",
           "type": "CLIP",
+          "slot_index": 1,
           "links": [
             101,
             102
-          ],
-          "slot_index": 1
+          ]
         },
         {
           "name": "VAE",
           "type": "VAE",
+          "slot_index": 2,
           "links": [
             53
-          ],
-          "slot_index": 2
+          ]
         }
       ],
       "title": "base_model",
@@ -513,7 +321,44 @@
         "Node name for S&R": "CheckpointLoaderSimple"
       },
       "widgets_values": [
-        "sd3_medium_incl_clips_t5xxlfp8.safetensors"
+        "sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors"
+      ]
+    },
+    {
+      "id": 60,
+      "type": "PathchSageAttentionKJ",
+      "pos": [
+        442.7381286621094,
+        -38.23139190673828
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 116
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            117
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PathchSageAttentionKJ"
+      },
+      "widgets_values": [
+        "auto"
       ]
     }
   ],
@@ -575,68 +420,28 @@
       "IMAGE"
     ],
     [
-      104,
-      4,
-      0,
-      55,
-      0,
-      "MODEL"
-    ],
-    [
-      105,
-      55,
-      0,
-      3,
-      0,
-      "MODEL"
-    ],
-    [
-      106,
-      56,
+      115,
+      40,
       0,
       3,
       2,
       "CONDITIONING"
     ],
     [
-      107,
-      40,
+      116,
+      4,
       0,
-      57,
+      60,
       0,
-      "CONDITIONING"
+      "MODEL"
     ],
     [
-      108,
-      57,
+      117,
+      60,
       0,
-      58,
+      3,
       0,
-      "CONDITIONING"
-    ],
-    [
-      109,
-      40,
-      0,
-      59,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      110,
-      58,
-      0,
-      56,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      111,
-      59,
-      0,
-      56,
-      1,
-      "CONDITIONING"
+      "MODEL"
     ]
   ],
   "groups": [],
@@ -648,7 +453,12 @@
         -728.8035414872579,
         -146.463153885076
       ]
-    }
+    },
+    "frontendVersion": "1.18.6",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }

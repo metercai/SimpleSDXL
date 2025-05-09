@@ -96,7 +96,7 @@
       "tiling": "enable",
       "copy_model": "Make a copy",
       "model": [
-        "130",
+        "146",
         0
       ]
     },
@@ -188,6 +188,19 @@
     "class_type": "OffsetImage",
     "_meta": {
       "title": "Offset Image"
+    }
+  },
+  "146": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "130",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

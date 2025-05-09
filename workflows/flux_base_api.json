@@ -170,9 +170,9 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "12",
+        "31",
         0
       ]
     },
@@ -188,6 +188,19 @@
     "class_type": "easy float",
     "_meta": {
       "title": "wavespeed_strength"
+    }
+  },
+  "31": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

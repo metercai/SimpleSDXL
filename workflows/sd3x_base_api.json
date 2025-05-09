@@ -1,7 +1,7 @@
 {
   "3": {
     "inputs": {
-      "seed": 697693309708461,
+      "seed": 353037533599784,
       "steps": 28,
       "cfg": 4.5,
       "sampler_name": "dpmpp_2m",
@@ -131,11 +131,11 @@
         "63",
         0
       ],
-      "start": 0.4,
-      "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "start": 0.4000000000000001,
+      "end": 0.9000000000000001,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "4",
+        "64",
         0
       ]
     },
@@ -151,6 +151,19 @@
     "class_type": "easy float",
     "_meta": {
       "title": "wavespeed_strength"
+    }
+  },
+  "64": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

@@ -513,7 +513,10 @@ class WanVideoModelLoader:
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
 
-                
+        compute_cap = mm.get_current_compute_capability().lower()
+        if compute_cap not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
+            log.info(f"Unsupported GPU architecture {compute_cap} detected, forcing SDPA attention mode")
+            attention_mode = "sdpa"
         manual_offloading = True
         transformer_load_device = device if load_device == "main_device" else offload_device
         

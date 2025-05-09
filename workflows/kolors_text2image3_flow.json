@@ -1,6 +1,8 @@
 {
-  "last_node_id": 137,
-  "last_link_id": 190,
+  "id": "24a37902-2d72-48e2-a923-f8f905145cbc",
+  "revision": 0,
+  "last_node_id": 138,
+  "last_link_id": 192,
   "nodes": [
     {
       "id": 130,
@@ -9,23 +11,23 @@
         892,
         -115
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 0,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "model",
           "name": "model",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
             183
-          ],
-          "shape": 3,
-          "label": "model",
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -42,22 +44,22 @@
         890,
         406
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 1,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "VAE",
           "name": "VAE",
           "type": "VAE",
           "links": [
             92
-          ],
-          "shape": 3,
-          "label": "VAE"
+          ]
         }
       ],
       "properties": {
@@ -68,86 +70,36 @@
       ]
     },
     {
-      "id": 126,
-      "type": "ModelMergeSimple",
-      "pos": [
-        1350,
-        -105
-      ],
-      "size": {
-        "0": 315,
-        "1": 78
-      },
-      "flags": {},
-      "order": 7,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model1",
-          "type": "MODEL",
-          "link": 183,
-          "label": "model1"
-        },
-        {
-          "name": "model2",
-          "type": "MODEL",
-          "link": 175,
-          "label": "model2"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            179
-          ],
-          "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
-        }
-      ],
-      "title": "model_merge_ratio",
-      "properties": {
-        "Node name for S&R": "ModelMergeSimple"
-      },
-      "widgets_values": [
-        1
-      ]
-    },
-    {
       "id": 131,
       "type": "MZ_ChatGLM3_V2",
       "pos": [
         1350,
         50
       ],
-      "size": {
-        "0": 395.505126953125,
-        "1": 158.75376892089844
-      },
+      "size": [
+        395.505126953125,
+        158.75376892089844
+      ],
       "flags": {},
       "order": 5,
       "mode": 0,
       "inputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
-          "link": 189,
-          "label": "chatglm3_model",
-          "slot_index": 0
+          "link": 189
         }
       ],
       "outputs": [
         {
+          "label": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
             184
-          ],
-          "shape": 3,
-          "label": "CONDITIONING",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "prompt",
@@ -165,31 +117,30 @@
         1741,
         -99
       ],
-      "size": {
-        "0": 315,
-        "1": 82
-      },
+      "size": [
+        315,
+        82
+      ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
+          "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 179,
-          "label": "model"
+          "link": 192
         }
       ],
       "outputs": [
         {
+          "label": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
             180
-          ],
-          "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "lora_speedup",
@@ -208,44 +159,43 @@
         1831,
         73
       ],
-      "size": {
-        "0": 250,
-        "1": 46
-      },
+      "size": [
+        250,
+        46
+      ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
+          "label": "samples",
           "name": "samples",
           "type": "LATENT",
-          "link": 9,
-          "label": "samples"
+          "link": 9
         },
         {
+          "label": "vae",
           "name": "vae",
           "type": "VAE",
-          "link": 92,
-          "label": "vae",
-          "slot_index": 1
+          "link": 92
         }
       ],
       "outputs": [
         {
+          "label": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
+          "slot_index": 0,
           "links": [
             11,
             188
-          ],
-          "shape": 3,
-          "label": "IMAGE",
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "VAEDecode"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 9,
@@ -254,22 +204,22 @@
         1339,
         484
       ],
-      "size": {
-        "0": 385,
-        "1": 170
-      },
+      "size": [
+        385,
+        170
+      ],
       "flags": {},
       "order": 2,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
             8
-          ],
-          "shape": 3,
-          "label": "LATENT"
+          ]
         }
       ],
       "title": "aspect_ratios_size",
@@ -289,31 +239,30 @@
         1338,
         274
       ],
-      "size": {
-        "0": 395.0398254394531,
-        "1": 144.48951721191406
-      },
+      "size": [
+        395.0398254394531,
+        144.48951721191406
+      ],
       "flags": {},
       "order": 6,
       "mode": 0,
       "inputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
-          "link": 190,
-          "label": "chatglm3_model"
+          "link": 190
         }
       ],
       "outputs": [
         {
+          "label": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
             185
-          ],
-          "shape": 3,
-          "label": "CONDITIONING",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "negative_prompt",
@@ -331,53 +280,48 @@
         1775,
         221
       ],
-      "size": {
-        "0": 315,
-        "1": 475
-      },
+      "size": [
+        315,
+        475
+      ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
+          "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 180,
-          "label": "model",
-          "slot_index": 0
+          "link": 180
         },
         {
+          "label": "positive",
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 184,
-          "label": "positive",
-          "slot_index": 1
+          "link": 184
         },
         {
+          "label": "negative",
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 185,
-          "label": "negative",
-          "slot_index": 2
+          "link": 185
         },
         {
+          "label": "latent_image",
           "name": "latent_image",
           "type": "LATENT",
-          "link": 8,
-          "label": "latent_image",
-          "slot_index": 3
+          "link": 8
         }
       ],
       "outputs": [
         {
+          "label": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
+          "slot_index": 0,
           "links": [
             9
-          ],
-          "shape": 3,
-          "label": "LATENT",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "main_sampler",
@@ -401,24 +345,26 @@
         2353,
         -77
       ],
-      "size": {
-        "0": 670.8212890625,
-        "1": 717.841064453125
-      },
+      "size": [
+        670.8212890625,
+        717.841064453125
+      ],
       "flags": {},
-      "order": 11,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
+          "label": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 11,
-          "label": "images"
+          "link": 11
         }
       ],
+      "outputs": [],
       "properties": {
         "Node name for S&R": "PreviewImage"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 134,
@@ -432,20 +378,22 @@
         246
       ],
       "flags": {},
-      "order": 12,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
+          "label": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 188,
-          "label": "images"
+          "link": 188
         }
       ],
+      "outputs": [],
       "title": "result_image",
       "properties": {
         "Node name for S&R": "SaveImageWebsocket"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 136,
@@ -454,24 +402,24 @@
         891,
         204
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 3,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
+          "slot_index": 0,
           "links": [
             189,
             190
-          ],
-          "shape": 3,
-          "label": "chatglm3_model",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "llms_model",
@@ -489,23 +437,23 @@
         891,
         32
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        82
+      ],
       "flags": {},
       "order": 4,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
             175
-          ],
-          "shape": 3,
-          "label": "MODEL",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "merge_model",
@@ -513,7 +461,92 @@
         "Node name for S&R": "UNETLoader"
       },
       "widgets_values": [
-        "juggernautXL_v8Rundiffusion.safetensors"
+        "juggernautXL_v8Rundiffusion.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 126,
+      "type": "ModelMergeSimple",
+      "pos": [
+        1350,
+        -105
+      ],
+      "size": [
+        315,
+        78
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "model1",
+          "name": "model1",
+          "type": "MODEL",
+          "link": 183
+        },
+        {
+          "label": "model2",
+          "name": "model2",
+          "type": "MODEL",
+          "link": 175
+        }
+      ],
+      "outputs": [
+        {
+          "label": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            191
+          ]
+        }
+      ],
+      "title": "model_merge_ratio",
+      "properties": {
+        "Node name for S&R": "ModelMergeSimple"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 138,
+      "type": "PathchSageAttentionKJ",
+      "pos": [
+        1762.419921875,
+        -216.53994750976562
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 191
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            192
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PathchSageAttentionKJ"
+      },
+      "widgets_values": [
+        "auto"
       ]
     }
   ],
@@ -556,14 +589,6 @@
       0,
       126,
       1,
-      "MODEL"
-    ],
-    [
-      179,
-      126,
-      0,
-      128,
-      0,
       "MODEL"
     ],
     [
@@ -621,6 +646,22 @@
       132,
       0,
       "CHATGLM3MODEL"
+    ],
+    [
+      191,
+      126,
+      0,
+      138,
+      0,
+      "MODEL"
+    ],
+    [
+      192,
+      138,
+      0,
+      128,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [],
@@ -632,7 +673,12 @@
         -811.1596465054535,
         269.87924603579
       ]
-    }
+    },
+    "frontendVersion": "1.18.6",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }
