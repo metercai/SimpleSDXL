@@ -15,7 +15,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "normal",
-      "denoise": 0.9,
+      "denoise": 0.9000000000000001,
       "model": [
         "479:3",
         0
@@ -56,8 +56,7 @@
   },
   "17": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -167,9 +166,9 @@
   "48": {
     "inputs": {
       "lora_name": "flux1-turbo.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
-        "45",
+        "480",
         0
       ]
     },
@@ -198,8 +197,7 @@
   },
   "56": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -231,7 +229,7 @@
   },
   "59": {
     "inputs": {
-      "scale": 1,
+      "scale": 1.0000000000000002,
       "method": "lanczos",
       "scale_by": "longest",
       "scale_by_length": [
@@ -254,7 +252,7 @@
   },
   "61": {
     "inputs": {
-      "scale": 1,
+      "scale": 1.0000000000000002,
       "method": "lanczos",
       "scale_by": "by_scale",
       "scale_by_length": 1024,
@@ -323,8 +321,7 @@
   },
   "88": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -650,7 +647,7 @@
       "matting_method": "SegmentAnything",
       "sam_model": "sam_vit_h (2.56GB)",
       "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
-      "sam_threshold": 0.3,
+      "sam_threshold": 0.30000000000000004,
       "sam_prompt": [
         "472",
         0
@@ -723,7 +720,7 @@
   "479": {
     "inputs": {
       "lora_name": "comfyui_portrait_lora64.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
         "48",
         0
@@ -732,6 +729,19 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "LoraLoaderModelOnly"
+    }
+  },
+  "480": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   },
   "403:0": {
@@ -783,7 +793,7 @@
       "downsampling_function": "area",
       "mode": "autocrop with mask",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "26",
         0
@@ -812,7 +822,7 @@
   },
   "479:3": {
     "inputs": {
-      "weight": 1,
+      "weight": 1.0000000000000002,
       "start_at": 0,
       "end_at": 1,
       "model": [
