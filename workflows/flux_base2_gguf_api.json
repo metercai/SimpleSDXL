@@ -82,7 +82,7 @@
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "36",
+        "75",
         0
       ]
     },
@@ -477,7 +477,7 @@
       ],
       "start": 0,
       "end": 0.7000000000000002,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "67",
         0
@@ -540,6 +540,19 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "75": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

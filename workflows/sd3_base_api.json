@@ -8,7 +8,7 @@
       "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
-        "55",
+        "60",
         0
       ],
       "positive": [
@@ -16,7 +16,7 @@
         0
       ],
       "negative": [
-        "56",
+        "40",
         0
       ],
       "latent_image": [
@@ -31,7 +31,7 @@
   },
   "4": {
     "inputs": {
-      "ckpt_name": "sd3_medium_incl_clips_t5xxlfp8.safetensors"
+      "ckpt_name": "sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -100,76 +100,20 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "result_image"
+      "title": "SaveImageWebsocket"
     }
   },
-  "55": {
+  "60": {
     "inputs": {
-      "shift": 3,
+      "sage_attention": "auto",
       "model": [
         "4",
         0
       ]
     },
-    "class_type": "ModelSamplingSD3",
+    "class_type": "PathchSageAttentionKJ",
     "_meta": {
-      "title": "ModelSamplingSD3"
-    }
-  },
-  "56": {
-    "inputs": {
-      "conditioning_1": [
-        "58",
-        0
-      ],
-      "conditioning_2": [
-        "59",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "57": {
-    "inputs": {
-      "conditioning": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ConditioningZeroOut",
-    "_meta": {
-      "title": "ConditioningZeroOut"
-    }
-  },
-  "58": {
-    "inputs": {
-      "start": 0.1,
-      "end": 1,
-      "conditioning": [
-        "57",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "59": {
-    "inputs": {
-      "start": 0,
-      "end": 0.1,
-      "conditioning": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

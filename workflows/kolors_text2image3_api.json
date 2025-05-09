@@ -79,7 +79,8 @@
   },
   "105": {
     "inputs": {
-      "unet_name": "juggernautXL_v8Rundiffusion.safetensors"
+      "unet_name": "juggernautXL_v8Rundiffusion.safetensors",
+      "weight_dtype": "default"
     },
     "class_type": "UNETLoader",
     "_meta": {
@@ -106,9 +107,9 @@
   "128": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
-        "126",
+        "137",
         0
       ]
     },
@@ -171,6 +172,19 @@
     "class_type": "DownloadAndLoadChatGLM3",
     "_meta": {
       "title": "llms_model"
+    }
+  },
+  "137": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "126",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

@@ -115,8 +115,7 @@
   },
   "287": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -360,8 +359,7 @@
   },
   "702": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -370,8 +368,7 @@
   },
   "703": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -380,8 +377,7 @@
   },
   "704": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -390,8 +386,7 @@
   },
   "705": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -804,8 +799,7 @@
   },
   "1002": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -814,8 +808,7 @@
   },
   "1003": {
     "inputs": {
-      "image": "welcome.png",
-      "upload": "image"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -1442,15 +1435,7 @@
       "upscale_method": "nearest-exact",
       "keep_proportion": true,
       "divisible_by": 2,
-      "width_input": [
-        "307",
-        0
-      ],
-      "height_input": [
-        "308",
-        0
-      ],
-      "crop": "disabled",
+      "crop": 0,
       "image": [
         "305",
         0
@@ -1458,7 +1443,7 @@
     },
     "class_type": "ImageResizeKJ",
     "_meta": {
-      "title": "Resize Image"
+      "title": "Resize Image (deprecated)"
     }
   },
   "1890": {
@@ -1470,7 +1455,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 548404199857307,
+      "seed": 639137684155290,
       "steps": 30,
       "cfg": 7,
       "denoise": 0
