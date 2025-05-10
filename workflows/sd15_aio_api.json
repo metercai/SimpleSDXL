@@ -1430,8 +1430,14 @@
   },
   "1872": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": [
+        "307",
+        0
+      ],
+      "height": [
+        "308",
+        0
+      ],
       "upscale_method": "nearest-exact",
       "keep_proportion": true,
       "divisible_by": 2,

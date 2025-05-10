@@ -2158,18 +2158,20 @@
   },
   "1872": {
     "inputs": {
-      "width": 512,
-      "height": 512,
-      "upscale_method": "bicubic",
+      "width": [
+        "307",
+        0
+      ],
+      "height": [
+        "308",
+        0
+      ],
+      "upscale_method": "lanczos",
       "keep_proportion": true,
       "divisible_by": 2,
       "crop": 0,
       "image": [
         "305",
-        0
-      ],
-      "height_input": [
-        "308",
         0
       ]
     },
@@ -3675,8 +3677,14 @@
   },
   "2383": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": [
+        "1890",
+        1
+      ],
+      "height": [
+        "1890",
+        2
+      ],
       "upscale_method": "lanczos",
       "keep_proportion": false,
       "divisible_by": 2,
@@ -3684,10 +3692,6 @@
       "image": [
         "1951",
         0
-      ],
-      "height_input": [
-        "1890",
-        2
       ]
     },
     "class_type": "ImageResizeKJ",
