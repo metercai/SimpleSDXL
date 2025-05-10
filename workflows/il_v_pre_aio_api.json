@@ -1433,8 +1433,14 @@
   },
   "1872": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": [
+        "307",
+        0
+      ],
+      "height": [
+        "308",
+        0
+      ],
       "upscale_method": "bicubic",
       "keep_proportion": true,
       "divisible_by": 2,
@@ -4768,7 +4774,7 @@
       "check_mode": "any_vpred",
       "specific_type": "V_PREDICTION",
       "model": [
-        "2869",
+        "2957",
         0
       ]
     },
@@ -4788,7 +4794,7 @@
         0
       ],
       "on_false": [
-        "2957",
+        "2869",
         0
       ]
     },
