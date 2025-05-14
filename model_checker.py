@@ -1587,8 +1587,6 @@ packages = {
             ("controlnet/noob_sdxl_controlnet_depth.fp16.safetensors", 2502139136),
             ("controlnet/noob_sdxl_controlnet_pose.fp16.safetensors", 2502140008),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
-            ("inpaint/inpaint_v25.fooocus.patch", 2580722369),
-            ("inpaint/fooocus_inpaint_head.pth", 52602),
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
