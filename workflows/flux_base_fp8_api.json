@@ -197,15 +197,28 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": -1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "30",
+        "33",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "33": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

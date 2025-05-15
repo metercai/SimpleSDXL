@@ -343,7 +343,7 @@
       ],
       "start": 0,
       "end": 0.7000000000000001,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "328",
         0
@@ -902,9 +902,9 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "248",
+        "335",
         0
       ]
     },
@@ -1218,7 +1218,7 @@
       "lora_name": "comfyui_subject_lora16.safetensors",
       "strength_model": 1,
       "model": [
-        "237",
+        "337",
         0
       ]
     },
@@ -1338,15 +1338,41 @@
       ],
       "start": 0,
       "end": 0.8,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "237",
+        "337",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "335": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "248",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "337": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

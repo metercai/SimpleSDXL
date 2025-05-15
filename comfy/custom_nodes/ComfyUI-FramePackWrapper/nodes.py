@@ -227,7 +227,10 @@ class LoadFramePackModel:
                   compile_args=None, attention_mode="sdpa", lora=None, load_device="main_device"):
 
         base_dtype = {"fp8_e4m3fn": torch.float8_e4m3fn, "fp8_e4m3fn_fast": torch.float8_e4m3fn, "bf16": torch.bfloat16, "fp16": torch.float16, "fp16_fast": torch.float16, "fp32": torch.float32}[base_precision]
-
+        compute_cap = mm.get_current_compute_capability().lower()
+        if compute_cap not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
+            log.info(f"Unsupported GPU architecture {compute_cap} detected, forcing SDPA attention mode")
+            attention_mode = "sdpa"
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
         if load_device == "main_device":

@@ -1,6 +1,8 @@
 {
-  "last_node_id": 145,
-  "last_link_id": 34,
+  "id": "3fe26dbe-6939-472e-a8c6-8a5cf84f0bd8",
+  "revision": 0,
+  "last_node_id": 146,
+  "last_link_id": 36,
   "nodes": [
     {
       "id": 9,
@@ -9,22 +11,22 @@
         100,
         130
       ],
-      "size": {
-        "0": 315,
-        "1": 106
-      },
+      "size": [
+        315,
+        106
+      ],
       "flags": {},
       "order": 0,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
             22
-          ],
-          "shape": 3,
-          "label": "LATENT"
+          ]
         }
       ],
       "properties": {
@@ -43,22 +45,22 @@
         100,
         366
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 1,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "VAE",
           "name": "VAE",
           "type": "VAE",
           "links": [
             23
-          ],
-          "shape": 3,
-          "label": "VAE"
+          ]
         }
       ],
       "properties": {
@@ -75,30 +77,29 @@
         515,
         554
       ],
-      "size": {
-        "0": 400,
-        "1": 200
-      },
+      "size": [
+        400,
+        200
+      ],
       "flags": {},
       "order": 5,
       "mode": 0,
       "inputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
-          "link": 15,
-          "label": "chatglm3_model"
+          "link": 15
         }
       ],
       "outputs": [
         {
+          "label": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
             20
-          ],
-          "shape": 3,
-          "label": "CONDITIONING"
+          ]
         }
       ],
       "title": "prompt",
@@ -116,30 +117,29 @@
         515,
         884
       ],
-      "size": {
-        "0": 400,
-        "1": 200
-      },
+      "size": [
+        400,
+        200
+      ],
       "flags": {},
       "order": 6,
       "mode": 0,
       "inputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
-          "link": 16,
-          "label": "chatglm3_model"
+          "link": 16
         }
       ],
       "outputs": [
         {
+          "label": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
             21
-          ],
-          "shape": 3,
-          "label": "CONDITIONING"
+          ]
         }
       ],
       "title": "negative_prompt",
@@ -157,23 +157,23 @@
         100,
         742
       ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
+      "size": [
+        315,
+        58
+      ],
       "flags": {},
       "order": 2,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
+          "label": "chatglm3_model",
           "name": "chatglm3_model",
           "type": "CHATGLM3MODEL",
           "links": [
             15,
             16
-          ],
-          "shape": 3,
-          "label": "chatglm3_model"
+          ]
         }
       ],
       "title": "llms_model",
@@ -188,27 +188,29 @@
       "id": 144,
       "type": "PreviewImage",
       "pos": [
-        1965.3779882642807,
-        166.915507408826
+        1965.3779296875,
+        166.91551208496094
       ],
       "size": [
-        627.1252051511651,
-        494.3503453610982
+        627.1251831054688,
+        494.350341796875
       ],
       "flags": {},
-      "order": 13,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
+          "label": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 34,
-          "label": "images"
+          "link": 34
         }
       ],
+      "outputs": [],
       "properties": {
         "Node name for S&R": "PreviewImage"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 134,
@@ -217,25 +219,27 @@
         1296,
         375
       ],
-      "size": {
-        "0": 724.1514282226562,
-        "1": 751.1021118164062
-      },
+      "size": [
+        724.1514282226562,
+        751.1021118164062
+      ],
       "flags": {},
-      "order": 12,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
+          "label": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 32,
-          "label": "images"
+          "link": 32
         }
       ],
+      "outputs": [],
       "title": "result_image",
       "properties": {
         "Node name for S&R": "SaveImageWebsocket"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 141,
@@ -249,26 +253,25 @@
         82
       ],
       "flags": {},
-      "order": 10,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
+          "label": "pixels",
           "name": "pixels",
           "type": "IMAGE",
-          "link": 24,
-          "label": "pixels"
+          "link": 24
         }
       ],
       "outputs": [
         {
+          "label": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
+          "slot_index": 0,
           "links": [
             32
-          ],
-          "shape": 3,
-          "label": "IMAGE",
-          "slot_index": 0
+          ]
         }
       ],
       "title": "offset_image",
@@ -288,30 +291,29 @@
         189
       ],
       "size": [
-        224.25087340363234,
+        224.25086975097656,
         82
       ],
       "flags": {},
-      "order": 11,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
+          "label": "pixels",
           "name": "pixels",
           "type": "IMAGE",
-          "link": 33,
-          "label": "pixels"
+          "link": 33
         }
       ],
       "outputs": [
         {
+          "label": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
+          "slot_index": 0,
           "links": [
             34
-          ],
-          "shape": 3,
-          "label": "IMAGE",
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -323,87 +325,53 @@
       ]
     },
     {
-      "id": 130,
-      "type": "MZ_KolorsUNETLoaderV2",
-      "pos": [
-        111,
-        554
-      ],
-      "size": {
-        "0": 315,
-        "1": 58
-      },
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "links": [
-            27
-          ],
-          "shape": 3,
-          "label": "model",
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MZ_KolorsUNETLoaderV2"
-      },
-      "widgets_values": [
-        "kolors_unet_fp16.safetensors"
-      ]
-    },
-    {
       "id": 139,
       "type": "TiledKSampler",
       "pos": [
         959,
         306
       ],
-      "size": {
-        "0": 315,
-        "1": 498
-      },
+      "size": [
+        315,
+        498
+      ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
+          "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 19,
-          "label": "model"
+          "link": 19
         },
         {
+          "label": "positive",
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 20,
-          "label": "positive"
+          "link": 20
         },
         {
+          "label": "negative",
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 21,
-          "label": "negative"
+          "link": 21
         },
         {
+          "label": "latent_image",
           "name": "latent_image",
           "type": "LATENT",
-          "link": 22,
-          "label": "latent_image"
+          "link": 22
         }
       ],
       "outputs": [
         {
+          "label": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
             13
-          ],
-          "shape": 3,
-          "label": "LATENT"
+          ]
         }
       ],
       "title": "main_sampler",
@@ -428,43 +396,43 @@
         987,
         153
       ],
-      "size": {
-        "0": 210,
-        "1": 46
-      },
+      "size": [
+        210,
+        46
+      ],
       "flags": {},
-      "order": 9,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
+          "label": "samples",
           "name": "samples",
           "type": "LATENT",
-          "link": 13,
-          "label": "samples"
+          "link": 13
         },
         {
+          "label": "vae",
           "name": "vae",
           "type": "VAE",
-          "link": 14,
-          "label": "vae"
+          "link": 14
         }
       ],
       "outputs": [
         {
+          "label": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
+          "slot_index": 0,
           "links": [
             24,
             33
-          ],
-          "shape": 3,
-          "label": "IMAGE",
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "VAEDecode"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 138,
@@ -474,29 +442,28 @@
         403
       ],
       "size": [
-        265.0090017602157,
+        265.0090026855469,
         82
       ],
       "flags": {},
-      "order": 7,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
+          "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 27,
-          "label": "model"
+          "link": 36
         }
       ],
       "outputs": [
         {
+          "label": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
           "links": [
             19
-          ],
-          "shape": 3,
-          "label": "MODEL"
+          ]
         }
       ],
       "title": "seamless_tile",
@@ -516,7 +483,7 @@
         130
       ],
       "size": [
-        266.1881722656857,
+        266.18817138671875,
         82
       ],
       "flags": {},
@@ -524,21 +491,20 @@
       "mode": 0,
       "inputs": [
         {
+          "label": "vae",
           "name": "vae",
           "type": "VAE",
-          "link": 23,
-          "label": "vae"
+          "link": 23
         }
       ],
       "outputs": [
         {
+          "label": "VAE",
           "name": "VAE",
           "type": "VAE",
           "links": [
             14
-          ],
-          "shape": 3,
-          "label": "VAE"
+          ]
         }
       ],
       "title": "vae_tiled",
@@ -548,6 +514,76 @@
       "widgets_values": [
         "enable",
         "Make a copy"
+      ]
+    },
+    {
+      "id": 130,
+      "type": "MZ_KolorsUNETLoaderV2",
+      "pos": [
+        111,
+        554
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "model",
+          "name": "model",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            35
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MZ_KolorsUNETLoaderV2"
+      },
+      "widgets_values": [
+        "kolors_unet_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 146,
+      "type": "PathchSageAttentionKJ",
+      "pos": [
+        526.3827514648438,
+        273.9629821777344
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PathchSageAttentionKJ"
+      },
+      "widgets_values": [
+        "auto"
       ]
     }
   ],
@@ -633,14 +669,6 @@
       "IMAGE"
     ],
     [
-      27,
-      130,
-      0,
-      138,
-      0,
-      "MODEL"
-    ],
-    [
       32,
       141,
       0,
@@ -663,6 +691,22 @@
       144,
       0,
       "IMAGE"
+    ],
+    [
+      35,
+      130,
+      0,
+      146,
+      0,
+      "MODEL"
+    ],
+    [
+      36,
+      146,
+      0,
+      138,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [],
@@ -674,7 +718,12 @@
         -190.1882337041362,
         -63.15079407703057
       ]
-    }
+    },
+    "frontendVersion": "1.18.6",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }

@@ -1433,20 +1433,18 @@
   },
   "1872": {
     "inputs": {
-      "width": 512,
-      "height": 512,
-      "upscale_method": "bicubic",
-      "keep_proportion": true,
-      "divisible_by": 2,
-      "width_input": [
+      "width": [
         "307",
         0
       ],
-      "height_input": [
+      "height": [
         "308",
         0
       ],
-      "crop": "disabled",
+      "upscale_method": "bicubic",
+      "keep_proportion": true,
+      "divisible_by": 2,
+      "crop": 0,
       "image": [
         "305",
         0
@@ -1454,7 +1452,7 @@
     },
     "class_type": "ImageResizeKJ",
     "_meta": {
-      "title": "Resize Image"
+      "title": "Resize Image (deprecated)"
     }
   },
   "1890": {
@@ -4625,7 +4623,7 @@
     "inputs": {
       "multiplier": 0.7,
       "model": [
-        "2869",
+        "2957",
         0
       ]
     },
@@ -4776,7 +4774,7 @@
       "check_mode": "any_vpred",
       "specific_type": "V_PREDICTION",
       "model": [
-        "2869",
+        "2957",
         0
       ]
     },
@@ -4796,7 +4794,7 @@
         0
       ],
       "on_false": [
-        "2869",
+        "2957",
         0
       ]
     },
@@ -5220,6 +5218,19 @@
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE Encode"
+    }
+  },
+  "2957": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "2869",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

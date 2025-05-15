@@ -418,7 +418,7 @@
       ],
       "start": 0,
       "end": 0.7000000000000001,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "238",
         0
@@ -958,7 +958,7 @@
       "lora_name": "comfyui_subject_lora16.safetensors",
       "strength_model": 1,
       "model": [
-        "92",
+        "244",
         0
       ]
     },
@@ -1078,15 +1078,28 @@
       ],
       "start": 0,
       "end": 0.8,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "92",
+        "244",
         0
       ]
     },
     "class_type": "ApplyFBCacheOnModel",
     "_meta": {
       "title": "Apply First Block Cache"
+    }
+  },
+  "244": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "92",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   }
 }

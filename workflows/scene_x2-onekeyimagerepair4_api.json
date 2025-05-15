@@ -52,7 +52,7 @@
   "187": {
     "inputs": {
       "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": 0.12,
+      "residual_diff_threshold": 0.12000000000000002,
       "start": 0,
       "end": 1,
       "max_consecutive_cache_hits": -1,
@@ -94,7 +94,7 @@
   "197": {
     "inputs": {
       "model": [
-        "196",
+        "331",
         0
       ]
     },
@@ -283,7 +283,7 @@
   "303": {
     "inputs": {
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
         "297",
         0
@@ -312,8 +312,7 @@
   },
   "306": {
     "inputs": {
-      "image": "1原始照片.png",
-      "upload": "image"
+      "image": "1原始照片.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -398,16 +397,16 @@
   },
   "314": {
     "inputs": {
-      "prompt": [
-        "320",
-        0
-      ],
       "find1": "noise",
       "replace1": "",
       "find2": "spots",
       "replace2": "",
       "find3": "cracks",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "320",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -435,16 +434,16 @@
   },
   "316": {
     "inputs": {
-      "prompt": [
-        "315",
-        4
-      ],
       "find1": "photograph",
       "replace1": "photo",
       "find2": "old photo",
       "replace2": "",
       "find3": "",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "315",
+        4
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -453,16 +452,16 @@
   },
   "317": {
     "inputs": {
-      "prompt": [
-        "316",
-        0
-      ],
       "find1": "vintage photo",
       "replace1": "",
       "find2": "old time photo",
       "replace2": "",
       "find3": "old style photo",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "316",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -471,16 +470,16 @@
   },
   "318": {
     "inputs": {
-      "prompt": [
-        "317",
-        0
-      ],
       "find1": "old picture",
       "replace1": "",
       "find2": "old portrait",
       "replace2": "",
       "find3": "old image",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "317",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -489,16 +488,16 @@
   },
   "319": {
     "inputs": {
-      "prompt": [
-        "314",
-        0
-      ],
       "find1": "incomplete",
       "replace1": "",
       "find2": "scratch",
       "replace2": "",
       "find3": "crack",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "314",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -507,16 +506,16 @@
   },
   "320": {
     "inputs": {
-      "prompt": [
-        "318",
-        0
-      ],
       "find1": "fuzzy",
       "replace1": "",
       "find2": "blurry",
       "replace2": "clear, sharp, focused",
       "find3": "yellowing",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "318",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -545,8 +544,8 @@
   },
   "322": {
     "inputs": {
-      "brightness": 1,
-      "contrast": 1.3,
+      "brightness": 1.0000000000000002,
+      "contrast": 1.3000000000000003,
       "saturation": 0,
       "image": [
         "299",
@@ -560,9 +559,9 @@
   },
   "323": {
     "inputs": {
-      "brightness": 1,
-      "contrast": 1,
-      "saturation": 0.7000000000000001,
+      "brightness": 1.0000000000000002,
+      "contrast": 1.0000000000000002,
+      "saturation": 0.7000000000000002,
       "image": [
         "292",
         0
@@ -605,8 +604,8 @@
   },
   "328": {
     "inputs": {
-      "brightness": 1,
-      "contrast": 1.3,
+      "brightness": 1.0000000000000002,
+      "contrast": 1.3000000000000003,
       "saturation": 0,
       "image": [
         "207",
@@ -620,16 +619,16 @@
   },
   "329": {
     "inputs": {
-      "prompt": [
-        "319",
-        0
-      ],
       "find1": "monochrome",
       "replace1": "",
       "find2": "greyscale",
       "replace2": "",
       "find3": "black and white",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "319",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -638,20 +637,33 @@
   },
   "330": {
     "inputs": {
-      "prompt": [
-        "329",
-        0
-      ],
       "find1": "sepia",
       "replace1": "",
       "find2": "brown theme",
       "replace2": "",
       "find3": "yellowed",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "329",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
+    }
+  },
+  "331": {
+    "inputs": {
+      "sage_attention": "auto",
+      "model": [
+        "196",
+        0
+      ]
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
     }
   },
   "309:0": {
@@ -750,7 +762,7 @@
   },
   "301:1": {
     "inputs": {
-      "strength": 0.8,
+      "strength": 0.8000000000000002,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
@@ -785,7 +797,7 @@
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "112",
         0
@@ -810,7 +822,7 @@
   },
   "240:1": {
     "inputs": {
-      "strength": 0.7000000000000001,
+      "strength": 0.7000000000000002,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
