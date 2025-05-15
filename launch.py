@@ -79,7 +79,7 @@ def check_base_environment():
                 run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
 
     if is_installed("sageattention"):
-        extra_pkgs = [('comfyui-frontend-package', 'comfyui_frontend_package==1.18.6'), ('comfyui-workflow-templates', 'comfyui_workflow_templates==0.1.3')]
+        extra_pkgs = [('comfyui_frontend_package', 'comfyui_frontend_package==1.18.6'), ('comfyui_workflow_templates', 'comfyui_workflow_templates==0.1.3')]
         for (extra_pkg, extra_pkg_name) in extra_pkgs:
             if not is_installed(extra_pkg):
                 pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
