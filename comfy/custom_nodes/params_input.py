@@ -72,15 +72,15 @@ class EnhanceRegionInput:
                     }}
     
     RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "FLOAT", "FLOAT", "INT", "BOOLEAN", "BOOLEAN", "STRING", "FLOAT", "FLOAT", "INT",)
-    RETURN_NAMES = ("mask_dino_prompt_text", "prompt", "negative_prompt", "mask_model", "mask_cloth_category", "mask_sam_model", "mask_text_threshold", "mask_box_threshold", "mask_invert", "inpaint_disable_initial_latent", "inpaint_engine", "inpaint_strength",  "inpaint_respective_field", "inpaint_erode_or_dilate",)
+    RETURN_NAMES = ("mask_dino_prompt_text", "prompt", "negative_prompt", "mask_model", "mask_cloth_category", "mask_sam_model", "mask_text_threshold", "mask_box_threshold", "mask_sam_max_detections", "mask_invert", "inpaint_disable_initial_latent", "inpaint_engine", "inpaint_strength",  "inpaint_respective_field", "inpaint_erode_or_dilate",)
     
     FUNCTION = "enhance_region_input"
 
     CATEGORY = "api/input"
 
-    def enhance_region_input(self, prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate ):
+    def enhance_region_input(self, mask_dino_prompt_text, prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_sam_max_detections, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate ):
 
-        return (prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate, )
+        return (mask_dino_prompt_text, prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_sam_max_detections, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate, )
         
 NODE_CLASS_MAPPINGS = {
     "GeneralInput": GeneralInput,
