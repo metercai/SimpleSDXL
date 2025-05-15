@@ -844,4 +844,4 @@ def prompt_token_prediction(text, style_selections):
         tokenizer = CLIPTokenizer.from_pretrained(cur_clip_path)
     return len(tokenizer.tokenize(text))
 
-system_message = get_system_message()
+#system_message = get_system_message()

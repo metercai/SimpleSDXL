@@ -1644,6 +1644,33 @@ def worker():
                 else:
                     if async_task.task_class == 'Flux':
                         async_task.params_backend['base_model_dtype'] = 'default'
+                if async_task.enhance_checkbox:
+                    if async_task.enhance_input_image is not None:
+                        input_images.set_image(f'enhance_input_image', async_task.enhance_input_image)
+                    if async_task.enhance_uov_method.lower() != 'disabled':
+                        async_task.params_backend[f'enhance_uov_method'] = async_task.enhance_uov_method
+                        async_task.params_backend[f'enhance_uov_processing_order'] = async_task.enhance_uov_processing_order
+                        if async_task.enhance_uov_processing_order == flags.enhancement_uov_after:
+                            async_task.params_backend[f'enhance_uov_prompt_type'] = async_task.enhance_uov_prompt_type
+                    if len(async_task.enhance_ctrls) > 0:
+                        for i in range(len(async_task.enhance_ctrls)):
+                            n = f'{i}' if i > 0 else ''
+                            async_task.params_backend[f'enhance_mask_dino_prompt_text{n}'] = async_task.enhance_ctrls[i][0]
+                            async_task.params_backend[f'enhance_prompt{n}'] = async_task.enhance_ctrls[i][1]
+                            async_task.params_backend[f'enhance_negative_prompt{n}'] = async_task.enhance_ctrls[i][2]
+                            async_task.params_backend[f'enhance_mask_model{n}'] = async_task.enhance_ctrls[i][3]
+                            async_task.params_backend[f'enhance_mask_cloth_category{n}'] = async_task.enhance_ctrls[i][4]
+                            async_task.params_backend[f'enhance_mask_sam_model{n}'] = async_task.enhance_ctrls[i][5]
+                            async_task.params_backend[f'enhance_mask_text_threshold{n}'] = async_task.enhance_ctrls[i][6]
+                            async_task.params_backend[f'enhance_mask_box_threshold{n}'] = async_task.enhance_ctrls[i][7]
+                            async_task.params_backend[f'enhance_mask_sam_max_detections{n}'] = async_task.enhance_ctrls[i][8]
+                            async_task.params_backend[f'enhance_inpaint_disable_initial_latent{n}'] = async_task.enhance_ctrls[i][9]
+                            async_task.params_backend[f'enhance_inpaint_engine{n}'] = async_task.enhance_ctrls[i][10]
+                            async_task.params_backend[f'enhance_inpaint_strength{n}'] = async_task.enhance_ctrls[i][11]
+                            async_task.params_backend[f'enhance_inpaint_respective_field{n}'] = async_task.enhance_ctrls[i][12]
+                            async_task.params_backend[f'enhance_inpaint_erode_or_dilate{n}'] = async_task.enhance_ctrls[i][13]
+                            async_task.params_backend[f'enhance_mask_invert{n}'] = async_task.enhance_ctrls[i][14]
+
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
                     if async_task.skipping_cn_preprocessor:

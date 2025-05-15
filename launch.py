@@ -43,7 +43,7 @@ def check_base_environment():
     print(f'{now_string()} {version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.21"
+    ver_required = "0.3.23"
     REINSTALL_BASE = True #if '_dev' not in version.get_branch() else True
     base_branch = "release"
     if '--dev' in (sys.argv):
@@ -68,7 +68,8 @@ def check_base_environment():
 
     base_path = os.path.abspath(os.path.join(root, f'enhanced/libs/{base_file[platform_os]}'))
     base_url = f'{base_url}/{base_file[platform_os]}'
-    if download_if_updated(base_url, base_path) or REINSTALL_BASE:
+    has_update_whl = download_if_updated(base_url, base_path)
+    if has_update_whl or REINSTALL_BASE:
         if not is_installed(base_pkg):
             run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
         else:

@@ -45,7 +45,7 @@ def check_base_environment():
     print(f'{now_string()} {version.get_branch()} version: {version.get_simplesdxl_ver()}')
 
     base_pkg = "simpleai_base"
-    ver_required = "0.3.21"
+    ver_required = "0.3.23"
     REINSTALL_BASE = True #if '_dev' not in version.get_branch() else True
     base_branch = "release"
     if '--dev' in (sys.argv):
@@ -70,7 +70,8 @@ def check_base_environment():
 
     base_path = os.path.abspath(os.path.join(root, f'enhanced/libs/{base_file[platform_os]}'))
     base_url = f'{base_url}/{base_file[platform_os]}'
-    if download_if_updated(base_url, base_path) or REINSTALL_BASE:
+    has_update_whl = download_if_updated(base_url, base_path)
+    if has_update_whl or REINSTALL_BASE:
         if not is_installed(base_pkg):
             run(f'"{python}" -m pip install {base_path}', f'Install {base_pkg} {ver_required}')
         else:
@@ -115,11 +116,11 @@ def check_base_environment():
     logger.info(f'GPU: {sysinfo["gpu_name"]}, RAM: {sysinfo["ram_total"]}MB, SWAP: {sysinfo["ram_swap"]}MB, VRAM: {sysinfo["gpu_memory"]}MB, DiskFree: {sysinfo["disk_free"]}MB, CUDA: {sysinfo["cuda"]}, HOST: {sysinfo["host_type"]}')
     #print(f'[SimpleAI] root: {sysinfo["root_dir"]}, sys_name: {sysinfo["root_name"]}, dev_name:{sysinfo["host_name"]}')
 
-    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960 and not shared.args.disable_backend:
+    if (sysinfo["ram_total"]+sysinfo["ram_swap"])<40960:
         logger.info(f'The total virtual memory capacity of the system is too small, which will affect the loading and computing efficiency of the model. Please expand the total virtual memory capacity of the system to be greater than 40G.')
         logger.info(f'系统虚拟内存总容量过小，会影响模型的加载与计算效率，请扩充系统虚拟内存总容量(RAM+SWAP)大于40G。')
         logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
-        sys.exit(0)
+        shared.args.disable_backend = True
 
     return token, sysinfo
 
@@ -313,13 +314,14 @@ if shared.args.gpu_device_id is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(shared.args.gpu_device_id)
     logger.info("Set device to:", shared.args.gpu_device_id)
 
-if shared.sysinfo["gpu_memory"]<4000 and not shared.args.disable_backend:
+if shared.sysinfo["gpu_memory"]<4000:
     logger.info(f'The GPU memory capacity of the system is too small to run the latest models such as Flux, SD3m, Kolors, and HyDiT properly, and the Comfyd engine will be automatically disabled.')
     logger.info(f'系统GPU显存容量太小，无法正常运行Flux, SD3m, Kolors和HyDiT等最新模型，将自动禁用Comfyd引擎。请知晓，尽早升级硬件。')
     logger.info(f'有任何疑问可到SimpleSDXL的QQ群交流: 938075852')
     shared.args.async_cuda_allocation = False
     shared.args.disable_async_cuda_allocation = True
     shared.args.disable_comfyd = True
+    shared.args.disable_backend = True
 
 if shared.args.async_cuda_allocation:
     env_var = os.environ.get('PYTORCH_CUDA_ALLOC_CONF', None)
@@ -329,6 +331,7 @@ if shared.args.async_cuda_allocation:
         env_var += ",backend:cudaMallocAsync"
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = env_var
 
+shared.args.in_browser = False
 
 from modules import config
 from modules.hash_cache import init_cache
