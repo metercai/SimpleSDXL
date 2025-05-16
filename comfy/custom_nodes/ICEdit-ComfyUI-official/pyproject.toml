@@ -1,0 +1,14 @@
+[project]
+name = "ICEdit"
+description = "This node pack provides the official ComfyUI workflow for ICEdit."
+version = "1.0.1"
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/hayd-zju/ICEdit-ComfyUI-official"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "hayd"
+DisplayName = "ICEdit"
+Icon = "https://raw.githubusercontent.com/hayd-zju/ICEdit-ComfyUI-official/refs/heads/main/assets/logo.svg"
