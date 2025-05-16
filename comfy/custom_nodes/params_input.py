@@ -1,34 +1,70 @@
+import torch
+import hashlib
+import numpy as np
+import folder_paths
+import node_helpers
+import modules.flags as flags
+
+from PIL import Image, ImageOps, ImageSequence
 
 MAX_RESOLUTION=32768
 class GeneralInput:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-                    "prompt": ("STRING", {"default": "正向提示词", "multiline": True}),           
+                    "prompt": ("STRING", {"default": "", "multiline": True}),           
                     "negative_prompt": ("STRING", {"default": "", "multiline": True}),
                     "width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
                     "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
+                    "refiner_step": ("INT", {"default": 16, "min": 1, "max": 10000}),
+                    "sampler": (flags.sampler_list, {"default": flags.sampler_list[0]}), 
+                    "scheduler": (flags.scheduler_list, {"default": flags.scheduler_list[0]}),
                     "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                     "clip_skip": ("INT", {"default": -1, "min": -24, "max": -1, "step": 1}),
-                    "additional_prompt": ("STRING", {"default": "", "multiline": False}),
-                    "var_number": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 1}),
+                    "inpaint_disable_initial_latent": ("BOOLEAN", {"default": False}),
                     "wavespeed_strength": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 1.0, "step": 0.01}),
                     }}
     
-    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "FLOAT", "INT", "INT", "STRING", "INT", "FLOAT",)
-    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "denoise", "seed", "clip_skip", "additional_prompt",  "var_number", "wavespeed_strength",)
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", "STRING", "STRING", "FLOAT", "INT", "INT", "BOOLEAN", "FLOAT",)
+    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "seed", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength",)
     
     FUNCTION = "general_input"
 
     CATEGORY = "api/input"
 
-    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, denoise, seed, clip_skip, additional_prompt, var_number, wavespeed_strength ):
-        
+    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, seed, clip_skip, inpaint_disable_initial_latent, wavespeed_strength ):
 
-        return (prompt, negative_prompt, width, height, cfg, steps, denoise, seed, clip_skip, additional_prompt, var_number, wavespeed_strength, )
+        return (prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, seed, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, )
+
+
+class SceneInput:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "prompt": ("STRING", {"default": "", "multiline": True}),
+                    "additional_prompt": ("STRING", {"default": "", "multiline": False}),
+                    "ip_image": ("STRING", {"default": "None", "multiline": False}),
+                    "ip_image1": ("STRING", {"default": "None", "multiline": False}),
+                    "inpaint_image": ("STRING", {"default": "None", "multiline": False}),
+                    "inpaint_mask": ("STRING", {"default": "None", "multiline": False}),
+                    "width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                    "height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                    "var_number": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 1}),
+                }}
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "INT", "INT", "INT", )
+    RETURN_NAMES = ("prompt", "additional_prompt", "ip_image", "ip_image1", "inpaint_image", "inpaint_mask", "width", "height", "var_number", )
+
+    FUNCTION = "scene_input"
+
+    CATEGORY = "api/input"
+
+    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number):
+
+        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number)
+
 
 class EnhanceUovInput:
     @classmethod
@@ -65,7 +101,7 @@ class EnhanceRegionInput:
                     "mask_sam_max_detections": ("INT", {"default": 0, "min": 0, "max": 10, "step": 1}),
                     "mask_invert": ("BOOLEAN", {"default": False}),
                     "inpaint_disable_initial_latent": ("BOOLEAN", {"default": False}),
-                    "inpaint_engine": (["v2.6", "v2.5", "None"], {"default": "v2.6", "multiline": False}),
+                    "inpaint_engine": ("STRING", {"default": "v2.6", "multiline": False}),
                     "inpaint_strength": ("FLOAT", {"default": 0.5, "min": 0, "max": 1, "step": 0.001}),
                     "inpaint_respective_field": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001}),
                     "inpaint_erode_or_dilate": ("INT", {"default": 0, "min": -64, "max": 64, "step": 1}),
@@ -81,9 +117,101 @@ class EnhanceRegionInput:
     def enhance_region_input(self, mask_dino_prompt_text, prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_sam_max_detections, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate ):
 
         return (mask_dino_prompt_text, prompt, negative_prompt, mask_model, mask_cloth_category, mask_sam_model, mask_text_threshold, mask_box_threshold, mask_sam_max_detections, mask_invert, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field, inpaint_erode_or_dilate, )
-        
+       
+
+class LoadInputImage:
+    @classmethod
+    def INPUT_TYPES(s):
+        files = folder_paths.get_input_directory_files()
+        return {"required": {
+                    "image_name": ("STRING", {}),
+                    "image": (["None"]+sorted(files), {"default":"None", "image_upload": True}),
+                }}
+
+    CATEGORY = "api/input"
+
+    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT", )
+    RETURN_NAMES = ("IMAGE", "MASK", "width", "height", )
+
+    FUNCTION = "load_image"
+
+    def load_image(self, image_name, image):
+        if image_name:
+            image = image_name.strip()
+        if image != 'None':
+            image_path = folder_paths.get_annotated_filepath(image)
+            img = node_helpers.pillow(Image.open, image_path)
+        else:
+            width = 1024
+            height = 1024
+            img = np.zeros((width, height), dtype=np.uint8)
+            return (img, img, width, height)
+
+        output_images = []
+        output_masks = []
+        w, h = None, None
+
+        excluded_formats = ['MPO']
+
+        for i in ImageSequence.Iterator(img):
+            i = node_helpers.pillow(ImageOps.exif_transpose, i)
+
+            if i.mode == 'I':
+                i = i.point(lambda i: i * (1 / 255))
+            image = i.convert("RGB")
+
+            if len(output_images) == 0:
+                w = image.size[0]
+                h = image.size[1]
+
+            if image.size[0] != w or image.size[1] != h:
+                continue
+
+            image = np.array(image).astype(np.float32) / 255.0
+            image = torch.from_numpy(image)[None,]
+            if 'A' in i.getbands():
+                mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+                mask = 1. - torch.from_numpy(mask)
+            else:
+                mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
+            output_images.append(image)
+            output_masks.append(mask.unsqueeze(0))
+
+        if len(output_images) > 1 and img.format not in excluded_formats:
+            output_image = torch.cat(output_images, dim=0)
+            output_mask = torch.cat(output_masks, dim=0)
+        else:
+            output_image = output_images[0]
+            output_mask = output_masks[0]
+
+        return (output_image, output_mask, w, h)
+
+    @classmethod
+    def IS_CHANGED(s, image_name, image):
+        if image_name:
+            image = image_name.strip()
+        m = hashlib.sha256()
+        if image!='None':
+            image_path = folder_paths.get_annotated_filepath(image)
+            with open(image_path, 'rb') as f:
+                m.update(f.read())
+        else:
+            m.update(image)
+        return m.digest().hex()
+
+    @classmethod
+    def VALIDATE_INPUTS(s, image_name, image):
+        if image_name:
+            image = image_name.strip()
+        if image!='None' and not folder_paths.exists_annotated_filepath(image):
+            return "Invalid image file: {}".format(image)
+
+        return True
+
 NODE_CLASS_MAPPINGS = {
     "GeneralInput": GeneralInput,
+    "SceneInput": SceneInput,
+    "LoadInputImage": LoadInputImage,
     "EnhanceUovInput": EnhanceUovInput,
     "EnhanceRegionInput": EnhanceRegionInput,
 }
