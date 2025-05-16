@@ -53,17 +53,18 @@ class SceneInput:
                     "width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "var_number": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 1}),
+                    "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 }}
-    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "INT", "INT", "INT", )
-    RETURN_NAMES = ("prompt", "additional_prompt", "ip_image", "ip_image1", "inpaint_image", "inpaint_mask", "width", "height", "var_number", )
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "INT", "INT", "INT", "INT",)
+    RETURN_NAMES = ("prompt", "additional_prompt", "ip_image", "ip_image1", "inpaint_image", "inpaint_mask", "width", "height", "var_number", "seed", )
 
     FUNCTION = "scene_input"
 
     CATEGORY = "api/input"
 
-    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number):
+    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed):
 
-        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number)
+        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed)
 
 
 class EnhanceUovInput:
