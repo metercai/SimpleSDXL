@@ -1,0 +1,25 @@
+PREPROCESSOR:
+  - TYPE: repainting
+    REPAINTING_SCALE: 1.0
+    ANNOTATOR:
+  - TYPE: no_preprocess
+    REPAINTING_SCALE: 0.0
+    ANNOTATOR:
+  - TYPE: contour_repainting
+    REPAINTING_SCALE: 0.0
+    ANNOTATOR:
+      NAME: InfoDrawContourAnnotator
+      INPUT_NC: 3
+      OUTPUT_NC: 1
+      N_RESIDUAL_BLOCKS: 3
+      SIGMOID: True
+      PRETRAINED_MODEL: "ms://iic/scepter_annotator@annotator/ckpts/informative_drawing_contour_style.pth"
+  - TYPE: depth_repainting
+    REPAINTING_SCALE: 0.0
+    ANNOTATOR:
+      NAME: MidasDetector
+      PRETRAINED_MODEL: "ms://iic/scepter_annotator@annotator/ckpts/dpt_hybrid-midas-501f0c75.pt"
+  - TYPE: recolorizing
+    REPAINTING_SCALE: 0.0
+    ANNOTATOR:
+      NAME: GrayAnnotator

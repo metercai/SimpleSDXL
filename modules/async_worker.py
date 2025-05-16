@@ -1603,9 +1603,13 @@ def worker():
         if async_task.task_class not in ['Fooocus']:
             pipeline.free_everything()
             #ldm_patched.modules.model_management.unload_and_free_everything()
+            callback_function = callback_comfytask
+
+            if async_task.refiner_model_name:
+                async_task.params_backend['base_model2'] = async_task.refiner_model_name
+                async_task.params_backend['refiner_step'] = async_task.refiner_switch
             async_task.refiner_model_name = ''
             async_task.refiner_switch = 1.0
-            callback_function = callback_comfytask
             
             input_images = None
             if async_task.layer_input_image is not None:
@@ -1757,6 +1761,8 @@ def worker():
                     async_task.params_backend['i2i_function'] = 3 # image inpaint
                     input_images.set_image(f'i2i_inpaint_image', inpaint_worker.current_task.interested_image)
                     input_images.set_image(f'i2i_inpaint_mask', inpaint_worker.current_task.interested_mask)
+                    if async_task.inpaint_disable_initial_latent:
+                        async_task.params_backend['i2i_inpaint_disable_initial_latent'] = async_task.inpaint_disable_initial_latent
                     inpaint_engine_model_index = f'{async_task.task_method}_{async_task.inpaint_engine}'
                     if inpaint_engine_model_index in flags.inpaint_engine_model_names:
                         async_task.base_model_name = flags.inpaint_engine_model_names[inpaint_engine_model_index]
@@ -1789,6 +1795,8 @@ def worker():
             if 'display_steps' not in async_task.params_backend:
                 async_task.params_backend['display_steps'] = 30 if async_task.steps==-1 else async_task.steps
             all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+            if 'refiner_step' in async_task.params_backend:
+                async_task.params_backend['refiner_step'] = int(async_task.steps * (1 - async_task.params_backend['refiner_step']))
             async_task.params_backend['input_images'] = input_images
 
         ldm_patched.modules.model_management.print_memory_info("begin to process_task")
