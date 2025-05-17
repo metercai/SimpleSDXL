@@ -3,8 +3,8 @@ import hashlib
 import numpy as np
 import folder_paths
 import node_helpers
-import modules.flags as flags
 
+from comfy.samplers import SAMPLER_NAMES, SCHEDULER_NAMES
 from PIL import Image, ImageOps, ImageSequence
 
 MAX_RESOLUTION=32768
@@ -19,8 +19,8 @@ class GeneralInput:
                     "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
                     "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
                     "refiner_step": ("INT", {"default": 16, "min": 1, "max": 10000}),
-                    "sampler": (flags.sampler_list, {"default": flags.sampler_list[0]}), 
-                    "scheduler": (flags.scheduler_list, {"default": flags.scheduler_list[0]}),
+                    "sampler": (SAMPLER_NAMES, {"default": SAMPLER_NAMES[0]}), 
+                    "scheduler": (SCHEDULER_NAMES, {"default": SCHEDULER_NAMES[0]}),
                     "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                     "clip_skip": ("INT", {"default": -1, "min": -24, "max": -1, "step": 1}),
@@ -28,7 +28,7 @@ class GeneralInput:
                     "wavespeed_strength": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 1.0, "step": 0.01}),
                     }}
     
-    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", "STRING", "STRING", "FLOAT", "INT", "INT", "BOOLEAN", "FLOAT",)
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", SAMPLER_NAMES, SCHEDULER_NAMES, "FLOAT", "INT", "INT", "BOOLEAN", "FLOAT",)
     RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "seed", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength",)
     
     FUNCTION = "general_input"
@@ -71,10 +71,10 @@ class EnhanceUovInput:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-                    "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
-                    "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
-                    "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
-                    }}
+                "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
+                "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
+                "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
+                }}
     RETURN_TYPES = ("STRING", "STRING", "STRING",)
     RETURN_NAMES = ("uov_method", "uov_processing_order", "uov_prompt_type",)
 

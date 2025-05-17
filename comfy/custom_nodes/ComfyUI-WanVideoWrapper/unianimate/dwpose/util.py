@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import matplotlib
+import colorsys
 import cv2
 
 
@@ -176,8 +176,11 @@ def draw_handpose(canvas, all_hand_peaks, draw_hands=True, hand_keypoint_size=4)
                 x2 = int(x2 * W)
                 y2 = int(y2 * H)
                 if x1 > eps and y1 > eps and x2 > eps and y2 > eps:
-                    cv2.line(canvas, (x1, y1), (x2, y2), matplotlib.colors.hsv_to_rgb([ie / float(len(edges)), 1.0, 1.0]) * 255, thickness=2)
-
+                    h = (ie / float(len(edges))) % 1.0
+                    s, v = 1.0, 1.0
+                    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+                    color = (int(255 * r), int(255 * g), int(255 * b))
+                    cv2.line(canvas, (x1, y1), (x2, y2), color, thickness=2)
         if hand_keypoint_size > 0:
             for i, keypoint in enumerate(peaks):
                 x, y = keypoint

@@ -1,4 +1,3 @@
-
 import torch.nn as nn
 from ..utils import log
 import comfy.model_management as mm
@@ -63,9 +62,7 @@ import torch
 import numpy as np
 import math
 
-from .dwpose.util import draw_body_and_foot, draw_handpose, draw_facepose
 from .dwpose.wholebody import Wholebody
-
 
 def smoothing_factor(t_e, cutoff):
     r = 2 * math.pi * cutoff * t_e
@@ -186,6 +183,7 @@ class DWposeDetector:
 
 def draw_pose(pose, H, W, stick_width=4,draw_body=True, draw_hands=True, draw_feet=True, 
               body_keypoint_size=4, hand_keypoint_size=4):
+    from .dwpose.util import draw_body_and_foot, draw_handpose, draw_facepose
     bodies = pose['bodies']
     faces = pose['faces']
     hands = pose['hands']
