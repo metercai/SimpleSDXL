@@ -9,6 +9,19 @@ from einops import repeat, rearrange
 from ...enhance_a_video.enhance import get_feta_scores
 from ...enhance_a_video.globals import is_enhance_enabled
 
+import sys
+import os
+subpath = os.path.join("comfy", "comfy")
+new_paths = [p for p in sys.path if not p.endswith(subpath)] + [p for p in sys.path if p.endswith(subpath)]
+sys.path[:] = new_paths
+
+try:
+    from torch.nn.attention.flex_attention import create_block_mask, flex_attention, BlockMask
+    create_block_mask = torch.compile(create_block_mask)
+    flex_attention = torch.compile(flex_attention)
+except:
+    BlockMask = create_block_mask = flex_attention = None
+    pass
 from .attention import attention
 import numpy as np
 __all__ = ['WanModel']
@@ -180,7 +193,7 @@ class WanSelfAttention(nn.Module):
         self.norm_q = WanRMSNorm(dim, eps=eps) if qk_norm else nn.Identity()
         self.norm_k = WanRMSNorm(dim, eps=eps) if qk_norm else nn.Identity()
 
-    def forward(self, x, seq_lens, grid_sizes, freqs, rope_func = "default"):
+    def forward(self, x, seq_lens, grid_sizes, freqs, rope_func = "default", block_mask=None):
         r"""
         Args:
             x(Tensor): Shape [B, L, num_heads, C / num_heads]
@@ -199,22 +212,58 @@ class WanSelfAttention(nn.Module):
 
         q, k, v = qkv_fn(x)
 
-        if rope_func == "comfy":
-            q, k = apply_rope_comfy(q, k, freqs)
-        else:
-            q=rope_apply(q, grid_sizes, freqs)
-            k=rope_apply(k, grid_sizes, freqs)
 
         if is_enhance_enabled():
             feta_scores = get_feta_scores(q, k)
 
-        x = attention(
-            q=q,
-            k=k,
-            v=v,
-            k_lens=seq_lens,
-            window_size=self.window_size,
-            attention_mode=self.attention_mode)
+        if self.attention_mode == 'flex_attention':
+            if rope_func == "comfy":
+                roped_query, roped_key = apply_rope_comfy(q, k, freqs)
+            else:
+                roped_query = rope_apply(q, grid_sizes, freqs).type_as(v)
+                roped_key = rope_apply(k, grid_sizes, freqs).type_as(v)
+
+            padded_length = math.ceil(q.shape[1] / 128) * 128 - q.shape[1]
+            padded_roped_query = torch.cat(
+                [roped_query,
+                 torch.zeros([q.shape[0], padded_length, q.shape[2], q.shape[3]],
+                             device=q.device, dtype=v.dtype)],
+                dim=1
+            )
+
+            padded_roped_key = torch.cat(
+                [roped_key, torch.zeros([k.shape[0], padded_length, k.shape[2], k.shape[3]],
+                                        device=k.device, dtype=v.dtype)],
+                dim=1
+            )
+
+            padded_v = torch.cat(
+                [v, torch.zeros([v.shape[0], padded_length, v.shape[2], v.shape[3]],
+                                device=v.device, dtype=v.dtype)],
+                dim=1
+            )
+
+            x = flex_attention(
+                query=padded_roped_query.transpose(2, 1),
+                key=padded_roped_key.transpose(2, 1),
+                value=padded_v.transpose(2, 1),
+                block_mask=block_mask
+            )[:, :, :-padded_length].transpose(2, 1)
+        
+        else:
+            if rope_func == "comfy":
+                q, k = apply_rope_comfy(q, k, freqs)
+            else:
+                q=rope_apply(q, grid_sizes, freqs)
+                k=rope_apply(k, grid_sizes, freqs)
+                
+            x = attention(
+                q=q,
+                k=k,
+                v=v,
+                k_lens=seq_lens,
+                window_size=self.window_size,
+                attention_mode=self.attention_mode)
 
         # output
         x = x.flatten(2)
@@ -512,6 +561,7 @@ class WanAttentionBlock(nn.Module):
         audio_context_lens=None,
         audio_scale=1.0,
         num_latent_frames=21,
+        block_mask=None
         
     ):
         r"""
@@ -549,7 +599,8 @@ class WanAttentionBlock(nn.Module):
             y = self.self_attn.forward(
             input_x, 
             seq_lens, grid_sizes,
-            freqs, rope_func=rope_func
+            freqs, rope_func=rope_func,
+            block_mask=block_mask
             )
         #ReCamMaster
         if camera_embed is not None:
@@ -964,6 +1015,50 @@ class WanModel(ModelMixin, ConfigMixin):
         else:
             self.control_adapter = None
 
+        self.block_mask=None
+
+    @staticmethod
+    def _prepare_blockwise_causal_attn_mask(
+        device: torch.device | str, num_frames: int = 21,
+        frame_seqlen: int = 1560, num_frame_per_block=1
+    ) -> BlockMask:
+        """
+        we will divide the token sequence into the following format
+        [1 latent frame] [1 latent frame] ... [1 latent frame]
+        We use flexattention to construct the attention mask
+        """
+        print("num_frames", num_frames)
+        print("frame_seqlen", frame_seqlen)
+        total_length = num_frames * frame_seqlen
+
+        # we do right padding to get to a multiple of 128
+        padded_length = math.ceil(total_length / 128) * 128 - total_length
+
+        ends = torch.zeros(total_length + padded_length,
+                           device=device, dtype=torch.long)
+
+        # Block-wise causal mask will attend to all elements that are before the end of the current chunk
+        frame_indices = torch.arange(
+            start=0,
+            end=total_length,
+            step=frame_seqlen * num_frame_per_block,
+            device=device
+        )
+
+        for tmp in frame_indices:
+            ends[tmp:tmp + frame_seqlen * num_frame_per_block] = tmp + \
+                frame_seqlen * num_frame_per_block
+
+        def attention_mask(b, h, q_idx, kv_idx):
+            return (kv_idx < ends[q_idx]) | (q_idx == kv_idx)
+            # return ((kv_idx < total_length) & (q_idx < total_length))  | (q_idx == kv_idx) # bidirectional mask
+
+        
+        block_mask = create_block_mask(attention_mask, B=None, H=None, Q_LEN=total_length + padded_length,
+                                       KV_LEN=total_length + padded_length, _compile=False, device=device)
+
+        return block_mask
+
     def block_swap(self, blocks_to_swap, offload_txt_emb=False, offload_img_emb=False, vace_blocks_to_swap=None):
         log.info(f"Swapping {blocks_to_swap + 1} transformer blocks")
         self.blocks_to_swap = blocks_to_swap
@@ -1100,6 +1195,14 @@ class WanModel(ModelMixin, ConfigMixin):
            freqs = freqs.to(device)
 
         _, F, H, W = x[0].shape
+
+        # Construct blockwise causal attn mask
+        if self.attention_mode == 'flex_attention' and current_step == 0:
+            self.block_mask = self._prepare_blockwise_causal_attn_mask(
+                device, num_frames=F,
+                frame_seqlen=H * W // (self.patch_size[1] * self.patch_size[2]),
+                num_frame_per_block=3
+            )
             
         if y is not None:
             if hasattr(self, "randomref_embedding_pose") and unianim_data is not None:
@@ -1243,10 +1346,11 @@ class WanModel(ModelMixin, ConfigMixin):
                     accumulated_rel_l1_distance += rescale_func((
                         (temb.to(device) - previous_modulated_input).abs().mean() / previous_modulated_input.abs().mean()
                         ).cpu().item())
+                    del temb
                 else:
                     temb_relative_l1 = relative_l1_distance(previous_modulated_input, e0)
                     accumulated_rel_l1_distance = accumulated_rel_l1_distance.to(e0.device) + temb_relative_l1
-                del temb
+                    del temb_relative_l1
 
                 #print("accumulated_rel_l1_distance", accumulated_rel_l1_distance)
 
@@ -1292,7 +1396,8 @@ class WanModel(ModelMixin, ConfigMixin):
                 audio_proj=audio_proj,
                 audio_context_lens=audio_context_lens,
                 num_latent_frames = F,
-                audio_scale=audio_scale
+                audio_scale=audio_scale,
+                block_mask=self.block_mask
                 )
             
             if vace_data is not None:

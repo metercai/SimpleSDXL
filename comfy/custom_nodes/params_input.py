@@ -3,10 +3,11 @@ import hashlib
 import numpy as np
 import folder_paths
 import node_helpers
-import modules.flags as flags
 
+from comfy.samplers import SAMPLER_NAMES, SCHEDULER_NAMES
 from PIL import Image, ImageOps, ImageSequence
 
+MAX_SEED_NUM = 1125899906842624
 MAX_RESOLUTION=32768
 class GeneralInput:
     @classmethod
@@ -19,25 +20,24 @@ class GeneralInput:
                     "cfg": ("FLOAT", {"default": 8.0, "min": 0.0, "max": 100.0}),
                     "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
                     "refiner_step": ("INT", {"default": 16, "min": 1, "max": 10000}),
-                    "sampler": (flags.sampler_list, {"default": flags.sampler_list[0]}), 
-                    "scheduler": (flags.scheduler_list, {"default": flags.scheduler_list[0]}),
+                    "sampler": (SAMPLER_NAMES, {"default": SAMPLER_NAMES[0]}), 
+                    "scheduler": (SCHEDULER_NAMES, {"default": SCHEDULER_NAMES[0]}),
                     "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                    "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                     "clip_skip": ("INT", {"default": -1, "min": -24, "max": -1, "step": 1}),
                     "inpaint_disable_initial_latent": ("BOOLEAN", {"default": False}),
                     "wavespeed_strength": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 1.0, "step": 0.01}),
                     }}
     
-    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", "STRING", "STRING", "FLOAT", "INT", "INT", "BOOLEAN", "FLOAT",)
-    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "seed", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength",)
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", SAMPLER_NAMES, SCHEDULER_NAMES, "FLOAT", "INT",  "BOOLEAN", "FLOAT",)
+    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength",)
     
     FUNCTION = "general_input"
 
     CATEGORY = "api/input"
 
-    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, seed, clip_skip, inpaint_disable_initial_latent, wavespeed_strength ):
+    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength ):
 
-        return (prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, seed, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, )
+        return (prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, )
 
 
 class SceneInput:
@@ -53,10 +53,9 @@ class SceneInput:
                     "width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
                     "var_number": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 1}),
-                    "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 }}
-    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "INT", "INT", "INT", "INT",)
-    RETURN_NAMES = ("prompt", "additional_prompt", "ip_image", "ip_image1", "inpaint_image", "inpaint_mask", "width", "height", "var_number", "seed", )
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING", "STRING", "STRING", "INT", "INT", "INT", )
+    RETURN_NAMES = ("prompt", "additional_prompt", "ip_image", "ip_image1", "inpaint_image", "inpaint_mask", "width", "height", "var_number", )
 
     FUNCTION = "scene_input"
 
@@ -66,15 +65,32 @@ class SceneInput:
 
         return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed)
 
+class SeedInput:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "seed": ("INT", {"default": 0, "min": 0, "max": MAX_SEED_NUM}),
+            },
+        }
+
+    RETURN_TYPES = ("INT",)
+    RETURN_NAMES = ("seed",)
+    FUNCTION = "seed_input"
+
+    CATEGORY = "api/input"
+
+    def seed_input(self, seed=0):
+        return seed,
 
 class EnhanceUovInput:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-                    "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
-                    "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
-                    "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
-                    }}
+                "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
+                "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
+                "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
+                }}
     RETURN_TYPES = ("STRING", "STRING", "STRING",)
     RETURN_NAMES = ("uov_method", "uov_processing_order", "uov_prompt_type",)
 
@@ -212,6 +228,7 @@ class LoadInputImage:
 NODE_CLASS_MAPPINGS = {
     "GeneralInput": GeneralInput,
     "SceneInput": SceneInput,
+    "SeedInput": SeedInput,
     "LoadInputImage": LoadInputImage,
     "EnhanceUovInput": EnhanceUovInput,
     "EnhanceRegionInput": EnhanceRegionInput,
