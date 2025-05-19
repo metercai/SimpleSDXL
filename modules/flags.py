@@ -22,6 +22,16 @@ enhancement_uov_prompt_type_original = 'Original Prompts'
 enhancement_uov_prompt_type_last_filled = 'Last Filled Enhancement Prompts'
 enhancement_uov_prompt_types = [enhancement_uov_prompt_type_original, enhancement_uov_prompt_type_last_filled]
 
+enhance_uov_strengths = {
+        uov_list[0]: 0,
+        uov_list[1]: 0.5,
+        uov_list[2]: 0.85,
+        uov_list[3]: 0.2,
+        uov_list[4]: 0.2,
+        uov_list[5]: 0.2,
+        }
+
+
 CIVITAI_NO_KARRAS = ["euler", "euler_ancestral", "heun", "dpm_fast", "dpm_adaptive", "ddim", "uni_pc"]
 
 # fooocus: a1111 (Civitai)

@@ -34,6 +34,7 @@ import enhanced.wildcards as wildcards
 import enhanced.simpleai as simpleai
 import enhanced.comfy_task as comfy_task
 import enhanced.all_parameters as ads
+import simpleai_base.api_params as api_params
 from enhanced.simpleai import comfyd, p2p_task 
 from enhanced.minicpm import MiniCPM, minicpm
 
@@ -68,7 +69,7 @@ def get_start_timestamp(request: gr.Request):
 def get_task(*args):
     args = list(args)
     args.pop(0)
-    args = ads.normalization(args, modules.config.default_max_lora_number, modules.config.default_controlnet_image_count, modules.config.default_enhance_tabs)
+    args = api_params.normalization(args, modules.config.default_max_lora_number, modules.config.default_controlnet_image_count, modules.config.default_enhance_tabs)
     return worker.AsyncTask(args=args)
 
 def generate_clicked(task: worker.AsyncTask, state):
@@ -672,7 +673,9 @@ with shared.gradio_root:
                                             with gr.Row():
                                                 with gr.Column():
                                                     enhance_uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list,
-                                                              value=modules.config.default_enhance_uov_method)
+                                                                        value=modules.config.default_enhance_uov_method)
+                                                    enhance_uov_strength = gr.Slider(label='Denoising Strength of enhance',
+                                                                        visible=False, minimum=0, maximum=1.0, step=0.001, value=0)
                                                     enhance_uov_processing_order = gr.Radio(label='Order of Processing',
                                                                         info='Use before to enhance small details and after to enhance large areas.',
                                                                         choices=flags.enhancement_uov_processing_order,
@@ -682,7 +685,8 @@ with shared.gradio_root:
                                                                    choices=flags.enhancement_uov_prompt_types,
                                                                    value=modules.config.default_enhance_uov_prompt_type,
                                                                    visible=modules.config.default_enhance_uov_processing_order == flags.enhancement_uov_after)
-
+                                                    
+                                                    enhance_uov_method.change(lambda x: gr.update(visible=x.lower() != 'disabled', value=flags.enhance_uov_strengths[x]), inputs=enhance_uov_method, outputs=enhance_uov_strength, queue=False, show_progress=False)
                                                     enhance_uov_processing_order.change(lambda x: gr.update(visible=x == flags.enhancement_uov_after),
                                                                     inputs=enhance_uov_processing_order,
                                                                     outputs=enhance_uov_prompt_type,
@@ -1535,7 +1539,7 @@ with shared.gradio_root:
         ctrls += [metadata_scheme if not args_manager.args.disable_metadata else None]
         ctrls += ip_ctrls
         ctrls += [debugging_dino, dino_erode_or_dilate, debugging_enhance_masks_checkbox,
-                  enhance_input_image, enhance_checkbox, enhance_uov_method, enhance_uov_processing_order,
+                  enhance_input_image, enhance_checkbox, enhance_uov_method, enhance_uov_strength, enhance_uov_processing_order,
                   enhance_uov_prompt_type]
         ctrls += enhance_ctrls
 

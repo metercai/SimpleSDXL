@@ -115,6 +115,7 @@ def switch_scene_theme_ready_to_gen(state, image_number, canvas_image, input_ima
     inter = scenes.get('disinteractive', [])
     input_image_number = 1 if 'scene_canvas_image' not in visible or 'scene_input_image1' not in visible else 0
     input_image_number = 2 if 'scene_canvas_image' not in visible and 'scene_input_image1' not in visible else input_image_number
+    refer_image_number = 2 if 'scene_input_image1' not in visible and 'scene_input_image2' not in visible else 1 if 'scene_input_image1' not in visible else 0
     ready_to_gen = True if (input_image_number==1 and (('scene_canvas_image' not in visible and canvas_image is not None) or ('scene_input_image1' not in visible and input_image1 is not None))) or (input_image_number==2 and (('scene_canvas_image' not in visible and canvas_image is not None) and ('scene_input_image1' not in visible and input_image1 is not None))) else False
     describe_prompt, img_is_ok = describe_prompt_for_scene(state, input_image1, theme, f'{additional_prompt}{additional_prompt_2}') if ready_to_gen else ('', False)
     return describe_prompt if describe_prompt else gr.update(), gr.update(interactive=ready_to_gen and img_is_ok)

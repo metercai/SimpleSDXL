@@ -61,9 +61,9 @@ class SceneInput:
 
     CATEGORY = "api/input"
 
-    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed):
+    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number):
 
-        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed)
+        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number)
 
 class SeedInput:
     @classmethod
@@ -88,19 +88,20 @@ class EnhanceUovInput:
     def INPUT_TYPES(s):
         return {"required": {
                 "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
+                "uov_denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
                 "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
                 }}
-    RETURN_TYPES = ("STRING", "STRING", "STRING",)
-    RETURN_NAMES = ("uov_method", "uov_processing_order", "uov_prompt_type",)
+    RETURN_TYPES = ("STRING", "FLOAT", "STRING", "STRING", )
+    RETURN_NAMES = ("uov_method", "uov_denoise", "uov_processing_order", "uov_prompt_type", )
 
     FUNCTION = "enhance_uov_input"
 
     CATEGORY = "api/input"
 
-    def enhance_uov_input(self, uov_method, uov_processing_order, uov_prompt_type):
+    def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type):
 
-        return (uov_method, uov_processing_order, uov_prompt_type)
+        return (uov_method, uov_denoise, uov_processing_order, uov_prompt_type)
 
 
 class EnhanceRegionInput:
