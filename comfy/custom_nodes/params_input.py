@@ -87,7 +87,7 @@ class EnhanceUovInput:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-                "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
+                "uov_method": (["disabled", "vary (subtle)", "vary (strong)", "upscale (1.5x)", "upscale (2x)", "upscale (fast 2x)"], {"default": "disabled"}),
                 "uov_denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
                 "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
@@ -105,7 +105,7 @@ class EnhanceUovInput:
 
     def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps):
 
-        return (uov_method.lower(), uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps)
+        return (uov_method, uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps)
 
 
 class EnhanceRegionInput:
