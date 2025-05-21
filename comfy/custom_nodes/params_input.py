@@ -101,7 +101,7 @@ class EnhanceUovInput:
 
     def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type):
 
-        return (uov_method, uov_denoise, uov_processing_order, uov_prompt_type)
+        return (uov_method.lower(), uov_denoise, uov_processing_order, uov_prompt_type)
 
 
 class EnhanceRegionInput:

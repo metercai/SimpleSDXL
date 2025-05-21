@@ -1850,6 +1850,10 @@ def worker():
             stop_processing(async_task, processing_start_time)
             return
 
+        if async_task.task_class not in ['Fooocus']:
+            stop_processing(async_task, processing_start_time)
+            return
+
         progressbar(async_task, current_progress, '图像增强处理中...')
 
         active_enhance_tabs = len(async_task.enhance_ctrls)
