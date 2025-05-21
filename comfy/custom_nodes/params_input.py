@@ -91,17 +91,21 @@ class EnhanceUovInput:
                 "uov_denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
                 "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
+                "uov_multiple": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 4.0, "step": 0.1}),
+                "uov_tiled_width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                "uov_tiled_height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                "uov_tiled_steps": ("INT", {"default": 1, "min": 1, "max": 10000, "step": 1}),
                 }}
-    RETURN_TYPES = ("STRING", "FLOAT", "STRING", "STRING", )
-    RETURN_NAMES = ("uov_method", "uov_denoise", "uov_processing_order", "uov_prompt_type", )
+    RETURN_TYPES = ("STRING", "FLOAT", "STRING", "STRING", "FLOAT", "INT", "INT", "INT", )
+    RETURN_NAMES = ("uov_method", "uov_denoise", "uov_processing_order", "uov_prompt_type", "uov_multiple", "uov_tiled_width", "uov_tiled_height", "uov_tiled_steps", )
 
     FUNCTION = "enhance_uov_input"
 
     CATEGORY = "api/input"
 
-    def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type):
+    def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps):
 
-        return (uov_method.lower(), uov_denoise, uov_processing_order, uov_prompt_type)
+        return (uov_method.lower(), uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps)
 
 
 class EnhanceRegionInput:
