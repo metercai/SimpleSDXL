@@ -61,9 +61,9 @@ class SceneInput:
 
     CATEGORY = "api/input"
 
-    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed):
+    def scene_input(self, prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number):
 
-        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number, seed)
+        return (prompt, additional_prompt, ip_image, ip_image1, inpaint_image, inpaint_mask, width, height, var_number)
 
 class SeedInput:
     @classmethod
@@ -87,20 +87,25 @@ class EnhanceUovInput:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-                "uov_method": (["Disabled", "Vary (Subtle)", "Vary (Strong)", "Upscale (1.5x)", "Upscale (2x)", "Upscale (Fast 2x)"], {"default": "Disabled"}),
+                "uov_method": (["disabled", "vary (subtle)", "vary (strong)", "upscale (1.5x)", "upscale (2x)", "upscale (fast 2x)"], {"default": "disabled"}),
+                "uov_denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
                 "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
+                "uov_multiple": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 4.0, "step": 0.1}),
+                "uov_tiled_width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                "uov_tiled_height": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
+                "uov_tiled_steps": ("INT", {"default": 1, "min": 1, "max": 10000, "step": 1}),
                 }}
-    RETURN_TYPES = ("STRING", "STRING", "STRING",)
-    RETURN_NAMES = ("uov_method", "uov_processing_order", "uov_prompt_type",)
+    RETURN_TYPES = ("STRING", "FLOAT", "STRING", "STRING", "FLOAT", "INT", "INT", "INT", )
+    RETURN_NAMES = ("uov_method", "uov_denoise", "uov_processing_order", "uov_prompt_type", "uov_multiple", "uov_tiled_width", "uov_tiled_height", "uov_tiled_steps", )
 
     FUNCTION = "enhance_uov_input"
 
     CATEGORY = "api/input"
 
-    def enhance_uov_input(self, uov_method, uov_processing_order, uov_prompt_type):
+    def enhance_uov_input(self, uov_method, uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps):
 
-        return (uov_method, uov_processing_order, uov_prompt_type)
+        return (uov_method, uov_denoise, uov_processing_order, uov_prompt_type, uov_multiple, uov_tiled_width, uov_tiled_height, uov_tiled_steps)
 
 
 class EnhanceRegionInput:

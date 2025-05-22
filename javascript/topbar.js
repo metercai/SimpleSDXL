@@ -213,6 +213,7 @@ function setCookie(name, value, days) {
 function checkAndUpdateSession(sstoken, days) {
     if (sstoken) {
 	setCookie('aitoken', `${sstoken}`, days);
+	localStorage.setItem('aitoken', sstoken); 
     }
 }
 
@@ -270,7 +271,6 @@ async function refresh_identity_qrcode(nickname, did, memo, user_qrcode) {
 }
 
 function refresh_topbar_status_js(system_params) {
-    console.log('sp.length:', Object.keys(system_params).length);
     const preset=system_params["__preset"];
     const theme=system_params["__theme"];
     const nav_name_list_str = system_params["__nav_name_list"];
@@ -398,6 +398,17 @@ function getRandomTip() {
     return tips[Math.floor(Math.random() * tips.length)];
   }
   return '';
+}
+
+const cookieToken = getCookie("aitoken");
+if (!cookieToken) {
+    const localStorageToken = localStorage.getItem("aitoken");
+    if (localStorageToken) {
+    	setCookie('aitoken', `${localStorageToken}`, 90);
+    	console.log("AiToken 已从 localStorage 写入 Cookie");
+    }
+} else {
+    console.log("AiToken 存在 Cookie 中");
 }
 
 document.addEventListener("DOMContentLoaded", function() {

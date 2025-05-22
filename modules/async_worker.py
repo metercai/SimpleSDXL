@@ -22,6 +22,7 @@ class AsyncTask:
         import time
         import shared
         import enhanced.all_parameters as ads
+        import simpleai_base.api_params as api_params
 
         normalize_lines = lambda text: re.sub(r'[\r\n]+', ' ', text)
 
@@ -117,7 +118,7 @@ class AsyncTask:
         self.inpaint_erode_or_dilate = args.pop()
 
         self.params_backend = args.pop().copy()
-        self.params_backend = ads.convert_dict(self.params_backend)
+        self.params_backend = api_params.convert_dict(self.params_backend)
         self.translation_methods = ads.get_admin_default('translation_methods')
         self.nickname = self.params_backend.pop('nickname')
         self.user_did = self.params_backend.pop('user_did')
@@ -144,6 +145,7 @@ class AsyncTask:
         self.enhance_input_image = args.pop()
         self.enhance_checkbox = args.pop()
         self.enhance_uov_method = args.pop()
+        self.enhance_uov_strength = args.pop()
         self.enhance_uov_processing_order = args.pop()
         self.enhance_uov_prompt_type = args.pop()
         self.enhance_ctrls = args.pop()
@@ -1320,6 +1322,19 @@ def worker():
                 done_steps_upscaling += steps
         return current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result
 
+    def uov_tiled_size(async_task, width, height):
+        tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
+        tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
+        tiled_steps = [10, 6, 4]
+        match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
+        multiple = 1.0 if not match else float(match.group(1))
+        multiple = multiple if multiple<4.0 else 4.0
+        tiled_width = tiled_size(width, multiple)
+        tiled_height = tiled_size(height, multiple)
+        tiled_steps = int(async_task.steps * 0.6)
+        return multiple, tiled_width, tiled_height, tiled_steps
+
+
     @torch.no_grad()
     @torch.inference_mode()
     def handler(async_task: AsyncTask):
@@ -1653,27 +1668,44 @@ def worker():
                         input_images.set_image(f'enhance_input_image', async_task.enhance_input_image)
                     if async_task.enhance_uov_method.lower() != 'disabled':
                         async_task.params_backend[f'enhance_uov_method'] = async_task.enhance_uov_method
+                        async_task.params_backend[f'enhance_uov_strength'] = async_task.enhance_uov_strength
                         async_task.params_backend[f'enhance_uov_processing_order'] = async_task.enhance_uov_processing_order
                         if async_task.enhance_uov_processing_order == flags.enhancement_uov_after:
                             async_task.params_backend[f'enhance_uov_prompt_type'] = async_task.enhance_uov_prompt_type
+                        if async_task.enhance_input_image is not None:
+                            H, W, C = async_task.enhance_input_image.shape
+                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, W, H)
+                        else:
+                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, width, height)
+                        if match_multiple>1.0:
+                            async_task.params_backend['i2i_uov_multiple'] = match_multiple
+                            if 'fast' not in async_task.enhance_uov_method.lower():
+                                async_task.params_backend['i2i_uov_tiled_width'] = tiled_width
+                                async_task.params_backend['i2i_uov_tiled_height'] = tiled_height
+                                async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps
+                                async_task.steps = tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
+
                     if len(async_task.enhance_ctrls) > 0:
+                        k = 0
                         for i in range(len(async_task.enhance_ctrls)):
-                            n = f'{i}' if i > 0 else ''
-                            async_task.params_backend[f'enhance_mask_dino_prompt_text{n}'] = async_task.enhance_ctrls[i][0]
-                            async_task.params_backend[f'enhance_prompt{n}'] = async_task.enhance_ctrls[i][1]
-                            async_task.params_backend[f'enhance_negative_prompt{n}'] = async_task.enhance_ctrls[i][2]
-                            async_task.params_backend[f'enhance_mask_model{n}'] = async_task.enhance_ctrls[i][3]
-                            async_task.params_backend[f'enhance_mask_cloth_category{n}'] = async_task.enhance_ctrls[i][4]
-                            async_task.params_backend[f'enhance_mask_sam_model{n}'] = async_task.enhance_ctrls[i][5]
-                            async_task.params_backend[f'enhance_mask_text_threshold{n}'] = async_task.enhance_ctrls[i][6]
-                            async_task.params_backend[f'enhance_mask_box_threshold{n}'] = async_task.enhance_ctrls[i][7]
-                            async_task.params_backend[f'enhance_mask_sam_max_detections{n}'] = async_task.enhance_ctrls[i][8]
-                            async_task.params_backend[f'enhance_inpaint_disable_initial_latent{n}'] = async_task.enhance_ctrls[i][9]
-                            async_task.params_backend[f'enhance_inpaint_engine{n}'] = async_task.enhance_ctrls[i][10]
-                            async_task.params_backend[f'enhance_inpaint_strength{n}'] = async_task.enhance_ctrls[i][11]
-                            async_task.params_backend[f'enhance_inpaint_respective_field{n}'] = async_task.enhance_ctrls[i][12]
-                            async_task.params_backend[f'enhance_inpaint_erode_or_dilate{n}'] = async_task.enhance_ctrls[i][13]
-                            async_task.params_backend[f'enhance_mask_invert{n}'] = async_task.enhance_ctrls[i][14]
+                            if not async_task.enhance_ctrls[i][0]:
+                                n = f'{k}' if k > 0 else ''
+                                async_task.params_backend[f'enhance_mask_dino_prompt_text{n}'] = async_task.enhance_ctrls[i][0]
+                                async_task.params_backend[f'enhance_prompt{n}'] = async_task.enhance_ctrls[i][1]
+                                async_task.params_backend[f'enhance_negative_prompt{n}'] = async_task.enhance_ctrls[i][2]
+                                async_task.params_backend[f'enhance_mask_model{n}'] = async_task.enhance_ctrls[i][3]
+                                async_task.params_backend[f'enhance_mask_cloth_category{n}'] = async_task.enhance_ctrls[i][4]
+                                async_task.params_backend[f'enhance_mask_sam_model{n}'] = async_task.enhance_ctrls[i][5]
+                                async_task.params_backend[f'enhance_mask_text_threshold{n}'] = async_task.enhance_ctrls[i][6]
+                                async_task.params_backend[f'enhance_mask_box_threshold{n}'] = async_task.enhance_ctrls[i][7]
+                                async_task.params_backend[f'enhance_mask_sam_max_detections{n}'] = async_task.enhance_ctrls[i][8]
+                                async_task.params_backend[f'enhance_inpaint_disable_initial_latent{n}'] = async_task.enhance_ctrls[i][9]
+                                async_task.params_backend[f'enhance_inpaint_engine{n}'] = async_task.enhance_ctrls[i][10]
+                                async_task.params_backend[f'enhance_inpaint_strength{n}'] = async_task.enhance_ctrls[i][11]
+                                async_task.params_backend[f'enhance_inpaint_respective_field{n}'] = async_task.enhance_ctrls[i][12]
+                                async_task.params_backend[f'enhance_inpaint_erode_or_dilate{n}'] = async_task.enhance_ctrls[i][13]
+                                async_task.params_backend[f'enhance_mask_invert{n}'] = async_task.enhance_ctrls[i][14]
+                                k += 1
 
                 if 'cn' in goals:
                     async_task.params_backend['i2i_function'] = 1 # image prompt
@@ -1719,34 +1751,26 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
-                    tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
-                    tiled_steps = [10, 6, 4]
-                    match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
-                    match_multiple = 1.0 if not match else float(match.group(1))
-                    match_multiple = match_multiple if match_multiple<4.0 else 4.0
+                    match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, width, height)
                     if 'vary' in async_task.uov_method and 'subtle' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 2
                     elif 'vary' in async_task.uov_method and 'strong' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 3
-                    elif 'upscale' in async_task.uov_method and 'fast' in async_task.uov_method and match:
+                    elif 'upscale' in async_task.uov_method and 'fast' in async_task.uov_method and match_multiple>1.0:
                         async_task.params_backend['i2i_uov_fn'] = 1
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
                         tasks = tasks[:1]
-                    elif 'upscale' in async_task.uov_method and match:
+                    elif 'upscale' in async_task.uov_method and match_multiple>1.0:
                         async_task.params_backend['i2i_uov_fn'] = 4
                         async_task.params_backend['i2i_uov_multiple'] = match_multiple
-                        async_task.params_backend['i2i_uov_tiled_width'] = tiled_size(width, match_multiple)
-                        async_task.params_backend['i2i_uov_tiled_height'] = tiled_size(height, match_multiple)
+                        async_task.params_backend['i2i_uov_tiled_width'] = tiled_width
+                        async_task.params_backend['i2i_uov_tiled_height'] = tiled_height
                         width = int(width * match_multiple)
                         height = int(height * match_multiple)
-                        if async_task.task_class == 'Flux':
-                            async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps[1 if 'gguf' in async_task.base_model_name else 0]
-                        else:
-                            async_task.params_backend['i2i_uov_tiled_steps'] = int(async_task.steps * 0.6)
-                        async_task.steps = async_task.params_backend['i2i_uov_tiled_steps'] * math.ceil(width/(async_task.params_backend['i2i_uov_tiled_width'])) * math.ceil(height/(async_task.params_backend['i2i_uov_tiled_height']))
+                        async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps
+                        async_task.steps = tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
                         #all_steps = async_task.steps * async_task.image_number
                     elif 'hires.fix' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 5
@@ -1841,6 +1865,10 @@ def worker():
 
         if not async_task.should_enhance:
             logger.info(f'[Enhance] Skipping, preconditions aren\'t met')
+            stop_processing(async_task, processing_start_time)
+            return
+
+        if async_task.task_class not in ['Fooocus']:
             stop_processing(async_task, processing_start_time)
             return
 
