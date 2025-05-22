@@ -78,6 +78,7 @@ def generate_clicked(task: worker.AsyncTask, state):
     if len(task.args) == 0:
         return
     is_mobile = state["__is_mobile"]
+    is_fooocus = state["engine"] == 'Fooocus'
 
     # outputs=[progress_html, progress_window, progress_gallery, progress_video, gallery]
     if "absent_model" in state and state["absent_model"]:
@@ -177,7 +178,7 @@ def generate_clicked(task: worker.AsyncTask, state):
                     gr.update(visible=False), \
                     gr.update(visible=False)
             if flag == 'finish':
-                if not args_manager.args.disable_enhance_output_sorting:
+                if not args_manager.args.disable_enhance_output_sorting and is_fooocus:
                     product = sort_enhance_images(product, task)
 
                 has_video = False

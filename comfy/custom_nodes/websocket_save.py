@@ -42,6 +42,36 @@ class SaveImageWebsocket:
     def IS_CHANGED(s, images): #, format):
         return time.time()
 
+class SaveImageWebsocketLazy:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required":
+                    {"images": ("IMAGE", ),
+                     "format": (["PNG", "JPEG", "WEBP"], {"default": "PNG"})
+                    }
+                }
+
+    RETURN_TYPES = ("IMAGE", )
+    RETURN_NAMES = ("images", )
+
+    FUNCTION = "save_images"
+
+    OUTPUT_NODE = False
+
+    CATEGORY = "api/image"
+
+    def save_images(self, images, format):
+        #format = 'png'
+        pbar = comfy.utils.ProgressBar(images.shape[0])
+        step = 0
+        for image in images:
+            i = 255. * image.cpu().numpy()
+            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+            pbar.update_absolute(step, images.shape[0], (format, img, None))
+            step += 1
+
+        return (images)
+
 class SaveVideoWebsocket:
     @classmethod
     def INPUT_TYPES(s):

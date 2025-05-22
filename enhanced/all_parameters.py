@@ -131,5 +131,17 @@ default = {
     'p2p_in_did_list': '',
     'p2p_out_did_list': '',
     'style_preview_checkbox': True,
+    'enhance_mask_model': 'sam',
+    'enhance_mask_cloth_category': 'full',
+    'enhance_mask_sam_model': 'vit_b',
+    'enhance_mask_text_threshold': 0.25,
+    'enhance_mask_box_threshold': 0.3,
+    'enhance_mask_sam_max_detections': 0,
+    'enhance_inpaint_disable_initial_latent': False,
+    'enhance_inpaint_engine': 'None',
+    'enhance_inpaint_strength': 0.5,
+    'enhance_inpaint_respective_field': 0,
+    'enhance_inpaint_erode_or_dilate': 0,
+    'enhance_mask_invert': False,
     }
 
