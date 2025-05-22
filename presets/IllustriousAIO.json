@@ -49,18 +49,12 @@
     "lora_downloads": {},
     "model_list": [
         "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,",
-        "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
-	    "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
-        "controlnet,noob_sdxl_controlnet_canny.fp16.safetensors,2502139104,0,",
-        "controlnet,noob_sdxl_controlnet_depth.fp16.safetensors,2502139136,0,",
-        "controlnet,noob_sdxl_controlnet_pose.fp16.safetensors,2502140008,0,",
         "ipadapter,noob_ip_adapter.bin,1396798350,0,",
-        "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
         "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
         "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
         "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
-        "controlnet,illustriousXL_controlnet_tile_v2.5.safetensors,5004167832,0,",
-        "controlnet,noob_sdxl_controlnet_inpainting.safetensors,5004167832,0,"
+        "controlnet,noob_sdxl_controlnet_inpainting.safetensors,5004167832,0,",
+        "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,"
     ]
 }
 
