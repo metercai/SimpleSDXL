@@ -981,6 +981,7 @@ packages = {
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("controlnet/parsing_parsenet.pth", 85331193),
             ("controlnet/xinsir_cn_openpose_sdxl_1.0.safetensors", 2502139104),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("controlnet/lllyasviel/Annotators/body_pose_model.pth", 209267595),
             ("controlnet/lllyasviel/Annotators/facenet.pth", 153718792),
             ("controlnet/lllyasviel/Annotators/hand_pose_model.pth", 147341049),
