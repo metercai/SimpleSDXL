@@ -3696,7 +3696,7 @@
   },
   "2851": {
     "inputs": {
-      "upscale_method": "lanczos",
+      "upscale_method": "bicubic",
       "scale_by": 0.5,
       "samples": [
         "2810",
@@ -4832,7 +4832,7 @@
   },
   "2945": {
     "inputs": {
-      "upscale_method": "lanczos",
+      "upscale_method": "bicubic",
       "scale_by": 2,
       "samples": [
         "421",
@@ -5549,7 +5549,8 @@
       "denoise": 1,
       "clip_skip": -1,
       "inpaint_disable_initial_latent": false,
-      "wavespeed_strength": 0.12
+      "wavespeed_strength": 0.12,
+      "save_final_enhanced_image_only": false
     },
     "class_type": "GeneralInput",
     "_meta": {
