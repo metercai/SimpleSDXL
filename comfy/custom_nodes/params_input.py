@@ -26,18 +26,19 @@ class GeneralInput:
                     "clip_skip": ("INT", {"default": -1, "min": -24, "max": -1, "step": 1}),
                     "inpaint_disable_initial_latent": ("BOOLEAN", {"default": False}),
                     "wavespeed_strength": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 1.0, "step": 0.01}),
+                    "save_final_enhanced_image_only": ("BOOLEAN", {"default": False}),
                     }}
     
-    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", SAMPLER_NAMES, SCHEDULER_NAMES, "FLOAT", "INT",  "BOOLEAN", "FLOAT",)
-    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength",)
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "FLOAT", "INT", "INT", SAMPLER_NAMES, SCHEDULER_NAMES, "FLOAT", "INT",  "BOOLEAN", "FLOAT", "BOOLEAN", )
+    RETURN_NAMES = ("prompt", "negative_prompt", "width", "height", "cfg", "steps", "refiner_step", "sampler", "scheduler", "denoise", "clip_skip", "inpaint_disable_initial_latent", "wavespeed_strength", "save_final_enhanced_image_only", )
     
     FUNCTION = "general_input"
 
     CATEGORY = "api/input"
 
-    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength ):
+    def general_input(self, prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, save_final_enhanced_image_only):
 
-        return (prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, )
+        return (prompt, negative_prompt, width, height, cfg, steps, refiner_step, sampler, scheduler, denoise, clip_skip, inpaint_disable_initial_latent, wavespeed_strength, save_final_enhanced_image_only)
 
 
 class SceneInput:

@@ -1176,11 +1176,11 @@ def worker():
             goals.append('cn')
             progressbar(async_task, 1, '下载控制模型 ...')
             if len(async_task.cn_tasks[flags.cn_canny]) > 0:
-                controlnet_canny_path = modules.config.downloading_controlnet_canny()
+                controlnet_canny_path = modules.config.downloading_controlnet_union() #modules.config.downloading_controlnet_canny()
             if len(async_task.cn_tasks[flags.cn_cpds]) > 0:
-                controlnet_cpds_path = modules.config.downloading_controlnet_cpds()
+                controlnet_cpds_path = modules.config.downloading_controlnet_union() #modules.config.downloading_controlnet_cpds()
             if len(async_task.cn_tasks[flags.cn_pose]) > 0:
-                controlnet_pose_path = modules.config.downloading_controlnet_pose()
+                controlnet_pose_path = modules.config.downloading_controlnet_union() #modules.config.downloading_controlnet_pose()
             if len(async_task.cn_tasks[flags.cn_ip]) > 0:
                 clip_vision_path, ip_negative_path, ip_adapter_path = modules.config.downloading_ip_adapters('ip')
             if len(async_task.cn_tasks[flags.cn_ip_face]) > 0:
@@ -1620,7 +1620,7 @@ def worker():
             #ldm_patched.modules.model_management.unload_and_free_everything()
             callback_function = callback_comfytask
 
-            if async_task.refiner_model_name:
+            if async_task.refiner_model_name is not None and async_task.refiner_model_name != 'None' and async_task.refiner_model_name != '':
                 async_task.params_backend['base_model2'] = async_task.refiner_model_name
                 async_task.params_backend['refiner_step'] = async_task.refiner_switch
             async_task.refiner_model_name = ''
@@ -1667,8 +1667,10 @@ def worker():
                     if async_task.enhance_input_image is not None:
                         input_images.set_image(f'enhance_input_image', async_task.enhance_input_image)
                     if async_task.enhance_uov_method.lower() != 'disabled':
+                        if async_task.save_final_enhanced_image_only:
+                            async_task.params_backend[f'save_final_enhanced_image_only'] = True
                         async_task.params_backend[f'enhance_uov_method'] = async_task.enhance_uov_method
-                        async_task.params_backend[f'enhance_uov_strength'] = async_task.enhance_uov_strength
+                        async_task.params_backend[f'enhance_uov_denoise'] = async_task.enhance_uov_strength
                         async_task.params_backend[f'enhance_uov_processing_order'] = async_task.enhance_uov_processing_order
                         if async_task.enhance_uov_processing_order == flags.enhancement_uov_after:
                             async_task.params_backend[f'enhance_uov_prompt_type'] = async_task.enhance_uov_prompt_type
@@ -1684,27 +1686,40 @@ def worker():
                                 async_task.params_backend['i2i_uov_tiled_height'] = tiled_height
                                 async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps
                                 async_task.steps = tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
-
                     if len(async_task.enhance_ctrls) > 0:
                         k = 0
                         for i in range(len(async_task.enhance_ctrls)):
-                            if not async_task.enhance_ctrls[i][0]:
+                            if async_task.enhance_ctrls[i][0] != '':
                                 n = f'{k}' if k > 0 else ''
                                 async_task.params_backend[f'enhance_mask_dino_prompt_text{n}'] = async_task.enhance_ctrls[i][0]
-                                async_task.params_backend[f'enhance_prompt{n}'] = async_task.enhance_ctrls[i][1]
-                                async_task.params_backend[f'enhance_negative_prompt{n}'] = async_task.enhance_ctrls[i][2]
-                                async_task.params_backend[f'enhance_mask_model{n}'] = async_task.enhance_ctrls[i][3]
-                                async_task.params_backend[f'enhance_mask_cloth_category{n}'] = async_task.enhance_ctrls[i][4]
-                                async_task.params_backend[f'enhance_mask_sam_model{n}'] = async_task.enhance_ctrls[i][5]
-                                async_task.params_backend[f'enhance_mask_text_threshold{n}'] = async_task.enhance_ctrls[i][6]
-                                async_task.params_backend[f'enhance_mask_box_threshold{n}'] = async_task.enhance_ctrls[i][7]
-                                async_task.params_backend[f'enhance_mask_sam_max_detections{n}'] = async_task.enhance_ctrls[i][8]
-                                async_task.params_backend[f'enhance_inpaint_disable_initial_latent{n}'] = async_task.enhance_ctrls[i][9]
-                                async_task.params_backend[f'enhance_inpaint_engine{n}'] = async_task.enhance_ctrls[i][10]
-                                async_task.params_backend[f'enhance_inpaint_strength{n}'] = async_task.enhance_ctrls[i][11]
-                                async_task.params_backend[f'enhance_inpaint_respective_field{n}'] = async_task.enhance_ctrls[i][12]
-                                async_task.params_backend[f'enhance_inpaint_erode_or_dilate{n}'] = async_task.enhance_ctrls[i][13]
-                                async_task.params_backend[f'enhance_mask_invert{n}'] = async_task.enhance_ctrls[i][14]
+                                if async_task.enhance_ctrls[i][1] != '':
+                                    async_task.params_backend[f'enhance_prompt{n}'] = async_task.enhance_ctrls[i][1]
+                                if async_task.enhance_ctrls[i][2] != '':
+                                    async_task.params_backend[f'enhance_negative_prompt{n}'] = async_task.enhance_ctrls[i][2]
+                                if async_task.enhance_ctrls[i][3] != ads.default['enhance_mask_model']:
+                                    async_task.params_backend[f'enhance_mask_model{n}'] = async_task.enhance_ctrls[i][3]
+                                if async_task.enhance_ctrls[i][4] != ads.default['enhance_mask_cloth_category']:
+                                    async_task.params_backend[f'enhance_mask_cloth_category{n}'] = async_task.enhance_ctrls[i][4]
+                                if async_task.enhance_ctrls[i][5] != ads.default['enhance_mask_sam_model']:
+                                    async_task.params_backend[f'enhance_mask_sam_model{n}'] = async_task.enhance_ctrls[i][5]
+                                if async_task.enhance_ctrls[i][6] != ads.default['enhance_mask_text_threshold']:
+                                    async_task.params_backend[f'enhance_mask_text_threshold{n}'] = async_task.enhance_ctrls[i][6]
+                                if async_task.enhance_ctrls[i][7] != ads.default['enhance_mask_box_threshold']:
+                                    async_task.params_backend[f'enhance_mask_box_threshold{n}'] = async_task.enhance_ctrls[i][7]
+                                if async_task.enhance_ctrls[i][8] != ads.default['enhance_mask_sam_max_detections']:
+                                    async_task.params_backend[f'enhance_mask_sam_max_detections{n}'] = async_task.enhance_ctrls[i][8]
+                                if async_task.enhance_ctrls[i][9] != ads.default['enhance_inpaint_disable_initial_latent']:
+                                    async_task.params_backend[f'enhance_inpaint_disable_initial_latent{n}'] = async_task.enhance_ctrls[i][9]
+                                if async_task.enhance_ctrls[i][10] is not None and async_task.enhance_ctrls[i][10] != ads.default['enhance_inpaint_engine']: 
+                                    async_task.params_backend[f'enhance_inpaint_engine{n}'] = async_task.enhance_ctrls[i][10]
+                                if async_task.enhance_ctrls[i][11] != ads.default['enhance_inpaint_strength']:
+                                    async_task.params_backend[f'enhance_inpaint_strength{n}'] = async_task.enhance_ctrls[i][11]
+                                if async_task.enhance_ctrls[i][12] != ads.default['enhance_inpaint_respective_field']:
+                                    async_task.params_backend[f'enhance_inpaint_respective_field{n}'] = async_task.enhance_ctrls[i][12]
+                                if async_task.enhance_ctrls[i][13] != ads.default['enhance_inpaint_erode_or_dilate']:
+                                    async_task.params_backend[f'enhance_inpaint_erode_or_dilate{n}'] = async_task.enhance_ctrls[i][13]
+                                if async_task.enhance_ctrls[i][14] != ads.default['enhance_mask_invert']:
+                                    async_task.params_backend[f'enhance_mask_invert{n}'] = async_task.enhance_ctrls[i][14]
                                 k += 1
 
                 if 'cn' in goals:

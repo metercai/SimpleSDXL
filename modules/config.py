@@ -1216,6 +1216,15 @@ def downloading_controlnet_pose():
     )
     return os.path.join(paths_controlnet[0], 'xinsir_cn_openpose_sdxl_1.0.safetensors')
 
+def downloading_controlnet_union():
+    load_file_from_url(
+        url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors'
+        'https://huggingface.co/xinsir/controlnet-openpose-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors',
+        model_dir=paths_controlnet[0],
+        file_name='xinsir_cn_union_sdxl_1.0_promax.safetensors'
+    )
+    return os.path.join(paths_controlnet[0], 'xinsir_cn_union_sdxl_1.0_promax.safetensors')
+
 def downloading_ip_adapters(v):
     assert v in ['ip', 'face']
 
