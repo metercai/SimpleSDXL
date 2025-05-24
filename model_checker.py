@@ -981,6 +981,7 @@ packages = {
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("controlnet/parsing_parsenet.pth", 85331193),
             ("controlnet/xinsir_cn_openpose_sdxl_1.0.safetensors", 2502139104),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("controlnet/lllyasviel/Annotators/body_pose_model.pth", 209267595),
             ("controlnet/lllyasviel/Annotators/facenet.pth", 153718792),
             ("controlnet/lllyasviel/Annotators/hand_pose_model.pth", 147341049),
@@ -1215,9 +1216,8 @@ packages = {
         "files": [
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("controlnet/kolors_controlnet_canny.safetensors", 2526129624),
-            ("controlnet/kolors_controlnet_depth.safetensors", 2526129624),
             ("controlnet/kolors_controlnet_pose.safetensors", 2526129624),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
             ("diffusers/Kolors/model_index.json", 427),
             ("diffusers/Kolors/MODEL_LICENSE", 14920),
@@ -1343,7 +1343,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("controlnet/kolors_controlnet_canny.safetensors", 2526129624),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
             ("diffusers/Kolors/model_index.json", 427),
             ("diffusers/Kolors/MODEL_LICENSE", 14920),
             ("diffusers/Kolors/README.md", 4707),
@@ -1581,18 +1581,12 @@ packages = {
         "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
-            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
-            ("controlnet/noob_sdxl_controlnet_canny.fp16.safetensors", 2502139104),
-            ("controlnet/noob_sdxl_controlnet_depth.fp16.safetensors", 2502139136),
-            ("controlnet/noob_sdxl_controlnet_pose.fp16.safetensors", 2502140008),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
-            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
             ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
-            ("controlnet/illustriousXL_controlnet_tile_v2.5.safetensors", 5004167832),
-            ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832)
+            ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
         ],
         "download_links": [
         "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",

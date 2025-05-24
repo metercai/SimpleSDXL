@@ -2,7 +2,7 @@
     "default_engine": {
 	"backend_engine": "Kolors",
 	"disvisible": ["backend_selection", "performance_selection"],
-	"disinteractive": ["enhance_checkbox", "performance_selection", "refiner_model", "layer_method", "layer_input_image", "enhance_input_image"],
+	"disinteractive": ["performance_selection", "refiner_model", "layer_method", "layer_input_image"],
 	"available_aspect_ratios_selection": "Common",
 	"backend_params": {
 		"task_method": "kolors_aio"
@@ -38,6 +38,7 @@
     "default_sampler": "euler",
     "default_scheduler": "ddim_uniform",
     "default_performance": "Speed",
+    "default_prompt_negative": "nsfw，脸部阴影，低分辨率，jpeg伪影、模糊、糟糕，黑脸，霓虹灯",
     "default_styles": [],
     "default_aspect_ratio": "1280*960",
     "default_image_number": 1,
@@ -48,8 +49,6 @@
     "model_list": [
         "checkpoints,kolors_unet_fp16.safetensors,5159140240,0,",
         "unet,kolors_inpainting.safetensors,5159169040,0,",
-        "controlnet,kolors_controlnet_canny.safetensors,2526129624,0,",
-        "controlnet,kolors_controlnet_depth.safetensors,2526129624,0,",
         "controlnet,kolors_controlnet_pose.safetensors,2526129624,0,",
         "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
         "insightface,models/antelopev2/1k3d68.onnx,143607619,0,",
@@ -65,6 +64,7 @@
         "ipadapter,kolors_ipa_faceid_plus.bin,2385842603,0,",
         "diffusers,[Kolors],9,0,https://huggingface.co/metercai/SimpleSDXL2/resolve/main/models_kolors_diffusers_simpleai_1214.zip",
         "loras,Hyper-SDXL-8steps-lora.safetensors,787359648,0,",
-        "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,"
+        "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,",
+        "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,"
         ] 
 }
