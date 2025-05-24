@@ -609,7 +609,7 @@ with shared.gradio_root:
                                                                   '(Outpaint always use 1.0)')
                         gr.HTML('* Powered by Fooocus Inpaint Engine, <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Documentation</a>, and Comfyd workflow engine from ComfyUI.')
                         
-                        def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug, params_extra):
+                        def generate_mask(image, mask_model, cloth_category, dino_prompt_text, sam_model, box_threshold, text_threshold, sam_max_detections, dino_erode_or_dilate, dino_debug):
                             from extras.inpaint_mask import generate_mask_from_image
 
                             extras = {}
@@ -618,7 +618,7 @@ with shared.gradio_root:
                                 extras['cloth_category'] = cloth_category
                             elif mask_model == 'sam':
                                 sam_options = SAMOptions(
-                                    dino_prompt=translator.convert(dino_prompt_text, params_extra['translation_methods']),
+                                    dino_prompt=translator.convert(dino_prompt_text, ads.get_admin_default('translation_methods')),
                                     dino_box_threshold=box_threshold,
                                     dino_text_threshold=text_threshold,
                                     dino_erode_or_dilate=dino_erode_or_dilate,
@@ -1510,7 +1510,7 @@ with shared.gradio_root:
                                    inputs=[inpaint_input_image, inpaint_mask_model, inpaint_mask_cloth_category,
                                            inpaint_mask_dino_prompt_text, inpaint_mask_sam_model,
                                            inpaint_mask_box_threshold, inpaint_mask_text_threshold,
-                                           inpaint_mask_sam_max_detections, dino_erode_or_dilate, debugging_dino, params_backend],
+                                           inpaint_mask_sam_max_detections, dino_erode_or_dilate, debugging_dino],
                                    outputs=inpaint_mask_image, show_progress=True, queue=True)
 
         ctrls = [currentTask, generate_image_grid]

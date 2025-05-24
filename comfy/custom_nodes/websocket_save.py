@@ -47,7 +47,7 @@ class SaveImageWebsocketLazy:
     def INPUT_TYPES(s):
         return {"required":
                     {"images": ("IMAGE", ),
-                     "format": (["PNG", "JPEG", "WEBP"], {"default": "PNG"})
+                     "format": (["png", "jpeg", "webp"], {"default": "png"})
                     }
                 }
 
@@ -70,7 +70,7 @@ class SaveImageWebsocketLazy:
             pbar.update_absolute(step, images.shape[0], (format, img, None))
             step += 1
 
-        return (images)
+        return (images,)
 
 class SaveVideoWebsocket:
     @classmethod
@@ -151,5 +151,6 @@ class SaveVideoWebsocket:
 
 NODE_CLASS_MAPPINGS = {
     "SaveImageWebsocket": SaveImageWebsocket,
+    "SaveImageWebsocketLazy": SaveImageWebsocketLazy,
     "SaveVideoWebsocket": SaveVideoWebsocket,
 }

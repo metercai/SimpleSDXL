@@ -1680,11 +1680,11 @@ def worker():
                         else:
                             match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, width, height)
                         if match_multiple>1.0:
-                            async_task.params_backend['i2i_uov_multiple'] = match_multiple
+                            async_task.params_backend['enhance_uov_multiple'] = match_multiple
                             if 'fast' not in async_task.enhance_uov_method.lower():
-                                async_task.params_backend['i2i_uov_tiled_width'] = tiled_width
-                                async_task.params_backend['i2i_uov_tiled_height'] = tiled_height
-                                async_task.params_backend['i2i_uov_tiled_steps'] = tiled_steps
+                                async_task.params_backend['enhance_uov_tiled_width'] = tiled_width
+                                async_task.params_backend['enhance_uov_tiled_height'] = tiled_height
+                                async_task.params_backend['enhance_uov_tiled_steps'] = tiled_steps
                                 async_task.steps = tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
                     if len(async_task.enhance_ctrls) > 0:
                         k = 0
