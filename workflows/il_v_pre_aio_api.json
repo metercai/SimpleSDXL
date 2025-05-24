@@ -8414,6 +8414,10 @@
       "resolution": [
         "3193",
         0
+      ],
+      "image": [
+        "3156",
+        0
       ]
     },
     "class_type": "AIO_Preprocessor",
