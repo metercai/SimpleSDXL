@@ -7248,7 +7248,7 @@
         0
       ],
       "positive": [
-        "2648",
+        "1311",
         0
       ],
       "negative": [
@@ -7670,7 +7670,7 @@
         0
       ],
       "positive": [
-        "2648",
+        "1311",
         0
       ],
       "negative": [
@@ -7996,7 +7996,7 @@
     "inputs": {
       "noise_mask": true,
       "positive": [
-        "3233",
+        "3827",
         0
       ],
       "negative": [
@@ -8588,11 +8588,11 @@
   "3233": {
     "inputs": {
       "clip_l": [
-        "3294",
+        "3698",
         0
       ],
       "t5xxl": [
-        "3294",
+        "3698",
         0
       ],
       "guidance": [
@@ -8787,26 +8787,6 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
-    }
-  },
-  "3294": {
-    "inputs": {
-      "boolean": [
-        "3293",
-        0
-      ],
-      "on_true": [
-        "2939",
-        0
-      ],
-      "on_false": [
-        "3698",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "3307": {
@@ -9745,7 +9725,7 @@
         0
       ],
       "on_true": [
-        "2648",
+        "1311",
         0
       ],
       "on_false": [
@@ -10093,6 +10073,26 @@
       ],
       "on_false": [
         "3327",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3827": {
+    "inputs": {
+      "boolean": [
+        "3293",
+        0
+      ],
+      "on_true": [
+        "1315",
+        0
+      ],
+      "on_false": [
+        "3233",
         0
       ]
     },

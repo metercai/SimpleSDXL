@@ -6422,12 +6422,12 @@
         0
       ],
       "positive": [
-        "1311",
+        "3131",
         0
       ],
       "negative": [
-        "2854",
-        0
+        "3131",
+        1
       ],
       "vae": [
         "256",
@@ -7408,6 +7408,10 @@
       "image": [
         "3101",
         0
+      ],
+      "vae": [
+        "256",
+        0
       ]
     },
     "class_type": "ControlNetApplyAdvanced",
@@ -7976,7 +7980,7 @@
   "3127": {
     "inputs": {
       "text": [
-        "2878",
+        "3092",
         0
       ],
       "chatglm3_model": [
@@ -7997,6 +8001,73 @@
     "class_type": "UNETLoader",
     "_meta": {
       "title": "Load Diffusion Model"
+    }
+  },
+  "3131": {
+    "inputs": {
+      "strength": 0.3,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "1311",
+        0
+      ],
+      "negative": [
+        "2854",
+        0
+      ],
+      "control_net": [
+        "3132",
+        0
+      ],
+      "image": [
+        "3133",
+        0
+      ],
+      "vae": [
+        "256",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet"
+    }
+  },
+  "3132": {
+    "inputs": {
+      "type": "tile",
+      "control_net": [
+        "3134",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "3133": {
+    "inputs": {
+      "preprocessor": "TTPlanet_TileSimple_Preprocessor",
+      "resolution": 512,
+      "image": [
+        "3119",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "AIO Aux Preprocessor"
+    }
+  },
+  "3134": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
     }
   }
 }
