@@ -90,7 +90,7 @@ class EnhanceUovInput:
         return {"required": {
                 "uov_method": (["disabled", "vary (subtle)", "vary (strong)", "upscale (1.5x)", "upscale (2x)", "upscale (fast 2x)"], {"default": "disabled"}),
                 "uov_denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "uov_processing_order": (["Before First Enhancemen", "After Last Enhancement"], {"default": "Before First Enhancemen"}),
+                "uov_processing_order": (["Before First Enhancement", "After Last Enhancement"], {"default": "Before First Enhancement"}),
                 "uov_prompt_type": (["Original Prompts", "Last Filled Enhancement Prompts"], {"default": ""}),
                 "uov_multiple": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 4.0, "step": 0.1}),
                 "uov_tiled_width": ("INT", {"default": 512, "min": 64, "max": MAX_RESOLUTION, "step": 8}),
