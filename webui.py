@@ -699,7 +699,7 @@ with shared.gradio_root:
                                         enhance_inpaint_update_ctrls = []
                                         for index in range(modules.config.default_enhance_tabs):
                                             with gr.Tab(label=f'Region#{index + 1}') as enhance_tab_item:
-                                                enhance_enabled = gr.Checkbox(label='Enable', value=False if index not in [0,1] else True, 
+                                                enhance_enabled = gr.Checkbox(label='Enable', value=False, 
                                                         elem_classes='min_check', container=False)
 
                                                 enhance_mask_dino_prompt_text = gr.Textbox(label='Detection prompt',

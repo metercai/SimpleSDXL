@@ -8501,7 +8501,7 @@
   },
   "3207": {
     "inputs": {
-      "value": "Before First Enhancemen"
+      "value": "Before First Enhancement"
     },
     "class_type": "easy string",
     "_meta": {
@@ -8512,7 +8512,7 @@
     "inputs": {
       "uov_method": "disabled",
       "uov_denoise": 0.5000000000000001,
-      "uov_processing_order": "Before First Enhancemen",
+      "uov_processing_order": "Before First Enhancement",
       "uov_prompt_type": "Original Prompts",
       "uov_multiple": 1.5,
       "uov_tiled_width": 1024,
