@@ -523,6 +523,7 @@ def worker():
             if 'vary' in goals and 'hires.fix' in async_task.uov_method:
                 goals = [v if v!='vary' else 'hires.fix' for v in goals]
             goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
+            height, width, C = x.shape
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
