@@ -4628,7 +4628,7 @@
       "denoise": 1,
       "clip_skip": -1,
       "inpaint_disable_initial_latent": false,
-      "wavespeed_strength": 0.12,
+      "wavespeed_strength": 0,
       "save_final_enhanced_image_only": false
     },
     "class_type": "GeneralInput",
