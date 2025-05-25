@@ -47,7 +47,7 @@ class SaveImageWebsocketLazy:
     def INPUT_TYPES(s):
         return {"required":
                     {"images": ("IMAGE", ),
-                     "format": (["png", "jpeg", "webp"], {"default": "png"})
+                     "format": (["PNG", "JPEG", "WEBP"], {"default": "PNG"})
                     }
                 }
 
@@ -61,7 +61,7 @@ class SaveImageWebsocketLazy:
     CATEGORY = "api/image"
 
     def save_images(self, images, format):
-        #format = 'png'
+        format = format.lower()
         pbar = comfy.utils.ProgressBar(images.shape[0])
         step = 0
         for image in images:
