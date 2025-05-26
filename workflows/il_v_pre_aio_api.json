@@ -2222,7 +2222,7 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 2,
+      "max_consecutive_cache_hits": 3,
       "model": [
         "305",
         0
@@ -2251,9 +2251,9 @@
       ],
       "start": 0,
       "end": 1,
-      "max_consecutive_cache_hits": 1,
+      "max_consecutive_cache_hits": 3,
       "model": [
-        "596",
+        "5",
         0
       ]
     },
@@ -3440,7 +3440,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 3,
       "model": [
-        "596",
+        "5",
         0
       ]
     },
@@ -4194,7 +4194,10 @@
         "467",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "467",
+        4
+      ],
       "sampler_name": [
         "467",
         7
@@ -4462,7 +4465,10 @@
         "524",
         7
       ],
-      "cfg": 1,
+      "cfg": [
+        "467",
+        4
+      ],
       "sampler_name": [
         "467",
         7
@@ -5127,7 +5133,10 @@
         "467",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "467",
+        4
+      ],
       "sampler_name": [
         "467",
         7
@@ -5212,7 +5221,10 @@
         "467",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "467",
+        4
+      ],
       "sampler_name": [
         "467",
         7
@@ -5430,7 +5442,10 @@
         "524",
         7
       ],
-      "cfg": 1,
+      "cfg": [
+        "467",
+        4
+      ],
       "sampler_name": [
         "467",
         7

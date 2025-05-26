@@ -4218,7 +4218,10 @@
         "675",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "675",
+        4
+      ],
       "sampler_name": [
         "675",
         7
@@ -4232,7 +4235,7 @@
         1
       ],
       "model": [
-        "813",
+        "7",
         0
       ],
       "positive": [
@@ -4733,7 +4736,7 @@
       "denoise": 1,
       "clip_skip": -1,
       "inpaint_disable_initial_latent": false,
-      "wavespeed_strength": 0.12,
+      "wavespeed_strength": 0,
       "save_final_enhanced_image_only": false
     },
     "class_type": "GeneralInput",
@@ -4788,7 +4791,7 @@
         0
       ],
       "model": [
-        "813",
+        "7",
         0
       ],
       "positive": [
@@ -4881,7 +4884,10 @@
         "675",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "675",
+        4
+      ],
       "sampler_name": [
         "675",
         7
@@ -5123,7 +5129,10 @@
         "675",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "675",
+        4
+      ],
       "sampler_name": [
         "675",
         7
@@ -5137,7 +5146,7 @@
         1
       ],
       "model": [
-        "813",
+        "7",
         0
       ],
       "positive": [
@@ -5253,7 +5262,10 @@
         "697",
         7
       ],
-      "cfg": 1,
+      "cfg": [
+        "675",
+        4
+      ],
       "sampler_name": [
         "675",
         7
@@ -5289,7 +5301,7 @@
         0
       ],
       "model": [
-        "813",
+        "7",
         0
       ],
       "positive": [
