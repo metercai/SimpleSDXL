@@ -4345,7 +4345,7 @@
         0
       ],
       "control_net": [
-        "658",
+        "828",
         0
       ],
       "image": [
@@ -4733,7 +4733,7 @@
       "denoise": 1,
       "clip_skip": -1,
       "inpaint_disable_initial_latent": false,
-      "wavespeed_strength": 0,
+      "wavespeed_strength": 0.12,
       "save_final_enhanced_image_only": false
     },
     "class_type": "GeneralInput",
@@ -5342,7 +5342,7 @@
         0
       ],
       "control_net": [
-        "701",
+        "830",
         0
       ],
       "image": [
@@ -6359,6 +6359,38 @@
     "class_type": "easy anythingIndexSwitch",
     "_meta": {
       "title": "Any Index Switch"
+    }
+  },
+  "828": {
+    "inputs": {
+      "control_net": [
+        "658",
+        0
+      ],
+      "model": [
+        "137",
+        0
+      ]
+    },
+    "class_type": "MZ_KolorsControlNetPatch",
+    "_meta": {
+      "title": "MinusZone - KolorsControlNetPatch"
+    }
+  },
+  "830": {
+    "inputs": {
+      "control_net": [
+        "701",
+        0
+      ],
+      "model": [
+        "137",
+        0
+      ]
+    },
+    "class_type": "MZ_KolorsControlNetPatch",
+    "_meta": {
+      "title": "MinusZone - KolorsControlNetPatch"
     }
   }
 }
