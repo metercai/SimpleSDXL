@@ -523,7 +523,8 @@ def worker():
             if 'vary' in goals and 'hires.fix' in async_task.uov_method:
                 goals = [v if v!='vary' else 'hires.fix' for v in goals]
             goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
-            height, width, C = x.shape
+            if isinstance(x, np.ndarray):
+                height, width, C = x.shape
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
@@ -1324,6 +1325,7 @@ def worker():
         return current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result
 
     def uov_tiled_size(width, height, steps, uov_method, tiled_block=2048):
+        print(f'uov_tiled_size, width={width}, height={height}')
         tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
         match_value = re.search(r'\((?:fast )?([\d.]+)x\)', uov_method)
         multiple = 1.0 if not match_value else float(match_value.group(1))
@@ -1829,21 +1831,22 @@ def worker():
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
                     else:
                         async_task.params_backend['display_steps'] = async_task.steps
-                    #all_steps = async_task.params_backend['display_steps'] * async_task.image_number
                 elif async_task.task_class == 'Kolors':
-                    async_task.params_backend['display_steps'] = async_task.steps + 1
-                    #all_steps = async_task.params_backend['display_steps'] * async_task.image_number
+                    async_task.params_backend['display_steps'] = async_task.steps # + 1
             if 'display_steps' not in async_task.params_backend:
                 async_task.params_backend['display_steps'] = 30 if async_task.steps==-1 else async_task.steps
             if async_task.enhance_checkbox:
-                display_steps = async_task.params_backend['display_steps'] #original_steps
+                display_steps = 0
+                if async_task.enhance_input_image is None:
+                    display_steps = async_task.params_backend['display_steps']
                 if len(async_task.enhance_ctrls) > 0:
                     display_steps += async_task.original_steps * len(async_task.enhance_ctrls)
                 if 'enhance_uov_tiled_steps' in async_task.params_backend:
+                    multiple = async_task.params_backend['enhance_uov_multiple']
                     tiled_steps = async_task.params_backend['enhance_uov_tiled_steps']
                     tiled_width = async_task.params_backend['enhance_uov_tiled_width']
                     tiled_height = async_task.params_backend['enhance_uov_tiled_height']
-                    display_steps += tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
+                    display_steps += tiled_steps * math.ceil(int(width*multiple)/tiled_width) * math.ceil(int(height*multiple)/tiled_height)
                 async_task.params_backend['display_steps'] = display_steps
             all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             if 'refiner_step' in async_task.params_backend:

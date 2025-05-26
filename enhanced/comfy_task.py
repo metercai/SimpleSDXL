@@ -118,7 +118,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     global defaul_method_names, default_method_list
 
     #print(f'task_name:{task_name}, task_method:{task_method}')
-    total_steps = default_params.pop("display_steps", None)
+    total_steps = default_params.pop("display_steps", default_params['steps'])
     comfy_params = ComfyTaskParams(default_params, user_did)
     if task_name == 'default':
         if task_method == default_method_names[1]:
@@ -149,7 +149,6 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
                 comfy_params.delete_params(['denoise'])
                 return ComfyTask('layerdiffuse_cond', comfy_params, input_images, 60)
         else:
-            total_steps = total_steps if total_steps else default_params["steps"]
             return ComfyTask(task_method, comfy_params, input_images, total_steps)
     
     elif task_name == 'SD3x':
@@ -164,7 +163,6 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             comfy_params.update_params({
                 "llms_model": 'quant4' if sysinfo["gpu_memory"]<VRAM8G else 'quant8' if sysinfo["gpu_memory"]<VRAM16G else 'fp16'
                 })
-        total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
         check_download_kolors_model(config.path_models_root)
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     
@@ -180,7 +178,6 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             return ComfyTask(task_method, comfy_params, input_images, total_steps)
 
         if '_aio' in task_method:
-            total_steps = default_params["steps"] if 'i2i_uov_tiled_steps' in default_params or ('i2i_inpaint_fn' in default_params and default_params['i2i_inpaint_fn'] == 1) else None
             check_download_flux_model(default_params["base_model"], default_params.get("clip_model", None))
             if 'base_model_gguf' in default_params:
                 comfy_params.delete_params(['base_model'])
@@ -241,11 +238,9 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     elif task_name == 'SD15AIO' and '_aio' in task_method:
-        total_steps = total_steps if total_steps else default_params["steps"]
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])
-        total_steps = total_steps if total_steps else default_params["steps"]
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
 
 
