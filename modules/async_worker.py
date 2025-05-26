@@ -523,6 +523,7 @@ def worker():
             if 'vary' in goals and 'hires.fix' in async_task.uov_method:
                 goals = [v if v!='vary' else 'hires.fix' for v in goals]
             goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
+            height, width, C = x.shape
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
@@ -1322,16 +1323,14 @@ def worker():
                 done_steps_upscaling += steps
         return current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result
 
-    def uov_tiled_size(async_task, width, height):
-        tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
+    def uov_tiled_size(width, height, steps, uov_method, tiled_block=2048):
         tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
-        tiled_steps = [10, 6, 4]
-        match = re.search(r'\((?:fast )?([\d.]+)x\)', async_task.uov_method)
-        multiple = 1.0 if not match else float(match.group(1))
+        match_value = re.search(r'\((?:fast )?([\d.]+)x\)', uov_method)
+        multiple = 1.0 if not match_value else float(match_value.group(1))
         multiple = multiple if multiple<4.0 else 4.0
         tiled_width = tiled_size(width, multiple)
         tiled_height = tiled_size(height, multiple)
-        tiled_steps = int(async_task.steps * 0.6)
+        tiled_steps = int(steps * 0.6)
         return multiple, tiled_width, tiled_height, tiled_steps
 
 
@@ -1674,18 +1673,20 @@ def worker():
                         async_task.params_backend[f'enhance_uov_processing_order'] = async_task.enhance_uov_processing_order
                         if async_task.enhance_uov_processing_order == flags.enhancement_uov_after:
                             async_task.params_backend[f'enhance_uov_prompt_type'] = async_task.enhance_uov_prompt_type
+                        tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
+                        uov_method = async_task.enhance_uov_method
                         if async_task.enhance_input_image is not None:
                             H, W, C = async_task.enhance_input_image.shape
-                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, W, H)
+                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(W, H, async_task.steps, uov_method, tiled_block)
                         else:
-                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, width, height)
+                            match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(width, height, async_task.steps, uov_method, tiled_block)
                         if match_multiple>1.0:
                             async_task.params_backend['enhance_uov_multiple'] = match_multiple
+                            print(f'enhance_uov_method:{async_task.enhance_uov_method}')
                             if 'fast' not in async_task.enhance_uov_method.lower():
                                 async_task.params_backend['enhance_uov_tiled_width'] = tiled_width
                                 async_task.params_backend['enhance_uov_tiled_height'] = tiled_height
                                 async_task.params_backend['enhance_uov_tiled_steps'] = tiled_steps
-                                async_task.steps = tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
                     if len(async_task.enhance_ctrls) > 0:
                         k = 0
                         for i in range(len(async_task.enhance_ctrls)):
@@ -1766,7 +1767,8 @@ def worker():
                 if 'vary' in goals or 'upscale' in goals:
                     async_task.params_backend['i2i_function'] = 2 # iamge upscale and vary
                     input_images.set_image(f'i2i_uov_image', async_task.uov_input_image)
-                    match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(async_task, width, height)
+                    tiled_block = 1024 if (async_task.task_class == 'Comfy' and async_task.task_method == 'sd15_aio') else 2048
+                    match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(width, height, async_task.steps, async_task.uov_method, tiled_block)
                     if 'vary' in async_task.uov_method and 'subtle' in async_task.uov_method:
                         async_task.params_backend['i2i_uov_fn'] = 2
                     elif 'vary' in async_task.uov_method and 'strong' in async_task.uov_method:
@@ -1833,6 +1835,16 @@ def worker():
                     #all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             if 'display_steps' not in async_task.params_backend:
                 async_task.params_backend['display_steps'] = 30 if async_task.steps==-1 else async_task.steps
+            if async_task.enhance_checkbox:
+                display_steps = async_task.params_backend['display_steps'] #original_steps
+                if len(async_task.enhance_ctrls) > 0:
+                    display_steps += async_task.original_steps * len(async_task.enhance_ctrls)
+                if 'enhance_uov_tiled_steps' in async_task.params_backend:
+                    tiled_steps = async_task.params_backend['enhance_uov_tiled_steps']
+                    tiled_width = async_task.params_backend['enhance_uov_tiled_width']
+                    tiled_height = async_task.params_backend['enhance_uov_tiled_height']
+                    display_steps += tiled_steps * math.ceil(width/(tiled_width)) * math.ceil(height/(tiled_height))
+                async_task.params_backend['display_steps'] = display_steps
             all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             if 'refiner_step' in async_task.params_backend:
                 async_task.params_backend['refiner_step'] = int(async_task.steps * (1 - async_task.params_backend['refiner_step']))
