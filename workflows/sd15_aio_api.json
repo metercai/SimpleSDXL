@@ -320,16 +320,16 @@
       ],
       "denoise": 1,
       "model": [
-        "2696",
+        "3365",
         0
       ],
       "positive": [
-        "2648",
+        "3293",
         0
       ],
       "negative": [
-        "2955",
-        0
+        "3293",
+        1
       ],
       "latent_image": [
         "2851",
@@ -436,7 +436,7 @@
         0
       ],
       "on_true": [
-        "2696",
+        "3365",
         0
       ],
       "on_false": [
@@ -447,228 +447,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "939": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "940": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "941": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "964",
-        0
-      ],
-      "b": [
-        "939",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "946": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "964",
-        0
-      ],
-      "b": [
-        "940",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "947": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "964",
-        0
-      ],
-      "b": [
-        "951",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "948": {
-    "inputs": {
-      "boolean": [
-        "941",
-        0
-      ],
-      "on_true": [
-        "1872",
-        0
-      ],
-      "on_false": [
-        "1328",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "949": {
-    "inputs": {
-      "boolean": [
-        "946",
-        0
-      ],
-      "on_true": [
-        "2935",
-        0
-      ],
-      "on_false": [
-        "948",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "950": {
-    "inputs": {
-      "boolean": [
-        "947",
-        0
-      ],
-      "on_true": [
-        "2935",
-        0
-      ],
-      "on_false": [
-        "949",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "951": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "961": {
-    "inputs": {
-      "value": 4
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "964": {
-    "inputs": {
-      "value": [
-        "1324",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "965": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "964",
-        0
-      ],
-      "b": [
-        "961",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "968": {
-    "inputs": {
-      "boolean": [
-        "965",
-        0
-      ],
-      "on_true": [
-        "286",
-        0
-      ],
-      "on_false": [
-        "950",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "972": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "973": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "972",
-        0
-      ],
-      "b": [
-        "964",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
     }
   },
   "983": {
@@ -788,7 +566,7 @@
         0
       ],
       "on_false": [
-        "968",
+        "3376",
         0
       ]
     },
@@ -942,83 +720,6 @@
       "title": "i2i_ip_fn4_s"
     }
   },
-  "1100": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2582",
-        0
-      ],
-      "b": [
-        "1104",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1104": {
-    "inputs": {
-      "value": 4
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "1181": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2612",
-        0
-      ],
-      "b": [
-        "1104",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1219": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2625",
-        0
-      ],
-      "b": [
-        "1104",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "1288": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2599",
-        0
-      ],
-      "b": [
-        "1104",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
   "1311": {
     "inputs": {
       "boolean": [
@@ -1026,7 +727,7 @@
         0
       ],
       "on_true": [
-        "2648",
+        "3293",
         0
       ],
       "on_false": [
@@ -1064,7 +765,7 @@
         0
       ],
       "on_true": [
-        "2696",
+        "3365",
         0
       ],
       "on_false": [
@@ -1084,7 +785,7 @@
         0
       ],
       "on_true": [
-        "2648",
+        "3293",
         0
       ],
       "on_false": [
@@ -1104,26 +805,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_uov_fn"
-    }
-  },
-  "1328": {
-    "inputs": {
-      "boolean": [
-        "973",
-        0
-      ],
-      "on_true": [
-        "287",
-        0
-      ],
-      "on_false": [
-        "972",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "1330": {
@@ -1309,66 +990,6 @@
       "title": "Float"
     }
   },
-  "1741": {
-    "inputs": {
-      "boolean": [
-        "1100",
-        0
-      ],
-      "on_true": [
-        "2748",
-        0
-      ],
-      "on_false": [
-        "2678",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1743": {
-    "inputs": {
-      "boolean": [
-        "1288",
-        0
-      ],
-      "on_true": [
-        "2751",
-        0
-      ],
-      "on_false": [
-        "1741",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "1745": {
-    "inputs": {
-      "boolean": [
-        "1181",
-        0
-      ],
-      "on_true": [
-        "2752",
-        0
-      ],
-      "on_false": [
-        "1743",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "1811": {
     "inputs": {
       "boolean": [
@@ -1488,70 +1109,6 @@
       "title": "i2i_uov_multiple"
     }
   },
-  "1943": {
-    "inputs": {
-      "resolution": [
-        "2839",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "Zoe-DepthMapPreprocessor",
-    "_meta": {
-      "title": "Zoe Depth Map"
-    }
-  },
-  "1946": {
-    "inputs": {
-      "resolution": [
-        "2839",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "Zoe-DepthMapPreprocessor",
-    "_meta": {
-      "title": "Zoe Depth Map"
-    }
-  },
-  "1947": {
-    "inputs": {
-      "resolution": [
-        "2839",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "Zoe-DepthMapPreprocessor",
-    "_meta": {
-      "title": "Zoe Depth Map"
-    }
-  },
-  "1948": {
-    "inputs": {
-      "resolution": [
-        "2839",
-        0
-      ],
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "Zoe-DepthMapPreprocessor",
-    "_meta": {
-      "title": "Zoe Depth Map"
-    }
-  },
   "1989": {
     "inputs": {
       "expand": 5,
@@ -1572,26 +1129,6 @@
       "title": "Grow Mask With Blur"
     }
   },
-  "2037": {
-    "inputs": {
-      "boolean": [
-        "1219",
-        0
-      ],
-      "on_true": [
-        "2753",
-        0
-      ],
-      "on_false": [
-        "1745",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "2091": {
     "inputs": {
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
@@ -1604,320 +1141,6 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_4"
-    }
-  },
-  "2260": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2582",
-        0
-      ],
-      "b": [
-        "2261",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2261": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2262": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2582",
-        0
-      ],
-      "b": [
-        "2265",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2263": {
-    "inputs": {
-      "boolean": [
-        "2260",
-        0
-      ],
-      "on_true": [
-        "2761",
-        0
-      ],
-      "on_false": [
-        "2919",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2264": {
-    "inputs": {
-      "boolean": [
-        "2262",
-        0
-      ],
-      "on_true": [
-        "2263",
-        0
-      ],
-      "on_false": [
-        "2920",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2265": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2266": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2599",
-        0
-      ],
-      "b": [
-        "2261",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2267": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2599",
-        0
-      ],
-      "b": [
-        "2265",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2268": {
-    "inputs": {
-      "boolean": [
-        "2266",
-        0
-      ],
-      "on_true": [
-        "2642",
-        0
-      ],
-      "on_false": [
-        "2918",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2269": {
-    "inputs": {
-      "boolean": [
-        "2267",
-        0
-      ],
-      "on_true": [
-        "2268",
-        0
-      ],
-      "on_false": [
-        "2921",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2270": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2612",
-        0
-      ],
-      "b": [
-        "2261",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2271": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2612",
-        0
-      ],
-      "b": [
-        "2265",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2272": {
-    "inputs": {
-      "boolean": [
-        "2270",
-        0
-      ],
-      "on_true": [
-        "2644",
-        0
-      ],
-      "on_false": [
-        "2917",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2273": {
-    "inputs": {
-      "boolean": [
-        "2271",
-        0
-      ],
-      "on_true": [
-        "2272",
-        0
-      ],
-      "on_false": [
-        "2922",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2274": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2625",
-        0
-      ],
-      "b": [
-        "2261",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2275": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2625",
-        0
-      ],
-      "b": [
-        "2265",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2276": {
-    "inputs": {
-      "boolean": [
-        "2274",
-        0
-      ],
-      "on_true": [
-        "2646",
-        0
-      ],
-      "on_false": [
-        "2916",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2277": {
-    "inputs": {
-      "boolean": [
-        "2275",
-        0
-      ],
-      "on_true": [
-        "2276",
-        0
-      ],
-      "on_false": [
-        "2923",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "2290": {
@@ -2133,86 +1356,6 @@
       "title": "i2i_skip_preprocessors"
     }
   },
-  "2521": {
-    "inputs": {
-      "boolean": [
-        "2515",
-        0
-      ],
-      "on_true": [
-        "702",
-        0
-      ],
-      "on_false": [
-        "1943",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2522": {
-    "inputs": {
-      "boolean": [
-        "2515",
-        0
-      ],
-      "on_true": [
-        "703",
-        0
-      ],
-      "on_false": [
-        "1946",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2523": {
-    "inputs": {
-      "boolean": [
-        "2515",
-        0
-      ],
-      "on_true": [
-        "704",
-        0
-      ],
-      "on_false": [
-        "1947",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2524": {
-    "inputs": {
-      "boolean": [
-        "2515",
-        0
-      ],
-      "on_true": [
-        "705",
-        0
-      ],
-      "on_false": [
-        "1948",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "2542": {
     "inputs": {
       "image": [
@@ -2223,211 +1366,6 @@
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "2582": {
-    "inputs": {
-      "value": [
-        "706",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2599": {
-    "inputs": {
-      "value": [
-        "707",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2612": {
-    "inputs": {
-      "value": [
-        "708",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2625": {
-    "inputs": {
-      "value": [
-        "709",
-        0
-      ]
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2639": {
-    "inputs": {
-      "value": 5
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "2640": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2582",
-        0
-      ],
-      "b": [
-        "2639",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2642": {
-    "inputs": {
-      "boolean": [
-        "2640",
-        0
-      ],
-      "on_true": [
-        "2264",
-        0
-      ],
-      "on_false": [
-        "2912",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2643": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2599",
-        0
-      ],
-      "b": [
-        "2639",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2644": {
-    "inputs": {
-      "boolean": [
-        "2643",
-        0
-      ],
-      "on_true": [
-        "2269",
-        0
-      ],
-      "on_false": [
-        "2913",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2645": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2612",
-        0
-      ],
-      "b": [
-        "2639",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2646": {
-    "inputs": {
-      "boolean": [
-        "2645",
-        0
-      ],
-      "on_true": [
-        "2273",
-        0
-      ],
-      "on_false": [
-        "2914",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2647": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "2625",
-        0
-      ],
-      "b": [
-        "2639",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2648": {
-    "inputs": {
-      "boolean": [
-        "2647",
-        0
-      ],
-      "on_true": [
-        "2277",
-        0
-      ],
-      "on_false": [
-        "2915",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "2678": {
@@ -2442,163 +1380,6 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_5"
-    }
-  },
-  "2692": {
-    "inputs": {
-      "boolean": [
-        "2698",
-        0
-      ],
-      "on_true": [
-        "2756",
-        0
-      ],
-      "on_false": [
-        "2694",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2693": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2612",
-        0
-      ],
-      "b": [
-        "2700",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2694": {
-    "inputs": {
-      "boolean": [
-        "2699",
-        0
-      ],
-      "on_true": [
-        "2755",
-        0
-      ],
-      "on_false": [
-        "2037",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2695": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2625",
-        0
-      ],
-      "b": [
-        "2700",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2696": {
-    "inputs": {
-      "boolean": [
-        "2695",
-        0
-      ],
-      "on_true": [
-        "2758",
-        0
-      ],
-      "on_false": [
-        "2697",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2697": {
-    "inputs": {
-      "boolean": [
-        "2693",
-        0
-      ],
-      "on_true": [
-        "2757",
-        0
-      ],
-      "on_false": [
-        "2692",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2698": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2599",
-        0
-      ],
-      "b": [
-        "2700",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2699": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "2582",
-        0
-      ],
-      "b": [
-        "2700",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "2700": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
     }
   },
   "2745": {
@@ -2666,302 +1447,6 @@
       "title": "Pipe Out"
     }
   },
-  "2748": {
-    "inputs": {
-      "preset": "FACEID PLUS V2",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": 1,
-      "weight_faceidv2": [
-        "1079",
-        0
-      ],
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1082",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "2678",
-        0
-      ],
-      "image": [
-        "2929",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2751": {
-    "inputs": {
-      "preset": "FACEID PLUS V2",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": 1,
-      "weight_faceidv2": [
-        "1075",
-        0
-      ],
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1083",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "1741",
-        0
-      ],
-      "image": [
-        "2930",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2752": {
-    "inputs": {
-      "preset": "FACEID PLUS V2",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": 1,
-      "weight_faceidv2": [
-        "1080",
-        0
-      ],
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1084",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "1743",
-        0
-      ],
-      "image": [
-        "2931",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2753": {
-    "inputs": {
-      "preset": "FACEID PLUS V2",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": 1,
-      "weight_faceidv2": [
-        "1081",
-        0
-      ],
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1085",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "1745",
-        0
-      ],
-      "image": [
-        "2932",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2755": {
-    "inputs": {
-      "preset": "STANDARD (medium strength)",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": [
-        "1079",
-        0
-      ],
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1082",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "2037",
-        0
-      ],
-      "image": [
-        "2925",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2756": {
-    "inputs": {
-      "preset": "STANDARD (medium strength)",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": [
-        "1075",
-        0
-      ],
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1083",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "2694",
-        0
-      ],
-      "image": [
-        "2926",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2757": {
-    "inputs": {
-      "preset": "STANDARD (medium strength)",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": [
-        "1080",
-        0
-      ],
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1084",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "2692",
-        0
-      ],
-      "image": [
-        "2927",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
-  "2758": {
-    "inputs": {
-      "preset": "STANDARD (medium strength)",
-      "lora_strength": 0.6,
-      "provider": "CPU",
-      "weight": [
-        "1081",
-        0
-      ],
-      "weight_faceidv2": 1,
-      "weight_type": "linear",
-      "combine_embeds": "concat",
-      "start_at": 0,
-      "end_at": [
-        "1085",
-        0
-      ],
-      "embeds_scaling": "V only",
-      "cache_mode": "all",
-      "use_tiled": false,
-      "use_batch": false,
-      "sharpening": 0,
-      "layer_weights": "",
-      "model": [
-        "2697",
-        0
-      ],
-      "image": [
-        "2928",
-        0
-      ]
-    },
-    "class_type": "easy ipadapterApplyADV",
-    "_meta": {
-      "title": "Easy Apply IPAdapter (Advanced)"
-    }
-  },
   "2759": {
     "inputs": {
       "ckpt_name": "realisticVisionV60B1_v51VAE.safetensors"
@@ -3001,33 +1486,6 @@
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "2764": {
-    "inputs": {
-      "control_net_name": "control_v11f1p_sd15_depth_fp16.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "2765": {
-    "inputs": {
-      "control_net_name": "control_v11p_sd15_canny_fp16.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "2766": {
-    "inputs": {
-      "control_net_name": "control_v11p_sd15_openpose_fp16.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
     }
   },
   "2767": {
@@ -3490,198 +1948,6 @@
       "title": "If else"
     }
   },
-  "2841": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2844": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2845": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2846": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2847": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2521",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2848": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2522",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2849": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2523",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "2850": {
-    "inputs": {
-      "width": [
-        "2899",
-        0
-      ],
-      "height": [
-        "2902",
-        0
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "2524",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "2851": {
     "inputs": {
       "upscale_method": "bicubic",
@@ -4056,12 +2322,12 @@
       "start_percent": 0,
       "end_percent": 1,
       "positive": [
-        "2648",
+        "3293",
         0
       ],
       "negative": [
-        "2955",
-        0
+        "3293",
+        1
       ],
       "control_net": [
         "2898",
@@ -4206,570 +2472,6 @@
       "title": "Load ControlNet Model"
     }
   },
-  "2912": {
-    "inputs": {
-      "strength": [
-        "1079",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1082",
-        0
-      ],
-      "positive": [
-        "2761",
-        0
-      ],
-      "negative": [
-        "2763",
-        0
-      ],
-      "control_net": [
-        "2766",
-        0
-      ],
-      "image": [
-        "2841",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2913": {
-    "inputs": {
-      "strength": [
-        "1075",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1083",
-        0
-      ],
-      "positive": [
-        "2642",
-        0
-      ],
-      "negative": [
-        "2947",
-        0
-      ],
-      "control_net": [
-        "2766",
-        0
-      ],
-      "image": [
-        "2844",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2914": {
-    "inputs": {
-      "strength": [
-        "1080",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1084",
-        0
-      ],
-      "positive": [
-        "2644",
-        0
-      ],
-      "negative": [
-        "2950",
-        0
-      ],
-      "control_net": [
-        "2766",
-        0
-      ],
-      "image": [
-        "2845",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2915": {
-    "inputs": {
-      "strength": [
-        "1081",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1085",
-        0
-      ],
-      "positive": [
-        "2646",
-        0
-      ],
-      "negative": [
-        "2953",
-        0
-      ],
-      "control_net": [
-        "2766",
-        0
-      ],
-      "image": [
-        "2846",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2916": {
-    "inputs": {
-      "strength": [
-        "1081",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1085",
-        0
-      ],
-      "positive": [
-        "2646",
-        0
-      ],
-      "negative": [
-        "2953",
-        0
-      ],
-      "control_net": [
-        "2765",
-        0
-      ],
-      "image": [
-        "2979",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2917": {
-    "inputs": {
-      "strength": [
-        "1080",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1084",
-        0
-      ],
-      "positive": [
-        "2644",
-        0
-      ],
-      "negative": [
-        "2950",
-        0
-      ],
-      "control_net": [
-        "2765",
-        0
-      ],
-      "image": [
-        "2978",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2918": {
-    "inputs": {
-      "strength": [
-        "1075",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1083",
-        0
-      ],
-      "positive": [
-        "2642",
-        0
-      ],
-      "negative": [
-        "2947",
-        0
-      ],
-      "control_net": [
-        "2765",
-        0
-      ],
-      "image": [
-        "2977",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2919": {
-    "inputs": {
-      "strength": [
-        "1079",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1082",
-        0
-      ],
-      "positive": [
-        "2761",
-        0
-      ],
-      "negative": [
-        "2763",
-        0
-      ],
-      "control_net": [
-        "2765",
-        0
-      ],
-      "image": [
-        "2976",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2920": {
-    "inputs": {
-      "strength": [
-        "1079",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1082",
-        0
-      ],
-      "positive": [
-        "2761",
-        0
-      ],
-      "negative": [
-        "2763",
-        0
-      ],
-      "control_net": [
-        "2764",
-        0
-      ],
-      "image": [
-        "2847",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2921": {
-    "inputs": {
-      "strength": [
-        "1075",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1083",
-        0
-      ],
-      "positive": [
-        "2642",
-        0
-      ],
-      "negative": [
-        "2947",
-        0
-      ],
-      "control_net": [
-        "2764",
-        0
-      ],
-      "image": [
-        "2848",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2922": {
-    "inputs": {
-      "strength": [
-        "1080",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1084",
-        0
-      ],
-      "positive": [
-        "2644",
-        0
-      ],
-      "negative": [
-        "2950",
-        0
-      ],
-      "control_net": [
-        "2764",
-        0
-      ],
-      "image": [
-        "2849",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2923": {
-    "inputs": {
-      "strength": [
-        "1081",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "1085",
-        0
-      ],
-      "positive": [
-        "2646",
-        0
-      ],
-      "negative": [
-        "2953",
-        0
-      ],
-      "control_net": [
-        "2764",
-        0
-      ],
-      "image": [
-        "2850",
-        0
-      ],
-      "vae": [
-        "2972",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplyAdvanced",
-    "_meta": {
-      "title": "Apply ControlNet"
-    }
-  },
-  "2925": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "center",
-      "sharpening": 0,
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2926": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "center",
-      "sharpening": 0,
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2927": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "center",
-      "sharpening": 0,
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2928": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "center",
-      "sharpening": 0,
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2929": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "pad",
-      "sharpening": 0,
-      "image": [
-        "702",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2930": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "pad",
-      "sharpening": 0,
-      "image": [
-        "703",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2931": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "pad",
-      "sharpening": 0,
-      "image": [
-        "704",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
-  "2932": {
-    "inputs": {
-      "interpolation": "LANCZOS",
-      "crop_position": "pad",
-      "sharpening": 0,
-      "image": [
-        "705",
-        0
-      ]
-    },
-    "class_type": "PrepImageForClipVision",
-    "_meta": {
-      "title": "Prep Image For ClipVision"
-    }
-  },
   "2933": {
     "inputs": {
       "width": [
@@ -4832,246 +2534,6 @@
       "title": "Upscale Latent By"
     }
   },
-  "2946": {
-    "inputs": {
-      "boolean": [
-        "2262",
-        0
-      ],
-      "on_true": [
-        "2948",
-        0
-      ],
-      "on_false": [
-        "2920",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2947": {
-    "inputs": {
-      "boolean": [
-        "2640",
-        0
-      ],
-      "on_true": [
-        "2946",
-        0
-      ],
-      "on_false": [
-        "2912",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2948": {
-    "inputs": {
-      "boolean": [
-        "2260",
-        0
-      ],
-      "on_true": [
-        "2763",
-        0
-      ],
-      "on_false": [
-        "2919",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2949": {
-    "inputs": {
-      "boolean": [
-        "2266",
-        0
-      ],
-      "on_true": [
-        "2947",
-        0
-      ],
-      "on_false": [
-        "2918",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2950": {
-    "inputs": {
-      "boolean": [
-        "2643",
-        0
-      ],
-      "on_true": [
-        "2951",
-        0
-      ],
-      "on_false": [
-        "2913",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2951": {
-    "inputs": {
-      "boolean": [
-        "2267",
-        0
-      ],
-      "on_true": [
-        "2949",
-        0
-      ],
-      "on_false": [
-        "2921",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2952": {
-    "inputs": {
-      "boolean": [
-        "2270",
-        0
-      ],
-      "on_true": [
-        "2950",
-        0
-      ],
-      "on_false": [
-        "2917",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2953": {
-    "inputs": {
-      "boolean": [
-        "2645",
-        0
-      ],
-      "on_true": [
-        "2954",
-        0
-      ],
-      "on_false": [
-        "2914",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2954": {
-    "inputs": {
-      "boolean": [
-        "2271",
-        0
-      ],
-      "on_true": [
-        "2952",
-        0
-      ],
-      "on_false": [
-        "2922",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2955": {
-    "inputs": {
-      "boolean": [
-        "2647",
-        0
-      ],
-      "on_true": [
-        "2957",
-        0
-      ],
-      "on_false": [
-        "2915",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2956": {
-    "inputs": {
-      "boolean": [
-        "2274",
-        0
-      ],
-      "on_true": [
-        "2953",
-        0
-      ],
-      "on_false": [
-        "2916",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "2957": {
-    "inputs": {
-      "boolean": [
-        "2275",
-        0
-      ],
-      "on_true": [
-        "2956",
-        0
-      ],
-      "on_false": [
-        "2923",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "2960": {
     "inputs": {
       "boolean": [
@@ -5079,8 +2541,8 @@
         0
       ],
       "on_true": [
-        "2955",
-        0
+        "3293",
+        1
       ],
       "on_false": [
         "2763",
@@ -5099,8 +2561,8 @@
         0
       ],
       "on_true": [
-        "2955",
-        0
+        "3293",
+        1
       ],
       "on_false": [
         "2763",
@@ -5181,78 +2643,6 @@
     "class_type": "VAELoader",
     "_meta": {
       "title": "vae_model"
-    }
-  },
-  "2976": {
-    "inputs": {
-      "channel": "RGB",
-      "black_point": 128,
-      "white_point": 200,
-      "gray_point": 1,
-      "output_black_point": 0,
-      "output_white_point": 255,
-      "image": [
-        "2841",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Levels",
-    "_meta": {
-      "title": "LayerColor: Levels"
-    }
-  },
-  "2977": {
-    "inputs": {
-      "channel": "RGB",
-      "black_point": 128,
-      "white_point": 200,
-      "gray_point": 1,
-      "output_black_point": 0,
-      "output_white_point": 255,
-      "image": [
-        "2844",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Levels",
-    "_meta": {
-      "title": "LayerColor: Levels"
-    }
-  },
-  "2978": {
-    "inputs": {
-      "channel": "RGB",
-      "black_point": 128,
-      "white_point": 200,
-      "gray_point": 1,
-      "output_black_point": 0,
-      "output_white_point": 255,
-      "image": [
-        "2845",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Levels",
-    "_meta": {
-      "title": "LayerColor: Levels"
-    }
-  },
-  "2979": {
-    "inputs": {
-      "channel": "RGB",
-      "black_point": 128,
-      "white_point": 200,
-      "gray_point": 1,
-      "output_black_point": 0,
-      "output_white_point": 255,
-      "image": [
-        "2846",
-        0
-      ]
-    },
-    "class_type": "LayerColor: Levels",
-    "_meta": {
-      "title": "LayerColor: Levels"
     }
   },
   "2981": {
@@ -5339,7 +2729,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 3,
       "model": [
-        "2696",
+        "3365",
         0
       ]
     },
@@ -5743,7 +3133,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 1,
       "model": [
-        "2696",
+        "3365",
         0
       ]
     },
@@ -6994,7 +4384,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 3,
       "model": [
-        "2696",
+        "3365",
         0
       ]
     },
@@ -7756,7 +5146,7 @@
   },
   "3176": {
     "inputs": {
-      "mask_dino_prompt_text": "hand",
+      "mask_dino_prompt_text": "none",
       "prompt": "none",
       "negative_prompt": "none",
       "mask_model": "sam",
@@ -8325,9 +5715,9 @@
   },
   "3212": {
     "inputs": {
-      "uov_method": "vary (subtle)",
+      "uov_method": "disabled",
       "uov_denoise": 0.5000000000000001,
-      "uov_processing_order": "Before First Enhancemen",
+      "uov_processing_order": "Before First Enhancement",
       "uov_prompt_type": "Original Prompts",
       "uov_multiple": 1.5,
       "uov_tiled_width": 1024,
@@ -8341,7 +5731,7 @@
   },
   "3213": {
     "inputs": {
-      "value": "Before First Enhancemen"
+      "value": "Before First Enhancement"
     },
     "class_type": "easy string",
     "_meta": {
@@ -8525,7 +5915,7 @@
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "2696",
+        "3365",
         0
       ]
     },
@@ -8824,7 +6214,7 @@
   },
   "3247": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "3009",
         5
@@ -8837,7 +6227,7 @@
   },
   "3249": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "3009",
         5
@@ -8850,7 +6240,7 @@
   },
   "3251": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "3009",
         5
@@ -8929,6 +6319,1000 @@
     "class_type": "easy imagePixelPerfect",
     "_meta": {
       "title": "ImagePixelPerfect"
+    }
+  },
+  "3272": {
+    "inputs": {
+      "resolution": [
+        "2839",
+        0
+      ],
+      "image": [
+        "3297",
+        0
+      ]
+    },
+    "class_type": "Zoe-DepthMapPreprocessor",
+    "_meta": {
+      "title": "Zoe Depth Map"
+    }
+  },
+  "3273": {
+    "inputs": {
+      "boolean": [
+        "2515",
+        0
+      ],
+      "on_true": [
+        "3297",
+        0
+      ],
+      "on_false": [
+        "3272",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3274": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "3275": {
+    "inputs": {
+      "value": 5
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "3277": {
+    "inputs": {
+      "index": [
+        "3299",
+        1
+      ],
+      "value0": [
+        "3274",
+        0
+      ],
+      "value1": [
+        "3278",
+        0
+      ],
+      "value2": [
+        "3275",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "CN类型"
+    }
+  },
+  "3278": {
+    "inputs": {
+      "value": 3
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "3279": {
+    "inputs": {
+      "channel": "RGB",
+      "black_point": 128,
+      "white_point": 200,
+      "gray_point": 1,
+      "output_black_point": 0,
+      "output_white_point": 255,
+      "image": [
+        "3297",
+        0
+      ]
+    },
+    "class_type": "LayerColor: Levels",
+    "_meta": {
+      "title": "LayerColor: Levels"
+    }
+  },
+  "3280": {
+    "inputs": {
+      "index": [
+        "3299",
+        1
+      ],
+      "value0": [
+        "3279",
+        0
+      ],
+      "value1": [
+        "3273",
+        0
+      ],
+      "value2": [
+        "3297",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像处理"
+    }
+  },
+  "3289": {
+    "inputs": {
+      "boolean": [
+        "3290",
+        0
+      ],
+      "on_true": [
+        "3300",
+        0
+      ],
+      "on_false": [
+        "3302",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3290": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "3296",
+        0
+      ],
+      "b": [
+        "3277",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "3291": {
+    "inputs": {
+      "flow": [
+        "3302",
+        0
+      ],
+      "initial_value1": [
+        "3289",
+        0
+      ],
+      "initial_value2": [
+        "3301",
+        0
+      ]
+    },
+    "class_type": "easy forLoopEnd",
+    "_meta": {
+      "title": "For Loop End"
+    }
+  },
+  "3292": {
+    "inputs": {
+      "index": [
+        "3302",
+        1
+      ],
+      "value0": [
+        "1079",
+        0
+      ],
+      "value1": [
+        "1075",
+        0
+      ],
+      "value2": [
+        "1080",
+        0
+      ],
+      "value3": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像权重"
+    }
+  },
+  "3293": {
+    "inputs": {
+      "flow": [
+        "3299",
+        0
+      ],
+      "initial_value1": [
+        "3291",
+        0
+      ],
+      "initial_value2": [
+        "3291",
+        1
+      ]
+    },
+    "class_type": "easy forLoopEnd",
+    "_meta": {
+      "title": "For Loop End"
+    }
+  },
+  "3294": {
+    "inputs": {
+      "width": [
+        "2899",
+        0
+      ],
+      "height": [
+        "2902",
+        0
+      ],
+      "interpolation": "lanczos",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "3280",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "3296": {
+    "inputs": {
+      "index": [
+        "3302",
+        1
+      ],
+      "value0": [
+        "706",
+        0
+      ],
+      "value1": [
+        "707",
+        0
+      ],
+      "value2": [
+        "708",
+        0
+      ],
+      "value3": [
+        "709",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像功能"
+    }
+  },
+  "3297": {
+    "inputs": {
+      "index": [
+        "3302",
+        1
+      ],
+      "value0": [
+        "702",
+        0
+      ],
+      "value1": [
+        "703",
+        0
+      ],
+      "value2": [
+        "704",
+        0
+      ],
+      "value3": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像"
+    }
+  },
+  "3298": {
+    "inputs": {
+      "index": [
+        "3302",
+        1
+      ],
+      "value0": [
+        "1082",
+        0
+      ],
+      "value1": [
+        "1083",
+        0
+      ],
+      "value2": [
+        "1084",
+        0
+      ],
+      "value3": [
+        "1085",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像停止"
+    }
+  },
+  "3299": {
+    "inputs": {
+      "total": 3,
+      "initial_value1": [
+        "2761",
+        0
+      ],
+      "initial_value2": [
+        "2763",
+        0
+      ]
+    },
+    "class_type": "easy forLoopStart",
+    "_meta": {
+      "title": "For Loop Start"
+    }
+  },
+  "3300": {
+    "inputs": {
+      "strength": [
+        "3292",
+        0
+      ],
+      "start_percent": 0,
+      "end_percent": [
+        "3298",
+        0
+      ],
+      "positive": [
+        "3302",
+        2
+      ],
+      "negative": [
+        "3302",
+        3
+      ],
+      "control_net": [
+        "3303",
+        0
+      ],
+      "vae": [
+        "2972",
+        0
+      ],
+      "image": [
+        "3294",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "Apply Controlnet with VAE"
+    }
+  },
+  "3301": {
+    "inputs": {
+      "boolean": [
+        "3290",
+        0
+      ],
+      "on_true": [
+        "3300",
+        1
+      ],
+      "on_false": [
+        "3302",
+        3
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3302": {
+    "inputs": {
+      "total": 4,
+      "initial_value1": [
+        "3299",
+        2
+      ],
+      "initial_value2": [
+        "3299",
+        3
+      ]
+    },
+    "class_type": "easy forLoopStart",
+    "_meta": {
+      "title": "For Loop Start"
+    }
+  },
+  "3303": {
+    "inputs": {
+      "index": [
+        "3299",
+        1
+      ],
+      "value0": [
+        "3313",
+        0
+      ],
+      "value1": [
+        "3312",
+        0
+      ],
+      "value2": [
+        "3314",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "CN加载"
+    }
+  },
+  "3312": {
+    "inputs": {
+      "control_net_name": "control_v11f1p_sd15_depth_fp16.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "3313": {
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_canny_fp16.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "3314": {
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_openpose_fp16.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "3322": {
+    "inputs": {
+      "index": [
+        "3361",
+        1
+      ],
+      "value0": [
+        "706",
+        0
+      ],
+      "value1": [
+        "707",
+        0
+      ],
+      "value2": [
+        "708",
+        0
+      ],
+      "value3": [
+        "709",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像功能"
+    }
+  },
+  "3324": {
+    "inputs": {
+      "index": [
+        "3361",
+        1
+      ],
+      "value0": [
+        "1079",
+        0
+      ],
+      "value1": [
+        "1075",
+        0
+      ],
+      "value2": [
+        "1080",
+        0
+      ],
+      "value3": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像权重"
+    }
+  },
+  "3334": {
+    "inputs": {
+      "index": [
+        "3361",
+        1
+      ],
+      "value0": [
+        "1082",
+        0
+      ],
+      "value1": [
+        "1083",
+        0
+      ],
+      "value2": [
+        "1084",
+        0
+      ],
+      "value3": [
+        "1085",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像停止"
+    }
+  },
+  "3335": {
+    "inputs": {
+      "boolean": [
+        "3362",
+        0
+      ],
+      "on_true": [
+        "3374",
+        0
+      ],
+      "on_false": [
+        "3361",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3336": {
+    "inputs": {
+      "index": [
+        "3361",
+        1
+      ],
+      "value0": [
+        "702",
+        0
+      ],
+      "value1": [
+        "703",
+        0
+      ],
+      "value2": [
+        "704",
+        0
+      ],
+      "value3": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像"
+    }
+  },
+  "3337": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "center",
+      "sharpening": 0,
+      "image": [
+        "3336",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "3354": {
+    "inputs": {
+      "flow": [
+        "3361",
+        0
+      ],
+      "initial_value1": [
+        "3335",
+        0
+      ]
+    },
+    "class_type": "easy forLoopEnd",
+    "_meta": {
+      "title": "For Loop End"
+    }
+  },
+  "3355": {
+    "inputs": {
+      "index": [
+        "3367",
+        1
+      ],
+      "value0": [
+        "1082",
+        0
+      ],
+      "value1": [
+        "1083",
+        0
+      ],
+      "value2": [
+        "1084",
+        0
+      ],
+      "value3": [
+        "1085",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像停止"
+    }
+  },
+  "3356": {
+    "inputs": {
+      "index": [
+        "3367",
+        1
+      ],
+      "value0": [
+        "706",
+        0
+      ],
+      "value1": [
+        "707",
+        0
+      ],
+      "value2": [
+        "708",
+        0
+      ],
+      "value3": [
+        "709",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像功能"
+    }
+  },
+  "3361": {
+    "inputs": {
+      "total": 4,
+      "initial_value1": [
+        "2678",
+        0
+      ]
+    },
+    "class_type": "easy forLoopStart",
+    "_meta": {
+      "title": "For Loop Start"
+    }
+  },
+  "3362": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "3322",
+        0
+      ],
+      "b": [
+        "3363",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "3363": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "3365": {
+    "inputs": {
+      "flow": [
+        "3367",
+        0
+      ],
+      "initial_value1": [
+        "3373",
+        0
+      ]
+    },
+    "class_type": "easy forLoopEnd",
+    "_meta": {
+      "title": "For Loop End"
+    }
+  },
+  "3366": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "3367": {
+    "inputs": {
+      "total": 4,
+      "initial_value1": [
+        "3354",
+        0
+      ]
+    },
+    "class_type": "easy forLoopStart",
+    "_meta": {
+      "title": "For Loop Start"
+    }
+  },
+  "3368": {
+    "inputs": {
+      "interpolation": "LANCZOS",
+      "crop_position": "center",
+      "sharpening": 0,
+      "image": [
+        "3369",
+        0
+      ]
+    },
+    "class_type": "PrepImageForClipVision",
+    "_meta": {
+      "title": "Prep Image For ClipVision"
+    }
+  },
+  "3369": {
+    "inputs": {
+      "index": [
+        "3367",
+        1
+      ],
+      "value0": [
+        "702",
+        0
+      ],
+      "value1": [
+        "703",
+        0
+      ],
+      "value2": [
+        "704",
+        0
+      ],
+      "value3": [
+        "705",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像"
+    }
+  },
+  "3370": {
+    "inputs": {
+      "index": [
+        "3367",
+        1
+      ],
+      "value0": [
+        "1079",
+        0
+      ],
+      "value1": [
+        "1075",
+        0
+      ],
+      "value2": [
+        "1080",
+        0
+      ],
+      "value3": [
+        "1081",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "图像权重"
+    }
+  },
+  "3372": {
+    "inputs": {
+      "comparison": "a == b",
+      "a": [
+        "3356",
+        0
+      ],
+      "b": [
+        "3366",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "3373": {
+    "inputs": {
+      "boolean": [
+        "3372",
+        0
+      ],
+      "on_true": [
+        "3375",
+        0
+      ],
+      "on_false": [
+        "3367",
+        2
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "3374": {
+    "inputs": {
+      "preset": "STANDARD (medium strength)",
+      "lora_strength": 0.6,
+      "provider": "CPU",
+      "weight": [
+        "3324",
+        0
+      ],
+      "weight_faceidv2": 1,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": [
+        "3334",
+        0
+      ],
+      "embeds_scaling": "V only",
+      "cache_mode": "all",
+      "use_tiled": false,
+      "use_batch": false,
+      "sharpening": 0,
+      "layer_weights": "",
+      "model": [
+        "3361",
+        2
+      ],
+      "image": [
+        "3337",
+        0
+      ]
+    },
+    "class_type": "easy ipadapterApplyADV",
+    "_meta": {
+      "title": "Easy Apply IPAdapter (Advanced)"
+    }
+  },
+  "3375": {
+    "inputs": {
+      "preset": "FACEID PLUS V2",
+      "lora_strength": 0.6,
+      "provider": "CPU",
+      "weight": 1,
+      "weight_faceidv2": [
+        "3370",
+        0
+      ],
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": [
+        "3355",
+        0
+      ],
+      "embeds_scaling": "V only",
+      "cache_mode": "all",
+      "use_tiled": false,
+      "use_batch": false,
+      "sharpening": 0,
+      "layer_weights": "",
+      "model": [
+        "3367",
+        2
+      ],
+      "image": [
+        "3368",
+        0
+      ]
+    },
+    "class_type": "easy ipadapterApplyADV",
+    "_meta": {
+      "title": "Easy Apply IPAdapter (Advanced)"
+    }
+  },
+  "3376": {
+    "inputs": {
+      "index": [
+        "1324",
+        0
+      ],
+      "value0": [
+        "287",
+        0
+      ],
+      "value1": [
+        "1872",
+        0
+      ],
+      "value2": [
+        "2935",
+        0
+      ],
+      "value3": [
+        "2935",
+        0
+      ],
+      "value4": [
+        "286",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "Any Index Switch"
     }
   }
 }
