@@ -1639,7 +1639,7 @@
         0
       ],
       "on_true": [
-        "273",
+        "269",
         0
       ],
       "on_false": [
@@ -1654,7 +1654,7 @@
   },
   "269": {
     "inputs": {
-      "grow_mask_by": 0,
+      "grow_mask_by": 6,
       "pixels": [
         "101",
         0
@@ -1695,7 +1695,7 @@
   },
   "272": {
     "inputs": {
-      "grow_mask_by": 0,
+      "grow_mask_by": 6,
       "pixels": [
         "101",
         0
@@ -1712,26 +1712,6 @@
     "class_type": "VAEEncodeForInpaint",
     "_meta": {
       "title": "VAE Encode (for Inpainting)"
-    }
-  },
-  "273": {
-    "inputs": {
-      "boolean": [
-        "467",
-        11
-      ],
-      "on_true": [
-        "269",
-        0
-      ],
-      "on_false": [
-        "289",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "276": {
@@ -1915,7 +1895,7 @@
         0
       ],
       "mask_blur": 64,
-      "tile_padding": 96,
+      "tile_padding": 192,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -1960,22 +1940,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_uov_tiled_height"
-    }
-  },
-  "289": {
-    "inputs": {
-      "pixels": [
-        "238",
-        0
-      ],
-      "vae": [
-        "204",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
     }
   },
   "290": {
@@ -2235,7 +2199,7 @@
   },
   "307": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
+      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -2761,7 +2725,7 @@
   },
   "354": {
     "inputs": {
-      "image_crop_multi": 1.1000000000000003,
+      "image_crop_multi": 1.2000000000000002,
       "mask_crop_multi": 1,
       "bbox_smooth_alpha": 1,
       "image": [
@@ -4061,11 +4025,11 @@
         0
       ],
       "value4": [
-        "460",
+        "630",
         0
       ],
       "value5": [
-        "460",
+        "630",
         0
       ]
     },
@@ -4491,7 +4455,7 @@
         6
       ],
       "mask_blur": 32,
-      "tile_padding": 64,
+      "tile_padding": 192,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -4709,11 +4673,11 @@
         0
       ],
       "value4": [
-        "518",
+        "631",
         0
       ],
       "value5": [
-        "518",
+        "631",
         0
       ]
     },
@@ -5286,9 +5250,9 @@
   "510": {
     "inputs": {
       "upscale_method": "lanczos",
-      "megapixels": 1.0000000000000002,
+      "megapixels": 1.6400000000000003,
       "image": [
-        "509",
+        "628",
         0
       ]
     },
@@ -5468,7 +5432,7 @@
         6
       ],
       "mask_blur": 32,
-      "tile_padding": 64,
+      "tile_padding": 192,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -6525,6 +6489,65 @@
     "class_type": "easy anythingIndexSwitch",
     "_meta": {
       "title": "Any Index Switch"
+    }
+  },
+  "628": {
+    "inputs": {
+      "upscale_model": [
+        "629",
+        0
+      ],
+      "image": [
+        "509",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "629": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "630": {
+    "inputs": {
+      "opacity": 75,
+      "image": [
+        "460",
+        0
+      ],
+      "color_ref_image": [
+        "527",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
+    }
+  },
+  "631": {
+    "inputs": {
+      "opacity": 75,
+      "image": [
+        "518",
+        0
+      ],
+      "color_ref_image": [
+        "529",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
     }
   }
 }
