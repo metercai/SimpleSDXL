@@ -43,7 +43,7 @@
     "default_styles": [
         "Illustrious"
     ],
-    "default_aspect_ratio": "768*1344",
+    "default_aspect_ratio": "832*1216",
     "default_overwrite_step": 30,
     "embeddings_downloads": {},
     "lora_downloads": {},
