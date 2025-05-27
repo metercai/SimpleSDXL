@@ -877,6 +877,7 @@ def worker():
     def apply_overrides(async_task, steps, height, width):
         if async_task.overwrite_step > 0:
             steps = async_task.overwrite_step
+            async_task.original_steps = async_task.overwrite_step
         switch = int(round(async_task.steps * async_task.refiner_switch))
         if async_task.overwrite_switch > 0:
             switch = async_task.overwrite_switch
@@ -1327,7 +1328,6 @@ def worker():
         return current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result
 
     def uov_tiled_size(width, height, steps, uov_method, tiled_block=2048):
-        print(f'uov_tiled_size, width={width}, height={height}')
         tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
         match_value = re.search(r'\((?:fast )?([\d.]+)x\)', uov_method)
         multiple = 1.0 if not match_value else float(match_value.group(1))
