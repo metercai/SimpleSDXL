@@ -1590,7 +1590,7 @@
   },
   "274": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -2437,9 +2437,9 @@
   "344": {
     "inputs": {
       "upscale_method": "lanczos",
-      "megapixels": 1.0000000000000002,
+      "megapixels": 1.6400000000000003,
       "image": [
-        "349",
+        "760",
         0
       ]
     },
@@ -3610,7 +3610,7 @@
   },
   "425": {
     "inputs": {
-      "image_crop_multi": 1.1000000000000003,
+      "image_crop_multi": 1.2000000000000002,
       "mask_crop_multi": 1,
       "bbox_smooth_alpha": 1,
       "image": [
@@ -4738,15 +4738,6 @@
       "title": "Int"
     }
   },
-  "551": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "552": {
     "inputs": {
       "value": 3
@@ -5276,7 +5267,7 @@
         0
       ],
       "mask_blur": 32,
-      "tile_padding": 32,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -6382,7 +6373,7 @@
         6
       ],
       "mask_blur": 32,
-      "tile_padding": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -6474,7 +6465,7 @@
         6
       ],
       "mask_blur": 32,
-      "tile_padding": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -7254,6 +7245,31 @@
     "class_type": "easy string",
     "_meta": {
       "title": "String"
+    }
+  },
+  "760": {
+    "inputs": {
+      "upscale_model": [
+        "761",
+        0
+      ],
+      "image": [
+        "349",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "761": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
     }
   }
 }

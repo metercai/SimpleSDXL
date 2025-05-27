@@ -2162,10 +2162,10 @@
         0
       ],
       "mask_blur": 64,
-      "tile_padding": 96,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
-      "seam_fix_width": 64,
+      "seam_fix_width": 128,
       "seam_fix_mask_blur": 8,
       "seam_fix_padding": 16,
       "force_uniform_tiles": true,
@@ -2305,7 +2305,7 @@
   },
   "514": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -2812,9 +2812,9 @@
   "557": {
     "inputs": {
       "upscale_method": "lanczos",
-      "megapixels": 1.0000000000000002,
+      "megapixels": 1.6400000000000003,
       "image": [
-        "562",
+        "837",
         0
       ]
     },
@@ -2851,7 +2851,7 @@
   },
   "559": {
     "inputs": {
-      "image_crop_multi": 1.1000000000000003,
+      "image_crop_multi": 1.2000000000000002,
       "mask_crop_multi": 1,
       "bbox_smooth_alpha": 1,
       "image": [
@@ -4125,11 +4125,11 @@
         0
       ],
       "value4": [
-        "677",
+        "839",
         0
       ],
       "value5": [
-        "677",
+        "839",
         0
       ]
     },
@@ -4506,11 +4506,11 @@
         0
       ],
       "value4": [
-        "704",
+        "840",
         0
       ],
       "value5": [
-        "704",
+        "840",
         0
       ]
     },
@@ -4777,8 +4777,8 @@
         "697",
         6
       ],
-      "mask_blur": 32,
-      "tile_padding": 64,
+      "mask_blur": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -5287,8 +5287,8 @@
         "697",
         6
       ],
-      "mask_blur": 32,
-      "tile_padding": 64,
+      "mask_blur": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -5329,7 +5329,10 @@
   "707": {
     "inputs": {
       "preprocessor": "TTPlanet_TileSimple_Preprocessor",
-      "resolution": 512,
+      "resolution": [
+        "836",
+        0
+      ],
       "image": [
         "703",
         0
@@ -6364,7 +6367,7 @@
         0
       ],
       "value4": [
-        "495",
+        "841",
         0
       ]
     },
@@ -6403,6 +6406,95 @@
     "class_type": "MZ_KolorsControlNetPatch",
     "_meta": {
       "title": "MinusZone - KolorsControlNetPatch"
+    }
+  },
+  "836": {
+    "inputs": {
+      "resize_mode": "Just Resize",
+      "image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "easy imagePixelPerfect",
+    "_meta": {
+      "title": "ImagePixelPerfect"
+    }
+  },
+  "837": {
+    "inputs": {
+      "upscale_model": [
+        "838",
+        0
+      ],
+      "image": [
+        "562",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "838": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "839": {
+    "inputs": {
+      "opacity": 75,
+      "image": [
+        "677",
+        0
+      ],
+      "color_ref_image": [
+        "648",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
+    }
+  },
+  "840": {
+    "inputs": {
+      "opacity": 75,
+      "image": [
+        "704",
+        0
+      ],
+      "color_ref_image": [
+        "703",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
+    }
+  },
+  "841": {
+    "inputs": {
+      "opacity": 75,
+      "image": [
+        "495",
+        0
+      ],
+      "color_ref_image": [
+        "218",
+        0
+      ]
+    },
+    "class_type": "LayerColor: ColorAdapter",
+    "_meta": {
+      "title": "LayerColor: ColorAdapter"
     }
   }
 }
