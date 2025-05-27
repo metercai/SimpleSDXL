@@ -2162,7 +2162,7 @@
         0
       ],
       "mask_blur": 64,
-      "tile_padding": 192,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 128,
@@ -4777,8 +4777,8 @@
         "697",
         6
       ],
-      "mask_blur": 32,
-      "tile_padding": 192,
+      "mask_blur": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -5287,8 +5287,8 @@
         "697",
         6
       ],
-      "mask_blur": 32,
-      "tile_padding": 192,
+      "mask_blur": 64,
+      "tile_padding": 128,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
