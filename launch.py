@@ -92,7 +92,7 @@ def check_base_environment():
                 pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
                 run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
 
-        if platform.system() == 'Linux' and not is_installed_version('nunchaku', '0.3.0.dev2'):
+        if platform.system() == 'Windows' and not is_installed_version('nunchaku', '0.3.0.dev2'):
             pkg_url = 'https://huggingface.co/metercai/SimpleSDXL2/resolve/main/libs/dev/nunchaku-0.3.0.dev2%2Btorch2.7-cp310-cp310-win_amd64.whl'
             pkg_path = os.path.abspath(os.path.join(root, 'nunchaku-0.3.0.dev2+torch2.7-cp310-cp310-win_amd64.whl'))
             has_update_whl = download_if_updated(pkg_url, pkg_path)
