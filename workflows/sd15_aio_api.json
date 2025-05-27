@@ -2439,7 +2439,7 @@
         0
       ],
       "mask_blur": 32,
-      "tile_padding": 48,
+      "tile_padding": 96,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -2922,7 +2922,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 3,
       "model": [
-        "629",
+        "211",
         0
       ]
     },
@@ -3430,7 +3430,7 @@
   },
   "378": {
     "inputs": {
-      "image_crop_multi": 1.1000000000000003,
+      "image_crop_multi": 1.2000000000000002,
       "mask_crop_multi": 1,
       "bbox_smooth_alpha": 1,
       "image": [
@@ -4957,7 +4957,7 @@
         6
       ],
       "mask_blur": 32,
-      "tile_padding": 64,
+      "tile_padding": 96,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
       "seam_fix_width": 64,
@@ -5259,7 +5259,7 @@
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "629",
+        "212",
         0
       ]
     },
@@ -5499,7 +5499,7 @@
       "end": 1,
       "max_consecutive_cache_hits": 3,
       "model": [
-        "629",
+        "211",
         0
       ]
     },
@@ -5641,7 +5641,7 @@
   },
   "514": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "542",
         5
@@ -5654,7 +5654,7 @@
   },
   "517": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "542",
         5
@@ -5667,7 +5667,7 @@
   },
   "519": {
     "inputs": {
-      "model_name": "4xNomosUniDAT_bokeh_jpg.safetensors"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -5805,7 +5805,7 @@
       "tile_padding": 64,
       "seam_fix_mode": "None",
       "seam_fix_denoise": 1,
-      "seam_fix_width": 64,
+      "seam_fix_width": 96,
       "seam_fix_mask_blur": 8,
       "seam_fix_padding": 16,
       "force_uniform_tiles": true,
@@ -5920,7 +5920,7 @@
   },
   "534": {
     "inputs": {
-      "value": "a*1.6",
+      "value": "a",
       "a": [
         "542",
         5
