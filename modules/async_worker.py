@@ -514,7 +514,7 @@ def worker():
         )
 
     def save_and_log(async_task, height, imgs, task, use_expansion, width, loras, goals, persist_image=True):
-        for x in imgs:
+        for index, x in enumerate(imgs):
             scene_task = None
             if hasattr(async_task, 'scene_frontend'):
                 scene_task = async_task.task_method
@@ -525,6 +525,8 @@ def worker():
             goals = [v if v!='cn' else f'cn({cn_tasks})' for v in goals]
             if isinstance(x, np.ndarray):
                 height, width, C = x.shape
+            if async_task.task_class not in ['Fooocus'] and async_task.should_enhance and (index+1)==len(imgs):
+                persist_image = True
             d = [('Prompt', 'prompt', task['log_positive_prompt']),
                  ('Negative Prompt', 'negative_prompt', task['log_negative_prompt']),
                  ('Fooocus V2 Expansion', 'prompt_expansion', task['expansion']),
@@ -1930,7 +1932,7 @@ def worker():
 
             if enhance_uov_before:
                 current_task_id += 1
-                persist_image = not async_task.save_final_enhanced_image_only or active_enhance_tabs == 0
+                persist_image = not async_task.save_final_enhanced_image_only or active_enhance_tabs == 1
                 current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result = enhance_upscale(
                     all_steps, async_task, base_progress, callback, controlnet_canny_path, controlnet_cpds_path, controlnet_pose_path,
                     current_task_id, denoising_strength, done_steps_inpainting, done_steps_upscaling, enhance_steps,

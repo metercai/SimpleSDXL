@@ -91,7 +91,7 @@ try:
     else: 
         print(f'{branch_name_display}: Update failed when {local_commit_short} <- {remote_commit_short}')
 except Exception as e:
-    print(f'{branch_name_display}: Update failed.')
+    print(f'Repo Update failed.')
     print(str(e))
 
 
