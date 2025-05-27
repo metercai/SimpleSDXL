@@ -72,7 +72,7 @@ def download_if_updated(url, save_path):
             return False
 
     try:
-        with requests.get(url, stream=True) as r:
+        with requests.get(url, stream=True, allow_redirects=True) as r:
             r.raise_for_status()
             with open(save_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
