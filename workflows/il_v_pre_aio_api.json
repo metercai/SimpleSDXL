@@ -2141,7 +2141,7 @@
   },
   "303": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -2199,7 +2199,7 @@
   },
   "307": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -4634,7 +4634,7 @@
   },
   "471": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -6509,7 +6509,7 @@
   },
   "629": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
