@@ -1217,7 +1217,7 @@ packages = {
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
             ("controlnet/kolors_controlnet_pose.safetensors", 2526129624),
-            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
             ("diffusers/Kolors/model_index.json", 427),
             ("diffusers/Kolors/MODEL_LICENSE", 14920),
@@ -1343,7 +1343,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("diffusers/Kolors/model_index.json", 427),
             ("diffusers/Kolors/MODEL_LICENSE", 14920),
             ("diffusers/Kolors/README.md", 4707),
