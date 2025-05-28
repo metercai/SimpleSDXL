@@ -359,6 +359,21 @@ def validate_files(packages):
                     size_mismatch_files.append((os.path.join(actual_dir, actual_filename), actual_size, expected_size))
                 else:
                     non_missing_size += expected_size
+        obsolete_files = []
+        MODEL_PATHS_TO_SCAN = [
+        os.path.join(simplemodels_root, "checkpoints"),
+        os.path.join(simplemodels_root, "loras"),
+        os.path.join(simplemodels_root, "controlnet")]
+        for model_root in MODEL_PATHS_TO_SCAN:
+            if not os.path.exists(model_root):
+                continue
+            for root, _, files in os.walk(model_root):
+                for file in files:
+                    # 使用文件名全小写匹配
+                    if file.lower() in [x.lower() for x in OBSOLETE_MODELS]:
+                        full_path = os.path.join(root, file)
+                        obsolete_files.append(full_path)
+
 
         if total_size > 0:
             non_missing_percentage = (non_missing_size / total_size) * 100
@@ -416,6 +431,19 @@ def validate_files(packages):
 
             missing_size_gb = total_size_gb * (1 - (percentage / 100))
             print(f"- {package_name} - 总大小：{total_size_gb:.2f}GB，完整度：{percentage:.2f}%，尚需下载：{missing_size_gb:.2f}GB")
+    if obsolete_files:
+        # 新增空间计算
+        total_obsolete_size = 0
+        for file in obsolete_files:
+            try:
+                total_obsolete_size += os.path.getsize(file)
+            except:
+                pass
+        print(f"\n{Fore.YELLOW}△发现以下可删除的废弃模型：{Style.RESET_ALL}")
+        for file in obsolete_files:
+            print(f"  {file}")
+        # 新增空间显示
+        print(f"{Fore.CYAN}※这些模型已被新版替代，可节省空间: {total_obsolete_size/1024/1024/1024:.2f}GB (按0+回车清理时选择删除){Style.RESET_ALL}")
     # 新增基础包自动下载逻辑
     sorted_download_files = sorted(download_files.items(), key=lambda x: x[1])
 
@@ -445,7 +473,9 @@ def validate_files(packages):
 
         print(f"\n{Fore.CYAN}△检测到基础包不完整，自动触发下载流程...{Style.RESET_ALL}")
         auto_download_missing_files_with_retry(max_threads=5)
+
 def delete_partial_files():
+    global OBSOLETE_MODELS
     try:
         path_mapping = load_model_paths()
     except Exception as e:
@@ -473,6 +503,7 @@ def delete_partial_files():
     total_size = 0
     files_found = False
     files_to_delete = []
+    obsolete_files_found = []  # 新增废弃文件存储
 
     for model_dir in scan_dirs:
         if not os.path.exists(model_dir):
@@ -490,25 +521,35 @@ def delete_partial_files():
                         total_size += os.path.getsize(file_path)
                     except:
                         pass
-
+                if file in OBSOLETE_MODELS:  # 精确文件名匹配
+                    file_path = os.path.join(root, file)
+                    obsolete_files_found.append(file_path)
+                    files_found = True
     if files_found:
         print(f"{Fore.YELLOW}△以下未下载完或损坏的文件将被删除：{Style.RESET_ALL}")
         for file_path in files_to_delete:
             print(f"- {file_path}")
 
-        print(f"{Fore.CYAN}△可清理的磁盘空间: {total_size / (1024 * 1024):.2f} MB{Style.RESET_ALL}")
+        obsolete_total = sum(os.path.getsize(f) for f in obsolete_files_found if os.path.exists(f))
 
+        if obsolete_files_found:
+            print(f"\n{Fore.YELLOW}△以下废弃模型文件将被删除：{Style.RESET_ALL}")
+            for file in obsolete_files_found:
+                print(f"  {file}")
+        all_files_to_delete = files_to_delete + obsolete_files_found  # 新增合并逻辑
+
+        print(f"{Fore.CYAN}△可清理的磁盘空间: {(total_size + obsolete_total) / (1024 * 1024):.2f} MB{Style.RESET_ALL}")
         confirm = input(f"{Fore.GREEN}△是否确认删除这些文件？(y/n): {Style.RESET_ALL}")
         if confirm.lower() == 'y':
             success_count = 0
-            for file_path in files_to_delete:
+            for file_path in all_files_to_delete:
                 try:
                     os.remove(file_path)
                     print(f"{Fore.GREEN}√已删除: {file_path}{Style.RESET_ALL}")
                     success_count += 1
                 except Exception as e:
                     print(f"{Fore.RED}×删除失败[{file_path}]: {str(e)}{Style.RESET_ALL}")
-            print(f"操作完成！成功删除 {success_count}/{len(files_to_delete)} 个文件")
+            print(f"操作完成！成功删除 {success_count}/{len(all_files_to_delete)} 个文件")
         else:
             print(f"{Fore.RED}△删除操作已取消{Style.RESET_ALL}")
     else:
@@ -973,14 +1014,11 @@ packages = {
             ("configs/v2-inference.yaml", 1789),
             ("configs/v2-inference_fp32.yaml", 1790),
             ("configs/v2-inpainting-inference.yaml", 4450),
-            ("controlnet/control-lora-canny-rank128.safetensors", 395733680),
             ("controlnet/detection_Resnet50_Final.pth", 109497761),
             ("controlnet/fooocus_ip_negative.safetensors", 65616),
-            ("controlnet/fooocus_xl_cpds_128.safetensors", 395706528),
             ("controlnet/ip-adapter-plus-face_sdxl_vit-h.bin", 1013454761),
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("controlnet/parsing_parsenet.pth", 85331193),
-            ("controlnet/xinsir_cn_openpose_sdxl_1.0.safetensors", 2502139104),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
             ("controlnet/lllyasviel/Annotators/body_pose_model.pth", 209267595),
             ("controlnet/lllyasviel/Annotators/facenet.pth", 153718792),
@@ -1020,7 +1058,6 @@ packages = {
             ("llms/superprompt-v1/tokenizer.json", 2424064),
             ("llms/superprompt-v1/tokenizer_config.json", 2539),
             ("loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
-            ("loras/sdxl_hyper_sd_4step_lora.safetensors", 787359648),
             ("loras/sdxl_lightning_4step_lora.safetensors", 393854592),
             ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
             ("prompt_expansion/fooocus_expansion/config.json", 937),
@@ -1728,6 +1765,22 @@ MANUAL_DOWNLOAD_LIST = [
     for filename in files
 ]
 
+OBSOLETE_MODELS = [
+    "flux1-dev-bnb-nf4.safetensors",
+    "flux1-schnell-bnb-nf4.safetensors",
+    "sdxl_hyper_sd_4step_lora.safetensors",
+    "xinsir_cn_openpose_sdxl_1.0.safetensors",
+    "fooocus_xl_cpds_128.safetensors",
+    "control-lora-canny-rank128.safetensors",
+    "flux.1-dev_controlnet_union_pro.safetensors",
+    "illustriousXL_controlnet_tile_v2.5.safetensors",
+    "kolors_controlnet_canny.safetensors",
+    "kolors_controlnet_depth.safetensors",
+    "noob_sdxl_controlnet_canny.fp16.safetensors",
+    "noob_sdxl_controlnet_depth.fp16.safetensors",
+    "noob_sdxl_controlnet_pose.fp16.safetensors",
+    "NoobAI-XL-v1.1.safetensors"
+]
 def main():
     print()
     print_colored("★★★★★★★★★★★★★★★★★★欢迎使用SimpleAI模型检测器★★★★★★★★★★★★★★★★★★", Fore.CYAN)
