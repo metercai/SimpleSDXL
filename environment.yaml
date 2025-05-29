@@ -1,7 +1,16 @@
 name: simpleai
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - python=3.10
-  - pip=23.0
+  - pip=25.1.1
   - packaging
+  - numpy=1.26.4
+  - siphash24
+  - pyopencl
+  - pygit2=1.15.1
+  - httpx
+  - PyYAML
+  - tqdm
+  - anyio

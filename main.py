@@ -155,7 +155,7 @@ def prepare_environment():
     torch_index_url = os.environ.get('TORCH_INDEX_URL', torch_index_url)
     torch_command = os.environ.get('TORCH_COMMAND',
                                 f"pip install torch=={torch_ver} torchvision=={torchvisio_ver} --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    requirements_file = os.environ.get('REQS_FILE', "requirements.txt")
     torch_command += target_path_install
     torch_command += f' -i {index_url} '
 
