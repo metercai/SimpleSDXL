@@ -363,7 +363,8 @@ def validate_files(packages):
         MODEL_PATHS_TO_SCAN = [
         os.path.join(simplemodels_root, "checkpoints"),
         os.path.join(simplemodels_root, "loras"),
-        os.path.join(simplemodels_root, "controlnet")]
+        os.path.join(simplemodels_root, "controlnet"),
+        os.path.join(simplemodels_root, "ipadapter")]
         for model_root in MODEL_PATHS_TO_SCAN:
             if not os.path.exists(model_root):
                 continue
@@ -484,7 +485,7 @@ def delete_partial_files():
 
     scan_categories = [
         'checkpoints', 'loras', 'controlnet', 'embeddings',
-        'vae_approx', 'vae', 'upscale_models', 'inpaint',
+        'vae_approx', 'vae', 'upscale_models', 'inpaint', "ipadapter",
         'clip', 'clip_vision', 'llms', 'unet', 'diffusers'
     ]
 
@@ -1233,7 +1234,6 @@ packages = {
             ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
             ("insightface/models/buffalo_l/genderage.onnx", 1322532),
             ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
             ("ipadapter/ip-adapter-faceid-plusv2_sd15.bin", 156558509),
             ("ipadapter/ip-adapter_sd15.safetensors", 44642768),
             ("loras/ip-adapter-faceid-plusv2_sd15_lora.safetensors", 51059544),
@@ -1443,7 +1443,6 @@ packages = {
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
             ("rembg/Portrait.safetensors", 884878856),
             ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
             ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
             ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
             ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
@@ -1487,7 +1486,7 @@ packages = {
             ("controlnet/detection_Resnet50_Final.pth", 109497761),
             ("controlnet/facerestore_models/codeformer-v0.1.0.pth", 376637898),
             ("controlnet/facerestore_models/GFPGANv1.4.pth", 348632874),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
@@ -1618,7 +1617,6 @@ packages = {
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
@@ -1653,7 +1651,6 @@ packages = {
             ("controlnet/lllyasviel/Annotators/ControlNetHED.pth", 29444406),
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
@@ -1677,7 +1674,7 @@ packages = {
             ("controlnet/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth", 1341395338),
             ("controlnet/lllyasviel/Annotators/sk_model.pth", 17173511),
             ("controlnet/lllyasviel/Annotators/sk_model2.pth", 17173511),
-            ("ipadapter/clip-vit-h-14-laion2B-s32B-b79K.safetensors", 3944517836),
+            ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427)
         ],
         "download_links": [
@@ -1777,7 +1774,8 @@ OBSOLETE_MODELS = [
     "noob_sdxl_controlnet_canny.fp16.safetensors",
     "noob_sdxl_controlnet_depth.fp16.safetensors",
     "noob_sdxl_controlnet_pose.fp16.safetensors",
-    "NoobAI-XL-v1.1.safetensors"
+    "NoobAI-XL-v1.1.safetensors",
+    "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
 ]
 def main():
     print()

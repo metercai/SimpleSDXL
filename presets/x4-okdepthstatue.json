@@ -85,7 +85,7 @@
         "controlnet,depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth,1341395338,0,",
         "controlnet,lllyasviel/Annotators/sk_model.pth,17173511,0,",
         "controlnet,lllyasviel/Annotators/sk_model2.pth,17173511,0,",
-        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "clip_vision,clip_vision_vit_h.safetensors,1972298538,0,",
         "controlnet,ip-adapter-plus_sdxl_vit-h.bin,1013454427,0,"
         ]
 }

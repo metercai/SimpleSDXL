@@ -51,7 +51,7 @@
         "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,",
         "ipadapter,noob_ip_adapter.bin,1396798350,0,",
         "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
-        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "clip_vision,clip_vision_vit_h.safetensors,1972298538,0,",
         "controlnet,lllyasviel/Annotators/ZoeD_M12_N.pt,1443406099,0,",
         "controlnet,noob_sdxl_controlnet_inpainting.safetensors,5004167832,0,",
         "controlnet,xinsir_cn_union_sdxl_1.0_promax.safetensors,2513342408,0,"
