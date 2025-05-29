@@ -96,7 +96,7 @@
         "controlnet,detection_Resnet50_Final.pth,109497761,0,",
         "controlnet,facerestore_models/codeformer-v0.1.0.pth,376637898,0,",
         "controlnet,facerestore_models/GFPGANv1.4.pth,348632874,0,",
-        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "clip_vision,clip_vision_vit_h.safetensors,1972298538,0,",
         "controlnet,ip-adapter-plus_sdxl_vit-h.bin,1013454427,0,",
         "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,"
         ]

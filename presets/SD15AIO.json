@@ -59,7 +59,7 @@
         "controlnet,control_v11f1p_sd15_depth_fp16.safetensors,722601100,0,",
         "controlnet,control_v11p_sd15_openpose_fp16.safetensors,722601100,0,",
         "controlnet,control_v11f1e_sd15_tile_fp16.safetensors,722601104,0,",
-        "ipadapter,clip-vit-h-14-laion2B-s32B-b79K.safetensors,3944517836,0,",
+        "clip_vision,clip_vision_vit_h.safetensors,1972298538,0,",
         "ipadapter,ip-adapter_sd15.safetensors,44642768,0,",
         "ipadapter,ip-adapter-faceid-plusv2_sd15.bin,156558509,0,",
         "insightface,models/buffalo_l/1k3d68.onnx,143607619,0,",
