@@ -994,7 +994,6 @@ packages = {
         "note": "SDXL全功能|显存需求：★★ 速度：★★★☆",
         "files": [
             ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
-            ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
             ("clip_vision/model_base_caption_capfilt_large.pth", 896081425),
             ("clip_vision/wd-v1-4-moat-tagger-v2.onnx", 326197340),
@@ -1082,13 +1081,13 @@ packages = {
     "extension_package": {
         "id": 2,
         "name": "[2]增强模型包",
-        "note": "功能性补充|显存需求：★★ 速度：★★★☆",
+        "note": "融图打光等功能性补充|显存需求：★★ 速度：★★★☆",
         "files": [
+            ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("embeddings/unaestheticXLhk1.safetensors", 33296),
             ("embeddings/unaestheticXLv31.safetensors", 33296),
             ("inpaint/inpaint_v25.fooocus.patch", 2580722369),
             ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("inpaint/sam_vit_l_0b3195.pth", 1249524607),
             ("layer_model/layer_xl_bg2ble.safetensors", 701981624),
             ("layer_model/layer_xl_transparent_attn.safetensors", 743352688),
             ("layer_model/layer_xl_fg2ble.safetensors", 701981624),
