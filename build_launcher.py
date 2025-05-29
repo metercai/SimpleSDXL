@@ -51,8 +51,10 @@ def download_if_updated(url, save_path):
     if os.path.exists(save_path):
         local_mtime = os.path.getmtime(save_path)
         local_mtime_str = datetime.fromtimestamp(local_mtime).strftime('%a, %d %b %Y %H:%M:%S GMT')
+        local_file_size = os.path.getsize(save_path)
     else:
         local_mtime = None
+        local_file_size = 0
     try:
         response = requests.head(url, allow_redirects=True)
         response.raise_for_status()  # 检查请求是否成功
@@ -65,16 +67,19 @@ def download_if_updated(url, save_path):
         remote_mtime = None
     else:
         remote_mtime = datetime.strptime(remote_mtime_str, '%a, %d %b %Y %H:%M:%S GMT')
-
+    
+    remote_file_size = int(response.headers.get('Content-Length', 0))
     if local_mtime and remote_mtime:
         local_mtime_dt = datetime.fromtimestamp(local_mtime)
-        if local_mtime_dt >= remote_mtime:
+        if local_mtime_dt >= remote_mtime and remote_file_size==local_file_size:
             return False
 
+
+    partial_path = save_path + ".partial"
     try:
-        with requests.get(url, stream=True) as r:
+        with requests.get(url, stream=True, allow_redirects=True, timeout=(5, 30)) as r:
             r.raise_for_status()
-            with open(save_path, 'wb') as f:
+            with open(partial_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
         print(f"Downloaded the lastest lib file and save to: {save_path}")
@@ -82,9 +87,11 @@ def download_if_updated(url, save_path):
         print(f"Update lib file: {e}")
         return False
 
-    if remote_mtime:
-        remote_mtime_timestamp = int(remote_mtime.timestamp())
-        os.utime(save_path, (remote_mtime_timestamp, remote_mtime_timestamp))
-
-    return True
+    if os.path.getsize(partial_path) == remote_file_size:
+        os.replace(partial_path, save_path)
+        if remote_mtime:
+            remote_mtime_timestamp = int(remote_mtime.timestamp())
+            os.utime(save_path, (remote_mtime_timestamp, remote_mtime_timestamp))
+        return True
+    return False
 

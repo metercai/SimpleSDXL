@@ -877,6 +877,7 @@ def worker():
     def apply_overrides(async_task, steps, height, width):
         if async_task.overwrite_step > 0:
             steps = async_task.overwrite_step
+            async_task.original_steps = async_task.overwrite_step
         switch = int(round(async_task.steps * async_task.refiner_switch))
         if async_task.overwrite_switch > 0:
             switch = async_task.overwrite_switch
@@ -1327,7 +1328,6 @@ def worker():
         return current_task_id, done_steps_inpainting, done_steps_upscaling, img, exception_result
 
     def uov_tiled_size(width, height, steps, uov_method, tiled_block=2048):
-        print(f'uov_tiled_size, width={width}, height={height}')
         tiled_size = lambda x, p: int(x*p+16) if int(x*p) < tiled_block else int(int(x*p)/math.ceil(int(x*p)/tiled_block))+16
         match_value = re.search(r'\((?:fast )?([\d.]+)x\)', uov_method)
         multiple = 1.0 if not match_value else float(match_value.group(1))
@@ -1684,9 +1684,8 @@ def worker():
                             match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(W, H, async_task.steps, uov_method, tiled_block)
                         else:
                             match_multiple, tiled_width, tiled_height, tiled_steps = uov_tiled_size(width, height, async_task.steps, uov_method, tiled_block)
-                        if match_multiple>1.0:
+                        if 'upscale' in uov_method and match_multiple>1.0:
                             async_task.params_backend['enhance_uov_multiple'] = match_multiple
-                            print(f'enhance_uov_method:{async_task.enhance_uov_method}')
                             if 'fast' not in async_task.enhance_uov_method.lower():
                                 async_task.params_backend['enhance_uov_tiled_width'] = tiled_width
                                 async_task.params_backend['enhance_uov_tiled_height'] = tiled_height
@@ -1843,13 +1842,17 @@ def worker():
                     display_steps = async_task.params_backend['display_steps']
                 if len(async_task.enhance_ctrls) > 0:
                     display_steps += async_task.original_steps * len(async_task.enhance_ctrls)
-                if 'enhance_uov_tiled_steps' in async_task.params_backend:
-                    multiple = async_task.params_backend['enhance_uov_multiple']
-                    tiled_steps = async_task.params_backend['enhance_uov_tiled_steps']
-                    tiled_width = async_task.params_backend['enhance_uov_tiled_width']
-                    tiled_height = async_task.params_backend['enhance_uov_tiled_height']
-                    display_steps += tiled_steps * math.ceil(int(width*multiple)/tiled_width) * math.ceil(int(height*multiple)/tiled_height)
-                async_task.params_backend['display_steps'] = display_steps
+                if 'enhance_uov_method' in async_task.params_backend:
+                    if 'enhance_uov_tiled_steps' in async_task.params_backend:
+                        multiple = async_task.params_backend['enhance_uov_multiple']
+                        tiled_steps = async_task.params_backend['enhance_uov_tiled_steps']
+                        tiled_width = async_task.params_backend['enhance_uov_tiled_width']
+                        tiled_height = async_task.params_backend['enhance_uov_tiled_height']
+                        display_steps += tiled_steps * math.ceil(int(width*multiple)/tiled_width) * math.ceil(int(height*multiple)/tiled_height)
+                    else:
+                        display_steps += async_task.original_steps
+                if display_steps>0:
+                    async_task.params_backend['display_steps'] = display_steps
             all_steps = async_task.params_backend['display_steps'] * async_task.image_number
             if 'refiner_step' in async_task.params_backend:
                 async_task.params_backend['refiner_step'] = int(async_task.steps * (1 - async_task.params_backend['refiner_step']))
