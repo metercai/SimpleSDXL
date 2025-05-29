@@ -293,7 +293,7 @@
   },
   "97": {
     "inputs": {
-      "clip_name": "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+      "clip_name": "clip_vision_vit_h.safetensors"
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {

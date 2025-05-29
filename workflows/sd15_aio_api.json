@@ -7158,6 +7158,10 @@
       "image": [
         "637",
         0
+      ],
+      "clip_vision": [
+        "672",
+        0
       ]
     },
     "class_type": "easy ipadapterApplyADV",
@@ -7320,11 +7324,33 @@
       "image": [
         "636",
         0
+      ],
+      "clip_vision": [
+        "671",
+        0
       ]
     },
     "class_type": "easy ipadapterApplyADV",
     "_meta": {
       "title": "Easy Apply IPAdapter (Advanced)"
+    }
+  },
+  "671": {
+    "inputs": {
+      "clip_name": "clip_vision_vit_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "672": {
+    "inputs": {
+      "clip_name": "clip_vision_vit_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
     }
   }
 }
