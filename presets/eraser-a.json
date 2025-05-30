@@ -33,7 +33,7 @@
   "default_refiner_switch": 0.5,
   "default_loras": [
       [
-          "fill_remove.safetensors",
+          "removal_timestep_alpha-2-1740.safetensors",
           1.2
       ],
       [
@@ -75,6 +75,6 @@
       "clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
       "style_models,flux1-redux-dev.safetensors,129063232,0,",
       "vae,ae.safetensors,335304388,0,",
-      "loras,fill_remove.safetensors,104667792,0,"
+      "loras,removal_timestep_alpha-2-1740.safetensors,89746016,0,"
   ]
 }
