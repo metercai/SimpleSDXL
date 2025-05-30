@@ -1,7 +1,7 @@
 [project]
 name = "comfyui_pulid_flux_ll"
 description = "The implementation for PuLID-Flux, support use with TeaCache and WaveSpeed, no model pollution."
-version = "1.1.2"
+version = "1.1.4"
 license = {file = "LICENSE"}
 dependencies = ['cython', 'facexlib', 'insightface', 'onnxruntime', 'onnxruntime-gpu; sys_platform != "darwin" and (platform_machine == "x86_64" or platform_machine == "AMD64")', 'ftfy', 'timm']
 

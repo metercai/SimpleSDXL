@@ -202,7 +202,7 @@ class ReduxAdvanced:
                              "style_model": ("STYLE_MODEL", ),
                              "clip_vision": ("CLIP_VISION", ),
                              "image": ("IMAGE",),
-                             "downsampling_factor": ("FLOAT", {"default": 3.0, "min": 1.0, "max": 9.0}),
+                             "downsampling_factor": ("FLOAT", {"default": 3, "min": 1, "max":9, "step": 0.1}),
                              "downsampling_function": (["nearest", "bilinear", "bicubic","area","nearest-exact"], {"default": "area"}),
                              "mode": (IMAGE_MODES, {"default": "center crop (square)"}),
                              "weight": ("FLOAT", {"default": 1.0, "min":0.0, "max":1.0, "step":0.01})
@@ -217,8 +217,13 @@ class ReduxAdvanced:
     CATEGORY = "conditioning/style_model"
 
     def apply_stylemodel(self, clip_vision, image, style_model, conditioning, downsampling_factor, downsampling_function,mode,weight, mask=None, autocrop_margin=0.0):
-        image, masko = prepareImageAndMask(clip_vision, image, mask, mode, autocrop_margin)
-        clip_vision_output,mask=(clip_vision.encode_image(image), patchifyMask(masko))
+        desiredSize = 384
+        patchSize = 14
+        if clip_vision.model.vision_model.embeddings.position_embedding.weight.shape[0] == 1024:
+            desiredSize = 512
+            patchSize = 16
+        image, masko = prepareImageAndMask(clip_vision, image, mask, mode, autocrop_margin, desiredSize)
+        clip_vision_output,mask=(clip_vision.encode_image(image), patchifyMask(masko, patchSize))
         mode="area"
         cond = style_model.get_cond(clip_vision_output).flatten(start_dim=0, end_dim=1).unsqueeze(dim=0)
         (b,t,h)=cond.shape
@@ -245,7 +250,7 @@ class ReduxAdvanced:
         for t in conditioning:
             n = [torch.cat((t[0], cond), dim=1), t[1].copy()]
             c.append(n)
-        return (c, image, masko)
+        return (c, image, masko.squeeze(-1) if masko is not None else None)
 
 
 # A dictionary that contains all nodes you want to export with their names

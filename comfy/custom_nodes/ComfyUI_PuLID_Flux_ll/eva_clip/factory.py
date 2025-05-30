@@ -84,7 +84,7 @@ def load_state_dict(checkpoint_path: str, map_location: str='cpu', model_key: st
         for key in ["input_resolution", "context_length", "vocab_size"]:
             state_dict.pop(key, None)
     else:
-        checkpoint = torch.load(checkpoint_path, map_location=map_location)
+        checkpoint = torch.load(checkpoint_path, map_location=map_location, weights_only=False)
         for mk in model_key.split('|'):
             if isinstance(checkpoint, dict) and mk in checkpoint:
                 state_dict = checkpoint[mk]
@@ -223,6 +223,7 @@ def create_model(
         pretrained_visual_model: str = None,
         pretrained_text_model: str = None,
         cache_dir: Optional[str] = None,
+        local_dir: Optional[str] = None,
         skip_list: list  = [],
 ):
     model_name = model_name.replace('/', '-')  # for callers using old naming with / in ViT names
@@ -276,11 +277,10 @@ def create_model(
             checkpoint_path = ''
             pretrained_cfg = get_pretrained_cfg(model_name, pretrained)
             if pretrained_cfg:
-                checkpoint_path = pretrained_cfg['hf_hub'] #download_pretrained(pretrained_cfg, cache_dir=cache_dir)
+                checkpoint_path = download_pretrained(pretrained_cfg, cache_dir=cache_dir, local_dir=local_dir)
             elif os.path.exists(pretrained):
                 checkpoint_path = pretrained
 
-            checkpoint_path = os.path.join(cache_dir, os.path.basename(checkpoint_path))
             if checkpoint_path:
                 logging.info(f'Loading pretrained {model_name} weights ({pretrained}).')
                 load_checkpoint(model,
@@ -373,6 +373,7 @@ def create_model_and_transforms(
         image_mean: Optional[Tuple[float, ...]] = None,
         image_std: Optional[Tuple[float, ...]] = None,
         cache_dir: Optional[str] = None,
+        local_dir: Optional[str] = None,
         skip_list: list = [],
 ):
     model = create_model(
@@ -390,6 +391,7 @@ def create_model_and_transforms(
         pretrained_visual_model=pretrained_visual_model,
         pretrained_text_model=pretrained_text_model,
         cache_dir=cache_dir,
+        local_dir=local_dir,
         skip_list=skip_list,
     )
 

@@ -86,6 +86,7 @@ class Image(
         brush_radius: float | None = None,
         brush_color: str = "#000000",
         mask_opacity: float = 0.7,
+        mask_color: bool = False,
         show_share_button: bool | None = None,
         **kwargs,
     ):
@@ -121,6 +122,7 @@ class Image(
         self.brush_radius = brush_radius
         self.brush_color = brush_color
         self.mask_opacity = mask_opacity
+        self.mask_color = mask_color
         self.mirror_webcam = mirror_webcam
         valid_types = ["numpy", "pil", "filepath"]
         if type not in valid_types:
@@ -189,6 +191,7 @@ class Image(
             "brush_radius": self.brush_radius,
             "brush_color": self.brush_color,
             "mask_opacity": self.mask_opacity,
+            "mask_color": self.mask_color,
             "selectable": self.selectable,
             "show_share_button": self.show_share_button,
             "show_download_button": self.show_download_button,
@@ -211,6 +214,7 @@ class Image(
         brush_radius: float | None = None,
         brush_color: str | None = None,
         mask_opacity: float | None = None,
+        mask_color: bool | None = None,
         show_share_button: bool | None = None,
     ):
         return {
@@ -228,6 +232,7 @@ class Image(
             "brush_radius": brush_radius,
             "brush_color": brush_color,
             "mask_opacity": mask_opacity,
+            "mask_color": mask_color,
             "show_share_button": show_share_button,
             "__type__": "update",
         }
@@ -296,7 +301,7 @@ class Image(
         if self.tool == "sketch" and self.source in ["upload", "webcam"]:
             if mask is not None:
                 mask_im = processing_utils.decode_base64_to_image(mask)
-                if mask_im.mode == "RGBA":  # whiten any opaque pixels in the mask
+                if not self.mask_color and mask_im.mode == "RGBA":  # whiten any opaque pixels in the mask
                     alpha_data = mask_im.getchannel("A").convert("L")
                     mask_im = _Image.merge("RGB", [alpha_data, alpha_data, alpha_data])
                 return {
