@@ -1,7 +1,12 @@
 import types
+import zipfile
 
+import cv2
 import torch
-from torch import nn, Tensor
+from insightface.utils.download import download_file
+from insightface.utils.storage import BASE_REPO_URL
+from insightface.utils import face_align
+from torch import nn
 from torchvision import transforms
 from torchvision.transforms import functional
 import os
@@ -9,8 +14,7 @@ import logging
 import folder_paths
 import comfy
 from insightface.app import FaceAnalysis
-from facexlib.parsing import init_parsing_model
-from facexlib.utils.face_restoration_helper import FaceRestoreHelper
+from .face_restoration_helper import FaceRestoreHelper, get_face_by_index, draw_on
 
 from comfy import model_management
 from .eva_clip.constants import OPENAI_DATASET_MEAN, OPENAI_DATASET_STD
@@ -19,17 +23,30 @@ from .encoders_flux import IDFormer, PerceiverAttentionCA
 from .PulidFluxHook import pulid_forward_orig, set_model_dit_patch_replace, pulid_enter, pulid_patch_double_blocks_after
 from .patch_util import PatchKeys, add_model_patch_option, set_model_patch
 
-INSIGHTFACE_DIR = os.path.join(folder_paths.models_dir, "insightface")
 
-MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
-CLIP_DIR = os.path.join(folder_paths.models_dir, "clip")
-CONTROLNET_DIR = os.path.join(folder_paths.models_dir, "controlnet")
+def set_extra_config_model_path(extra_config_models_dir_key, models_dir_name:str):
+    models_dir_default = os.path.join(folder_paths.models_dir, models_dir_name)
+    if extra_config_models_dir_key not in folder_paths.folder_names_and_paths:
+        folder_paths.folder_names_and_paths[extra_config_models_dir_key] = (
+            [os.path.join(folder_paths.models_dir, models_dir_name)], folder_paths.supported_pt_extensions)
+    else:
+        if not os.path.exists(models_dir_default):
+            os.makedirs(models_dir_default, exist_ok=True)
+        folder_paths.add_model_folder_path(extra_config_models_dir_key, models_dir_default, is_default=True)
 
-if "pulid" not in folder_paths.folder_names_and_paths:
-    current_paths = [MODELS_DIR]
-else:
-    current_paths, _ = folder_paths.folder_names_and_paths["pulid"]
-folder_paths.folder_names_and_paths["pulid"] = (current_paths, folder_paths.supported_pt_extensions)
+set_extra_config_model_path("pulid", "pulid")
+set_extra_config_model_path("insightface", "insightface")
+#set_extra_config_model_path("facexlib", "facexlib")
+
+INSIGHTFACE_DIR = folder_paths.get_folder_paths("insightface")[0]
+FACEXLIB_DIR = folder_paths.get_folder_paths("controlnet")[0]
+
+# MODELS_DIR = os.path.join(folder_paths.models_dir, "pulid")
+# if "pulid" not in folder_paths.folder_names_and_paths:
+#     current_paths = [MODELS_DIR]
+# else:
+#     current_paths, _ = folder_paths.folder_names_and_paths["pulid"]
+# folder_paths.folder_names_and_paths["pulid"] = (current_paths, folder_paths.supported_pt_extensions)
 
 class PulidFluxModel(nn.Module):
     def __init__(self):
@@ -118,6 +135,29 @@ class PulidFluxModelLoader:
 
         return (model_patcher,)
 
+def download_insightface_model(sub_dir, name, force=False, root='~/.insightface'):
+    # Copied and modified from insightface.utils.storage.download
+    # Solve https://github.com/deepinsight/insightface/issues/2711
+    _root = os.path.expanduser(root)
+    dir_path = os.path.join(_root, sub_dir, name)
+    if os.path.exists(dir_path) and not force:
+        return dir_path
+    print('download_path:', dir_path)
+    zip_file_path = os.path.join(_root, sub_dir, name + '.zip')
+    model_url = "%s/%s.zip"%(BASE_REPO_URL, name)
+    download_file(model_url,
+             path=zip_file_path,
+             overwrite=True)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    # zip file has contains ${name}
+    real_dir_path = os.path.join(_root, sub_dir)
+    with zipfile.ZipFile(zip_file_path) as zf:
+        zf.extractall(real_dir_path)
+    #os.remove(zip_file_path)
+    return dir_path
+
 class PulidFluxInsightFaceLoader:
     @classmethod
     def INPUT_TYPES(s):
@@ -132,7 +172,9 @@ class PulidFluxInsightFaceLoader:
     CATEGORY = "pulid"
 
     def load_insightface(self, provider):
-        model = FaceAnalysis(name="antelopev2", root=INSIGHTFACE_DIR, providers=[provider + 'ExecutionProvider',]) # alternative to buffalo_l
+        name = "antelopev2"
+        download_insightface_model("models", name, root=INSIGHTFACE_DIR)
+        model = FaceAnalysis(name=name, root=INSIGHTFACE_DIR, providers=[provider + 'ExecutionProvider', ]) # alternative to buffalo_l
         model.prepare(ctx_id=0, det_size=(640, 640))
 
         return (model,)
@@ -151,7 +193,12 @@ class PulidFluxEvaClipLoader:
     def load_eva_clip(self):
         from .eva_clip.factory import create_model_and_transforms
 
-        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=CLIP_DIR)
+        clip_file_path = folder_paths.get_full_path("text_encoders", 'EVA02_CLIP_L_336_psz14_s6B.pt')
+        if clip_file_path is None:
+            clip_dir = os.path.join(folder_paths.models_dir, "clip")
+        else:
+            clip_dir = os.path.dirname(clip_file_path)
+        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, local_dir=clip_dir)
 
         model = model.visual
 
@@ -180,6 +227,7 @@ class ApplyPulidFlux:
             },
             "optional": {
                 "attn_mask": ("MASK", ),
+                "options": ("OPTIONS",),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID"
@@ -190,7 +238,7 @@ class ApplyPulidFlux:
     FUNCTION = "apply_pulid_flux"
     CATEGORY = "pulid"
 
-    def apply_pulid_flux(self, model, pulid_flux, eva_clip, face_analysis, image, weight, start_at, end_at, attn_mask=None, unique_id=None):
+    def apply_pulid_flux(self, model, pulid_flux, eva_clip, face_analysis, image, weight, start_at, end_at, attn_mask=None, options={}, unique_id=None):
         model = model.clone()
 
         device = comfy.model_management.get_torch_device()
@@ -223,30 +271,29 @@ class ApplyPulidFlux:
             face_size=512,
             crop_ratio=(1, 1),
             det_model='retinaface_resnet50',
+            parsing_model='bisenet',
             save_ext='png',
             device=device,
-            model_rootpath=CONTROLNET_DIR,
+            model_rootpath=FACEXLIB_DIR
         )
-
-        face_helper.face_parse = None
-        face_helper.face_parse = init_parsing_model(model_name='bisenet', device=device, model_rootpath=CONTROLNET_DIR)
 
         bg_label = [0, 16, 18, 7, 8, 9, 14, 15]
         cond = []
 
+        input_face_sort = options.get('input_faces_order', "large-small")
+        input_face_index = options.get('input_faces_index', 0)
+        input_face_align_mode = options.get('input_faces_align_mode', 1)
         # Analyse multiple images at multiple sizes and combine largest area embeddings
         for i in range(image.shape[0]):
             # get insightface embeddings
+            bboxes = []
             iface_embeds = None
             for size in [(size, size) for size in range(640, 256, -64)]:
                 face_analysis.det_model.input_size = size
                 face_info = face_analysis.get(image[i])
                 if face_info:
-                    # Only use the maximum face
-                    # Removed the reverse=True from original code because we need the largest area not the smallest one!
-                    # Sorts the list in ascending order (smallest to largest),
-                    # then selects the last element, which is the largest face
-                    face_info = sorted(face_info, key=lambda x: (x.bbox[2] - x.bbox[0]) * (x.bbox[3] - x.bbox[1]))[-1]
+                    face_info, index, sorted_faces = get_face_by_index(face_info, face_sort_rule=input_face_sort, face_index=input_face_index)
+                    bboxes = [face.bbox for face in sorted_faces]
                     iface_embeds = torch.from_numpy(face_info.embedding).unsqueeze(0).to(device, dtype=dtype)
                     break
             else:
@@ -254,18 +301,26 @@ class ApplyPulidFlux:
                 logging.warning(f'Warning: No face detected in image {str(i)}')
                 continue
 
-            # get eva_clip embeddings
-            face_helper.clean_all()
-            face_helper.read_image(image[i])
-            face_helper.get_face_landmarks_5(only_keep_largest=True)
-            face_helper.align_warp_face()
+            if input_face_align_mode == 1:
+                image_size = 512
+                M = face_align.estimate_norm(face_info.kps, image_size=image_size)
+                align_face = cv2.warpAffine(image[i], M, (image_size, image_size), borderMode=cv2.BORDER_CONSTANT,
+                                            borderValue=(135, 133, 132))
+                # align_face = face_align.norm_crop(image[i], landmark=face_info.kps, image_size=image_size)
+                del M
+            else:
+                # get eva_clip embeddings
+                face_helper.clean_all()
+                face_helper.read_image(image[i])
+                face_helper.get_face_landmarks_5(ref_sort_bboxes=bboxes, face_index=input_face_index)
+                face_helper.align_warp_face()
 
-            if len(face_helper.cropped_faces) == 0:
-                # No face detected, skip this image
-                continue
+                if len(face_helper.cropped_faces) == 0:
+                    # No face detected, skip this image
+                    continue
 
-            # Get aligned face image
-            align_face = face_helper.cropped_faces[0]
+                # Get aligned face image
+                align_face = face_helper.cropped_faces[0]
             # Convert bgr face image to tensor
             align_face = image_to_tensor(align_face).unsqueeze(0).permute(0, 3, 1, 2).to(device)
             parsing_out = face_helper.face_parse(functional.normalize(align_face, [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))[0]
@@ -298,6 +353,7 @@ class ApplyPulidFlux:
         if not cond:
             # No faces detected, return the original model
             logging.warning("PuLID warning: No faces detected in any of the given images, returning unmodified model.")
+            del eva_clip, face_analysis, pulid_flux, face_helper, attn_mask
             return (model,)
 
         # average embeddings
@@ -372,6 +428,166 @@ class FixPulidFluxPatch:
         return (model,)
 
 
+class PulidFluxOptions:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "input_faces_order": (
+                    ["left-right","right-left","top-bottom","bottom-top","small-large","large-small"],
+                    {
+                        "default": "large-small",
+                        "tooltip": "left-right: Sort the left boundary of bbox by column from left to right.\n"
+                                   "right-left: Reverse order of left-right (Sort the left boundary of bbox by column from right to left).\n"
+                                   "top-bottom: Sort the top boundary of bbox by row from top to bottom.\n"
+                                   "bottom-top: Reverse order of top-bottom (Sort the top boundary of bbox by row from bottom to top).\n"
+                                   "small-large: Sort the area of bbox from small to large.\n"
+                                   "large-small: Sort the area of bbox from large to small."
+                    }
+                ),
+                "input_faces_index": ("INT",
+                                      {
+                                          "default": 0, "min": 0, "max": 1000, "step": 1,
+                                          "tooltip": "If the value is greater than the size of bboxes, will set value to 0."
+                                      }),
+                "input_faces_align_mode": ("INT",
+                                      {
+                                          "default": 1, "min": 0, "max": 1, "step": 1,
+                                          "tooltip": "Align face mode.\n"
+                                                     "0: align_face and embed_face use different detectors. The results maybe different.\n"
+                                                     "1: align_face and embed_face use the same detector."
+                                      }),
+            }
+        }
+
+    RETURN_TYPES = ("OPTIONS",)
+    FUNCTION = "execute"
+    CATEGORY = "pulid"
+
+    def execute(self,input_faces_order, input_faces_index, input_faces_align_mode=1):
+        options: dict = {
+            "input_faces_order": input_faces_order,
+            "input_faces_index": input_faces_index,
+            "input_faces_align_mode": input_faces_align_mode,
+        }
+        return (options, )
+
+
+class PulidFluxFaceDetector:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "face_analysis": ("FACEANALYSIS", ),
+                "image": ("IMAGE",),
+                "options": ("OPTIONS",),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE",)
+    RETURN_NAMES = ("embed_face", "align_face", "face_bbox_image",)
+    FUNCTION = "execute"
+    CATEGORY = "pulid"
+    OUTPUT_IS_LIST = (True, True, True,)
+
+    def execute(self, face_analysis, image, options):
+
+        device = comfy.model_management.get_torch_device()
+
+        input_face_sort = options.get('input_faces_order', "large-small")
+        input_face_index = options.get('input_faces_index', 0)
+        input_face_align_mode = options.get('input_faces_align_mode', 1)
+
+        if input_face_align_mode == 0:
+            face_helper = FaceRestoreHelper(
+                upscale_factor=1,
+                face_size=512,
+                crop_ratio=(1, 1),
+                det_model='retinaface_resnet50',
+                parsing_model='bisenet',
+                save_ext='png',
+                device=device,
+                model_rootpath=FACEXLIB_DIR
+            )
+
+        # Analyse multiple images at multiple sizes and combine largest area embeddings
+        embed_faces=[]
+        align_faces=[]
+        draw_embed_face_bbox=[]
+        image = tensor_to_image(image)
+        for i in range(image.shape[0]):
+            bboxes = []
+            for size in [(size, size) for size in range(640, 256, -64)]:
+                face_analysis.det_model.input_size = size
+                face_info = face_analysis.get(image[i])
+                if face_info:
+                    face_info, index, sorted_faces = get_face_by_index(face_info, face_sort_rule=input_face_sort,
+                                                         face_index=input_face_index)
+                    bboxes = [face.bbox for face in sorted_faces]
+                    embed_faces.append(crop_image(image[i], face_info.bbox, margin=10))
+                    draw_embed_face_bbox.append(image_to_tensor(draw_on(image[i], sorted_faces)).unsqueeze(0))
+                    break
+            else:
+                # No face detected, skip this image
+                logging.warning(f'Warning: No face detected in image {str(i)}')
+                continue
+
+            if input_face_align_mode == 1:
+                image_size = 512
+                M = face_align.estimate_norm(face_info.kps, image_size=image_size)
+                align_face = cv2.warpAffine(image[i], M, (image_size, image_size), borderMode=cv2.BORDER_CONSTANT, borderValue=(135, 133, 132))
+                # align_face = face_align.norm_crop(image[i], landmark=face_info.kps, image_size=image_size)
+                del M
+            else:
+                # get eva_clip embeddings
+                face_helper.clean_all()
+                face_helper.read_image(image[i])
+                face_helper.get_face_landmarks_5(ref_sort_bboxes=bboxes, face_index=input_face_index)
+                face_helper.align_warp_face()
+
+                if len(face_helper.cropped_faces) == 0:
+                    # No face detected, skip this image
+                    continue
+
+                # Get aligned face image
+                align_face = face_helper.cropped_faces[0]
+                del face_helper
+            align_faces.append(image_to_tensor(align_face).unsqueeze(0))
+            del bboxes, align_face
+        del image
+        if len(embed_faces) == 0:
+            # No face detected, skip this image
+            logging.warning(f'Warning: No embed face detected in image')
+        if  len(align_faces) == 0:
+            logging.warning(f'Warning: No align face detected in image')
+        return embed_faces, align_faces, draw_embed_face_bbox,
+
+
+def crop_image(image, bbox, margin=0):
+    if len(image.shape) == 3:
+        image = image[None, ...]
+    image = image_to_tensor(image)
+    x, y, x1, y1 = bbox.astype(int)
+    w = x1 - x
+    h = y1 - y
+    image_height = image.shape[1]
+    image_width = image.shape[2]
+    # 左上角坐标
+    x = min(x, image_width)
+    y = min(y, image_height)
+    # 右下角坐标
+    to_x = min(w + x + margin, image_width)
+    to_y = min(h + y + margin, image_height)
+    # 防止越界
+    x = max(0, x - margin)
+    y = max(0, y - margin)
+    to_x = max(0, to_x)
+    to_y = max(0, to_y)
+    # 按区域截取图片
+    crop_img = image[:, y:to_y, x:to_x, :]
+    return crop_img
+
+
 def set_hook(diffusion_model, target_forward_orig):
     # comfy.ldm.flux.model.Flux.old_forward_orig_for_pulid = comfy.ldm.flux.model.Flux.forward_orig
     # comfy.ldm.flux.model.Flux.forward_orig = pulid_forward_orig
@@ -433,6 +649,8 @@ NODE_CLASS_MAPPINGS = {
     "PulidFluxEvaClipLoader": PulidFluxEvaClipLoader,
     "ApplyPulidFlux": ApplyPulidFlux,
     "FixPulidFluxPatch": FixPulidFluxPatch,
+    "PulidFluxOptions": PulidFluxOptions,
+    "PulidFluxFaceDetector": PulidFluxFaceDetector,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -441,4 +659,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PulidFluxEvaClipLoader": "Load Eva Clip (PuLID Flux)",
     "ApplyPulidFlux": "Apply PuLID Flux",
     "FixPulidFluxPatch": "Fix PuLID Flux Patch",
+    "PulidFluxOptions": "Pulid Flux Options",
+    "PulidFluxFaceDetector": "Pulid Flux Face Detector",
 }

@@ -344,11 +344,14 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
         if util.is_chinese(scene_additional_prompt) and not scene_frontend['task_method'][scene_theme].lower().endswith('_cn'):
             scene_additional_prompt = minicpm.translate(scene_additional_prompt, 'Slim Model')
         resize_image_flag = True
+        mask_color_flag = False
         preprocessor_methods = modules.flags.get_value_by_scene_theme(state_params, scene_theme, 'image_preprocessor_method', [])
         if len(preprocessor_methods)>0:
             for preprocessor_method in preprocessor_methods:
                 if '-normalization' in preprocessor_method:
                     resize_image_flag = False
+                if 'mask_color' in preprocessor_method:
+                    mask_color_flag = True
         if scene_input_image1 is not None:
             scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
         if scene_input_image2 is not None:
@@ -356,8 +359,11 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
 
         if scene_canvas_image is not None:
             scene_canvas_image['image'] = util.resize_image(util.HWC3(scene_canvas_image['image']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
-            scene_canvas_image['mask'] = scene_canvas_image['mask'][:, :, 0]
-            scene_canvas_image['mask'] = util.resize_image(util.HWC3(scene_canvas_image['mask']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['mask']
+            mask = scene_canvas_image['mask'][:, :, 0]
+            if not mask_color_flag and mask.mode == "RGBA":  # whiten any opaque pixels in the mask
+                alpha_data = mask.getchannel("A").convert("L")
+                mask = _Image.merge("RGB", [alpha_data, alpha_data, alpha_data])
+            scene_canvas_image['mask'] = util.resize_image(util.HWC3(mask), max_side=1280, resize_mode=4) if resize_image_flag else mask
         backend_params.update(dict(
             task_method=f'scene_{scene_frontend["task_method"][scene_theme]}',
             scene_frontend=scene_frontend['version'],

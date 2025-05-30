@@ -30,7 +30,7 @@ def set_model_dit_patch_replace(model, patch_kwargs, key):
         to["patches_replace"]["dit"][key].add(pulid_patch, **patch_kwargs)
 
 def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, mask=None, transformer_options={}):
-    pulid_img = weight * pulid_model.model.pulid_ca[ca_idx](embedding, img)
+    pulid_img = weight * pulid_model.model.pulid_ca[ca_idx].to(img.device)(embedding, img)
     if mask is not None:
         pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
         latent_image_shape = pulid_temp_attrs.get("latent_image_shape", None)
@@ -40,8 +40,8 @@ def pulid_patch(img, pulid_model=None, ca_idx=None, weight=1.0, embedding=None, 
             patch_size = transformer_options[PatchKeys.running_net_model].patch_size
             mask = comfy.ldm.common_dit.pad_to_patch_size(mask, (patch_size, patch_size))
             mask = rearrange(mask, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
-            # (b, seq_len, _) =>(b, seq_len, seq_len)
-            mask = mask[..., 0].unsqueeze(-1).repeat(1, 1, mask.shape[1]).to(dtype=pulid_img.dtype)
+            # (b, seq_len, _) =>(b, seq_len, pulid.dim)
+            mask = mask[..., 0].unsqueeze(-1).repeat(1, 1, pulid_img.shape[-1]).to(dtype=pulid_img.dtype)
             del patch_size, latent_image_shape
 
         pulid_img = pulid_img * mask
@@ -65,12 +65,12 @@ class DitDoubleBlockReplace:
     def __call__(self, input_args, extra_options):
         transformer_options = extra_options["transformer_options"]
         pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
-        sigma = pulid_temp_attrs["timesteps"].detach().cpu().item()
+        sigma = pulid_temp_attrs["timesteps"][0].detach().cpu().item()
         out = extra_options["original_block"](input_args)
         img = out['img']
         temp_img = img
         for i, callback in enumerate(self.callback):
-            if sigma <= self.kwargs[i]["sigma_start"] and sigma >= self.kwargs[i]["sigma_end"]:
+            if self.kwargs[i]["sigma_start"] >= sigma >= self.kwargs[i]["sigma_end"]:
                 img = img + callback(temp_img,
                                      pulid_model=self.kwargs[i]['pulid_model'],
                                      ca_idx=self.kwargs[i]['ca_idx'],
@@ -118,7 +118,7 @@ class DitSingleBlockReplace:
         real_img, txt = img[:, txt.shape[1]:, ...], img[:, :txt.shape[1], ...]
         temp_img = real_img
         for i, callback in enumerate(self.callback):
-            if sigma <= self.kwargs[i]["sigma_start"] and sigma >= self.kwargs[i]["sigma_end"]:
+            if self.kwargs[i]["sigma_start"] >= sigma >= self.kwargs[i]["sigma_end"]:
                 real_img = real_img + callback(temp_img,
                                                pulid_model=self.kwargs[i]['pulid_model'],
                                                ca_idx=self.kwargs[i]['ca_idx'],
@@ -159,9 +159,8 @@ def pulid_forward_orig(
     img = self.img_in(img)
     vec = self.time_in(timestep_embedding(timesteps, 256).to(img.dtype))
     if self.params.guidance_embed:
-        if guidance is None:
-            raise ValueError("Didn't get guidance strength for guidance distilled model.")
-        vec = vec + self.guidance_in(timestep_embedding(guidance, 256).to(img.dtype))
+        if guidance is not None:
+            vec = vec + self.guidance_in(timestep_embedding(guidance, 256).to(img.dtype))
 
     vec = vec + self.vector_in(y)
     txt = self.txt_in(txt)
@@ -170,9 +169,6 @@ def pulid_forward_orig(
     pe = self.pe_embedder(ids)
 
     blocks_replace = patches_replace.get("dit", {})
-
-    # pulid_temp_attrs = transformer_options.get(PatchKeys.pulid_patch_key_attrs, {})
-    # pulid_temp_attrs['timesteps'] = timesteps
 
     for i, block in enumerate(self.double_blocks):
         # 0 -> 18
@@ -211,8 +207,6 @@ def pulid_forward_orig(
                 add = control_i[i]
                 if add is not None:
                     img += add
-
-    # pulid_temp_attrs['double_blocks_txt'] = txt
 
     img = torch.cat((txt, img), 1)
 

@@ -239,7 +239,9 @@ def get_pretrained_url(model: str, tag: str):
 def download_pretrained_from_url(
         url: str,
         cache_dir: Union[str, None] = None,
+        local_dir: Union[str, None] = None,
 ):
+    cache_dir = local_dir if not local_dir else cache_dir
     if not cache_dir:
         cache_dir = os.path.expanduser("~/.cache/clip")
     os.makedirs(cache_dir, exist_ok=True)
@@ -295,9 +297,10 @@ def download_pretrained_from_hf(
         filename: str = 'open_clip_pytorch_model.bin',
         revision=None,
         cache_dir: Union[str, None] = None,
+        local_dir: Union[str, None] = None,
 ):
     has_hf_hub(True)
-    cached_file = hf_hub_download(model_id, filename, revision=revision, cache_dir=cache_dir)
+    cached_file = hf_hub_download(model_id, filename, revision=revision, cache_dir=cache_dir, local_dir=local_dir)
     return cached_file
 
 
@@ -305,6 +308,7 @@ def download_pretrained(
         cfg: Dict,
         force_hf_hub: bool = False,
         cache_dir: Union[str, None] = None,
+        local_dir: Union[str, None] = None,
 ):
     target = ''
     if not cfg:
@@ -317,16 +321,20 @@ def download_pretrained(
         download_url = ''
 
     if download_url:
-        target = download_pretrained_from_url(download_url, cache_dir=cache_dir)
+        target = download_pretrained_from_url(download_url, cache_dir=cache_dir, local_dir=local_dir)
     elif download_hf_hub:
         has_hf_hub(True)
         # we assume the hf_hub entries in pretrained config combine model_id + filename in
         # 'org/model_name/filename.pt' form. To specify just the model id w/o filename and
         # use 'open_clip_pytorch_model.bin' default, there must be a trailing slash 'org/model_name/'.
         model_id, filename = os.path.split(download_hf_hub)
+        if local_dir is not None:
+            full_model_path = os.path.join(local_dir, filename)
+            if os.path.exists(full_model_path):
+                return full_model_path
         if filename:
-            target = download_pretrained_from_hf(model_id, filename=filename, cache_dir=cache_dir)
+            target = download_pretrained_from_hf(model_id, filename=filename, cache_dir=cache_dir, local_dir=local_dir)
         else:
-            target = download_pretrained_from_hf(model_id, cache_dir=cache_dir)
+            target = download_pretrained_from_hf(model_id, cache_dir=cache_dir, local_dir=local_dir)
 
     return target
