@@ -157,7 +157,7 @@
   },
   "47": {
     "inputs": {
-      "model_name": "4x-UltraSharp.pth"
+      "model_name": "4xNomos8kSCHAT-L.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -307,7 +307,7 @@
         1
       ],
       "interpolation": "lanczos",
-      "method": "keep proportion",
+      "method": "stretch",
       "condition": "always",
       "multiple_of": 0,
       "image": [
@@ -590,7 +590,7 @@
       "detect": "mask_area",
       "x_adjust": 0,
       "y_adjust": 0,
-      "scale_adjust": 1.2000000000000002,
+      "scale_adjust": 1.3000000000000003,
       "mask": [
         "107",
         0
@@ -634,8 +634,8 @@
         0
       ],
       "mask": [
-        "124",
-        0
+        "134",
+        1
       ],
       "origin": [
         "113",
@@ -671,38 +671,6 @@
       "title": "Cut For Inpaint"
     }
   },
-  "116": {
-    "inputs": {
-      "mask": [
-        "113",
-        1
-      ]
-    },
-    "class_type": "InvertMask",
-    "_meta": {
-      "title": "InvertMask"
-    }
-  },
-  "117": {
-    "inputs": {
-      "boolean": [
-        "104",
-        0
-      ],
-      "on_true": [
-        "116",
-        0
-      ],
-      "on_false": [
-        "113",
-        1
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "119": {
     "inputs": {
       "samples": [
@@ -710,8 +678,8 @@
         0
       ],
       "mask": [
-        "107",
-        0
+        "134",
+        1
       ]
     },
     "class_type": "SetLatentNoiseMask",
@@ -774,33 +742,6 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
-    }
-  },
-  "124": {
-    "inputs": {
-      "amount": 50,
-      "device": "auto",
-      "mask": [
-        "117",
-        0
-      ]
-    },
-    "class_type": "MaskBlur+",
-    "_meta": {
-      "title": "🔧 Mask Blur"
-    }
-  },
-  "128": {
-    "inputs": {
-      "preview": "1886",
-      "source": [
-        "122",
-        0
-      ]
-    },
-    "class_type": "PreviewAny",
-    "_meta": {
-      "title": "Preview Any"
     }
   },
   "130": {
@@ -866,6 +807,96 @@
     "class_type": "LoadInputImage",
     "_meta": {
       "title": "LoadInputImage"
+    }
+  },
+  "134": {
+    "inputs": {
+      "expand": 0,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 30,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "145",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "135": {
+    "inputs": {
+      "width": [
+        "138",
+        0
+      ],
+      "height": [
+        "138",
+        1
+      ],
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "138": {
+    "inputs": {
+      "image": [
+        "113",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "142": {
+    "inputs": {
+      "left": 80,
+      "top": 80,
+      "right": 80,
+      "bottom": 80,
+      "feathering": 0,
+      "image": [
+        "135",
+        0
+      ]
+    },
+    "class_type": "ImagePadForOutpaintMasked",
+    "_meta": {
+      "title": "Image Pad For Outpaint Masked"
+    }
+  },
+  "145": {
+    "inputs": {
+      "width": [
+        "138",
+        0
+      ],
+      "height": [
+        "138",
+        1
+      ],
+      "keep_proportions": false,
+      "upscale_method": "nearest-exact",
+      "crop": "disabled",
+      "mask": [
+        "142",
+        1
+      ]
+    },
+    "class_type": "ResizeMask",
+    "_meta": {
+      "title": "Resize Mask"
     }
   }
 }
