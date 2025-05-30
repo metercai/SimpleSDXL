@@ -187,7 +187,7 @@ def prepare_environment():
                 run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.30")
 
     if platform.system() == "Darwin":
-        requirements_file = "requirements_macos.txt"
+        requirements_file = "requirements_darwin.txt"
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
             for p in met_diff.keys():
@@ -198,9 +198,6 @@ def prepare_environment():
         else:
             run_pip(f"install -r \"{requirements_file}\"", "requirements")
 
-    patch_requirements = "requirements_patch.txt"
-    if (REINSTALL_ALL or not requirements_met(patch_requirements)) and not is_win32_standalone_build:
-        run_pip(f"install -r \"{patch_requirements}\"", "requirements patching")
     return
 
 def ini_args():

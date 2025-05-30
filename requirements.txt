@@ -6,7 +6,7 @@ accelerate==1.6.0 #0.32.1
 av==14.2
 bitsandbytes==0.45.5 #0.43.3
 colour-science
-cuda-python==11.7.1
+#cuda-python==11.7.1
 download==0.3.5
 einops==0.8.0
 ftfy
@@ -27,8 +27,8 @@ open-clip-torch>=2.17.1
 omegaconf==2.3.0 #
 onnx==1.14.0
 onnxruntime==1.20.1 #
-onnxruntime-gpu==1.20.1
-onnx-graphsurgeon==0.3.27
+#onnxruntime-gpu==1.20.1
+#onnx-graphsurgeon==0.3.27
 peft==0.10.0
 Pillow #==10.4.0 #
 pixeloe
@@ -73,3 +73,5 @@ blind-watermark
 qrcode
 pyzbar
 transparent-background
+facexlib
+insightface

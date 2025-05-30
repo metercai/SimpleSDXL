@@ -1,0 +1,8 @@
+cuda-python==11.7.1
+onnxruntime==1.20.1
+onnxruntime-gpu==1.20.1
+onnx-graphsurgeon==0.3.27
+polygraphy==0.47.1
+protobuf==3.19.0
+nvidia-pyindex==1.0.9
+flash-attn
