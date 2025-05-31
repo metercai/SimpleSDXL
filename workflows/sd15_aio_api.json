@@ -2838,7 +2838,7 @@
         3
       ],
       "keep_proportions": false,
-      "upscale_method": "lanczos",
+      "upscale_method": "area",
       "crop": "disabled",
       "mask": [
         "297",
