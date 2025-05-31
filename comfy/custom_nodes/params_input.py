@@ -6,6 +6,7 @@ import node_helpers
 
 from comfy.samplers import SAMPLER_NAMES, SCHEDULER_NAMES
 from PIL import Image, ImageOps, ImageSequence
+from sklearn.cluster import MiniBatchKMeans
 
 MAX_SEED_NUM = 1125899906842624
 MAX_RESOLUTION=32768
@@ -231,9 +232,54 @@ class LoadInputImage:
 
         return True
 
+class SceneMaskColorInput:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "image": ("IMAGE", ),
+                }}
+
+    CATEGORY = "api/input"
+
+    RETURN_TYPES = ("STRING", )
+    RETURN_NAMES = ("color", )
+
+    FUNCTION = "mask_color"
+
+    def mask_color(self, image):
+        image = np.array(image)
+        if image.dtype != np.uint8:
+            image = (image * 255).clip(0, 255).astype(np.uint8)
+        if image.shape[-1] == 4:
+            image = image[..., :3]
+        pixels = image.reshape(-1, 3)
+        non_black_pixels = pixels[np.any(pixels > 0, axis=1)]
+        if len(non_black_pixels) == 0:
+            return ("#FFFFFF",)
+
+        k = min(3, len(non_black_pixels))
+        sample_size = min(5000, len(non_black_pixels))
+        indices = np.random.choice(non_black_pixels.shape[0], size=sample_size, replace=False)
+        sampled_pixels = non_black_pixels[indices]
+        kmeans = MiniBatchKMeans(n_clusters=k, batch_size=512, n_init=3)
+        kmeans.fit(sampled_pixels)
+
+        cluster_counts = np.bincount(kmeans.labels_)
+        sorted_indices = np.argsort(cluster_counts)[::-1]
+        
+        for idx in sorted_indices:
+            cluster_center = np.round(kmeans.cluster_centers_[idx]).astype(int)
+            if not (cluster_center[0] == 0 and cluster_center[1] == 0 and cluster_center[2] == 0):
+                hex_color = '#{:02X}{:02X}{:02X}'.format(*cluster_center)
+                return (hex_color,)
+
+        return ("#FFFFFF", )
+
+
 NODE_CLASS_MAPPINGS = {
     "GeneralInput": GeneralInput,
     "SceneInput": SceneInput,
+    "SceneMaskColorInput": SceneMaskColorInput,
     "SeedInput": SeedInput,
     "LoadInputImage": LoadInputImage,
     "EnhanceUovInput": EnhanceUovInput,

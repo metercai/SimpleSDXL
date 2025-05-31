@@ -359,10 +359,14 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
 
         if scene_canvas_image is not None:
             scene_canvas_image['image'] = util.resize_image(util.HWC3(scene_canvas_image['image']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
-            mask = scene_canvas_image['mask'][:, :, 0]
-            if not mask_color_flag and mask.mode == "RGBA":  # whiten any opaque pixels in the mask
-                alpha_data = mask.getchannel("A").convert("L")
-                mask = _Image.merge("RGB", [alpha_data, alpha_data, alpha_data])
+            mask = scene_canvas_image['mask']
+            if not mask_color_flag and mask.shape[2] == 4:
+                alpha = mask[:, :, 3]
+                h, w = alpha.shape
+                mask = np.zeros((h, w, 3), dtype=np.uint8)
+                mask[:, :, 0] = alpha
+                mask[:, :, 1] = alpha
+                mask[:, :, 2] = alpha
             scene_canvas_image['mask'] = util.resize_image(util.HWC3(mask), max_side=1280, resize_mode=4) if resize_image_flag else mask
         backend_params.update(dict(
             task_method=f'scene_{scene_frontend["task_method"][scene_theme]}',
