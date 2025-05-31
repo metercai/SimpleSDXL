@@ -2838,7 +2838,7 @@
         3
       ],
       "keep_proportions": false,
-      "upscale_method": "lanczos",
+      "upscale_method": "area",
       "crop": "disabled",
       "mask": [
         "297",
@@ -5124,7 +5124,7 @@
   },
   "477": {
     "inputs": {
-      "model_name": "RealESRGAN_x4plus_anime_6B.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
