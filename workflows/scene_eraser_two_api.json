@@ -39,7 +39,7 @@
   },
   "309": {
     "inputs": {
-      "lora_name": "fill_remove.safetensors",
+      "lora_name": "removal_timestep_alpha-2-1740.safetensors",
       "strength_model": 1.0000000000000002,
       "model": [
         "334",

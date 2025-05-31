@@ -1591,7 +1591,7 @@ packages = {
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("vae/ae.safetensors", 335304388),
-            ("loras/fill_remove.safetensors",104667792),
+            ("loras/removal_timestep_alpha-2-1740.safetensors",89746016),
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
@@ -1697,6 +1697,25 @@ packages = {
             "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/llava_llama3_fp8_scaled.safetensors",
             "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
         ]
+    },
+        "ICEdit_package": {
+        "id": 26,
+        "name": "[26]ICEdit图像编辑扩展包",
+        "note": "实现使用自然语言编辑图像|显存需求：★★★ 速度：★★",
+        "files": [
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
+            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp16.safetensors", 9787841024),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("vae/ae.safetensors", 335304388),
+            ("style_models/flux1-redux-dev.safetensors", 129063232),
+            ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661),
+            ("loras/ICEdit-normal-lora.safetensors", 231918592)
+        ],
+        "download_links": [
+        "【选配】模型文件基于FluxAIO扩展包。部分文件、Lora点击生成会自动下载。"
+        ]
     }
 }
 
@@ -1775,7 +1794,8 @@ OBSOLETE_MODELS = [
     "noob_sdxl_controlnet_depth.fp16.safetensors",
     "noob_sdxl_controlnet_pose.fp16.safetensors",
     "NoobAI-XL-v1.1.safetensors",
-    "clip-vit-h-14-laion2B-s32B-b79K.safetensors"
+    "clip-vit-h-14-laion2B-s32B-b79K.safetensors",
+    "fill_remove.safetensors"
 ]
 def main():
     print()
