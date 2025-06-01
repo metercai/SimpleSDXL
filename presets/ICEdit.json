@@ -6,26 +6,26 @@
 	"available_aspect_ratios_selection": "Flux",
 	"scene_frontend": {
 	    "version": "m1.1",
-	    "theme": ["ICedit"],
+	    "theme": ["ICEdit"],
 	    "theme_title": "使用自然语言指令进行图像编辑[支持涂抹蒙版]",
             "disvisible": ["scene_additional_prompt", "scene_additional_prompt_2", "scene_aspect_ratio", "scene_input_image1", "scene_var_number", "scene_input_image2"],
 	    "prompt": {
-            "ICedit": ""
+            "ICEdit": ""
 	    },
 	    "additional_prompt": {
-            "ICedit": ""
+            "ICEdit": ""
 	    },
-	    "additional_prompt_title": "",
+	    "additional_prompt_title_2": "",
 	    "multimodal_prompt": {
-            "ICedit": ""
+            "ICEdit": ""
 	    },
 	    "image_preprocessor_method": [["-normalization"]],
 	    "aspect_ratio" : ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
 	    "task_method": {
-            "ICedit": "ICEF"
+            "ICEdit": "ICEF"
 	    },
         "scene_steps": {
-            "ICedit": 20
+            "ICEdit": 20
         }
     	}
     },
