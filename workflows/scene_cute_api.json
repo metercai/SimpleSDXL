@@ -74,6 +74,9 @@
   "33": {
     "inputs": {
       "inputcount": 2,
+      "delimiter": "",
+      "return_list": "",
+      "Update inputs": " ",
       "string_1": [
         "32",
         0
@@ -81,10 +84,7 @@
       "string_2": [
         "98",
         0
-      ],
-      "delimiter": " ",
-      "return_list": false,
-      "Update inputs": null
+      ]
     },
     "class_type": "JoinStringMulti",
     "_meta": {
@@ -247,7 +247,7 @@
   },
   "56": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         0
@@ -260,7 +260,7 @@
   },
   "57": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         1
@@ -388,6 +388,10 @@
       "image": [
         "10",
         0
+      ],
+      "clip_vision": [
+        "106",
+        0
       ]
     },
     "class_type": "easy ipadapterApplyADV",
@@ -492,16 +496,16 @@
   },
   "98": {
     "inputs": {
-      "prompt": [
-        "34",
-        4
-      ],
       "find1": "realistic",
       "replace1": " ",
       "find2": "",
       "replace2": "",
       "find3": "",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "34",
+        4
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -565,6 +569,15 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
+    }
+  },
+  "106": {
+    "inputs": {
+      "clip_name": "clip_vision_vit_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
     }
   }
 }
