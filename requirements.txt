@@ -4,7 +4,8 @@ torchsde==0.2.6 #
 
 accelerate==1.6.0 #0.32.1
 av==14.2
-bitsandbytes==0.45.5 #0.43.3
+bitsandbytes==0.42.0; platform_system == "Darwin"
+bitsandbytes==0.45.5; platform_system == "Linux" or platform_system == "Windows"
 colour-science
 #cuda-python==11.7.1
 download==0.3.5
