@@ -505,7 +505,7 @@
         "91",
         4
       ],
-      "image": "QR-codes-combine2.jpg"
+      "image": "None"
     },
     "class_type": "LoadInputImage",
     "_meta": {
@@ -523,7 +523,7 @@
   },
   "95": {
     "inputs": {
-      "positive": "light and shadow,masterpiece, best quality,"
+      "positive": "masterpiece, best quality,"
     },
     "class_type": "easy positive",
     "_meta": {
@@ -1151,7 +1151,7 @@
         "91",
         5
       ],
-      "image": "2025-06-01_19-21-22_8183.jpg"
+      "image": "None"
     },
     "class_type": "LoadInputImage",
     "_meta": {
