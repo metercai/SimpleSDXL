@@ -408,7 +408,7 @@
       "end": 1,
       "max_consecutive_cache_hits": -1,
       "model": [
-        "78",
+        "212",
         0
       ]
     },
@@ -451,7 +451,7 @@
   },
   "84": {
     "inputs": {
-      "downsampling_factor": 1,
+      "downsampling_factor": 2,
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
@@ -538,7 +538,7 @@
   "92": {
     "inputs": {
       "images": [
-        "132",
+        "180",
         0
       ]
     },
@@ -612,7 +612,7 @@
         0
       ],
       "on_false": [
-        "113",
+        "179",
         0
       ]
     },
@@ -634,8 +634,8 @@
         0
       ],
       "mask": [
-        "134",
-        1
+        "211",
+        0
       ],
       "origin": [
         "113",
@@ -678,7 +678,7 @@
         0
       ],
       "mask": [
-        "134",
+        "228",
         1
       ]
     },
@@ -809,34 +809,97 @@
       "title": "LoadInputImage"
     }
   },
-  "134": {
+  "179": {
     "inputs": {
-      "expand": 0,
-      "incremental_expandrate": 0,
-      "tapered_corners": true,
-      "flip_input": false,
-      "blur_radius": 30,
-      "lerp_alpha": 1,
-      "decay_factor": 1,
-      "fill_holes": false,
-      "mask": [
-        "145",
+      "boolean": [
+        "122",
+        0
+      ],
+      "on_true": [
+        "113",
+        0
+      ],
+      "on_false": [
+        "130",
         0
       ]
     },
-    "class_type": "GrowMaskWithBlur",
+    "class_type": "easy ifElse",
     "_meta": {
-      "title": "Grow Mask With Blur"
+      "title": "If else"
     }
   },
-  "135": {
+  "180": {
+    "inputs": {
+      "boolean": [
+        "104",
+        0
+      ],
+      "on_true": [
+        "81",
+        0
+      ],
+      "on_false": [
+        "132",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "182": {
+    "inputs": {
+      "mask": [
+        "186",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "185": {
     "inputs": {
       "width": [
-        "138",
+        "122",
         0
       ],
       "height": [
-        "138",
+        "122",
+        0
+      ],
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "186": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "185",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "188": {
+    "inputs": {
+      "width": [
+        "189",
+        0
+      ],
+      "height": [
+        "189",
         1
       ],
       "batch_size": 1,
@@ -847,10 +910,10 @@
       "title": "EmptyImage"
     }
   },
-  "138": {
+  "189": {
     "inputs": {
       "image": [
-        "113",
+        "130",
         0
       ]
     },
@@ -859,44 +922,179 @@
       "title": "🔧 Get Image Size"
     }
   },
-  "142": {
-    "inputs": {
-      "left": 80,
-      "top": 80,
-      "right": 80,
-      "bottom": 80,
-      "feathering": 0,
-      "image": [
-        "135",
-        0
-      ]
-    },
-    "class_type": "ImagePadForOutpaintMasked",
-    "_meta": {
-      "title": "Image Pad For Outpaint Masked"
-    }
-  },
-  "145": {
+  "190": {
     "inputs": {
       "width": [
-        "138",
+        "122",
         0
       ],
       "height": [
-        "138",
+        "122",
+        0
+      ],
+      "image": [
+        "188",
+        0
+      ],
+      "mask": [
+        "107",
+        0
+      ]
+    },
+    "class_type": "CutForInpaint",
+    "_meta": {
+      "title": "Cut For Inpaint"
+    }
+  },
+  "192": {
+    "inputs": {
+      "kernel": 5,
+      "sigma": 10,
+      "inpaint": [
+        "194",
+        0
+      ],
+      "original": [
+        "188",
+        0
+      ],
+      "mask": [
+        "202",
+        0
+      ],
+      "origin": [
+        "190",
+        2
+      ]
+    },
+    "class_type": "BlendInpaint",
+    "_meta": {
+      "title": "Blend Inpaint"
+    }
+  },
+  "194": {
+    "inputs": {
+      "image": [
+        "190",
+        0
+      ]
+    },
+    "class_type": "ImageInvert",
+    "_meta": {
+      "title": "Invert Image"
+    }
+  },
+  "202": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "194",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "206": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "192",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "211": {
+    "inputs": {
+      "expand": -50,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 15,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
+      "mask": [
+        "206",
+        0
+      ]
+    },
+    "class_type": "GrowMaskWithBlur",
+    "_meta": {
+      "title": "Grow Mask With Blur"
+    }
+  },
+  "212": {
+    "inputs": {
+      "model": [
+        "78",
+        0
+      ]
+    },
+    "class_type": "DifferentialDiffusion",
+    "_meta": {
+      "title": "Differential Diffusion"
+    }
+  },
+  "219": {
+    "inputs": {
+      "width": [
+        "69",
         1
       ],
-      "keep_proportions": false,
-      "upscale_method": "nearest-exact",
-      "crop": "disabled",
+      "height": [
+        "69",
+        2
+      ],
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "225": {
+    "inputs": {
+      "left": 40,
+      "top": 40,
+      "right": 40,
+      "bottom": 40,
+      "feathering": 0,
+      "image": [
+        "219",
+        0
+      ]
+    },
+    "class_type": "ImagePadForOutpaint",
+    "_meta": {
+      "title": "Pad Image for Outpainting"
+    }
+  },
+  "228": {
+    "inputs": {
+      "expand": 0,
+      "incremental_expandrate": 0,
+      "tapered_corners": true,
+      "flip_input": false,
+      "blur_radius": 50,
+      "lerp_alpha": 1,
+      "decay_factor": 1,
+      "fill_holes": false,
       "mask": [
-        "142",
+        "225",
         1
       ]
     },
-    "class_type": "ResizeMask",
+    "class_type": "GrowMaskWithBlur",
     "_meta": {
-      "title": "Resize Mask"
+      "title": "Grow Mask With Blur"
     }
   }
 }
