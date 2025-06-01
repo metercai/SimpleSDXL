@@ -139,11 +139,15 @@ met_diff = {}
 def requirements_met(requirements_file):
     global met_diff
 
+    import platform
+
     met_diff = {}
     result = True
     with open(requirements_file, "r", encoding="utf8") as file:
         for line in file:
             if line.strip() == "":
+                continue
+            if 'platform_system' in line and platform.system() not in line:
                 continue
 
             m = re.match(re_requirement, line)
