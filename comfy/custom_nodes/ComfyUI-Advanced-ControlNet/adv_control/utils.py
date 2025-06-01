@@ -3,22 +3,29 @@ from typing import Callable, Union
 import torch
 from torch import Tensor
 import torch.nn.functional
+from einops import rearrange
 import numpy as np
 import math
 
 import comfy.ops
 import comfy.utils
-import comfy.sample
-import comfy.samplers
-import comfy.model_base
 
-from comfy.controlnet import ControlBase, broadcast_image_to
+from comfy.controlnet import ControlBase
 from comfy.model_patcher import ModelPatcher
+from comfy.sd import VAE
 
 from .logger import logger
 
 BIGMIN = -(2**53-1)
 BIGMAX = (2**53-1)
+BIGMAX_TENSOR = torch.tensor(9999999999.9)
+
+ORIG_PREVIOUS_CONTROLNET = "_orig_previous_controlnet"
+CONTROL_INIT_BY_ACN = "_control_init_by_ACN"
+
+class Extras:
+    MIDDLE_MULT = "middle_mult"
+
 
 def load_torch_file_with_dict_factory(controlnet_data: dict[str, Tensor], orig_load_torch_file: Callable):
     def load_torch_file_with_dict(*args, **kwargs):
@@ -27,107 +34,14 @@ def load_torch_file_with_dict_factory(controlnet_data: dict[str, Tensor], orig_l
         return controlnet_data
     return load_torch_file_with_dict
 
-# wrapping len function so that it will save the thing len is trying to get the length of;
-# this will be assumed to be the cond_or_uncond variable;
-# automatically restores len to original function after running
-def wrapper_len_factory(orig_len: Callable) -> Callable:
-    def wrapper_len(*args, **kwargs):
-        cond_or_uncond = args[0]
-        real_length = orig_len(*args, **kwargs)
-        if real_length > 0 and type(cond_or_uncond) == list and (cond_or_uncond[0] in [0, 1]):
-            try:
-                to_return = IntWithCondOrUncond(real_length)
-                setattr(to_return, "cond_or_uncond", cond_or_uncond)
-                return to_return
-            finally:
-                __builtins__["len"] = orig_len
-        else:
-            return real_length
-    return wrapper_len
 
-# wrapping cond_cat function so that it will wrap around len function to get cond_or_uncond variable value
-# from comfy.samplers.calc_conds_batch
-def wrapper_cond_cat_factory(orig_cond_cat: Callable):
-    def wrapper_cond_cat(*args, **kwargs):
-        __builtins__["len"] = wrapper_len_factory(__builtins__["len"])
-        return orig_cond_cat(*args, **kwargs)
-    return wrapper_cond_cat
-orig_cond_cat = comfy.samplers.cond_cat
-comfy.samplers.cond_cat = wrapper_cond_cat_factory(orig_cond_cat)
+CURRENT_WRAPPER_VERSION = 10002
 
-
-# wrapping apply_model so that len function will be cleaned up fairly soon after being injected
-def apply_model_uncond_cleanup_factory(orig_apply_model, orig_len):
-    def apply_model_uncond_cleanup_wrapper(self, *args, **kwargs):
-        __builtins__["len"] = orig_len
-        return orig_apply_model(self, *args, **kwargs)
-    return apply_model_uncond_cleanup_wrapper
-global_orig_len = __builtins__["len"]
-orig_apply_model = comfy.model_base.BaseModel.apply_model
-comfy.model_base.BaseModel.apply_model = apply_model_uncond_cleanup_factory(orig_apply_model, global_orig_len)
-
-
-def uncond_multiplier_check_cn_sample_factory(orig_comfy_sample: Callable, is_custom=False) -> Callable:
-    def contains_uncond_multiplier(control: Union[ControlBase, 'AdvancedControlBase']):
-        if control is None:
-            return False
-        if not isinstance(control, AdvancedControlBase):
-            return contains_uncond_multiplier(control.previous_controlnet)
-        # check if weights_override has an uncond_multiplier
-        if control.weights_override is not None and control.weights_override.has_uncond_multiplier:
-            return True
-        # check if any timestep_keyframes have an uncond_multiplier on their weights
-        if control.timestep_keyframes is not None:
-            for tk in control.timestep_keyframes.keyframes:
-                if tk.has_control_weights() and tk.control_weights.has_uncond_multiplier:
-                    return True
-        return contains_uncond_multiplier(control.previous_controlnet)
-
-    # check if positive or negative conds contain Adv. Cns that use multiply_negative on weights
-    def uncond_multiplier_check_cn_sample(model: ModelPatcher, *args, **kwargs):
-        positive = args[-3]
-        negative = args[-2]
-        has_uncond_multiplier = False
-        if positive is not None:
-            for cond in positive:
-                if "control" in cond[1]:
-                    has_uncond_multiplier = contains_uncond_multiplier(cond[1]["control"])
-                    if has_uncond_multiplier:
-                        break
-        if negative is not None and not has_uncond_multiplier:
-            for cond in negative:
-                if "control" in cond[1]:
-                    has_uncond_multiplier = contains_uncond_multiplier(cond[1]["control"])
-                    if has_uncond_multiplier:
-                        break
-        try:
-            # if uncond_multiplier found, continue to use wrapped version of function
-            if has_uncond_multiplier:
-                return orig_comfy_sample(model, *args, **kwargs)
-            # otherwise, use original version of function to prevent even the smallest of slowdowns (0.XX%)
-            try:
-                wrapped_cond_cat = comfy.samplers.cond_cat
-                comfy.samplers.cond_cat = orig_cond_cat
-                return orig_comfy_sample(model, *args, **kwargs)
-            finally:
-                comfy.samplers.cond_cat = wrapped_cond_cat
-        finally:
-            # make sure len function is unwrapped by the time sampling is done, just in case
-            __builtins__["len"] = global_orig_len
-    return uncond_multiplier_check_cn_sample
-# inject sample functions
-comfy.sample.sample = uncond_multiplier_check_cn_sample_factory(comfy.sample.sample)
-comfy.sample.sample_custom = uncond_multiplier_check_cn_sample_factory(comfy.sample.sample_custom, is_custom=True)
-
-
-class IntWithCondOrUncond(int):
-    def __new__(cls, *args, **kwargs):
-        return super(IntWithCondOrUncond, cls).__new__(cls, *args, **kwargs)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        self.cond_or_uncond = None
-
+class WrapperConsts:
+    ACN = "ACN"
+    VERSION = "version"
+    ACN_OUTER_SAMPLE_WRAPPER_KEY = "ACN_outer_sample_wrapper"
+    ACN_CREATE_SAMPLER_SAMPLE_WRAPPER = "create_outer_sample_wrapper"
 
 
 def get_properly_arranged_t2i_weights(initial_weights: list[float]):
@@ -144,74 +58,91 @@ class ControlWeightType:
     UNIVERSAL = "universal"
     T2IADAPTER = "t2iadapter"
     CONTROLNET = "controlnet"
+    CONTROLNETPLUSPLUS = "controlnet++"
     CONTROLLORA = "controllora"
     CONTROLLLLITE = "controllllite"
     SVD_CONTROLNET = "svd_controlnet"
     SPARSECTRL = "sparsectrl"
+    CTRLORA = "ctrlora"
 
 
 class ControlWeights:
-    def __init__(self, weight_type: str, base_multiplier: float=1.0, flip_weights: bool=False, weights: list[float]=None, weight_mask: Tensor=None,
-                 uncond_multiplier=1.0):
+    def __init__(self, weight_type: str, base_multiplier: float=1.0,
+                 weights_input: list[float]=None, weights_middle: list[float]=None, weights_output: list[float]=None,
+                 weight_func: Callable=None, weight_mask: Tensor=None,
+                 uncond_multiplier=1.0, uncond_mask: Tensor=None,
+                 extras: dict[str]={}, disable_applied_to=False):
         self.weight_type = weight_type
         self.base_multiplier = base_multiplier
-        self.flip_weights = flip_weights
-        self.weights = weights
-        if self.weights is not None and self.flip_weights:
-            self.weights.reverse()
+        self.weights_input = weights_input
+        self.weights_middle = weights_middle
+        self.weights_output = weights_output
+        self.weight_func = weight_func
         self.weight_mask = weight_mask
         self.uncond_multiplier = float(uncond_multiplier)
         self.has_uncond_multiplier = not math.isclose(self.uncond_multiplier, 1.0)
+        self.uncond_mask = uncond_mask if uncond_mask is not None else 1.0
+        self.has_uncond_mask = uncond_mask is not None
+        self.extras = extras.copy()
+        self.disable_applied_to = disable_applied_to
 
-    def get(self, idx: int, default=1.0) -> Union[float, Tensor]:
+    def get(self, idx: int, control: dict[str, list[Tensor]], key: str, default=1.0) -> Union[float, Tensor]:
+        # if weight_func present, use it
+        if self.weight_func is not None:
+            return self.weight_func(idx=idx, control=control, key=key)
+        effective_mult = 1.0
         # if weights is not none, return index
-        if self.weights is not None:
-            # this implies weights list is not aligning with expectations - will need to adjust code
-            if idx >= len(self.weights):
-                return default
-            return self.weights[idx]
-        return 1.0
+        relevant_weights = None
+        if key == "middle":
+            relevant_weights = self.weights_middle
+            effective_mult *= self.extras.get(Extras.MIDDLE_MULT, 1.0)
+        elif key == "input":
+            relevant_weights = self.weights_input
+            if relevant_weights is not None:
+                relevant_weights = list(reversed(relevant_weights))
+        else:
+            relevant_weights = self.weights_output
+        if relevant_weights is None:
+            return default * effective_mult
+        elif idx >= len(relevant_weights):
+            return default * effective_mult
+        return relevant_weights[idx] * effective_mult
 
-    def copy_with_new_weights(self, new_weights: list[float]):
-        return ControlWeights(weight_type=self.weight_type, base_multiplier=self.base_multiplier, flip_weights=self.flip_weights,
-                              weights=new_weights, weight_mask=self.weight_mask, uncond_multiplier=self.uncond_multiplier)
+    def copy_with_new_weights(self, new_weights_input: list[float]=None, new_weights_middle: list[float]=None, new_weights_output: list[float]=None,
+                              new_weight_func: Callable=None):
+        return ControlWeights(weight_type=self.weight_type, base_multiplier=self.base_multiplier,
+                              weights_input=new_weights_input, weights_middle=new_weights_middle, weights_output=new_weights_output,
+                              weight_func=new_weight_func, weight_mask=self.weight_mask,
+                              uncond_multiplier=self.uncond_multiplier,
+                              extras=self.extras, disable_applied_to=self.disable_applied_to)
 
     @classmethod
-    def default(cls):
-        return cls(ControlWeightType.DEFAULT)
+    def default(cls, extras: dict[str]={}):
+        return cls(ControlWeightType.DEFAULT, extras=extras)
 
     @classmethod
-    def universal(cls, base_multiplier: float, flip_weights: bool=False, uncond_multiplier: float=1.0):
-        return cls(ControlWeightType.UNIVERSAL, base_multiplier=base_multiplier, flip_weights=flip_weights, uncond_multiplier=uncond_multiplier)
+    def universal(cls, base_multiplier: float, uncond_multiplier: float=1.0, extras: dict[str]={}):
+        return cls(ControlWeightType.UNIVERSAL, base_multiplier=base_multiplier, uncond_multiplier=uncond_multiplier, disable_applied_to=True, extras=extras)
     
     @classmethod
-    def universal_mask(cls, weight_mask: Tensor, uncond_multiplier: float=1.0):
-        return cls(ControlWeightType.UNIVERSAL, weight_mask=weight_mask, uncond_multiplier=uncond_multiplier)
+    def universal_mask(cls, weight_mask: Tensor, uncond_multiplier: float=1.0, extras: dict[str]={}):
+        return cls(ControlWeightType.UNIVERSAL, weight_mask=weight_mask, uncond_multiplier=uncond_multiplier, disable_applied_to=True, extras=extras)
 
     @classmethod
-    def t2iadapter(cls, weights: list[float]=None, flip_weights: bool=False, uncond_multiplier: float=1.0):
-        if weights is None:
-            weights = [1.0]*12
-        return cls(ControlWeightType.T2IADAPTER, weights=weights,flip_weights=flip_weights, uncond_multiplier=uncond_multiplier)
+    def t2iadapter(cls, weights_input: list[float]=None, uncond_multiplier: float=1.0, extras: dict[str]={}, disable_applied_to=False):
+        return cls(ControlWeightType.T2IADAPTER, weights_input=weights_input, uncond_multiplier=uncond_multiplier, extras=extras, disable_applied_to=disable_applied_to)
 
     @classmethod
-    def controlnet(cls, weights: list[float]=None, flip_weights: bool=False, uncond_multiplier: float=1.0):
-        if weights is None:
-            weights = [1.0]*13
-        return cls(ControlWeightType.CONTROLNET, weights=weights, flip_weights=flip_weights, uncond_multiplier=uncond_multiplier)
+    def controlnet(cls, weights_output: list[float]=None, weights_middle: list[float]=None, weights_input: list[float]=None, uncond_multiplier: float=1.0, extras: dict[str]={}, disable_applied_to=False):
+        return cls(ControlWeightType.CONTROLNET, weights_output=weights_output, weights_middle=weights_middle, weights_input=weights_input, uncond_multiplier=uncond_multiplier, extras=extras, disable_applied_to=disable_applied_to)
     
     @classmethod
-    def controllora(cls, weights: list[float]=None, flip_weights: bool=False, uncond_multiplier: float=1.0):
-        if weights is None:
-            weights = [1.0]*10
-        return cls(ControlWeightType.CONTROLLORA, weights=weights, flip_weights=flip_weights, uncond_multiplier=uncond_multiplier)
+    def controllora(cls, weights_output: list[float]=None, weights_middle: list[float]=None, weights_input: list[float]=None, uncond_multiplier: float=1.0, extras: dict[str]={}, disable_applied_to=False):
+        return cls(ControlWeightType.CONTROLLORA, weights_output=weights_output, weights_middle=weights_middle, weights_input=weights_input, uncond_multiplier=uncond_multiplier, extras=extras, disable_applied_to=disable_applied_to)
     
     @classmethod
-    def controllllite(cls, weights: list[float]=None, flip_weights: bool=False, uncond_multiplier: float=1.0):
-        if weights is None:
-            # TODO: make this have a real value
-            weights = [1.0]*200
-        return cls(ControlWeightType.CONTROLLLLITE, weights=weights, flip_weights=flip_weights, uncond_multiplier=uncond_multiplier)
+    def controllllite(cls, weights_output: list[float]=None, weights_middle: list[float]=None, weights_input: list[float]=None, uncond_multiplier: float=1.0, extras: dict[str]={}, disable_applied_to=False):
+        return cls(ControlWeightType.CONTROLLLLITE, weights_output=weights_output, weights_middle=weights_middle, weights_input=weights_input, uncond_multiplier=uncond_multiplier, extras=extras, disable_applied_to=disable_applied_to)
 
 
 class StrengthInterpolation:
@@ -316,6 +247,11 @@ class TimestepKeyframe:
     def has_mask_hint(self):
         return self.mask_hint_orig is not None
     
+    def get_effective_guarantee_steps(self, max_sigma: torch.Tensor):
+        '''If keyframe starts before current sampling range (max_sigma), treat as 0.'''
+        if self.start_t > max_sigma:
+            return 0
+        return self.guarantee_steps
     
     @staticmethod
     def default() -> 'TimestepKeyframe':
@@ -324,9 +260,10 @@ class TimestepKeyframe:
 
 # always maintain sorted state (by start_percent of TimestepKeyFrame)
 class TimestepKeyframeGroup:
-    def __init__(self) -> None:
+    def __init__(self, add_default=True) -> None:
         self.keyframes: list[TimestepKeyframe] = []
-        self.keyframes.append(TimestepKeyframe.default())
+        if add_default:
+            self.keyframes.append(TimestepKeyframe.default())
 
     def add(self, keyframe: TimestepKeyframe) -> None:
         # add to end of list, then sort
@@ -352,7 +289,7 @@ class TimestepKeyframeGroup:
         return len(self.keyframes) == 0
     
     def clone(self) -> 'TimestepKeyframeGroup':
-        cloned = TimestepKeyframeGroup()
+        cloned = TimestepKeyframeGroup(add_default=False)
         # already sorted, so don't use add function to make cloning quicker
         for tk in self.keyframes:
             cloned.keyframes.append(tk)
@@ -367,7 +304,7 @@ class TimestepKeyframeGroup:
 
 class AbstractPreprocWrapper:
     error_msg = "Invalid use of [InsertHere] output. The output of [InsertHere] preprocessor is NOT a usual image, but a latent pretending to be an image - you must connect the output directly to an Apply ControlNet node (advanced or otherwise). It cannot be used for anything else that accepts IMAGE input."
-    def __init__(self, condhint: Tensor):
+    def __init__(self, condhint):
         self.condhint = condhint
     
     def movedim(self, *args, **kwargs):
@@ -416,11 +353,20 @@ class manual_cast_clean_groupnorm(comfy.ops.manual_cast):
 
 
 # adapted from comfy/sample.py
-def prepare_mask_batch(mask: Tensor, shape: Tensor, multiplier: int=1, match_dim1=False):
+def prepare_mask_batch(mask: Tensor, shape: Tensor, multiplier: int=1, match_dim1=False, match_shape=False, flux_shape=None):
     mask = mask.clone()
-    mask = torch.nn.functional.interpolate(mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])), size=(shape[2]*multiplier, shape[3]*multiplier), mode="bilinear")
+    if flux_shape is not None:
+        multiplier = multiplier * 0.5
+        mask = torch.nn.functional.interpolate(mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])), size=(round(flux_shape[-2]*multiplier), round(flux_shape[-1]*multiplier)), mode="bilinear")
+        mask = rearrange(mask, "b c h w -> b (h w) c")
+    else:
+        mask = torch.nn.functional.interpolate(mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])), size=(round(shape[-2]*multiplier), round(shape[-1]*multiplier)), mode="bilinear")
     if match_dim1:
+        if match_shape and len(shape) < 4:
+            raise Exception(f"match_dim1 cannot be True if shape is under 4 dims; was {len(shape)}.")
         mask = torch.cat([mask] * shape[1], dim=1)
+    if match_shape and len(shape) == 3 and len(mask.shape) != 3:
+        mask = mask.squeeze(1)
     return mask
 
 
@@ -433,8 +379,15 @@ def normalize_min_max(x: Tensor, new_min = 0.0, new_max = 1.0):
 def linear_conversion(x, x_min=0.0, x_max=1.0, new_min=0.0, new_max=1.0):
     return (((x - x_min)/(x_max - x_min)) * (new_max - new_min)) + new_min
 
+def extend_to_batch_size(tensor: Tensor, batch_size: int):
+    if tensor.shape[0] > batch_size:
+        return tensor[:batch_size]
+    elif tensor.shape[0] < batch_size:
+        remainder = batch_size-tensor.shape[0]
+        return torch.cat([tensor] + [tensor[-1:]]*remainder, dim=0)
+    return tensor
 
-def broadcast_image_to_full(tensor, target_batch_size, batched_number, except_one=True):
+def broadcast_image_to_extend(tensor, target_batch_size, batched_number, except_one=True):
     current_batch_size = tensor.shape[0]
     #print(current_batch_size, target_batch_size)
     if except_one and current_batch_size == 1:
@@ -444,7 +397,7 @@ def broadcast_image_to_full(tensor, target_batch_size, batched_number, except_on
     tensor = tensor[:per_batch]
 
     if per_batch > tensor.shape[0]:
-        tensor = torch.cat([tensor] * (per_batch // tensor.shape[0]) + [tensor[:(per_batch % tensor.shape[0])]], dim=0)
+        tensor = extend_to_batch_size(tensor=tensor, batch_size=per_batch)
 
     current_batch_size = tensor.shape[0]
     if current_batch_size == target_batch_size:
@@ -515,15 +468,25 @@ def get_sorted_list_via_attr(objects: list, attr: str) -> list:
     return sorted_list
 
 
+# DFS Search for Torch.nn.Module, Written by Lvmin
+def torch_dfs(model: torch.nn.Module):
+    result = [model]
+    for child in model.children():
+        result += torch_dfs(child)
+    return result
+
+
 class WeightTypeException(TypeError):
     "Raised when weight not compatible with AdvancedControlBase object"
     pass
 
 
 class AdvancedControlBase:
-    def __init__(self, base: ControlBase, timestep_keyframes: TimestepKeyframeGroup, weights_default: ControlWeights, require_model=False):
+    ACN_VERSION = CURRENT_WRAPPER_VERSION
+    
+    def __init__(self, base: ControlBase, timestep_keyframes: TimestepKeyframeGroup, weights_default: ControlWeights, require_vae=False, allow_condhint_latents=False):
         self.base = base
-        self.compatible_weights = [ControlWeightType.UNIVERSAL]
+        self.compatible_weights = [ControlWeightType.UNIVERSAL, ControlWeightType.DEFAULT]
         self.add_compatible_weight(weights_default.weight_type)
         # mask for which parts of controlnet output to keep
         self.mask_cond_hint_original = None
@@ -536,9 +499,11 @@ class AdvancedControlBase:
         self.full_latent_length = 0
         self.context_length = 0
         # timesteps
-        self.t: Tensor = None
-        self.batched_number: Union[int, IntWithCondOrUncond] = None
+        self.t: float = None
+        self.prev_t: float = None
+        self.batched_number: int = None
         self.batch_size: int = 0
+        self.cond_or_uncond: list[int] = None
         # weights + override
         self.weights: ControlWeights = None
         self.weights_default: ControlWeights = weights_default
@@ -554,13 +519,18 @@ class AdvancedControlBase:
         self.pre_run = self.pre_run_inject
         self.cleanup = self.cleanup_inject
         self.set_previous_controlnet = self.set_previous_controlnet_inject
-        # require model to be passed into Apply Advanced ControlNet 🛂🅐🅒🅝 node
-        self.require_model = require_model
+        self.set_cond_hint = self.set_cond_hint_inject
+        # vae to store
+        self.adv_vae = None
+        self.mult_by_ratio_when_vae = True
+        # compression ratio stuff
+        self.real_compression_ratio = None
+        # require model/vae to be passed into Apply Advanced ControlNet 🛂🅐🅒🅝 node
+        self.require_vae = require_vae
+        self.allow_condhint_latents = allow_condhint_latents
+        self.postpone_condhint_latents_check = False
         # disarm - when set to False, used to force usage of Apply Advanced ControlNet 🛂🅐🅒🅝 node (which will set it to True)
-        self.disarmed = not require_model
-    
-    def patch_model(self, model: ModelPatcher):
-        pass
+        self.disarmed = True
 
     def add_compatible_weight(self, control_weight_type: str):
         self.compatible_weights.append(control_weight_type)
@@ -576,7 +546,7 @@ class AdvancedControlBase:
         else:
             for tk in self.timestep_keyframes.keyframes:
                 if tk.has_control_weights() and tk.control_weights.weight_type not in self.compatible_weights:
-                    msg = f"Weight on Timestep Keyframe with start_percent={tk.start_percent} is type" + \
+                    msg = f"Weight on Timestep Keyframe with start_percent={tk.start_percent} is type " + \
                         f"{tk.control_weights.weight_type}, but loaded {type(self).__name__} only supports {self.compatible_weights} weights."
                     raise WeightTypeException(msg)
 
@@ -589,15 +559,17 @@ class AdvancedControlBase:
         self.weights = None
         self.latent_keyframes = None
 
-    def prepare_current_timestep(self, t: Tensor, batched_number: int):
+    def prepare_current_timestep(self, t: Tensor, transformer_options: dict[str, torch.Tensor]):
         self.t = float(t[0])
-        self.batched_number = batched_number
-        self.batch_size = len(t)
+        # check if t has changed (otherwise do nothing, as step already accounted for)
+        if self.t == self.prev_t:
+            return
         # get current step percent
         curr_t: float = self.t
         prev_index = self._current_timestep_index
+        max_sigma = torch.max(transformer_options.get("sample_sigmas", BIGMAX_TENSOR))
         # if met guaranteed steps (or no current keyframe), look for next keyframe in case need to switch
-        if self._current_timestep_keyframe is None or self._current_used_steps >= self._current_timestep_keyframe.guarantee_steps:
+        if self._current_timestep_keyframe is None or self._current_used_steps >= self._current_timestep_keyframe.get_effective_guarantee_steps(max_sigma):
             # if has next index, loop through and see if need to switch
             if self.timestep_keyframes.has_index(self._current_timestep_index+1):
                 for i in range(self._current_timestep_index+1, len(self.timestep_keyframes)):
@@ -623,12 +595,13 @@ class AdvancedControlBase:
                             del self.tk_mask_cond_hint_original
                             self.tk_mask_cond_hint_original = None
                         # if guarantee_steps greater than zero, stop searching for other keyframes
-                        if self._current_timestep_keyframe.guarantee_steps > 0:
+                        if self._current_timestep_keyframe.get_effective_guarantee_steps(max_sigma) > 0:
                             break
                     # if eval_tk is outside of percent range, stop looking further
                     else:
                         break
-        
+        # update prev_t
+        self.prev_t = self.t
         # update steps current keyframe is used
         self._current_used_steps += 1
         # if index changed, apply overrides
@@ -643,7 +616,7 @@ class AdvancedControlBase:
         self.prepare_weights()
     
     def prepare_weights(self):
-        if self.weights is None or self.weights.weight_type == ControlWeightType.DEFAULT:
+        if self.weights is None:
             self.weights = self.weights_default
         elif self.weights.weight_type == ControlWeightType.UNIVERSAL:
             # if universal and weight_mask present, no need to convert
@@ -658,6 +631,23 @@ class AdvancedControlBase:
         self.mask_cond_hint_original = mask_hint
         return self
 
+    def set_cond_hint_inject(self, *args, **kwargs):
+        to_return = self.base.set_cond_hint(*args, **kwargs)
+        # if vae required, look in args and kwargs for it
+        if self.require_vae:
+            # check args first, as that's the default way vae param is used in ComfyUI
+            for arg in args:
+                if isinstance(arg, VAE):
+                    self.adv_vae = arg
+                    self.vae = arg
+                    break
+            # if not in args, check kwargs now
+            if self.adv_vae is None:
+                if 'vae' in kwargs:
+                    self.adv_vae = kwargs['vae']
+                    self.vae = kwargs['vae']
+        return to_return
+
     def pre_run_inject(self, model, percent_to_timestep_function):
         self.base.pre_run(model, percent_to_timestep_function)
         self.pre_run_advanced(model, percent_to_timestep_function)
@@ -666,6 +656,9 @@ class AdvancedControlBase:
         # for each timestep keyframe, calculate the start_t
         for tk in self.timestep_keyframes.keyframes:
             tk.start_t = percent_to_timestep_function(tk.start_percent)
+        # set real_compression_ratio to compression_ratio
+        if hasattr(self, "compression_ratio"):
+            self.real_compression_ratio = self.compression_ratio
         # clear variables
         self.cleanup_advanced()
 
@@ -686,34 +679,49 @@ class AdvancedControlBase:
                 return False
         return True
 
-    def get_control_inject(self, x_noisy, t, cond, batched_number):
+    def get_control_inject(self, x_noisy, t, cond, batched_number, transformer_options: dict):
+        self.batched_number = batched_number
+        self.batch_size = len(t)
+        self.cond_or_uncond = transformer_options.get("cond_or_uncond", None)
+        # fill out ad_param-related fields, if present
+        if "ad_params" in transformer_options:
+            self.sub_idxs = transformer_options["ad_params"]["sub_idxs"]
+            self.full_latent_length = transformer_options["ad_params"]["full_length"]
+            self.context_length = transformer_options["ad_params"]["context_length"]
         # prepare timestep and everything related
-        self.prepare_current_timestep(t=t, batched_number=batched_number)
+        self.prepare_current_timestep(t=t, transformer_options=transformer_options)
         # if should not perform any actions for the controlnet, exit without doing any work
         if self.strength == 0.0 or self._current_timestep_keyframe.strength == 0.0:
-            return self.default_control_actions(x_noisy, t, cond, batched_number)
+            return self.default_control_actions(x_noisy, t, cond, batched_number, transformer_options)
         # otherwise, perform normal function
-        return self.get_control_advanced(x_noisy, t, cond, batched_number)
+        return self.get_control_advanced(x_noisy, t, cond, batched_number, transformer_options)
 
-    def get_control_advanced(self, x_noisy, t, cond, batched_number):
-        return self.default_control_actions(x_noisy, t, cond, batched_number)
+    def get_control_advanced(self, x_noisy, t, cond, batched_number, transformer_options):
+        return self.default_control_actions(x_noisy, t, cond, batched_number, transformer_options)
 
-    def default_control_actions(self, x_noisy, t, cond, batched_number):
+    def default_control_actions(self, x_noisy, t, cond, batched_number, transformer_options):
         control_prev = None
         if self.previous_controlnet is not None:
-            control_prev = self.previous_controlnet.get_control(x_noisy, t, cond, batched_number)
+            control_prev = self.previous_controlnet.get_control(x_noisy, t, cond, batched_number, transformer_options)
         return control_prev
 
-    def calc_weight(self, idx: int, x: Tensor, layers: int) -> Union[float, Tensor]:
+    def calc_weight(self, idx: int, x: Tensor, control: dict[str, list[Tensor]], key: str) -> Union[float, Tensor]:
         if self.weights.weight_mask is not None:
             # prepare weight mask
             self.prepare_weight_mask_cond_hint(x, self.batched_number)
             # adjust mask for current layer and return
-            return torch.pow(self.weight_mask_cond_hint, self.get_calc_pow(idx=idx, layers=layers))
-        return self.weights.get(idx=idx)
+            return torch.pow(self.weight_mask_cond_hint, self.get_calc_pow(idx=idx, control=control, key=key))
+        return self.weights.get(idx=idx, control=control, key=key)
     
-    def get_calc_pow(self, idx: int, layers: int) -> int:
-        return (layers-1)-idx
+    def get_calc_pow(self, idx: int, control: dict[str, list[Tensor]], key: str) -> int:
+        if key == "middle":
+            return 0
+        else:
+            c_len = len(control[key])
+            real_idx = c_len-idx
+            if key == "input":
+                real_idx = c_len - real_idx + 1
+            return real_idx
 
     def calc_latent_keyframe_mults(self, x: Tensor, batched_number: int) -> Tensor:
         # apply strengths, and get batch indeces to null out
@@ -763,64 +771,56 @@ class AdvancedControlBase:
             final_tensor = final_tensor.unsqueeze(-1)
         return final_tensor
 
-    def apply_advanced_strengths_and_masks(self, x: Tensor, batched_number: int):
+    def apply_advanced_strengths_and_masks(self, x: Tensor, batched_number: int, flux_shape: tuple=None):
         # handle weight's uncond_multiplier, if applicable
         if self.weights.has_uncond_multiplier:
-            cond_or_uncond = self.batched_number.cond_or_uncond
             actual_length = x.size(0) // batched_number
-            for idx, cond_type in enumerate(cond_or_uncond):
+            for idx, cond_type in enumerate(self.cond_or_uncond):
                 # if uncond, set to weight's uncond_multiplier
                 if cond_type == 1:
                     x[actual_length*idx:actual_length*(idx+1)] *= self.weights.uncond_multiplier
+        if self.weights.has_uncond_mask:
+            pass
 
         if self.latent_keyframes is not None:
             x[:] = x[:] * self.calc_latent_keyframe_mults(x=x, batched_number=batched_number)
         # apply masks, resizing mask to required dims
         if self.mask_cond_hint is not None:
-            masks = prepare_mask_batch(self.mask_cond_hint, x.shape)
+            masks = prepare_mask_batch(self.mask_cond_hint, x.shape, match_shape=True, flux_shape=flux_shape)
             x[:] = x[:] * masks
         if self.tk_mask_cond_hint is not None:
-            masks = prepare_mask_batch(self.tk_mask_cond_hint, x.shape)
+            masks = prepare_mask_batch(self.tk_mask_cond_hint, x.shape, match_shape=True, flux_shape=flux_shape)
             x[:] = x[:] * masks
         # apply timestep keyframe strengths
         if self._current_timestep_keyframe.strength != 1.0:
             x[:] *= self._current_timestep_keyframe.strength
     
-    def control_merge_inject(self: 'AdvancedControlBase', control_input, control_output, control_prev, output_dtype):
+    def control_merge_inject(self: 'AdvancedControlBase', control: dict[str, list[Tensor]], control_prev: dict, output_dtype):
         out = {'input':[], 'middle':[], 'output': []}
 
-        if control_input is not None:
-            for i in range(len(control_input)):
-                key = 'input'
-                x = control_input[i]
-                if x is not None:
-                    self.apply_advanced_strengths_and_masks(x, self.batched_number)
-
-                    x *= self.strength * self.calc_weight(i, x, len(control_input))
-                    if x.dtype != output_dtype:
-                        x = x.to(output_dtype)
-                out[key].insert(0, x)
-
-        if control_output is not None:
+        for key in control:
+            control_output = control[key]
+            applied_to = set()
             for i in range(len(control_output)):
-                if i == (len(control_output) - 1):
-                    key = 'middle'
-                    index = 0
-                else:
-                    key = 'output'
-                    index = i
                 x = control_output[i]
                 if x is not None:
-                    self.apply_advanced_strengths_and_masks(x, self.batched_number)
-
                     if self.global_average_pooling:
                         x = torch.mean(x, dim=(2, 3), keepdim=True).repeat(1, 1, x.shape[2], x.shape[3])
 
-                    x *= self.strength * self.calc_weight(i, x, len(control_output))
-                    if x.dtype != output_dtype:
+                    # if should disable applied_to optimization, clone the weight if in applied_to
+                    if self.weights.disable_applied_to and x in applied_to:
+                        x = x.clone()
+
+                    if x not in applied_to: #memory saving strategy, allow shared tensors and only apply strength to shared tensors once
+                        applied_to.add(x)
+                        self.apply_advanced_strengths_and_masks(x, self.batched_number)
+                        x *= self.strength * self.calc_weight(i, x, control, key)
+
+                    if output_dtype is not None and x.dtype != output_dtype:
                         x = x.to(output_dtype)
 
                 out[key].append(x)
+
         if control_prev is not None:
             for x in ['input', 'middle', 'output']:
                 o = out[x]
@@ -835,7 +835,7 @@ class AdvancedControlBase:
                             if o[i].shape[0] < prev_val.shape[0]:
                                 o[i] = prev_val + o[i]
                             else:
-                                o[i] += prev_val
+                                o[i] = prev_val + o[i]  # TODO from base ComfyUI: change back to inplace add if shared tensors stop being an issue
         return out
 
     def prepare_mask_cond_hint(self, x_noisy: Tensor, t, cond, batched_number, dtype=None, direct_attn=False):
@@ -858,18 +858,18 @@ class AdvancedControlBase:
                 del out_mask
                 # TODO: perform upscale on only the sub_idxs masks at a time instead of all to conserve RAM
                 # resize mask and match batch count
-                out_mask = prepare_mask_batch(orig_mask, x_noisy.shape, multiplier=multiplier)
+                out_mask = prepare_mask_batch(orig_mask, x_noisy.shape, multiplier=multiplier, match_shape=True)
                 actual_latent_length = x_noisy.shape[0] // batched_number
-                out_mask = comfy.utils.repeat_to_batch_size(out_mask, actual_latent_length if self.sub_idxs is None else self.full_latent_length)
+                out_mask = extend_to_batch_size(out_mask, actual_latent_length if self.sub_idxs is None else self.full_latent_length)
                 if self.sub_idxs is not None:
                     out_mask = out_mask[self.sub_idxs]
             # make cond_hint_mask length match x_noise
             if x_noisy.shape[0] != out_mask.shape[0]:
-                out_mask = broadcast_image_to(out_mask, x_noisy.shape[0], batched_number)
+                out_mask = broadcast_image_to_extend(out_mask, x_noisy.shape[0], batched_number)
             # default dtype to be same as x_noisy
             if dtype is None:
                 dtype = x_noisy.dtype
-            setattr(self, attr_name, out_mask.to(dtype=dtype).to(self.device))
+            setattr(self, attr_name, out_mask.to(dtype=dtype).to(x_noisy.device))
             del out_mask
 
     def _reset_attr(self, attr_name, new_value=None):
@@ -886,10 +886,14 @@ class AdvancedControlBase:
         self.full_latent_length = 0
         self.context_length = 0
         self.t = None
+        self.prev_t = None
         self.batched_number = None
         self.batch_size = 0
         self.weights = None
         self.latent_keyframes = None
+        # set effective_compression_ratio to compression_ratio
+        if hasattr(self, "compression_ratio"):
+            self.real_compression_ratio = self.compression_ratio
         # timestep stuff
         self._current_timestep_keyframe = None
         self._current_timestep_index = -1
@@ -912,4 +916,9 @@ class AdvancedControlBase:
         copied.mask_cond_hint_original = self.mask_cond_hint_original
         copied.weights_override = self.weights_override
         copied.latent_keyframe_override = self.latent_keyframe_override
+        copied.adv_vae = self.adv_vae
+        copied.mult_by_ratio_when_vae = self.mult_by_ratio_when_vae
+        copied.require_vae = self.require_vae
+        copied.allow_condhint_latents = self.allow_condhint_latents
+        copied.postpone_condhint_latents_check = self.postpone_condhint_latents_check
         copied.disarmed = self.disarmed

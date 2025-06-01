@@ -6,7 +6,7 @@ import comfy.utils
 from comfy.sd import VAE
 
 from .utils import TimestepKeyframeGroup
-from .control_sparsectrl import SparseMethod, SparseIndexMethod, SparseSettings, SparseSpreadMethod, PreprocSparseRGBWrapper
+from .control_sparsectrl import SparseMethod, SparseIndexMethod, SparseSettings, SparseSpreadMethod, PreprocSparseRGBWrapper, SparseConst, SparseContextAware, get_idx_list_from_str
 from .control import load_sparsectrl, load_controlnet, ControlNetAdvanced, SparseCtrlAdvanced
 
 
@@ -24,6 +24,10 @@ class SparseCtrlLoaderAdvanced:
             "optional": {
                 "sparse_method": ("SPARSE_METHOD", ),
                 "tk_optional": ("TIMESTEP_KEYFRAME", ),
+                "context_aware": (SparseContextAware.LIST, ),
+                "sparse_hint_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "sparse_nonhint_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "sparse_mask_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
             }
         }
     
@@ -32,9 +36,12 @@ class SparseCtrlLoaderAdvanced:
 
     CATEGORY = "Adv-ControlNet 🛂🅐🅒🅝/SparseCtrl"
 
-    def load_controlnet(self, sparsectrl_name: str, use_motion: bool, motion_strength: float, motion_scale: float, sparse_method: SparseMethod=SparseSpreadMethod(), tk_optional: TimestepKeyframeGroup=None):
+    def load_controlnet(self, sparsectrl_name: str, use_motion: bool, motion_strength: float, motion_scale: float, sparse_method: SparseMethod=SparseSpreadMethod(), tk_optional: TimestepKeyframeGroup=None,
+                        context_aware=SparseContextAware.NEAREST_HINT, sparse_hint_mult=1.0, sparse_nonhint_mult=1.0, sparse_mask_mult=1.0):
         sparsectrl_path = folder_paths.get_full_path("controlnet", sparsectrl_name)
-        sparse_settings = SparseSettings(sparse_method=sparse_method, use_motion=use_motion, motion_strength=motion_strength, motion_scale=motion_scale)
+        sparse_settings = SparseSettings(sparse_method=sparse_method, use_motion=use_motion, motion_strength=motion_strength, motion_scale=motion_scale,
+                                         context_aware=context_aware,
+                                         sparse_mask_mult=sparse_mask_mult, sparse_hint_mult=sparse_hint_mult, sparse_nonhint_mult=sparse_nonhint_mult)
         sparsectrl = load_sparsectrl(sparsectrl_path, timestep_keyframe=tk_optional, sparse_settings=sparse_settings)
         return (sparsectrl,)
 
@@ -96,21 +103,7 @@ class SparseIndexMethodNode:
     CATEGORY = "Adv-ControlNet 🛂🅐🅒🅝/SparseCtrl"
 
     def get_method(self, indexes: str):
-        idxs = []
-        unique_idxs = set()
-        # get indeces from string
-        str_idxs = [x.strip() for x in indexes.strip().split(",")]
-        for str_idx in str_idxs:
-            try:
-                idx = int(str_idx)
-                if idx in unique_idxs:
-                    raise ValueError(f"'{idx}' is duplicated; indexes must be unique.")
-                idxs.append(idx)
-                unique_idxs.add(idx)
-            except ValueError:
-                raise ValueError(f"'{str_idx}' is not a valid integer index.")
-        if len(idxs) == 0:
-            raise ValueError(f"No indexes were listed in Sparse Index Method.")
+        idxs = get_idx_list_from_str(indexes)
         return (SparseIndexMethod(idxs),)
 
 
@@ -140,6 +133,9 @@ class RgbSparseCtrlPreprocessor:
                 "image": ("IMAGE", ),
                 "vae": ("VAE", ),
                 "latent_size": ("LATENT", ),
+            },
+            "hidden": {
+                "autosize": ("ACNAUTOSIZE", {"padding": 0}),
             }
         }
 
@@ -161,3 +157,32 @@ class RgbSparseCtrlPreprocessor:
             image = VAEEncode.vae_encode_crop_pixels(image)
         encoded = vae.encode(image[:,:,:,:3])
         return (PreprocSparseRGBWrapper(condhint=encoded),)
+
+
+class SparseWeightExtras:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "optional": {
+                "cn_extras": ("CN_WEIGHTS_EXTRAS",),
+                "sparse_hint_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "sparse_nonhint_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "sparse_mask_mult": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+            },
+            "hidden": {
+                "autosize": ("ACNAUTOSIZE", {"padding": 0}),
+            }
+        }
+    
+    RETURN_TYPES = ("CN_WEIGHTS_EXTRAS", )
+    RETURN_NAMES = ("cn_extras", )
+    FUNCTION = "create_weight_extras"
+
+    CATEGORY = "Adv-ControlNet 🛂🅐🅒🅝/SparseCtrl/extras"
+
+    def create_weight_extras(self, cn_extras: dict[str]={}, sparse_hint_mult=1.0, sparse_nonhint_mult=1.0, sparse_mask_mult=1.0):
+        cn_extras = cn_extras.copy()
+        cn_extras[SparseConst.HINT_MULT] = sparse_hint_mult
+        cn_extras[SparseConst.NONHINT_MULT] = sparse_nonhint_mult
+        cn_extras[SparseConst.MASK_MULT] = sparse_mask_mult
+        return (cn_extras, )

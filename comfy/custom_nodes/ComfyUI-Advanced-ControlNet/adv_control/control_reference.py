@@ -1,10 +1,14 @@
 from typing import Callable, Union
 
+from uuid import UUID
 import math
 import torch
 from torch import Tensor
 
+import comfy.model_management
+import comfy.patcher_extension
 import comfy.sample
+import comfy.hooks
 import comfy.model_patcher
 import comfy.utils
 from comfy.controlnet import ControlBase
@@ -13,137 +17,14 @@ from comfy.ldm.modules.attention import BasicTransformerBlock
 from comfy.ldm.modules.diffusionmodules import openaimodel
 
 from .logger import logger
-from .utils import (AdvancedControlBase, ControlWeights, TimestepKeyframeGroup, AbstractPreprocWrapper,
-                    deepcopy_with_sharing, prepare_mask_batch, broadcast_image_to_full)
+from .utils import (AdvancedControlBase, ControlWeights, TimestepKeyframeGroup, TimestepKeyframe, AbstractPreprocWrapper,
+                    broadcast_image_to_extend, ORIG_PREVIOUS_CONTROLNET, CONTROL_INIT_BY_ACN)
 
 
-def refcn_sample_factory(orig_comfy_sample: Callable, is_custom=False) -> Callable:
-    def get_refcn(control: ControlBase, order: int=-1):
-        ref_set: set[ReferenceAdvanced] = set()
-        if control is None:
-            return ref_set
-        if type(control) == ReferenceAdvanced:
-            control.order = order
-            order -= 1
-            ref_set.add(control)
-        ref_set.update(get_refcn(control.previous_controlnet, order=order))
-        return ref_set
-
-    def refcn_sample(model: ModelPatcher, *args, **kwargs):
-        # check if positive or negative conds contain ref cn
-        positive = args[-3]
-        negative = args[-2]
-        ref_set = set()
-        if positive is not None:
-            for cond in positive:
-                if "control" in cond[1]:
-                    ref_set.update(get_refcn(cond[1]["control"]))
-        if negative is not None:
-            for cond in negative:
-                if "control" in cond[1]:
-                    ref_set.update(get_refcn(cond[1]["control"]))
-        # if no ref cn found, do original function immediately
-        if len(ref_set) == 0:
-            return orig_comfy_sample(model, *args, **kwargs)
-        # otherwise, injection time
-        try:
-            # inject
-            # storage for all Reference-related injections
-            reference_injections = ReferenceInjections()
-
-            # first, handle attn module injection
-            all_modules = torch_dfs(model.model)
-            attn_modules: list[RefBasicTransformerBlock] = []
-            for module in all_modules:
-                if isinstance(module, BasicTransformerBlock):
-                    attn_modules.append(module)
-            attn_modules = [module for module in all_modules if isinstance(module, BasicTransformerBlock)]
-            attn_modules = sorted(attn_modules, key=lambda x: -x.norm1.normalized_shape[0])
-            for i, module in enumerate(attn_modules):
-                injection_holder = InjectionBasicTransformerBlockHolder(block=module, idx=i)
-                injection_holder.attn_weight = float(i) / float(len(attn_modules))
-                if hasattr(module, "_forward"): # backward compatibility
-                    module._forward = _forward_inject_BasicTransformerBlock.__get__(module, type(module))
-                else:
-                    module.forward = _forward_inject_BasicTransformerBlock.__get__(module, type(module))
-                module.injection_holder = injection_holder
-                reference_injections.attn_modules.append(module)
-            # figure out which module is middle block
-            if hasattr(model.model.diffusion_model, "middle_block"):
-                mid_modules = torch_dfs(model.model.diffusion_model.middle_block)
-                mid_attn_modules: list[RefBasicTransformerBlock] = [module for module in mid_modules if isinstance(module, BasicTransformerBlock)]
-                for module in mid_attn_modules:
-                    module.injection_holder.is_middle = True
-
-            # next, handle gn module injection (TimestepEmbedSequential)
-            # TODO: figure out the logic behind these hardcoded indexes
-            if type(model.model).__name__ == "SDXL":
-                input_block_indices = [4, 5, 7, 8]
-                output_block_indices = [0, 1, 2, 3, 4, 5]
-            else:
-                input_block_indices = [4, 5, 7, 8, 10, 11]
-                output_block_indices = [0, 1, 2, 3, 4, 5, 6, 7]
-            if hasattr(model.model.diffusion_model, "middle_block"):
-                module = model.model.diffusion_model.middle_block
-                injection_holder = InjectionTimestepEmbedSequentialHolder(block=module, idx=0, is_middle=True)
-                injection_holder.gn_weight = 0.0
-                module.injection_holder = injection_holder
-                reference_injections.gn_modules.append(module)
-            for w, i in enumerate(input_block_indices):
-                module = model.model.diffusion_model.input_blocks[i]
-                injection_holder = InjectionTimestepEmbedSequentialHolder(block=module, idx=i, is_input=True)
-                injection_holder.gn_weight = 1.0 - float(w) / float(len(input_block_indices))
-                module.injection_holder = injection_holder
-                reference_injections.gn_modules.append(module)
-            for w, i in enumerate(output_block_indices):
-                module = model.model.diffusion_model.output_blocks[i]
-                injection_holder = InjectionTimestepEmbedSequentialHolder(block=module, idx=i, is_output=True)
-                injection_holder.gn_weight = float(w) / float(len(output_block_indices))
-                module.injection_holder = injection_holder
-                reference_injections.gn_modules.append(module)
-            # hack gn_module forwards and update weights
-            for i, module in enumerate(reference_injections.gn_modules):
-                module.injection_holder.gn_weight *= 2
-
-            # handle diffusion_model forward injection
-            reference_injections.diffusion_model_orig_forward = model.model.diffusion_model.forward
-            model.model.diffusion_model.forward = factory_forward_inject_UNetModel(reference_injections).__get__(model.model.diffusion_model, type(model.model.diffusion_model))
-            # store ordered ref cns in model's transformer options
-            orig_model_options = model.model_options
-            new_model_options = model.model_options.copy()
-            new_model_options["transformer_options"] = model.model_options["transformer_options"].copy()
-            ref_list: list[ReferenceAdvanced] = list(ref_set)
-            new_model_options["transformer_options"][REF_CONTROL_LIST_ALL] = sorted(ref_list, key=lambda x: x.order)
-            model.model_options = new_model_options
-            # continue with original function
-            return orig_comfy_sample(model, *args, **kwargs)
-        finally:
-            # cleanup injections
-            # restore attn modules
-            attn_modules: list[RefBasicTransformerBlock] = reference_injections.attn_modules
-            for module in attn_modules:
-                module.injection_holder.restore(module)
-                module.injection_holder.clean()
-                del module.injection_holder
-            del attn_modules
-            # restore gn modules
-            gn_modules: list[RefTimestepEmbedSequential] = reference_injections.gn_modules
-            for module in gn_modules:
-                module.injection_holder.restore(module)
-                module.injection_holder.clean()
-                del module.injection_holder
-            del gn_modules
-            # restore diffusion_model forward function
-            model.model.diffusion_model.forward = reference_injections.diffusion_model_orig_forward.__get__(model.model.diffusion_model, type(model.model.diffusion_model))
-            # restore model_options
-            model.model_options = orig_model_options
-            # cleanup
-            reference_injections.cleanup()
-    return refcn_sample
-# inject sample functions
-comfy.sample.sample = refcn_sample_factory(comfy.sample.sample)
-comfy.sample.sample_custom = refcn_sample_factory(comfy.sample.sample_custom, is_custom=True)
-
+REF_READ_ATTN_CONTROL_LIST = "ref_read_attn_control_list"
+REF_WRITE_ATTN_CONTROL_LIST = "ref_write_attn_control_list"
+REF_READ_ADAIN_CONTROL_LIST = "ref_read_adain_control_list"
+REF_WRITE_ADAIN_CONTROL_LIST = "ref_write_adain_control_list"
 
 REF_ATTN_CONTROL_LIST = "ref_attn_control_list"
 REF_ADAIN_CONTROL_LIST = "ref_adain_control_list"
@@ -154,12 +35,34 @@ REF_ADAIN_MACHINE_STATE = "ref_adain_machine_state"
 REF_COND_IDXS = "ref_cond_idxs"
 REF_UNCOND_IDXS = "ref_uncond_idxs"
 
+CONTEXTREF_OPTIONS_CLASS = "contextref_options_class"
+CONTEXTREF_CLEAN_FUNC = "contextref_clean_func"
+CONTEXTREF_CONTROL_LIST_ALL = "contextref_control_list_all"
+CONTEXTREF_MACHINE_STATE = "contextref_machine_state"
+CONTEXTREF_TEMP_COND_IDX = "contextref_temp_cond_idx"
+
+HIGHEST_VERSION_SUPPORT = 1
+RETURNED_CONTEXTREF_VERSION = 1
+
+
+class RefConst:
+    OPTS = "refcn_opts"
+    CREF_MODE = "contextref_mode"
+    REFCN_PRESENT_IN_CONDS = "refcn_present_in_conds"
+
 
 class MachineState:
     WRITE = "write"
     READ = "read"
+    READ_WRITE = "read_write"
     STYLEALIGN = "stylealign"
     OFF = "off"
+
+def is_read(state: str):
+    return state in [MachineState.READ, MachineState.READ_WRITE]
+
+def is_write(state: str):
+    return state in [MachineState.WRITE, MachineState.READ_WRITE]
 
 
 class ReferenceType:
@@ -214,11 +117,27 @@ class ReferenceOptions:
                                 attn_style_fidelity=style_fidelity, adain_style_fidelity=style_fidelity,
                                 attn_ref_weight=ref_weight, adain_ref_weight=ref_weight,
                                 ref_with_other_cns=ref_with_other_cns)
-
+    
+    @staticmethod
+    def create_from_kwargs(attn_style_fidelity=0.0, adain_style_fidelity=0.0,
+                         attn_ref_weight=0.0, adain_ref_weight=0.0,
+                         attn_strength=0.0, adain_strength=0.0, **kwargs):
+        has_attn = attn_strength > 0.0
+        has_adain = adain_strength > 0.0
+        if has_attn and has_adain:
+            reference_type = ReferenceType.ATTN_ADAIN
+        elif has_adain:
+            reference_type = ReferenceType.ADAIN
+        else:
+            reference_type = ReferenceType.ATTN
+        return ReferenceOptions(reference_type=reference_type,
+                                attn_style_fidelity=float(attn_style_fidelity), adain_style_fidelity=float(adain_style_fidelity),
+                                attn_ref_weight=float(attn_ref_weight), adain_ref_weight=float(adain_ref_weight),
+                                attn_strength=float(attn_strength), adain_strength=float(adain_strength))
 
 
 class ReferencePreprocWrapper(AbstractPreprocWrapper):
-    error_msg = error_msg = "Invalid use of Reference Preprocess output. The output of RGB SparseCtrl preprocessor is NOT a usual image, but a latent pretending to be an image - you must connect the output directly to an Apply Advanced ControlNet node. It cannot be used for anything else that accepts IMAGE input."
+    error_msg = error_msg = "Invalid use of Reference Preprocess output. The output of Reference preprocessor is NOT a usual image, but a latent pretending to be an image - you must connect the output directly to an Apply Advanced ControlNet node. It cannot be used for anything else that accepts IMAGE input."
     def __init__(self, condhint: Tensor):
         super().__init__(condhint)
 
@@ -226,17 +145,35 @@ class ReferencePreprocWrapper(AbstractPreprocWrapper):
 class ReferenceAdvanced(ControlBase, AdvancedControlBase):
     CHANNEL_TO_MULT = {320: 1, 640: 2, 1280: 4}
 
-    def __init__(self, ref_opts: ReferenceOptions, timestep_keyframes: TimestepKeyframeGroup, device=None):
-        super().__init__(device)
-        AdvancedControlBase.__init__(self, super(), timestep_keyframes=timestep_keyframes, weights_default=ControlWeights.controllllite())
-        self.ref_opts = ref_opts
+    def __init__(self, ref_opts: ReferenceOptions, timestep_keyframes: TimestepKeyframeGroup, extra_hooks: comfy.hooks.HookGroup=None):
+        super().__init__()
+        AdvancedControlBase.__init__(self, super(), timestep_keyframes=timestep_keyframes, weights_default=ControlWeights.controllllite(), allow_condhint_latents=True)
+        # TODO: allow vae_optional to be used instead of preprocessor
+        #require_vae=True
+        self._ref_opts = ref_opts
         self.order = 0
-        self.latent_format = None
+        self.model_latent_format = None
         self.model_sampling_current = None
         self.should_apply_attn_effective_strength = False
         self.should_apply_adain_effective_strength = False
         self.should_apply_effective_masks = False
         self.latent_shape = None
+        # wrapper hooks
+        self.extra_hooks = extra_hooks.clone() if extra_hooks else self.import_and_create_wrapper_hooks()
+        # ContextRef stuff
+        self.is_context_ref = False
+        self.contextref_cond_idx = -1 # NOTE: does nothing ever since conds got uuids associated with them; can remove
+        self.contextref_version = RETURNED_CONTEXTREF_VERSION
+
+    @property
+    def ref_opts(self):
+        if self._current_timestep_keyframe is not None and self._current_timestep_keyframe.has_control_weights():
+            return self._current_timestep_keyframe.control_weights.extras.get(RefConst.OPTS, self._ref_opts)
+        return self._ref_opts
+
+    def import_and_create_wrapper_hooks(self):
+        from .sampling import create_wrapper_hooks
+        return create_wrapper_hooks()
 
     def any_attn_strength_to_apply(self):
         return self.should_apply_attn_effective_strength or self.should_apply_effective_masks
@@ -272,6 +209,12 @@ class ReferenceAdvanced(ControlBase, AdvancedControlBase):
         self.apply_advanced_strengths_and_masks(x=real_mask, batched_number=self.batched_number)
         return real_mask
 
+    def get_contextref_mode_replace(self):
+        # used by ADE to get mode_replace for current keyframe
+        if self._current_timestep_keyframe.has_control_weights():
+            return self._current_timestep_keyframe.control_weights.extras.get(RefConst.CREF_MODE, None)
+        return None
+
     def should_run(self):
         running = super().should_run()
         if not running:
@@ -288,48 +231,56 @@ class ReferenceAdvanced(ControlBase, AdvancedControlBase):
 
     def pre_run_advanced(self, model, percent_to_timestep_function):
         AdvancedControlBase.pre_run_advanced(self, model, percent_to_timestep_function)
-        if type(self.cond_hint_original) == ReferencePreprocWrapper:
+        if isinstance(self.cond_hint_original, AbstractPreprocWrapper):
             self.cond_hint_original = self.cond_hint_original.condhint
-        self.latent_format = model.latent_format # LatentFormat object, used to process_in latent cond_hint
+        self.model_latent_format = model.latent_format # LatentFormat object, used to process_in latent cond_hint
         self.model_sampling_current = model.model_sampling
-        # SDXL is more sensitive to style_fidelity according to sd-webui-controlnet comments
-        if type(model).__name__ == "SDXL":
-            self.ref_opts.attn_style_fidelity = self.ref_opts.original_attn_style_fidelity ** 3.0
-            self.ref_opts.adain_style_fidelity = self.ref_opts.original_adain_style_fidelity ** 3.0
-        else:
-            self.ref_opts.attn_style_fidelity = self.ref_opts.original_attn_style_fidelity
-            self.ref_opts.adain_style_fidelity = self.ref_opts.original_adain_style_fidelity
+        # SDXL is more sensitive to style_fidelity according to sd-webui-controlnet comments;
+        # prepare all ref_opts accordingly
+        all_ref_opts = [self._ref_opts]
+        for kf in self.timestep_keyframes.keyframes:
+            if kf.has_control_weights() and RefConst.OPTS in kf.control_weights.extras:
+                all_ref_opts.append(kf.control_weights.extras[RefConst.OPTS])
+        for ropts in all_ref_opts:
+            if type(model).__name__ == "SDXL":
+                ropts.attn_style_fidelity = ropts.original_attn_style_fidelity ** 3.0
+                ropts.adain_style_fidelity = ropts.original_adain_style_fidelity ** 3.0
+            else:
+                ropts.attn_style_fidelity = ropts.original_attn_style_fidelity
+                ropts.adain_style_fidelity = ropts.original_adain_style_fidelity
 
-    def get_control_advanced(self, x_noisy: Tensor, t, cond, batched_number: int):
+    def get_control_advanced(self, x_noisy: Tensor, t, cond, batched_number: int, transformer_options):
         # normal ControlNet stuff
         control_prev = None
         if self.previous_controlnet is not None:
-            control_prev = self.previous_controlnet.get_control(x_noisy, t, cond, batched_number)
+            control_prev = self.previous_controlnet.get_control(x_noisy, t, cond, batched_number, transformer_options)
 
         if self.timestep_range is not None:
             if t[0] > self.timestep_range[0] or t[0] < self.timestep_range[1]:
                 return control_prev
 
         dtype = x_noisy.dtype
-        # prepare cond_hint - it is a latent, NOT an image
-        #if self.sub_idxs is not None or self.cond_hint is None or x_noisy.shape[2] != self.cond_hint.shape[2] or x_noisy.shape[3] != self.cond_hint.shape[3]:
-        if self.cond_hint is not None:
-            del self.cond_hint
-        self.cond_hint = None
-        # if self.cond_hint_original length greater or equal to real latent count, subdivide it before scaling
-        if self.sub_idxs is not None and self.cond_hint_original.size(0) >= self.full_latent_length:
-            self.cond_hint = comfy.utils.common_upscale(
-                self.cond_hint_original[self.sub_idxs],
-                x_noisy.shape[3], x_noisy.shape[2], 'nearest-exact', "center").to(dtype).to(self.device)
-        else:
-            self.cond_hint = comfy.utils.common_upscale(
-                self.cond_hint_original,
-                x_noisy.shape[3], x_noisy.shape[2], 'nearest-exact', "center").to(dtype).to(self.device)
-        if x_noisy.shape[0] != self.cond_hint.shape[0]:
-            self.cond_hint = broadcast_image_to_full(self.cond_hint, x_noisy.shape[0], batched_number, except_one=False)
-        # noise cond_hint based on sigma (current step)
-        self.cond_hint = self.latent_format.process_in(self.cond_hint)
-        self.cond_hint = ref_noise_latents(self.cond_hint, sigma=t, noise=None)
+        # cond_hint_original only matters for RefCN, NOT ContextRef
+        if self.cond_hint_original is not None:
+            # prepare cond_hint - it is a latent, NOT an image
+            #if self.sub_idxs is not None or self.cond_hint is None or x_noisy.shape[2] != self.cond_hint.shape[2] or x_noisy.shape[3] != self.cond_hint.shape[3]:
+            if self.cond_hint is not None:
+                del self.cond_hint
+            self.cond_hint = None
+            # if self.cond_hint_original length greater or equal to real latent count, subdivide it before scaling
+            if self.sub_idxs is not None and self.cond_hint_original.size(0) >= self.full_latent_length:
+                self.cond_hint = comfy.utils.common_upscale(
+                    self.cond_hint_original[self.sub_idxs],
+                    x_noisy.shape[3], x_noisy.shape[2], 'nearest-exact', "center").to(dtype).to(x_noisy.device)
+            else:
+                self.cond_hint = comfy.utils.common_upscale(
+                    self.cond_hint_original,
+                    x_noisy.shape[3], x_noisy.shape[2], 'nearest-exact', "center").to(dtype).to(x_noisy.device)
+            if x_noisy.shape[0] != self.cond_hint.shape[0]:
+                self.cond_hint = broadcast_image_to_extend(self.cond_hint, x_noisy.shape[0], batched_number, except_one=False)
+            # noise cond_hint based on sigma (current step)
+            self.cond_hint = self.model_latent_format.process_in(self.cond_hint)
+            self.cond_hint = ref_noise_latents(self.cond_hint, sigma=t, noise=None)
         timestep = self.model_sampling_current.timestep(t)
         self.should_apply_attn_effective_strength = not (math.isclose(self.strength, 1.0) and math.isclose(self._current_timestep_keyframe.strength, 1.0) and math.isclose(self.ref_opts.attn_strength, 1.0))
         self.should_apply_adain_effective_strength = not (math.isclose(self.strength, 1.0) and math.isclose(self._current_timestep_keyframe.strength, 1.0) and math.isclose(self.ref_opts.adain_strength, 1.0))
@@ -338,13 +289,14 @@ class ReferenceAdvanced(ControlBase, AdvancedControlBase):
         self.should_apply_effective_masks = self.latent_keyframes is not None or self.mask_cond_hint is not None or self.tk_mask_cond_hint is not None
         self.latent_shape = list(x_noisy.shape)
         # done preparing; model patches will take care of everything now.
+        transformer_options[RefConst.REFCN_PRESENT_IN_CONDS] = True
         # return normal controlnet stuff
         return control_prev
 
     def cleanup_advanced(self):
         super().cleanup_advanced()
-        del self.latent_format
-        self.latent_format = None
+        del self.model_latent_format
+        self.model_latent_format = None
         del self.model_sampling_current
         self.model_sampling_current = None
         self.should_apply_attn_effective_strength = False
@@ -352,8 +304,9 @@ class ReferenceAdvanced(ControlBase, AdvancedControlBase):
         self.should_apply_effective_masks = False
     
     def copy(self):
-        c = ReferenceAdvanced(self.ref_opts, self.timestep_keyframes)
+        c = ReferenceAdvanced(self.ref_opts, self.timestep_keyframes, self.extra_hooks)
         c.order = self.order
+        c.is_context_ref = self.is_context_ref
         self.copy_to(c)
         self.copy_to_advanced(c)
         return c
@@ -362,6 +315,92 @@ class ReferenceAdvanced(ControlBase, AdvancedControlBase):
     # TODO: do the bookkeeping to do this in a proper way for all Adv-ControlNets
     def __deepcopy__(self, memo):
         return self
+
+
+def handle_context_ref_setup(contextref_obj, transformer_options: dict, conds: dict[str, list[dict, str]]):
+    transformer_options[CONTEXTREF_MACHINE_STATE] = MachineState.OFF
+    # verify version is compatible
+    if contextref_obj.version > HIGHEST_VERSION_SUPPORT:
+        raise Exception(f"AnimateDiff-Evolved's ContextRef v{contextref_obj.version} is not supported in currently-installed Advanced-ControlNet (only supports ContextRef up to v{HIGHEST_VERSION_SUPPORT}); " +
+                        f"update your Advanced-ControlNet nodes for ContextRef to work.")
+    # init ReferenceOptions
+    cref_opt_dict = contextref_obj.tune.create_dict() # ContextRefTune obj from ADE
+    opts = ReferenceOptions.create_from_kwargs(**cref_opt_dict)
+    # init TimestepKeyframes
+    cref_tks_list = contextref_obj.keyframe.create_list_of_dicts() # ContextRefKeyframeGroup obj from ADE
+    timestep_keyframes = _create_tks_from_dict_list(cref_tks_list)
+    # create ReferenceAdvanced
+    cref = ReferenceAdvanced(ref_opts=opts, timestep_keyframes=timestep_keyframes)
+    cref.strength = contextref_obj.strength # ContextRef obj from ADE
+    cref.set_cond_hint_mask(contextref_obj.mask)
+    cref.order = 99
+    cref.is_context_ref = True
+    context_ref_list = [cref]
+    transformer_options[CONTEXTREF_CONTROL_LIST_ALL] = context_ref_list
+    transformer_options[CONTEXTREF_OPTIONS_CLASS] = ReferenceOptions
+    _add_context_ref_to_conds(conds, cref)
+    return context_ref_list
+
+
+def _create_tks_from_dict_list(dlist: list[dict[str]]) -> TimestepKeyframeGroup:
+    tks = TimestepKeyframeGroup()
+    if dlist is None or len(dlist) == 0:
+        return tks
+    for d in dlist:
+        # scheduling
+        start_percent = d["start_percent"]
+        guarantee_steps = d["guarantee_steps"]
+        inherit_missing = d["inherit_missing"]
+        # values
+        strength = d["strength"]
+        mask = d["mask"]
+        tune = d["tune"]
+        mode = d["mode"]
+        weights = None
+        extras = {}
+        if tune is not None:
+            cref_opt_dict = tune.create_dict() # ContextRefTune obj from ADE
+            opts = ReferenceOptions.create_from_kwargs(**cref_opt_dict)
+            extras[RefConst.OPTS] = opts
+        if mode is not None:
+            extras[RefConst.CREF_MODE] = mode
+        weights = ControlWeights.default(extras=extras)
+        # create keyframe
+        tk = TimestepKeyframe(start_percent=start_percent, guarantee_steps=guarantee_steps, inherit_missing=inherit_missing,
+                              strength=strength, mask_hint_orig=mask, control_weights=weights)
+        tks.add(tk)
+    return tks
+
+
+def _add_context_ref_to_conds(conds: dict[list[dict[str]]], context_ref: ReferenceAdvanced):
+    def _add_context_ref_to_existing_control(control: ControlBase, context_ref: ReferenceAdvanced):
+        curr_cn = control
+        while curr_cn is not None:
+            if type(curr_cn) == ReferenceAdvanced and curr_cn.is_context_ref:
+                break
+            if curr_cn.previous_controlnet is not None:
+                curr_cn = curr_cn.previous_controlnet
+                continue
+            orig_previous_controlnet = curr_cn.previous_controlnet
+            # NOTE: code is already in place to restore any ORIG_PREVIOUS_CONTROLNET props
+            setattr(curr_cn, ORIG_PREVIOUS_CONTROLNET, orig_previous_controlnet)
+            curr_cn.previous_controlnet = context_ref
+            curr_cn = orig_previous_controlnet
+
+    def _add_context_ref(actual_cond: dict[str], context_ref: ReferenceAdvanced):
+        # if controls already present on cond, add it to the last previous_controlnet
+        if "control" in actual_cond:
+            return _add_context_ref_to_existing_control(actual_cond["control"], context_ref)
+        # otherwise, need to add it to begin with, and should mark that it should be cleaned after
+        actual_cond["control"] = context_ref
+        actual_cond[CONTROL_INIT_BY_ACN] = True
+    
+    # either add context_ref to end of existing cnet chain, or init 'control' key on actual cond
+    for cond_type in conds:
+        cond = conds[cond_type]
+        if cond is not None:
+            for actual_cond in cond:
+                _add_context_ref(actual_cond, context_ref)
 
 
 def ref_noise_latents(latents: Tensor, sigma: Tensor, noise: Tensor=None):
@@ -388,47 +427,211 @@ def simple_noise_latents(latents: Tensor, sigma: float, noise: Tensor=None):
 
 class BankStylesBasicTransformerBlock:
     def __init__(self):
+        # ref
         self.bank = []
         self.style_cfgs = []
         self.cn_idx: list[int] = []
+        # contextref - list of lists as each cond/uncond stored separately
+        self.c_bank: dict[UUID, list[Tensor]] = {}
+        self.c_style_cfgs: dict[UUID, list[float]] = {}
+        self.c_cn_idx: dict[UUID, list[int]] = {}
+
+    def set_c_bank_for_uuids(self, x: Tensor, uuids: list[UUID]):
+        per_uuid = len(x) // len(uuids)
+        for uuid, i in zip(uuids, list(range(0, len(x), per_uuid))):
+            self.c_bank.setdefault(uuid, []).append(x[i:i+per_uuid])
+
+    def _get_c_bank_for_uuids(self, uuids: list[UUID]):
+        per_i: list[list[Tensor]] = []
+        for uuid in uuids:
+            for i, bank in enumerate(self.c_bank[uuid]):
+                if i >= len(per_i):
+                    per_i.append([])
+                per_i[i].append(bank)
+        real_banks = []
+        for bank in per_i:
+            if len(bank) == 1:
+                combined = bank[0]
+            else:
+                combined = torch.cat(bank, dim=0)
+            real_banks.append(combined)
+        return real_banks
+
+    def get_bank(self, uuids: list[UUID], ignore_contextref, cdevice=None):
+        if ignore_contextref:
+            return self.bank
+        real_c_bank_list = self._get_c_bank_for_uuids(uuids)
+        if cdevice != None:
+            real_c_bank_list = real_c_bank_list.copy()
+            for i in range(len(real_c_bank_list)):
+                real_c_bank_list[i] = real_c_bank_list[i].to(cdevice)
+        return self.bank + real_c_bank_list
+
+
+    def set_c_style_cfgs_for_uuids(self, style_cfg: float, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_style_cfgs.setdefault(uuid, []).append(style_cfg)
+
+    def get_avg_style_fidelity(self, uuids: list[UUID], ignore_contextref):
+        if ignore_contextref:
+            return sum(self.style_cfgs) / float(len(self.style_cfgs))
+        combined = self.style_cfgs + self._get_c_style_cfgs_for_uuids(uuids)
+        return sum(combined) / float(len(combined))
     
-    def get_avg_style_fidelity(self):
-        return sum(self.style_cfgs) / float(len(self.style_cfgs))
+    def _get_c_style_cfgs_for_uuids(self, uuids: list[UUID]):
+        # c_style_cfgs will be the same for all provided uuids
+        return self.c_style_cfgs[uuids[0]]
     
-    def clean(self):
+
+    def set_c_cn_idx_for_uuids(self, cn_idx: int, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_cn_idx.setdefault(uuid, []).append(cn_idx)
+
+    def get_cn_idxs(self, uuids: list[UUID], ignore_contxtref):
+        if ignore_contxtref:
+            return self.cn_idx
+        return self.cn_idx + self._get_c_cn_idxs_for_uuids(uuids)
+    
+    def _get_c_cn_idxs_for_uuids(self, uuids: list[UUID]):
+        # c_cn_idxs will be the same for all provided uuids
+        return self.c_cn_idx.get(uuids[0], [])
+
+
+    def init_cref_for_uuids(self, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_bank.setdefault(uuid, [])
+            self.c_style_cfgs.setdefault(uuid, [])
+            self.c_cn_idx.setdefault(uuid, [])
+    
+    def clear_cref_for_uuids(self, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_bank[uuid] = []
+            self.c_style_cfgs[uuid] = []
+            self.c_cn_idx[uuid] = []
+
+    def clean_ref(self):
         del self.bank
-        self.bank = []
         del self.style_cfgs
-        self.style_cfgs = []
         del self.cn_idx
+        self.bank = []
+        self.style_cfgs = []
         self.cn_idx = []
+
+    def clean_contextref(self):
+        del self.c_bank
+        del self.c_style_cfgs
+        del self.c_cn_idx
+        self.c_bank = {}
+        self.c_style_cfgs = {}
+        self.c_cn_idx = {}
+
+    def clean_all(self):
+        self.clean_ref()
+        self.clean_contextref()
 
 
 class BankStylesTimestepEmbedSequential:
     def __init__(self):
+        # ref
         self.var_bank = []
         self.mean_bank = []
         self.style_cfgs = []
         self.cn_idx: list[int] = []
+        # cref
+        self.c_var_bank: dict[UUID, list[Tensor]] = {}
+        self.c_mean_bank: dict[UUID, list[Tensor]] = {}
+        self.c_style_cfgs: dict[UUID, list[float]] = {}
+        self.c_cn_idx: dict[UUID, list[int]] = {}
 
-    def get_avg_var_bank(self):
-        return sum(self.var_bank) / float(len(self.var_bank))
+    def set_c_var_bank_for_uuids(self, var: Tensor, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_var_bank.setdefault(uuid, []).append(var)
 
-    def get_avg_mean_bank(self):
-        return sum(self.mean_bank) / float(len(self.mean_bank))
+    def get_var_bank(self, uuids: list[UUID], ignore_contextref):
+        if ignore_contextref:
+            return self.var_bank
+        return self.var_bank + self._get_c_var_bank_for_uuids(uuids)
     
-    def get_avg_style_fidelity(self):
-        return sum(self.style_cfgs) / float(len(self.style_cfgs))
+    def _get_c_var_bank_for_uuids(self, uuids: list[UUID]):
+        return self.c_var_bank.get(uuids[0], [])
 
-    def clean(self):
+
+    def set_c_mean_bank_for_uuids(self, mean: Tensor, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_mean_bank.setdefault(uuid, []).append(mean)
+
+    def get_mean_bank(self, uuids: list[UUID], ignore_contextref):
+        if ignore_contextref:
+            return self.mean_bank
+        return self.mean_bank + self._get_c_mean_bank_for_uuids(uuids)
+
+    def _get_c_mean_bank_for_uuids(self, uuids: list[UUID]):
+        return self.c_mean_bank.get(uuids[0], [])
+
+
+    def set_c_style_cfgs_for_uuids(self, style_cfg: float, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_style_cfgs.setdefault(uuid, []).append(style_cfg)
+
+    def get_style_cfgs(self, uuids: list[UUID], ignore_contextref):
+        if ignore_contextref:
+            return self.style_cfgs
+        return self.style_cfgs + self._get_c_style_cfgs_for_uuids(uuids)
+    
+    def _get_c_style_cfgs_for_uuids(self, uuids: list[UUID]):
+        return self.c_style_cfgs.get(uuids[0], [])
+
+
+    def set_c_cn_idx_for_uuids(self, cn_idx: int, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_cn_idx.setdefault(uuid, []).append(cn_idx)
+
+    def get_cn_idxs(self, uuids: list[UUID], ignore_contextref):
+        if ignore_contextref:
+            return self.cn_idx
+        return self.cn_idx + self._get_c_cn_idxs_for_uuids(uuids)
+
+    def _get_c_cn_idxs_for_uuids(self, uuids: list[UUID]):
+        return self.c_cn_idx.get(uuids[0], [])
+
+
+    def init_cref_for_uuids(self, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_var_bank.setdefault(uuid, [])
+            self.c_mean_bank.setdefault(uuid, [])
+            self.c_style_cfgs.setdefault(uuid, [])
+            self.c_cn_idx.setdefault(uuid, [])
+
+    def clear_cref_for_uuids(self, uuids: list[UUID]):
+        for uuid in uuids:
+            self.c_var_bank[uuid] = []
+            self.c_mean_bank[uuid] = []
+            self.c_style_cfgs[uuid] = []
+            self.c_cn_idx[uuid] = []
+
+    def clean_ref(self):
         del self.mean_bank
-        self.mean_bank = []
         del self.var_bank
-        self.var_bank = []
         del self.style_cfgs
-        self.style_cfgs = []
         del self.cn_idx
+        self.mean_bank = []
+        self.var_bank = []
+        self.style_cfgs = []
         self.cn_idx = []
+
+    def clean_contextref(self):
+        del self.c_var_bank
+        del self.c_mean_bank
+        del self.c_style_cfgs
+        del self.c_cn_idx
+        self.c_var_bank = {}
+        self.c_mean_bank = {}
+        self.c_style_cfgs = {}
+        self.c_cn_idx = {}
+
+    def clean_all(self):
+        self.clean_ref()
+        self.clean_contextref()
 
 
 class InjectionBasicTransformerBlockHolder:
@@ -448,8 +651,14 @@ class InjectionBasicTransformerBlockHolder:
         else:
             block.forward = self.original_forward
 
-    def clean(self):
-        self.bank_styles.clean()
+    def clean_ref(self):
+        self.bank_styles.clean_ref()
+    
+    def clean_contextref(self):
+        self.bank_styles.clean_contextref()
+
+    def clean_all(self):
+        self.bank_styles.clean_all()
 
 
 class InjectionTimestepEmbedSequentialHolder:
@@ -465,51 +674,105 @@ class InjectionTimestepEmbedSequentialHolder:
     def restore(self, block: openaimodel.TimestepEmbedSequential):
         block.forward = self.original_forward
     
-    def clean(self):
-        self.bank_styles.clean()
+    def clean_ref(self):
+        self.bank_styles.clean_ref()
+    
+    def clean_contextref(self):
+        self.bank_styles.clean_contextref()
+
+    def clean_all(self):
+        self.bank_styles.clean_all()
 
 
 class ReferenceInjections:
     def __init__(self, attn_modules: list['RefBasicTransformerBlock']=None, gn_modules: list['RefTimestepEmbedSequential']=None):
         self.attn_modules = attn_modules if attn_modules else []
         self.gn_modules = gn_modules if gn_modules else []
-        self.diffusion_model_orig_forward: Callable = None
     
-    def clean_module_mem(self):
+    def clean_ref_module_mem(self):
         for attn_module in self.attn_modules:
             try:
-                attn_module.injection_holder.clean()
+                attn_module.injection_holder.clean_ref()
             except Exception:
                 pass
         for gn_module in self.gn_modules:
             try:
-                gn_module.injection_holder.clean()
+                gn_module.injection_holder.clean_ref()
+            except Exception:
+                pass
+
+    def clean_contextref_module_mem(self):
+        for attn_module in self.attn_modules:
+            try:
+                attn_module.injection_holder.clean_contextref()
+            except Exception:
+                pass
+        for gn_module in self.gn_modules:
+            try:
+                gn_module.injection_holder.clean_contextref()
+            except Exception:
+                pass
+
+    def clean_all_module_mem(self):
+        for attn_module in self.attn_modules:
+            try:
+                attn_module.injection_holder.clean_all()
+            except Exception:
+                pass
+        for gn_module in self.gn_modules:
+            try:
+                gn_module.injection_holder.clean_all()
             except Exception:
                 pass
 
     def cleanup(self):
-        self.clean_module_mem()
+        self.clean_all_module_mem()
         del self.attn_modules
         self.attn_modules = []
         del self.gn_modules
         self.gn_modules = []
-        self.diffusion_model_orig_forward = None
 
 
-def factory_forward_inject_UNetModel(reference_injections: ReferenceInjections):
-    def forward_inject_UNetModel(self, x: Tensor, *args, **kwargs):
-        # get control and transformer_options from kwargs
+def handle_reference_injection(model_options: dict, reference_injections: ReferenceInjections):
+    # register wrapper functions on transformer_options
+    comfy.patcher_extension.add_wrapper_with_key(comfy.patcher_extension.WrappersMP.DIFFUSION_MODEL,
+                                                 "ACN_refcn_diffusion_model",
+                                                 refcn_diffusion_model_wrapper_factory(reference_injections),
+                                                 model_options, is_model_options=True)
+
+
+def refcn_diffusion_model_wrapper_factory(reference_injections: ReferenceInjections):
+    def refcn_diffusion_model_wrapper(executor, x, *args, **kwargs):
+        # get control and transformer_options from args
         real_args = list(args)
         real_kwargs = list(kwargs.keys())
-        control = kwargs.get("control", None)
-        transformer_options = kwargs.get("transformer_options", None)
-        # look for ReferenceAttnPatch objects to get ReferenceAdvanced objects
-        ref_controlnets: list[ReferenceAdvanced] = transformer_options[REF_CONTROL_LIST_ALL]
+        # args values (x is treated separately, so all args are actually shifted by -1):
+        # -1: x
+        #  0: timesteps
+        #  1: context
+        #  2: y
+        #  3: control
+        #  4: transformer_options
+        control = args[3]
+        transformer_options = args[4]
+        # NOTE: adds support for both ReferenceCN and ContextRef, so need to track them separately
+        # get ReferenceAdvanced objects
+        ref_controlnets: list[ReferenceAdvanced] = transformer_options.get(REF_CONTROL_LIST_ALL, [])
+        context_controlnets: list[ReferenceAdvanced] = transformer_options.get(CONTEXTREF_CONTROL_LIST_ALL, [])
+        # clean contextref stuff if OFF
+        if len(context_controlnets) > 0 and transformer_options[CONTEXTREF_MACHINE_STATE] == MachineState.OFF:
+            reference_injections.clean_contextref_module_mem()
+            context_controlnets = []
         # discard any controlnets that should not run
-        ref_controlnets = [x for x in ref_controlnets if x.should_run()]
+        refcn_present_in_conds = transformer_options.get(RefConst.REFCN_PRESENT_IN_CONDS, False)
+        if refcn_present_in_conds:
+            ref_controlnets = [z for z in ref_controlnets if z.should_run()]
+        else:
+            ref_controlnets = []
+        context_controlnets = [z for z in context_controlnets if z.should_run()]
         # if nothing related to reference controlnets, do nothing special
-        if len(ref_controlnets) == 0:
-            return reference_injections.diffusion_model_orig_forward(x, *args, **kwargs)
+        if len(ref_controlnets) == 0 and len(context_controlnets) == 0:
+            return executor(x, *args, **kwargs)
         try:
             # assign cond and uncond idxs
             batched_number = len(transformer_options["cond_or_uncond"])
@@ -517,8 +780,8 @@ def factory_forward_inject_UNetModel(reference_injections: ReferenceInjections):
             indiv_conds = []
             for cond_type in transformer_options["cond_or_uncond"]:
                 indiv_conds.extend([cond_type] * per_batch)
-            transformer_options[REF_UNCOND_IDXS] = [i for i, x in enumerate(indiv_conds) if x == 1]
-            transformer_options[REF_COND_IDXS] = [i for i, x in enumerate(indiv_conds) if x == 0]
+            transformer_options[REF_UNCOND_IDXS] = [i for i, z in enumerate(indiv_conds) if z == 1]
+            transformer_options[REF_COND_IDXS] = [i for i, z in enumerate(indiv_conds) if z == 0]
             # check which controlnets do which thing
             attn_controlnets = []
             adain_controlnets = []
@@ -527,42 +790,96 @@ def factory_forward_inject_UNetModel(reference_injections: ReferenceInjections):
                     attn_controlnets.append(control)
                 if ReferenceType.is_adain(control.ref_opts.reference_type):
                     adain_controlnets.append(control)
-            if len(adain_controlnets) > 0:
+            context_attn_controlnets = []
+            context_adain_controlnets = []
+            # for ease of access, store current contextref_cond_idx value
+            if len(context_controlnets) == 0:
+                transformer_options[CONTEXTREF_TEMP_COND_IDX] = -1
+            else:
+                transformer_options[CONTEXTREF_TEMP_COND_IDX] = context_controlnets[0].contextref_cond_idx
+                # logger.info(f"{transformer_options[CONTEXTREF_MACHINE_STATE]}: {transformer_options[CONTEXTREF_TEMP_COND_IDX]}")
+            
+            for control in context_controlnets:
+                if ReferenceType.is_attn(control.ref_opts.reference_type):
+                    context_attn_controlnets.append(control)
+                if ReferenceType.is_adain(control.ref_opts.reference_type):
+                    context_adain_controlnets.append(control)
+            if len(adain_controlnets) > 0 or len(context_adain_controlnets) > 0:
                 # ComfyUI uses forward_timestep_embed with the TimestepEmbedSequential passed into it
                 orig_forward_timestep_embed = openaimodel.forward_timestep_embed
                 openaimodel.forward_timestep_embed = forward_timestep_embed_ref_inject_factory(orig_forward_timestep_embed)
-            # handle running diffusion with ref cond hints
-            for control in ref_controlnets:
-                if ReferenceType.is_attn(control.ref_opts.reference_type):
-                    transformer_options[REF_ATTN_MACHINE_STATE] = MachineState.WRITE
-                else:
-                    transformer_options[REF_ATTN_MACHINE_STATE] = MachineState.OFF
-                if ReferenceType.is_adain(control.ref_opts.reference_type):
-                    transformer_options[REF_ADAIN_MACHINE_STATE] = MachineState.WRITE
-                else:
-                    transformer_options[REF_ADAIN_MACHINE_STATE] = MachineState.OFF
-                transformer_options[REF_ATTN_CONTROL_LIST] = [control]
-                transformer_options[REF_ADAIN_CONTROL_LIST] = [control]
+            
+            # if RefCN to be used, handle running diffusion with ref cond hints
+            if len(ref_controlnets) > 0:
+                for control in ref_controlnets:
+                    read_attn_list = []
+                    write_attn_list = []
+                    read_adain_list = []
+                    write_adain_list = []
 
-                orig_kwargs = kwargs
-                if not control.ref_opts.ref_with_other_cns:
-                    kwargs = kwargs.copy()
-                    kwargs["control"] = None
-                reference_injections.diffusion_model_orig_forward(control.cond_hint.to(dtype=x.dtype).to(device=x.device), *args, **kwargs)
-                kwargs = orig_kwargs
-            # run diffusion for real now
-            transformer_options[REF_ATTN_MACHINE_STATE] = MachineState.READ
-            transformer_options[REF_ADAIN_MACHINE_STATE] = MachineState.READ
-            transformer_options[REF_ATTN_CONTROL_LIST] = attn_controlnets
-            transformer_options[REF_ADAIN_CONTROL_LIST] = adain_controlnets
-            return reference_injections.diffusion_model_orig_forward(x, *args, **kwargs)
+                    if ReferenceType.is_attn(control.ref_opts.reference_type):
+                        write_attn_list.append(control)
+                    if ReferenceType.is_adain(control.ref_opts.reference_type):
+                        write_adain_list.append(control)
+                    # apply lists
+                    transformer_options[REF_READ_ATTN_CONTROL_LIST] = read_attn_list
+                    transformer_options[REF_WRITE_ATTN_CONTROL_LIST] = write_attn_list
+                    transformer_options[REF_READ_ADAIN_CONTROL_LIST] = read_adain_list
+                    transformer_options[REF_WRITE_ADAIN_CONTROL_LIST] = write_adain_list
+
+                    orig_args = args
+                    # disable other controlnets for this run, if specified
+                    if not control.ref_opts.ref_with_other_cns:
+                        args = list(args)
+                        args[3] = None
+                        args = tuple(args)
+                    executor(control.cond_hint.to(dtype=x.dtype).to(device=x.device), *args, **kwargs)
+                    args = orig_args
+            # prepare running diffusion for real now
+            read_attn_list = []
+            write_attn_list = []
+            read_adain_list = []
+            write_adain_list = []
+
+            # add RefCNs to read lists
+            read_attn_list.extend(attn_controlnets)
+            read_adain_list.extend(adain_controlnets)
+            
+            # do contextref stuff, if needed
+            if len(context_controlnets) > 0:
+                # clean contextref stuff if first WRITE
+                # if context_controlnets[0].contextref_cond_idx == 0 and is_write(transformer_options[CONTEXTREF_MACHINE_STATE]):
+                #     reference_injections.clean_contextref_module_mem()
+                ### add ContextRef to appropriate lists
+                # attn
+                if is_read(transformer_options[CONTEXTREF_MACHINE_STATE]):
+                    read_attn_list.extend(context_attn_controlnets)
+                if is_write(transformer_options[CONTEXTREF_MACHINE_STATE]):
+                    write_attn_list.extend(context_attn_controlnets)
+                # adain
+                if is_read(transformer_options[CONTEXTREF_MACHINE_STATE]):
+                    read_adain_list.extend(context_adain_controlnets)
+                if is_write(transformer_options[CONTEXTREF_MACHINE_STATE]):
+                    write_adain_list.extend(context_adain_controlnets)
+            # apply lists, containing both RefCN and ContextRef
+            transformer_options[REF_READ_ATTN_CONTROL_LIST] = read_attn_list
+            transformer_options[REF_WRITE_ATTN_CONTROL_LIST] = write_attn_list
+            transformer_options[REF_READ_ADAIN_CONTROL_LIST] = read_adain_list
+            transformer_options[REF_WRITE_ADAIN_CONTROL_LIST] = write_adain_list
+            # run diffusion for real
+            try:
+                return executor(x, *args, **kwargs)
+            finally:
+                # increment current cond idx
+                if len(context_controlnets) > 0:
+                    for cn in context_controlnets:
+                        cn.contextref_cond_idx += 1
         finally:
-            # make sure banks are cleared no matter what happens - otherwise, RIP VRAM
-            reference_injections.clean_module_mem()
-            if len(adain_controlnets) > 0:
+            # make sure ref banks are cleared no matter what happens - otherwise, RIP VRAM
+            reference_injections.clean_ref_module_mem()
+            if len(adain_controlnets) > 0 or len(context_adain_controlnets) > 0:
                 openaimodel.forward_timestep_embed = orig_forward_timestep_embed
-
-    return forward_inject_UNetModel
+    return refcn_diffusion_model_wrapper
 
 
 # dummy class just to help IDE keep track of injected variables
@@ -602,16 +919,34 @@ def _forward_inject_BasicTransformerBlock(self: RefBasicTransformerBlock, x: Ten
 
     # Reference CN stuff
     uc_idx_mask = transformer_options.get(REF_UNCOND_IDXS, [])
-    c_idx_mask = transformer_options.get(REF_COND_IDXS, [])
-    # WRITE mode will only have one ReferenceAdvanced, other modes will have all ReferenceAdvanced
-    ref_controlnets: list[ReferenceAdvanced] = transformer_options.get(REF_ATTN_CONTROL_LIST, None)
-    ref_machine_state: str = transformer_options.get(REF_ATTN_MACHINE_STATE, None)
-    # if in WRITE mode, save n and style_fidelity
-    if ref_controlnets and ref_machine_state == MachineState.WRITE:
-        if ref_controlnets[0].ref_opts.attn_ref_weight > self.injection_holder.attn_weight:
-            self.injection_holder.bank_styles.bank.append(n.detach().clone())
-            self.injection_holder.bank_styles.style_cfgs.append(ref_controlnets[0].ref_opts.attn_style_fidelity)
-            self.injection_holder.bank_styles.cn_idx.append(ref_controlnets[0].order)
+    uuids = transformer_options["uuids"]
+    cref_mode = transformer_options.get(CONTEXTREF_MACHINE_STATE, MachineState.OFF)
+    #c_idx_mask = transformer_options.get(REF_COND_IDXS, [])
+    # WRITE mode may have only 1 ReferenceAdvanced for RefCN at a time, other modes will have all ReferenceAdvanced
+    ref_write_cns: list[ReferenceAdvanced] = transformer_options.get(REF_WRITE_ATTN_CONTROL_LIST, [])
+    ref_read_cns: list[ReferenceAdvanced] = transformer_options.get(REF_READ_ATTN_CONTROL_LIST, [])
+    ignore_contextref_read = cref_mode in [MachineState.OFF, MachineState.WRITE]
+    #logger.info(f"cref: {cref_cond_idx}, cmode: {cref_mode}, ignored: {ignore_contextref_read}")
+
+    cached_n = None
+    cref_write_cns: list[ReferenceAdvanced] = []
+    # check if any WRITE cns are applicable; Reference CN WRITEs immediately, ContextREF WRITEs after READ completed
+    # if any refs to WRITE, save n and style_fidelity
+    for refcn in ref_write_cns:
+        if refcn.ref_opts.attn_ref_weight > self.injection_holder.attn_weight:
+            if cached_n is None:
+                cached_n = n.detach().clone()
+            # for ContextRef, make sure relevant lists are long enough to cond_idx
+            # store RefCN and ContextRef stuff separately
+            if refcn.is_context_ref:
+                cref_write_cns.append(refcn)
+                self.injection_holder.bank_styles.init_cref_for_uuids(uuids)
+            else: # Reference CN WRITE
+                self.injection_holder.bank_styles.bank.append(cached_n)
+                self.injection_holder.bank_styles.style_cfgs.append(refcn.ref_opts.attn_style_fidelity)
+                self.injection_holder.bank_styles.cn_idx.append(refcn.order)
+    if len(cref_write_cns) == 0:
+        del cached_n
 
     if "attn1_patch" in transformer_patches:
         patch = transformer_patches["attn1_patch"]
@@ -636,20 +971,21 @@ def _forward_inject_BasicTransformerBlock(self: RefBasicTransformerBlock, x: Ten
             value_attn1 = n
         n = self.attn1.to_q(n)
         # Reference CN READ - use attn1_replace_patch appropriately
-        if ref_machine_state == MachineState.READ and len(self.injection_holder.bank_styles.bank) > 0:
+        if len(ref_read_cns) > 0 and len(self.injection_holder.bank_styles.get_cn_idxs(uuids, ignore_contextref_read)) > 0:
             bank_styles = self.injection_holder.bank_styles
-            style_fidelity = bank_styles.get_avg_style_fidelity()
-            real_bank = bank_styles.bank.copy()
+            style_fidelity = bank_styles.get_avg_style_fidelity(uuids, ignore_contextref_read)
+            real_bank = bank_styles.get_bank(uuids, ignore_contextref_read, cdevice=n.device).copy()
+            real_cn_idxs = bank_styles.get_cn_idxs(uuids, ignore_contextref_read)
             cn_idx = 0
-            for idx, order in enumerate(bank_styles.cn_idx):
+            for idx, order in enumerate(real_cn_idxs):
                 # make sure matching ref cn is selected
-                for i in range(cn_idx, len(ref_controlnets)):
-                    if ref_controlnets[i].order == order:
+                for i in range(cn_idx, len(ref_read_cns)):
+                    if ref_read_cns[i].order == order:
                         cn_idx = i
                         break
-                assert order == ref_controlnets[cn_idx].order
-                if ref_controlnets[cn_idx].any_attn_strength_to_apply():
-                    effective_strength = ref_controlnets[cn_idx].get_effective_attn_mask_or_float(x=n, channels=n.shape[2], is_mid=self.injection_holder.is_middle)
+                assert order == ref_read_cns[cn_idx].order
+                if ref_read_cns[cn_idx].any_attn_strength_to_apply():
+                    effective_strength = ref_read_cns[cn_idx].get_effective_attn_mask_or_float(x=n, channels=n.shape[2], is_mid=self.injection_holder.is_middle)
                     real_bank[idx] = real_bank[idx] * effective_strength + context_attn1 * (1-effective_strength)
             n_uc = self.attn1.to_out(attn1_replace_patch[block_attn1](
                 n,
@@ -664,7 +1000,7 @@ def _forward_inject_BasicTransformerBlock(self: RefBasicTransformerBlock, x: Ten
                     self.attn1.to_v(value_attn1[uc_idx_mask]),
                     extra_options))
             n = style_fidelity * n_c + (1.0-style_fidelity) * n_uc
-            bank_styles.clean()
+            bank_styles.clean_ref()
         else:
             context_attn1 = self.attn1.to_k(context_attn1)
             value_attn1 = self.attn1.to_v(value_attn1)
@@ -672,22 +1008,23 @@ def _forward_inject_BasicTransformerBlock(self: RefBasicTransformerBlock, x: Ten
             n = self.attn1.to_out(n)
     else:
         # Reference CN READ - no attn1_replace_patch
-        if ref_machine_state == MachineState.READ and len(self.injection_holder.bank_styles.bank) > 0:
+        if len(ref_read_cns) > 0 and len(self.injection_holder.bank_styles.get_cn_idxs(uuids, ignore_contextref_read)) > 0:
             if context_attn1 is None:
                 context_attn1 = n
             bank_styles = self.injection_holder.bank_styles
-            style_fidelity = bank_styles.get_avg_style_fidelity()
-            real_bank = bank_styles.bank.copy()
+            style_fidelity = bank_styles.get_avg_style_fidelity(uuids, ignore_contextref_read)
+            real_bank = bank_styles.get_bank(uuids, ignore_contextref_read, cdevice=n.device).copy()
+            real_cn_idxs = bank_styles.get_cn_idxs(uuids, ignore_contextref_read)
             cn_idx = 0
-            for idx, order in enumerate(bank_styles.cn_idx):
+            for idx, order in enumerate(real_cn_idxs):
                 # make sure matching ref cn is selected
-                for i in range(cn_idx, len(ref_controlnets)):
-                    if ref_controlnets[i].order == order:
+                for i in range(cn_idx, len(ref_read_cns)):
+                    if ref_read_cns[i].order == order:
                         cn_idx = i
                         break
-                assert order == ref_controlnets[cn_idx].order
-                if ref_controlnets[cn_idx].any_attn_strength_to_apply():
-                    effective_strength = ref_controlnets[cn_idx].get_effective_attn_mask_or_float(x=n, channels=n.shape[2], is_mid=self.injection_holder.is_middle)
+                assert order == ref_read_cns[cn_idx].order
+                if ref_read_cns[cn_idx].any_attn_strength_to_apply():
+                    effective_strength = ref_read_cns[cn_idx].get_effective_attn_mask_or_float(x=n, channels=n.shape[2], is_mid=self.injection_holder.is_middle)
                     real_bank[idx] = real_bank[idx] * effective_strength + context_attn1 * (1-effective_strength)
             n_uc: Tensor = self.attn1(
                 n,
@@ -700,9 +1037,20 @@ def _forward_inject_BasicTransformerBlock(self: RefBasicTransformerBlock, x: Ten
                     context=context_attn1[uc_idx_mask],
                     value=value_attn1[uc_idx_mask] if value_attn1 is not None else value_attn1)
             n = style_fidelity * n_c + (1.0-style_fidelity) * n_uc
-            bank_styles.clean()
+            bank_styles.clean_ref()
         else:
             n = self.attn1(n, context=context_attn1, value=value_attn1)
+
+    # ContextRef CN WRITE
+    if len(cref_write_cns) > 0:
+        # clear so that ContextRef CNs can properly 'replace' previous value at relevant uuids
+        self.injection_holder.bank_styles.clear_cref_for_uuids(uuids)
+        for refcn in cref_write_cns:
+            # add a whole list to match expected type when combining
+            self.injection_holder.bank_styles.set_c_bank_for_uuids(cached_n.to(comfy.model_management.unet_offload_device()), uuids)
+            self.injection_holder.bank_styles.set_c_style_cfgs_for_uuids(refcn.ref_opts.attn_style_fidelity, uuids)
+            self.injection_holder.bank_styles.set_c_cn_idx_for_uuids(refcn.order, uuids)
+        del cached_n
 
     if "attn1_output_patch" in transformer_patches:
         patch = transformer_patches["attn1_output_patch"]
@@ -773,61 +1121,86 @@ def forward_timestep_embed_ref_inject_factory(orig_timestep_embed_inject_factory
         transformer_options: dict[str] = args[4]
         # Reference CN stuff
         uc_idx_mask = transformer_options.get(REF_UNCOND_IDXS, [])
-        c_idx_mask = transformer_options.get(REF_COND_IDXS, [])
+        uuids = transformer_options["uuids"]
+        cref_mode = transformer_options.get(CONTEXTREF_MACHINE_STATE, MachineState.OFF)
+        #c_idx_mask = transformer_options.get(REF_COND_IDXS, [])
         # WRITE mode will only have one ReferenceAdvanced, other modes will have all ReferenceAdvanced
-        ref_controlnets: list[ReferenceAdvanced] = transformer_options.get(REF_ADAIN_CONTROL_LIST, None)
-        ref_machine_state: str = transformer_options.get(REF_ADAIN_MACHINE_STATE, None)
-        
-        # if in WRITE mode, save var, mean, and style_cfg
-        if ref_machine_state == MachineState.WRITE:
-            if ref_controlnets[0].ref_opts.adain_ref_weight > ts.injection_holder.gn_weight:
-                var, mean = torch.var_mean(x, dim=(2, 3), keepdim=True, correction=0)
-                ts.injection_holder.bank_styles.var_bank.append(var)
-                ts.injection_holder.bank_styles.mean_bank.append(mean)
-                ts.injection_holder.bank_styles.style_cfgs.append(ref_controlnets[0].ref_opts.adain_style_fidelity)
-                ts.injection_holder.bank_styles.cn_idx.append(ref_controlnets[0].order)
-        # if in READ mode, do math with saved var, mean, and style_cfg
-        if ref_machine_state == MachineState.READ:
-            if len(ts.injection_holder.bank_styles.var_bank) > 0:
+        ref_write_cns: list[ReferenceAdvanced] = transformer_options.get(REF_WRITE_ADAIN_CONTROL_LIST, [])
+        ref_read_cns: list[ReferenceAdvanced] = transformer_options.get(REF_READ_ADAIN_CONTROL_LIST, [])
+        ignore_contextref_read = cref_mode in [MachineState.OFF, MachineState.WRITE]
+
+        cached_var = None
+        cached_mean = None
+        cref_write_cns: list[ReferenceAdvanced] = []
+        # if any refs to WRITE, save var, mean, and style_cfg
+        for refcn in ref_write_cns:
+            if refcn.ref_opts.adain_ref_weight > ts.injection_holder.gn_weight:
+                if cached_var is None:
+                    cached_var, cached_mean = torch.var_mean(x, dim=(2, 3), keepdim=True, correction=0)
+                if refcn.is_context_ref:
+                    cref_write_cns.append(refcn)
+                    ts.injection_holder.bank_styles.init_cref_for_uuids(uuids)
+                else:
+                    ts.injection_holder.bank_styles.var_bank.append(cached_var)
+                    ts.injection_holder.bank_styles.mean_bank.append(cached_mean)
+                    ts.injection_holder.bank_styles.style_cfgs.append(refcn.ref_opts.adain_style_fidelity)
+                    ts.injection_holder.bank_styles.cn_idx.append(refcn.order)
+        if len(cref_write_cns) == 0:
+            del cached_var
+            del cached_mean
+
+        # if any refs to READ, do math with saved var, mean, and style_cfg
+        if len(ref_read_cns) > 0:
+            if len(ts.injection_holder.bank_styles.get_cn_idxs(uuids, ignore_contextref_read)) > 0:
                 bank_styles = ts.injection_holder.bank_styles
                 var, mean = torch.var_mean(x, dim=(2, 3), keepdim=True, correction=0)
                 std = torch.maximum(var, torch.zeros_like(var) + eps) ** 0.5
                 y_uc = torch.zeros_like(x)
                 cn_idx = 0
-                for idx, order in enumerate(bank_styles.cn_idx):
+                real_style_cfgs = bank_styles.get_style_cfgs(uuids, ignore_contextref_read)
+                real_var_bank = bank_styles.get_var_bank(uuids, ignore_contextref_read)
+                real_mean_bank = bank_styles.get_mean_bank(uuids, ignore_contextref_read)
+                real_cn_idxs = bank_styles.get_cn_idxs(uuids, ignore_contextref_read)
+                for idx, order in enumerate(real_cn_idxs):
                     # make sure matching ref cn is selected
-                    for i in range(cn_idx, len(ref_controlnets)):
-                        if ref_controlnets[i].order == order:
+                    for i in range(cn_idx, len(ref_read_cns)):
+                        if ref_read_cns[i].order == order:
                             cn_idx = i
                             break
-                    assert order == ref_controlnets[cn_idx].order
-                    style_fidelity = bank_styles.style_cfgs[idx]
-                    var_acc = bank_styles.var_bank[idx]
-                    mean_acc = bank_styles.mean_bank[idx]
+                    assert order == ref_read_cns[cn_idx].order
+                    style_fidelity = real_style_cfgs[idx]
+                    var_acc = real_var_bank[idx]
+                    mean_acc = real_mean_bank[idx]
                     std_acc = torch.maximum(var_acc, torch.zeros_like(var_acc) + eps) ** 0.5
                     sub_y_uc = (((x - mean) / std) * std_acc) + mean_acc
-                    if ref_controlnets[cn_idx].any_adain_strength_to_apply():
-                        effective_strength = ref_controlnets[cn_idx].get_effective_adain_mask_or_float(x=x)
+                    if ref_read_cns[cn_idx].any_adain_strength_to_apply():
+                        effective_strength = ref_read_cns[cn_idx].get_effective_adain_mask_or_float(x=x)
                         sub_y_uc = sub_y_uc * effective_strength + x * (1-effective_strength)
                     y_uc += sub_y_uc
                 # get average, if more than one
-                if len(bank_styles.cn_idx) > 1:
-                    y_uc /= len(bank_styles.cn_idx)
+                if len(real_cn_idxs) > 1:
+                    y_uc /= len(real_cn_idxs)
                 y_c = y_uc.clone()
                 if len(uc_idx_mask) > 0 and not math.isclose(style_fidelity, 0.0):
                     y_c[uc_idx_mask] = x.to(y_c.dtype)[uc_idx_mask]
                 y = style_fidelity * y_c + (1.0 - style_fidelity) * y_uc
-            ts.injection_holder.bank_styles.clean()
+            ts.injection_holder.bank_styles.clean_ref()
+
+        # ContextRef CN WRITE
+        if len(cref_write_cns) > 0:
+            # clear so that ContextRef CNs can properly 'replace' previous value at cond_idx
+            ts.injection_holder.bank_styles.clear_cref_for_uuids(uuids)
+            for refcn in cref_write_cns:
+                # add a whole list to match expected type when combining
+                ts.injection_holder.bank_styles.set_c_var_bank_for_uuids(cached_var, uuids)
+                ts.injection_holder.bank_styles.set_c_mean_bank_for_uuids(cached_mean, uuids)
+                ts.injection_holder.bank_styles.set_c_style_cfgs_for_uuids(refcn.ref_opts.adain_style_fidelity, uuids)
+                ts.injection_holder.bank_styles.set_c_cn_idx_for_uuids(refcn.order, uuids)
+            del cached_var
+            del cached_mean
 
         if y is None:
             y = x
         return y.to(x.dtype)
 
     return forward_timestep_embed_ref_inject
-
-# DFS Search for Torch.nn.Module, Written by Lvmin
-def torch_dfs(model: torch.nn.Module):
-    result = [model]
-    for child in model.children():
-        result += torch_dfs(child)
-    return result
