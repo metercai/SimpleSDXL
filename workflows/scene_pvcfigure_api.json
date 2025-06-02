@@ -67,7 +67,7 @@
       "lora_name": "Hyper-SDXL-8steps-lora.safetensors",
       "strength_model": 0.5,
       "model": [
-        "77",
+        "79",
         0
       ]
     },
@@ -105,6 +105,9 @@
   "33": {
     "inputs": {
       "inputcount": 2,
+      "delimiter": "",
+      "return_list": "",
+      "Update inputs": " ",
       "string_1": [
         "32",
         0
@@ -112,10 +115,7 @@
       "string_2": [
         "34",
         4
-      ],
-      "delimiter": " ",
-      "return_list": false,
-      "Update inputs": null
+      ]
     },
     "class_type": "JoinStringMulti",
     "_meta": {
@@ -295,7 +295,7 @@
   },
   "56": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         0
@@ -308,7 +308,7 @@
   },
   "57": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         1
@@ -416,23 +416,31 @@
       "title": "IPAdapterModelLoader"
     }
   },
-  "66": {
+  "69": {
     "inputs": {
-      "provider": "CPU",
-      "model_name": "buffalo_l"
+      "value": "0"
     },
-    "class_type": "IPAdapterInsightFaceLoader",
+    "class_type": "easy string",
     "_meta": {
-      "title": "IPAdapterInsightFaceLoader"
+      "title": "additional_prompt"
     }
   },
-  "67": {
+  "74": {
+    "inputs": {
+      "value": "a+0.5",
+      "a": [
+        "69",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "79": {
     "inputs": {
       "weight": [
-        "74",
-        1
-      ],
-      "weight_faceidv2": [
         "74",
         1
       ],
@@ -456,83 +464,11 @@
       "clip_vision": [
         "64",
         0
-      ],
-      "insightface": [
-        "66",
-        0
       ]
     },
-    "class_type": "IPAdapterFaceID",
+    "class_type": "IPAdapterAdvanced",
     "_meta": {
-      "title": "IPAdapterFaceID"
-    }
-  },
-  "69": {
-    "inputs": {
-      "value": "0"
-    },
-    "class_type": "easy string",
-    "_meta": {
-      "title": "additional_prompt"
-    }
-  },
-  "74": {
-    "inputs": {
-      "value": "a+0.5",
-      "a": [
-        "69",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "76": {
-    "inputs": {
-      "value": "0"
-    },
-    "class_type": "easy string",
-    "_meta": {
-      "title": "String"
-    }
-  },
-  "77": {
-    "inputs": {
-      "boolean": [
-        "78",
-        0
-      ],
-      "on_true": [
-        "11",
-        0
-      ],
-      "on_false": [
-        "67",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "78": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "69",
-        0
-      ],
-      "b": [
-        "76",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
+      "title": "IPAdapter Advanced"
     }
   }
 }

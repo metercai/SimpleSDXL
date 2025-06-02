@@ -88,6 +88,9 @@
   "33": {
     "inputs": {
       "inputcount": 2,
+      "delimiter": "",
+      "return_list": "",
+      "Update inputs": " ",
       "string_1": [
         "32",
         0
@@ -95,10 +98,7 @@
       "string_2": [
         "80",
         0
-      ],
-      "delimiter": " ",
-      "return_list": false,
-      "Update inputs": null
+      ]
     },
     "class_type": "JoinStringMulti",
     "_meta": {
@@ -544,7 +544,7 @@
   },
   "77": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         0
@@ -557,7 +557,7 @@
   },
   "78": {
     "inputs": {
-      "value": "a*1.5",
+      "value": "a*1.33",
       "a": [
         "55",
         1
@@ -594,16 +594,16 @@
   },
   "80": {
     "inputs": {
-      "prompt": [
-        "34",
-        4
-      ],
       "find1": "realistic",
       "replace1": "anime",
       "find2": "3D",
       "replace2": "2D",
       "find3": "photo",
-      "replace3": "painting"
+      "replace3": "painting",
+      "prompt": [
+        "34",
+        4
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -681,7 +681,7 @@
   "89": {
     "inputs": {
       "weight": 0.5000000000000001,
-      "style_boost": 2.0000000000000004,
+      "style_boost": 1.5000000000000002,
       "combine_embeds": "concat",
       "start_at": 0,
       "end_at": 1,
