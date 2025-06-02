@@ -141,9 +141,9 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     canvas_height = int(545 - ui_lines * 82.6) if input_image_number==1 else int(325 - ui_lines * 41)
     input_height = int(545 - ui_lines * 82.6) if input_image_number==1 else int(245 - ui_lines * 41)
     input_height = int((input_height * 2) / 3) if input_image_number==1 and refer_image_number==2 else input_height
-    results = [gr.update(visible=False) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=canvas_height) if not switch_flag else gr.update(visible=True, height=canvas_height)]
-    results.append(gr.update(visible=False) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=input_height) if not switch_flag else gr.update(visible=True, height=input_height))
-    results.append(gr.update(visible=False) if 'scene_input_image1' in visible or 'scene_input_image2' in visible else gr.update(visible=True, value=None, height=input_height) if not switch_flag else gr.update(visible=True, height=input_height))
+    results = [gr.update(visible=False, value=None) if 'scene_canvas_image' in visible else gr.update(visible=True, value=None, height=canvas_height) if not switch_flag else gr.update(visible=True, height=canvas_height)]
+    results.append(gr.update(visible=False, value=None) if 'scene_input_image1' in visible else gr.update(visible=True, value=None, height=input_height) if not switch_flag else gr.update(visible=True, height=input_height))
+    results.append(gr.update(visible=False, value=None) if 'scene_input_image1' in visible or 'scene_input_image2' in visible else gr.update(visible=True, value=None, height=input_height) if not switch_flag else gr.update(visible=True, height=input_height))
     themes = scenes.get('theme', [])
     index = themes.index(theme) if theme and themes and theme in themes else 0
     title = scenes.get('additional_prompt_title', '')

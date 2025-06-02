@@ -1488,8 +1488,6 @@ def worker():
             progressbar(async_task, current_progress, '图片处理中 ...')
             logger.info(f'Preprocess the image for {",".join(goals)}.')
 
-        should_enhance = async_task.enhance_checkbox and (async_task.enhance_uov_method != flags.disabled.casefold() or len(async_task.enhance_ctrls) > 0)
-        
         if 'vary' in goals:
             async_task.uov_input_image, denoising_strength, initial_latent, width, height, current_progress = apply_vary(
                 async_task, async_task.uov_method, denoising_strength, async_task.uov_input_image, switch,
@@ -1634,6 +1632,8 @@ def worker():
                 input_images = comfypipeline.ComfyInputImage([])
                 input_images.set_image('input_image', HWC3(async_task.layer_input_image))
             if "scene_" in async_task.task_method:
+                async_task.enhance_checkbox = False
+                async_task.should_enhance = False
                 input_images = comfypipeline.ComfyInputImage([])
                 if async_task.scene_input_image1 is not None:
                     input_images.set_image('i2i_ip_image1', async_task.scene_input_image1)
