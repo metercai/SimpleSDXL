@@ -3419,32 +3419,13 @@
   "377": {
     "inputs": {
       "image": [
-        "378",
-        0
+        "675",
+        3
       ]
     },
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "378": {
-    "inputs": {
-      "image_crop_multi": 1.2000000000000002,
-      "mask_crop_multi": 1,
-      "bbox_smooth_alpha": 1,
-      "image": [
-        "453",
-        2
-      ],
-      "mask": [
-        "392",
-        0
-      ]
-    },
-    "class_type": "easy imageCropFromMask",
-    "_meta": {
-      "title": "imageCropFromMask"
     }
   },
   "379": {
@@ -7351,6 +7332,24 @@
     "class_type": "CLIPVisionLoader",
     "_meta": {
       "title": "Load CLIP Vision"
+    }
+  },
+  "675": {
+    "inputs": {
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
+        "453",
+        2
+      ],
+      "masks": [
+        "392",
+        0
+      ]
+    },
+    "class_type": "BatchCropFromMaskAdvanced",
+    "_meta": {
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }

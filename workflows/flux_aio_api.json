@@ -2425,8 +2425,8 @@
   "343": {
     "inputs": {
       "image": [
-        "425",
-        0
+        "764",
+        3
       ]
     },
     "class_type": "GetImageSize+",
@@ -3606,25 +3606,6 @@
     "class_type": "easy anythingIndexSwitch",
     "_meta": {
       "title": "Any Index Switch"
-    }
-  },
-  "425": {
-    "inputs": {
-      "image_crop_multi": 1.2000000000000002,
-      "mask_crop_multi": 1,
-      "bbox_smooth_alpha": 1,
-      "image": [
-        "722",
-        2
-      ],
-      "mask": [
-        "360",
-        0
-      ]
-    },
-    "class_type": "easy imageCropFromMask",
-    "_meta": {
-      "title": "imageCropFromMask"
     }
   },
   "426": {
@@ -7270,6 +7251,24 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
+    }
+  },
+  "764": {
+    "inputs": {
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
+        "722",
+        2
+      ],
+      "masks": [
+        "360",
+        0
+      ]
+    },
+    "class_type": "BatchCropFromMaskAdvanced",
+    "_meta": {
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }

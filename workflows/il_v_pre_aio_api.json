@@ -2714,32 +2714,13 @@
   "353": {
     "inputs": {
       "image": [
-        "354",
-        0
+        "636",
+        3
       ]
     },
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "354": {
-    "inputs": {
-      "image_crop_multi": 1.2000000000000002,
-      "mask_crop_multi": 1,
-      "bbox_smooth_alpha": 1,
-      "image": [
-        "432",
-        2
-      ],
-      "mask": [
-        "367",
-        0
-      ]
-    },
-    "class_type": "easy imageCropFromMask",
-    "_meta": {
-      "title": "imageCropFromMask"
     }
   },
   "355": {
@@ -6548,6 +6529,24 @@
     "class_type": "LayerColor: ColorAdapter",
     "_meta": {
       "title": "LayerColor: ColorAdapter"
+    }
+  },
+  "636": {
+    "inputs": {
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
+        "432",
+        2
+      ],
+      "masks": [
+        "367",
+        0
+      ]
+    },
+    "class_type": "BatchCropFromMaskAdvanced",
+    "_meta": {
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }
