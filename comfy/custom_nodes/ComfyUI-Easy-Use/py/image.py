@@ -1420,6 +1420,10 @@ class imageCropFromMask:
       for mask in masks:
         _mask = tensor2pil(mask)
         non_zero_indices = np.nonzero(np.array(_mask))
+        # 添加空mask检测
+        if len(non_zero_indices[0]) == 0 or len(non_zero_indices[1]) == 0:
+            print("Warning: Empty mask detected during max bbox calculation")
+            continue  # 跳过空mask
         min_x, max_x = np.min(non_zero_indices[1]), np.max(non_zero_indices[1])
         min_y, max_y = np.min(non_zero_indices[0]), np.max(non_zero_indices[0])
         width = max_x - min_x
@@ -1434,12 +1438,22 @@ class imageCropFromMask:
       # Apply the crop size multiplier
       self.max_bbox_width = round(self.max_bbox_width * crop_size_mult)
       self.max_bbox_height = round(self.max_bbox_height * crop_size_mult)
+      # 添加零值保护
+      if self.max_bbox_width == 0:
+          self.max_bbox_width = 64  # 设置最小默认宽度
+      if self.max_bbox_height == 0:
+          self.max_bbox_height = 64  # 设置最小默认高度
       bbox_aspect_ratio = self.max_bbox_width / self.max_bbox_height
 
       # Then, for each mask and corresponding image...
       for i, (mask, img) in enumerate(zip(masks, original_images)):
         _mask = tensor2pil(mask)
         non_zero_indices = np.nonzero(np.array(_mask))
+        if len(non_zero_indices[0]) == 0 or len(non_zero_indices[1]) == 0:
+            print(f"Warning: Empty mask detected at index {i}, using full image")
+            cropped_images.append(img)
+            bounding_boxes.append((0, 0, img.shape[2], img.shape[1]))
+            continue  # 跳过后续处理
         min_x, max_x = np.min(non_zero_indices[1]), np.max(non_zero_indices[1])
         min_y, max_y = np.min(non_zero_indices[0]), np.max(non_zero_indices[0])
 
