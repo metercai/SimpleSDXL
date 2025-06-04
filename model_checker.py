@@ -1612,11 +1612,12 @@ packages = {
         "Illustrious_aio_package": {
         "id": 22,
         "name": "[22]光辉AIO扩展包",
-        "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
+        "note": "NoobAI/光辉模型全功能图生图-默认模型miaomiaoHaremV15b|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
@@ -1715,6 +1716,24 @@ packages = {
         ],
         "download_links": [
         "【选配】模型文件基于FluxAIO扩展包。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "Illustrious2_aio_package": {
+        "id": 27,
+        "name": "[27]光辉2.0_AIO扩展包",
+        "note": "NoobAI/光辉2.0模型全功能图生图-默认模型oneObsessionV13|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/oneObsession_13.safetensors", 6938040682),
+            ("ipadapter/noob_ip_adapter.bin", 1396798350),
+            ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+        ],
+        "download_links": [
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/oneObsession_13.safetensors"
         ]
     }
 }

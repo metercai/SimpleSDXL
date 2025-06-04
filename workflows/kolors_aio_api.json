@@ -4325,7 +4325,7 @@
         0
       ],
       "initial_value1": [
-        "843",
+        "683",
         0
       ]
     },
@@ -6495,38 +6495,6 @@
     "class_type": "LayerColor: ColorAdapter",
     "_meta": {
       "title": "LayerColor: ColorAdapter"
-    }
-  },
-  "842": {
-    "inputs": {
-      "mask": [
-        "548",
-        0
-      ]
-    },
-    "class_type": "easy isMaskEmpty",
-    "_meta": {
-      "title": "Is Mask Empty"
-    }
-  },
-  "843": {
-    "inputs": {
-      "boolean": [
-        "842",
-        0
-      ],
-      "on_true": [
-        "635",
-        2
-      ],
-      "on_false": [
-        "683",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   }
 }

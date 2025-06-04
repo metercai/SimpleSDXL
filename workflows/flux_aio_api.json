@@ -6839,7 +6839,7 @@
         0
       ],
       "initial_value1": [
-        "763",
+        "428",
         0
       ]
     },
@@ -7270,38 +7270,6 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
-    }
-  },
-  "762": {
-    "inputs": {
-      "mask": [
-        "424",
-        0
-      ]
-    },
-    "class_type": "easy isMaskEmpty",
-    "_meta": {
-      "title": "Is Mask Empty"
-    }
-  },
-  "763": {
-    "inputs": {
-      "boolean": [
-        "762",
-        0
-      ],
-      "on_true": [
-        "722",
-        2
-      ],
-      "on_false": [
-        "428",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   }
 }
