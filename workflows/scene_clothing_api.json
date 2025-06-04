@@ -261,7 +261,7 @@
       "downsampling_function": "area",
       "mode": "autocrop with mask",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -297,9 +297,9 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 117127582064589,
+      "seed": 0,
       "steps": 20,
-      "cfg": 30,
+      "cfg": 50,
       "denoise": 1
     },
     "class_type": "Co_Input_Zho",
@@ -417,7 +417,7 @@
         0
       ],
       "start": 0,
-      "end": 0.7000000000000001,
+      "end": 0.7000000000000002,
       "max_consecutive_cache_hits": 3,
       "model": [
         "238",
@@ -624,7 +624,7 @@
       "matting_method": "SegmentAnything",
       "sam_model": "sam_vit_h (2.56GB)",
       "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
-      "sam_threshold": 0.3,
+      "sam_threshold": 0.30000000000000004,
       "sam_prompt": [
         "170",
         0
@@ -665,7 +665,7 @@
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -772,8 +772,8 @@
         0
       ],
       "on_true": [
-        "205",
-        0
+        "252",
+        3
       ],
       "on_false": [
         "195",
@@ -825,7 +825,7 @@
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -920,7 +920,7 @@
   },
   "236": {
     "inputs": {
-      "value": "a*0.2+b*0.25",
+      "value": "a*0.2+b*0.1",
       "a": [
         "234",
         1
@@ -956,7 +956,7 @@
   "238": {
     "inputs": {
       "lora_name": "comfyui_subject_lora16.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
         "244",
         0
@@ -1077,7 +1077,7 @@
         0
       ],
       "start": 0,
-      "end": 0.8,
+      "end": 0.8000000000000002,
       "max_consecutive_cache_hits": 3,
       "model": [
         "244",
@@ -1100,6 +1100,36 @@
     "class_type": "PathchSageAttentionKJ",
     "_meta": {
       "title": "Patch Sage Attention KJ"
+    }
+  },
+  "245": {
+    "inputs": {
+      "images": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "252": {
+    "inputs": {
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
+        "205",
+        0
+      ],
+      "masks": [
+        "202",
+        1
+      ]
+    },
+    "class_type": "BatchCropFromMaskAdvanced",
+    "_meta": {
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }
