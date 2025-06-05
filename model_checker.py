@@ -992,7 +992,7 @@ packages = {
     "base_package": {
         "id": 1,
         "name": "[1]基础模型包",
-        "note": "SDXL全功能|显存需求：★★ 速度：★★★☆",
+        "note": "SDXL全功能-默认模型[主宰XL_V11]|显存需求：★★ 速度：★★★☆",
         "files": [
             ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
@@ -1081,8 +1081,8 @@ packages = {
     },
     "extension_package": {
         "id": 2,
-        "name": "[2]增强模型包",
-        "note": "融图打光等功能性补充|显存需求：★★ 速度：★★★☆",
+        "name": "[2]融图打光&增强模型包",
+        "note": "融图打光预置包等功能性补充。|显存需求：★★ 速度：★★★☆",
         "files": [
             ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("embeddings/unaestheticXLhk1.safetensors", 33296),
@@ -1112,7 +1112,7 @@ packages = {
         "kolors_package": {
         "id": 3,
         "name": "[3]可图扩展包",
-        "note": "可图文生图|显存需求：★★ 速度：★★★☆",
+        "note": "可图文生图-默认模型[Kolors_V1.0]|显存需求：★★ 速度：★★★☆",
         "files": [
             ("diffusers/Kolors/model_index.json", 427),
             ("diffusers/Kolors/MODEL_LICENSE", 14920),
@@ -1169,7 +1169,7 @@ packages = {
         "Flux_package": {
         "id": 5,
         "name": "[5]Flux全量包",
-        "note": "Flux官方全量|显存需求：★★★★★ 速度：★★",
+        "note": "Flux官方满血版-默认模型[Flux_devFP16]|显存需求：★★★★★ 速度：★★",
         "files": [
             ("checkpoints/flux1-dev.safetensors", 23802932552),
             ("clip/clip_l.safetensors", 246144152),
@@ -1183,7 +1183,7 @@ packages = {
         "Flux_aio_package": {
         "id": 6,
         "name": "[6]Flux_AIO扩展包",
-        "note": "Flux全功能[Q5模型]|显存需求：★★★☆ 速度：★★",
+        "note": "Flux全功能-默认模型[Flux_Q5K_M]|显存需求：★★★☆ 速度：★★",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -1217,7 +1217,7 @@ packages = {
         "SD15_aio_package": {
         "id": 7,
         "name": "[7]SD1.5_AIO扩展包",
-        "note": "SD1.5全功能|显存需求：★ 速度：★★★★",
+        "note": "SD1.5全功能-默认模型[realisticVision]|显存需求：★ 速度：★★★★",
         "files": [
             ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
             ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
@@ -1247,7 +1247,7 @@ packages = {
         "Kolors_aio_package": {
         "id": 8,
         "name": "[8]Kolors_AIO扩展包",
-        "note": "可图全功能|显存需求：★★★ 速度：★★★",
+        "note": "可图全功能-默认模型[Kolors_V1.0]|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
@@ -1303,7 +1303,7 @@ packages = {
         "SD3x_medium_package": {
         "id": 9,
         "name": "[9]SD3.5_medium扩展包",
-        "note": "SD3.5中号文生图|显存需求：★★ 速度：★★★",
+        "note": "SD3.5中号文生图-默认模型[SD3.5medium]|显存需求：★★ 速度：★★★",
         "files": [
             ("checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
             ("clip/clip_l.safetensors", 246144152),
@@ -1317,7 +1317,7 @@ packages = {
         "SD3x_large_package": {
         "id": 10,
         "name": "[10]SD3.5_Large 扩展包",
-        "note": "SD3.5大号文生图|显存需求：★★★★★ 速度：★★",
+        "note": "SD3.5大号文生图-默认模型[SD3.5large]|显存需求：★★★★★ 速度：★★",
         "files": [
             ("checkpoints/sd3.5_large.safetensors", 16460379262),
             ("clip/clip_g.safetensors", 1389382176),
@@ -1416,7 +1416,7 @@ packages = {
         "clothing_package": {
         "id": 13,
         "name": "[13]换装包",
-        "note": "万物迁移[Q4模型]|显存需求：★★★ 速度：★★",
+        "note": "万物迁移-默认模型[FluxFill_Q4]|显存需求：★★★ 速度：★★",
         "files": [
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
@@ -1437,7 +1437,7 @@ packages = {
         "3DPurikura_package": {
         "id": 14,
         "name": "[14]3D大头贴",
-        "note": "3D个性头像|显存需求：★★ 速度：★★",
+        "note": "3D个性头像-默认模型[Yamers_Cartoon]|显存需求：★★ 速度：★★",
         "files": [
             ("checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
@@ -1472,7 +1472,7 @@ packages = {
         "x2-okimagerepair_package": {
         "id": 16,
         "name": "[16]一键修复",
-        "note": "上色、修复模糊、旧照片|显存需求：★★★ 速度：★☆",
+        "note": "上色、修复模糊、旧照片[XL/Flux]|显存需求：★★★ 速度：★☆",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
@@ -1497,7 +1497,7 @@ packages = {
         "x3-swapface_package": {
         "id": 17,
         "name": "[17]一键换脸",
-        "note": "高精度换脸|显存需求：★★★ 速度：★★",
+        "note": "高精度换脸-默认模型[FluxFill_Q4]|显存需求：★★★ 速度：★★",
         "files": [
             ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
             ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
@@ -1525,7 +1525,7 @@ packages = {
         "Flux_aio_plus_package": {
         "id": 18,
         "name": "[18]Flux_AIO_plus扩展包",
-        "note": "Flux全功能[fp8模型]|显存需求：★★★★ 速度：★★☆",
+        "note": "Flux全功能-默认模型[Fluxdev_fp8]|显存需求：★★★★ 速度：★★☆",
         "files": [
             ("checkpoints/flux1-dev-fp8.safetensors", 11901525888),
             ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -1560,7 +1560,7 @@ packages = {
         "clothing_plus_package": {
         "id": 19,
         "name": "[19]换装plus包",
-        "note": "万物迁移[fp8模型]|显存需求：★★★☆ 速度：★★★",
+        "note": "万物迁移-默认模型[Fluxdev_fp8]|显存需求：★★★☆ 速度：★★★",
         "files": [
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
@@ -1584,7 +1584,7 @@ packages = {
         "eraser-a_package": {
         "id": 20,
         "name": "[20]一键消除",
-        "note": "一键消除|显存需求：★★ 速度：★★☆",
+        "note": "一键消除-默认模型[FluxQ5/Fill_Q4]|显存需求：★★ 速度：★★☆",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -1601,7 +1601,7 @@ packages = {
         "Illustrious_package": {
         "id": 21,
         "name": "[21]光辉模型包",
-        "note": "支持NoobAI/光辉模型文生图|显存需求：★★ 速度：★★★☆",
+        "note": "支持NoobAI/光辉文生图-默认模型[miaomiaoV15b]|显存需求：★★ 速度：★★★☆",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
         ],
@@ -1612,11 +1612,12 @@ packages = {
         "Illustrious_aio_package": {
         "id": 22,
         "name": "[22]光辉AIO扩展包",
-        "note": "NoobAI/光辉模型全功能图生图|显存需求：★★★ 速度：★★★",
+        "note": "NoobAI/光辉全功能-默认模型[miaomiaoV15b]|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
             ("ipadapter/noob_ip_adapter.bin", 1396798350),
             ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
@@ -1684,7 +1685,7 @@ packages = {
         "Framepack_package": {
         "id": 25,
         "name": "[25]Framepack视频扩展包",
-        "note": "图像转视频功能支持|显存需求：★★★ 速度：★",
+        "note": "图像转视频功能支持-默认模型[FramePackfp8]|显存需求：★★★ 速度：★",
         "files": [
             ("checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors", 16331849976),
             ("clip/clip_l.safetensors", 246144152),
@@ -1701,7 +1702,7 @@ packages = {
         "ICEdit_package": {
         "id": 26,
         "name": "[26]ICEdit图像编辑扩展包",
-        "note": "实现使用自然语言编辑图像|显存需求：★★★ 速度：★★",
+        "note": "指令编辑图像-默认模型[FluxQ5/Fill_Q4]|显存需求：★★★ 速度：★★",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
@@ -1715,6 +1716,24 @@ packages = {
         ],
         "download_links": [
         "【选配】模型文件基于FluxAIO扩展包。部分文件、Lora点击生成会自动下载。"
+        ]
+    },
+        "Illustrious2_aio_package": {
+        "id": 27,
+        "name": "[27]光辉2.0_AIO扩展包",
+        "note": "NoobAI/光辉2.0全功能-默认模型oneObsV13|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/oneObsession_13.safetensors", 6938040682),
+            ("ipadapter/noob_ip_adapter.bin", 1396798350),
+            ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
+            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
+        ],
+        "download_links": [
+        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
+        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/oneObsession_13.safetensors"
         ]
     }
 }

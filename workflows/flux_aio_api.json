@@ -2425,8 +2425,8 @@
   "343": {
     "inputs": {
       "image": [
-        "425",
-        0
+        "764",
+        3
       ]
     },
     "class_type": "GetImageSize+",
@@ -3606,25 +3606,6 @@
     "class_type": "easy anythingIndexSwitch",
     "_meta": {
       "title": "Any Index Switch"
-    }
-  },
-  "425": {
-    "inputs": {
-      "image_crop_multi": 1.2000000000000002,
-      "mask_crop_multi": 1,
-      "bbox_smooth_alpha": 1,
-      "image": [
-        "722",
-        2
-      ],
-      "mask": [
-        "360",
-        0
-      ]
-    },
-    "class_type": "easy imageCropFromMask",
-    "_meta": {
-      "title": "imageCropFromMask"
     }
   },
   "426": {
@@ -6839,7 +6820,7 @@
         0
       ],
       "initial_value1": [
-        "763",
+        "428",
         0
       ]
     },
@@ -7272,36 +7253,22 @@
       "title": "Load Upscale Model"
     }
   },
-  "762": {
+  "764": {
     "inputs": {
-      "mask": [
-        "424",
-        0
-      ]
-    },
-    "class_type": "easy isMaskEmpty",
-    "_meta": {
-      "title": "Is Mask Empty"
-    }
-  },
-  "763": {
-    "inputs": {
-      "boolean": [
-        "762",
-        0
-      ],
-      "on_true": [
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
         "722",
         2
       ],
-      "on_false": [
-        "428",
+      "masks": [
+        "360",
         0
       ]
     },
-    "class_type": "easy ifElse",
+    "class_type": "BatchCropFromMaskAdvanced",
     "_meta": {
-      "title": "If else"
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }
