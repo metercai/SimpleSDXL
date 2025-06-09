@@ -1465,7 +1465,13 @@ def worker():
                                                          base_model_additional_loras, async_task.image_number,
                                                          async_task.disable_seed_increment, use_expansion, use_style,
                                                          use_synthetic_refiner, current_progress, advance_progress=True)
-        
+        else:
+            pipeline.refresh_everything(refiner_model_name=async_task.refiner_model_name,
+                                    base_model_name=async_task.base_model_name,
+                                    loras=async_task.loras,
+                                    vae_name=async_task.vae_name)
+            pipeline.set_clip_skip(async_task.clip_skip)
+
         if async_task.task_class in flags.comfy_classes:
             logger.info(f'Enable Comfyd backend.')
             # if "flux_aio" in async_task.task_method and \
