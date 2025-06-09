@@ -9,7 +9,7 @@
                 "task_method": "il_v_pre_aio"
                 }
         },
-    "default_model": "miaomiaoHarem_v15b.safetensors",
+    "default_model": "oneObsession_13.safetensors",
     "default_refiner": "None",
     "default_refiner_switch": 0.5,
     "default_loras": [
@@ -19,27 +19,27 @@
         ],
         [
             "None",
-            1.0
+            0.8
         ],
 	    [
             "None",
-            1.0
+            0.8
         ],
 	    [
             "None",
-            1.0
+            0.8
         ],
 	    [
             "None",
-            1.0
+            0.8
         ]
     ],
-    "default_cfg_scale": 6.0,
+    "default_cfg_scale": 4.0,
     "default_sample_sharpness": 2.0,
     "default_sampler": "euler a",
     "default_scheduler": "normal",
     "default_performance": "Speed",
-    "default_prompt_negative": "nude,nsfw,lowres,(bad),bad feet,text,error,fewer,extra,missing,worst quality,jpeg artifacts,low quality,watermark,unfinished,displeasing,oldest,early,chromatic aberration,signature,artistic error,username,scan,abstract,english text,shiny_skin,low quality, bad anatomy, bad hands, 4koma, comic, greyscale, censored, overly saturated, overly vivid",
+    "default_prompt_negative": "lowres,(bad),bad feet,text,error,fewer,extra,missing,worst quality,jpeg artifacts,low quality,watermark,unfinished,displeasing,oldest,early,chromatic aberration,signature,artistic error,username,scan,abstract,english text,shiny_skin,low quality, bad anatomy, bad hands, 4koma, comic, greyscale, censored, overly saturated, overly vivid",
     "default_styles": [
         "Illustrious"
     ],
@@ -48,7 +48,7 @@
     "embeddings_downloads": {},
     "lora_downloads": {},
     "model_list": [
-        "checkpoints,miaomiaoHarem_v15b.safetensors,6938043202,0,",
+        "oneObsession_13.safetensors,6938040682,0,",
         "ipadapter,noob_ip_adapter.bin,1396798350,0,",
         "upscale_models,RealESRGAN_x4plus_anime_6B.pth,17938799,0,",
         "upscale_models,4x-UltraSharp.pth,66961958,0,",

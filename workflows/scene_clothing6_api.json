@@ -288,7 +288,7 @@
       "batch_size": 1,
       "positive": "",
       "negative": "",
-      "seed": 335675887817782,
+      "seed": 0,
       "steps": 25,
       "cfg": 30,
       "denoise": 1
@@ -763,8 +763,8 @@
         0
       ],
       "on_true": [
-        "205",
-        0
+        "311",
+        3
       ],
       "on_false": [
         "195",
@@ -911,7 +911,7 @@
   },
   "236": {
     "inputs": {
-      "value": "a*0.2+b*0.25",
+      "value": "a*0.2+b*0.1",
       "a": [
         "234",
         1
@@ -1620,6 +1620,24 @@
     "class_type": "PathchSageAttentionKJ",
     "_meta": {
       "title": "Patch Sage Attention KJ"
+    }
+  },
+  "311": {
+    "inputs": {
+      "crop_size_mult": 1,
+      "bbox_smooth_alpha": 0.5,
+      "original_images": [
+        "205",
+        0
+      ],
+      "masks": [
+        "202",
+        1
+      ]
+    },
+    "class_type": "BatchCropFromMaskAdvanced",
+    "_meta": {
+      "title": "Batch Crop From Mask Advanced"
     }
   }
 }
