@@ -42,7 +42,7 @@
     "default_aspect_ratio": "1280*720",
     "default_image_number": 1,
     "default_overwrite_step": 20,
-    "default_inpaint_engine": "fp16",
+    "default_inpaint_engine": "Q4",
     "checkpoint_downloads": {},
     "embeddings_downloads": {},
     "lora_downloads": {},
@@ -69,7 +69,6 @@
         "clip_vision,sigclip_vision_patch14_384.safetensors,856505640,0,",
         "vae,ae.safetensors,335304388,0,",
         "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
-	"loras,flux1-canny-dev-lora.safetensors,1244443944,0,",
 	"loras,flux1-depth-dev-lora.safetensors,1244440512,0,",
 	"style_models,flux1-redux-dev.safetensors,129063232,0,",
         "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,"
