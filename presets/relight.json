@@ -20,11 +20,12 @@
             "aspect_ratio" : ["1024|1:1", "832|13:19", "1216|19:13"],
 	    "aspect_ratio_select_mode": "auto_candidate",
 	    "image_preprocessor_method": [["mask_color"]],
-	    "var_number_title": "光源位置编号，左上1，上2，右上3，左4，中心5，右6，左下7，下8，右下9，大于9为随机。优先使用主体图片的蒙版绘制光源。",
+	    "var_number_title": "光源位置编号，左上1，上2，右上3，左4，中心5，右6，左下7，下8，右下9，10为随机。优先使用主体图片的蒙版绘制光源。",
             "var_number": {
                     "提示词背景":10,
     		     "原背景": "10"
              },
+	     "var_number_max": 10,
 	    "task_method": {
 		"提示词背景": "relight_fc_promptbg",
     		"原背景": "relight_fc_keepbg"
