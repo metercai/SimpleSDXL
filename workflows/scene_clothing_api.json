@@ -50,8 +50,8 @@
   "31": {
     "inputs": {
       "text": [
-        "122",
-        4
+        "253",
+        0
       ],
       "clip": [
         "8",
@@ -66,8 +66,8 @@
   "33": {
     "inputs": {
       "guidance": [
-        "122",
-        8
+        "253",
+        4
       ],
       "conditioning": [
         "31",
@@ -288,38 +288,6 @@
       "title": "ReduxAdvanced"
     }
   },
-  "122": {
-    "inputs": {
-      "clip_skip": -1,
-      "width": 1024,
-      "height": 1024,
-      "swap": false,
-      "batch_size": 1,
-      "positive": "",
-      "negative": "",
-      "seed": 0,
-      "steps": 20,
-      "cfg": 50,
-      "denoise": 1
-    },
-    "class_type": "Co_Input_Zho",
-    "_meta": {
-      "title": "i2i_overall_input"
-    }
-  },
-  "123": {
-    "inputs": {
-      "steps_total": 30,
-      "refiner_step": 24,
-      "cfg": 8,
-      "sampler_name": "euler",
-      "scheduler": "simple"
-    },
-    "class_type": "KSampler Config (rgthree)",
-    "_meta": {
-      "title": "i2i_KSampler"
-    }
-  },
   "124": {
     "inputs": {
       "conditioning": [
@@ -374,7 +342,7 @@
         "155",
         1
       ],
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "pad",
       "condition": "always",
       "multiple_of": 0,
@@ -413,8 +381,8 @@
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": [
-        "208",
-        0
+        "253",
+        12
       ],
       "start": 0,
       "end": 0.7000000000000002,
@@ -541,7 +509,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 8,
@@ -559,7 +527,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,
@@ -583,7 +551,7 @@
         "190",
         1
       ],
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "stretch",
       "condition": "always",
       "multiple_of": 0,
@@ -852,15 +820,6 @@
       "title": "ReduxAdvanced"
     }
   },
-  "208": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "wavespeed_strength"
-    }
-  },
   "214": {
     "inputs": {
       "anything": [
@@ -939,7 +898,7 @@
     "inputs": {
       "width": 1280,
       "height": 1280,
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 8,
@@ -971,21 +930,21 @@
     "inputs": {
       "add_noise": "enable",
       "noise_seed": [
-        "122",
-        6
+        "254",
+        0
       ],
       "steps": [
-        "122",
-        7
+        "253",
+        5
       ],
       "cfg": 1,
       "sampler_name": [
-        "123",
-        3
+        "253",
+        7
       ],
       "scheduler": [
-        "123",
-        4
+        "253",
+        8
       ],
       "start_at_step": 0,
       "end_at_step": 12,
@@ -1016,21 +975,21 @@
     "inputs": {
       "add_noise": "enable",
       "noise_seed": [
-        "122",
-        6
+        "254",
+        0
       ],
       "steps": [
-        "122",
-        7
+        "253",
+        5
       ],
       "cfg": 1,
       "sampler_name": [
-        "123",
-        3
+        "253",
+        7
       ],
       "scheduler": [
-        "123",
-        4
+        "253",
+        8
       ],
       "start_at_step": 12,
       "end_at_step": 20,
@@ -1073,8 +1032,8 @@
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": [
-        "208",
-        0
+        "253",
+        12
       ],
       "start": 0,
       "end": 0.8000000000000002,
@@ -1116,8 +1075,8 @@
   },
   "252": {
     "inputs": {
-      "crop_size_mult": 1,
-      "bbox_smooth_alpha": 0.5,
+      "crop_size_mult": 1.0000000000000002,
+      "bbox_smooth_alpha": 0.5000000000000001,
       "original_images": [
         "205",
         0
@@ -1130,6 +1089,37 @@
     "class_type": "BatchCropFromMaskAdvanced",
     "_meta": {
       "title": "Batch Crop From Mask Advanced"
+    }
+  },
+  "253": {
+    "inputs": {
+      "prompt": "",
+      "negative_prompt": "",
+      "width": 1024,
+      "height": 1024,
+      "cfg": 3.5,
+      "steps": 20,
+      "refiner_step": 16,
+      "sampler": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "clip_skip": -1,
+      "inpaint_disable_initial_latent": false,
+      "wavespeed_strength": 0,
+      "save_final_enhanced_image_only": false
+    },
+    "class_type": "GeneralInput",
+    "_meta": {
+      "title": "GeneralInput"
+    }
+  },
+  "254": {
+    "inputs": {
+      "seed": 0
+    },
+    "class_type": "SeedInput",
+    "_meta": {
+      "title": "SeedInput"
     }
   }
 }
