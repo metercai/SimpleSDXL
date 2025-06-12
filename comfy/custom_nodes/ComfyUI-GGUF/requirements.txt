@@ -1,2 +1,5 @@
-gguf>=0.9.1
-numpy<2.0.0
+# main
+gguf>=0.13.0
+# optional - tokenizer
+sentencepiece
+protobuf

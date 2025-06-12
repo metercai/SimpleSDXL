@@ -153,7 +153,7 @@ def switch_scene_theme(state, image_number, canvas_image, input_image1, addition
     additional_prompt_2_default = modules.flags.get_value_by_scene_theme(state, theme, 'additional_prompt_2', '')
     results.append(get_layout_update_label_visible_inter(title_2, additional_prompt_2 if ready_to_gen and switch_flag else additional_prompt_2_default, 'scene_additional_prompt_2', visible, inter))
     var_number_title = scenes.get('var_number_title', 'Duration(s)')
-    var_number_max = scenes.get('var_number_max', 60)
+    var_number_max = scenes.get('var_number_max', 10)
     var_number_default = modules.flags.get_value_by_scene_theme(state, theme, 'var_number', 3)
     var_number = var_number if ready_to_gen and switch_flag else var_number_default
     results.append(gr.update(label=var_number_title, value=var_number, maximum=var_number_max, visible='scene_var_number' not in visible, interactive='scene_var_number' not in inter))

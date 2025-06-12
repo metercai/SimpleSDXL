@@ -120,6 +120,7 @@ def get_comfy_task(user_did, task_name, task_method, default_params, input_image
     #print(f'task_name:{task_name}, task_method:{task_method}')
     total_steps = default_params.pop("display_steps", default_params['steps'])
     comfy_params = ComfyTaskParams(default_params, user_did)
+    comfy_params.update_mapping_rule('base_model', 'NunchakuFluxDiTLoader:base_model:model_path')
     if task_name == 'default':
         if task_method == default_method_names[1]:
             comfy_params.update_params({"layer_diffuse_injection": "SDXL, Conv Injection"})

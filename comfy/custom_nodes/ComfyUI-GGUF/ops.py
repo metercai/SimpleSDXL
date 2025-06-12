@@ -1,10 +1,45 @@
 # (c) City96 || Apache-2.0 (apache.org/licenses/LICENSE-2.0)
 import gguf
 import torch
+import logging
 
 import comfy.ops
+import comfy.lora
 import comfy.model_management
 from .dequant import dequantize_tensor, is_quantized
+
+def chained_hasattr(obj, chained_attr):
+    probe = obj
+    for attr in chained_attr.split('.'):
+        if hasattr(probe, attr):
+            probe = getattr(probe, attr)
+        else:
+            return False
+    return True
+
+# A bakcward and forward compatible way to get `torch.compiler.disable`.
+def get_torch_compiler_disable_decorator():
+    def dummy_decorator(*args, **kwargs):
+        def noop(x):
+            return x
+        return noop
+
+    from packaging import version
+
+    if not chained_hasattr(torch, "compiler.disable"):
+        logging.info("ComfyUI-GGUF: Torch too old for torch.compile - bypassing")
+        return dummy_decorator # torch too old
+    elif version.parse(torch.__version__) >= version.parse("2.8"):
+        logging.info("ComfyUI-GGUF: Allowing full torch compile")
+        return dummy_decorator # torch compile works
+    if chained_hasattr(torch, "_dynamo.config.nontraceable_tensor_subclasses"):
+        logging.info("ComfyUI-GGUF: Allowing full torch compile (nightly)")
+        return dummy_decorator # torch compile works, nightly before 2.8 release
+    else:
+        logging.info("ComfyUI-GGUF: Partial torch compile only, consider updating pytorch")
+        return torch.compiler.disable
+
+torch_compiler_disable = get_torch_compiler_disable_decorator()
 
 class GGMLTensor(torch.Tensor):
     """
@@ -37,7 +72,7 @@ class GGMLTensor(torch.Tensor):
         try:
             return super().copy_(*args, **kwargs)
         except Exception as e:
-            print(f"ignoring 'copy_' on tensor: {e}")
+            logging.warning(f"ignoring 'copy_' on tensor: {e}")
 
     def new_empty(self, size, *args, **kwargs):
         # Intel Arc fix, ref#50
@@ -74,8 +109,11 @@ class GGMLLayer(torch.nn.Module):
 
     def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
         weight, bias = state_dict.get(f"{prefix}weight"), state_dict.get(f"{prefix}bias")
-        # NOTE: using modified load for linear due to not initializing on creation, see GGMLOps todo 
+        # NOTE: using modified load for linear due to not initializing on creation, see GGMLOps todo
         if self.is_ggml_quantized(weight=weight, bias=bias) or isinstance(self, torch.nn.Linear):
+            return self.ggml_load_from_state_dict(state_dict, prefix, *args, **kwargs)
+        # Not strictly required, but fixes embedding shape mismatch. Threshold set in loader.py
+        if isinstance(self, torch.nn.Embedding) and self.weight.shape[0] >= (64 * 1024):
             return self.ggml_load_from_state_dict(state_dict, prefix, *args, **kwargs)
         return super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
 
@@ -132,7 +170,7 @@ class GGMLLayer(torch.nn.Module):
         # consolidate and load patches to GPU in async
         patch_list = []
         device = tensor.device
-        for function, patches, key in getattr(tensor, "patches", []):
+        for patches, key in getattr(tensor, "patches", []):
             patch_list += move_patch_to_device(patches, device)
 
         # dequantize tensor while patches load
@@ -140,18 +178,19 @@ class GGMLLayer(torch.nn.Module):
 
         # prevent propagating custom tensor class
         if isinstance(weight, GGMLTensor):
-            weight.__class__ = torch.Tensor
+            weight = torch.Tensor(weight)
 
         # apply patches
-        if patch_list:
+        if len(patch_list) > 0:
             if self.patch_dtype is None:
-                weight = function(patch_list, weight, key)
+                weight = comfy.lora.calculate_weight(patch_list, weight, key)
             else:
                 # for testing, may degrade image quality
                 patch_dtype = dtype if self.patch_dtype == "target" else self.patch_dtype
-                weight = function(patch_list, weight, key, patch_dtype)
+                weight = comfy.lora.calculate_weight(patch_list, weight, key, patch_dtype)
         return weight
 
+    @torch_compiler_disable()
     def cast_bias_weight(s, input=None, dtype=None, device=None, bias_dtype=None):
         if input is not None:
             if dtype is None:
@@ -179,7 +218,7 @@ class GGMLLayer(torch.nn.Module):
 
         # non-ggml forward might still propagate custom tensor class
         if isinstance(out, GGMLTensor):
-            out.__class__ = torch.Tensor
+            out = torch.Tensor(out)
         return out
 
     def forward_ggml_cast_weights(self, input):

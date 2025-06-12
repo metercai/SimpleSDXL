@@ -1,8 +1,16 @@
 import os
+from pathlib import Path
 
+import yaml
 from huggingface_hub import hf_hub_download, snapshot_download
 
 from nunchaku.utils import get_precision
+
+
+def load_yaml(path: str | Path) -> dict:
+    with open(path, "r", encoding="utf-8") as file:
+        data = yaml.safe_load(file)
+    return data
 
 
 def download_file(
@@ -11,7 +19,7 @@ def download_file(
     sub_folder: str,
     new_filename: str | None = None,
 ) -> str:
-    assert os.path.isdir(os.path.join("models", sub_folder))
+    os.makedirs(os.path.join("models", sub_folder), exist_ok=True)
     target_folder = os.path.join("models", sub_folder)
     target_file = os.path.join(target_folder, filename if new_filename is None else new_filename)
     if not os.path.exists(target_file):
@@ -37,7 +45,7 @@ def download_original_models():
     )
 
 
-def download_svdquant_models():
+def download_nunchaku_models():
     precision = get_precision()
     svdquant_models = [
         f"mit-han-lab/svdq-{precision}-shuttle-jaguar",
@@ -48,40 +56,51 @@ def download_svdquant_models():
         f"mit-han-lab/svdq-{precision}-flux.1-depth-dev",
         f"mit-han-lab/svdq-{precision}-flux.1-fill-dev",
     ]
+    os.makedirs(os.path.join("models", "diffusion_models"), exist_ok=True)
     for model_path in svdquant_models:
         snapshot_download(
             model_path, local_dir=os.path.join("models", "diffusion_models", os.path.basename(model_path))
         )
 
 
-def download_loras():
+def download_from_yaml():
+    data = load_yaml(Path(__file__).resolve().parent.parent / "test_data" / "models.yaml")
+    for model_info in data["models"]:
+        repo_id = model_info["repo_id"]
+        filename = model_info["filename"].format(precision=get_precision())
+        sub_folder = model_info["sub_folder"]
+        new_filename = model_info.get("new_filename", None)
+        download_file(repo_id=repo_id, filename=filename, sub_folder=sub_folder, new_filename=new_filename)
+
+
+def download_other():
     download_file(
-        repo_id="alimama-creative/FLUX.1-Turbo-Alpha",
+        repo_id="Shakker-Labs/FLUX.1-dev-ControlNet-Union-Pro-2.0",
         filename="diffusion_pytorch_model.safetensors",
-        sub_folder="loras",
-        new_filename="flux.1-turbo-alpha.safetensors",
-    )
-
-    download_file(
-        repo_id="aleksa-codes/flux-ghibsky-illustration",
-        filename="lora.safetensors",
-        sub_folder="loras",
-        new_filename="flux.1-dev-ghibsky.safetensors",
-    )
-
-    download_file(
-        repo_id="black-forest-labs/FLUX.1-Depth-dev-lora",
-        filename="flux1-depth-dev-lora.safetensors",
-        sub_folder="loras",
+        sub_folder="controlnet",
+        new_filename="controlnet-union-pro-2.0.safetensors",
     )
     download_file(
-        repo_id="black-forest-labs/FLUX.1-Canny-dev-lora",
-        filename="flux1-canny-dev-lora.safetensors",
-        sub_folder="loras",
+        repo_id="jasperai/Flux.1-dev-Controlnet-Upscaler",
+        filename="diffusion_pytorch_model.safetensors",
+        sub_folder="controlnet",
+        new_filename="controlnet-upscaler.safetensors",
+    )
+    download_file(
+        repo_id="black-forest-labs/FLUX.1-Redux-dev",
+        filename="flux1-redux-dev.safetensors",
+        sub_folder="style_models",
+        new_filename="flux1-redux-dev.safetensors",
+    )
+    download_file(
+        repo_id="Comfy-Org/sigclip_vision_384",
+        filename="sigclip_vision_patch14_384.safetensors",
+        sub_folder="clip_vision",
     )
 
 
 if __name__ == "__main__":
     download_original_models()
-    download_svdquant_models()
-    download_loras()
+    download_nunchaku_models()
+    download_from_yaml()
+    download_other()
