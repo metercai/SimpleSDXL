@@ -1202,7 +1202,6 @@ packages = {
             ("insightface/models/antelopev2/glintr100.onnx", 260665334),
             ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
             ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
-            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
@@ -1543,7 +1542,6 @@ packages = {
             ("insightface/models/antelopev2/glintr100.onnx", 260665334),
             ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
             ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
-            ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
             ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
@@ -1733,7 +1731,69 @@ packages = {
         "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/oneObsession_13.safetensors"
         ]
-    }
+    },
+        "nunchaku_int4_aio_package": {
+        "id": 28,
+        "name": "[28]双截棍int4量化Flux扩展包",
+        "note": "适配非50系-默认模型[svdq-int4]|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/svdq-int4_r32-flux.1-dev.safetensors", 6768309832),
+            ("checkpoints/svdq-int4_r32-flux.1-fill-dev.safetensors", 6770275936),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("controlnet/flux.1-dev_controlnet_union_pro_2.0.safetensors", 4281779224),
+            ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("controlnet/parsing_bisenet.pth", 53289463),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("vae/ae.safetensors", 335304388),
+            ("style_models/flux1-redux-dev.safetensors", 129063232)
+        ],
+        "download_links": [
+        "【按键下载】"
+        ]
+    },
+        "nunchaku_fp4_aio_package": {
+        "id": 29,
+        "name": "[29]双截棍fp4量化Flux扩展包",
+        "note": "仅适配50系-默认模型[svdq-fp4]|显存需求：★★★ 速度：★★★",
+        "files": [
+            ("checkpoints/svdq-fp4_r32-flux.1-dev.safetensors", 7038706888),
+            ("checkpoints/svdq-fp4_r32-flux.1-fill-dev.safetensors", 7040672992),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
+            ("controlnet/flux.1-dev_controlnet_union_pro_2.0.safetensors", 4281779224),
+            ("controlnet/flux.1-dev_controlnet_upscaler.safetensors", 3583232168),
+            ("controlnet/parsing_bisenet.pth", 53289463),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
+            ("insightface/models/antelopev2/2d106det.onnx", 5030888),
+            ("insightface/models/antelopev2/genderage.onnx", 1322532),
+            ("insightface/models/antelopev2/glintr100.onnx", 260665334),
+            ("insightface/models/antelopev2/scrfd_10g_bnkps.onnx", 16923827),
+            ("loras/flux1-depth-dev-lora.safetensors", 1244440512),
+            ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("vae/ae.safetensors", 335304388),
+            ("style_models/flux1-redux-dev.safetensors", 129063232)
+        ],
+        "download_links": [
+        "【按键下载】"
+        ]
+    },
 }
 
 MANUAL_DOWNLOAD_MAP = {
