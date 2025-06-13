@@ -77,7 +77,6 @@
     "model_list": [
         "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
 	"checkpoints,kolors_unet_fp16.safetensors,5159140240,0,",
-	"controlnet,kolors_controlnet_canny.safetensors,2526129624,0,",
 	"pulid,pulid_flux_v0.9.1.safetensors,1142099520,0,",
         "clip,clip_l.safetensors,246144152,0,",
 	"clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",
