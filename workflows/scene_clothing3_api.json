@@ -50,8 +50,8 @@
   "31": {
     "inputs": {
       "text": [
-        "122",
-        4
+        "340",
+        0
       ],
       "clip": [
         "8",
@@ -66,8 +66,8 @@
   "33": {
     "inputs": {
       "guidance": [
-        "122",
-        8
+        "340",
+        4
       ],
       "conditioning": [
         "31",
@@ -198,7 +198,7 @@
       "downsampling_function": "area",
       "mode": "autocrop with mask",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -223,38 +223,6 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
-    }
-  },
-  "122": {
-    "inputs": {
-      "clip_skip": -1,
-      "width": 1024,
-      "height": 1024,
-      "swap": false,
-      "batch_size": 1,
-      "positive": "",
-      "negative": "",
-      "seed": 0,
-      "steps": 25,
-      "cfg": 50,
-      "denoise": 1
-    },
-    "class_type": "Co_Input_Zho",
-    "_meta": {
-      "title": "i2i_overall_input"
-    }
-  },
-  "123": {
-    "inputs": {
-      "steps_total": 30,
-      "refiner_step": 24,
-      "cfg": 8,
-      "sampler_name": "euler",
-      "scheduler": "simple"
-    },
-    "class_type": "KSampler Config (rgthree)",
-    "_meta": {
-      "title": "i2i_KSampler"
     }
   },
   "124": {
@@ -311,7 +279,7 @@
         "187",
         2
       ],
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "pad",
       "condition": "always",
       "multiple_of": 0,
@@ -338,11 +306,11 @@
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": [
-        "208",
-        0
+        "340",
+        12
       ],
       "start": 0,
-      "end": 0.7000000000000001,
+      "end": 0.7000000000000002,
       "max_consecutive_cache_hits": 3,
       "model": [
         "328",
@@ -453,7 +421,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 8,
@@ -471,7 +439,7 @@
     "inputs": {
       "width": 1024,
       "height": 1024,
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 8,
@@ -536,7 +504,7 @@
       "matting_method": "SegmentAnything",
       "sam_model": "sam_vit_h (2.56GB)",
       "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
-      "sam_threshold": 0.3,
+      "sam_threshold": 0.30000000000000004,
       "sam_prompt": [
         "170",
         0
@@ -577,7 +545,7 @@
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -737,7 +705,7 @@
       "downsampling_function": "area",
       "mode": "keep aspect ratio",
       "weight": 1,
-      "autocrop_margin": 0.05,
+      "autocrop_margin": 0.05000000000000001,
       "conditioning": [
         "33",
         0
@@ -762,15 +730,6 @@
     "class_type": "ReduxAdvanced",
     "_meta": {
       "title": "ReduxAdvanced"
-    }
-  },
-  "208": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "wavespeed_strength"
     }
   },
   "214": {
@@ -860,8 +819,8 @@
   "238": {
     "inputs": {
       "seed": [
-        "122",
-        6
+        "341",
+        0
       ],
       "steps": [
         "246",
@@ -897,8 +856,8 @@
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": [
-        "208",
-        0
+        "340",
+        12
       ],
       "start": 0,
       "end": 1,
@@ -933,8 +892,8 @@
     "inputs": {
       "value": "a*0.8",
       "a": [
-        "122",
-        7
+        "340",
+        5
       ]
     },
     "class_type": "SimpleMath+",
@@ -946,8 +905,8 @@
     "inputs": {
       "value": "a*0.2",
       "a": [
-        "122",
-        7
+        "340",
+        5
       ]
     },
     "class_type": "SimpleMath+",
@@ -1216,7 +1175,7 @@
   "328": {
     "inputs": {
       "lora_name": "comfyui_subject_lora16.safetensors",
-      "strength_model": 1,
+      "strength_model": 1.0000000000000002,
       "model": [
         "337",
         0
@@ -1231,8 +1190,8 @@
     "inputs": {
       "add_noise": "enable",
       "noise_seed": [
-        "122",
-        6
+        "341",
+        0
       ],
       "steps": [
         "245",
@@ -1240,12 +1199,12 @@
       ],
       "cfg": 1,
       "sampler_name": [
-        "123",
-        3
+        "340",
+        7
       ],
       "scheduler": [
-        "123",
-        4
+        "340",
+        8
       ],
       "start_at_step": 0,
       "end_at_step": 12,
@@ -1276,8 +1235,8 @@
     "inputs": {
       "add_noise": "enable",
       "noise_seed": [
-        "122",
-        6
+        "341",
+        0
       ],
       "steps": [
         "245",
@@ -1285,12 +1244,12 @@
       ],
       "cfg": 1,
       "sampler_name": [
-        "123",
-        3
+        "340",
+        7
       ],
       "scheduler": [
-        "123",
-        4
+        "340",
+        8
       ],
       "start_at_step": 12,
       "end_at_step": 20,
@@ -1333,11 +1292,11 @@
     "inputs": {
       "object_to_patch": "diffusion_model",
       "residual_diff_threshold": [
-        "208",
-        0
+        "340",
+        12
       ],
       "start": 0,
-      "end": 0.8,
+      "end": 0.8000000000000002,
       "max_consecutive_cache_hits": 3,
       "model": [
         "337",
@@ -1377,8 +1336,8 @@
   },
   "339": {
     "inputs": {
-      "crop_size_mult": 1,
-      "bbox_smooth_alpha": 0.5,
+      "crop_size_mult": 1.0000000000000002,
+      "bbox_smooth_alpha": 0.5000000000000001,
       "original_images": [
         "205",
         0
@@ -1391,6 +1350,37 @@
     "class_type": "BatchCropFromMaskAdvanced",
     "_meta": {
       "title": "Batch Crop From Mask Advanced"
+    }
+  },
+  "340": {
+    "inputs": {
+      "prompt": "",
+      "negative_prompt": "",
+      "width": 1024,
+      "height": 1024,
+      "cfg": 3.5,
+      "steps": 25,
+      "refiner_step": 16,
+      "sampler": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "clip_skip": -1,
+      "inpaint_disable_initial_latent": false,
+      "wavespeed_strength": 0,
+      "save_final_enhanced_image_only": false
+    },
+    "class_type": "GeneralInput",
+    "_meta": {
+      "title": "GeneralInput"
+    }
+  },
+  "341": {
+    "inputs": {
+      "seed": 0
+    },
+    "class_type": "SeedInput",
+    "_meta": {
+      "title": "SeedInput"
     }
   }
 }

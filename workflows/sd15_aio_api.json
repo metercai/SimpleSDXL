@@ -2012,7 +2012,7 @@
         "542",
         3
       ],
-      "interpolation": "bilinear",
+      "interpolation": "lanczos",
       "method": "keep proportion",
       "condition": "always",
       "multiple_of": 0,

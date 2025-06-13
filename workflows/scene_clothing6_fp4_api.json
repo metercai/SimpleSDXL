@@ -111,7 +111,7 @@
   "35": {
     "inputs": {
       "model": [
-        "178",
+        "314",
         0
       ]
     },
@@ -366,26 +366,6 @@
     "class_type": "easy string",
     "_meta": {
       "title": "additional_prompt"
-    }
-  },
-  "178": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "208",
-        0
-      ],
-      "start": 0,
-      "end": 0.7000000000000002,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "238",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "180": {
@@ -912,20 +892,6 @@
       "title": "🔧 Image Resize"
     }
   },
-  "238": {
-    "inputs": {
-      "lora_name": "comfyui_subject_lora16.safetensors",
-      "strength_model": 1.0000000000000002,
-      "model": [
-        "309",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
   "239": {
     "inputs": {
       "width": 1280,
@@ -1121,7 +1087,7 @@
       ],
       "denoise": 0.15000000000000002,
       "model": [
-        "276",
+        "275",
         0
       ],
       "positive": [
@@ -1140,15 +1106,6 @@
     "class_type": "KSampler",
     "_meta": {
       "title": "KSampler"
-    }
-  },
-  "264": {
-    "inputs": {
-      "unet_name": "flux-hyp8-Q5_K_M.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "Unet Loader (GGUF)"
     }
   },
   "266": {
@@ -1227,33 +1184,13 @@
   "275": {
     "inputs": {
       "model": [
-        "310",
+        "316",
         0
       ]
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
-    }
-  },
-  "276": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "208",
-        0
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "275",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "277": {
@@ -1301,16 +1238,6 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
-    }
-  },
-  "281": {
-    "inputs": {
-      "unet_name": "flux1-fill-dev_fp8.safetensors",
-      "weight_dtype": "default"
-    },
-    "class_type": "UNETLoader",
-    "_meta": {
-      "title": "base_model"
     }
   },
   "283": {
@@ -1527,33 +1454,13 @@
   "297": {
     "inputs": {
       "model": [
-        "299",
+        "315",
         0
       ]
     },
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
-    }
-  },
-  "299": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "208",
-        0
-      ],
-      "start": 0,
-      "end": 0.8000000000000002,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "309",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "308": {
@@ -1568,32 +1475,6 @@
     "class_type": "GrowMask",
     "_meta": {
       "title": "GrowMask"
-    }
-  },
-  "309": {
-    "inputs": {
-      "sage_attention": "auto",
-      "model": [
-        "281",
-        0
-      ]
-    },
-    "class_type": "PathchSageAttentionKJ",
-    "_meta": {
-      "title": "Patch Sage Attention KJ"
-    }
-  },
-  "310": {
-    "inputs": {
-      "sage_attention": "auto",
-      "model": [
-        "264",
-        0
-      ]
-    },
-    "class_type": "PathchSageAttentionKJ",
-    "_meta": {
-      "title": "Patch Sage Attention KJ"
     }
   },
   "311": {
@@ -1643,6 +1524,50 @@
     "class_type": "SeedInput",
     "_meta": {
       "title": "SeedInput"
+    }
+  },
+  "314": {
+    "inputs": {
+      "lora_name": "comfyui_subject_lora16.safetensors",
+      "lora_strength": 1,
+      "model": [
+        "315",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "Nunchaku FLUX.1 LoRA Loader"
+    }
+  },
+  "315": {
+    "inputs": {
+      "model_path": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
+      "cache_threshold": 0,
+      "attention": "nunchaku-fp16",
+      "cpu_offload": "enable",
+      "device_id": 0,
+      "data_type": "bfloat16",
+      "i2f_mode": "enabled"
+    },
+    "class_type": "NunchakuFluxDiTLoader",
+    "_meta": {
+      "title": "base_model"
+    }
+  },
+  "316": {
+    "inputs": {
+      "model_path": "svdq-fp4_r32-flux.1-dev.safetensors",
+      "cache_threshold": 0,
+      "attention": "nunchaku-fp16",
+      "cpu_offload": "enable",
+      "device_id": 0,
+      "data_type": "bfloat16",
+      "i2f_mode": "enabled"
+    },
+    "class_type": "NunchakuFluxDiTLoader",
+    "_meta": {
+      "title": "Nunchaku FLUX DiT Loader"
     }
   }
 }

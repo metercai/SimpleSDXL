@@ -115,11 +115,15 @@ inpaint_engine_versions = {
     "kolors_aio": ['kolors_inpainting', 'None'],
     "flux_aio": ['Q4', 'fp8', 'None'],
     "il_v_pre_aio": ['NoobAI_Inpainting','None'],
+    "nun_int4_aio": ['Nun_int4','None'],
+    "nun_fp4_aio": ['Nun_fp4','None'],
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
     "flux_aio_Q4": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
     "flux_aio_fp8": "flux1-fill-dev_fp8.safetensors",
+    "nun_int4_aio_Nun_int4": "svdq-int4_r32-flux.1-fill-dev.safetensors",
+    "nun_fp4_aio_Nun_fp4": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
     }
 default_inpaint_engine_versions = lambda x: inpaint_engine_versions[x][0] if x in inpaint_engine_versions else inpaint_engine_versions["SDXL"][0]
 inpaint_engine_versions_all = list({version for versions in inpaint_engine_versions.values() for version in versions})
