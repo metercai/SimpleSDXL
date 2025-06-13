@@ -12,7 +12,7 @@ from comfy.supported_models import Flux, FluxSchnell
 from diffusers import FluxPipeline, FluxTransformer2DModel
 from einops import rearrange
 from torch import nn
-
+import comfy.model_management as mm
 from nunchaku import NunchakuFluxTransformer2dModel
 from nunchaku.caching.diffusers_adapters.flux import apply_cache_on_transformer
 from nunchaku.caching.utils import cache_context, create_cache_context
@@ -198,7 +198,7 @@ class NunchakuFluxDiTLoader:
 
         if all_turing:
             attention_options = ["nunchaku-fp16"]  # turing GPUs do not support flashattn2
-            dtype_options = ["float16"]
+            dtype_options = ["bfloat16", "float16"]
         else:
             attention_options = ["nunchaku-fp16", "flash-attention2"]
             dtype_options = ["bfloat16", "float16"]
@@ -306,7 +306,9 @@ class NunchakuFluxDiTLoader:
         gpu_properties = torch.cuda.get_device_properties(device_id)
         gpu_memory = gpu_properties.total_memory / (1024**2)  # Convert to MiB
         gpu_name = gpu_properties.name
-        print(f"GPU {device_id} ({gpu_name}) Memory: {gpu_memory} MiB")
+
+        compute_cap = mm.get_current_compute_capability().lower()
+        print(f"GPU {device_id} ({gpu_name}) Memory: {gpu_memory} MiB, Compute Capability: {compute_cap}")
 
         # Check if CPU offload needs to be enabled
         if cpu_offload == "auto":
@@ -340,11 +342,18 @@ class NunchakuFluxDiTLoader:
                 comfy.model_management.soft_empty_cache()
                 comfy.model_management.free_memory(model_size, device)
 
+            # 根据GPU架构决定实际数据类型（20系强制float16）
+            if compute_cap not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
+                print(f"Unsupported GPU architecture {compute_cap} detected, forcing float16 dtype.")
+                effective_dtype = torch.float16
+            else:
+                effective_dtype = torch.float16 if data_type == "float16" else torch.bfloat16
+
             self.transformer, self.metadata = NunchakuFluxTransformer2dModel.from_pretrained(
                 model_path,
                 offload=cpu_offload_enabled,
                 device=device,
-                torch_dtype=torch.float16 if data_type == "float16" else torch.bfloat16,
+                torch_dtype=effective_dtype,  # 使用实际数据类型
                 return_metadata=True,
             )
             self.model_path = model_path
