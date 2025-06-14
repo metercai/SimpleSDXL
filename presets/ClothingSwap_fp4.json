@@ -19,10 +19,10 @@
                 "换装+++": "主体"
                 },
 	    "task_method": {
-		"换装": "clothing2_nun_fp4",
-        "换装+": "clothing3_nun_fp4",
-        "换装++": "clothing4_nun_fp4",
-        "换装+++": "clothing6_nun_fp4"
+		"换装": "clothing2_fp4",
+        "换装+": "clothing3_fp4",
+        "换装++": "clothing4_fp4",
+        "换装+++": "clothing6_fp4"
 	    },
         "prompt": {
             "换装": "keep the feature from the left picture.",
