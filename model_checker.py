@@ -3,18 +3,26 @@ import sys
 import time
 import requests
 import queue
+import platform
 from tqdm import tqdm
 from colorama import init, Fore, Style
 import threading
 import atexit
 import json
 from collections import defaultdict
+from multiprocessing import current_process
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(script_dir)
+if current_process().name != "MainProcess":
+    root_dir = os.path.dirname(os.path.dirname(root_dir))
+elif platform.system() == 'Windows':
+    root_dir = os.path.dirname(root_dir)
+
 def load_model_paths():
     global simplemodels_root
 
-    config_path = os.path.normpath(os.path.join(script_dir, "..", "..", "users", "config.txt"))
+    config_path = os.path.normpath(os.path.join(root_dir, "users", "config.txt"))
     path_mapping = {}
 
     try:
@@ -24,7 +32,7 @@ def load_model_paths():
         if models_root:
             simplemodels_root = os.path.abspath(os.path.join(script_dir, models_root)) if not os.path.isabs(models_root) else models_root
         else:
-            simplemodels_root = os.path.normpath(os.path.join(script_dir, "..", "..", "SimpleModels"))
+            simplemodels_root = os.path.normpath(os.path.join(root_dir, "SimpleModels"))
         path_mapping = {
             "checkpoints": [os.path.abspath(os.path.join(script_dir, p)) if not os.path.isabs(p) else p
                         for p in config.get("path_checkpoints", [])],
@@ -136,7 +144,7 @@ def check_python_embedded():
     python_exe = sys.executable
     print(f"Python解析器路径: {python_exe}")
 
-    if "python_embeded" not in python_exe.lower():
+    if platform.system() =='Windows' and "python_embeded" not in python_exe.lower():
         print_colored("×当前 Python 解释器不在 python_embeded 目录中，请检查运行环境", Fore.RED)
         input("按任意键继续。")
         sys.exit(1)

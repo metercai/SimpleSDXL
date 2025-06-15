@@ -48,9 +48,9 @@ def check_base_environment():
     base_branch = "release"
     if '--dev' in (sys.argv):
         base_branch = 'dev'
-    base_url = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/libs/{base_branch}"
+    base_url = f"https://modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/libs/{base_branch}"
+    #base_url = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/libs/{base_branch}"
     #base_url = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/libs/{base_branch}"
-    #base_url = f"https://edge.tokentm.net/pkg/simpleai_base/{base_branch}"
     base_file = {
         "Windows": f'simpleai_base-{ver_required}-cp310-cp310-win_amd64.whl',
         "Linux": f'simpleai_base-{ver_required}-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
@@ -93,7 +93,8 @@ def check_base_environment():
                 run(f'"{python}" -m {pkg_command}', f'Installing {update_pkg_name}', f"Couldn't install {update_pkg_name}", live=True)
 
         if platform.system() == 'Windows' and not is_installed_version('nunchaku', '0.3.1.dev20250611+torch2.7'):
-            pkg_url = 'https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/libs/dev/nunchaku-0.3.1.dev20250611%2Btorch2.7-cp310-cp310-win_amd64.whl'
+            #pkg_url = 'https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/libs/dev/nunchaku-0.3.1.dev20250611%2Btorch2.7-cp310-cp310-win_amd64.whl'
+            pkg_url = 'https://modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/libs/dev/nunchaku-0.3.1.dev20250611%2Btorch2.7-cp310-cp310-win_amd64.whl'
             pkg_path = os.path.abspath(os.path.join(root, 'nunchaku-0.3.1.dev20250611+torch2.7-cp310-cp310-win_amd64.whl'))
             has_update_whl = download_if_updated(pkg_url, pkg_path)
             if has_update_whl:
