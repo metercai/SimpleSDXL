@@ -168,24 +168,11 @@ class AsyncTask:
         if self.task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x'] and self.task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x']:
             self.task_name = self.task_class
         if len(self.loras) > 0:
-            if self.task_name in ['Kolors', 'Flux'] and '_aio' not in self.task_method:
+            for i, (lora_name, lora_strength) in enumerate(self.loras):
                 self.params_backend.update({
-                    "lora_1": self.loras[0][0],
-                    "lora_1_strength": self.loras[0][1],
-                    })
-            elif len(self.loras) > 1 and (self.task_name in ['Kolors'] or 'base2_gguf' in self.task_method) and '_aio' not in self.task_method:
-                self.params_backend.update({
-                    "lora_1": self.loras[0][0],
-                    "lora_1_strength": self.loras[0][1],
-                    "lora_2": self.loras[1][0],
-                    "lora_2_strength": self.loras[1][1],
-                    })
-            else:
-                for i, (lora_name, lora_strength) in enumerate(self.loras):
-                    self.params_backend.update({
-                        f"lora_{i+1}": lora_name,
-                        f"lora_{i+1}_strength": lora_strength,
-                        })
+                    f"lora_{i+1}": lora_name,
+                    f"lora_{i+1}_strength": lora_strength,
+                })
 
         ui_options = {
             'iclight_enable': self.iclight_enable,
