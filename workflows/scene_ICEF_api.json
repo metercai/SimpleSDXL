@@ -209,7 +209,10 @@
   "56": {
     "inputs": {
       "width": 512,
-      "height": 1024,
+      "height": [
+        "229",
+        1
+      ],
       "x": 512,
       "y": 0,
       "image": [
@@ -1095,6 +1098,18 @@
     "class_type": "GrowMaskWithBlur",
     "_meta": {
       "title": "Grow Mask With Blur"
+    }
+  },
+  "229": {
+    "inputs": {
+      "image": [
+        "60",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
     }
   }
 }
