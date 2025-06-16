@@ -96,9 +96,11 @@ def check_base_environment():
             #pkg_url = 'https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/libs/dev/nunchaku-0.3.1.dev20250611%2Btorch2.7-cp310-cp310-win_amd64.whl'
             pkg_url = 'https://modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/libs/dev/nunchaku-0.3.1.dev20250611%2Btorch2.7-cp310-cp310-win_amd64.whl'
             pkg_path = os.path.abspath(os.path.join(root, 'nunchaku-0.3.1.dev20250611+torch2.7-cp310-cp310-win_amd64.whl'))
+            print('check nunchaku...')
             has_update_whl = download_if_updated(pkg_url, pkg_path)
             if has_update_whl:
-                run(f'"{python}" -m pip install -U {pkg_path}', f'Install {pkg_path}')
+                print(f'ready to install {pkg_path}')
+                run(f'"{python}" -m pip install -U {pkg_path}', f'Install {pkg_path}', live=True)
 
         if platform.system() == 'Windows' and is_installed("rembg") and not is_installed("facexlib") and not is_installed("insightface"):
             logger.info(f'Due to Windows restrictions, The new version of SimpleSDXL requires downloading a new installation package, updating the system environment, and then running it. Download URL: https://hf-mirror.com/metercai/SimpleSDXL2/')
