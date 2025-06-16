@@ -1865,6 +1865,7 @@ MANUAL_DOWNLOAD_LIST = [
 
 OBSOLETE_MODELS = [
     "flux1-dev-bnb-nf4.safetensors",
+    "flux1-dev-bnb-nf4-v2.safetensors",
     "flux1-schnell-bnb-nf4.safetensors",
     "sdxl_hyper_sd_4step_lora.safetensors",
     "xinsir_cn_openpose_sdxl_1.0.safetensors",
