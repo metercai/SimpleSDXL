@@ -56,12 +56,12 @@ def download_if_updated(url, save_path):
         local_mtime = None
         local_file_size = 0
     try:
-        response = requests.head(url, allow_redirects=True)
+        response = requests.get(url, allow_redirects=True, stream=True)
         response.raise_for_status()  # 检查请求是否成功
     except requests.exceptions.RequestException as e:
         print(f"无法访问的 URL: {e}")
         return False
-
+    
     remote_mtime_str = response.headers.get("Last-Modified")
     if not remote_mtime_str:
         remote_mtime = None
