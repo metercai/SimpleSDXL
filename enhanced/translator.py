@@ -73,6 +73,20 @@ def translate2zh_model(model, tokenizer, text_en):
 
 
 @lru_cache(maxsize=32, typed=False)
+def translate2zh_apis(text):
+    global translator_default
+    if not text:
+        return text
+    try:
+        return ts.translate_text(text, translator=translator_default, from_language='en', to_language='zh')
+    except Exception as e:
+        try:
+            logger.info(f'Change another translator because of {e}')
+            translator_default = translator_org[random.randint(1,1)]
+            return ts.translate_text(text, translator=translator_default, from_language='en', to_language='zh')
+        except Exception as e:
+            logger.info(f'Error during translation of APIs methods: {e}')
+            return text
 def translate2en_apis(text):
     global translator_default
     if not text:
@@ -157,10 +171,13 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
     start = time.perf_counter()
 
     if lang=='cn':
-        tokenizer, model = init_or_load_translator_model('Big Model')
-        text_zh = translate2zh_model(model, tokenizer, text)
+        if method == 'Third APIs':
+            text_zh = translate2zh_apis(text)
+        else:
+            tokenizer, model = init_or_load_translator_model(method)
+            text_zh = translate2zh_model(model, tokenizer, text)
         stop = time.perf_counter()
-        logger.info(f'Translate by "Big Model" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
+        logger.info(f'Translate by "{method}" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
         return text_zh
     is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
     #text = Q2B_number_punctuation(text)

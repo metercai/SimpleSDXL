@@ -456,6 +456,27 @@ with shared.gradio_root:
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                         skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
 
+                with gr.Accordion(label='Translation Preview', visible=True, open=False, elem_id='translation_preview_accordion', elem_classes='translation_preview_accordion') as translation_preview:
+                    translated_prompt = gr.HTML(value="", elem_classes='translation-preview')
+                    translation_preview_open = gr.Checkbox(value=False, elem_id="translation_preview_open",visible=False,container=False)
+                    def translate_prompt(text):
+                        try:
+                            if not text.strip():
+                                return ""
+                            translation_method = ads.get_admin_default('translation_methods')
+                            if translation_method == 'Big Model' and MiniCPM.get_enable():
+                                return minicpm.translate_cn(text)
+                            return translator.toggle(text, translation_method)
+                        except Exception as e:
+                            return f"Translation error：{str(e)}"
+
+                    def handle_translation_preview_open(current_prompt, is_open):
+                        if is_open:
+                            return translate_prompt(current_prompt)
+                        return translated_prompt.value
+                    trigger_translation_btn = gr.Button(visible=False, elem_id="trigger_translation_btn")
+                    trigger_translation_btn.click(fn=handle_translation_preview_open,inputs=[prompt, translation_preview_open],outputs=[translated_prompt])
+
                 with gr.Accordion(label='Wildcards & Batch Prompts', visible=False, open=True) as prompt_wildcards:
                     wildcards_list = gr.Dataset(components=[prompt], type='index', label='Wildcards: [__color__:L3:4], take 3 phrases starting from the 4th in color in order. [__color__:3], take 3 randomly. [__color__], take 1 randomly.', samples=wildcards.get_wildcards_samples(), visible=True, samples_per_page=28)
                     with gr.Accordion(label='Words/phrases of wildcard', visible=True, open=False) as words_in_wildcard:
