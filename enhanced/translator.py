@@ -173,11 +173,12 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
     if lang=='cn':
         if method == 'Third APIs':
             text_zh = translate2zh_apis(text)
+            ts_method = translator_default
         else:
             tokenizer, model = init_or_load_translator_model(method)
             text_zh = translate2zh_model(model, tokenizer, text)
         stop = time.perf_counter()
-        logger.info(f'Translate by "{method}" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
+        logger.info(f'Translate by "{ts_method}" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
         return text_zh
     is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
     #text = Q2B_number_punctuation(text)
