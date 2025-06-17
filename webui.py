@@ -432,9 +432,8 @@ with shared.gradio_root:
                         if isinstance(default_prompt, str) and default_prompt != '':
                             shared.gradio_root.load(lambda: default_prompt, outputs=prompt)
                     with gr.Column(scale=2, min_width=0) as prompt_internal_panel:
-                        random_button = gr.Button(value="RandomPrompt", elem_classes='type_row_third', size="sm", min_width = 70)
-                        translator_button = gr.Button(value="Translator", elem_classes='type_row_third', size='sm', min_width = 70)
-                        super_prompter = gr.Button(value="SuperPrompt", elem_classes='type_row_third', size="sm", min_width = 70)
+                        random_button = gr.Button(value="RandomPrompt", elem_classes='type_row_half', size="sm", min_width = 70)
+                        super_prompter = gr.Button(value="SuperPrompt", elem_classes='type_row_half', size="sm", min_width = 70)
                     with gr.Column(scale=2, min_width=0):
                         generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True, min_width = 70)
                         load_parameter_button = gr.Button(label="Load Parameters", value="Load Parameters", elem_classes='type_row', elem_id='load_parameter_button', visible=False, min_width = 70)
@@ -1582,8 +1581,6 @@ with shared.gradio_root:
             return [gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update()]
 
         prompt.change(parse_meta, inputs=[prompt, state_topbar, scene_input_image1, state_is_generating], outputs=[prompt, generate_button, load_parameter_button, prompt_panel_checkbox], queue=False, show_progress=False)      
-        translator_button.click(lambda x, y: minicpm.translate(x, y), inputs=[prompt, translation_methods], outputs=prompt, queue=False, show_progress=True)
-
 
         def trigger_metadata_import(file, state_is_generating, state_params):
             parameters, metadata_scheme = modules.meta_parser.read_info_from_image(file)
@@ -1600,7 +1597,7 @@ with shared.gradio_root:
             .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
         model_check = [prompt, negative_prompt, base_model, refiner_model] + lora_ctrls
-        protections = [random_button, translator_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
+        protections = [random_button, super_prompter, background_theme, image_tools_checkbox] + nav_bars
         generate_button.click(topbar.process_before_generation, inputs=[state_topbar, seed_random, image_seed, params_backend] + scene_params[:-1], outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating, index_radio, image_toolbox, prompt_info_box, image_seed] + protections + [preset_store, identity_dialog], show_progress=False) \
             .then(topbar.avoid_empty_prompt_for_scene, inputs=[prompt, state_topbar, scene_input_image1, scene_theme, scene_additional_prompt, scene_additional_prompt_2], outputs=prompt, show_progress=True) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
