@@ -21,7 +21,7 @@ Q_alphabet = 'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖ
 B_alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 translator_org = ['baidu', 'alibaba', 'sogou', 'caiyun']
-translator_default = translator_org[random.randint(1,1)]
+translator_default = 'alibaba'
 translator_path = os.path.join(paths_llms[0], 'nllb-200-distilled-600M')
 translator_slim_path = os.path.join(paths_llms[0], 'Helsinki-NLP/opus-mt-zh-en')
 
@@ -73,6 +73,20 @@ def translate2zh_model(model, tokenizer, text_en):
 
 
 @lru_cache(maxsize=32, typed=False)
+def translate2zh_apis(text):
+    global translator_default
+    if not text:
+        return text
+    try:
+        return ts.translate_text(text, translator=translator_default, from_language='en', to_language='zh')
+    except Exception as e:
+        try:
+            logger.info(f'Change another translator because of {e}')
+            translator_default = translator_org[random.randint(1,3)]
+            return ts.translate_text(text, translator=translator_default, from_language='en', to_language='zh')
+        except Exception as e:
+            logger.info(f'Error during translation of APIs methods: {e}')
+            return text
 def translate2en_apis(text):
     global translator_default
     if not text:
@@ -82,7 +96,7 @@ def translate2en_apis(text):
     except Exception as e:
         try:
             logger.info(f'Change another translator because of {e}')
-            translator_default = translator_org[random.randint(1,1)]
+            translator_default = translator_org[random.randint(1,3)]
             return ts.translate_text(text, translator=translator_default, to_language='en')
         except Exception as e:
             logger.info(f'Error during translation of APIs methods: {e}')
@@ -157,10 +171,14 @@ def convert(text: str, method: str = 'Slim Model', lang: str = 'en' ) -> str:
     start = time.perf_counter()
 
     if lang=='cn':
-        tokenizer, model = init_or_load_translator_model('Big Model')
-        text_zh = translate2zh_model(model, tokenizer, text)
+        if method == 'Third APIs':
+            text_zh = translate2zh_apis(text)
+            ts_method = translator_default
+        else:
+            tokenizer, model = init_or_load_translator_model(method)
+            text_zh = translate2zh_model(model, tokenizer, text)
         stop = time.perf_counter()
-        logger.info(f'Translate by "Big Model" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
+        logger.info(f'Translate by "{ts_method}" in {(stop-start):.2f}s: "{text}" to "{text_zh}"')
         return text_zh
     is_chinese_ext = lambda x: (Q_alphabet + B_punct).find(x) < -1 
     #text = Q2B_number_punctuation(text)

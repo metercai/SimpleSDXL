@@ -469,3 +469,104 @@ function htmlDecode(input) {
   var doc = new DOMParser().parseFromString(input, "text/html");
   return doc.documentElement.textContent;
 }
+function initTranslationPreview() {
+    window.addEventListener('error', (e) => {
+        console.error('全局JS错误:', e.message, e.filename, e.lineno);
+    });
+
+    let retryCount = 0;
+    function tryInit() {
+        const accordionElement = gradioApp().getElementById('translation_preview_accordion');
+        if (!accordionElement) {
+            retryCount++;
+            if (retryCount < 10) {
+                setTimeout(tryInit, 1000);
+            } else {
+                console.error('未找到翻译预览面板');
+            }
+            return;
+        }
+
+        const accordionHeader = accordionElement.querySelector('.label-wrap');
+
+        if (!accordionHeader) {
+            console.error('未找到翻译预览标题');
+            return;
+        }
+
+        accordionHeader.removeEventListener('click', handleHeaderClick);
+        accordionHeader.addEventListener('click', handleHeaderClick);
+    }
+
+    function handleHeaderClick() {
+        const translationPreviewOpenContainer = gradioApp().getElementById('translation_preview_open');
+        const translationPreviewOpenCheckbox = translationPreviewOpenContainer?.querySelector('input[type="checkbox"]');
+        const promptContainer = gradioApp().getElementById('positive_prompt');
+        const promptInput = promptContainer?.querySelector('textarea, input');
+
+        if (!translationPreviewOpenCheckbox || !promptInput) {
+            console.error('组件未找到！');
+            return;
+        }
+
+        const isOpen = translationPreviewOpenCheckbox.checked;
+        const promptValue = promptInput.value.trim();
+
+        translationPreviewOpenCheckbox.checked = !isOpen;
+        const changeEvent = new Event('change');
+        translationPreviewOpenCheckbox.dispatchEvent(changeEvent);
+
+        const triggerBtn = gradioApp().getElementById('trigger_translation_btn');
+        if (triggerBtn) {
+            triggerBtn.click();
+        } else {
+            console.error('未找到触发翻译的按钮');
+        }
+    }
+
+    const observer = new MutationObserver(() => {
+        if (gradioApp().getElementById('translation_preview_accordion')) {
+            observer.disconnect();
+            tryInit();
+        }
+    });
+    observer.observe(gradioApp(), { childList: true, subtree: true });
+}
+
+onUiLoaded(() => {
+    initTranslationPreview();
+});
+
+function setupAutoTranslate() {
+    const promptContainer = gradioApp().getElementById('positive_prompt');
+    const promptInput = promptContainer?.querySelector('textarea, input');
+    const translateBtn = gradioApp().getElementById('trigger_translation_btn');
+
+    if (promptInput && translateBtn) {
+        let timer = null;
+        let lastContent = '';
+
+        const handleInput = () => {
+            const currentContent = promptInput.value;
+            if (currentContent === lastContent) return;
+
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => {
+                translateBtn.click();
+                lastContent = currentContent;
+            }, 1000);
+        };
+
+        let lastManualCheck = promptInput.value;
+        setInterval(() => {
+            if (promptInput.value !== lastManualCheck) {
+                lastManualCheck = promptInput.value;
+                handleInput();
+            }
+        }, 1500);
+
+        promptInput.addEventListener('input', handleInput);
+    }
+}
+
+onUiLoaded(setupAutoTranslate);
