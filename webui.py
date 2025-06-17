@@ -456,16 +456,20 @@ with shared.gradio_root:
                         stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                         skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
 
-                with gr.Accordion(label='Translation Preview', visible=True, open=False, elem_id='translation_preview_accordion', elem_classes='translation_preview_accordion') as translation_preview:
+                with gr.Accordion(label='Parallel Translation', visible=True, open=False, elem_id='translation_preview_accordion', elem_classes='translation_preview_accordion') as translation_preview:
                     translated_prompt = gr.HTML(value="", elem_classes='translation-preview')
                     translation_preview_open = gr.Checkbox(value=False, elem_id="translation_preview_open",visible=False,container=False)
                     def translate_prompt(text):
+                        from modules.util import is_chinese
                         try:
                             if not text.strip():
                                 return ""
                             translation_method = ads.get_admin_default('translation_methods')
                             if translation_method == 'Big Model' and MiniCPM.get_enable():
-                                return minicpm.translate_cn(text)
+                                if is_chinese(text):
+                                    return minicpm.translate(text)
+                                else:
+                                    return minicpm.translate_cn(text)
                             return translator.toggle(text, translation_method)
                         except Exception as e:
                             return f"Translation error：{str(e)}"
