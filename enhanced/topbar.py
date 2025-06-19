@@ -353,12 +353,12 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
                 if 'mask_color' in preprocessor_method:
                     mask_color_flag = True
         if scene_input_image1 is not None:
-            scene_input_image1 = util.resize_image(util.HWC3(scene_input_image1), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
+            scene_input_image1 = util.resize_image(scene_input_image1, max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image1
         if scene_input_image2 is not None:
-            scene_input_image2 = util.resize_image(util.HWC3(scene_input_image2), max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image2
+            scene_input_image2 = util.resize_image(scene_input_image2, max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image2
 
         if scene_canvas_image is not None:
-            scene_canvas_image['image'] = util.resize_image(util.HWC3(scene_canvas_image['image']), max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
+            scene_canvas_image['image'] = util.resize_image(scene_canvas_image['image'], max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
             mask = scene_canvas_image['mask']
             if mask.shape[2] == 4:
                 if mask_color_flag:
