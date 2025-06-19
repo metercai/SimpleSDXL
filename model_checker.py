@@ -815,8 +815,13 @@ def auto_download_missing_files_with_retry(max_threads=5):
                         target_base_dir = base_dir
                         break
                 if not target_base_dir:
-                    print(f"{Fore.RED}×无法找到路径类型 '{path_type}' 的配置，跳过下载: {relative_path}{Style.RESET_ALL}")
-                    continue
+                    target_base_dir = sorted_base_dir[0]
+                    try:
+                        os.makedirs(target_base_dir, exist_ok=True)
+                        print(f"{Fore.YELLOW}△自动创建缺失目录: {target_base_dir}{Style.RESET_ALL}")
+                    except Exception as e:
+                        print(f"{Fore.RED}×目录创建失败[{target_base_dir}]: {str(e)}{Style.RESET_ALL}")
+                        continue
 
                 file_name = os.path.basename(relative_path)
                 file_sub_dir = os.path.dirname(relative_path_without_prefix).replace(path_type, "").strip('/')
