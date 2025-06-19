@@ -358,7 +358,14 @@ def process_before_generation(state_params, seed_random, image_seed, backend_par
             scene_input_image2 = util.resize_image(scene_input_image2, max_side=1280, resize_mode=4) if resize_image_flag else scene_input_image2
 
         if scene_canvas_image is not None:
-            scene_canvas_image['image'] = util.resize_image(scene_canvas_image['image'], max_side=1280, resize_mode=4) if resize_image_flag else scene_canvas_image['image']
+            image = scene_canvas_image['image']
+            rgb = image[:, :, :3]
+            alpha = image[:, :, 3]
+            white_background = np.full_like(rgb, 255, dtype=np.uint8)
+            mask = alpha > 0
+            image = np.where(np.expand_dims(mask, axis=-1), rgb, white_background)
+            image = np.dstack((image, alpha))
+            scene_canvas_image['image'] = util.resize_image(image, max_side=1280, resize_mode=4) if resize_image_flag else image
             mask = scene_canvas_image['mask']
             if mask.shape[2] == 4:
                 if mask_color_flag:
