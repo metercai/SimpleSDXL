@@ -599,10 +599,7 @@ def worker():
             cn_img, cn_stop, cn_weight = task
             cn_img = HWC3(cn_img)
             if not async_task.skipping_cn_preprocessor:
-                if async_task.task_class in ['Fooocus']:
-                    cn_img = preprocessors.openpose(cn_img, stick_scaling=True)
-                else:
-                    cn_img = preprocessors.openpose(cn_img)
+                cn_img = preprocessors.openpose(cn_img, stick_scaling=True)
             cn_img = resize_image(HWC3(cn_img), width=width, height=height)
             task[0] = core.numpy_to_pytorch(cn_img) if async_task.task_class in ['Fooocus'] else cn_img
             if async_task.debugging_cn_preprocessor:
