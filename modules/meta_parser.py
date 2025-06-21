@@ -15,7 +15,7 @@ import shared
 
 from modules.flags import MetadataScheme, Performance, Steps, task_class_mapping, get_taskclass_by_fullname, default_class_params, scheduler_list, sampler_list
 from modules.flags import SAMPLERS, CIVITAI_NO_KARRAS
-from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder, resize_image, is_chinese
+from modules.util import quote, unquote, extract_styles_from_prompt, is_json, sha256, get_files_from_folder, resize_image, is_chinese, HWC3
 import enhanced.all_parameters as ads
 from modules.hash_cache import sha256_from_cache
 import extras.preprocessors as preprocessors
@@ -76,7 +76,7 @@ def get_auto_candidate(img, selections, mode):
 
 
 def describe_prompt_for_scene(state, img, scene_theme, additional_prompt):
-    img = img if img is None else resize_image(img, max_side=1280, resize_mode=4)
+    img = img if img is None else resize_image(HWC3(img), max_side=1280, resize_mode=4)
     preprocessor_methods = modules.flags.get_value_by_scene_theme(state, scene_theme, 'image_preprocessor_method', [])
     img_is_ok = True
     if len(preprocessor_methods)>0 and img is not None:
