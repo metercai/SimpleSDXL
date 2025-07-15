@@ -348,61 +348,79 @@ class SingleStreamMultiAttention(SingleStreamAttention):
 
     def forward(
         self,
-                x: torch.Tensor, 
-                encoder_hidden_states: torch.Tensor, 
-                shape=None, 
-                x_ref_attn_map=None,
+        x: torch.Tensor,
+        encoder_hidden_states: torch.Tensor,
+        shape=None,
+        x_ref_attn_map=None,
         human_num=None,
     ) -> torch.Tensor:
-        
         encoder_hidden_states = encoder_hidden_states.squeeze(0)
 
         # Single-speaker fall-through
         if human_num is None or human_num <= 1:
             return super().forward(x, encoder_hidden_states, shape)
 
-        # Safety check: do we have enough buckets?
-        assert human_num <= self.max_humans, (
-            f"Configured for at most {self.max_humans} speakers but got {human_num}.")
-
-        N_t, _, _ = shape 
-        x = rearrange(x, "B (N_t S) C -> (B N_t) S C", N_t=N_t) 
+        N_t, _, _ = shape
+        x = rearrange(x, "B (N_t S) C -> (B N_t) S C", N_t=N_t)
 
         # Query projection
         B, N, C = x.shape
-        q = self.q_linear(x) 
+        q = self.q_linear(x)
         q = q.view(B, N, self.num_heads, self.head_dim).permute(0, 2, 1, 3)
         if self.qk_norm:
             q = self.q_norm(q)
 
-        # 1) Build per-speaker rotary ranges
-        rope_ranges = [
-            (i * self.class_interval, (i + 1) * self.class_interval)
-            for i in range(human_num)
-        ]
+        if human_num == 2:
+            # Use `class_range` logic for exactly 2 speakers
+            rope_h1 = (0, self.class_interval)
+            rope_h2 = (self.class_range - self.class_interval, self.class_range)
+            rope_bak = int(self.class_range // 2)
 
-        # 2) Normalise each speaker's attention map into its own bucket
-        human_norm_list = []
-        for idx in range(human_num):
-            attn_map = x_ref_attn_map[idx]
-            att_min, att_max = attn_map.min(), attn_map.max()
-            human_norm = normalize_and_scale(
-                attn_map, (att_min, att_max), rope_ranges[idx]
+            # Normalize and scale attention maps for each speaker
+            max_values = x_ref_attn_map.max(1).values[:, None, None]
+            min_values = x_ref_attn_map.min(1).values[:, None, None]
+            max_min_values = torch.cat([max_values, min_values], dim=2)
+
+            human1_max_value, human1_min_value = max_min_values[0, :, 0].max(), max_min_values[0, :, 1].min()
+            human2_max_value, human2_min_value = max_min_values[1, :, 0].max(), max_min_values[1, :, 1].min()
+
+            human1 = normalize_and_scale(x_ref_attn_map[0], (human1_min_value, human1_max_value), rope_h1)
+            human2 = normalize_and_scale(x_ref_attn_map[1], (human2_min_value, human2_max_value), rope_h2)
+            back = torch.full((x_ref_attn_map.size(1),), rope_bak, dtype=human1.dtype, device=human1.device)
+
+            # Token-wise speaker dominance
+            max_indices = x_ref_attn_map.argmax(dim=0)
+            normalized_map = torch.stack([human1, human2, back], dim=1)
+            normalized_pos = normalized_map[torch.arange(x_ref_attn_map.size(1)), max_indices]
+        else:
+            # General case for more than 2 speakers
+            rope_ranges = [
+                (i * self.class_interval, (i + 1) * self.class_interval)
+                for i in range(human_num)
+            ]
+
+            # Normalize each speaker's attention map into its own bucket
+            human_norm_list = []
+            for idx in range(human_num):
+                attn_map = x_ref_attn_map[idx]
+                att_min, att_max = attn_map.min(), attn_map.max()
+                human_norm = normalize_and_scale(
+                    attn_map, (att_min, att_max), rope_ranges[idx]
+                )
+                human_norm_list.append(human_norm)
+
+            # Background constant bucket
+            back = torch.full(
+                (x_ref_attn_map.size(1),),
+                self.rope_bak,
+                dtype=x_ref_attn_map.dtype,
+                device=x_ref_attn_map.device,
             )
-            human_norm_list.append(human_norm)
 
-        # Background constant bucket
-        back = torch.full(
-            (x_ref_attn_map.size(1),),
-            self.rope_bak,
-            dtype=x_ref_attn_map.dtype,
-            device=x_ref_attn_map.device,
-        )
-
-        # Token-wise speaker dominance
-        max_indices = x_ref_attn_map.argmax(dim=0)
-        normalized_map = torch.stack(human_norm_list + [back], dim=1)
-        normalized_pos = normalized_map[torch.arange(x_ref_attn_map.size(1)), max_indices]
+            # Token-wise speaker dominance
+            max_indices = x_ref_attn_map.argmax(dim=0)
+            normalized_map = torch.stack(human_norm_list + [back], dim=1)
+            normalized_pos = normalized_map[torch.arange(x_ref_attn_map.size(1)), max_indices]
 
         # Apply rotary to Q
         q = rearrange(q, "(B N_t) H S C -> B H (N_t S) C", N_t=N_t)
@@ -410,25 +428,31 @@ class SingleStreamMultiAttention(SingleStreamAttention):
         q = rearrange(q, "B H (N_t S) C -> (B N_t) H S C", N_t=N_t)
 
         # Keys / Values
-        _, N_a, _ = encoder_hidden_states.shape 
-        encoder_kv = self.kv_linear(encoder_hidden_states) 
+        _, N_a, _ = encoder_hidden_states.shape
+        encoder_kv = self.kv_linear(encoder_hidden_states)
         encoder_kv = encoder_kv.view(B, N_a, 2, self.num_heads, self.head_dim).permute(2, 0, 3, 1, 4)
-        encoder_k, encoder_v = encoder_kv.unbind(0) 
+        encoder_k, encoder_v = encoder_kv.unbind(0)
         if self.qk_norm:
             encoder_k = self.add_k_norm(encoder_k)
 
         # Rotary for keys – assign centre of each speaker bucket to its context tokens
-        tokens_per_human = N_a // human_num
-        encoder_pos_list = []
-        for i in range(human_num):
-            start, end = rope_ranges[i]
-            centre = (start + end) / 2
-            encoder_pos_list.append(
-                torch.full(
-                    (tokens_per_human,), centre, dtype=encoder_k.dtype, device=encoder_k.device
+        if human_num == 2:
+            per_frame = torch.zeros(N_a, dtype=encoder_k.dtype, device=encoder_k.device)
+            per_frame[: per_frame.size(0) // 2] = (rope_h1[0] + rope_h1[1]) / 2
+            per_frame[per_frame.size(0) // 2 :] = (rope_h2[0] + rope_h2[1]) / 2
+            encoder_pos = torch.cat([per_frame] * N_t, dim=0)
+        else:
+            tokens_per_human = N_a // human_num
+            encoder_pos_list = []
+            for i in range(human_num):
+                start, end = rope_ranges[i]
+                centre = (start + end) / 2
+                encoder_pos_list.append(
+                    torch.full(
+                        (tokens_per_human,), centre, dtype=encoder_k.dtype, device=encoder_k.device
+                    )
                 )
-            )
-        encoder_pos = torch.cat(encoder_pos_list * N_t, dim=0)
+            encoder_pos = torch.cat(encoder_pos_list * N_t, dim=0)
 
         encoder_k = rearrange(encoder_k, "(B N_t) H S C -> B H (N_t S) C", N_t=N_t)
         encoder_k = self.rope_1d(encoder_k, encoder_pos)
@@ -441,14 +465,13 @@ class SingleStreamMultiAttention(SingleStreamAttention):
         x = attention(
             q, encoder_k, encoder_v, attention_mode=self.attention_mode
         )
-        # x is already in B M H K format from attention function
 
         # Linear projection
         x = x.reshape(B, N, C)
-        x = self.proj(x) 
+        x = self.proj(x)
         x = self.proj_drop(x)
 
         # Restore original layout
-        x = rearrange(x, "(B N_t) S C -> B (N_t S) C", N_t=N_t) 
+        x = rearrange(x, "(B N_t) S C -> B (N_t S) C", N_t=N_t)
 
         return x

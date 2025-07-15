@@ -44,7 +44,7 @@ sacremoses==0.1.1
 safetensors==0.4.3
 scipy==1.14.0 #
 segment_anything==1.0
-sentencepiece==0.1.99
+sentencepiece>=0.2.0
 siphash24
 spandrel
 tqdm==4.66.4 #

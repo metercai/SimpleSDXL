@@ -14,6 +14,11 @@ from comfy.utils import load_torch_file, ProgressBar
 import comfy.model_base
 from comfy.sd import load_lora_for_models
 
+try:
+    from server import PromptServer
+except:
+    PromptServer = None
+
 #from city96's gguf nodes
 def update_folder_names_and_paths(key, targets=[]):
     # check for existing key
@@ -250,7 +255,10 @@ class WanVideoLoraSelect:
                 "prev_lora":("WANVIDLORA", {"default": None, "tooltip": "For loading multiple LoRAs"}),
                 "blocks":("SELECTEDBLOCKS", ),
                 "low_mem_load": ("BOOLEAN", {"default": False, "tooltip": "Load the LORA model with less VRAM usage, slower loading"}),
-            }
+            },
+            "hidden": {
+                "unique_id": "UNIQUE_ID",
+            },
         }
 
     RETURN_TYPES = ("WANVIDLORA",)
@@ -259,11 +267,57 @@ class WanVideoLoraSelect:
     CATEGORY = "WanVideoWrapper"
     DESCRIPTION = "Select a LoRA model from ComfyUI/models/loras"
 
-    def getlorapath(self, lora, strength, blocks={}, prev_lora=None, low_mem_load=False):
+    def getlorapath(self, lora, strength, unique_id, blocks={}, prev_lora=None, low_mem_load=False):
         loras_list = []
 
+        strength = round(strength, 4)
+
+        try:
+            lora_path = folder_paths.get_full_path("loras", lora)
+        except:
+            lora_path = lora
+
+        # Load metadata from the safetensors file
+        metadata = {}
+        try:
+            from safetensors.torch import safe_open
+            with safe_open(lora_path, framework="pt", device="cpu") as f:
+                metadata = f.metadata()
+        except Exception as e:
+            print(f"Could not load metadata from {lora}: {e}")
+
+        if unique_id and PromptServer is not None:
+            try:
+                # Build table rows for metadata
+                metadata_rows = ""
+                if metadata:
+                    for key, value in metadata.items():
+                        # Format value - handle special cases
+                        if isinstance(value, dict):
+                            formatted_value = "<pre>" + "\n".join([f"{k}: {v}" for k, v in value.items()]) + "</pre>"
+                        elif isinstance(value, (list, tuple)):
+                            formatted_value = "<pre>" + "\n".join([str(item) for item in value]) + "</pre>"
+                        else:
+                            formatted_value = str(value)
+                        
+                        metadata_rows += f"<tr><td><b>{key}</b></td><td>{formatted_value}</td></tr>"
+                
+                PromptServer.instance.send_progress_text(
+                    f"<details>"
+                    f"<summary><b>Metadata</b></summary>"
+                    f"<table border='0' cellpadding='3'>"
+                    f"<tr><td colspan='2'><b>Metadata</b></td></tr>"
+                    f"{metadata_rows if metadata else '<tr><td>No metadata found</td></tr>'}"
+                    f"</table>"
+                    f"</details>", 
+                    unique_id
+                )
+            except Exception as e:
+                print(f"Error displaying metadata: {e}")
+                pass
+
         lora = {
-            "path": folder_paths.get_full_path("loras", lora),
+            "path": lora_path,
             "strength": strength,
             "name": lora.split(".")[0],
             "blocks": blocks.get("selected_blocks", {}),
@@ -311,6 +365,12 @@ class WanVideoLoraSelectMulti:
                 lora_3, strength_3, lora_4, strength_4, blocks={}, prev_lora=None, 
                 low_mem_load=False):
         loras_list = []
+
+        strength_0 = round(strength_0, 4)
+        strength_1 = round(strength_1, 4)
+        strength_2 = round(strength_2, 4)
+        strength_3 = round(strength_3, 4)
+        strength_4 = round(strength_4, 4)
         
         if prev_lora is not None:
             loras_list.extend(prev_lora)
@@ -498,7 +558,7 @@ class WanVideoModelLoader:
         if vace_model is not None:
             if gguf:
                 if not vace_model["path"].endswith(".gguf"):
-                    raise ValueError("With GGUF main model the VACE model must also be a GGUF model")
+                    raise ValueError("With GGUF main model the VACE module must also be a GGUF quantized, if the main model already has VACE included, you can disconnect the VACE module loader")
                 vace_sd = load_gguf_checkpoint(model_path)
             else:
                 vace_sd = load_torch_file(vace_model["path"], device=transformer_load_device, safe_load=True)
@@ -608,6 +668,7 @@ class WanVideoModelLoader:
             "num_heads": num_heads,
             "num_layers": num_layers,
             "attention_mode": attention_mode,
+            "rope_func": "comfy",
             "main_device": device,
             "offload_device": offload_device,
             "teacache_coefficients": teacache_coefficients_map[model_variant],
@@ -1008,6 +1069,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "WanVideoLoraSelect": "WanVideo Lora Select",
     "WanVideoLoraBlockEdit": "WanVideo Lora Block Edit",
     "WanVideoTinyVAELoader": "WanVideo Tiny VAE Loader",
-    "WanVideoVACEModelSelect": "WanVideo VACE Model Select",
+    "WanVideoVACEModelSelect": "WanVideo VACE Module Select",
     "WanVideoLoraSelectMulti": "WanVideo Lora Select Multi"
     }

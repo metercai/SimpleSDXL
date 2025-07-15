@@ -33,6 +33,10 @@ def get_module_memory_mb(module):
             memory += param.nelement() * param.element_size()
     return memory / (1024 * 1024)  # Convert to MB
 
+def get_tensor_memory(tensor):
+    memory_bytes = tensor.element_size() * tensor.nelement()
+    return f"{memory_bytes / (1024 * 1024):.2f} MB"
+
 def apply_lora(model, device_to, transformer_load_device, params_to_keep=None, dtype=None, base_dtype=None, state_dict=None, low_mem_load=False):
         to_load = []
         for n, m in model.model.named_modules():

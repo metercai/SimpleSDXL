@@ -19,7 +19,7 @@ from .wanvideo.utils.scheduling_flow_match_lcm import FlowMatchLCMScheduler
 
 from .multitalk.multitalk import timestep_transform, add_noise
 
-from .enhance_a_video.globals import enable_enhance, disable_enhance, set_enhance_weight, set_num_frames
+from .enhance_a_video.globals import set_enhance_weight, set_num_frames
 from .taehv import TAEHV
 
 from einops import rearrange
@@ -137,7 +137,6 @@ Official recommended values https://github.com/ali-vilab/TeaCache/tree/main/TeaC
 +-------------------+--------+---------+--------+
 </pre> 
 """
-    EXPERIMENTAL = True
 
     def process(self, rel_l1_thresh, start_step, end_step, cache_device, use_coefficients, mode="e"):
         if cache_device == "main_device":
@@ -184,6 +183,39 @@ class WanVideoMagCache:
             "cache_type": "MagCache",
             "magcache_thresh": magcache_thresh,
             "magcache_K": magcache_K,
+            "start_step": start_step,
+            "end_step": end_step,
+            "cache_device": cache_device,
+        }
+        return (cache_args,)
+    
+class WanVideoEasyCache:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "easycache_thresh": ("FLOAT", {"default": 0.015, "min": 0.0, "max": 1.0, "step": 0.001, "tooltip": "How strongly to cache the output of diffusion model. This value must be non-negative."}),
+                "start_step": ("INT", {"default": 10, "min": 1, "max": 9999, "step": 1, "tooltip": "Step to start applying EasyCache"}),
+                "end_step": ("INT", {"default": -1, "min": -1, "max": 9999, "step": 1, "tooltip": "Step to end applying EasyCache"}),
+                "cache_device": (["main_device", "offload_device"], {"default": "offload_device", "tooltip": "Device to cache to"}),
+            },
+        }
+    RETURN_TYPES = ("CACHEARGS",)
+    RETURN_NAMES = ("cache_args",)
+    FUNCTION = "setargs"
+    CATEGORY = "WanVideoWrapper"
+    EXPERIMENTAL = True
+    DESCRIPTION = "EasyCache for WanVideoWrapper, source https://github.com/H-EmbodVis/EasyCache"
+
+    def setargs(self, easycache_thresh, start_step, end_step, cache_device):
+        if cache_device == "main_device":
+            cache_device = mm.get_torch_device()
+        else:
+            cache_device = mm.unet_offload_device()
+
+        cache_args = {
+            "cache_type": "EasyCache",
+            "easycache_thresh": easycache_thresh,
             "start_step": start_step,
             "end_step": end_step,
             "cache_device": cache_device,
@@ -622,8 +654,8 @@ class WanVideoImageClipEncode:
             "clip_vision": ("CLIP_VISION",),
             "image": ("IMAGE", {"tooltip": "Image to encode"}),
             "vae": ("WANVAE",),
-            "generation_width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "generation_height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "generation_width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "generation_height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
             },
             "optional": {
@@ -745,8 +777,8 @@ class WanVideoImageResizeToClosest:
     def INPUT_TYPES(s):
         return {"required": {
             "image": ("IMAGE", {"tooltip": "Image to resize"}),
-            "generation_width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "generation_height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "generation_width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "generation_height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "aspect_ratio_preservation": (["keep_input", "stretch_to_new", "crop_to_new"],),
             },
         }
@@ -888,11 +920,11 @@ class WanVideoRealisDanceLatents:
     def INPUT_TYPES(s):
         return {"required": {
             "ref_latent": ("LATENT", {"tooltip": "Reference image to encode"}),
-            "smpl_latent": ("LATENT", {"tooltip": "SMPL pose image to encode"}),
             "pose_cond_start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Start percent of the SMPL model"}),
             "pose_cond_end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "End percent of the SMPL model"}),
             },
             "optional": {
+                "smpl_latent": ("LATENT", {"tooltip": "SMPL pose image to encode"}),
                 "hamer_latent": ("LATENT", {"tooltip": "Hamer hand pose image to encode"}),
             },
         }
@@ -902,13 +934,19 @@ class WanVideoRealisDanceLatents:
     FUNCTION = "process"
     CATEGORY = "WanVideoWrapper"
 
-    def process(self, ref_latent, smpl_latent, pose_cond_start_percent, pose_cond_end_percent, hamer_latent=None):
+    def process(self, ref_latent, pose_cond_start_percent, pose_cond_end_percent, hamer_latent=None, smpl_latent=None):
+        if smpl_latent is None and hamer_latent is None:
+            raise Exception("At least one of smpl_latent or hamer_latent must be provided")
+        if smpl_latent is None:
+            smpl = torch.zeros_like(hamer_latent["samples"])
+        else:
+            smpl = smpl_latent["samples"]
         if hamer_latent is None:
             hamer = torch.zeros_like(smpl_latent["samples"])
         else:
             hamer = hamer_latent["samples"]
 
-        pose_latent = torch.cat((smpl_latent["samples"], hamer), dim=1)
+        pose_latent = torch.cat((smpl, hamer), dim=1)
         
         add_cond_latents = {
             "ref_latent": ref_latent["samples"],
@@ -924,8 +962,8 @@ class WanVideoImageToVideoEncode:
     def INPUT_TYPES(s):
         return {"required": {
             "vae": ("WANVAE",),
-            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
             "noise_aug_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Strength of noise augmentation, helpful for I2V where some noise can add motion and give sharper results"}),
             "start_latent_strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Additional latent multiplier, helpful for I2V where lower values allow for more motion"}),
@@ -1083,8 +1121,8 @@ class WanVideoEmptyEmbeds:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
             },
             "optional": {
@@ -1114,8 +1152,8 @@ class WanVideoMiniMaxRemoverEmbeds:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
             "latents": ("LATENT", {"tooltip": "Encoded latents to use as control signals"}),
             "mask_latents": ("LATENT", {"tooltip": "Encoded latents to use as mask"}),
@@ -1276,8 +1314,8 @@ class WanVideoVACEEncode:
     def INPUT_TYPES(s):
         return {"required": {
             "vae": ("WANVAE",),
-            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
+            "width": ("INT", {"default": 832, "min": 64, "max": 8096, "step": 8, "tooltip": "Width of the image to encode"}),
+            "height": ("INT", {"default": 480, "min": 64, "max": 8096, "step": 8, "tooltip": "Height of the image to encode"}),
             "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
             "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
             "vace_start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Start percent of the steps to apply VACE"}),
@@ -1548,12 +1586,12 @@ class WanVideoVACEStartToEndFrame:
             # Create a mask of frames that are still empty (mask == 1)
             empty_frames = masks.sum(dim=(1, 2)) > 0.5 * H * W
             
-            # Only process frames that are empty and within control_images range
-            valid_frames = torch.arange(num_frames, device=device)
-            valid_indices = (empty_frames & (valid_frames < control_images.shape[0]))
-            
-            if valid_indices.any():
-                out_batch[valid_indices] = control_images[:num_frames][valid_indices]
+            if empty_frames.any():
+                # Only apply control images where they exist
+                control_length = control_images.shape[0]
+                for frame_idx in range(num_frames):
+                    if empty_frames[frame_idx] and frame_idx < control_length:
+                        out_batch[frame_idx] = control_images[frame_idx]
         
         # Apply inpaint mask if provided
         if inpaint_mask is not None:
@@ -1584,6 +1622,9 @@ class WanVideoContextOptions:
             "freenoise": ("BOOLEAN", {"default": True, "tooltip": "Shuffle the noise"}),
             "verbose": ("BOOLEAN", {"default": False, "tooltip": "Print debug output"}),
             },
+            "optional": {
+                "fuse_method": (["linear", "pyramid"], {"default": "linear", "tooltip": "Window weight function: linear=ramps at edges only, pyramid=triangular weights peaking in middle"}),
+            }
         }
 
     RETURN_TYPES = ("WANVIDCONTEXT", )
@@ -1592,7 +1633,7 @@ class WanVideoContextOptions:
     CATEGORY = "WanVideoWrapper"
     DESCRIPTION = "Context options for WanVideo, allows splitting the video into context windows and attemps blending them for longer generations than the model and memory otherwise would allow."
 
-    def process(self, context_schedule, context_frames, context_stride, context_overlap, freenoise, verbose, image_cond_start_step=6, image_cond_window_count=2, vae=None):
+    def process(self, context_schedule, context_frames, context_stride, context_overlap, freenoise, verbose, image_cond_start_step=6, image_cond_window_count=2, vae=None, fuse_method="linear"):
         context_options = {
             "context_schedule":context_schedule,
             "context_frames":context_frames,
@@ -1600,6 +1641,7 @@ class WanVideoContextOptions:
             "context_overlap":context_overlap,
             "freenoise":freenoise,
             "verbose":verbose,
+            "fuse_method":fuse_method
         }
 
         return (context_options,)
@@ -1777,7 +1819,7 @@ class WanVideoSampler:
                 "flowedit_args": ("FLOWEDITARGS", ),
                 "batched_cfg": ("BOOLEAN", {"default": False, "tooltip": "Batch cond and uncond for faster sampling, possibly faster on some hardware, uses more memory"}),
                 "slg_args": ("SLGARGS", ),
-                "rope_function": (["default", "comfy"], {"default": "comfy", "tooltip": "Comfy's RoPE implementation doesn't use complex numbers and can thus be compiled, that should be a lot faster when using torch.compile"}),
+                "rope_function": (["default", "comfy", "comfy_chunked"], {"default": "comfy", "tooltip": "Comfy's RoPE implementation doesn't use complex numbers and can thus be compiled, that should be a lot faster when using torch.compile. Chunked version has reduced peak VRAM usage when not using torch.compile"}),
                 "loop_args": ("LOOPARGS", ),
                 "experimental_args": ("EXPERIMENTALARGS", ),
                 "sigmas": ("SIGMAS", ),
@@ -2180,21 +2222,54 @@ class WanVideoSampler:
 
         is_looped = False
         if context_options is not None:
-            def create_window_mask(noise_pred_context, c, latent_video_length, context_overlap, looped=False):
+            def create_window_mask(noise_pred_context, c, latent_video_length, context_overlap, looped=False, window_type="linear"):
                 window_mask = torch.ones_like(noise_pred_context)
                 
-                # Apply left-side blending for all except first chunk (or always in loop mode)
-                if min(c) > 0 or (looped and max(c) == latent_video_length - 1):
-                    ramp_up = torch.linspace(0, 1, context_overlap, device=noise_pred_context.device)
-                    ramp_up = ramp_up.view(1, -1, 1, 1)
-                    window_mask[:, :context_overlap] = ramp_up
+                if window_type == "pyramid":
+                    # Create pyramid weights that peak in the middle
+                    length = noise_pred_context.shape[1]
+                    if length % 2 == 0:
+                        max_weight = length // 2
+                        weight_sequence = list(range(1, max_weight + 1, 1)) + list(range(max_weight, 0, -1))
+                    else:
+                        max_weight = (length + 1) // 2
+                        weight_sequence = list(range(1, max_weight, 1)) + [max_weight] + list(range(max_weight - 1, 0, -1))
                     
-                # Apply right-side blending for all except last chunk (or always in loop mode)
-                if max(c) < latent_video_length - 1 or (looped and min(c) == 0):
-                    ramp_down = torch.linspace(1, 0, context_overlap, device=noise_pred_context.device)
-                    ramp_down = ramp_down.view(1, -1, 1, 1)
-                    window_mask[:, -context_overlap:] = ramp_down
+                    # Normalize weights to range from 0 to 1
+                    max_val = max(weight_sequence)
+                    weight_sequence = [w / max_val for w in weight_sequence]
                     
+                    # Apply the weights to create the mask
+                    weights_tensor = torch.tensor(weight_sequence, device=noise_pred_context.device)
+                    weights_tensor = weights_tensor.view(1, -1, 1, 1)
+                    window_mask = weights_tensor.expand_as(window_mask).clone()
+                    
+                    # Adjust for position in sequence if needed
+                    if not looped:
+                        if min(c) == 0:  # First chunk
+                            left_ramp = torch.linspace(0, 1, context_overlap, device=noise_pred_context.device).view(1, -1, 1, 1)
+                            # Clone to avoid in-place memory conflict
+                            left_section = window_mask[:, :context_overlap].clone()
+                            window_mask[:, :context_overlap] = torch.maximum(left_section, left_ramp)
+                            
+                        if max(c) == latent_video_length - 1:  # Last chunk
+                            right_ramp = torch.linspace(1, 0, context_overlap, device=noise_pred_context.device).view(1, -1, 1, 1)
+                            # Clone to avoid in-place memory conflict
+                            right_section = window_mask[:, -context_overlap:].clone()
+                            window_mask[:, -context_overlap:] = torch.maximum(right_section, right_ramp)
+                else:  # Original "linear" window masking
+                    # Apply left-side blending for all except first chunk (or always in loop mode)
+                    if min(c) > 0 or (looped and max(c) == latent_video_length - 1):
+                        ramp_up = torch.linspace(0, 1, context_overlap, device=noise_pred_context.device)
+                        ramp_up = ramp_up.view(1, -1, 1, 1)
+                        window_mask[:, :context_overlap] = ramp_up
+                        
+                    # Apply right-side blending for all except last chunk (or always in loop mode)
+                    if max(c) < latent_video_length - 1 or (looped and min(c) == 0):
+                        ramp_down = torch.linspace(1, 0, context_overlap, device=noise_pred_context.device)
+                        ramp_down = ramp_down.view(1, -1, 1, 1)
+                        window_mask[:, -context_overlap:] = ramp_down
+                        
                 return window_mask
             
             context_schedule = context_options["context_schedule"]
@@ -2260,7 +2335,7 @@ class WanVideoSampler:
         freqs = None
         transformer.rope_embedder.k = None
         transformer.rope_embedder.num_frames = None
-        if rope_function=="comfy":
+        if "comfy" in rope_function:
             transformer.rope_embedder.k = riflex_freq_index
             transformer.rope_embedder.num_frames = latent_video_length
         else:
@@ -2271,6 +2346,12 @@ class WanVideoSampler:
                 rope_params(1024, 2 * (d // 6))
             ],
             dim=1)
+        transformer.rope_func = rope_function
+        for block in transformer.blocks:
+            block.rope_func = rope_function
+        if transformer.vace_layers is not None:
+            for block in transformer.vace_blocks:
+                block.rope_func = rope_function
 
         if not isinstance(cfg, list):
             cfg = [cfg] * (steps +1)
@@ -2351,10 +2432,10 @@ class WanVideoSampler:
                 set_num_frames(context_frames)
             else:
                 set_num_frames(latent_video_length)
-            enable_enhance()
+            enhance_enabled = True
         else:
             feta_args = None
-            disable_enhance()
+            enhance_enabled = False
 
         # Initialize Cache if enabled
         transformer.enable_teacache = transformer.enable_magcache = False
@@ -2379,6 +2460,13 @@ class WanVideoSampler:
                 transformer.magcache_end_step = len(timesteps)-1 if cache_args["end_step"] == -1 else cache_args["end_step"]
                 transformer.magcache_thresh = cache_args["magcache_thresh"]
                 transformer.magcache_K = cache_args["magcache_K"]
+            elif cache_args["cache_type"] == "EasyCache":
+                log.info(f"EasyCache: Using cache device: {transformer.cache_device}")
+                transformer.easycache_state.clear_all()
+                transformer.enable_easycache = True
+                transformer.easycache_start_step = cache_args["start_step"]
+                transformer.easycache_end_step = len(timesteps)-1 if cache_args["end_step"] == -1 else cache_args["end_step"]
+                transformer.easycache_thresh = cache_args["easycache_thresh"]
 
         if slg_args is not None:
             assert batched_cfg is not None, "Batched cfg is not supported with SLG"
@@ -2591,6 +2679,7 @@ class WanVideoSampler:
                     't': timestep,
                     'current_step': idx,
                     'control_lora_enabled': control_lora_enabled,
+                    'enhance_enabled': enhance_enabled,
                     'camera_embed': camera_embed,
                     'unianim_data': unianim_data,
                     'fun_ref': fun_ref_input if fun_ref_image is not None else None,
@@ -2604,7 +2693,7 @@ class WanVideoSampler:
                     "nag_params": text_embeds.get("nag_params", {}),
                     "nag_context": text_embeds.get("nag_prompt_embeds", None),
                     "multitalk_audio": multitalk_audio_input if multitalk_audio_embedding is not None else None,
-                    "ref_target_masks": ref_target_masks if multitalk_audio_embedding is not None else None
+                    "ref_target_masks": ref_target_masks if multitalk_audio_embedding is not None else None,
                 }
 
                 batch_size = 1
@@ -2762,6 +2851,7 @@ class WanVideoSampler:
         gc.collect()
         try:
             torch.cuda.reset_peak_memory_stats(device)
+            #torch.cuda.memory._record_memory_history(max_entries=100000)
         except:
             pass
 
@@ -2838,10 +2928,9 @@ class WanVideoSampler:
                         latent_model_input = torch.cat([latent_model_input[:, shift_idx:]] + [latent_model_input[:, :shift_idx]], dim=1)
 
                 #enhance-a-video
+                enhance_enabled = False
                 if feta_args is not None and feta_start_percent <= current_step_percentage <= feta_end_percent:
-                    enable_enhance()
-                else:
-                    disable_enhance()
+                    enhance_enabled = True                    
 
                 #flow-edit
                 if flowedit_args is not None:
@@ -2965,7 +3054,7 @@ class WanVideoSampler:
                     v_delta = v_delta.to(torch.float32)
                     x_tgt = x_tgt + (sigma_prev - sigma) * v_delta
                     x0 = x_tgt
-                #context windowing
+                #region context windowing
                 elif context_options is not None:
                     counter = torch.zeros_like(latent_model_input, device=intermediate_device)
                     noise_pred = torch.zeros_like(latent_model_input, device=intermediate_device)
@@ -3055,7 +3144,7 @@ class WanVideoSampler:
                         if cache_args is not None:
                             self.window_tracker.cache_states[window_id] = new_teacache
 
-                        window_mask = create_window_mask(noise_pred_context, c, latent_video_length, context_overlap, looped=is_looped)                    
+                        window_mask = create_window_mask(noise_pred_context, c, latent_video_length, context_overlap, looped=is_looped, window_type=context_options["fuse_method"])                    
                         noise_pred[:, c] += noise_pred_context * window_mask
                         counter[:, c] += window_mask
                         context_pbar.update_absolute(step_start_progress + (i + 1) * fraction_per_context, steps)
@@ -3108,7 +3197,7 @@ class WanVideoSampler:
 
                         noise = torch.randn(
                             16, (frame_num - 1) // 4 + 1,
-                            lat_h, lat_w, dtype=torch.float32, device=device) 
+                            lat_h, lat_w, dtype=torch.float32, device=torch.device("cpu"), generator=seed_g).to(device)
 
                         # get mask
                         msk = torch.ones(1, frame_num, lat_h, lat_w, device=device)
@@ -3158,7 +3247,7 @@ class WanVideoSampler:
                         # injecting motion frames
                         if not is_first_clip:
                             latent_motion_frames = latent_motion_frames.to(latent.dtype).to(device)
-                            motion_add_noise = torch.randn_like(latent_motion_frames).contiguous()
+                            motion_add_noise = torch.randn(latent_motion_frames.shape, device=torch.device("cpu"), generator=seed_g).to(device).contiguous()
                             add_latent = add_noise(latent_motion_frames, motion_add_noise, timesteps[0])
                             _, T_m, _, _ = add_latent.shape
                             latent[:, :T_m] = add_latent
@@ -3237,7 +3326,7 @@ class WanVideoSampler:
                             # injecting motion frames
                             if not is_first_clip:
                                 latent_motion_frames = latent_motion_frames.to(latent.dtype).to(device)
-                                motion_add_noise = torch.randn_like(latent_motion_frames).contiguous()
+                                motion_add_noise = torch.randn(latent_motion_frames.shape, device=torch.device("cpu"), generator=seed_g).to(device).contiguous()
                                 add_latent = add_noise(latent_motion_frames, motion_add_noise, timesteps[i+1])
                                 _, T_m, _, _ = add_latent.shape
                                 latent[:, :T_m] = add_latent
@@ -3294,7 +3383,7 @@ class WanVideoSampler:
                                 arrive_last_frame = True
                                 miss_lengths = []
                                 source_frames = []
-                                for human_inx in range(1):
+                                for human_inx in range(human_num):
                                     source_frame = len(audio_embedding[human_inx])
                                     source_frames.append(source_frame)
                                     if audio_end_idx >= len(audio_embedding[human_inx]):
@@ -3353,8 +3442,6 @@ class WanVideoSampler:
                     latent = temp_x0.squeeze(0)
 
                     x0 = latent.to(device)
-
-                    generator_state = seed_g.get_state()
                     
                     if freeinit_args is not None:
                         current_latent = x0.clone()
@@ -3382,7 +3469,12 @@ class WanVideoSampler:
                 
         if cache_args is not None:
             cache_type = cache_args["cache_type"]
-            states = transformer.teacache_state.states if cache_type == "TeaCache" else transformer.magcache_state.states
+            states = (
+                transformer.teacache_state.states if cache_type == "TeaCache" else
+                transformer.magcache_state.states if cache_type == "MagCache" else
+                transformer.easycache_state.states if cache_type == "EasyCache" else
+                None
+            )
             state_names = {
                 0: "conditional",
                 1: "unconditional"
@@ -3393,6 +3485,7 @@ class WanVideoSampler:
                     log.info(f"{cache_type} skipped: {len(state['skipped_steps'])} {name} steps: {state['skipped_steps']}")
             transformer.teacache_state.clear_all()
             transformer.magcache_state.clear_all()
+            transformer.easycache_state.clear_all()
             del states
 
         if force_offload:
@@ -3403,6 +3496,8 @@ class WanVideoSampler:
 
         try:
             print_memory(device)
+            #torch.cuda.memory._dump_snapshot("wanvideowrapper_memory_dump.pt")
+            #torch.cuda.memory._record_memory_history(enabled=None)
             torch.cuda.reset_peak_memory_stats(device)
         except:
             pass
@@ -3413,7 +3508,7 @@ class WanVideoSampler:
             "end_image": end_image if not fun_or_fl2v_model else None, 
             "has_ref": has_ref, 
             "drop_last": drop_last,
-            "generator_state": generator_state,
+            "generator_state": seed_g.get_state(),
         }, )
     
 class WindowTracker:
@@ -3640,6 +3735,7 @@ NODE_CLASS_MAPPINGS = {
     "WanVideoContextOptions": WanVideoContextOptions,
     "WanVideoTeaCache": WanVideoTeaCache,
     "WanVideoMagCache": WanVideoMagCache,
+    "WanVideoEasyCache": WanVideoEasyCache,
     "WanVideoVRAMManagement": WanVideoVRAMManagement,
     "WanVideoTextEmbedBridge": WanVideoTextEmbedBridge,
     "WanVideoFlowEdit": WanVideoFlowEdit,
@@ -3678,6 +3774,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "WanVideoContextOptions": "WanVideo Context Options",
     "WanVideoTeaCache": "WanVideo TeaCache",
     "WanVideoMagCache": "WanVideo MagCache",
+    "WanVideoEasyCache": "WanVideo EasyCache",
     "WanVideoVRAMManagement": "WanVideo VRAM Management",
     "WanVideoTextEmbedBridge": "WanVideo TextEmbed Bridge",
     "WanVideoFlowEdit": "WanVideo FlowEdit",
