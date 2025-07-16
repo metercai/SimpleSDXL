@@ -1006,8 +1006,6 @@ with shared.gradio_root:
                         freeu_s1 = gr.Slider(label='S1', minimum=0, maximum=4, step=0.01, value=0.99)
                         freeu_s2 = gr.Slider(label='S2', minimum=0, maximum=4, step=0.01, value=0.95)
                         freeu_ctrls = [freeu_enabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2]
-
-                history_link = gr.HTML()
                 
                 with gr.Tabs():
                     with gr.Tab(label='Describe Image', id='describe_tab', visible=True) as image_describe:
@@ -1449,7 +1447,8 @@ with shared.gradio_root:
             #with gr.Row():
             #    manual_link = gr.HTML(value='<a href="https://github.com/metercai/UseCaseGuidance/blob/main/UseCaseGuidanceForSimpleSDXL.md">SimpleSDXL创意生图场景应用指南</a>')
         state_is_generating = gr.State(False)
-
+    with gr.Row():
+        history_link = gr.HTML()
         load_data_outputs = [progress_window, progress_gallery, progress_video, gallery, gallery_index, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
                              overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
