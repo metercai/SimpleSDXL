@@ -1,6 +1,7 @@
 { 
     "default_engine": {
             "backend_engine": "Comfy",
+	    "engine_type": "video",
             "disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
             "disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
             "available_aspect_ratios_selection": "Flux",

@@ -201,7 +201,7 @@ function refresh_aspect_ratios_label(value) {
 }
 
 
-function refresh_finished_images_catalog_label(value) {
+function refresh_finished_images_catalog_label(value, type) {
     var label = document.querySelector('#finished_images_catalog div span');
     var translation = getTranslation("Finished Images Catalog");
     if (typeof translation == "undefined") {
@@ -210,6 +210,16 @@ function refresh_finished_images_catalog_label(value) {
     var translation_stat = getTranslation("total: xxx images and yyy pages");
     if (typeof translation_stat == "undefined") {
         translation_stat = "total: xxx images and yyy pages";
+    }
+    if (type == "video") {
+        translation = getTranslation("Finished Videoes");
+	translation_stat = getTranslation("total: xxx videoes");
+	if (typeof translation == "undefined") {
+            translation = "'s Finished Videoes";
+    	} else { translation = "的" + translation; }
+	if (typeof translation_stat == "undefined") {
+	    translation_stat = "total: xxx videoes";
+	}
     }
     var xxx = value.split(",")[0];
     var yyy = value.split(",")[1];

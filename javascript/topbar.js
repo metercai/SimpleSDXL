@@ -338,9 +338,10 @@ function refresh_topbar_status_js(system_params) {
     if (preset_url!=null) {
         set_iframe_src(theme,lang,preset_url);
     }
-    const image_num_pages = system_params["__finished_nums_pages"]; 
+    const image_num_pages = system_params["__finished_nums_pages"];
+    const gen_type = system_params["engine_type"];
     if (image_num_pages) {
-	refresh_finished_images_catalog_label(image_num_pages);
+	refresh_finished_images_catalog_label(image_num_pages, gen_type);
     }
     refresh_identity_center_label(system_params["user_role"], system_params["upstream"]);
     (async () => {

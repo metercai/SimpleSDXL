@@ -133,6 +133,9 @@ def toggle_note_box_preset(*args):
 filename_regex = re.compile(r'\<div id=\"(.*?)_png\"')
 
 def delete_image(state_params):
+    if 'engine_type' in state_params and state_params['engine_type'] == 'video':
+        return [gr.update()] * 4 + [state_params['__finished_nums_pages']]
+
     [choice, selected] = state_params["prompt_info"]
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]

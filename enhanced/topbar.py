@@ -283,6 +283,7 @@ def init_nav_bars(state_params, comfyd_active_checkbox, fast_comfyd_checkbox, re
     state_params.update({"bar_button": config.preset})
     state_params.update({"preset_store": False})
     state_params.update({"engine": 'Fooocus'})
+    state_params.update({"engine_type": 'image'})
     results = [gr.update(value=f'{get_welcome_image(config.preset, state_params["__is_mobile"])}')]
     results += [gr.update(value=modules.flags.language_radio(state_params["__lang"])), gr.update(value=state_params["__theme"])]
     preset = 'default'
@@ -459,13 +460,14 @@ def process_after_generation(state_params):
     max_per_page = state_params["__max_per_page"]
     max_catalog = state_params["__max_catalog"]
     user_did = state_params["user"].get_did()
-    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
+    engine_type = state_params["engine_type"]
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did, engine_type)
     state_params.update({"__output_list": output_list})
     state_params.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
-    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
+    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0 and state_params["engine_type"]!='video', open=False)]
     # random_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 5)
@@ -523,7 +525,9 @@ def reset_layout_params(prompt, negative_prompt, state_params, is_generating, in
     preset_prepared = meta_parser.parse_meta_from_preset(config_preset)
     
     engine = preset_prepared.get('engine', {}).get('backend_engine', 'Fooocus')
+    engine_type = preset_prepared.get('engine', {}).get('engine_type', 'image')
     state_params.update({"engine": engine})
+    state_params.update({"engine_type": engine_type})
     scene_frontend = preset_prepared.get('engine', {}).get('scene_frontend', None)
     if scene_frontend:
         state_params.update({"scene_frontend": scene_frontend})
@@ -691,7 +695,8 @@ def update_topbar_js_params(state):
         __lang=state["__lang"],
         __preset_url=state["__preset_url"],
         __finished_nums_pages=state["__finished_nums_pages"],
-        user_qr="" if 'user_qr' not in state else state.pop("user_qr")
+        user_qr="" if 'user_qr' not in state else state.pop("user_qr"),
+        engine_type=state['engine_type']
         )
     return [system_params]
 
@@ -760,8 +765,9 @@ def update_after_identity_sub(state):
     max_catalog = state["__max_catalog"]
     nickname = state["user"].get_nickname()
     user_did = state["user"].get_did()
+    engine_type = state["engine_type"]
     logger.info(f'Session identity/当前身份: {nickname}({user_did}{", admin" if shared.token.is_admin(user_did) else ""}), session({state["__session"]})')
-    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did)
+    output_list, finished_nums, finished_pages = gallery_util.refresh_output_list(max_per_page, max_catalog, user_did, engine_type)
     state.update({"__output_list": output_list})
     state.update({"__finished_nums_pages": f'{finished_nums},{finished_pages}'})
 

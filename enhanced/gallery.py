@@ -21,12 +21,14 @@ images_prompt = {}
 images_prompt_keys = {} #[]
 images_ads = {}
 
+videos_list = {}
 
-image_types = ['.png', '.jpg', '.jpeg', '.webp'] #, '.webm', '.mp4']
+image_types = ['.png', '.jpg', '.jpeg', '.webp'] 
+video_types = ['.webm', '.mp4']
 output_images_regex = re.compile(r'\d{4}-\d{2}-\d{2}')
 
-def refresh_output_list(max_per_page, max_catalog, user_did=None):
-    global image_types, images_list, images_list_keys, images_prompt, images_prompt_keys, images_ads
+def refresh_output_list(max_per_page, max_catalog, user_did=None, engine_type='image'):
+    global image_types, images_list, images_list_keys, images_prompt, images_prompt_keys, images_ads, videos_list
 
     user_path_outputs = config.get_user_path_outputs(user_did)
     if not os.path.exists(user_path_outputs):
@@ -37,6 +39,7 @@ def refresh_output_list(max_per_page, max_catalog, user_did=None):
         return None
     listdirs1 = listdirs.copy()
     total_nums = 0
+    video_files = {}
     for index in listdirs:
         path_gallery = os.path.join(user_path_outputs, index)
         nums = len(util.get_files_from_folder(path_gallery, image_types, None))
@@ -46,11 +49,18 @@ def refresh_output_list(max_per_page, max_catalog, user_did=None):
             for i in range(1,max_page_no+1):
                 listdirs1.append("{}/{}".format(index, str(i).zfill(len(str(max_page_no)))))
             listdirs1.remove(index)
+        video_files.update({"{}{}_{}".format(index[-5:-3],index[-2:],v.split('.')[0][-4:]): os.path.join(index, v) for v in util.get_files_from_folder(path_gallery, video_types, None)})
+    videos_list[user_did] = video_files
+    if engine_type == 'video':
+        output_list = sorted(video_files.keys(), reverse=True)
+        return output_list, len(output_list), len(output_list)
+
     output_list = sorted([f[2:] for f in listdirs1], reverse=True)
     pages = len(output_list)
     display_max_pages = max_catalog
     logger.info(f'Refresh_output_catalog: A total of {total_nums} images and {pages} pages, displaying the latest {pages if pages<display_max_pages else display_max_pages} pages.')
     output_list = output_list[:display_max_pages]
+
     if user_did not in images_list:
         images_list[user_did]={}
     if user_did not in images_list_keys:
@@ -65,16 +75,31 @@ def refresh_output_list(max_per_page, max_catalog, user_did=None):
     return output_list, total_nums, pages
 
 
-def images_list_update(choice, state_params):
+def images_list_update(choice, image_tools_checkbox, state_params):
+
     if "__output_list" not in state_params.keys():
         return  gr.update(), gr.update(), state_params
+    state_params.update({"infobox_state": 0})
+    state_params.update({"note_box_state": ['',0,0]})
+    state_params['identity_dialog'] = False
+    index_type = state_params['engine_type']
     output_list = state_params["__output_list"]
     if choice is None and len(output_list) > 0:
         choice = output_list[0]
     user_did = state_params["user"].get_did()
-    images_gallery = get_images_from_gallery_index(choice, state_params["__max_per_page"], user_did)
+    if index_type == 'image':
+        gallery_result = [gr.update(visible=True, value=get_images_from_gallery_index(choice, state_params["__max_per_page"], user_did)), gr.update(visible=False)]
+        logger.info(f'Selected_gallery_catalog: change image catalog:{choice}.')
+    elif index_type == 'video':
+        video_path = videos_list[user_did][choice]
+        video_path = os.path.join(config.get_user_path_outputs(user_did), video_path)
+        gallery_result = [gr.update(visible=False), gr.update(visible=True, value=video_path)]
+        logger.info(f'Selected_gallery_video: load video {video_path}.')
+    else:
+        gallery_result = [gr.update(), gr.update()]
     state_params.update({"prompt_info": [choice, 0]})
-    return gr.update(value=images_gallery), gr.update(visible=False), gr.update(open=False, visible=len(output_list)>0)
+
+    return gallery_result + [gr.update(open=False, visible=len(output_list)>0), gr.update(visible=image_tools_checkbox and index_type=='image')] + [gr.update(visible=False)] * 9
 
 
 def select_index(choice, image_tools_checkbox, state_params, evt: gr.SelectData):
@@ -84,7 +109,8 @@ def select_index(choice, image_tools_checkbox, state_params, evt: gr.SelectData)
     logger.info(f'Selected_gallery_catalog: change image catalog:{choice}.')
     state_params.update({"gallery_state": 'finished_index'})
     state_params['identity_dialog'] = False
-    return [gr.update(visible=True)] + [gr.update(visible=image_tools_checkbox)] + [gr.update(visible=False)] * 9
+    index_type = state_params['engine_type']
+    return [gr.update(visible=index_type=='image'), gr.update(visible=index_type=='video')] + [gr.update(visible=image_tools_checkbox and index_type=='image')] + [gr.update(visible=False)] * 9
 
 
 def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
@@ -96,9 +122,10 @@ def select_gallery(choice, state_params, backfill_prompt, evt: gr.SelectData):
         choice = state_params["__output_list"][0]
     result = get_images_prompt(choice, evt.index, state_params["__max_per_page"], True, state_params["user"].get_did())
     if backfill_prompt and 'Prompt' in result:
-        return [gr.update(value=toolbox.make_infobox_markdown(result, state_params['__theme'])), gr.update(value=result["Prompt"]), gr.update(value=result["Negative Prompt"])] + [gr.update(visible=False)] * 4 + [state_params]
+        gr_prompt_results =  [gr.update(value=result["Prompt"]), gr.update(value=result["Negative Prompt"])]
     else:
-        return [gr.update(value=toolbox.make_infobox_markdown(result, state_params['__theme'])), gr.update(), gr.update()] + [gr.update(visible=False)] * 4 + [state_params]
+        gr_prompt_results = [gr.update(), gr.update()]
+    return [gr.update(value=toolbox.make_infobox_markdown(result, state_params['__theme']))] + gr_prompt_results + [gr.update(visible=False)] * 4 + [state_params]
 
 def select_gallery_progress(state_params, evt: gr.SelectData):
     #if "__output_list" not in state_params.keys():
