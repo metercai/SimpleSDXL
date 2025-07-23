@@ -53,7 +53,9 @@ def refresh_output_list(max_per_page, max_catalog, user_did=None, engine_type='i
     videos_list[user_did] = video_files
     if engine_type == 'video':
         output_list = sorted(video_files.keys(), reverse=True)
-        return output_list, len(output_list), len(output_list)
+        total_nums = len(output_list)
+        output_list = output_list[:max_catalog]
+        return output_list, total_nums, len(output_list)
 
     output_list = sorted([f[2:] for f in listdirs1], reverse=True)
     pages = len(output_list)
