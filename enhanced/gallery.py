@@ -49,7 +49,7 @@ def refresh_output_list(max_per_page, max_catalog, user_did=None, engine_type='i
             for i in range(1,max_page_no+1):
                 listdirs1.append("{}/{}".format(index, str(i).zfill(len(str(max_page_no)))))
             listdirs1.remove(index)
-        video_files.update({"{}{}_{}".format(index[-5:-3],index[-2:],v.split('.')[0][-4:]): os.path.join(index, v) for v in util.get_files_from_folder(path_gallery, video_types, None)})
+        video_files.update({"{}{}{}".format(index[-5:-3],index[-2:],''.join(v.split('_')[1].split('-'))): os.path.join(index, v) for v in util.get_files_from_folder(path_gallery, video_types, None)})
     videos_list[user_did] = video_files
     if engine_type == 'video':
         output_list = sorted(video_files.keys(), reverse=True)

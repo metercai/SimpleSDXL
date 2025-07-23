@@ -467,7 +467,7 @@ def process_after_generation(state_params):
     # generate_button, stop_button, skip_button, state_is_generating
     results = [gr.update(visible=True, interactive=True)] + [gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False]
     # gallery_index, index_radio
-    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0 and state_params["engine_type"]!='video', open=False)]
+    results += [gr.update(choices=state_params["__output_list"], value=None), gr.update(visible=len(state_params["__output_list"])>0, open=False)]
     # random_button, super_prompter, background_theme, image_tools_checkbox, bar_store_button, bar0_button, bar1_button, bar2_button, bar3_button, bar4_button, bar5_button, bar6_button, bar7_button, bar8_button
     preset_nums = len(get_preset_name_list(state_params["__session"], state_params["ua_hash"]).split(','))
     results += [gr.update(interactive=True)] * (preset_nums + 5)
@@ -477,7 +477,7 @@ def process_after_generation(state_params):
     results += [update_history_link(user_did, state_params["local_access"])]
     
 
-    if len(state_params["__output_list"]) > 0:
+    if len(state_params["__output_list"]) > 0 and engine_type == 'image':
         output_index = state_params["__output_list"][0].split('/')[0]
         gallery_util.refresh_images_catalog(output_index, True, user_did)
         gallery_util.parse_html_log(output_index, True, user_did)
