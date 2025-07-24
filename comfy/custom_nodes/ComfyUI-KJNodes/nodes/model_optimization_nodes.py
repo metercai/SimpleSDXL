@@ -8,6 +8,7 @@ import folder_paths
 import comfy.model_management as mm
 from comfy.cli_args import args
 
+sageattn_modes = ["disabled", "auto", "sageattn_qk_int8_pv_fp16_cuda", "sageattn_qk_int8_pv_fp16_triton", "sageattn_qk_int8_pv_fp8_cuda", "sageattn_qk_int8_pv_fp8_cuda++"]
 
 _initialized = False
 _original_functions = {}
@@ -22,10 +23,9 @@ class BaseLoaderKJ:
     original_linear = None
     cublas_patched = False
 
+    @torch.compiler.disable()
     def _patch_modules(self, patch_cublaslinear, sage_attention):
         from comfy.ops import disable_weight_init, CastWeightBiasOp, cast_bias_weight
-        if mm.get_current_compute_capability().lower() not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
-            sage_attention = "disabled"
 
         if sage_attention != "disabled":
             print("Patching comfy attention to use sageattn")
@@ -49,6 +49,11 @@ class BaseLoaderKJ:
                     from sageattention import sageattn_qk_int8_pv_fp8_cuda
                     def func(q, k, v, is_causal=False, attn_mask=None, tensor_layout="NHD"):
                         return sageattn_qk_int8_pv_fp8_cuda(q, k, v, is_causal=is_causal, attn_mask=attn_mask, pv_accum_dtype="fp32+fp32", tensor_layout=tensor_layout)
+                    return func
+                elif sage_attention == "sageattn_qk_int8_pv_fp8_cuda++":
+                    from sageattention import sageattn_qk_int8_pv_fp8_cuda
+                    def func(q, k, v, is_causal=False, attn_mask=None, tensor_layout="NHD"):
+                        return sageattn_qk_int8_pv_fp8_cuda(q, k, v, is_causal=is_causal, attn_mask=attn_mask, pv_accum_dtype="fp32+fp16", tensor_layout=tensor_layout)
                     return func
 
             sage_func = set_sage_func(sage_attention)
@@ -137,7 +142,7 @@ class PathchSageAttentionKJ(BaseLoaderKJ):
     def INPUT_TYPES(s):
         return {"required": {
             "model": ("MODEL",),
-            "sage_attention": (["disabled", "auto", "sageattn_qk_int8_pv_fp16_cuda", "sageattn_qk_int8_pv_fp16_triton", "sageattn_qk_int8_pv_fp8_cuda"], {"default": False, "tooltip": "Global patch comfy attention to use sageattn, once patched to revert back to normal you would need to run this node again with disabled option."}),
+            "sage_attention": (sageattn_modes, {"default": False, "tooltip": "Global patch comfy attention to use sageattn, once patched to revert back to normal you would need to run this node again with disabled option."}),
         }}
 
     RETURN_TYPES = ("MODEL", )
@@ -148,8 +153,10 @@ class PathchSageAttentionKJ(BaseLoaderKJ):
 
     def patch(self, model, sage_attention):
         model_clone = model.clone()
+        @torch.compiler.disable()
         def patch_attention_enable(model):
             self._patch_modules(False, sage_attention)
+        @torch.compiler.disable()
         def patch_attention_disable(model):
             self._patch_modules(False, "disabled")
         
@@ -166,13 +173,12 @@ class CheckpointLoaderKJ(BaseLoaderKJ):
             "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2", "fp16", "bf16", "fp32"],),
             "compute_dtype": (["default", "fp16", "bf16", "fp32"], {"default": "default", "tooltip": "The compute dtype to use for the model."}),
             "patch_cublaslinear": ("BOOLEAN", {"default": False, "tooltip": "Enable or disable the patching, won't take effect on already loaded models!"}),
-            "sage_attention": (["disabled", "auto", "sageattn_qk_int8_pv_fp16_cuda", "sageattn_qk_int8_pv_fp16_triton", "sageattn_qk_int8_pv_fp8_cuda"], {"default": False, "tooltip": "Patch comfy attention to use sageattn."}),
+            "sage_attention": (sageattn_modes, {"default": False, "tooltip": "Patch comfy attention to use sageattn."}),
             "enable_fp16_accumulation": ("BOOLEAN", {"default": False, "tooltip": "Enable torch.backends.cuda.matmul.allow_fp16_accumulation, requires pytorch 2.7.0 nightly."}),
         }}
 
     RETURN_TYPES = ("MODEL", "CLIP", "VAE")
     FUNCTION = "patch"
-    OUTPUT_NODE = True
     DESCRIPTION = "Experimental node for patching torch.nn.Linear with CublasLinear."
     EXPERIMENTAL = True
     CATEGORY = "KJNodes/experimental"
@@ -308,13 +314,12 @@ class DiffusionModelLoaderKJ(BaseLoaderKJ):
             "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2", "fp16", "bf16", "fp32"],),
             "compute_dtype": (["default", "fp16", "bf16", "fp32"], {"default": "default", "tooltip": "The compute dtype to use for the model."}),
             "patch_cublaslinear": ("BOOLEAN", {"default": False, "tooltip": "Enable or disable the patching, won't take effect on already loaded models!"}),
-            "sage_attention": (["disabled", "auto", "sageattn_qk_int8_pv_fp16_cuda", "sageattn_qk_int8_pv_fp16_triton", "sageattn_qk_int8_pv_fp8_cuda"], {"default": False, "tooltip": "Patch comfy attention to use sageattn."}),
+            "sage_attention": (sageattn_modes, {"default": False, "tooltip": "Patch comfy attention to use sageattn."}),
             "enable_fp16_accumulation": ("BOOLEAN", {"default": False, "tooltip": "Enable torch.backends.cuda.matmul.allow_fp16_accumulation, requires pytorch 2.7.0 nightly."}),
         }}
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch_and_load"
-    OUTPUT_NODE = True
     DESCRIPTION = "Node for patching torch.nn.Linear with CublasLinear."
     EXPERIMENTAL = True
     CATEGORY = "KJNodes/experimental"
@@ -368,7 +373,6 @@ class ModelPatchTorchSettings:
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch"
-    OUTPUT_NODE = True
     DESCRIPTION = "Adds callbacks to model to set torch settings before and after running the model."
     EXPERIMENTAL = True
     CATEGORY = "KJNodes/experimental"
@@ -527,6 +531,7 @@ class TorchCompileModelFluxAdvanced:
 
     CATEGORY = "KJNodes/torchcompile"
     EXPERIMENTAL = True
+    DEPRECATED = True
 
     def parse_blocks(self, blocks_str):
         blocks = []
@@ -576,6 +581,61 @@ class TorchCompileModelFluxAdvanced:
         # diffusion_model.txt_in = torch.compile(diffusion_model.txt_in, mode=mode, fullgraph=fullgraph, backend=backend)
         # diffusion_model.vector_in = torch.compile(diffusion_model.vector_in, mode=mode, fullgraph=fullgraph, backend=backend)
 
+class TorchCompileModelFluxAdvancedV2:
+    def __init__(self):
+        self._compiled = False
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { 
+                    "model": ("MODEL",),
+                    "backend": (["inductor", "cudagraphs"],),
+                    "fullgraph": ("BOOLEAN", {"default": False, "tooltip": "Enable full graph mode"}),
+                    "mode": (["default", "max-autotune", "max-autotune-no-cudagraphs", "reduce-overhead"], {"default": "default"}),
+                    "double_blocks": ("BOOLEAN", {"default": True, "tooltip": "Compile double blocks"}),
+                    "single_blocks": ("BOOLEAN", {"default": True, "tooltip": "Compile single blocks"}),
+                    "dynamic": ("BOOLEAN", {"default": False, "tooltip": "Enable dynamic mode"}),
+                },
+                "optional": {
+                    "dynamo_cache_size_limit": ("INT", {"default": 64, "min": 0, "max": 1024, "step": 1, "tooltip": "torch._dynamo.config.cache_size_limit"}),
+                }
+                }
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "patch"
+
+    CATEGORY = "KJNodes/torchcompile"
+    EXPERIMENTAL = True
+
+    def patch(self, model, backend, mode, fullgraph, single_blocks, double_blocks, dynamic, dynamo_cache_size_limit):
+        from comfy_api.torch_helpers import set_torch_compile_wrapper
+        m = model.clone()
+        diffusion_model = m.get_model_object("diffusion_model")
+        torch._dynamo.config.cache_size_limit = dynamo_cache_size_limit
+
+        compile_key_list = []
+        
+        try:
+            if double_blocks:
+                for i, block in enumerate(diffusion_model.double_blocks):
+                    compile_key_list.append(f"diffusion_model.double_blocks.{i}")
+            if single_blocks:
+                for i, block in enumerate(diffusion_model.single_blocks):
+                    compile_key_list.append(f"diffusion_model.single_blocks.{i}")
+
+            set_torch_compile_wrapper(model=m, keys=compile_key_list, backend=backend, mode=mode, dynamic=dynamic, fullgraph=fullgraph)           
+        except:
+            raise RuntimeError("Failed to compile model")
+        
+        return (m, )
+        # rest of the layers that are not patched
+        # diffusion_model.final_layer = torch.compile(diffusion_model.final_layer, mode=mode, fullgraph=fullgraph, backend=backend)
+        # diffusion_model.guidance_in = torch.compile(diffusion_model.guidance_in, mode=mode, fullgraph=fullgraph, backend=backend)
+        # diffusion_model.img_in = torch.compile(diffusion_model.img_in, mode=mode, fullgraph=fullgraph, backend=backend)
+        # diffusion_model.time_in = torch.compile(diffusion_model.time_in, mode=mode, fullgraph=fullgraph, backend=backend)
+        # diffusion_model.txt_in = torch.compile(diffusion_model.txt_in, mode=mode, fullgraph=fullgraph, backend=backend)
+        # diffusion_model.vector_in = torch.compile(diffusion_model.vector_in, mode=mode, fullgraph=fullgraph, backend=backend)
+
+    
 class TorchCompileModelHyVideo:
     def __init__(self):
         self._compiled = False
@@ -661,6 +721,7 @@ class TorchCompileModelWanVideo:
 
     CATEGORY = "KJNodes/torchcompile"
     EXPERIMENTAL = True
+    DEPRECATED = True
 
     def patch(self, model, backend, fullgraph, mode, dynamic, dynamo_cache_size_limit, compile_transformer_blocks_only):
         m = model.clone()
@@ -686,6 +747,48 @@ class TorchCompileModelWanVideo:
             setattr(m.model, "compile_settings", compile_settings)
         except:
             raise RuntimeError("Failed to compile model")
+        return (m, )
+    
+class TorchCompileModelWanVideoV2:
+    def __init__(self):
+        self._compiled = False
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "backend": (["inductor","cudagraphs"], {"default": "inductor"}),
+                "fullgraph": ("BOOLEAN", {"default": False, "tooltip": "Enable full graph mode"}),
+                "mode": (["default", "max-autotune", "max-autotune-no-cudagraphs", "reduce-overhead"], {"default": "default"}),
+                "dynamic": ("BOOLEAN", {"default": False, "tooltip": "Enable dynamic mode"}),
+                "compile_transformer_blocks_only": ("BOOLEAN", {"default": True, "tooltip": "Compile only transformer blocks, faster compile and less error prone"}),
+                "dynamo_cache_size_limit": ("INT", {"default": 64, "min": 0, "max": 1024, "step": 1, "tooltip": "torch._dynamo.config.cache_size_limit"}),
+            },
+        }
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "patch"
+
+    CATEGORY = "KJNodes/torchcompile"
+    EXPERIMENTAL = True
+
+    def patch(self, model, backend, fullgraph, mode, dynamic, dynamo_cache_size_limit, compile_transformer_blocks_only):
+        from comfy_api.torch_helpers import set_torch_compile_wrapper
+        m = model.clone()
+        diffusion_model = m.get_model_object("diffusion_model")
+        torch._dynamo.config.cache_size_limit = dynamo_cache_size_limit            
+        try:
+            if compile_transformer_blocks_only:
+                compile_key_list = []
+                for i, block in enumerate(diffusion_model.blocks):
+                    compile_key_list.append(f"diffusion_model.blocks.{i}")
+            else:
+                compile_key_list =["diffusion_model"]
+
+            set_torch_compile_wrapper(model=m, keys=compile_key_list, backend=backend, mode=mode, dynamic=dynamic, fullgraph=fullgraph)           
+        except:
+            raise RuntimeError("Failed to compile model")
+
         return (m, )
 
 class TorchCompileVAE:
@@ -892,6 +995,125 @@ def relative_l1_distance(last_tensor, current_tensor):
     relative_l1_distance = l1_distance / norm
     return relative_l1_distance.to(torch.float32)
 
+@torch.compiler.disable()
+def tea_cache(self, x, e0, e, transformer_options):
+    #teacache for cond and uncond separately
+    rel_l1_thresh = transformer_options["rel_l1_thresh"]
+    
+    is_cond = True if transformer_options["cond_or_uncond"] == [0] else False
+
+    should_calc = True
+    suffix = "cond" if is_cond else "uncond"
+
+    # Init cache dict if not exists
+    if not hasattr(self, 'teacache_state'):
+        self.teacache_state = {
+            'cond': {'accumulated_rel_l1_distance': 0, 'prev_input': None, 
+                    'teacache_skipped_steps': 0, 'previous_residual': None},
+            'uncond': {'accumulated_rel_l1_distance': 0, 'prev_input': None,
+                    'teacache_skipped_steps': 0, 'previous_residual': None}
+        }
+        logging.info("\nTeaCache: Initialized")
+
+    cache = self.teacache_state[suffix]
+
+    if cache['prev_input'] is not None:
+        if transformer_options["coefficients"] == []:
+            temb_relative_l1 = relative_l1_distance(cache['prev_input'], e0)
+            curr_acc_dist = cache['accumulated_rel_l1_distance'] + temb_relative_l1
+        else:
+            rescale_func = np.poly1d(transformer_options["coefficients"])
+            curr_acc_dist = cache['accumulated_rel_l1_distance'] + rescale_func(((e-cache['prev_input']).abs().mean() / cache['prev_input'].abs().mean()).cpu().item())
+        try:
+            if curr_acc_dist < rel_l1_thresh:
+                should_calc = False
+                cache['accumulated_rel_l1_distance'] = curr_acc_dist
+            else:
+                should_calc = True
+                cache['accumulated_rel_l1_distance'] = 0
+        except:
+            should_calc = True
+            cache['accumulated_rel_l1_distance'] = 0
+
+    if transformer_options["coefficients"] == []:
+        cache['prev_input'] = e0.clone().detach()
+    else:
+        cache['prev_input'] = e.clone().detach()
+
+    if not should_calc:
+        x += cache['previous_residual'].to(x.device)
+        cache['teacache_skipped_steps'] += 1
+        #print(f"TeaCache: Skipping {suffix} step")
+    return should_calc, cache
+
+def teacache_wanvideo_vace_forward_orig(self, x, t, context, vace_context, vace_strength, clip_fea=None, freqs=None, transformer_options={}, **kwargs):
+        # embeddings
+        x = self.patch_embedding(x.float()).to(x.dtype)
+        grid_sizes = x.shape[2:]
+        x = x.flatten(2).transpose(1, 2)
+
+        # time embeddings
+        e = self.time_embedding(
+            sinusoidal_embedding_1d(self.freq_dim, t).to(dtype=x[0].dtype))
+        e0 = self.time_projection(e).unflatten(1, (6, self.dim))
+
+        # context
+        context = self.text_embedding(context)
+
+        context_img_len = None
+        if clip_fea is not None:
+            if self.img_emb is not None:
+                context_clip = self.img_emb(clip_fea)  # bs x 257 x dim
+                context = torch.concat([context_clip, context], dim=1)
+            context_img_len = clip_fea.shape[-2]
+
+        orig_shape = list(vace_context.shape)
+        vace_context = vace_context.movedim(0, 1).reshape([-1] + orig_shape[2:])
+        c = self.vace_patch_embedding(vace_context.float()).to(vace_context.dtype)
+        c = c.flatten(2).transpose(1, 2)
+        c = list(c.split(orig_shape[0], dim=0))
+
+        if not transformer_options:
+            raise RuntimeError("Can't access transformer_options, this requires ComfyUI nightly version from Mar 14, 2025 or later")
+
+        teacache_enabled = transformer_options.get("teacache_enabled", False)
+        if not teacache_enabled:
+            should_calc = True
+        else:
+            should_calc, cache = tea_cache(self, x, e0, e, transformer_options)
+        
+        if should_calc:
+            original_x = x.clone().detach()
+            patches_replace = transformer_options.get("patches_replace", {})
+            blocks_replace = patches_replace.get("dit", {})
+            for i, block in enumerate(self.blocks):
+                if ("double_block", i) in blocks_replace:
+                    def block_wrap(args):
+                        out = {}
+                        out["img"] = block(args["img"], context=args["txt"], e=args["vec"], freqs=args["pe"], context_img_len=context_img_len)
+                        return out
+                    out = blocks_replace[("double_block", i)]({"img": x, "txt": context, "vec": e0, "pe": freqs}, {"original_block": block_wrap, "transformer_options": transformer_options})
+                    x = out["img"]
+                else:
+                    x = block(x, e=e0, freqs=freqs, context=context, context_img_len=context_img_len)
+
+                ii = self.vace_layers_mapping.get(i, None)
+                if ii is not None:
+                    for iii in range(len(c)):
+                        c_skip, c[iii] = self.vace_blocks[ii](c[iii], x=original_x, e=e0, freqs=freqs, context=context, context_img_len=context_img_len)
+                        x += c_skip * vace_strength[iii]
+                    del c_skip
+
+            if teacache_enabled:
+                cache['previous_residual']  = (x - original_x).to(transformer_options["teacache_device"])
+          
+        # head
+        x = self.head(x, e)
+
+        # unpatchify
+        x = self.unpatchify(x, grid_sizes)
+        return x
+
 def teacache_wanvideo_forward_orig(self, x, t, context, clip_fea=None, freqs=None, transformer_options={}, **kwargs):
         # embeddings
         x = self.patch_embedding(x.float()).to(x.dtype)
@@ -905,69 +1127,20 @@ def teacache_wanvideo_forward_orig(self, x, t, context, clip_fea=None, freqs=Non
 
         # context
         context = self.text_embedding(context)
-        if clip_fea is not None and self.img_emb is not None:
-            context_clip = self.img_emb(clip_fea)  # bs x 257 x dim
-            context = torch.concat([context_clip, context], dim=1)
 
-        @torch.compiler.disable()
-        def tea_cache(x, e0, e, kwargs):
-            #teacache for cond and uncond separately
-            rel_l1_thresh = transformer_options["rel_l1_thresh"]
-            
-            is_cond = True if transformer_options["cond_or_uncond"] == [0] else False
+        context_img_len = None
+        if clip_fea is not None:
+            if self.img_emb is not None:
+                context_clip = self.img_emb(clip_fea)  # bs x 257 x dim
+                context = torch.concat([context_clip, context], dim=1)
+            context_img_len = clip_fea.shape[-2]
 
-            should_calc = True
-            suffix = "cond" if is_cond else "uncond"
-
-            # Init cache dict if not exists
-            if not hasattr(self, 'teacache_state'):
-                self.teacache_state = {
-                    'cond': {'accumulated_rel_l1_distance': 0, 'prev_input': None, 
-                            'teacache_skipped_steps': 0, 'previous_residual': None},
-                    'uncond': {'accumulated_rel_l1_distance': 0, 'prev_input': None,
-                            'teacache_skipped_steps': 0, 'previous_residual': None}
-                }
-                logging.info("\nTeaCache: Initialized")
-
-            cache = self.teacache_state[suffix]
-
-            if cache['prev_input'] is not None:
-                if transformer_options["coefficients"] == []:
-                    temb_relative_l1 = relative_l1_distance(cache['prev_input'], e0)
-                    curr_acc_dist = cache['accumulated_rel_l1_distance'] + temb_relative_l1
-                else:
-                    rescale_func = np.poly1d(transformer_options["coefficients"])
-                    curr_acc_dist = cache['accumulated_rel_l1_distance'] + rescale_func(((e-cache['prev_input']).abs().mean() / cache['prev_input'].abs().mean()).cpu().item())
-                try:
-                    if curr_acc_dist < rel_l1_thresh:
-                        should_calc = False
-                        cache['accumulated_rel_l1_distance'] = curr_acc_dist
-                    else:
-                        should_calc = True
-                        cache['accumulated_rel_l1_distance'] = 0
-                except:
-                    should_calc = True
-                    cache['accumulated_rel_l1_distance'] = 0
-
-            if transformer_options["coefficients"] == []:
-                cache['prev_input'] = e0.clone().detach()
-            else:
-                cache['prev_input'] = e.clone().detach()
-
-            if not should_calc:
-                x += cache['previous_residual'].to(x.device)
-                cache['teacache_skipped_steps'] += 1
-                #print(f"TeaCache: Skipping {suffix} step")
-            return should_calc, cache
-        
-        if not transformer_options:
-            raise RuntimeError("Can't access transformer_options, this requires ComfyUI nightly version from Mar 14, 2025 or later")
 
         teacache_enabled = transformer_options.get("teacache_enabled", False)
         if not teacache_enabled:
             should_calc = True
         else:
-            should_calc, cache = tea_cache(x, e0, e, kwargs)
+            should_calc, cache = tea_cache(self, x, e0, e, transformer_options)
         
         if should_calc:
             original_x = x.clone().detach()
@@ -977,12 +1150,12 @@ def teacache_wanvideo_forward_orig(self, x, t, context, clip_fea=None, freqs=Non
                 if ("double_block", i) in blocks_replace:
                     def block_wrap(args):
                         out = {}
-                        out["img"] = block(args["img"], context=args["txt"], e=args["vec"], freqs=args["pe"])
+                        out["img"] = block(args["img"], context=args["txt"], e=args["vec"], freqs=args["pe"], context_img_len=context_img_len)
                         return out
                     out = blocks_replace[("double_block", i)]({"img": x, "txt": context, "vec": e0, "pe": freqs}, {"original_block": block_wrap, "transformer_options": transformer_options})
                     x = out["img"]
                 else:
-                    x = block(x, e=e0, freqs=freqs, context=context)
+                    x = block(x, e=e0, freqs=freqs, context=context, context_img_len=context_img_len)
 
             if teacache_enabled:
                 cache['previous_residual']  = (x - original_x).to(transformer_options["teacache_device"])
@@ -1108,9 +1281,10 @@ Official recommended values https://github.com/ali-vilab/TeaCache/tree/main/TeaC
                 if start_percent <= current_percent <= end_percent:
                     c["transformer_options"]["teacache_enabled"] = True
                 
+                forward_function = teacache_wanvideo_vace_forward_orig if hasattr(diffusion_model, "vace_layers") else teacache_wanvideo_forward_orig
                 context = patch.multiple(
                     diffusion_model, 
-                    forward_orig=teacache_wanvideo_forward_orig.__get__(diffusion_model, diffusion_model.__class__)
+                    forward_orig=forward_function.__get__(diffusion_model, diffusion_model.__class__)
                 )
 
                 with context:
@@ -1142,7 +1316,7 @@ Official recommended values https://github.com/ali-vilab/TeaCache/tree/main/TeaC
 
 
 
-from comfy.ldm.modules.attention import optimized_attention
+
 from comfy.ldm.flux.math import apply_rope
 
 def modified_wan_self_attention_forward(self, x, freqs):
@@ -1166,7 +1340,7 @@ def modified_wan_self_attention_forward(self, x, freqs):
 
     feta_scores = get_feta_scores(q, k, self.num_frames, self.enhance_weight)
 
-    x = optimized_attention(
+    x = comfy.ldm.modules.attention.optimized_attention(
         q.view(b, s, n * d),
         k.view(b, s, n * d),
         v,
@@ -1243,7 +1417,7 @@ class WanVideoEnhanceAVideoKJ:
             "required": {
                 "model": ("MODEL",),
                 "latent": ("LATENT", {"tooltip": "Only used to get the latent count"}),
-                "weight": ("FLOAT", {"default": 0.2, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Strength of the enhance effect"}),
+                "weight": ("FLOAT", {"default": 2.0, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Strength of the enhance effect"}),
            }
         }
     
@@ -1273,6 +1447,170 @@ class WanVideoEnhanceAVideoKJ:
                 patched_attn = torch.compile(patched_attn, mode=compile_settings["mode"], dynamic=compile_settings["dynamic"], fullgraph=compile_settings["fullgraph"], backend=compile_settings["backend"])
             
             model_clone.add_object_patch(f"diffusion_model.blocks.{idx}.self_attn.forward", patched_attn)
+            
+        return (model_clone,)
+    
+def normalized_attention_guidance(self, query, context_positive, context_negative):
+    nag_scale = self.nag_scale
+    nag_alpha = self.nag_alpha
+    nag_tau = self.nag_tau
+
+    k_positive = self.norm_k(self.k(context_positive))
+    v_positive = self.v(context_positive)
+    k_negative = self.norm_k(self.k(context_negative))
+    v_negative = self.v(context_negative)
+
+    x_positive = comfy.ldm.modules.attention.optimized_attention(query, k_positive, v_positive, heads=self.num_heads)
+    x_positive = x_positive.flatten(2)
+
+    x_negative = comfy.ldm.modules.attention.optimized_attention(query, k_negative, v_negative, heads=self.num_heads)
+    x_negative = x_negative.flatten(2)
+
+    nag_guidance = x_positive * nag_scale - x_negative * (nag_scale - 1)
+    
+    norm_positive = torch.norm(x_positive, p=1, dim=-1, keepdim=True).expand_as(x_positive)
+    norm_guidance = torch.norm(nag_guidance, p=1, dim=-1, keepdim=True).expand_as(nag_guidance)
+    
+    scale = norm_guidance / norm_positive
+    scale = torch.nan_to_num(scale, nan=10.0)
+    
+    mask = scale > nag_tau
+    adjustment = (norm_positive * nag_tau) / (norm_guidance + 1e-7)
+    nag_guidance = torch.where(mask, nag_guidance * adjustment, nag_guidance)
+    
+    x = nag_guidance * nag_alpha + x_positive * (1 - nag_alpha)
+    del nag_guidance
+
+    return x
+
+#region NAG
+def wan_crossattn_forward_nag(self, x, context, **kwargs):
+    r"""
+    Args:
+        x(Tensor): Shape [B, L1, C]
+        context(Tensor): Shape [B, L2, C]
+    """
+ 
+    if context.shape[0] == 2:
+        x, x_real_negative = torch.chunk(x, 2, dim=0)
+        context_positive, context_negative = torch.chunk(context, 2, dim=0)
+    else:
+        context_positive = context
+        context_negative = None
+
+    q = self.norm_q(self.q(x))
+
+    x = normalized_attention_guidance(self, q, context_positive, self.nag_context)
+
+    if context_negative is not None:
+        q_real_negative = self.norm_q(self.q(x_real_negative))
+        k_real_negative = self.norm_k(self.k(context_negative))
+        v_real_negative = self.v(context_negative)
+        x_real_negative = comfy.ldm.modules.attention.optimized_attention(q_real_negative, k_real_negative, v_real_negative, heads=self.num_heads)
+        x = torch.cat([x, x_real_negative], dim=0)
+
+    x = self.o(x)
+    return x
+
+
+def wan_i2v_crossattn_forward_nag(self, x, context, context_img_len):
+    r"""
+    Args:
+        x(Tensor): Shape [B, L1, C]
+        context(Tensor): Shape [B, L2, C]
+    """
+    context_img = context[:, :context_img_len]
+    context = context[:, context_img_len:]
+
+    q_img = self.norm_q(self.q(x))    
+    k_img = self.norm_k_img(self.k_img(context_img))
+    v_img = self.v_img(context_img)
+    img_x = comfy.ldm.modules.attention.optimized_attention(q_img, k_img, v_img, heads=self.num_heads)
+
+    if context.shape[0] == 2:
+        x, x_real_negative = torch.chunk(x, 2, dim=0)
+        context_positive, context_negative = torch.chunk(context, 2, dim=0)
+    else:
+        context_positive = context
+        context_negative = None
+    
+    q = self.norm_q(self.q(x))
+
+    x = normalized_attention_guidance(self, q, context_positive, self.nag_context)
+
+    if context_negative is not None:
+        q_real_negative = self.norm_q(self.q(x_real_negative))
+        k_real_negative = self.norm_k(self.k(context_negative))
+        v_real_negative = self.v(context_negative)
+        x_real_negative = comfy.ldm.modules.attention.optimized_attention(q_real_negative, k_real_negative, v_real_negative, heads=self.num_heads)
+        x = torch.cat([x, x_real_negative], dim=0)
+
+    # output
+    x = x + img_x
+    x = self.o(x)
+    return x
+
+class WanCrossAttentionPatch:
+    def __init__(self, context, nag_scale, nag_alpha, nag_tau, i2v=False):
+        self.nag_context = context
+        self.nag_scale = nag_scale
+        self.nag_alpha = nag_alpha
+        self.nag_tau = nag_tau
+        self.i2v = i2v
+    def __get__(self, obj, objtype=None):
+        # Create bound method with stored parameters
+        def wrapped_attention(self_module, *args, **kwargs):
+            self_module.nag_context = self.nag_context
+            self_module.nag_scale = self.nag_scale
+            self_module.nag_alpha = self.nag_alpha
+            self_module.nag_tau = self.nag_tau
+            if self.i2v:
+                return wan_i2v_crossattn_forward_nag(self_module, *args, **kwargs)
+            else:
+                return wan_crossattn_forward_nag(self_module, *args, **kwargs)
+        return types.MethodType(wrapped_attention, obj)
+    
+class WanVideoNAG:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "conditioning": ("CONDITIONING",),
+                "nag_scale": ("FLOAT", {"default": 11.0, "min": 0.0, "max": 100.0, "step": 0.001, "tooltip": "Strength of negative guidance effect"}),
+                "nag_alpha": ("FLOAT", {"default": 0.25, "min": 0.0, "max": 1.0, "step": 0.001, "tooltip": "Mixing coefficient in that controls the balance between the normalized guided representation and the original positive representation."}),
+                "nag_tau": ("FLOAT", {"default": 2.5, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Clipping threshold that controls how much the guided attention can deviate from the positive attention."}),
+           }
+        }
+    
+    RETURN_TYPES = ("MODEL",)
+    RETURN_NAMES = ("model",)
+    FUNCTION = "patch"
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = "https://github.com/ChenDarYen/Normalized-Attention-Guidance"
+    EXPERIMENTAL = True
+
+    def patch(self, model, conditioning, nag_scale, nag_alpha, nag_tau):
+        if nag_scale == 0:
+            return (model,)
+        
+        device = mm.get_torch_device()
+        dtype = mm.unet_dtype()
+
+        model_clone = model.clone()
+
+        diffusion_model = model_clone.get_model_object("diffusion_model")
+
+        diffusion_model.text_embedding.to(device)
+        context = diffusion_model.text_embedding(conditioning[0][0].to(device, dtype))
+
+        type_str = str(type(model.model.model_config).__name__)
+        i2v = True if "WAN21_I2V" in type_str else False
+    
+        for idx, block in enumerate(diffusion_model.blocks):
+            patched_attn = WanCrossAttentionPatch(context, nag_scale, nag_alpha, nag_tau, i2v).__get__(block.cross_attn, block.__class__)
+          
+            model_clone.add_object_patch(f"diffusion_model.blocks.{idx}.cross_attn.forward", patched_attn)
             
         return (model_clone,)
     

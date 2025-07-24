@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Callable, Optional, List
-
+import torch
+from ..utils import log
 
 def ordered_halving(val):
     bin_str = f"{val:064b}"
@@ -182,3 +183,76 @@ def get_total_steps(
         )
         for i in range(len(timesteps))
     )
+
+def create_window_mask(noise_pred_context, c, latent_video_length, context_overlap, looped=False, window_type="linear"):
+    window_mask = torch.ones_like(noise_pred_context)
+    
+    if window_type == "pyramid":
+        # Create pyramid weights that peak in the middle
+        length = noise_pred_context.shape[1]
+        if length % 2 == 0:
+            max_weight = length // 2
+            weight_sequence = list(range(1, max_weight + 1, 1)) + list(range(max_weight, 0, -1))
+        else:
+            max_weight = (length + 1) // 2
+            weight_sequence = list(range(1, max_weight, 1)) + [max_weight] + list(range(max_weight - 1, 0, -1))
+        
+        # Normalize weights to range from 0 to 1
+        max_val = max(weight_sequence)
+        weight_sequence = [w / max_val for w in weight_sequence]
+        
+        # Apply the weights to create the mask
+        weights_tensor = torch.tensor(weight_sequence, device=noise_pred_context.device)
+        weights_tensor = weights_tensor.view(1, -1, 1, 1)
+        window_mask = weights_tensor.expand_as(window_mask).clone()
+        
+        # Adjust for position in sequence if needed
+        if not looped:
+            if min(c) == 0:  # First chunk
+                left_ramp = torch.linspace(0, 1, context_overlap, device=noise_pred_context.device).view(1, -1, 1, 1)
+                # Clone to avoid in-place memory conflict
+                left_section = window_mask[:, :context_overlap].clone()
+                window_mask[:, :context_overlap] = torch.maximum(left_section, left_ramp)
+                
+            if max(c) == latent_video_length - 1:  # Last chunk
+                right_ramp = torch.linspace(1, 0, context_overlap, device=noise_pred_context.device).view(1, -1, 1, 1)
+                # Clone to avoid in-place memory conflict
+                right_section = window_mask[:, -context_overlap:].clone()
+                window_mask[:, -context_overlap:] = torch.maximum(right_section, right_ramp)
+    else:  # Original "linear" window masking
+        # Apply left-side blending for all except first chunk (or always in loop mode)
+        if min(c) > 0 or (looped and max(c) == latent_video_length - 1):
+            ramp_up = torch.linspace(0, 1, context_overlap, device=noise_pred_context.device)
+            ramp_up = ramp_up.view(1, -1, 1, 1)
+            window_mask[:, :context_overlap] = ramp_up
+            
+        # Apply right-side blending for all except last chunk (or always in loop mode)
+        if max(c) < latent_video_length - 1 or (looped and min(c) == 0):
+            ramp_down = torch.linspace(1, 0, context_overlap, device=noise_pred_context.device)
+            ramp_down = ramp_down.view(1, -1, 1, 1)
+            window_mask[:, -context_overlap:] = ramp_down
+            
+    return window_mask
+
+class WindowTracker:
+    def __init__(self, verbose=False):
+        self.window_map = {}  # Maps frame sequence to persistent ID
+        self.next_id = 0
+        self.cache_states = {}  # Maps persistent ID to teacache state
+        self.verbose = verbose
+    
+    def get_window_id(self, frames):
+        key = tuple(sorted(frames))  # Order-independent frame sequence
+        if key not in self.window_map:
+            self.window_map[key] = self.next_id
+            if self.verbose:
+                log.info(f"New window pattern {key} -> ID {self.next_id}")
+            self.next_id += 1
+        return self.window_map[key]
+    
+    def get_teacache(self, window_id, base_state):
+        if window_id not in self.cache_states:
+            if self.verbose:
+                log.info(f"Initializing persistent teacache for window {window_id}")
+            self.cache_states[window_id] = base_state.copy()
+        return self.cache_states[window_id]

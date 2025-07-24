@@ -33,15 +33,6 @@ def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modul
         ):
             key = "diffusion_model." + module_prefix + "weight"
             patch = patches.get(key, [])
-            
-            lora_diffs = lora_strengths = None
-            if len(patch) != 0:
-                lora_diffs = [p[1].weights for p in patch]
-                lora_strengths = [p[0] for p in patch]
-            
-            #print("lora_diff", lora_diff)
-
-            #print(state_dict[module_prefix + "weight"].shape)
             in_features = state_dict[module_prefix + "weight"].shape[1]
             out_features = state_dict[module_prefix + "weight"].shape[0]
 
@@ -51,15 +42,29 @@ def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modul
                     in_features,
                     out_features,
                     module.bias is not None,
-                    compute_dtype=compute_dtype,
-                    lora_diffs=lora_diffs,
-                    lora_strengths = lora_strengths
+                    compute_dtype=compute_dtype
                 )
+            set_lora_params(model._modules[name], patches, module_prefix)
             model._modules[name].source_cls = type(module)
             # Force requires_grad to False to avoid unexpected errors
             model._modules[name].requires_grad_(False)
 
     return model
+
+def set_lora_params(module, patches, module_prefix=""):
+    # Recursively set lora_diffs and lora_strengths for all GGUFLinear layers
+    for name, child in module.named_children():
+        child_prefix = module_prefix + name + "."
+        set_lora_params(child, patches, child_prefix)
+    if isinstance(module, GGUFLinear):
+        key = "diffusion_model." + module_prefix + "weight"
+        patch = patches.get(key, [])
+        lora_diffs = lora_strengths = None
+        if len(patch) != 0:
+            lora_diffs = [p[1].weights for p in patch]
+            lora_strengths = [p[0] for p in patch]
+        module.lora_diffs = lora_diffs
+        module.lora_strengths = lora_strengths
 
 class GGUFLinear(nn.Linear):
     def __init__(
@@ -71,13 +76,11 @@ class GGUFLinear(nn.Linear):
         device=None,
         lora_diffs=None,
         lora_strengths=None,
-        lora_alphas=None
     ) -> None:
         super().__init__(in_features, out_features, bias, device)
         self.compute_dtype = compute_dtype
         self.lora_diffs = lora_diffs
         self.lora_strengths = lora_strengths
-        self.lora_alphas = lora_alphas
 
     def forward(self, inputs):
         weight = dequantize_without_compile(self.weight)

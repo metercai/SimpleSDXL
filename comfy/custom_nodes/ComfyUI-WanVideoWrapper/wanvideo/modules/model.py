@@ -15,6 +15,10 @@ try:
 except:
     BlockMask = create_block_mask = flex_attention = None
     pass
+try:
+    from ..radial_attention.attn_mask import RadialSpargeSageAttn, RadialSpargeSageAttnDense, MaskMap
+except:
+    pass
 
 from .attention import attention
 import numpy as np
@@ -24,7 +28,7 @@ from tqdm import tqdm
 import gc
 import comfy.model_management as mm
 from ...utils import log, get_module_memory_mb
-
+from ...cache_methods.cache_methods import TeaCacheState, MagCacheState, EasyCacheState, relative_l1_distance
 from ...multitalk.multitalk import get_attn_map_with_target
 
 from comfy.ldm.flux.math import apply_rope as apply_rope_comfy
@@ -259,6 +263,10 @@ class WanSelfAttention(nn.Module):
         self.eps = eps
         self.attention_mode = attention_mode
 
+        #radial attention
+        self.mask_map = None
+        self.decay_factor = 0.2
+
         # layers
         self.q = nn.Linear(in_features, out_features)
         self.k = nn.Linear(in_features, out_features)
@@ -316,6 +324,16 @@ class WanSelfAttention(nn.Module):
         # output
         x = x.flatten(2)
         x = self.o(x)
+
+        return x
+    
+    def forward_radial(self, q, k, v, dense_step=False):
+        if dense_step:
+            x = RadialSpargeSageAttnDense(q, k, v, self.mask_map)
+        else:
+            x = RadialSpargeSageAttn(q, k, v, self.mask_map, decay_factor=self.decay_factor)
+
+        x = self.o(x.flatten(2))
 
         return x
     
@@ -560,7 +578,7 @@ class WanAttentionBlock(nn.Module):
                  cross_attn_norm=False,
                  eps=1e-6,
                  attention_mode='sdpa',
-                 rope_func="comfy"
+                 rope_func="comfy",
                  ):
         super().__init__()
         self.dim = out_features
@@ -571,6 +589,10 @@ class WanAttentionBlock(nn.Module):
         self.eps = eps
         self.attention_mode = attention_mode
         self.rope_func = rope_func
+        #radial attn
+        self.dense_timesteps = 10
+        self.dense_block = False
+        self.dense_attention_mode = "sageattn"
 
         # layers
         self.norm1 = WanLayerNorm(out_features, eps)
@@ -597,13 +619,10 @@ class WanAttentionBlock(nn.Module):
     @torch.compiler.disable()
     def get_mod(self, e):
         if e.dim() == 3:
-            modulation = self.modulation  # 1, 6, dim
-            e = (modulation.to(e.device) + e).chunk(6, dim=1)
+            return (self.modulation  + e).chunk(6, dim=1) # 1, 6, dim
         elif e.dim() == 4:
-            modulation = self.modulation.unsqueeze(2)  # 1, 6, 1, dim
-            e = (modulation.to(e.device) + e).chunk(6, dim=1)
-            e = [ei.squeeze(1) for ei in e]
-        return e
+            e = (self.modulation.unsqueeze(2) + e).chunk(6, dim=1) # 1, 6, 1, dim
+            return [ei.squeeze(1) for ei in e]
     
     def modulate(self, x, shift_msa, scale_msa):
         return torch.addcmul(shift_msa, x, 1 + scale_msa)
@@ -662,7 +681,7 @@ class WanAttentionBlock(nn.Module):
             freqs(Tensor): Rope freqs, shape [1024, C / num_heads / 2]
         """
         #e = (self.modulation.to(e.device) + e).chunk(6, dim=1)
-        shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.get_mod(e)
+        shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.get_mod(e.to(x.device))
         input_x = self.modulate(self.norm1(x), shift_msa, scale_msa)
 
         if camera_embed is not None:
@@ -704,6 +723,14 @@ class WanAttentionBlock(nn.Module):
             )
         elif ref_target_masks is not None:
             y, x_ref_attn_map = self.self_attn.forward_multitalk(q, k, v, seq_lens, grid_sizes, ref_target_masks)
+        elif self.attention_mode == "radial_sage_attention":
+            if self.dense_block or self.dense_timesteps is not None and current_step < self.dense_timesteps:
+                if self.dense_attention_mode == "sparse_sage_attn":
+                    y = self.self_attn.forward_radial(q, k, v, dense_step=True)
+                else:
+                    y = self.self_attn.forward(q, k, v, seq_lens, block_mask=block_mask)
+            else:
+                y = self.self_attn.forward_radial(q, k, v, dense_step=False)
         else:
             y = self.self_attn.forward(q, k, v, seq_lens, block_mask=block_mask)
 
@@ -887,13 +914,10 @@ class Head(nn.Module):
 
     def get_mod(self, e):
         if e.dim() == 2:
-            modulation = self.modulation.to(e.device)  # 1, 2, dim
-            e = (modulation + e.unsqueeze(1)).chunk(2, dim=1)
+            return (self.modulation + e.unsqueeze(1)).chunk(2, dim=1)
         elif e.dim() == 3:
-            modulation = self.modulation.to(e.device).unsqueeze(2)  # 1, 2, seq, dim
-            e = (modulation + e.unsqueeze(1)).chunk(2, dim=1)
-            e = [ei.squeeze(1) for ei in e]
-        return e
+            e = (self.modulation.unsqueeze(2) + e.unsqueeze(1)).chunk(2, dim=1)
+            return [ei.squeeze(1) for ei in e]
 
     def forward(self, x, e):
         r"""
@@ -901,12 +925,8 @@ class Head(nn.Module):
             x(Tensor): Shape [B, L1, C]
             e(Tensor): Shape [B, C]
         """
-        
-        # e = (self.modulation.to(e.device) + e.unsqueeze(1)).chunk(2, dim=1)
-        # normed = self.norm(x)
-        # x = self.head(normed * (1 + e[1]) + e[0])
 
-        e = self.get_mod(e)
+        e = self.get_mod(e.to(x.device))
         x = self.head(self.norm(x).mul_(1 + e[1]).add_(e[0]))
         return x
 
@@ -1424,6 +1444,8 @@ class WanModel(ModelMixin, ConfigMixin):
             attn_cond = attn_cond.flatten(2).transpose(1, 2)
             x[0] = torch.cat([x[0], attn_cond], dim=1)
             seq_len += attn_cond.size(1)
+            for block in self.blocks:
+                block.self_attn.mask_map = MaskMap(video_token_num=seq_len, num_frame=F+1)
 
         if self.ref_conv is not None and fun_ref is not None:
             fun_ref = self.ref_conv(fun_ref).flatten(2).transpose(1, 2)
@@ -1488,9 +1510,9 @@ class WanModel(ModelMixin, ConfigMixin):
         # time embeddings
         if t.dim() == 2:
             b, f = t.shape
-            diffusion_forcing = True
+            expanded_timesteps = True
         else:
-            diffusion_forcing = False
+            expanded_timesteps = False
 
         e = self.time_embedding(
             sinusoidal_embedding_1d(self.freq_dim, t.flatten()).to(x.dtype)
@@ -1501,12 +1523,12 @@ class WanModel(ModelMixin, ConfigMixin):
             fps_embeds = torch.tensor(fps_embeds, dtype=torch.long, device=device)
 
             fps_emb = self.fps_embedding(fps_embeds).to(e0.dtype)
-            if diffusion_forcing:
+            if expanded_timesteps:
                 e0 = e0 + self.fps_projection(fps_emb).unflatten(1, (6, self.dim)).repeat(t.shape[1], 1, 1)
             else:
                 e0 = e0 + self.fps_projection(fps_emb).unflatten(1, (6, self.dim))
 
-        if diffusion_forcing:
+        if expanded_timesteps:
             e = e.view(b, f, 1, 1, self.dim).expand(b, f, grid_sizes[0][1], grid_sizes[0][2], self.dim)
             e0 = e0.view(b, f, 1, 1, 6, self.dim).expand(b, f, grid_sizes[0][1], grid_sizes[0][2], 6, self.dim)
             
@@ -1519,7 +1541,7 @@ class WanModel(ModelMixin, ConfigMixin):
             
             e = e.to(self.offload_device, non_blocking=self.use_non_blocking)
 
-        # context (text embedding)
+        #context (text embedding)
         context_lens = None
         if hasattr(self, "text_embedding") and context != []:
             if self.offload_txt_emb:
@@ -1841,110 +1863,3 @@ class WanModel(ModelMixin, ConfigMixin):
             u = u.reshape(c, *[i * j for i, j in zip(v, self.patch_size)])
             out.append(u)
         return out
-
-class TeaCacheState:
-    def __init__(self, cache_device='cpu'):
-        self.cache_device = cache_device
-        self.states = {}
-        self._next_pred_id = 0
-    
-    def new_prediction(self, cache_device='cpu'):
-        """Create new prediction state and return its ID"""
-        self.cache_device = cache_device
-        pred_id = self._next_pred_id
-        self._next_pred_id += 1
-        self.states[pred_id] = {
-            'previous_residual': None,
-            'accumulated_rel_l1_distance': 0,
-            'previous_modulated_input': None,
-            'skipped_steps': [],
-        }
-        return pred_id
-    
-    def update(self, pred_id, **kwargs):
-        """Update state for specific prediction"""
-        if pred_id not in self.states:
-            return None
-        for key, value in kwargs.items():
-            self.states[pred_id][key] = value
-    
-    def get(self, pred_id):
-        return self.states.get(pred_id, {})
-    
-    def clear_all(self):
-        self.states = {}
-        self._next_pred_id = 0
-
-class MagCacheState:
-    def __init__(self, cache_device='cpu'):
-        self.cache_device = cache_device
-        self.states = {}
-        self._next_pred_id = 0
-    
-    def new_prediction(self, cache_device='cpu'):
-        """Create new prediction state and return its ID"""
-        self.cache_device = cache_device
-        pred_id = self._next_pred_id
-        self._next_pred_id += 1
-        self.states[pred_id] = {
-            'residual_cache': None,
-            'accumulated_ratio': 1.0,
-            'accumulated_steps': 0,
-            'accumulated_err': 0,
-            'skipped_steps': [],
-        }
-        return pred_id
-    
-    def update(self, pred_id, **kwargs):
-        """Update state for specific prediction"""
-        if pred_id not in self.states:
-            return None
-        for key, value in kwargs.items():
-            self.states[pred_id][key] = value
-    
-    def get(self, pred_id):
-        return self.states.get(pred_id, {})
-    
-    def clear_all(self):
-        self.states = {}
-        self._next_pred_id = 0
-
-class EasyCacheState:
-    def __init__(self, cache_device='cpu'):
-        self.cache_device = cache_device
-        self.states = {}
-        self._next_pred_id = 0
-
-    def new_prediction(self, cache_device='cpu'):
-        """Create a new prediction state and return its ID."""
-        self.cache_device = cache_device
-        pred_id = self._next_pred_id
-        self._next_pred_id += 1
-        self.states[pred_id] = {
-            'previous_raw_input': None,
-            'previous_raw_output': None,
-            'cache': None,
-            'accumulated_error': 0.0,
-            'skipped_steps': [],
-        }
-        return pred_id
-
-    def update(self, pred_id, **kwargs):
-        """Update state for a specific prediction."""
-        if pred_id not in self.states:
-            return None
-        for key, value in kwargs.items():
-            self.states[pred_id][key] = value
-
-    def get(self, pred_id):
-        return self.states.get(pred_id, {})
-
-    def clear_all(self):
-        self.states = {}
-        self._next_pred_id = 0
-
-def relative_l1_distance(last_tensor, current_tensor):
-    l1_distance = torch.abs(last_tensor.to(current_tensor.device) - current_tensor).mean()
-    norm = torch.abs(last_tensor).mean()
-    relative_l1_distance = l1_distance / norm
-    return relative_l1_distance.to(torch.float32).to(current_tensor.device)

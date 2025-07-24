@@ -10,6 +10,41 @@ import base64
         
 from comfy.utils import common_upscale
 
+def parse_color(color):
+    if isinstance(color, str) and ',' in color:
+        return tuple(int(c.strip()) for c in color.split(','))
+    return color
+
+def parse_json_tracks(tracks):
+    tracks_data = []
+    try:
+        # If tracks is a string, try to parse it as JSON
+        if isinstance(tracks, str):
+            parsed = json.loads(tracks.replace("'", '"'))
+            tracks_data.extend(parsed)
+        else:
+            # If tracks is a list of strings, parse each one
+            for track_str in tracks:
+                parsed = json.loads(track_str.replace("'", '"'))
+                tracks_data.append(parsed)
+        
+        # Check if we have a single track (dict with x,y) or a list of tracks
+        if tracks_data and isinstance(tracks_data[0], dict) and 'x' in tracks_data[0]:
+            # Single track detected, wrap it in a list
+            tracks_data = [tracks_data]
+        elif tracks_data and isinstance(tracks_data[0], list) and tracks_data[0] and isinstance(tracks_data[0][0], dict) and 'x' in tracks_data[0][0]:
+            # Already a list of tracks, nothing to do
+            pass
+        else:
+            # Unexpected format
+            print(f"Warning: Unexpected track format: {type(tracks_data[0])}")
+            
+    except json.JSONDecodeError as e:
+        print(f"Error parsing tracks JSON: {e}")
+        tracks_data = []
+
+    return tracks_data
+
 def plot_coordinates_to_tensor(coordinates, height, width, bbox_height, bbox_width, size_multiplier, prompt):
         import matplotlib
         matplotlib.use('Agg')
@@ -119,7 +154,8 @@ class SplineEditor:
                 [   
                     'path',
                     'time',
-                    'controlpoints'
+                    'controlpoints',
+                    'speed'
                 ],
                 {
                     "default": 'time'
@@ -176,6 +212,16 @@ guaranteed!!
 Note that you can't delete from start/end.  
   
 Right click on canvas for context menu:  
+NEW!:
+- Add new spline
+    - Creates a new spline on same canvas, currently these paths are only outputed  
+      as coordinates.
+- Add single point
+    - Creates a single point that only returns it's current position coords  
+- Delete spline
+    - Deletes the currently selected spline, you can select a spline by clicking on   
+    it's path, or cycle through them with the 'Next spline' -option.  
+
 These are purely visual options, doesn't affect the output:  
  - Toggle handles visibility
  - Display sample points: display the points to be returned.  
@@ -186,6 +232,7 @@ actual control points, so the interpolation type matters.
 sampling_method: 
  - time: samples along the time axis, used for schedules  
  - path: samples along the path itself, useful for coordinates  
+ - controlpoints: samples only the control points themselves  
 
 output types:
  - mask batch  
@@ -200,52 +247,76 @@ output types:
 """
 
     def splinedata(self, mask_width, mask_height, coordinates, float_output_type, interpolation, 
-                   points_to_sample, sampling_method, points_store, tension, repeat_output, 
-                   min_value=0.0, max_value=1.0, bg_image=None):
-        
+               points_to_sample, sampling_method, points_store, tension, repeat_output, 
+               min_value=0.0, max_value=1.0, bg_image=None):
+    
         coordinates = json.loads(coordinates)
-        normalized = []
-        normalized_y_values = []
-        for coord in coordinates:
-            coord['x'] = int(round(coord['x']))
-            coord['y'] = int(round(coord['y']))
-            norm_x = (1.0 - (coord['x'] / mask_height) - 0.0) * (max_value - min_value) + min_value
-            norm_y = (1.0 - (coord['y'] / mask_height) - 0.0) * (max_value - min_value) + min_value
-            normalized_y_values.append(norm_y)
-            normalized.append({'x':norm_x, 'y':norm_y})
+        
+        # Handle nested list structure if present
+        all_normalized = []
+        all_normalized_y_values = []
+        
+        # Check if we have a nested list structure
+        if isinstance(coordinates, list) and len(coordinates) > 0 and isinstance(coordinates[0], list):
+            # Process each list of coordinates in the nested structure
+            coordinate_sets = coordinates
+        else:
+            # If not nested, treat as a single list of coordinates
+            coordinate_sets = [coordinates]
+        
+        # Process each set of coordinates
+        for coord_set in coordinate_sets:
+            normalized = []
+            normalized_y_values = []
+            
+            for coord in coord_set:
+                coord['x'] = int(round(coord['x']))
+                coord['y'] = int(round(coord['y']))
+                norm_x = (1.0 - (coord['x'] / mask_height) - 0.0) * (max_value - min_value) + min_value
+                norm_y = (1.0 - (coord['y'] / mask_height) - 0.0) * (max_value - min_value) + min_value
+                normalized_y_values.append(norm_y)
+                normalized.append({'x':norm_x, 'y':norm_y})
+            
+            all_normalized.extend(normalized)
+            all_normalized_y_values.extend(normalized_y_values)
+        
+        # Use the combined normalized values for output
         if float_output_type == 'list':
-            out_floats = normalized_y_values * repeat_output
+            out_floats = all_normalized_y_values * repeat_output
         elif float_output_type == 'pandas series':
             try:
                 import pandas as pd
             except:
                 raise Exception("MaskOrImageToWeight: pandas is not installed. Please install pandas to use this output_type")
-            out_floats = pd.Series(normalized_y_values * repeat_output),
+            out_floats = pd.Series(all_normalized_y_values * repeat_output),
         elif float_output_type == 'tensor':
-            out_floats = torch.tensor(normalized_y_values * repeat_output, dtype=torch.float32)
+            out_floats = torch.tensor(all_normalized_y_values * repeat_output, dtype=torch.float32)
+        
         # Create a color map for grayscale intensities
         color_map = lambda y: torch.full((mask_height, mask_width, 3), y, dtype=torch.float32)
 
         # Create image tensors for each normalized y value
-        mask_tensors = [color_map(y) for y in normalized_y_values]
+        mask_tensors = [color_map(y) for y in all_normalized_y_values]
         masks_out = torch.stack(mask_tensors)
         masks_out = masks_out.repeat(repeat_output, 1, 1, 1)
         masks_out = masks_out.mean(dim=-1)
+        
         if bg_image is None:
-            return (masks_out, json.dumps(coordinates), out_floats, len(out_floats) , json.dumps(normalized))
+            return (masks_out, json.dumps(coordinates if len(coordinates) > 1 else coordinates[0]), out_floats, len(out_floats), json.dumps(all_normalized))
         else:
             transform = transforms.ToPILImage()
             image = transform(bg_image[0].permute(2, 0, 1))
             buffered = io.BytesIO()
             image.save(buffered, format="JPEG", quality=75)
 
-            # Step 3: Encode the image bytes to a Base64 string
+            # Encode the image bytes to a Base64 string
             img_bytes = buffered.getvalue()
             img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-        return {
+            
+            return {
                 "ui": {"bg_image": [img_base64]},
-                "result":(masks_out, json.dumps(coordinates), out_floats, len(out_floats) , json.dumps(normalized))
-                }
+                "result": (masks_out, json.dumps(coordinates if len(coordinates) > 1 else coordinates[0]), out_floats, len(out_floats), json.dumps(all_normalized))
+            }
      
 
 class CreateShapeMaskOnPath:
@@ -258,6 +329,7 @@ class CreateShapeMaskOnPath:
 Creates a mask or batch of masks with the specified shape.  
 Locations are center locations.  
 """
+    DEPRECATED = True
 
     @classmethod
     def INPUT_TYPES(s):
@@ -329,6 +401,8 @@ Locations are center locations.
         outstack = torch.cat(out, dim=0)
         return (outstack, 1.0 - outstack,)
 
+
+
 class CreateShapeImageOnPath:
     
     RETURN_TYPES = ("IMAGE", "MASK",)
@@ -372,15 +446,11 @@ Locations are center locations.
 
     def createshapemask(self, coordinates, frame_width, frame_height, shape_width, shape_height, shape_color, 
                         bg_color, blur_radius, shape, intensity, size_multiplier=[1.0], trailing=1.0, border_width=0, border_color='black'):
-        # Define the number of images in the batch
-        if len(coordinates) < 10:
-            coords_list = []
-            for coords in coordinates:
-                coords = json.loads(coords.replace("'", '"'))
-                coords_list.append(coords)
-        else:
-            coords = json.loads(coordinates.replace("'", '"'))
-            coords_list = [coords]
+
+        shape_color = parse_color(shape_color)
+        border_color = parse_color(border_color)
+        bg_color = parse_color(bg_color)
+        coords_list = parse_json_tracks(coordinates)
 
         batch_size = len(coords_list[0])
         images_list = []
@@ -493,7 +563,7 @@ Locations are center locations.
         batch_size = len(coordinates)
         mask_list = []
         image_list = []
-        color = text_color
+        color = parse_color(text_color)
         font_path = folder_paths.get_full_path("kjnodes_fonts", font)
 
         if len(size_multiplier) != batch_size:
@@ -573,8 +643,8 @@ Creates a gradient image from coordinates.
         start_coord = coordinates[0]
         end_coord = coordinates[1]
 
-        start_color = ImageColor.getrgb(start_color)
-        end_color = ImageColor.getrgb(end_color)
+        start_color = parse_color(start_color)
+        end_color = parse_color(end_color)
 
         # Calculate the gradient direction (vector)
         gradient_direction = (end_coord['x'] - start_coord['x'], end_coord['y'] - start_coord['y'])
@@ -1492,14 +1562,7 @@ Cuts the masked area from the image, and drags it along the path. If inpaint is 
 
     def cutanddrag(self, image, coordinates, mask, frame_width, frame_height, inpaint, bg_image=None):
         # Parse coordinates
-        if len(coordinates) < 10:
-            coords_list = []
-            for coords in coordinates:
-                coords = json.loads(coords.replace("'", '"'))
-                coords_list.append(coords)
-        else:
-            coords = json.loads(coordinates.replace("'", '"'))
-            coords_list = [coords]
+        coords_list = parse_json_tracks(coordinates)
 
         batch_size = len(coords_list[0])
         images_list = []

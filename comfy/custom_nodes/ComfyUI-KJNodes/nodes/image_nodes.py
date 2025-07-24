@@ -16,14 +16,19 @@ try:
 except:
     print("OpenCV not installed")
     pass
-from PIL import ImageGrab, ImageDraw, ImageFont, Image, ImageSequence, ImageOps
+from PIL import ImageGrab, ImageDraw, ImageFont, Image, ImageOps
 
 from nodes import MAX_RESOLUTION, SaveImage
 from comfy_extras.nodes_mask import ImageCompositeMasked
 from comfy.cli_args import args
 from comfy.utils import ProgressBar, common_upscale
 import folder_paths
-import model_management
+from comfy import model_management
+try:
+    from server import PromptServer
+except:
+    PromptServer = None
+from concurrent.futures import ThreadPoolExecutor
 
 script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -68,6 +73,7 @@ class ColorMatch:
             },
             "optional": {
                 "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}),
+                "multithread": ("BOOLEAN", {"default": True}),
             }
         }
     
@@ -89,37 +95,41 @@ https://github.com/hahnec/color-matcher/
 
 """
     
-    def colormatch(self, image_ref, image_target, method, strength=1.0):
+    def colormatch(self, image_ref, image_target, method, strength=1.0, multithread=True):
         try:
             from color_matcher import ColorMatcher
         except:
             raise Exception("Can't import color-matcher, did you install requirements.txt? Manual install: pip install color-matcher")
-        cm = ColorMatcher()
+        
         image_ref = image_ref.cpu()
         image_target = image_target.cpu()
         batch_size = image_target.size(0)
-        out = []
+        
         images_target = image_target.squeeze()
         images_ref = image_ref.squeeze()
 
         image_ref_np = images_ref.numpy()
         images_target_np = images_target.numpy()
 
-        if image_ref.size(0) > 1 and image_ref.size(0) != batch_size:
-            raise ValueError("ColorMatch: Use either single reference image or a matching batch of reference images.")
-
-        for i in range(batch_size):
-            image_target_np = images_target_np if batch_size == 1 else images_target[i].numpy()
+        def process(i):
+            cm = ColorMatcher()
+            image_target_np_i = images_target_np if batch_size == 1 else images_target[i].numpy()
             image_ref_np_i = image_ref_np if image_ref.size(0) == 1 else images_ref[i].numpy()
             try:
-                image_result = cm.transfer(src=image_target_np, ref=image_ref_np_i, method=method)
-            except BaseException as e:
-                print(f"Error occurred during transfer: {e}")
-                break
-            # Apply the strength multiplier
-            image_result = image_target_np + strength * (image_result - image_target_np)
-            out.append(torch.from_numpy(image_result))
-            
+                image_result = cm.transfer(src=image_target_np_i, ref=image_ref_np_i, method=method)
+                image_result = image_target_np_i + strength * (image_result - image_target_np_i)
+                return torch.from_numpy(image_result)
+            except Exception as e:
+                print(f"Thread {i} error: {e}")
+                return torch.from_numpy(image_target_np_i)  # fallback
+
+        if multithread and batch_size > 1:
+            max_threads = min(os.cpu_count() or 1, batch_size)
+            with ThreadPoolExecutor(max_workers=max_threads) as executor:
+                out = list(executor.map(process, range(batch_size)))
+        else:
+            out = [process(i) for i in range(batch_size)]
+
         out = torch.stack(out, dim=0).to(torch.float32)
         out.clamp_(0, 1)
         return (out,)
@@ -809,12 +819,19 @@ with repeats 2 becomes batch of 10 images: 0, 0, 1, 1, 2, 2, 3, 3, 4, 4
         }
     
     def repeat(self, images, repeats, mask=None):
+        original_count = images.shape[0]
+        total_count = original_count * repeats
        
         repeated_images = torch.repeat_interleave(images, repeats=repeats, dim=0)
         if mask is not None:
             mask = torch.repeat_interleave(mask, repeats=repeats, dim=0)
         else:
-            mask = torch.zeros_like(repeated_images[:, 0:1, :, :])
+            mask = torch.zeros((total_count, images.shape[1], images.shape[2]), 
+                              device=images.device, dtype=images.dtype)
+            for i in range(original_count):
+                mask[i * repeats] = 1.0
+
+        print("mask shape", mask.shape)
         return (repeated_images, mask)
     
 class ImageUpscaleWithModelBatched:
@@ -1240,7 +1257,39 @@ nodes for example.
         if pass_through:
             return (preview, )
         return(self.save_images(preview, filename_prefix, prompt, extra_pnginfo))
-        
+
+def crossfade(images_1, images_2, alpha):
+    crossfade = (1 - alpha) * images_1 + alpha * images_2
+    return crossfade
+def ease_in(t):
+    return t * t
+def ease_out(t):
+    return 1 - (1 - t) * (1 - t)
+def ease_in_out(t):
+    return 3 * t * t - 2 * t * t * t
+def bounce(t):
+    if t < 0.5:
+        return ease_out(t * 2) * 0.5
+    else:
+        return ease_in((t - 0.5) * 2) * 0.5 + 0.5
+def elastic(t):
+    return math.sin(13 * math.pi / 2 * t) * math.pow(2, 10 * (t - 1))
+def glitchy(t):
+    return t + 0.1 * math.sin(40 * t)
+def exponential_ease_out(t):
+    return 1 - (1 - t) ** 4
+
+easing_functions = {
+    "linear": lambda t: t,
+    "ease_in": ease_in,
+    "ease_out": ease_out,
+    "ease_in_out": ease_in_out,
+    "bounce": bounce,
+    "elastic": elastic,
+    "glitchy": glitchy,
+    "exponential_ease_out": exponential_ease_out,
+}
+
 class CrossFadeImages:
     
     RETURN_TYPES = ("IMAGE",)
@@ -1254,7 +1303,7 @@ class CrossFadeImages:
                  "images_1": ("IMAGE",),
                  "images_2": ("IMAGE",),
                  "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out", "bounce", "elastic", "glitchy", "exponential_ease_out"],),
-                 "transition_start_index": ("INT", {"default": 1,"min": 0, "max": 4096, "step": 1}),
+                 "transition_start_index": ("INT", {"default": 1,"min": -4096, "max": 4096, "step": 1}),
                  "transitioning_frames": ("INT", {"default": 1,"min": 0, "max": 4096, "step": 1}),
                  "start_level": ("FLOAT", {"default": 0.0,"min": 0.0, "max": 1.0, "step": 0.01}),
                  "end_level": ("FLOAT", {"default": 1.0,"min": 0.0, "max": 1.0, "step": 0.01}),
@@ -1263,70 +1312,38 @@ class CrossFadeImages:
     
     def crossfadeimages(self, images_1, images_2, transition_start_index, transitioning_frames, interpolation, start_level, end_level):
 
-        def crossfade(images_1, images_2, alpha):
-            crossfade = (1 - alpha) * images_1 + alpha * images_2
-            return crossfade
-        def ease_in(t):
-            return t * t
-        def ease_out(t):
-            return 1 - (1 - t) * (1 - t)
-        def ease_in_out(t):
-            return 3 * t * t - 2 * t * t * t
-        def bounce(t):
-            if t < 0.5:
-                return self.ease_out(t * 2) * 0.5
-            else:
-                return self.ease_in((t - 0.5) * 2) * 0.5 + 0.5
-        def elastic(t):
-            return math.sin(13 * math.pi / 2 * t) * math.pow(2, 10 * (t - 1))
-        def glitchy(t):
-            return t + 0.1 * math.sin(40 * t)
-        def exponential_ease_out(t):
-            return 1 - (1 - t) ** 4
-
-        easing_functions = {
-            "linear": lambda t: t,
-            "ease_in": ease_in,
-            "ease_out": ease_out,
-            "ease_in_out": ease_in_out,
-            "bounce": bounce,
-            "elastic": elastic,
-            "glitchy": glitchy,
-            "exponential_ease_out": exponential_ease_out,
-        }
-
         crossfade_images = []
+
+        if transition_start_index < 0:
+            transition_start_index = len(images_1) + transition_start_index
+            if transition_start_index < 0:
+                raise ValueError("Transition start index is out of range for images_1.")
+            
+        transitioning_frames = min(transitioning_frames, len(images_1) - transition_start_index, len(images_2))
 
         alphas = torch.linspace(start_level, end_level, transitioning_frames)
         for i in range(transitioning_frames):
             alpha = alphas[i]
-            image1 = images_1[i + transition_start_index]
-            image2 = images_2[i + transition_start_index]
+            image1 = images_1[transition_start_index + i]
+            image2 = images_2[i]
             easing_function = easing_functions.get(interpolation)
             alpha = easing_function(alpha)  # Apply the easing function to the alpha value
 
             crossfade_image = crossfade(image1, image2, alpha)
             crossfade_images.append(crossfade_image)
-            
+
         # Convert crossfade_images to tensor
         crossfade_images = torch.stack(crossfade_images, dim=0)
-        # Get the last frame result of the interpolation
-        last_frame = crossfade_images[-1]
-        # Calculate the number of remaining frames from images_2
-        remaining_frames = len(images_2) - (transition_start_index + transitioning_frames)
-        # Crossfade the remaining frames with the last used alpha value
-        for i in range(remaining_frames):
-            alpha = alphas[-1]
-            image1 = images_1[i + transition_start_index + transitioning_frames]
-            image2 = images_2[i + transition_start_index + transitioning_frames]
-            easing_function = easing_functions.get(interpolation)
-            alpha = easing_function(alpha)  # Apply the easing function to the alpha value
 
-            crossfade_image = crossfade(image1, image2, alpha)
-            crossfade_images = torch.cat([crossfade_images, crossfade_image.unsqueeze(0)], dim=0)
-        # Append the beginning of images_1
+        # Append the beginning of images_1 (before the transition)
         beginning_images_1 = images_1[:transition_start_index]
         crossfade_images = torch.cat([beginning_images_1, crossfade_images], dim=0)
+
+        # Append the remaining frames of images_2 (after the transition)
+        remaining_images_2 = images_2[transitioning_frames:]
+        if len(remaining_images_2) > 0:
+            crossfade_images = torch.cat([crossfade_images, remaining_images_2], dim=0)
+
         return (crossfade_images, )
     
 class CrossFadeImagesMulti:
@@ -1340,47 +1357,19 @@ class CrossFadeImagesMulti:
             "required": {
                  "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
                  "image_1": ("IMAGE",),
-                 "image_2": ("IMAGE",),
                  "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out", "bounce", "elastic", "glitchy", "exponential_ease_out"],),
                  "transitioning_frames": ("INT", {"default": 1,"min": 0, "max": 4096, "step": 1}),
         },
+        "optional": {
+            "image_2": ("IMAGE",),
+        }
     } 
     
     def crossfadeimages(self, inputcount, transitioning_frames, interpolation, **kwargs):
 
-        def crossfade(images_1, images_2, alpha):
-            crossfade = (1 - alpha) * images_1 + alpha * images_2
-            return crossfade
-        def ease_in(t):
-            return t * t
-        def ease_out(t):
-            return 1 - (1 - t) * (1 - t)
-        def ease_in_out(t):
-            return 3 * t * t - 2 * t * t * t
-        def bounce(t):
-            if t < 0.5:
-                return self.ease_out(t * 2) * 0.5
-            else:
-                return self.ease_in((t - 0.5) * 2) * 0.5 + 0.5
-        def elastic(t):
-            return math.sin(13 * math.pi / 2 * t) * math.pow(2, 10 * (t - 1))
-        def glitchy(t):
-            return t + 0.1 * math.sin(40 * t)
-        def exponential_ease_out(t):
-            return 1 - (1 - t) ** 4
-
-        easing_functions = {
-            "linear": lambda t: t,
-            "ease_in": ease_in,
-            "ease_out": ease_out,
-            "ease_in_out": ease_in_out,
-            "bounce": bounce,
-            "elastic": elastic,
-            "glitchy": glitchy,
-            "exponential_ease_out": exponential_ease_out,
-        }
-
         image_1 = kwargs["image_1"]
+        first_image_shape = image_1.shape
+        first_image_device = image_1.device
         height = image_1.shape[1]
         width = image_1.shape[2]
 
@@ -1388,7 +1377,7 @@ class CrossFadeImagesMulti:
        
         for c in range(1, inputcount):
             frames = []
-            new_image = kwargs[f"image_{c + 1}"]
+            new_image = kwargs.get(f"image_{c + 1}", torch.zeros(first_image_shape)).to(first_image_device)
             new_image_height = new_image.shape[1]
             new_image_width = new_image.shape[2]
 
@@ -1412,73 +1401,55 @@ class CrossFadeImagesMulti:
         return image_1,
 
 def transition_images(images_1, images_2, alpha, transition_type, blur_radius, reverse):        
-            width = images_1.shape[1]
-            height = images_1.shape[0]
+    width = images_1.shape[1]
+    height = images_1.shape[0]
 
-            mask = torch.zeros_like(images_1, device=images_1.device)
-          
-            alpha = alpha.item()
-            if reverse:
-                alpha = 1 - alpha
+    mask = torch.zeros_like(images_1, device=images_1.device)
+    
+    alpha = alpha.item()
+    if reverse:
+        alpha = 1 - alpha
 
-            #transitions from matteo's essential nodes
-            if "horizontal slide" in transition_type:
-                pos = round(width * alpha)
-                mask[:, :pos, :] = 1.0
-            elif "vertical slide" in transition_type:
-                pos = round(height * alpha)
-                mask[:pos, :, :] = 1.0
-            elif "box" in transition_type:
-                box_w = round(width * alpha)
-                box_h = round(height * alpha)
-                x1 = (width - box_w) // 2
-                y1 = (height - box_h) // 2
-                x2 = x1 + box_w
-                y2 = y1 + box_h
-                mask[y1:y2, x1:x2, :] = 1.0
-            elif "circle" in transition_type:
-                radius = math.ceil(math.sqrt(pow(width, 2) + pow(height, 2)) * alpha / 2)
-                c_x = width // 2
-                c_y = height // 2
-                x = torch.arange(0, width, dtype=torch.float32, device="cpu")
-                y = torch.arange(0, height, dtype=torch.float32, device="cpu")
-                y, x = torch.meshgrid((y, x), indexing="ij")
-                circle = ((x - c_x) ** 2 + (y - c_y) ** 2) <= (radius ** 2)
-                mask[circle] = 1.0
-            elif "horizontal door" in transition_type:
-                bar = math.ceil(height * alpha / 2)
-                if bar > 0:
-                    mask[:bar, :, :] = 1.0
-                    mask[-bar:,:, :] = 1.0
-            elif "vertical door" in transition_type:
-                bar = math.ceil(width * alpha / 2)
-                if bar > 0:
-                    mask[:, :bar,:] = 1.0
-                    mask[:, -bar:,:] = 1.0
-            elif "fade" in transition_type:
-                mask[:, :, :] = alpha
+    #transitions from matteo's essential nodes
+    if "horizontal slide" in transition_type:
+        pos = round(width * alpha)
+        mask[:, :pos, :] = 1.0
+    elif "vertical slide" in transition_type:
+        pos = round(height * alpha)
+        mask[:pos, :, :] = 1.0
+    elif "box" in transition_type:
+        box_w = round(width * alpha)
+        box_h = round(height * alpha)
+        x1 = (width - box_w) // 2
+        y1 = (height - box_h) // 2
+        x2 = x1 + box_w
+        y2 = y1 + box_h
+        mask[y1:y2, x1:x2, :] = 1.0
+    elif "circle" in transition_type:
+        radius = math.ceil(math.sqrt(pow(width, 2) + pow(height, 2)) * alpha / 2)
+        c_x = width // 2
+        c_y = height // 2
+        x = torch.arange(0, width, dtype=torch.float32, device="cpu")
+        y = torch.arange(0, height, dtype=torch.float32, device="cpu")
+        y, x = torch.meshgrid((y, x), indexing="ij")
+        circle = ((x - c_x) ** 2 + (y - c_y) ** 2) <= (radius ** 2)
+        mask[circle] = 1.0
+    elif "horizontal door" in transition_type:
+        bar = math.ceil(height * alpha / 2)
+        if bar > 0:
+            mask[:bar, :, :] = 1.0
+            mask[-bar:,:, :] = 1.0
+    elif "vertical door" in transition_type:
+        bar = math.ceil(width * alpha / 2)
+        if bar > 0:
+            mask[:, :bar,:] = 1.0
+            mask[:, -bar:,:] = 1.0
+    elif "fade" in transition_type:
+        mask[:, :, :] = alpha
 
-            mask = gaussian_blur(mask, blur_radius)
+    mask = gaussian_blur(mask, blur_radius)
 
-            return images_1 * (1 - mask) + images_2 * mask
-        
-def ease_in(t):
-    return t * t
-def ease_out(t):
-    return 1 - (1 - t) * (1 - t)
-def ease_in_out(t):
-    return 3 * t * t - 2 * t * t * t
-def bounce(t):
-    if t < 0.5:
-        return ease_out(t * 2) * 0.5
-    else:
-        return ease_in((t - 0.5) * 2) * 0.5 + 0.5
-def elastic(t):
-    return math.sin(13 * math.pi / 2 * t) * math.pow(2, 10 * (t - 1))
-def glitchy(t):
-    return t + 0.1 * math.sin(40 * t)
-def exponential_ease_out(t):
-    return 1 - (1 - t) ** 4
+    return images_1 * (1 - mask) + images_2 * mask
 
 def gaussian_blur(mask, blur_radius):
     if blur_radius > 0:
@@ -1522,14 +1493,16 @@ Creates transitions between images.
             "required": {
                  "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
                  "image_1": ("IMAGE",),
-                 "image_2": ("IMAGE",),
                  "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out", "bounce", "elastic", "glitchy", "exponential_ease_out"],),
                  "transition_type": (["horizontal slide", "vertical slide", "box", "circle", "horizontal door", "vertical door", "fade"],),
-                 "transitioning_frames": ("INT", {"default": 1,"min": 0, "max": 4096, "step": 1}),
+                 "transitioning_frames": ("INT", {"default": 2,"min": 2, "max": 4096, "step": 1}),
                  "blur_radius": ("FLOAT", {"default": 0.0,"min": 0.0, "max": 100.0, "step": 0.1}),
                  "reverse": ("BOOLEAN", {"default": False}),
                  "device": (["CPU", "GPU"], {"default": "CPU"}),
-        },
+            },
+            "optional": {
+                "image_2": ("IMAGE",),
+            }
     } 
 
     def transition(self, inputcount, transitioning_frames, transition_type, interpolation, device, blur_radius, reverse, **kwargs):
@@ -1539,12 +1512,14 @@ Creates transitions between images.
         image_1 = kwargs["image_1"]
         height = image_1.shape[1]
         width = image_1.shape[2]
+        first_image_shape = image_1.shape
+        first_image_device = image_1.device
 
         easing_function = easing_functions[interpolation]
     
         for c in range(1, inputcount):
             frames = []
-            new_image = kwargs[f"image_{c + 1}"]
+            new_image = kwargs.get(f"image_{c + 1}", torch.zeros(first_image_shape)).to(first_image_device)
             new_image_height = new_image.shape[1]
             new_image_width = new_image.shape[2]
 
@@ -1631,6 +1606,74 @@ Creates transitions between images in a batch.
         images = torch.cat(images_list, dim=0)
         
         return images.cpu(),
+
+class ImageBatchJoinWithTransition:
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "transition_batches"
+    CATEGORY = "KJNodes/image"
+    DESCRIPTION = """
+Transitions between two batches of images, starting at a specified index in the first batch.
+During the transition, frames from both batches are blended frame-by-frame, so the video keeps playing.
+"""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images_1": ("IMAGE",),
+                "images_2": ("IMAGE",),
+                "start_index": ("INT", {"default": 0, "min": -10000, "max": 10000, "step": 1}),
+                "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out", "bounce", "elastic", "glitchy", "exponential_ease_out"],),
+                "transition_type": (["horizontal slide", "vertical slide", "box", "circle", "horizontal door", "vertical door", "fade"],),
+                "transitioning_frames": ("INT", {"default": 1, "min": 1, "max": 4096, "step": 1}),
+                "blur_radius": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 100.0, "step": 0.1}),
+                "reverse": ("BOOLEAN", {"default": False}),
+                "device": (["CPU", "GPU"], {"default": "CPU"}),
+            },
+        }
+
+    def transition_batches(self, images_1, images_2, start_index, interpolation, transition_type, transitioning_frames, blur_radius, reverse, device):
+        if images_1.shape[0] == 0 or images_2.shape[0] == 0:
+            raise ValueError("Both input batches must have at least one image.")
+        
+        if start_index < 0:
+            start_index = images_1.shape[0] + start_index
+        if start_index < 0 or start_index > images_1.shape[0]:
+            raise ValueError("start_index is out of range.")
+
+        gpu = model_management.get_torch_device()
+        easing_function = easing_functions[interpolation]
+        out_frames = []
+
+        # Add images from images_1 up to start_index
+        if start_index > 0:
+            out_frames.append(images_1[:start_index])
+
+        # Determine how many frames we can blend
+        max_transition = min(transitioning_frames, images_1.shape[0] - start_index, images_2.shape[0])
+
+        # Blend corresponding frames from both batches
+        for i in range(max_transition):
+            img1 = images_1[start_index + i]
+            img2 = images_2[i]
+            if device == "GPU":
+                img1 = img1.to(gpu)
+                img2 = img2.to(gpu)
+            if reverse:
+                img1, img2 = img2, img1
+            t = i / (max_transition - 1) if max_transition > 1 else 1.0
+            alpha = easing_function(t)
+            alpha_tensor = torch.tensor(alpha, dtype=img1.dtype, device=img1.device)
+            frame_image = transition_images(img1, img2, alpha_tensor, transition_type, blur_radius, reverse)
+            out_frames.append(frame_image.cpu().unsqueeze(0))
+
+        # Add remaining images from images_2 after transition
+        if images_2.shape[0] > max_transition:
+            out_frames.append(images_2[max_transition:])
+
+        # Concatenate all frames
+        out = torch.cat(out_frames, dim=0)
+        return (out.cpu(),)
 
 class ShuffleImageBatch:
     RETURN_TYPES = ("IMAGE",)
@@ -2000,25 +2043,43 @@ with the replacement images.
     def INPUT_TYPES(s):
         return {
             "required": {
-                 "original_images": ("IMAGE",),
-                 "replacement_images": ("IMAGE",),
                  "start_index": ("INT", {"default": 1,"min": 0, "max": 4096, "step": 1}),
         },
         "optional": {
+            "original_images": ("IMAGE",),
+            "replacement_images": ("IMAGE",),
             "original_masks": ("MASK",),
             "replacement_masks": ("MASK",),
         }
     } 
     
-    def replace(self, original_images, replacement_images, start_index, original_masks=None, replacement_masks=None):
+    def replace(self, original_images=None, replacement_images=None, start_index=1, original_masks=None, replacement_masks=None):
         images = None
-        if start_index >= len(original_images):
-            raise ValueError("GetImageRangeFromBatch: Start index is out of range")
-        end_index = start_index + len(replacement_images)
-        if end_index > len(original_images):
-            raise ValueError("GetImageRangeFromBatch: End index is out of range")
+        masks = None
+        
+        if original_images is not None and replacement_images is not None:
+            if start_index >= len(original_images):
+                raise ValueError("ReplaceImagesInBatch: Start index is out of range")
+            end_index = start_index + len(replacement_images)
+            if end_index > len(original_images):
+                raise ValueError("ReplaceImagesInBatch: End index is out of range")
+            
+            original_images_copy = original_images.clone()
+            if original_images_copy.shape[2] != replacement_images.shape[2] or original_images_copy.shape[3] != replacement_images.shape[3]:
+                replacement_images = common_upscale(replacement_images.movedim(-1, 1), original_images_copy.shape[1], original_images_copy.shape[2], "lanczos", "center").movedim(1, -1)
+            
+            original_images_copy[start_index:end_index] = replacement_images
+            images = original_images_copy
+        else:
+            images = torch.zeros((1, 64, 64, 3))
         
         if original_masks is not None and replacement_masks is not None:
+            if start_index >= len(original_masks):
+                raise ValueError("ReplaceImagesInBatch: Start index is out of range")
+            end_index = start_index + len(replacement_masks)
+            if end_index > len(original_masks):
+                raise ValueError("ReplaceImagesInBatch: End index is out of range")
+
             original_masks_copy = original_masks.clone()
             if original_masks_copy.shape[1] != replacement_masks.shape[1] or original_masks_copy.shape[2] != replacement_masks.shape[2]:
                 replacement_masks = common_upscale(replacement_masks.unsqueeze(1), original_masks_copy.shape[1], original_masks_copy.shape[2], "nearest-exact", "center").squeeze(0)
@@ -2026,15 +2087,8 @@ with the replacement images.
             original_masks_copy[start_index:end_index] = replacement_masks
             masks = original_masks_copy
         else:
-            masks = torch.zeros(1,64,64, device=original_images.device, dtype=original_images.dtype)
+            masks = torch.zeros((1, 64, 64))
         
-        original_images_copy = original_images.clone()
-
-        if original_images_copy.shape[2] != replacement_images.shape[2] or original_images_copy.shape[3] != replacement_images.shape[3]:
-            replacement_images = common_upscale(replacement_images.movedim(-1, 1), original_images_copy.shape[1], original_images_copy.shape[2], "lanczos", "center").movedim(1, -1)
-        
-        original_images_copy[start_index:end_index] = replacement_images
-        images = original_images_copy
         return (images, masks)
     
 
@@ -2066,8 +2120,11 @@ class ImageBatchMulti:
             "required": {
                 "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
                 "image_1": ("IMAGE", ),
-                "image_2": ("IMAGE", ),
+                
             },
+            "optional": {
+                "image_2": ("IMAGE", ),
+            }
     }
 
     RETURN_TYPES = ("IMAGE",)
@@ -2083,9 +2140,10 @@ with the **inputcount** and clicking update.
     def combine(self, inputcount, **kwargs):
         from nodes import ImageBatch
         image_batch_node = ImageBatch()
-        image = kwargs["image_1"]
+        image = kwargs["image_1"].cpu()
+        first_image_shape = image.shape
         for c in range(1, inputcount):
-            new_image = kwargs[f"image_{c + 1}"]
+            new_image = kwargs.get(f"image_{c + 1}", torch.zeros(first_image_shape)).cpu()
             image, = image_batch_node.batch(image, new_image)
         return (image,)
 
@@ -2099,7 +2157,6 @@ class ImageTensorList:
         }}
 
     RETURN_TYPES = ("IMAGE",)
-    #OUTPUT_IS_LIST = (True,)
     FUNCTION = "append"
     CATEGORY = "KJNodes/image"
     DESCRIPTION = """
@@ -2170,7 +2227,7 @@ class ImageConcatMulti:
             "required": {
                 "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
                 "image_1": ("IMAGE", ),
-                "image_2": ("IMAGE", ),
+                
                 "direction": (
                 [   'right',
                     'down',
@@ -2181,6 +2238,9 @@ class ImageConcatMulti:
             "default": 'right'
              }),
             "match_image_size": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "image_2": ("IMAGE", ),
             },
     }
 
@@ -2200,7 +2260,7 @@ with the **inputcount** and clicking update.
         if first_image_shape is None:
             first_image_shape = image.shape
         for c in range(1, inputcount):
-            new_image = kwargs[f"image_{c + 1}"]
+            new_image = kwargs.get(f"image_{c + 1}", torch.zeros(first_image_shape))
             image, = ImageConcanate.concatenate(self, image, new_image, direction, match_image_size, first_image_shape=first_image_shape)
         first_image_shape = None
         return (image,)
@@ -2278,7 +2338,7 @@ class PreviewAnimation:
         c = len(pil_images)
         for i in range(0, c, num_frames):
             file = f"{filename}_{counter:05}_.webp"
-            pil_images[i].save(os.path.join(full_output_folder, file), save_all=True, duration=int(1000.0/fps), append_images=pil_images[i + 1:i + num_frames], lossless=False, quality=80, method=4)
+            pil_images[i].save(os.path.join(full_output_folder, file), save_all=True, duration=int(1000.0/fps), append_images=pil_images[i + 1:i + num_frames], lossless=False, quality=50, method=0)
             results.append({
                 "filename": file,
                 "subfolder": subfolder,
@@ -2381,10 +2441,17 @@ class ImageResizeKJv2:
                 "crop_position": (["center", "top", "bottom", "left", "right"], { "default": "center" }),
                 "divisible_by": ("INT", { "default": 2, "min": 0, "max": 512, "step": 1, }),
             },
+            "optional" : {
+                "mask": ("MASK",),
+                "device": (["cpu", "gpu"],),
+            },
+             "hidden": {
+                "unique_id": "UNIQUE_ID",
+            },
         }
 
-    RETURN_TYPES = ("IMAGE", "INT", "INT",)
-    RETURN_NAMES = ("IMAGE", "width", "height",)
+    RETURN_TYPES = ("IMAGE", "INT", "INT", "MASK",)
+    RETURN_NAMES = ("IMAGE", "width", "height", "mask",)
     FUNCTION = "resize"
     CATEGORY = "KJNodes/image"
     DESCRIPTION = """
@@ -2395,8 +2462,15 @@ Keep proportions keeps the aspect ratio of the image, by
 highest dimension.  
 """
 
-    def resize(self, image, width, height, keep_proportion, upscale_method, divisible_by, pad_color, crop_position):
+    def resize(self, image, width, height, keep_proportion, upscale_method, divisible_by, pad_color, crop_position, unique_id, device="cpu", mask=None):
         B, H, W, C = image.shape
+
+        if device == "gpu":
+            if upscale_method == "lanczos":
+                raise Exception("Lanczos is not supported on the GPU")
+            device = model_management.get_torch_device()
+        else:
+            device = torch.device("cpu")
 
         if width == 0:
             width = W
@@ -2418,10 +2492,32 @@ highest dimension.
                 new_height = round(H * ratio)
 
             if keep_proportion.startswith("pad"):
-                pad_left = (width - new_width) // 2
-                pad_right = width - new_width - pad_left
-                pad_top = (height - new_height) // 2
-                pad_bottom = height - new_height - pad_top
+                # Calculate padding based on position
+                if crop_position == "center":
+                    pad_left = (width - new_width) // 2
+                    pad_right = width - new_width - pad_left
+                    pad_top = (height - new_height) // 2
+                    pad_bottom = height - new_height - pad_top
+                elif crop_position == "top":
+                    pad_left = (width - new_width) // 2
+                    pad_right = width - new_width - pad_left
+                    pad_top = 0
+                    pad_bottom = height - new_height
+                elif crop_position == "bottom":
+                    pad_left = (width - new_width) // 2
+                    pad_right = width - new_width - pad_left
+                    pad_top = height - new_height
+                    pad_bottom = 0
+                elif crop_position == "left":
+                    pad_left = 0
+                    pad_right = width - new_width
+                    pad_top = (height - new_height) // 2
+                    pad_bottom = height - new_height - pad_top
+                elif crop_position == "right":
+                    pad_left = width - new_width
+                    pad_right = 0
+                    pad_top = (height - new_height) // 2
+                    pad_bottom = height - new_height - pad_top
 
             width = new_width
             height = new_height
@@ -2430,7 +2526,12 @@ highest dimension.
             width = width - (width % divisible_by)
             height = height - (height % divisible_by)
 
-        out_image = image.clone()
+        out_image = image.clone().to(device)
+
+        if mask is not None:
+            out_mask = mask.clone().to(device)
+        else:
+            out_mask = None
         
         if keep_proportion == "crop":
             old_width = W
@@ -2465,8 +2566,17 @@ highest dimension.
             
             # Apply crop
             out_image = out_image.narrow(-2, x, crop_w).narrow(-3, y, crop_h)
+            if mask is not None:
+                out_mask = out_mask.narrow(-1, x, crop_w).narrow(-2, y, crop_h)
         
         out_image = common_upscale(out_image.movedim(-1,1), width, height, upscale_method, crop="disabled").movedim(1,-1)
+
+        if mask is not None:
+            if upscale_method == "lanczos":
+                out_mask = common_upscale(out_mask.unsqueeze(1).repeat(1, 3, 1, 1), width, height, upscale_method, crop="disabled").movedim(1,-1)[:, :, :, 0]
+            else:
+                out_mask = common_upscale(out_mask.unsqueeze(1), width, height, upscale_method, crop="disabled").squeeze(1)
+            
         if keep_proportion.startswith("pad"):
             if pad_left > 0 or pad_right > 0 or pad_top > 0 or pad_bottom > 0:
                 padded_width = width + pad_left + pad_right
@@ -2481,9 +2591,30 @@ highest dimension.
                         extra_height = divisible_by - height_remainder
                         pad_bottom += extra_height
                 out_image, _ = ImagePadKJ.pad(self, out_image, pad_left, pad_right, pad_top, pad_bottom, 0, pad_color, "edge" if keep_proportion == "pad_edge" else "color")
+                if mask is not None:
+                    out_mask = out_mask.unsqueeze(1).repeat(1, 3, 1, 1).movedim(1,-1)
+                    out_mask, _ = ImagePadKJ.pad(self, out_mask, pad_left, pad_right, pad_top, pad_bottom, 0, pad_color, "edge" if keep_proportion == "pad_edge" else "color")
+                    out_mask = out_mask[:, :, :, 0]
+                else:
+                    B, H_pad, W_pad, _ = out_image.shape
+                    out_mask = torch.ones((B, H_pad, W_pad), dtype=out_image.dtype, device=out_image.device)
+                    out_mask[:, pad_top:pad_top+height, pad_left:pad_left+width] = 0.0
 
 
-        return(out_image, out_image.shape[2], out_image.shape[1],)
+        if unique_id and PromptServer is not None:
+            try:
+                num_elements = out_image.numel()
+                element_size = out_image.element_size()
+                memory_size_mb = (num_elements * element_size) / (1024 * 1024)
+                
+                PromptServer.instance.send_progress_text(
+                    f"<tr><td>Output: </td><td><b>{out_image.shape[0]}</b> x <b>{out_image.shape[2]}</b> x <b>{out_image.shape[1]} | {memory_size_mb:.2f}MB</b></td></tr>",
+                    unique_id
+                )
+            except:
+                pass
+
+        return(out_image.cpu(), out_image.shape[2], out_image.shape[1], out_mask.cpu() if out_mask is not None else torch.zeros(64,64, device=torch.device("cpu"), dtype=torch.float32))
     
 import pathlib    
 class LoadAndResizeImage:
@@ -2639,14 +2770,66 @@ class LoadAndResizeImage:
 
         return True
 
+import hashlib
 class LoadImagesFromFolderKJ:
+    # Dictionary to store folder hashes
+    folder_hashes = {}
+
+    @classmethod
+    def IS_CHANGED(cls, folder, **kwargs):
+        if not os.path.isdir(folder):
+            return float("NaN")
+        
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.webp', '.tga']
+        include_subfolders = kwargs.get('include_subfolders', False)
+        
+        file_data = []
+        if include_subfolders:
+            for root, _, files in os.walk(folder):
+                for file in files:
+                    if any(file.lower().endswith(ext) for ext in valid_extensions):
+                        path = os.path.join(root, file)
+                        try:
+                            mtime = os.path.getmtime(path)
+                            file_data.append((path, mtime))
+                        except OSError:
+                            pass
+        else:
+            for file in os.listdir(folder):
+                if any(file.lower().endswith(ext) for ext in valid_extensions):
+                    path = os.path.join(folder, file)
+                    try:
+                        mtime = os.path.getmtime(path)
+                        file_data.append((path, mtime))
+                    except OSError:
+                        pass
+        
+        file_data.sort()
+        
+        combined_hash = hashlib.md5()
+        combined_hash.update(folder.encode('utf-8'))
+        combined_hash.update(str(len(file_data)).encode('utf-8'))
+        
+        for path, mtime in file_data:
+            combined_hash.update(f"{path}:{mtime}".encode('utf-8'))
+        
+        current_hash = combined_hash.hexdigest()
+        
+        old_hash = cls.folder_hashes.get(folder)
+        cls.folder_hashes[folder] = current_hash
+        
+        if old_hash == current_hash:
+            return old_hash
+        
+        return current_hash
+
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
                 "folder": ("STRING", {"default": ""}),
-                "width": ("INT", {"default": 1024, "min": 64, "step": 1}),
-                "height": ("INT", {"default": 1024, "min": 64, "step": 1}),
+                "width": ("INT", {"default": 1024, "min": -1, "step": 1}),
+                "height": ("INT", {"default": 1024, "min": -1, "step": 1}),
                 "keep_aspect_ratio": (["crop", "pad", "stretch",],), 
             },
             "optional": {
@@ -2666,7 +2849,7 @@ class LoadImagesFromFolderKJ:
         if not os.path.isdir(folder):
             raise FileNotFoundError(f"Folder '{folder} cannot be found.'")
         
-        valid_extensions = ['.jpg', '.jpeg', '.png', '.webp']
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.webp', '.tga']
         image_paths = []
         if include_subfolders:
             for root, _, files in os.walk(folder):
@@ -2704,6 +2887,9 @@ class LoadImagesFromFolderKJ:
             i = ImageOps.exif_transpose(i)
             
             # Resize image to maximum dimensions
+            if width == -1 and height == -1:
+                width = i.size[0]
+                height = i.size[1]
             if i.size != (width, height):
                 i = self.resize_with_aspect_ratio(i, width, height, keep_aspect_ratio)
             

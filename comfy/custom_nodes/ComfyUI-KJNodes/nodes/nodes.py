@@ -2,25 +2,18 @@ import torch
 import torch.nn as nn
 import numpy as np
 from PIL import Image
-from typing import Union
-import json, re, os, io, time, platform
+import json, re, os, io, time
 import re
 import importlib
 
-import model_management
+from comfy import model_management
 import folder_paths
 from nodes import MAX_RESOLUTION
 from comfy.utils import common_upscale, ProgressBar, load_torch_file
+from comfy.comfy_types.node_typing import IO
 
 script_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 folder_paths.add_model_folder_path("kjnodes_fonts", os.path.join(script_directory, "fonts"))
-
-class AnyType(str):
-  """A special class that is always equal in not equal comparisons. Credit to pythongosssss"""
-
-  def __ne__(self, __value: object) -> bool:
-    return False
-any = AnyType("*")
 
 class BOOLConstant:
     @classmethod
@@ -41,7 +34,7 @@ class INTConstant:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "value": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            "value": ("INT", {"default": 0, "min": -0xffffffffffffffff, "max": 0xffffffffffffffff}),
         },
         }
     RETURN_TYPES = ("INT",)
@@ -255,16 +248,18 @@ class JoinStrings:
     def INPUT_TYPES(cls):
         return {
             "required": {
+                "delimiter": ("STRING", {"default": ' ', "multiline": False}),
+            },
+            "optional": {
                 "string1": ("STRING", {"default": '', "forceInput": True}),
                 "string2": ("STRING", {"default": '', "forceInput": True}),
-                "delimiter": ("STRING", {"default": ' ', "multiline": False}),
             }
         }
     RETURN_TYPES = ("STRING",)
     FUNCTION = "joinstring"
     CATEGORY = "KJNodes/text"
 
-    def joinstring(self, string1, string2, delimiter):
+    def joinstring(self, delimiter, string1="", string2=""):
         joined_string = string1 + delimiter + string2
         return (joined_string, )
     
@@ -275,10 +270,12 @@ class JoinStringMulti:
             "required": {
                 "inputcount": ("INT", {"default": 2, "min": 2, "max": 1000, "step": 1}),
                 "string_1": ("STRING", {"default": '', "forceInput": True}),
-                "string_2": ("STRING", {"default": '', "forceInput": True}),
                 "delimiter": ("STRING", {"default": ' ', "multiline": False}),
                 "return_list": ("BOOLEAN", {"default": False}),
             },
+            "optional": {
+                "string_2": ("STRING", {"default": '', "forceInput": True}),
+            }
     }
 
     RETURN_TYPES = ("STRING",)
@@ -297,7 +294,9 @@ with the **inputcount** and clicking update.
         return_list = kwargs["return_list"]
         strings = [string] # Initialize a list with the first string
         for c in range(1, inputcount):
-            new_string = kwargs[f"string_{c + 1}"]
+            new_string = kwargs.get(f"string_{c + 1}", "")
+            if not new_string:
+                continue
             if return_list:
                 strings.append(new_string) # Add new string to the list
             else:
@@ -615,13 +614,13 @@ class VRAM_Debug:
             "unload_all_models": ("BOOLEAN", {"default": False}),
         },
         "optional": {
-            "any_input": (any, {}),
+            "any_input": (IO.ANY,),
             "image_pass": ("IMAGE",),
             "model_pass": ("MODEL",),
         }
 	}
         
-    RETURN_TYPES = (any, "IMAGE","MODEL","INT", "INT",)
+    RETURN_TYPES = (IO.ANY, "IMAGE","MODEL","INT", "INT",)
     RETURN_NAMES = ("any_output", "image_pass", "model_pass", "freemem_before", "freemem_after")
     FUNCTION = "VRAMdebug"
     CATEGORY = "KJNodes/misc"
@@ -655,7 +654,7 @@ class SomethingToString:
     def INPUT_TYPES(s):
      return {
         "required": {
-        "input": (any, {}),
+        "input": (IO.ANY, ),
     },
     "optional": {
         "prefix": ("STRING", {"default": ""}),
@@ -688,12 +687,12 @@ class Sleep:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "input": (any, {}),
+                "input": (IO.ANY, ),
                 "minutes": ("INT", {"default": 0, "min": 0, "max": 1439}),
                 "seconds": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 59.99, "step": 0.01}),
             },
         }
-    RETURN_TYPES = (any,)
+    RETURN_TYPES = (IO.ANY,)
     FUNCTION = "sleepdelay"
     CATEGORY = "KJNodes/misc"
     DESCRIPTION = """
@@ -807,19 +806,20 @@ The choices are loaded from 'custom_dimensions.json' in the nodes folder.
 
 class WidgetToString:
     @classmethod
-    def IS_CHANGED(cls, **kwargs):
-        return float("NaN")
+    def IS_CHANGED(cls,*,id,node_title,any_input,**kwargs):
+        if any_input is not None and (id != 0 or node_title != ""):
+            return float("NaN")
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "id": ("INT", {"default": 0}),
+                "id": ("INT", {"default": 0, "min": 0, "max": 100000, "step": 1}),
                 "widget_name": ("STRING", {"multiline": False}),
                 "return_all": ("BOOLEAN", {"default": False}),
             },
             "optional": {
-                         "any_input": (any, {}),
+                         "any_input": (IO.ANY, ),
                          "node_title": ("STRING", {"multiline": False}),
                          "allowed_float_decimals": ("INT", {"default": 2, "min": 0, "max": 10, "tooltip": "Number of decimal places to display for float values"}),
                          
@@ -915,11 +915,11 @@ class DummyOut:
     def INPUT_TYPES(cls):
         return {
             "required": {
-            "any_input": (any, {}),
+            "any_input": (IO.ANY, ),
             }
         }
 
-    RETURN_TYPES = (any,)
+    RETURN_TYPES = (IO.ANY,)
     FUNCTION = "dummy"
     CATEGORY = "KJNodes/misc"
     OUTPUT_NODE = True
@@ -1693,158 +1693,7 @@ or a .txt file with RealEstate camera intrinsics and coordinates, in a 3D plot.
         ret_poses = [transform_matrix @ x for x in ret_poses]
         return np.array(ret_poses, dtype=np.float32)
     
-
-
-class StabilityAPI_SD3:
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "prompt": ("STRING", {"multiline": True}),
-                "n_prompt": ("STRING", {"multiline": True}),
-                "seed": ("INT", {"default": 123,"min": 0, "max": 4294967294, "step": 1}),
-                "model": (
-                [   
-                    'sd3',
-                    'sd3-turbo',
-                ],
-                {
-                "default": 'sd3'
-                 }),
-                 "aspect_ratio": (
-                [   
-                    '1:1',
-                    '16:9',
-                    '21:9',
-                    '2:3',
-                    '3:2',
-                    '4:5',
-                    '5:4',
-                    '9:16',
-                    '9:21',
-                ],
-                {
-                "default": '1:1'
-                }),
-                "output_format": (
-                [   
-                    'png',
-                    'jpeg',
-                ],
-                {
-                "default": 'jpeg'
-                 }),                 
-            },
-            "optional": {
-                "api_key": ("STRING", {"multiline": True}),
-                "image": ("IMAGE",),
-                "img2img_strength": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "disable_metadata": ("BOOLEAN", {"default": True}),
-            },
-        }
-
-    RETURN_TYPES = ("IMAGE",)
-    FUNCTION = "apicall"
-
-    CATEGORY = "KJNodes/experimental"
-    DESCRIPTION = """
-## Calls StabilityAI API
-   
-Although you may have multiple keys in your account,  
-you should use the same key for all requests to this API.  
-
-Get your API key here: https://platform.stability.ai/account/keys  
-Recommended to set the key in the config.json -file under this  
-node packs folder.  
-# WARNING:  
-Otherwise the API key may get saved in the image metadata even  
-with "disable_metadata" on if the workflow includes save nodes  
-separate from this node.  
-   
-sd3 requires 6.5 credits per generation  
-sd3-turbo requires 4 credits per generation  
-
-If no image is provided, mode is set to text-to-image  
-
-"""
-
-    def apicall(self, prompt, n_prompt, model, seed, aspect_ratio, output_format, 
-                img2img_strength=0.5, image=None, disable_metadata=True, api_key=""):
-        from comfy.cli_args import args
-        if disable_metadata:
-            args.disable_metadata = True
-        else:
-            args.disable_metadata = False
-        
-        import requests
-        from torchvision import transforms
-        
-        data = {
-                "mode": "text-to-image",
-                "prompt": prompt,
-                "model": model,
-                "seed": seed,
-                "output_format": output_format
-                }
-        
-        if image is not None:
-            image = image.permute(0, 3, 1, 2).squeeze(0)
-            to_pil = transforms.ToPILImage()
-            pil_image = to_pil(image)
-            # Save the PIL Image to a BytesIO object
-            buffer = io.BytesIO()
-            pil_image.save(buffer, format='PNG')
-            buffer.seek(0)
-            files = {"image": ("image.png", buffer, "image/png")}
-           
-            data["mode"] = "image-to-image"
-            data["image"] = pil_image
-            data["strength"] = img2img_strength
-        else:
-            data["aspect_ratio"] = aspect_ratio,
-            files = {"none": ''}
-        
-        if model != "sd3-turbo":
-            data["negative_prompt"] = n_prompt
-
-        headers={
-                "accept": "image/*"
-            }
-        
-        if api_key != "":
-            headers["authorization"] = api_key
-        else:
-            config_file_path = os.path.join(script_directory,"config.json")
-            with open(config_file_path, 'r') as file:
-                config = json.load(file)
-            api_key_from_config = config.get("sai_api_key")
-            headers["authorization"] = api_key_from_config            
-        
-        response = requests.post(
-            f"https://api.stability.ai/v2beta/stable-image/generate/sd3",
-            headers=headers,
-            files = files,
-            data = data,
-        )
-
-        if response.status_code == 200:
-            # Convert the response content to a PIL Image
-            image = Image.open(io.BytesIO(response.content))
-            # Convert the PIL Image to a PyTorch tensor
-            transform = transforms.ToTensor()
-            tensor_image = transform(image)
-            tensor_image = tensor_image.unsqueeze(0)
-            tensor_image = tensor_image.permute(0, 2, 3, 1).cpu().float()
-            return (tensor_image,)
-        else:
-            try:
-                # Attempt to parse the response as JSON
-                error_data = response.json()
-                raise Exception(f"Server error: {error_data}")
-            except json.JSONDecodeError:
-                # If the response is not valid JSON, raise a different exception
-                raise Exception(f"Server error: {response.text}")
+    
             
 class CheckpointPerturbWeights:
 
@@ -1947,7 +1796,7 @@ class FluxBlockLoraSelect:
 
         return {"required": arg_dict}
     
-    RETURN_TYPES = ("SELECTEDBLOCKS", )
+    RETURN_TYPES = ("SELECTEDDITBLOCKS", )
     RETURN_NAMES = ("blocks", )
     OUTPUT_TOOLTIPS = ("The modified diffusion model.",)
     FUNCTION = "load_lora"
@@ -1959,9 +1808,6 @@ class FluxBlockLoraSelect:
         return (kwargs,)
     
 class HunyuanVideoBlockLoraSelect:
-    def __init__(self):
-        self.loaded_lora = None
-
     @classmethod
     def INPUT_TYPES(s):
         arg_dict = {}
@@ -1975,7 +1821,29 @@ class HunyuanVideoBlockLoraSelect:
 
         return {"required": arg_dict}
     
-    RETURN_TYPES = ("SELECTEDBLOCKS", )
+    RETURN_TYPES = ("SELECTEDDITBLOCKS", )
+    RETURN_NAMES = ("blocks", )
+    OUTPUT_TOOLTIPS = ("The modified diffusion model.",)
+    FUNCTION = "load_lora"
+
+    CATEGORY = "KJNodes/experimental"
+    DESCRIPTION = "Select individual block alpha values, value of 0 removes the block altogether"
+
+    def load_lora(self, **kwargs):
+        return (kwargs,)
+
+class Wan21BlockLoraSelect:
+    @classmethod
+    def INPUT_TYPES(s):
+        arg_dict = {}
+        argument = ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000.0, "step": 0.01})
+
+        for i in range(40):
+            arg_dict["blocks.{}.".format(i)] = argument
+
+        return {"required": arg_dict}
+    
+    RETURN_TYPES = ("SELECTEDDITBLOCKS", )
     RETURN_NAMES = ("blocks", )
     OUTPUT_TOOLTIPS = ("The modified diffusion model.",)
     FUNCTION = "load_lora"
@@ -1986,7 +1854,7 @@ class HunyuanVideoBlockLoraSelect:
     def load_lora(self, **kwargs):
         return (kwargs,)
     
-class FluxBlockLoraLoader:
+class DiTBlockLoraLoader:
     def __init__(self):
         self.loaded_lora = None
 
@@ -2000,7 +1868,7 @@ class FluxBlockLoraLoader:
                 "optional": {
                     "lora_name": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
                     "opt_lora_path": ("STRING", {"forceInput": True, "tooltip": "Absolute path of the LoRA."}),
-                    "blocks": ("SELECTEDBLOCKS",),
+                    "blocks": ("SELECTEDDITBLOCKS",),
                 }
                }
     
@@ -2024,13 +1892,13 @@ class FluxBlockLoraLoader:
             if self.loaded_lora[0] == lora_path:
                 lora = self.loaded_lora[1]
             else:
-                temp = self.loaded_lora
                 self.loaded_lora = None
-                del temp
         
         if lora is None:
             lora = load_torch_file(lora_path, safe_load=True)
-            # Find the first key that ends with "weight"
+            self.loaded_lora = (lora_path, lora)
+
+        # Find the first key that ends with "weight"
         rank = "unknown"
         weight_key = next((key for key in lora.keys() if key.endswith('weight')), None)
         # Print the shape of the value corresponding to the key
@@ -2067,26 +1935,17 @@ class FluxBlockLoraLoader:
                         if ratio == 0:
                             keys_to_delete.append(key)
                         else:
-                            value = loaded[key]
-                            if isinstance(value, tuple) and len(value) > 1 and isinstance(value[1], tuple):
-                                inner_tuple = value[1]
-                                if len(inner_tuple) >= 3:
-                                    inner_tuple = (inner_tuple[0], inner_tuple[1], ratio, *inner_tuple[3:])
-                                    loaded[key] = (value[0], inner_tuple)
-                            else:
-                                loaded[key] = (value[0], ratio)
+                            value = loaded[key].weights
+                            weights_list = list(loaded[key].weights)
+                            weights_list[2] = ratio
+                            loaded[key].weights = tuple(weights_list)
 
             for key in keys_to_delete:
                 del loaded[key]
 
             print("loading lora keys:")
             for key, value in loaded.items():
-                if isinstance(value, tuple) and len(value) > 1 and isinstance(value[1], tuple):
-                    inner_tuple = value[1]
-                    alpha = inner_tuple[2] if len(inner_tuple) >= 3 else None
-                else:
-                    alpha = value[1] if len(value) > 1 else None
-                print(f"Key: {key}, Alpha: {alpha}")
+                print(f"Key: {key}, Alpha: {value.weights[2]}")
 
 
                 if model is not None:
@@ -2633,7 +2492,7 @@ class TimerNodeKJ:
     def INPUT_TYPES(s):
       return {
         "required": {
-            "any_input": (any, {}),
+            "any_input": (IO.ANY, ),
             "mode": (["start", "stop"],),
             "name": ("STRING", {"default": "Timer"}),
         },
@@ -2642,7 +2501,7 @@ class TimerNodeKJ:
         },
 	}
 
-    RETURN_TYPES = (any, "TIMER", "INT", )
+    RETURN_TYPES = (IO.ANY, "TIMER", "INT", )
     RETURN_NAMES = ("any_output", "timer", "time")
     FUNCTION = "timer"
     CATEGORY = "KJNodes/misc"

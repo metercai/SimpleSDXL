@@ -72,10 +72,10 @@ const create_documentation_stylesheet = () => {
   }
 }
 
-loadScript('/kjweb_async/svg-path-properties.min.js').catch((e) => {
+loadScript('kjweb_async/svg-path-properties.min.js').catch((e) => {
   console.log(e)
 })
-loadScript('/kjweb_async/protovis.min.js').catch((e) => {
+loadScript('kjweb_async/protovis.min.js').catch((e) => {
   console.log(e)
 })
 create_documentation_stylesheet()
@@ -112,9 +112,7 @@ app.registerExtension({
         this.uuid = makeUUID()
         element.id = `points-editor-${this.uuid}`
 
-        // fake image widget to allow copy/paste
-        const fakeimagewidget = this.addWidget("COMBO", "image", null, () => { }, {});
-        hideWidgetForGood(this, fakeimagewidget)
+        this.previewMediaType = 'image'
 
         this.pointsEditor = this.addDOMWidget(nodeData.name, "PointsEditorWidget", element, {
           serialize: false,

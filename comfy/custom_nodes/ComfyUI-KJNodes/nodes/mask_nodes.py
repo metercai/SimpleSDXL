@@ -7,7 +7,7 @@ import numpy as np
 from contextlib import nullcontext
 import os
 
-import model_management
+from comfy import model_management
 from comfy.utils import ProgressBar
 from comfy.utils import common_upscale
 from nodes import MAX_RESOLUTION
@@ -618,7 +618,7 @@ and interpolating from that to fully black at the 16th frame.
                  "frames": ("INT", {"default": 16,"min": 2, "max": 10000, "step": 1}),
                  "width": ("INT", {"default": 512,"min": 1, "max": 4096, "step": 1}),
                  "height": ("INT", {"default": 512,"min": 1, "max": 4096, "step": 1}),
-                 "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out"],),
+                 "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out", "none", "default_to_black"],),
         },
     } 
     
@@ -642,7 +642,7 @@ and interpolating from that to fully black at the 16th frame.
             points.append((frame, color))
 
         # Check if the last frame is already in the points
-        if len(points) == 0 or points[-1][0] != frames - 1:
+        if (interpolation != "default_to_black") and (len(points) == 0 or points[-1][0] != frames - 1):
             # If not, add it with the color of the last specified frame
             points.append((frames - 1, points[-1][1] if points else 0))
 
@@ -662,17 +662,39 @@ and interpolating from that to fully black at the 16th frame.
 
             # Interpolate between the previous point and the next point
             prev_point = next_point - 1
-            t = (i - points[prev_point][0]) / (points[next_point][0] - points[prev_point][0])
-            if interpolation == "ease_in":
-                t = ease_in(t)
-            elif interpolation == "ease_out":
-                t = ease_out(t)
-            elif interpolation == "ease_in_out":
-                t = ease_in_out(t)
-            elif interpolation == "linear":
-                pass  # No need to modify `t` for linear interpolation
 
-            color = points[prev_point][1] - t * (points[prev_point][1] - points[next_point][1])
+            if interpolation == "none":
+                exact_match = False
+                for p in points:
+                    if p[0] == i:  # Exact frame match
+                        color = p[1]
+                        exact_match = True
+                        break
+                if not exact_match:
+                    color = points[prev_point][1]
+
+            elif interpolation == "default_to_black":
+                exact_match = False
+                for p in points:
+                    if p[0] == i:  # Exact frame match
+                        color = p[1]
+                        exact_match = True
+                        break
+                if not exact_match:
+                    color = 0        
+            else:
+                t = (i - points[prev_point][0]) / (points[next_point][0] - points[prev_point][0])
+                if interpolation == "ease_in":
+                    t = ease_in(t)
+                elif interpolation == "ease_out":
+                    t = ease_out(t)
+                elif interpolation == "ease_in_out":
+                    t = ease_in_out(t)
+                elif interpolation == "linear":
+                    pass  # No need to modify `t` for linear interpolation
+
+                color = points[prev_point][1] - t * (points[prev_point][1] - points[next_point][1])
+                
             color = np.clip(color, 0, 255)
             image = np.full((height, width), color, dtype=np.float32)
             image_batch[i] = image
@@ -1210,11 +1232,13 @@ Resizes the mask or batch of masks to the specified width and height.
             ratio = min(width / ow, height / oh)
             width = round(ow*ratio)
             height = round(oh*ratio)
-        outputs = mask.unsqueeze(1)
-        outputs = common_upscale(outputs, width, height, upscale_method, crop)
-        outputs = outputs.squeeze(1)
 
-        return(outputs, outputs.shape[2], outputs.shape[1],)
+        if upscale_method == "lanczos":
+            out_mask = common_upscale(mask.unsqueeze(1).repeat(1, 3, 1, 1), width, height, upscale_method, crop=crop).movedim(1,-1)[:, :, :, 0]
+        else:
+            out_mask = common_upscale(mask.unsqueeze(1), width, height, upscale_method, crop=crop).squeeze(1)
+
+        return(out_mask, out_mask.shape[2], out_mask.shape[1],)
 
 class RemapMaskRange:
     @classmethod
@@ -1280,7 +1304,7 @@ class SeparateMasks:
                 "mask": ("MASK", ),
                 "size_threshold_width" : ("INT", {"default": 256, "min": 0.0, "max": 4096, "step": 1}),
                 "size_threshold_height" : ("INT", {"default": 256, "min": 0.0, "max": 4096, "step": 1}),
-                "mode": (["convex_polygons", "area"],),
+                "mode": (["convex_polygons", "area", "box"],),
                 "max_poly_points": ("INT", {"default": 8, "min": 3, "max": 32, "step": 1}),
 
             },
@@ -1375,12 +1399,18 @@ class SeparateMasks:
                 print(f"Component {component}: width={width}, height={height}, x_pos={centroid_x}")
                 
                 if width >= size_threshold_width and height >= size_threshold_height:
-                    if mode != "area":
+                    if mode == "convex_polygons":
                         polygon = self.get_mask_polygon(component_mask_np, max_poly_points)
                         if polygon is not None:
                             poly_mask = self.polygon_to_mask(polygon, (H, W))
                             poly_mask = torch.tensor(poly_mask, device=mask.device)
                             separated.append((centroid_x, poly_mask))
+                    elif mode == "box":
+                        # Create bounding box mask
+                        box_mask = np.zeros((H, W), dtype=np.uint8)
+                        box_mask[y_min:y_max+1, x_min:x_max+1] = 1
+                        box_mask = torch.tensor(box_mask, device=mask.device)
+                        separated.append((centroid_x, box_mask))
                     else:
                         area_mask = torch.tensor(component_mask_np, device=mask.device)
                         separated.append((centroid_x, area_mask))

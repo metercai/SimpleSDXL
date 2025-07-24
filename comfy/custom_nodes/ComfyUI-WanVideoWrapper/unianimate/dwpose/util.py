@@ -207,8 +207,13 @@ def draw_body_and_foot(canvas, candidate, subset, score, stick_width=4, draw_bod
                     continue
                 x, y = candidate[index][0:2]
                 conf = score[n][i - 1]
-                x = int(x * W)
-                y = int(y * H)
+                if not np.isfinite(x) or not np.isfinite(y):
+                    continue
+                x = int(np.clip(x * W, 0, W - 1
+                ))
+                y = int(np.clip(y * H, 0, H - 1))
+                # x = int(x * W)
+                # y = int(y * H)
                 cv2.circle(canvas, (x, y), 4, alpha_blend_color(color, conf), thickness=-1)
 
     return canvas
