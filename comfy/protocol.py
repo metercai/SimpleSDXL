@@ -1,0 +1,8 @@
+
+class BinaryEventTypes:
+    PREVIEW_IMAGE = 1
+    UNENCODED_PREVIEW_IMAGE = 2
+    TEXT = 3
+    PREVIEW_VIDEO = 4
+    PREVIEW_IMAGE_WITH_METADATA = 5
+
