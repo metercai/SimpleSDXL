@@ -4764,7 +4764,7 @@
   },
   "756": {
     "inputs": {
-      "uov_method": "upscale (1.5x)",
+      "uov_method": "disabled",
       "uov_denoise": 0.5000000000000001,
       "uov_processing_order": "Before First Enhancement",
       "uov_prompt_type": "Original Prompts",
@@ -6462,7 +6462,10 @@
         "756",
         7
       ],
-      "cfg": 8,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -6475,7 +6478,7 @@
         "918",
         1
       ],
-      "mode_type": "Linear",
+      "mode_type": "Chess",
       "tile_width": [
         "919",
         0
@@ -6645,7 +6648,7 @@
         "918",
         1
       ],
-      "mode_type": "Linear",
+      "mode_type": "Chess",
       "tile_width": [
         "919",
         0
