@@ -117,6 +117,7 @@ inpaint_engine_versions = {
     "il_v_pre_aio": ['NoobAI_Inpainting','None'],
     "nun_int4_aio": ['Nun_int4','None'],
     "nun_fp4_aio": ['Nun_fp4','None'],
+    "wan_aio_cn": ['VACE'],
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
