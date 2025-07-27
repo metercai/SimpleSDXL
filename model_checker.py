@@ -1822,7 +1822,7 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-kontext_fp8_scaled.safetensors"
         ]
     },
-    "wan_t2v_package": {
+    "wan_t2i_package": {
         "id": 31,
         "name": "[31]Wan2.1_T2I扩展包",
         "note": "Wan2.1文生图扩展包|显存需求：★★★ 速度：★★",
@@ -1832,7 +1832,8 @@ packages = {
             ("clip/umt5-xxl-encoder-Q8_0.gguf", 6043068256),
             ("vae/Wan2_1_VAE_bf16.safetensors", 253806278),
             ("loras/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors", 316822496),
-            ("loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors", 316822496)
+            ("loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors", 316822496),
+            ("loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors", 306848672)
         ],
         "download_links": [
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/wan2.1-t2v-14b-Q4_K_M.gguf",
@@ -1840,7 +1841,8 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/Wan2_1_VAE_bf16.safetensors",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors"
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors"
         ]
     }
 }
