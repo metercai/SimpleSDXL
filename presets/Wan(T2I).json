@@ -3,7 +3,7 @@
     "default_engine": {
         "backend_engine": "Comfy",
         "disvisible": ["backend_selection", "performance_selection", "layer_method", "layer_input_image","PyraCanny"],
-        "disinteractive": ["enhance_checkbox", "performance_selection"],
+        "disinteractive": ["performance_selection"],
         "available_aspect_ratios_selection": "Flux",
         "backend_params": {
                 "task_method": "wan_aio_cn"
