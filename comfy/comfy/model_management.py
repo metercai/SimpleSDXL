@@ -132,6 +132,11 @@ try:
 except:
     mlu_available = False
 
+try:
+    ixuca_available = hasattr(torch, "corex")
+except:
+    ixuca_available = False
+
 if args.cpu:
     cpu_state = CPUState.CPU
 
@@ -158,6 +163,12 @@ def is_ascend_npu():
 def is_mlu():
     global mlu_available
     if mlu_available:
+        return True
+    return False
+
+def is_ixuca():
+    global ixuca_available
+    if ixuca_available:
         return True
     return False
 
@@ -340,7 +351,7 @@ try:
         if torch_version_numeric[0] >= 2:
             if ENABLE_PYTORCH_ATTENTION == False and args.use_split_cross_attention == False and args.use_quad_cross_attention == False:
                 ENABLE_PYTORCH_ATTENTION = True
-    if is_intel_xpu() or is_ascend_npu() or is_mlu():
+    if is_intel_xpu() or is_ascend_npu() or is_mlu() or is_ixuca():
         if args.use_split_cross_attention == False and args.use_quad_cross_attention == False:
             ENABLE_PYTORCH_ATTENTION = True
 except:
@@ -432,6 +443,8 @@ def get_torch_device_name(device):
             except:
                 allocator_backend = ""
             return "{} {} : {}".format(device, torch.cuda.get_device_name(device), allocator_backend)
+        elif device.type == "xpu":
+            return "{} {}".format(device, torch.xpu.get_device_name(device))
         else:
             return "{}".format(device.type)
     elif is_intel_xpu():
@@ -568,6 +581,8 @@ WINDOWS = any(platform.win32_ver())
 EXTRA_RESERVED_VRAM = 400 * 1024 * 1024
 if WINDOWS:
     EXTRA_RESERVED_VRAM = 600 * 1024 * 1024 #Windows is higher because of the shared vram issue
+    if total_vram > (15 * 1024):  # more extra reserved vram on 16GB+ cards
+        EXTRA_RESERVED_VRAM += 100 * 1024 * 1024
 
 if args.reserve_vram is not None:
     EXTRA_RESERVED_VRAM = args.reserve_vram * 1024 * 1024 * 1024
@@ -1101,6 +1116,8 @@ def xformers_enabled():
         return False
     if is_mlu():
         return False
+    if is_ixuca():
+        return False
     if directml_enabled:
         return False
     return XFORMERS_IS_AVAILABLE
@@ -1136,6 +1153,8 @@ def pytorch_attention_flash_attention():
             return True
         if is_amd():
             return True #if you have pytorch attention enabled on AMD it probably supports at least mem efficient attention
+        if is_ixuca():
+            return True
     return False
 
 def force_upcast_attention_dtype():
@@ -1265,6 +1284,9 @@ def should_use_fp16(device=None, model_params=0, prioritize_performance=True, ma
     if is_mlu():
         return True
 
+    if is_ixuca():
+        return True
+
     if torch.version.hip:
         return True
 
@@ -1326,6 +1348,9 @@ def should_use_bf16(device=None, model_params=0, prioritize_performance=True, ma
             return torch.xpu.get_device_capability(device)['has_bfloat16_conversions']
 
     if is_ascend_npu():
+        return True
+
+    if is_ixuca():
         return True
 
     if is_amd():

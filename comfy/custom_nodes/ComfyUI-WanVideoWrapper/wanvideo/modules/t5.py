@@ -2,10 +2,11 @@
 # Copyright 2024-2025 The Alibaba Wan Team Authors. All rights reserved.
 import logging
 import math
-
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from comfy.utils import ProgressBar
 
 from .tokenizers import HuggingfaceTokenizer
 
@@ -307,8 +308,10 @@ class T5Encoder(nn.Module):
         x = self.dropout(x)
         e = self.pos_embedding(x.size(1),
                                x.size(1)) if self.shared_pos else None
-        for block in self.blocks:
+        pbar = ProgressBar(len(self.blocks))
+        for block in tqdm(self.blocks, desc="T5Encoder", leave=True):
             x = block(x, mask, pos_bias=e)
+            pbar.update(1)
         x = self.norm(x)
         x = self.dropout(x)
         return x

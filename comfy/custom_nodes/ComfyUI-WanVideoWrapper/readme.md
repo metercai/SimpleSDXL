@@ -58,6 +58,8 @@ FantasyTalking: https://github.com/Fantasy-AMAP/fantasy-talking
 
 MultiTalk: https://github.com/MeiGen-AI/MultiTalk
 
+EchoShot: https://github.com/D2I-ai/EchoShot
+
 
 Examples:
 ---

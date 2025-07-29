@@ -88,7 +88,7 @@ class GGUFLinear(nn.Linear):
         weight = weight.to(self.compute_dtype)
         bias = self.bias.to(self.compute_dtype) if self.bias is not None else None
 
-        if hasattr(self, "lora"):
+        if hasattr(self, "lora") and self.lora is not None:
             weight = self.apply_lora(weight).to(self.compute_dtype)
 
         output = torch.nn.functional.linear(inputs, weight, bias)

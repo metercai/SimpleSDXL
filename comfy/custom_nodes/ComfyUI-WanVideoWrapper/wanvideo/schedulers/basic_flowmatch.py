@@ -52,11 +52,11 @@ class FlowMatchScheduler():
             timestep_id = torch.argmin((self.timesteps.unsqueeze(0) - timestep.unsqueeze(1)).abs(), dim=1)
         
         sigma = self.sigmas[timestep_id].reshape(-1, 1, 1, 1)
-        if to_final or (timestep_id + 1 >= len(self.timesteps)).any():
-            sigma_ = 1 if (
-                self.inverse_timesteps or self.reverse_sigmas) else 0
-        else:
-            sigma_ = self.sigmas[timestep_id + 1].reshape(-1, 1, 1, 1)
+        # if to_final or (timestep_id + 1 >= len(self.timesteps)).any():
+        #     sigma_ = 1 if (
+        #         self.inverse_timesteps or self.reverse_sigmas) else 0
+        #else:
+        sigma_ = self.sigmas[timestep_id + 1].reshape(-1, 1, 1, 1)
         prev_sample = sample + model_output * (sigma_ - sigma)
         return prev_sample
 

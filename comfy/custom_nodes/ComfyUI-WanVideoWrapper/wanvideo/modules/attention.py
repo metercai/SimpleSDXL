@@ -28,6 +28,12 @@ except Exception as e:
     elif isinstance(e, ImportError) and "DLL" in str(e):
         print("sageattention DLL loading error")
     sageattn_func = None
+
+try:
+    from sageattn import sageattn_blackwell
+except:
+    SAGE3_AVAILABLE = False
+
 import warnings
 
 __all__ = [
@@ -182,5 +188,12 @@ def attention(
         )
     elif attention_mode == 'sdpa':
         return torch.nn.functional.scaled_dot_product_attention(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)).transpose(1, 2).contiguous()
+    elif attention_mode == 'sageattn_3':
+        return sageattn_blackwell(
+            q.transpose(1,2), 
+            k.transpose(1,2), 
+            v.transpose(1,2), 
+            per_block_mean=False #seems necessary for reasonable VRAM usage, not sure of other implications
+            ).transpose(1,2).contiguous()
     else:
         return sageattn_func(q, k, v, tensor_layout="NHD").contiguous()
