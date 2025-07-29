@@ -218,7 +218,7 @@
   },
   "118": {
     "inputs": {
-      "unet_name": "Wan2.2-T2V-A14B-LowNoise-Q4_K_M.gguf"
+      "unet_name": "Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf"
     },
     "class_type": "UnetLoaderGGUF",
     "_meta": {
