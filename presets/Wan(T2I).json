@@ -47,7 +47,7 @@
     "embeddings_downloads": {},
     "lora_downloads": {},
     "model_list": [
-        "checkpoints,wan2.1-t2v-14b-Q4_K_M.gguf,10124581504,0,",
+        "checkpoints,Wan2.2-T2V-A14B-LowNoise-Q4_K_M.gguf,9650090496,0,",
         "checkpoints,Wan2.1_14B_VACE-Q4_K_M.gguf,11639453600,0,",       
         "clip_vision,clip_vision_vit_h.safetensors,1972298538,0,",
         "clip,umt5-xxl-encoder-Q8_0.gguf,6043068256,0,",
