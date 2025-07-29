@@ -1827,7 +1827,7 @@ packages = {
         "name": "[31]Wan2.1_T2I扩展包",
         "note": "Wan2.1文生图扩展包|显存需求：★★★ 速度：★★",
         "files": [
-            ("checkpoints/wan2.1-t2v-14b-Q4_K_M.gguf", 10124581504),
+            ("checkpoints/Wan2.2-T2V-A14B-LowNoise-Q4_K_M.gguf", 9650090496),
             ("checkpoints/Wan2.1_14B_VACE-Q4_K_M.gguf", 11639453600),
             ("clip/umt5-xxl-encoder-Q8_0.gguf", 6043068256),
             ("vae/Wan2_1_VAE_bf16.safetensors", 253806278),
@@ -1836,7 +1836,7 @@ packages = {
             ("loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors", 306848672)
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/wan2.1-t2v-14b-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-T2V-A14B-LowNoise-Q4_K_M.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.1_14B_VACE-Q4_K_M.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/Wan2_1_VAE_bf16.safetensors",
