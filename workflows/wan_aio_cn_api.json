@@ -1216,7 +1216,7 @@
   "323": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -1261,7 +1261,7 @@
   "325": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -1729,15 +1729,6 @@
     "class_type": "easy promptReplace",
     "_meta": {
       "title": "PromptReplace"
-    }
-  },
-  "359": {
-    "inputs": {
-      "unet_name": "Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "base_model2"
     }
   },
   "360": {
@@ -2255,15 +2246,15 @@
     "inputs": {
       "index": 0,
       "value0": [
-        "359",
+        "863",
         0
       ],
       "value1": [
-        "359",
+        "863",
         0
       ],
       "value2": [
-        "359",
+        "863",
         0
       ]
     },
@@ -3598,7 +3589,7 @@
   "649": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -3784,7 +3775,7 @@
   "663": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -4154,7 +4145,7 @@
     "inputs": {
       "value": "a*0.9",
       "a": [
-        "417",
+        "977",
         0
       ]
     },
@@ -5034,7 +5025,7 @@
         "542",
         2
       ],
-      "length": 9,
+      "length": 5,
       "batch_size": 1,
       "strength": 1,
       "positive": [
@@ -5061,7 +5052,7 @@
   },
   "813": {
     "inputs": {
-      "amount": 9,
+      "amount": 5,
       "image": [
         "542",
         0
@@ -5589,7 +5580,7 @@
   "882": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -6332,7 +6323,7 @@
   "952": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -6419,7 +6410,7 @@
   "954": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -6465,7 +6456,7 @@
         0
       ],
       "model": [
-        "359",
+        "863",
         0
       ],
       "positive": [
@@ -6576,7 +6567,7 @@
   "960": {
     "inputs": {
       "seed": [
-        "417",
+        "977",
         0
       ],
       "steps": [
@@ -6622,7 +6613,7 @@
         0
       ],
       "model": [
-        "359",
+        "863",
         0
       ],
       "positive": [
@@ -6684,6 +6675,19 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
+    }
+  },
+  "977": {
+    "inputs": {
+      "reserved": 1,
+      "anything": [
+        "417",
+        0
+      ]
+    },
+    "class_type": "ReservedVRAMSetter",
+    "_meta": {
+      "title": "Set Reserved VRAM(GB) ⚙️"
     }
   }
 }
