@@ -905,7 +905,7 @@ def worker():
             task_extra_positive_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
             task_extra_negative_prompts = [wildcards.apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
            
-            if not async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT']: 
+            if not async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT', 'Wan']: 
                 task_prompt = minicpm.translate(task_prompt, async_task.translation_methods)
                 task_negative_prompt = minicpm.translate(task_negative_prompt, async_task.translation_methods)
                 task_extra_positive_prompts = [minicpm.translate(pmt, async_task.translation_methods) for pmt in extra_positive_prompts]
@@ -959,7 +959,7 @@ def worker():
                 styles=task_styles
             ))
         
-        if async_task.task_class not in ['Kolors', 'HyDiT']:
+        if not async_task.task_method.lower().endswith('_cn') and async_task.task_class not in ['Kolors', 'HyDiT', 'Wan']:
             minicpm.free_model()
         if async_task.task_class in ['Fooocus']:
             if advance_progress:
@@ -1819,7 +1819,7 @@ def worker():
                         async_task.params_backend['display_steps'] = int((30 if async_task.steps==-1 else async_task.steps) * 1.6)
                     else:
                         async_task.params_backend['display_steps'] = async_task.steps
-                elif async_task.task_class == 'Kolors':
+                elif async_task.task_class in ['Kolors', 'Wan']:
                     async_task.params_backend['display_steps'] = async_task.steps # + 1
             if 'display_steps' not in async_task.params_backend:
                 async_task.params_backend['display_steps'] = 30 if async_task.steps==-1 else async_task.steps
@@ -1944,7 +1944,7 @@ def worker():
                 is_last_enhance_for_image = (current_task_id + 1) % active_enhance_tabs == 0 and not enhance_uov_after
                 persist_image = not async_task.save_final_enhanced_image_only or is_last_enhance_for_image
 
-                if async_task.task_class not in ['Kolors', 'HyDiT']:
+                if async_task.task_class not in ['Kolors', 'HyDiT', 'Wan']:
                     enhance_mask_dino_prompt_text = minicpm.translate(enhance_mask_dino_prompt_text, async_task.translation_methods)
                     enhance_prompt = minicpm.translate(enhance_prompt, async_task.translation_methods)
                     enhance_negative_prompt = minicpm.translate(enhance_negative_prompt, async_task.translation_methods)
