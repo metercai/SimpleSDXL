@@ -1833,14 +1833,12 @@ packages = {
             ("loras/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors", 316822496),
             ("loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors", 316822496),
             ("loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors", 306848672)
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
         ],
         "download_links": [
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/Wan2_1_VAE_bf16.safetensors",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors"
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
     }
 }
