@@ -230,13 +230,14 @@ available_aspect_ratios_list = {
 }
 
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan']
 
 model_file_filter = {
         'SD3x'   : ['sd3'],
         'Flux'   : [['flux'], ['f.1']],
         'HyDiT'  : ['hunyuan'],
         'Kolors' : ['kolors'],
+        'Wan'    : ['wan'],
         }
 model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
 
@@ -250,6 +251,7 @@ task_class_mapping = {
             'SD3x'   : 'SD3m-SD3.5x',
             'HyDiT'  : 'Hunyuan-DiT',
             'Flux'   : 'Flux.1',
+            'Wan'    : 'Wan2.2',
             }
 def get_taskclass_by_fullname(fullname):
     if ':' in fullname:
@@ -259,7 +261,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux']
+comfy_classes = ['Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan']
 
 default_class_params = {
     'Fooocus': {
@@ -321,6 +323,16 @@ default_class_params = {
         'available_uov_method': uov_list_flux,
         'backend_params': {
             "task_method": "flux_base",
+            },
+        },
+    'Wan': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "wan_aio_cn",
             },
         },
     }

@@ -1,7 +1,7 @@
 
 {
     "default_engine": {
-        "backend_engine": "Comfy",
+        "backend_engine": "Wan",
         "disvisible": ["backend_selection", "performance_selection", "layer_method", "layer_input_image","PyraCanny"],
         "disinteractive": ["performance_selection"],
         "available_aspect_ratios_selection": "Flux",
