@@ -27,6 +27,9 @@ class BaseLoaderKJ:
     def _patch_modules(self, patch_cublaslinear, sage_attention):
         from comfy.ops import disable_weight_init, CastWeightBiasOp, cast_bias_weight
 
+        if mm.get_current_compute_capability().lower() not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
+            sage_attention = "disabled"
+
         if sage_attention != "disabled":
             print("Patching comfy attention to use sageattn")
             from sageattention import sageattn
