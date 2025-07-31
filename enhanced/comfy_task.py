@@ -121,6 +121,8 @@ def get_comfy_task(user_did, task_class, task_name, task_method, default_params,
     total_steps = default_params.pop("display_steps", default_params['steps'])
     comfy_params = ComfyTaskParams(default_params, user_did)
     comfy_params.update_mapping_rule('base_model', 'NunchakuFluxDiTLoader:base_model:model_path')
+    comfy_params.update_mapping_rule('sampler', 'GeneralInput:GeneralInput:sampler')
+    comfy_params.update_mapping_rule('scheduler', 'GeneralInput:GeneralInput:scheduler')
     if task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan'] and task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan']:
         task_name = task_class
     if task_name == 'default':
