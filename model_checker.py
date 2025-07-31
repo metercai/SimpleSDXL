@@ -1832,7 +1832,7 @@ packages = {
             ("vae/Wan2_1_VAE_bf16.safetensors", 253806278),
             ("loras/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors", 316822496),
             ("loras/Wan2.1_T2V_14B_FusionX_LoRA.safetensors", 316822496),
-            ("loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors", 306848672)
+            ("loras/WAN2.1_SmartphoneSnapshotPhotoReality_v1_by-AI_Characters.safetensors", 306848672),
             ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
         ],

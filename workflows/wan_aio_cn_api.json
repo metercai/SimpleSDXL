@@ -4717,7 +4717,7 @@
       "cfg": 1,
       "steps": 8,
       "refiner_step": 999,
-      "sampler": "dpmpp_2m_sde_gpu",
+      "sampler": "euler_ancestral",
       "scheduler": "kl_optimal",
       "denoise": 1,
       "clip_skip": -1,
