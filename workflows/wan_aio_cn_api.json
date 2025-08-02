@@ -2338,11 +2338,11 @@
         0
       ],
       "value4": [
-        "960",
+        "988",
         0
       ],
       "value5": [
-        "960",
+        "988",
         0
       ]
     },
@@ -3543,7 +3543,7 @@
         0
       ],
       "value4": [
-        "952",
+        "980",
         0
       ]
     },
@@ -4328,11 +4328,11 @@
         0
       ],
       "value4": [
-        "954",
+        "985",
         0
       ],
       "value5": [
-        "954",
+        "985",
         0
       ]
     },
@@ -4980,41 +4980,6 @@
       "title": "🔧 Get Image Size"
     }
   },
-  "785": {
-    "inputs": {
-      "width": [
-        "858",
-        0
-      ],
-      "height": [
-        "859",
-        0
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": 0,
-      "positive": [
-        "628",
-        0
-      ],
-      "negative": [
-        "823",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "953",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
   "812": {
     "inputs": {
       "width": [
@@ -5371,32 +5336,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_uov_tiled_height"
-    }
-  },
-  "858": {
-    "inputs": {
-      "value": "a+128",
-      "a": [
-        "860",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "859": {
-    "inputs": {
-      "value": "a+128",
-      "a": [
-        "861",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "860": {
@@ -6088,7 +6027,7 @@
         0
       ],
       "negative": [
-        "823",
+        "769",
         0
       ],
       "vae": [
@@ -6320,8 +6259,34 @@
       "title": "Set Latent Noise Mask"
     }
   },
-  "952": {
+  "977": {
     "inputs": {
+      "reserved": 1.5,
+      "anything": [
+        "417",
+        0
+      ]
+    },
+    "class_type": "ReservedVRAMSetter",
+    "_meta": {
+      "title": "Set Reserved VRAM(GB) ⚙️"
+    }
+  },
+  "979": {
+    "inputs": {
+      "model_name": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "980": {
+    "inputs": {
+      "upscale_by": [
+        "97",
+        0
+      ],
       "seed": [
         "977",
         0
@@ -6343,10 +6308,10 @@
         8
       ],
       "denoise": [
-        "973",
-        1
+        "728",
+        9
       ],
-      "mode_type": "Linear",
+      "mode_type": "Chess",
       "tile_width": [
         "860",
         0
@@ -6364,8 +6329,8 @@
       "seam_fix_padding": 16,
       "force_uniform_tiles": true,
       "tiled_decode": false,
-      "upscaled_image": [
-        "953",
+      "image": [
+        "3",
         0
       ],
       "model": [
@@ -6373,42 +6338,46 @@
         0
       ],
       "positive": [
-        "785",
+        "981",
         0
       ],
       "negative": [
-        "785",
-        1
+        "823",
+        0
       ],
       "vae": [
         "336",
         0
-      ]
-    },
-    "class_type": "UltimateSDUpscaleNoUpscale",
-    "_meta": {
-      "title": "Ultimate SD Upscale (No Upscale)"
-    }
-  },
-  "953": {
-    "inputs": {
-      "upscale_method": "bicubic",
-      "scale_by": [
-        "97",
-        0
       ],
-      "image": [
-        "3",
+      "upscale_model": [
+        "979",
         0
       ]
     },
-    "class_type": "ImageScaleBy",
+    "class_type": "UltimateSDUpscale",
     "_meta": {
-      "title": "Upscale Image By"
+      "title": "Ultimate SD Upscale"
     }
   },
-  "954": {
+  "981": {
     "inputs": {
+      "text": "(Masterpiece:1.2), (best quality:1.2),ultra high resolution,(ultra-detailed), (beautiful and aesthetic:1.2),4K,raw,arw,cr2,",
+      "clip": [
+        "765",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "985": {
+    "inputs": {
+      "upscale_by": [
+        "756",
+        4
+      ],
       "seed": [
         "977",
         0
@@ -6430,7 +6399,7 @@
         8
       ],
       "denoise": [
-        "974",
+        "756",
         1
       ],
       "mode_type": "Chess",
@@ -6451,64 +6420,16 @@
       "seam_fix_padding": 16,
       "force_uniform_tiles": true,
       "tiled_decode": false,
-      "upscaled_image": [
-        "955",
-        0
-      ],
-      "model": [
-        "863",
-        0
-      ],
-      "positive": [
-        "958",
-        0
-      ],
-      "negative": [
-        "958",
-        1
-      ],
-      "vae": [
-        "336",
-        0
-      ]
-    },
-    "class_type": "UltimateSDUpscaleNoUpscale",
-    "_meta": {
-      "title": "Ultimate SD Upscale (No Upscale)"
-    }
-  },
-  "955": {
-    "inputs": {
-      "upscale_method": "bicubic",
-      "scale_by": [
-        "756",
-        4
-      ],
       "image": [
         "658",
         0
-      ]
-    },
-    "class_type": "ImageScaleBy",
-    "_meta": {
-      "title": "Upscale Image By"
-    }
-  },
-  "958": {
-    "inputs": {
-      "width": [
-        "921",
+      ],
+      "model": [
+        "863",
         0
       ],
-      "height": [
-        "922",
-        0
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": 0,
       "positive": [
-        "628",
+        "981",
         0
       ],
       "negative": [
@@ -6519,53 +6440,31 @@
         "336",
         0
       ],
-      "control_video": [
-        "955",
+      "upscale_model": [
+        "986",
         0
       ]
     },
-    "class_type": "WanVaceToVideo",
+    "class_type": "UltimateSDUpscale",
     "_meta": {
-      "title": "WanVaceToVideo"
+      "title": "Ultimate SD Upscale"
     }
   },
-  "959": {
+  "986": {
     "inputs": {
-      "width": [
-        "921",
-        0
-      ],
-      "height": [
-        "922",
-        0
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": 0,
-      "positive": [
-        "429",
-        0
-      ],
-      "negative": [
-        "823",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "961",
-        0
-      ]
+      "model_name": "4x-UltraSharp.pth"
     },
-    "class_type": "WanVaceToVideo",
+    "class_type": "UpscaleModelLoader",
     "_meta": {
-      "title": "WanVaceToVideo"
+      "title": "Load Upscale Model"
     }
   },
-  "960": {
+  "988": {
     "inputs": {
+      "upscale_by": [
+        "756",
+        4
+      ],
       "seed": [
         "977",
         0
@@ -6587,7 +6486,7 @@
         8
       ],
       "denoise": [
-        "974",
+        "756",
         1
       ],
       "mode_type": "Chess",
@@ -6608,8 +6507,8 @@
       "seam_fix_padding": 16,
       "force_uniform_tiles": true,
       "tiled_decode": false,
-      "upscaled_image": [
-        "961",
+      "image": [
+        "712",
         0
       ],
       "model": [
@@ -6617,77 +6516,25 @@
         0
       ],
       "positive": [
-        "959",
+        "981",
         0
       ],
       "negative": [
-        "959",
-        1
+        "769",
+        0
       ],
       "vae": [
         "336",
         0
-      ]
-    },
-    "class_type": "UltimateSDUpscaleNoUpscale",
-    "_meta": {
-      "title": "Ultimate SD Upscale (No Upscale)"
-    }
-  },
-  "961": {
-    "inputs": {
-      "upscale_method": "bicubic",
-      "scale_by": [
-        "756",
-        4
       ],
-      "image": [
-        "712",
+      "upscale_model": [
+        "986",
         0
       ]
     },
-    "class_type": "ImageScaleBy",
+    "class_type": "UltimateSDUpscale",
     "_meta": {
-      "title": "Upscale Image By"
-    }
-  },
-  "973": {
-    "inputs": {
-      "value": "0.1+a*0.9",
-      "a": [
-        "728",
-        9
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "974": {
-    "inputs": {
-      "value": "0.1+a*0.9",
-      "a": [
-        "756",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "977": {
-    "inputs": {
-      "reserved": 1,
-      "anything": [
-        "417",
-        0
-      ]
-    },
-    "class_type": "ReservedVRAMSetter",
-    "_meta": {
-      "title": "Set Reserved VRAM(GB) ⚙️"
+      "title": "Ultimate SD Upscale"
     }
   }
 }
