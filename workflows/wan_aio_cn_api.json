@@ -260,12 +260,12 @@
     "inputs": {
       "comparison": "a <= b",
       "a": [
-        "728",
-        2
+        "993",
+        0
       ],
       "b": [
-        "728",
-        3
+        "994",
+        0
       ]
     },
     "class_type": "easy compare",
@@ -289,12 +289,12 @@
         0
       ],
       "on_true": [
-        "728",
-        2
+        "993",
+        0
       ],
       "on_false": [
-        "728",
-        3
+        "994",
+        0
       ]
     },
     "class_type": "easy ifElse",
@@ -381,8 +381,8 @@
         0
       ],
       "on_true": [
-        "728",
-        2
+        "993",
+        0
       ],
       "on_false": [
         "150",
@@ -461,8 +461,8 @@
         0
       ],
       "on_true": [
-        "728",
-        3
+        "994",
+        0
       ],
       "on_false": [
         "155",
@@ -612,12 +612,12 @@
     "inputs": {
       "comparison": "a > b",
       "a": [
-        "728",
-        2
+        "993",
+        0
       ],
       "b": [
-        "728",
-        3
+        "994",
+        0
       ]
     },
     "class_type": "easy compare",
@@ -847,12 +847,12 @@
         0
       ],
       "on_true": [
-        "728",
-        2
+        "993",
+        0
       ],
       "on_false": [
-        "728",
-        3
+        "994",
+        0
       ]
     },
     "class_type": "easy ifElse",
@@ -1165,7 +1165,7 @@
       "interpolation": "lanczos",
       "method": "stretch",
       "condition": "always",
-      "multiple_of": 8,
+      "multiple_of": 16,
       "image": [
         "312",
         0
@@ -3373,12 +3373,12 @@
   "600": {
     "inputs": {
       "width": [
-        "728",
-        2
+        "993",
+        0
       ],
       "height": [
-        "728",
-        3
+        "994",
+        0
       ],
       "interpolation": "lanczos",
       "method": "fill / crop",
@@ -3438,12 +3438,12 @@
   "620": {
     "inputs": {
       "width": [
-        "728",
-        2
+        "993",
+        0
       ],
       "height": [
-        "728",
-        3
+        "994",
+        0
       ],
       "interpolation": "lanczos",
       "method": "keep proportion",
@@ -3638,7 +3638,7 @@
         0
       ],
       "value1": [
-        "817",
+        "995",
         0
       ],
       "value2": [
@@ -4882,12 +4882,12 @@
   "776": {
     "inputs": {
       "width": [
-        "728",
-        2
+        "993",
+        0
       ],
       "height": [
-        "728",
-        3
+        "994",
+        0
       ],
       "length": 1,
       "batch_size": 1
@@ -6535,6 +6535,56 @@
     "class_type": "UltimateSDUpscale",
     "_meta": {
       "title": "Ultimate SD Upscale"
+    }
+  },
+  "993": {
+    "inputs": {
+      "value": "round(a/16)*16",
+      "a": [
+        "728",
+        2
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "994": {
+    "inputs": {
+      "value": "round(a/16)*16",
+      "a": [
+        "728",
+        3
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "995": {
+    "inputs": {
+      "width": [
+        "728",
+        2
+      ],
+      "height": [
+        "728",
+        3
+      ],
+      "interpolation": "lanczos",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "817",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
