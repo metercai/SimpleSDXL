@@ -537,7 +537,7 @@
   "177": {
     "inputs": {
       "samples": [
-        "846",
+        "323",
         0
       ],
       "vae": [
@@ -1235,22 +1235,25 @@
         "728",
         8
       ],
-      "denoise": 1,
+      "denoise": [
+        "871",
+        1
+      ],
       "model": [
         "766",
         0
       ],
       "positive": [
-        "845",
+        "628",
         0
       ],
       "negative": [
-        "845",
-        1
+        "823",
+        0
       ],
       "latent_image": [
-        "845",
-        2
+        "176",
+        0
       ]
     },
     "class_type": "KSampler",
@@ -5237,60 +5240,6 @@
       "title": "Resize Mask"
     }
   },
-  "845": {
-    "inputs": {
-      "width": [
-        "309",
-        1
-      ],
-      "height": [
-        "309",
-        2
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": [
-        "851",
-        1
-      ],
-      "positive": [
-        "628",
-        0
-      ],
-      "negative": [
-        "823",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "309",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
-  "846": {
-    "inputs": {
-      "trim_amount": [
-        "845",
-        3
-      ],
-      "samples": [
-        "323",
-        0
-      ]
-    },
-    "class_type": "TrimVideoLatent",
-    "_meta": {
-      "title": "TrimVideoLatent"
-    }
-  },
   "847": {
     "inputs": {
       "trim_amount": [
@@ -5305,19 +5254,6 @@
     "class_type": "TrimVideoLatent",
     "_meta": {
       "title": "TrimVideoLatent"
-    }
-  },
-  "851": {
-    "inputs": {
-      "value": "1-a",
-      "a": [
-        "871",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
     }
   },
   "856": {
@@ -5421,7 +5357,7 @@
   },
   "871": {
     "inputs": {
-      "value": "a*0.5",
+      "value": "a",
       "a": [
         "728",
         9
