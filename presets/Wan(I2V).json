@@ -1,0 +1,84 @@
+{ 
+    "default_engine": {
+            "backend_engine": "Comfy",
+            "engine_type": "video",
+            "disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "available_aspect_ratios_selection": "Flux",
+            "scene_frontend": {
+                "version": "m1.1",
+                "theme": ["基础"],
+                "theme_title": "Wan2.2图生视频",
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2"],
+                "prompt": {
+                    "基础": ""
+                },
+                "task_method": {
+                    "基础": "wan2.2_cn"
+                },
+                "multimodal_prompt": {
+                    "基础": ""
+                },
+                "agent_prompt": {
+                    "基础": "基于这张图像生成动画提示词：提示词组成必须包含[镜头推进/拉远/左右移动/上摇/手持/跟随/环绕]其中之一+[快速/中速/慢速]+角色动态行为+环境动态元素+情绪变化。 禁止静态描述|禁止解释图像|输出单句"
+                },
+                "var_number": {
+                    "基础": 5
+                },
+                "scene_steps": {
+                    "基础": 8
+                },
+                "aspect_ratio" : ["720|1:1","640|1:1","480|1:1","832|1:1","960|1:1","1024|1:1"],
+                "var_number_max": 10
+            }
+    },
+    "default_model": "Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf",
+    "default_refiner": "Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 3,
+    "default_sample_sharpness": 2,
+    "default_sampler": "dpmpp_2m_sde_gpu",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_image_number": 1,
+    "default_overwrite_step":30,
+    "default_prompt": "",
+    "default_prompt_negative": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf,9651728896,0,",
+        "checkpoints,Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf,9651728896,0,",
+        "clip,umt5-xxl-encoder-Q8_0.gguf,6043068256,0,",
+        "vae,Wan2_1_VAE_bf16.safetensors,253806278,0,",
+        "loras,lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors,738005744,0,",
+        "loras,Wan2.2-Lightning_T2V-A14B-4steps-lora_LOW_fp16.safetensors,613561776,0,",
+        "controlnet,rife/rife49.pth,21345274,0,"
+    ]
+}

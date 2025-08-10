@@ -1857,7 +1857,25 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/qwen_2.5_vl_7b_fp8_scaled.safetensors"
         ]
     },
-
+    "wan_i2v_package": {
+        "id": 33,
+        "name": "[33]Wan2.2图生视频扩展包",
+        "note": "Wan2.2图生图扩展包|显存需求：★★★★ 速度：★",
+        "files": [
+            ("checkpoints/Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf", 9651728896),
+            ("checkpoints/Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf", 9651728896),
+            ("clip/umt5-xxl-encoder-Q8_0.gguf", 6043068256),
+            ("vae/Wan2_1_VAE_bf16.safetensors", 253806278),
+            ("loras/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors", 738005744),
+            ("loras/Wan2.2-Lightning_T2V-A14B-4steps-lora_LOW_fp16.safetensors", 613561776),
+            ("controlnet/rife/rife49.pth", 21345274)
+        ],
+        "download_links": [
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
+        ]
+    }
 }
 
 MANUAL_DOWNLOAD_MAP = {
