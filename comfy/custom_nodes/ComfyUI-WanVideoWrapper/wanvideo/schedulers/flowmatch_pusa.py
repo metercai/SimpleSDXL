@@ -15,16 +15,19 @@ class FlowMatchSchedulerPusa():
         self.set_timesteps(num_inference_steps)
 
 
-    def set_timesteps(self, num_inference_steps=100, denoising_strength=1.0, training=False, shift=None):
+    def set_timesteps(self, num_inference_steps=100, denoising_strength=1.0, training=False, shift=None, sigmas=None):
         if shift is not None:
             self.shift = shift
         sigma_start = self.sigma_min + (self.sigma_max - self.sigma_min) * denoising_strength
-        if self.extra_one_step:
-            self.sigmas = torch.linspace(sigma_start, self.sigma_min, num_inference_steps + 1)[:-1]
+        if sigmas is None:
+            if self.extra_one_step:
+                self.sigmas = torch.linspace(sigma_start, self.sigma_min, num_inference_steps + 1)[:-1]
+            else:
+                self.sigmas = torch.linspace(sigma_start, self.sigma_min, num_inference_steps)
+            if self.inverse_timesteps:
+                self.sigmas = torch.flip(self.sigmas, dims=[0])
         else:
-            self.sigmas = torch.linspace(sigma_start, self.sigma_min, num_inference_steps)
-        if self.inverse_timesteps:
-            self.sigmas = torch.flip(self.sigmas, dims=[0])
+            self.sigmas = torch.tensor(sigmas, dtype=torch.float32)
         self.sigmas = self.shift * self.sigmas / (1 + (self.shift - 1) * self.sigmas)
         if self.reverse_sigmas:
             self.sigmas = 1 - self.sigmas

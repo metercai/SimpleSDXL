@@ -40,7 +40,7 @@ def get_scheduler(scheduler, steps, shift, device, transformer_dim, flowedit_arg
         if flowedit_args: #seems to work better
             timesteps, _ = retrieve_timesteps(sample_scheduler, device=device, sigmas=get_sampling_sigmas(steps, shift))
         else:
-            sample_scheduler.set_timesteps(steps, device=device, sigmas=sigmas.tolist() if sigmas is not None else None)
+            sample_scheduler.set_timesteps(steps, device=device, sigmas=sigmas[:-1].tolist() if sigmas is not None else None)
     # elif scheduler in ['euler/accvideo']:
     #     if steps != 50:
     #         raise Exception("Steps must be set to 50 for accvideo scheduler, 10 actual steps are used")
@@ -68,8 +68,10 @@ def get_scheduler(scheduler, steps, shift, device, transformer_dim, flowedit_arg
         sample_scheduler.sigmas[-1] = 1e-6
     elif 'lcm' in scheduler:
         sample_scheduler = FlowMatchLCMScheduler(shift=shift, use_beta_sigmas=(scheduler == 'lcm/beta'))
-        sample_scheduler.set_timesteps(steps, device=device, sigmas=sigmas.tolist() if sigmas is not None else None)
+        sample_scheduler.set_timesteps(steps, device=device, sigmas=sigmas[:-1].tolist() if sigmas is not None else None)
     elif 'flowmatch_causvid' in scheduler:
+        if sigmas is not None:
+            raise NotImplementedError("This scheduler does not support custom sigmas")
         if transformer_dim == 5120:
             denoising_list = [999, 934, 862, 756, 603, 410, 250, 140, 74]
         else:
@@ -80,6 +82,8 @@ def get_scheduler(scheduler, steps, shift, device, transformer_dim, flowedit_arg
         sample_scheduler.timesteps = torch.tensor(denoising_list)[:steps].to(device)
         sample_scheduler.sigmas = torch.cat([sample_scheduler.timesteps / 1000, torch.tensor([0.0], device=device)])
     elif 'flowmatch_distill' in scheduler:
+        if sigmas is not None:
+            raise NotImplementedError("This scheduler does not support custom sigmas")
         sample_scheduler = FlowMatchScheduler(
             shift=shift, sigma_min=0.0, extra_one_step=True
         )
@@ -99,11 +103,10 @@ def get_scheduler(scheduler, steps, shift, device, transformer_dim, flowedit_arg
         sample_scheduler = FlowMatchSchedulerPusa(
             shift=shift, sigma_min=0.0, extra_one_step=True
         )
-        sample_scheduler.set_timesteps(steps, denoising_strength=denoise_strength, shift=shift)
+        sample_scheduler.set_timesteps(steps, denoising_strength=denoise_strength, shift=shift, sigmas=sigmas[:-1].tolist() if sigmas is not None else None)
     elif scheduler == 'res_multistep':
         sample_scheduler = FlowMatchSchedulerResMultistep(shift=shift)
-        sample_scheduler.set_timesteps(steps, denoising_strength=denoise_strength)
+        sample_scheduler.set_timesteps(steps, denoising_strength=denoise_strength, sigmas=sigmas[:-1].tolist() if sigmas is not None else None)
     if timesteps is None:
         timesteps = sample_scheduler.timesteps
-        log.info(f"timesteps: {timesteps}")
     return sample_scheduler, timesteps

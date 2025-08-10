@@ -17,7 +17,7 @@ class FlowMatchSchedulerResMultistep():
         self.prev_model_output = None
         self.old_sigma_next = None
 
-    def set_timesteps(self, num_inference_steps=100, denoising_strength=1.0):
+    def set_timesteps(self, num_inference_steps=100, denoising_strength=1.0, sigmas=None):
         #Generate the full sigma schedule (from max to min)
         if self.extra_one_step:
             sigma_start = self.sigma_min + \
@@ -26,11 +26,12 @@ class FlowMatchSchedulerResMultistep():
                 sigma_start, self.sigma_min, num_inference_steps + 1)[:-1]
         full_sigmas = torch.linspace(self.sigma_max, self.sigma_min, self.num_train_timesteps)
         ss = len(full_sigmas) / num_inference_steps
-        sigmas = []
-        for x in range(num_inference_steps):
-            idx = int(round(x * ss))
-            sigmas.append(float(full_sigmas[idx]))
-        sigmas.append(0.0)
+        if sigmas is None:
+            sigmas = []
+            for x in range(num_inference_steps):
+                idx = int(round(x * ss))
+                sigmas.append(float(full_sigmas[idx]))
+            sigmas.append(0.0)
         self.sigmas = torch.FloatTensor(sigmas)
         self.sigmas = self.shift * self.sigmas / \
              (1 + (self.shift - 1) * self.sigmas)

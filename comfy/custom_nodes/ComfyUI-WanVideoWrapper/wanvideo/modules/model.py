@@ -1,10 +1,7 @@
 # Copyright 2024-2025 The Alibaba Wan Team Authors. All rights reserved.
 import math
-
 import torch
 import torch.nn as nn
-from diffusers.configuration_utils import ConfigMixin, register_to_config
-from diffusers.models.modeling_utils import ModelMixin
 from einops import repeat, rearrange
 from ...enhance_a_video.enhance import get_feta_scores
 
@@ -30,8 +27,9 @@ from comfy import model_management as mm
 from ...utils import log, get_module_memory_mb
 from ...cache_methods.cache_methods import TeaCacheState, MagCacheState, EasyCacheState, relative_l1_distance
 from ...multitalk.multitalk import get_attn_map_with_target
-from ...echoshot.echoshot import rope_apply_z, rope_apply_c
+from ...echoshot.echoshot import rope_apply_z, rope_apply_c, rope_apply_echoshot
 
+from comfy.model_management import get_torch_device, get_autocast_device
 from comfy.ldm.flux.math import apply_rope as apply_rope_comfy
 
 def apply_rope_comfy_chunked(xq, xk, freqs_cis, num_chunks=4):
@@ -158,7 +156,6 @@ def rope_params(max_seq_len, dim, theta=10000, L_test=25, k=0):
     freqs = torch.polar(torch.ones_like(freqs), freqs)
     return freqs
 
-from comfy.model_management import get_torch_device, get_autocast_device
 @torch.autocast(device_type=get_autocast_device(get_torch_device()), enabled=False)
 @torch.compiler.disable()
 def rope_apply(x, grid_sizes, freqs):
@@ -362,33 +359,30 @@ class WanSelfAttention(nn.Module):
         # Split by frames if multiple prompts are provided
         if seq_chunks > 1 and current_step in video_attention_split_steps:
             outputs = []
-            # Extract frame, height, width from grid_sizes - force to CPU scalars
-            frames = grid_sizes[0][0].item()
-            height = grid_sizes[0][1].item()
-            width = grid_sizes[0][2].item()
+            # Extract frame, height, width from grid_sizes
+            frames = grid_sizes[0][0]
+            height = grid_sizes[0][1]
+            width = grid_sizes[0][2]
             tokens_per_frame = height * width
             
-            actual_chunks = min(seq_chunks, frames)
-            if isinstance(actual_chunks, torch.Tensor):
-                actual_chunks = actual_chunks.item()
-            
-            frame_chunks = []  # Pre-calculate all chunk boundaries
-            start_frame = 0
+            actual_chunks = torch.min(torch.tensor(seq_chunks, device=frames.device), frames)
             base_frames_per_chunk = frames // actual_chunks
             extra_frames = frames % actual_chunks
             
-            # Pre-calculate all chunks
-            for i in range(actual_chunks):
-                chunk_size = base_frames_per_chunk + (1 if i < extra_frames else 0)
-                end_frame = start_frame + chunk_size
-                frame_chunks.append((start_frame, end_frame))
-                start_frame = end_frame
+            # Calculate all chunk boundaries
+            chunk_indices = torch.arange(actual_chunks, device=frames.device)
+            chunk_sizes = base_frames_per_chunk + (chunk_indices < extra_frames).long()
+            chunk_starts = torch.cumsum(torch.cat([torch.zeros(1, device=frames.device), chunk_sizes[:-1]]), dim=0).long()
+            chunk_ends = chunk_starts + chunk_sizes
             
-            # Process each chunk using the pre-calculated boundaries
-            for start_frame, end_frame in frame_chunks:
-                # Convert to token indices
-                start_idx = int(start_frame * tokens_per_frame)
-                end_idx = int(end_frame * tokens_per_frame)
+            # Process each chunk using tensor indexing
+            for i in range(actual_chunks.item()):
+                start_frame = chunk_starts[i]
+                end_frame = chunk_ends[i]
+                
+                # Convert to token indices using tensor operations
+                start_idx = start_frame * tokens_per_frame
+                end_idx = end_frame * tokens_per_frame
                 
                 chunk_q = q[:, start_idx:end_idx, :, :]
                 chunk_k = k[:, start_idx:end_idx, :, :]
@@ -709,7 +703,10 @@ class WanAttentionBlock(nn.Module):
             feta_scores = get_feta_scores(q, k)
 
         #RoPE
-        if self.rope_func == "comfy":
+        if inner_t is not None:
+            q=rope_apply_echoshot(q, grid_sizes, freqs, inner_t).to(q)
+            k=rope_apply_echoshot(k, grid_sizes, freqs, inner_t).to(k)
+        elif self.rope_func == "comfy":
             q, k = apply_rope_comfy(q, k, freqs)
         elif self.rope_func == "comfy_chunked":
             q, k = apply_rope_comfy_chunked(q, k, freqs)
@@ -721,7 +718,7 @@ class WanAttentionBlock(nn.Module):
         split_attn = (context is not None 
                       and (context.shape[0] > 1 or (clip_embed is not None and clip_embed.shape[0] > 1)) 
                       and x.shape[0] == 1
-                      and inner_t is not None
+                      and inner_t is None
                       )
         if split_attn:
             y = self.self_attn.forward_split(
@@ -965,17 +962,7 @@ class MLPProj(torch.nn.Module):
         return clip_extra_context_tokens
 
 
-class WanModel(ModelMixin, ConfigMixin):
-    r"""
-    Wan diffusion backbone supporting both text-to-video and image-to-video.
-    """
-
-    ignore_for_config = [
-        'patch_size', 'cross_attn_norm', 'qk_norm', 'text_dim'
-    ]
-    _no_split_modules = ['WanAttentionBlock']
-
-    @register_to_config
+class WanModel(torch.nn.Module):
     def __init__(self,
                  model_type='t2v',
                  patch_size=(1, 2, 2),
@@ -1066,6 +1053,8 @@ class WanModel(ModelMixin, ConfigMixin):
         self.rope_func = rope_func
         self.main_device = main_device
         self.offload_device = offload_device
+        self.vace_layers = vace_layers
+        self.device = main_device
 
         self.blocks_to_swap = -1
         self.offload_txt_emb = False
@@ -1104,9 +1093,10 @@ class WanModel(ModelMixin, ConfigMixin):
         self.slg_start_percent = 0.0
         self.slg_end_percent = 1.0
 
-        self.use_non_blocking = True
+        self.use_non_blocking = False
 
         self.video_attention_split_steps = []
+        self.lora_scheduling_enabled = False
 
         # embeddings
         self.patch_embedding = nn.Conv3d(
@@ -1395,7 +1385,12 @@ class WanModel(ModelMixin, ConfigMixin):
         Returns:
             List[Tensor]:
                 List of denoised video tensors with original input shapes [C_out, F, H / 8, W / 8]
-        """        
+        """
+        if self.lora_scheduling_enabled:
+            for name, submodule in self.named_modules():
+                if isinstance(submodule, nn.Linear):
+                    if hasattr(submodule, 'step'):
+                        submodule.step = current_step
         # params
         device = self.patch_embedding.weight.device
         if freqs is not None and freqs.device != device:

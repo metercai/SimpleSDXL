@@ -1,8 +1,8 @@
 {
   "id": "206247b6-9fec-4ed2-8927-e4f388c674d4",
   "revision": 0,
-  "last_node_id": 69,
-  "last_link_id": 89,
+  "last_node_id": 70,
+  "last_link_id": 92,
   "nodes": [
     {
       "id": 46,
@@ -232,46 +232,6 @@
       "bgcolor": "#653"
     },
     {
-      "id": 39,
-      "type": "WanVideoBlockSwap",
-      "pos": [
-        -210,
-        -760
-      ],
-      "size": [
-        315,
-        154
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "block_swap_args",
-          "type": "BLOCKSWAPARGS",
-          "slot_index": 0,
-          "links": [
-            50
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "ComfyUI-WanVideoWrapper",
-        "ver": "d9b1f4d1a5aea91d101ae97a54714a5861af3f50",
-        "Node name for S&R": "WanVideoBlockSwap"
-      },
-      "widgets_values": [
-        10,
-        false,
-        false,
-        true,
-        0
-      ],
-      "color": "#223",
-      "bgcolor": "#335"
-    },
-    {
       "id": 35,
       "type": "WanVideoTorchCompileSettings",
       "pos": [
@@ -283,7 +243,7 @@
         202
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -323,7 +283,7 @@
         58
       ],
       "flags": {},
-      "order": 6,
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -363,6 +323,7 @@
       "inputs": [
         {
           "name": "t5",
+          "shape": 7,
           "type": "WANTEXTENCODER",
           "link": 15
         },
@@ -391,7 +352,9 @@
       "widgets_values": [
         "an old man is stroking his beard thoughtfully",
         "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
-        true
+        true,
+        false,
+        "gpu"
       ],
       "color": "#332922",
       "bgcolor": "#593930"
@@ -408,7 +371,7 @@
         334
       ],
       "flags": {},
-      "order": 24,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -485,7 +448,7 @@
         198
       ],
       "flags": {},
-      "order": 23,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
@@ -601,7 +564,7 @@
         498.3180847167969
       ],
       "flags": {},
-      "order": 7,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -699,8 +662,7 @@
         "0, 0, 0",
         "center",
         16,
-        "cpu",
-        "<tr><td>Output: </td><td><b>1</b> x <b>624</b> x <b>624 | 4.46MB</b></td></tr>"
+        "cpu"
       ]
     },
     {
@@ -715,7 +677,7 @@
         58
       ],
       "flags": {},
-      "order": 8,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -748,7 +710,7 @@
         390
       ],
       "flags": {},
-      "order": 21,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
@@ -855,7 +817,7 @@
         130
       ],
       "flags": {},
-      "order": 9,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -894,7 +856,7 @@
         82
       ],
       "flags": {},
-      "order": 10,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -921,90 +883,6 @@
       "bgcolor": "#533"
     },
     {
-      "id": 22,
-      "type": "WanVideoModelLoader",
-      "pos": [
-        150,
-        -780
-      ],
-      "size": [
-        477.4410095214844,
-        274
-      ],
-      "flags": {},
-      "order": 17,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "compile_args",
-          "shape": 7,
-          "type": "WANCOMPILEARGS",
-          "link": null
-        },
-        {
-          "name": "block_swap_args",
-          "shape": 7,
-          "type": "BLOCKSWAPARGS",
-          "link": 50
-        },
-        {
-          "name": "lora",
-          "shape": 7,
-          "type": "WANVIDLORA",
-          "link": 89
-        },
-        {
-          "name": "vram_management_args",
-          "shape": 7,
-          "type": "VRAM_MANAGEMENTARGS",
-          "link": null
-        },
-        {
-          "name": "vace_model",
-          "shape": 7,
-          "type": "VACEPATH",
-          "link": null
-        },
-        {
-          "name": "fantasytalking_model",
-          "shape": 7,
-          "type": "FANTASYTALKINGMODEL",
-          "link": null
-        },
-        {
-          "name": "multitalk_model",
-          "shape": 7,
-          "type": "MULTITALKMODEL",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "model",
-          "type": "WANVIDEOMODEL",
-          "slot_index": 0,
-          "links": [
-            29,
-            79
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "ComfyUI-WanVideoWrapper",
-        "ver": "d9b1f4d1a5aea91d101ae97a54714a5861af3f50",
-        "Node name for S&R": "WanVideoModelLoader"
-      },
-      "widgets_values": [
-        "WanVideo\\Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors",
-        "fp16",
-        "fp8_e4m3fn",
-        "offload_device",
-        "sdpa"
-      ],
-      "color": "#223",
-      "bgcolor": "#335"
-    },
-    {
       "id": 69,
       "type": "WanVideoLoraSelect",
       "pos": [
@@ -1016,7 +894,7 @@
         176
       ],
       "flags": {},
-      "order": 11,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -1054,6 +932,52 @@
       ]
     },
     {
+      "id": 42,
+      "type": "Note",
+      "pos": [
+        -580,
+        -760
+      ],
+      "size": [
+        325.1150207519531,
+        196.76773071289062
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Adjust the blocks to swap based on your VRAM, this is a tradeoff between speed and memory usage.\n\nAlternatively there's option to use VRAM management introduced in DiffSynt-Studios. This is usually slower, but saves even more VRAM compared to BlockSwap\n\nFurther VRAM savings are from torch.compile or alternatively using the chunked rope option in the WanVideoSampler -node"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 44,
+      "type": "Note",
+      "pos": [
+        -620.9041137695312,
+        -1049.732421875
+      ],
+      "size": [
+        303.0501403808594,
+        88
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "If you have Triton installed, connect this for ~30% speed increase and reduced peak VRAM usage"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
       "id": 27,
       "type": "WanVideoSampler",
       "pos": [
@@ -1065,13 +989,13 @@
         927
       ],
       "flags": {},
-      "order": 22,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "WANVIDEOMODEL",
-          "link": 29
+          "link": 91
         },
         {
           "name": "image_embeds",
@@ -1177,6 +1101,11 @@
           "links": [
             33
           ]
+        },
+        {
+          "name": "denoised_samples",
+          "type": "LATENT",
+          "links": null
         }
       ],
       "properties": {
@@ -1196,54 +1125,178 @@
         1,
         "",
         "comfy",
-        ""
+        0,
+        -1,
+        false
       ]
     },
     {
-      "id": 42,
-      "type": "Note",
+      "id": 22,
+      "type": "WanVideoModelLoader",
       "pos": [
-        -580,
-        -760
+        150,
+        -780
       ],
       "size": [
-        325.1150207519531,
-        196.76773071289062
+        477.4410095214844,
+        274
       ],
       "flags": {},
-      "order": 12,
+      "order": 17,
       "mode": 0,
-      "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "Adjust the blocks to swap based on your VRAM, this is a tradeoff between speed and memory usage.\n\nAlternatively there's option to use VRAM management introduced in DiffSynt-Studios. This is usually slower, but saves even more VRAM compared to BlockSwap\n\nFurther VRAM savings are from torch.compile or alternatively using the chunked rope option in the WanVideoSampler -node"
+      "inputs": [
+        {
+          "name": "compile_args",
+          "shape": 7,
+          "type": "WANCOMPILEARGS",
+          "link": null
+        },
+        {
+          "name": "block_swap_args",
+          "shape": 7,
+          "type": "BLOCKSWAPARGS",
+          "link": null
+        },
+        {
+          "name": "lora",
+          "shape": 7,
+          "type": "WANVIDLORA",
+          "link": 89
+        },
+        {
+          "name": "vram_management_args",
+          "shape": 7,
+          "type": "VRAM_MANAGEMENTARGS",
+          "link": null
+        },
+        {
+          "name": "vace_model",
+          "shape": 7,
+          "type": "VACEPATH",
+          "link": null
+        },
+        {
+          "name": "fantasytalking_model",
+          "shape": 7,
+          "type": "FANTASYTALKINGMODEL",
+          "link": null
+        },
+        {
+          "name": "multitalk_model",
+          "shape": 7,
+          "type": "MULTITALKMODEL",
+          "link": null
+        }
       ],
-      "color": "#432",
-      "bgcolor": "#653"
+      "outputs": [
+        {
+          "name": "model",
+          "type": "WANVIDEOMODEL",
+          "slot_index": 0,
+          "links": [
+            79,
+            90
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-WanVideoWrapper",
+        "ver": "d9b1f4d1a5aea91d101ae97a54714a5861af3f50",
+        "Node name for S&R": "WanVideoModelLoader"
+      },
+      "widgets_values": [
+        "WanVideo\\Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors",
+        "fp16",
+        "fp8_e4m3fn",
+        "offload_device",
+        "sdpa"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
     },
     {
-      "id": 44,
-      "type": "Note",
+      "id": 39,
+      "type": "WanVideoBlockSwap",
       "pos": [
-        -620.9041137695312,
-        -1049.732421875
+        709.6087646484375,
+        -658.9224853515625
       ],
       "size": [
-        303.0501403808594,
-        88
+        315,
+        154
       ],
       "flags": {},
       "order": 13,
       "mode": 0,
       "inputs": [],
-      "outputs": [],
-      "properties": {},
-      "widgets_values": [
-        "If you have Triton installed, connect this for ~30% speed increase and reduced peak VRAM usage"
+      "outputs": [
+        {
+          "name": "block_swap_args",
+          "type": "BLOCKSWAPARGS",
+          "slot_index": 0,
+          "links": [
+            92
+          ]
+        }
       ],
-      "color": "#432",
-      "bgcolor": "#653"
+      "properties": {
+        "cnr_id": "ComfyUI-WanVideoWrapper",
+        "ver": "d9b1f4d1a5aea91d101ae97a54714a5861af3f50",
+        "Node name for S&R": "WanVideoBlockSwap"
+      },
+      "widgets_values": [
+        10,
+        false,
+        false,
+        true,
+        0
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 70,
+      "type": "WanVideoSetBlockSwap",
+      "pos": [
+        823.8463134765625,
+        -766.5842895507812
+      ],
+      "size": [
+        201.76815795898438,
+        46
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "WANVIDEOMODEL",
+          "link": 90
+        },
+        {
+          "name": "block_swap_args",
+          "shape": 7,
+          "type": "BLOCKSWAPARGS",
+          "link": 92
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "WANVIDEOMODEL",
+          "links": [
+            91
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-WanVideoWrapper",
+        "ver": "5406a72f62adf4a31a8a0a0e4923cc5288399652",
+        "Node name for S&R": "WanVideoSetBlockSwap"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
     }
   ],
   "links": [
@@ -1254,14 +1307,6 @@
       16,
       0,
       "WANTEXTENCODER"
-    ],
-    [
-      29,
-      22,
-      0,
-      27,
-      0,
-      "WANVIDEOMODEL"
     ],
     [
       30,
@@ -1294,14 +1339,6 @@
       28,
       0,
       "VAE"
-    ],
-    [
-      50,
-      39,
-      0,
-      22,
-      1,
-      "BLOCKSWAPARGS"
     ],
     [
       52,
@@ -1422,6 +1459,30 @@
       22,
       2,
       "WANVIDLORA"
+    ],
+    [
+      90,
+      22,
+      0,
+      70,
+      0,
+      "WANVIDEOMODEL"
+    ],
+    [
+      91,
+      70,
+      0,
+      27,
+      0,
+      "WANVIDEOMODEL"
+    ],
+    [
+      92,
+      39,
+      0,
+      70,
+      1,
+      "BLOCKSWAPARGS"
     ]
   ],
   "groups": [
@@ -1444,10 +1505,11 @@
     "ds": {
       "scale": 0.672749994932602,
       "offset": [
-        568.4491971472158,
-        889.9586829499522
+        922.2210318446557,
+        1106.9784252276236
       ]
     },
+    "frontendVersion": "1.25.1",
     "node_versions": {
       "ComfyUI-WanVideoWrapper": "5a2383621a05825d0d0437781afcb8552d9590fd",
       "comfy-core": "0.3.26",
@@ -1457,8 +1519,7 @@
     "VHS_latentpreview": true,
     "VHS_latentpreviewrate": 0,
     "VHS_MetadataImage": true,
-    "VHS_KeepIntermediate": true,
-    "frontendVersion": "1.24.1"
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }

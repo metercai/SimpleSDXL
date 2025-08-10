@@ -41,9 +41,11 @@ class WanVideoControlnetLoader:
         model_path = folder_paths.get_full_path_or_raise("controlnet", model)
       
         sd = load_torch_file(model_path, device=transformer_load_device, safe_load=True)
-
+        
         num_layers = 8 if "blocks.7.scale_shift_table" in sd else 6
-        out_proj_dim = 5120 if num_layers == 6 else 1536
+        out_proj_dim = sd["controlnet_blocks.0.bias"].shape[0]
+        downscale_coef = 16 if out_proj_dim == 3072 else 8
+        vae_channels = 48 if out_proj_dim == 3072 else 16
 
         if not "control_encoder.0.0.weight" in sd:
             raise ValueError("Invalid ControlNet model")
@@ -52,7 +54,7 @@ class WanVideoControlnetLoader:
             "added_kv_proj_dim": None,
             "attention_head_dim": 128,
             "cross_attn_norm": None,
-            "downscale_coef": 8,
+            "downscale_coef": downscale_coef,
             "eps": 1e-06,
             "ffn_dim": 8960,
             "freq_dim": 256,
@@ -69,8 +71,9 @@ class WanVideoControlnetLoader:
             "qk_norm": "rms_norm_across_heads",
             "rope_max_seq_len": 1024,
             "text_dim": 4096,
-            "vae_channels": 16
+            "vae_channels": vae_channels
             }
+        print(f"Loading WanControlnet with config: {controlnet_cfg}")
         
         from .wan_controlnet import WanControlnet
 

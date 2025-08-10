@@ -1,6 +1,7 @@
 import importlib.metadata
 import torch
 import logging
+import math
 from tqdm import tqdm
 import types, collections
 from comfy.utils import ProgressBar, copy_to_param, set_attr_param
@@ -501,6 +502,7 @@ def compile_model(transformer, compile_args=None):
         transformer = torch.compile(transformer, fullgraph=compile_args["fullgraph"], dynamic=compile_args["dynamic"], backend=compile_args["backend"], mode=compile_args["mode"])
     return transformer
 
+#https://5410tiffany.github.io/tcfg.github.io/
 def tangential_projection(pred_cond: torch.Tensor, pred_uncond: torch.Tensor) -> torch.Tensor:
     cond_dtype = pred_cond.dtype
     preds = torch.stack([pred_cond, pred_uncond], dim=1).float()
@@ -511,3 +513,13 @@ def tangential_projection(pred_cond: torch.Tensor, pred_uncond: torch.Tensor) ->
     Vh_modified[:, 1] = 0
     recon = U @ torch.diag_embed(S) @ Vh_modified
     return recon[:, 1].view(pred_uncond.shape).to(cond_dtype)
+
+#https://arxiv.org/abs/2508.03442
+def get_raag_guidance(noise_pred_cond, noise_pred_uncond, w_max, alpha=1.0, eps=1e-8):
+    delta = noise_pred_cond - noise_pred_uncond
+    norm_delta = torch.norm(delta.flatten(1), dim=1, keepdim=True)
+    norm_uncond = torch.norm(noise_pred_uncond.flatten(1), dim=1, keepdim=True)
+    ratio = norm_delta / (norm_uncond + eps)
+    ratio_mean = ratio.mean().item()
+    adaptive_w = 1.0 + (w_max - 1.0) * math.exp(-alpha * ratio_mean)
+    return adaptive_w

@@ -19,6 +19,10 @@ Long answer: Due to the complexity of ComfyUI core code, and my lack of coding e
 
 https://huggingface.co/Kijai/WanVideo_comfy/tree/main
 
+fp8 scaled models (personal recommendation):
+
+https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled
+
 Text encoders to `ComfyUI/models/text_encoders`
 
 Clip vision to `ComfyUI/models/clip_vision`

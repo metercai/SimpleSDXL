@@ -489,6 +489,8 @@ class T5EncoderModel:
         self.dtype = dtype
         self.device = device
         self.tokenizer_path = tokenizer_path
+        self.state_dict = state_dict
+        self.quantization = quantization
 
         # init model
         with init_empty_weights():
@@ -497,17 +499,7 @@ class T5EncoderModel:
                 return_tokenizer=False,
                 dtype=dtype,
                 device=device).eval().requires_grad_(False)
-        
-        if quantization == "fp8_e4m3fn":
-            cast_dtype = torch.float8_e4m3fn
-        else:
-            cast_dtype = dtype
 
-        params_to_keep = {'norm', 'pos_embedding', 'token_embedding'}
-        for name, param in model.named_parameters():
-            dtype_to_use = dtype if any(keyword in name for keyword in params_to_keep) else cast_dtype
-            set_module_tensor_to_device(model, name, device=device, dtype=dtype_to_use, value=state_dict[name])
-        del state_dict
         self.model = model
         self.tokenizer = HuggingfaceTokenizer(
             name=tokenizer_path, seq_len=text_len, clean='whitespace')

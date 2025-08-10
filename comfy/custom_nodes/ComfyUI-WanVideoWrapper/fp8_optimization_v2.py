@@ -1,42 +1,30 @@
 import torch
 import torch.nn as nn
-from diffusers.quantizers.gguf.utils import GGUFParameter, dequantize_gguf_tensor
-from diffusers.utils import is_accelerate_available
-from contextlib import nullcontext
-
-if is_accelerate_available():
-    import accelerate
-    from accelerate import init_empty_weights
+from accelerate import init_empty_weights
 
 #based on https://github.com/huggingface/diffusers/blob/main/src/diffusers/quantizers/gguf/utils.py
-def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modules_to_not_convert=[], patches=None):
-    def _should_convert_to_gguf(state_dict, prefix):
-        weight_key = prefix + "weight"
-        return weight_key in state_dict and isinstance(state_dict[weight_key], GGUFParameter)
-
+def _replace_linear(model, compute_dtype, state_dict, prefix="", patches=None, scale_weights=None):
+   
     has_children = list(model.children())
     if not has_children:
         return
-
     for name, module in model.named_children():
         module_prefix = prefix + name + "."
-        _replace_with_gguf_linear(module, compute_dtype, state_dict, module_prefix, modules_to_not_convert, patches)
+        _replace_linear(module, compute_dtype, state_dict, module_prefix, patches, scale_weights)
 
-        if (
-            isinstance(module, nn.Linear)
-            and _should_convert_to_gguf(state_dict, module_prefix)
-            and name not in modules_to_not_convert
-        ):
+        if isinstance(module, nn.Linear):
             in_features = state_dict[module_prefix + "weight"].shape[1]
             out_features = state_dict[module_prefix + "weight"].shape[0]
+            if scale_weights is not None:
+                scale_key = f"{module_prefix}scale_weight"
 
-            ctx = init_empty_weights if is_accelerate_available() else nullcontext
-            with ctx():
-                model._modules[name] = GGUFLinear(
+            with init_empty_weights():
+                model._modules[name] = Fp8Linear(
                     in_features,
                     out_features,
                     module.bias is not None,
-                    compute_dtype=compute_dtype
+                    compute_dtype=compute_dtype,
+                    scale_weight=scale_weights.get(scale_key) if scale_weights else None
                 )
             #set_lora_params(model._modules[name], patches, module_prefix)
             model._modules[name].source_cls = type(module)
@@ -46,11 +34,11 @@ def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modul
     return model
 
 def set_lora_params(module, patches, module_prefix=""):
-    # Recursively set lora_diffs and lora_strengths for all GGUFLinear layers
+    # Recursively set lora_diffs and lora_strengths for all Fp8Linear layers
     for name, child in module.named_children():
         child_prefix = (f"{module_prefix}{name}.")
         set_lora_params(child, patches, child_prefix)
-    if isinstance(module, GGUFLinear):
+    if isinstance(module, Fp8Linear):
         key = f"diffusion_model.{module_prefix}weight"
         patch = patches.get(key, [])
         #print(f"Processing LoRA patches for {key}: {len(patch)} patches found")
@@ -71,7 +59,7 @@ def set_lora_params(module, patches, module_prefix=""):
             module.step = 0  # Initialize step for LoRA scheduling
 
 
-class GGUFLinear(nn.Linear):
+class Fp8Linear(nn.Linear):
     def __init__(
         self,
         in_features,
@@ -79,32 +67,34 @@ class GGUFLinear(nn.Linear):
         bias=False,
         compute_dtype=None,
         device=None,
+        scale_weight=None
     ) -> None:
         super().__init__(in_features, out_features, bias, device)
         self.compute_dtype = compute_dtype
         self.lora = None
         self.step = 0
+        self.scale_weight = scale_weight
 
-    def forward(self, inputs):
-        weight = self.dequantize_without_compile()
-        weight = weight.to(self.compute_dtype)
-        bias = self.bias.to(self.compute_dtype) if self.bias is not None else None
+    def forward(self, input):
+        weight = self.weight.to(input.dtype)
+        bias = self.bias.to(input.dtype) if self.bias is not None else None
+        if self.scale_weight is not None:
+            scale_weight = self.scale_weight.to(input.device)
+            if weight.numel() < input.numel():
+                weight = weight * scale_weight
+            else:
+                input = input * scale_weight
 
-        if hasattr(self, "lora") and self.lora is not None:
-            weight = self.apply_lora(weight, self.step).to(self.compute_dtype)
+        if self.lora is not None:
+            weight = self.apply_lora(weight).to(input.dtype)
 
-        output = torch.nn.functional.linear(inputs, weight, bias)
-        return output
-    
+        return torch.nn.functional.linear(input, weight, bias)
+
     @torch.compiler.disable()
-    def dequantize_without_compile(self):
-        return dequantize_gguf_tensor(self.weight)
-
-    @torch.compiler.disable()
-    def apply_lora(self, weight, step=None):
+    def apply_lora(self, weight):
         for lora_diff, lora_strength in zip(self.lora[0], self.lora[1]):
             if isinstance(lora_strength, list):
-                lora_strength = lora_strength[step]
+                lora_strength = lora_strength[self.step]
                 if lora_strength == 0.0:
                     continue
             elif lora_strength == 0.0:
@@ -117,3 +107,7 @@ class GGUFLinear(nn.Linear):
             scale = lora_strength * alpha
             weight = weight.add(patch_diff, alpha=scale)
         return weight
+    
+def remove_lora_from_module(module):
+    for name, submodule in module.named_modules():
+        submodule.lora = None

@@ -228,15 +228,43 @@ class CreateCFGScheduleFloatList:
 
         return (cfg_list,)
     
+
+class DummyComfyWanModelObject:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "shift": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "Sigma shift value"}),
+            }
+        }
+
+    RETURN_TYPES = ("MODEL", )
+    RETURN_NAMES = ("model",)
+    FUNCTION = "create"
+    CATEGORY = "WanVideoWrapper"
+    DESCRIPTION = "Helper node to create empty Wan model to use with BasicScheduler -node to get sigmas"
+
+    def create(self, shift):
+        from comfy.model_sampling import ModelSamplingDiscreteFlow
+        class DummyModel:
+            def get_model_object(self, name):
+                if name == "model_sampling":
+                    model_sampling = ModelSamplingDiscreteFlow()
+                    model_sampling.set_parameters(shift=shift)
+                    return model_sampling
+                return None
+        return (DummyModel(),)
+    
 NODE_CLASS_MAPPINGS = {
     "WanVideoImageResizeToClosest": WanVideoImageResizeToClosest,
     "WanVideoVACEStartToEndFrame": WanVideoVACEStartToEndFrame,
     "ExtractStartFramesForContinuations": ExtractStartFramesForContinuations,
-    "CreateCFGScheduleFloatList": CreateCFGScheduleFloatList
+    "CreateCFGScheduleFloatList": CreateCFGScheduleFloatList,
+    "DummyComfyWanModelObject": DummyComfyWanModelObject
     }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "WanVideoImageResizeToClosest": "WanVideo Image Resize To Closest",
     "WanVideoVACEStartToEndFrame": "WanVideo VACE Start To End Frame",
     "ExtractStartFramesForContinuations": "Extract Start Frames For Continuations",
-    "CreateCFGScheduleFloatList": "Create CFG Schedule Float List"
+    "CreateCFGScheduleFloatList": "Create CFG Schedule Float List",
+    "DummyComfyWanModelObject": "Dummy Comfy Wan Model Object"
     }

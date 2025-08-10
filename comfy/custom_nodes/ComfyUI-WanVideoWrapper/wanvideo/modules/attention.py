@@ -1,18 +1,21 @@
 # Copyright 2024-2025 The Alibaba Wan Team Authors. All rights reserved.
 import torch
+from ...utils import log
 
+# Flash Attention imports
 try:
     import flash_attn_interface
     FLASH_ATTN_3_AVAILABLE = True
-except ModuleNotFoundError:
+except Exception as e:
     FLASH_ATTN_3_AVAILABLE = False
 
 try:
     import flash_attn
     FLASH_ATTN_2_AVAILABLE = True
-except ModuleNotFoundError:
+except Exception as e:
     FLASH_ATTN_2_AVAILABLE = False
-
+        
+# Sage Attention imports
 try:
     from sageattention import sageattn
     @torch.compiler.disable()
@@ -22,11 +25,11 @@ try:
         else:
             return sageattn(q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, tensor_layout=tensor_layout)
 except Exception as e:
-    print(f"Warning: Could not load sageattention: {str(e)}")
+    log.warning(f"Warning: Could not load sageattention: {str(e)}")
     if isinstance(e, ModuleNotFoundError):
-        print("sageattention package is not installed")
+        log.warning("sageattention package is not installed, sageattention will not be available")
     elif isinstance(e, ImportError) and "DLL" in str(e):
-        print("sageattention DLL loading error")
+        log.warning("sageattention DLL loading error, sageattention will not be available")
     sageattn_func = None
 
 try:
@@ -34,7 +37,6 @@ try:
 except:
     SAGE3_AVAILABLE = False
 
-import warnings
 
 __all__ = [
     'flash_attention',
@@ -107,9 +109,7 @@ def flash_attention(
         q = q * q_scale
 
     if version is not None and version == 3 and not FLASH_ATTN_3_AVAILABLE:
-        warnings.warn(
-            'Flash attention 3 is not available, use flash attention 2 instead.'
-        )
+        log.warning('Flash attention 3 is not available, use flash attention 2 instead.')
 
     # apply attention
     if (version is None or version == 3) and FLASH_ATTN_3_AVAILABLE:
