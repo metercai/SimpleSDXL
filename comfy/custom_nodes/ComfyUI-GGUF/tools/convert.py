@@ -18,6 +18,7 @@ class ModelTemplate:
     keys_detect = []  # list of lists to match in state dict
     keys_banned = []  # list of keys that should mark model as invalid for conversion
     keys_hiprec = []  # list of keys that need to be kept in fp32 for some reason
+    keys_ignore = []  # list of strings to ignore keys by when found
 
     def handle_nd_tensor(self, key, data):
         raise NotImplementedError(f"Tensor detected that exceeds dims supported by C++ code! ({key} @ {data.shape})")
@@ -59,6 +60,17 @@ class ModelHiDream(ModelTemplate):
         ".ff_i.gate.weight",
         "img_emb.emb_pos"
     ]
+
+class CosmosPredict2(ModelTemplate):
+    arch = "cosmos"
+    keys_detect = [
+        (
+            "blocks.0.mlp.layer1.weight",
+            "blocks.0.adaln_modulation_cross_attn.1.weight",
+        )
+    ]
+    keys_hiprec = ["pos_embedder"]
+    keys_ignore = ["_extra_state", "accum_"]
 
 class ModelHyVid(ModelTemplate):
     arch = "hyvid"
@@ -127,8 +139,14 @@ class ModelSD1(ModelTemplate):
         ), # Non-diffusers
     ]
 
-# The architectures are checked in order and the first successful match terminates the search.
-arch_list = [ModelFlux, ModelSD3, ModelAura, ModelHiDream, ModelLTXV, ModelHyVid, ModelWan, ModelSDXL, ModelSD1]
+class ModelLumina2(ModelTemplate):
+    arch = "lumina2"
+    keys_detect = [
+        ("cap_embedder.1.weight", "context_refiner.0.attention.qkv.weight")
+    ]
+
+arch_list = [ModelFlux, ModelSD3, ModelAura, ModelHiDream, CosmosPredict2, 
+             ModelLTXV, ModelHyVid, ModelWan, ModelSDXL, ModelSD1, ModelLumina2]
 
 def is_model_arch(model, state_dict):
     # check if model is correct
@@ -163,20 +181,32 @@ def parse_args():
     return args
 
 def strip_prefix(state_dict):
-    # only keep unet with no prefix!
+    # prefix for mixed state dict
     prefix = None
     for pfx in ["model.diffusion_model.", "model."]:
         if any([x.startswith(pfx) for x in state_dict.keys()]):
             prefix = pfx
             break
 
-    sd = {}
-    for k, v in state_dict.items():
-        if prefix and prefix not in k:
-            continue
-        if prefix:
+    # prefix for uniform state dict
+    if prefix is None:
+        for pfx in ["net."]:
+            if all([x.startswith(pfx) for x in state_dict.keys()]):
+                prefix = pfx
+                break
+
+    # strip prefix if found
+    if prefix is not None:
+        logging.info(f"State dict prefix found: '{prefix}'")
+        sd = {}
+        for k, v in state_dict.items():
+            if prefix not in k:
+                continue
             k = k.replace(prefix, "")
-        sd[k] = v
+            sd[k] = v
+    else:
+        logging.debug("State dict has no prefix")
+        sd = state_dict
 
     return sd
 
@@ -208,6 +238,10 @@ def handle_tensors(writer, state_dict, model_arch):
         raise ValueError(f"Can only handle tensor names up to {MAX_TENSOR_NAME_LENGTH} characters. Tensors exceeding the limit: {bad_list}")
     for key, data in tqdm(state_dict.items()):
         old_dtype = data.dtype
+
+        if any(x in key for x in model_arch.keys_ignore):
+            tqdm.write(f"Filtering ignored key: '{key}'")
+            continue
 
         if data.dtype == torch.bfloat16:
             data = data.to(torch.float32).numpy()
@@ -328,3 +362,4 @@ def convert_file(path, dst_path=None, interact=True, overwrite=False):
 if __name__ == "__main__":
     args = parse_args()
     convert_file(args.src, args.dst)
+
