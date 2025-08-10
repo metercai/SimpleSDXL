@@ -1343,7 +1343,7 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "vae_model"
     }
   },
   "337": {
