@@ -334,6 +334,7 @@ with shared.gradio_root:
                                         elem_id='final_gallery', preview=True )
                         progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False,
                                             elem_id='progress-bar', elem_classes='progress-bar')
+                        prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None, args_manager.args.theme), visible=False, elem_id='infobox', elem_classes='infobox')
                         with gr.Accordion("Finished Images Catalog", open=False, visible=False, elem_id='finished_images_catalog') as index_radio:
                             gallery_index = gr.Radio(choices=None, label="Gallery_Index", value=None, show_label=False)
                     with gr.Column(scale=1, visible=False) as scene_panel:
@@ -354,7 +355,6 @@ with shared.gradio_root:
                             outputs=scene_canvas_image,
                             queue=False,show_progress=False)
                         
-                prompt_info_box = gr.Markdown(toolbox.make_infobox_markdown(None, args_manager.args.theme), visible=False, elem_id='infobox', elem_classes='infobox')
                 with gr.Group(visible=False, elem_classes='toolbox_note') as params_note_box:
                     params_note_info = gr.Markdown(elem_classes='note_info')
                     params_note_input_name = gr.Textbox(show_label=False, placeholder="Type preset name here.", min_width=100, elem_classes='preset_input', visible=False)

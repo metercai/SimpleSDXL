@@ -650,7 +650,7 @@ div.block.tagHelper.active {
 .infobox {
     height: auto;
     position: absolute;
-    top: -25rem;
+    top: -15rem;
     left: 50%;
     transform: translateX(-50%);
     width: 28rem !important;
