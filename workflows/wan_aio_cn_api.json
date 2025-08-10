@@ -807,7 +807,7 @@
   "263": {
     "inputs": {
       "samples": [
-        "781",
+        "325",
         0
       ],
       "vae": [
@@ -1343,7 +1343,7 @@
     },
     "class_type": "VAELoader",
     "_meta": {
-      "title": "Load VAE"
+      "title": "vae_model"
     }
   },
   "337": {
@@ -3320,11 +3320,11 @@
     "inputs": {
       "total": 3,
       "initial_value1": [
-        "830",
+        "768",
         0
       ],
       "initial_value2": [
-        "831",
+        "769",
         0
       ]
     },
@@ -3487,7 +3487,7 @@
         0
       ],
       "on_false": [
-        "779",
+        "768",
         0
       ]
     },
@@ -4900,77 +4900,6 @@
       "title": "EmptyHunyuanLatentVideo"
     }
   },
-  "779": {
-    "inputs": {
-      "width": [
-        "839",
-        1
-      ],
-      "height": [
-        "839",
-        2
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": [
-        "878",
-        1
-      ],
-      "positive": [
-        "768",
-        0
-      ],
-      "negative": [
-        "769",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "780",
-        0
-      ],
-      "control_masks": [
-        "841",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
-  "780": {
-    "inputs": {
-      "amount": 1,
-      "image": [
-        "839",
-        0
-      ]
-    },
-    "class_type": "RepeatImageBatch",
-    "_meta": {
-      "title": "RepeatImageBatch"
-    }
-  },
-  "781": {
-    "inputs": {
-      "trim_amount": [
-        "779",
-        3
-      ],
-      "samples": [
-        "325",
-        0
-      ]
-    },
-    "class_type": "TrimVideoLatent",
-    "_meta": {
-      "title": "TrimVideoLatent"
-    }
-  },
   "782": {
     "inputs": {
       "image": [
@@ -5089,8 +5018,8 @@
         1
       ],
       "on_false": [
-        "779",
-        1
+        "769",
+        0
       ]
     },
     "class_type": "easy ifElse",
@@ -5113,72 +5042,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "830": {
-    "inputs": {
-      "boolean": [
-        "833",
-        0
-      ],
-      "on_true": [
-        "779",
-        0
-      ],
-      "on_false": [
-        "768",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "831": {
-    "inputs": {
-      "boolean": [
-        "833",
-        0
-      ],
-      "on_true": [
-        "779",
-        1
-      ],
-      "on_false": [
-        "769",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "833": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "640",
-        0
-      ],
-      "b": [
-        "835",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "835": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
     }
   },
   "839": {
@@ -5243,7 +5106,7 @@
   "847": {
     "inputs": {
       "trim_amount": [
-        "779",
+        "880",
         3
       ],
       "samples": [
@@ -5371,7 +5234,7 @@
   "875": {
     "inputs": {
       "pixels": [
-        "780",
+        "839",
         0
       ],
       "vae": [
@@ -5506,7 +5369,7 @@
       "mask_color": "128, 128, 128",
       "pass_through": true,
       "image": [
-        "780",
+        "839",
         0
       ],
       "mask": [
