@@ -8,7 +8,7 @@
             "scene_frontend": {
                 "version": "m1.1",
                 "theme": ["基础"],
-                "theme_title": "Wan2.2图生视频",
+                "theme_title": "Wan2.2图生视频 [左边上传首帧，右边尾帧可选]",
                 "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2"],
                 "prompt": {
                     "基础": ""
