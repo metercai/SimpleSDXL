@@ -1,0 +1,56 @@
+
+{
+    "default_engine": {
+        "backend_engine": "Comfy",
+        "disvisible": ["backend_selection", "performance_selection","refiner_model", "negative_prompt"],
+        "disinteractive": ["input_image_checkbox", "enhance_checkbox", "performance_selection", "negative_prompt", "refiner_model" ],
+        "available_aspect_ratios_selection": "Flux",
+        "backend_params": {
+                "task_method": "qwen_cn"
+                }
+        },
+    "default_model": "qwen-image-Q4_K_M.gguf",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 1,
+    "default_image_number":1,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_overwrite_step": 8,
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,qwen-image-Q4_K_M.gguf,13065746976,0,",
+        "loras,Qwen-Image-Lightning-8steps-V1.0.safetensors,1698951104,0,",
+        "clip,qwen_2.5_vl_7b_fp8_scaled.safetensors,9384670680,0,",
+        "vae,qwen_image_vae.safetensors,253806246,0,"
+    ]       
+}

@@ -1344,7 +1344,8 @@ packages = {
         "MiniCPM_package": {
         "id": 11,
         "name": "[11]MiniCPMv26反推扩展包",
-        "note": "本地多模态大语言模型|显存需求：★★ 速度：★★",
+        "note": "本地多模态大语言模型[反推、翻译、扩写]|显存需求：★★ 速度：★★",
+
         "files": [
             ("llms/MiniCPMv2_6-prompt-generator/.gitattributes", 1657),
             ("llms/MiniCPMv2_6-prompt-generator/.mdl", 49),
@@ -1824,8 +1825,8 @@ packages = {
     },
     "wan_t2i_package": {
         "id": 31,
-        "name": "[31]Wan2.1_T2I扩展包",
-        "note": "Wan2.1文生图扩展包|显存需求：★★★ 速度：★★",
+        "name": "[31]Wan2.2_T2I扩展包",
+        "note": "万相2.2文生图扩展包|显存需求：★★★ 速度：★★",
         "files": [
             ("checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf", 11629612832),
             ("clip/umt5-xxl-encoder-Q8_0.gguf", 6043068256),
@@ -1840,7 +1841,23 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
-    }
+    },
+    "qwen_image_package": {
+        "id": 32,
+        "name": "[32]Qwen-Image文生图扩展包",
+        "note": "千问大模型文生图扩展包|显存需求：★★★★★ 速度：★",
+        "files": [
+            ("checkpoints/qwen-image-Q4_K_M.gguf", 13065746976),
+            ("loras/Qwen-Image-Lightning-8steps-V1.0.safetensors", 1698951104),
+            ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
+            ("vae/qwen_image_vae.safetensors", 253806246)
+        ],
+        "download_links": [
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/qwen-image-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/qwen_2.5_vl_7b_fp8_scaled.safetensors"
+        ]
+    },
+
 }
 
 MANUAL_DOWNLOAD_MAP = {
