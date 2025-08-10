@@ -262,7 +262,7 @@
   },
   "26": {
     "inputs": {
-      "sage_attention": "auto",
+      "sage_attention": "disabled",
       "model": [
         "10",
         0
