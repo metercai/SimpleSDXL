@@ -7,6 +7,8 @@ import torch
 import folder_paths
 import comfy.model_management as mm
 from comfy.cli_args import args
+from typing import Optional, Tuple
+
 
 sageattn_modes = ["disabled", "auto", "sageattn_qk_int8_pv_fp16_cuda", "sageattn_qk_int8_pv_fp16_triton", "sageattn_qk_int8_pv_fp8_cuda", "sageattn_qk_int8_pv_fp8_cuda++"]
 
@@ -17,6 +19,10 @@ if not _initialized:
     _original_functions["orig_attention"] = comfy_attention.optimized_attention
     _original_functions["original_patch_model"] = comfy.model_patcher.ModelPatcher.patch_model
     _original_functions["original_load_lora_for_models"] = comfy.sd.load_lora_for_models
+    try:
+        _original_functions["original_qwen_forward"] = comfy.ldm.qwen_image.model.Attention.forward
+    except:
+        pass
     _initialized = True
 
 class BaseLoaderKJ:
@@ -25,6 +31,55 @@ class BaseLoaderKJ:
 
     @torch.compiler.disable()
     def _patch_modules(self, patch_cublaslinear, sage_attention):
+        try:
+            from comfy.ldm.qwen_image.model import apply_rotary_emb
+            def qwen_sage_forward(
+                self,
+                hidden_states: torch.FloatTensor,  # Image stream
+                encoder_hidden_states: torch.FloatTensor = None,  # Text stream
+                encoder_hidden_states_mask: torch.FloatTensor = None,
+                attention_mask: Optional[torch.FloatTensor] = None,
+                image_rotary_emb: Optional[torch.Tensor] = None,
+            ) -> Tuple[torch.Tensor, torch.Tensor]:
+                seq_txt = encoder_hidden_states.shape[1]
+
+                img_query = self.to_q(hidden_states).unflatten(-1, (self.heads, -1))
+                img_key = self.to_k(hidden_states).unflatten(-1, (self.heads, -1))
+                img_value = self.to_v(hidden_states).unflatten(-1, (self.heads, -1))
+
+                txt_query = self.add_q_proj(encoder_hidden_states).unflatten(-1, (self.heads, -1))
+                txt_key = self.add_k_proj(encoder_hidden_states).unflatten(-1, (self.heads, -1))
+                txt_value = self.add_v_proj(encoder_hidden_states).unflatten(-1, (self.heads, -1))
+
+                img_query = self.norm_q(img_query)
+                img_key = self.norm_k(img_key)
+                txt_query = self.norm_added_q(txt_query)
+                txt_key = self.norm_added_k(txt_key)
+
+                joint_query = torch.cat([txt_query, img_query], dim=1)
+                joint_key = torch.cat([txt_key, img_key], dim=1)
+                joint_value = torch.cat([txt_value, img_value], dim=1)
+
+                joint_query = apply_rotary_emb(joint_query, image_rotary_emb)
+                joint_key = apply_rotary_emb(joint_key, image_rotary_emb)
+
+                joint_query = joint_query.flatten(start_dim=2)
+                joint_key = joint_key.flatten(start_dim=2)
+                joint_value = joint_value.flatten(start_dim=2)
+
+                joint_hidden_states = attention_sage(joint_query, joint_key, joint_value, self.heads, attention_mask)
+
+                txt_attn_output = joint_hidden_states[:, :seq_txt, :]
+                img_attn_output = joint_hidden_states[:, seq_txt:, :]
+
+                img_attn_output = self.to_out[0](img_attn_output)
+                img_attn_output = self.to_out[1](img_attn_output)
+                txt_attn_output = self.to_add_out(txt_attn_output)
+
+                return img_attn_output, txt_attn_output
+        except:
+            print("Failed to patch QwenImage attention, Comfy not updated, skipping")
+
         from comfy.ops import disable_weight_init, CastWeightBiasOp, cast_bias_weight
 
         if mm.get_current_compute_capability().lower() not in ['sm80', 'sm86', 'sm87', 'sm89', 'sm90', 'sm100', 'sm120']:
@@ -100,6 +155,10 @@ class BaseLoaderKJ:
             comfy.ldm.genmo.joint_model.asymm_models_joint.optimized_attention = attention_sage
             comfy.ldm.cosmos.blocks.optimized_attention = attention_sage
             comfy.ldm.wan.model.optimized_attention = attention_sage
+            try:
+                comfy.ldm.qwen_image.model.Attention.forward = qwen_sage_forward
+            except:
+                pass
 
         else:
             print("Restoring initial comfy attention")
@@ -109,6 +168,10 @@ class BaseLoaderKJ:
             comfy.ldm.genmo.joint_model.asymm_models_joint.optimized_attention = _original_functions.get("orig_attention")
             comfy.ldm.cosmos.blocks.optimized_attention = _original_functions.get("orig_attention")
             comfy.ldm.wan.model.optimized_attention = _original_functions.get("orig_attention")
+            try:
+                comfy.ldm.qwen_image.model.Attention.forward = _original_functions.get("original_qwen_forward")
+            except:
+                pass
 
         if patch_cublaslinear:
             if not BaseLoaderKJ.cublas_patched:
@@ -138,6 +201,7 @@ class BaseLoaderKJ:
             if BaseLoaderKJ.cublas_patched:
                 disable_weight_init.Linear = BaseLoaderKJ.original_linear
                 BaseLoaderKJ.cublas_patched = False
+        
 
 from comfy.patcher_extension import CallbacksMP
 class PathchSageAttentionKJ(BaseLoaderKJ):
@@ -309,6 +373,25 @@ class CheckpointLoaderKJ(BaseLoaderKJ):
 
         return (model_patcher, clip, vae)
 
+class DiffusionModelSelector():
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "model_name": (folder_paths.get_filename_list("diffusion_models"), {"tooltip": "The name of the checkpoint (model) to load."}),
+        },
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("model_path",)
+    FUNCTION = "get_path"
+    DESCRIPTION = "Returns the path to the model as a string."
+    EXPERIMENTAL = True
+    CATEGORY = "KJNodes/experimental"
+
+    def get_path(self, model_name):        
+        model_path = folder_paths.get_full_path_or_raise("diffusion_models", model_name)
+        return (model_path,)
+
 class DiffusionModelLoaderKJ(BaseLoaderKJ):
     @classmethod
     def INPUT_TYPES(s):
@@ -319,7 +402,11 @@ class DiffusionModelLoaderKJ(BaseLoaderKJ):
             "patch_cublaslinear": ("BOOLEAN", {"default": False, "tooltip": "Enable or disable the patching, won't take effect on already loaded models!"}),
             "sage_attention": (sageattn_modes, {"default": False, "tooltip": "Patch comfy attention to use sageattn."}),
             "enable_fp16_accumulation": ("BOOLEAN", {"default": False, "tooltip": "Enable torch.backends.cuda.matmul.allow_fp16_accumulation, requires pytorch 2.7.0 nightly."}),
-        }}
+        },
+        "optional": {
+            "extra_state_dict": ("STRING", {"forceInput": True, "tooltip": "The full path to an additional state dict to load, this will be merged with the main state dict. Useful for example to add VACE module to a WanVideoModel. You can use DiffusionModelSelector to easily get the path."}),
+        }
+        }
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch_and_load"
@@ -327,7 +414,7 @@ class DiffusionModelLoaderKJ(BaseLoaderKJ):
     EXPERIMENTAL = True
     CATEGORY = "KJNodes/experimental"
 
-    def patch_and_load(self, model_name, weight_dtype, compute_dtype, patch_cublaslinear, sage_attention, enable_fp16_accumulation):        
+    def patch_and_load(self, model_name, weight_dtype, compute_dtype, patch_cublaslinear, sage_attention, enable_fp16_accumulation, extra_state_dict=None):        
         DTYPE_MAP = {
             "fp8_e4m3fn": torch.float8_e4m3fn,
             "fp8_e5m2": torch.float8_e5m2,
@@ -354,7 +441,14 @@ class DiffusionModelLoaderKJ(BaseLoaderKJ):
                 torch.backends.cuda.matmul.allow_fp16_accumulation = False
 
         unet_path = folder_paths.get_full_path_or_raise("diffusion_models", model_name)
-        model = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+    
+        sd = comfy.utils.load_torch_file(unet_path)
+        if extra_state_dict is not None:
+            extra_sd = comfy.utils.load_torch_file(extra_state_dict)
+            sd.update(extra_sd)
+            del extra_sd
+
+        model = comfy.sd.load_diffusion_model_state_dict(sd, model_options=model_options)
         if dtype := DTYPE_MAP.get(compute_dtype):
             model.set_model_compute_dtype(dtype)
             model.force_cast_weights = False
@@ -753,9 +847,6 @@ class TorchCompileModelWanVideo:
         return (m, )
     
 class TorchCompileModelWanVideoV2:
-    def __init__(self):
-        self._compiled = False
-
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -785,6 +876,45 @@ class TorchCompileModelWanVideoV2:
                 compile_key_list = []
                 for i, block in enumerate(diffusion_model.blocks):
                     compile_key_list.append(f"diffusion_model.blocks.{i}")
+            else:
+                compile_key_list =["diffusion_model"]
+
+            set_torch_compile_wrapper(model=m, keys=compile_key_list, backend=backend, mode=mode, dynamic=dynamic, fullgraph=fullgraph)           
+        except:
+            raise RuntimeError("Failed to compile model")
+
+        return (m, )
+    
+class TorchCompileModelQwenImage:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": ("MODEL",),
+                "backend": (["inductor","cudagraphs"], {"default": "inductor"}),
+                "fullgraph": ("BOOLEAN", {"default": False, "tooltip": "Enable full graph mode"}),
+                "mode": (["default", "max-autotune", "max-autotune-no-cudagraphs", "reduce-overhead"], {"default": "default"}),
+                "dynamic": ("BOOLEAN", {"default": False, "tooltip": "Enable dynamic mode"}),
+                "compile_transformer_blocks_only": ("BOOLEAN", {"default": True, "tooltip": "Compile only transformer blocks, faster compile and less error prone"}),
+                "dynamo_cache_size_limit": ("INT", {"default": 64, "min": 0, "max": 1024, "step": 1, "tooltip": "torch._dynamo.config.cache_size_limit"}),
+            },
+        }
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "patch"
+
+    CATEGORY = "KJNodes/torchcompile"
+    EXPERIMENTAL = True
+
+    def patch(self, model, backend, fullgraph, mode, dynamic, dynamo_cache_size_limit, compile_transformer_blocks_only):
+        from comfy_api.torch_helpers import set_torch_compile_wrapper
+        m = model.clone()
+        diffusion_model = m.get_model_object("diffusion_model")
+        torch._dynamo.config.cache_size_limit = dynamo_cache_size_limit            
+        try:
+            if compile_transformer_blocks_only:
+                compile_key_list = []
+                for i, block in enumerate(diffusion_model.transformer_blocks):
+                    compile_key_list.append(f"diffusion_model.transformer_blocks.{i}")
             else:
                 compile_key_list =["diffusion_model"]
 
@@ -1454,34 +1584,26 @@ class WanVideoEnhanceAVideoKJ:
         return (model_clone,)
     
 def normalized_attention_guidance(self, query, context_positive, context_negative):
-    nag_scale = self.nag_scale
-    nag_alpha = self.nag_alpha
-    nag_tau = self.nag_tau
-
     k_positive = self.norm_k(self.k(context_positive))
     v_positive = self.v(context_positive)
     k_negative = self.norm_k(self.k(context_negative))
     v_negative = self.v(context_negative)
 
-    x_positive = comfy.ldm.modules.attention.optimized_attention(query, k_positive, v_positive, heads=self.num_heads)
-    x_positive = x_positive.flatten(2)
+    x_positive = comfy.ldm.modules.attention.optimized_attention(query, k_positive, v_positive, heads=self.num_heads).flatten(2)
+    x_negative = comfy.ldm.modules.attention.optimized_attention(query, k_negative, v_negative, heads=self.num_heads).flatten(2)
 
-    x_negative = comfy.ldm.modules.attention.optimized_attention(query, k_negative, v_negative, heads=self.num_heads)
-    x_negative = x_negative.flatten(2)
+    nag_guidance = x_positive * self.nag_scale - x_negative * (self.nag_scale - 1)
 
-    nag_guidance = x_positive * nag_scale - x_negative * (nag_scale - 1)
-    
     norm_positive = torch.norm(x_positive, p=1, dim=-1, keepdim=True).expand_as(x_positive)
     norm_guidance = torch.norm(nag_guidance, p=1, dim=-1, keepdim=True).expand_as(nag_guidance)
     
-    scale = norm_guidance / norm_positive
-    scale = torch.nan_to_num(scale, nan=10.0)
-    
-    mask = scale > nag_tau
-    adjustment = (norm_positive * nag_tau) / (norm_guidance + 1e-7)
+    scale = torch.nan_to_num(norm_guidance / norm_positive, nan=10.0)
+
+    mask = scale > self.nag_tau
+    adjustment = (norm_positive * self.nag_tau) / (norm_guidance + 1e-7)
     nag_guidance = torch.where(mask, nag_guidance * adjustment, nag_guidance)
-    
-    x = nag_guidance * nag_alpha + x_positive * (1 - nag_alpha)
+
+    x = nag_guidance * self.nag_alpha + x_positive * (1 - self.nag_alpha)
     del nag_guidance
 
     return x
@@ -1493,27 +1615,38 @@ def wan_crossattn_forward_nag(self, x, context, **kwargs):
         x(Tensor): Shape [B, L1, C]
         context(Tensor): Shape [B, L2, C]
     """
- 
-    if context.shape[0] == 2:
-        x, x_real_negative = torch.chunk(x, 2, dim=0)
-        context_positive, context_negative = torch.chunk(context, 2, dim=0)
+    # Determine batch splitting and context handling
+    if self.input_type == "default":
+        # Single or [pos, neg] pair
+        if context.shape[0] == 1:
+            x_pos, context_pos = x, context
+            x_neg, context_neg = None, None
+        else:
+            x_pos, x_neg = torch.chunk(x, 2, dim=0)
+            context_pos, context_neg = torch.chunk(context, 2, dim=0)
+    elif self.input_type == "batch":
+        # Standard batch, no CFG
+        x_pos, context_pos = x, context
+        x_neg, context_neg = None, None
+
+    # Positive branch
+    q_pos = self.norm_q(self.q(x_pos))
+    nag_context = self.nag_context
+    if self.input_type == "batch":
+        nag_context = nag_context.repeat(x_pos.shape[0], 1, 1)
+    x_pos_out = normalized_attention_guidance(self, q_pos, context_pos, nag_context)
+
+    # Negative branch
+    if x_neg is not None and context_neg is not None:
+        q_neg = self.norm_q(self.q(x_neg))
+        k_neg = self.norm_k(self.k(context_neg))
+        v_neg = self.v(context_neg)
+        x_neg_out = comfy.ldm.modules.attention.optimized_attention(q_neg, k_neg, v_neg, heads=self.num_heads)
+        x = torch.cat([x_pos_out, x_neg_out], dim=0)
     else:
-        context_positive = context
-        context_negative = None
+        x = x_pos_out
 
-    q = self.norm_q(self.q(x))
-
-    x = normalized_attention_guidance(self, q, context_positive, self.nag_context)
-
-    if context_negative is not None:
-        q_real_negative = self.norm_q(self.q(x_real_negative))
-        k_real_negative = self.norm_k(self.k(context_negative))
-        v_real_negative = self.v(context_negative)
-        x_real_negative = comfy.ldm.modules.attention.optimized_attention(q_real_negative, k_real_negative, v_real_negative, heads=self.num_heads)
-        x = torch.cat([x, x_real_negative], dim=0)
-
-    x = self.o(x)
-    return x
+    return self.o(x)
 
 
 def wan_i2v_crossattn_forward_nag(self, x, context, context_img_len):
@@ -1554,12 +1687,13 @@ def wan_i2v_crossattn_forward_nag(self, x, context, context_img_len):
     return x
 
 class WanCrossAttentionPatch:
-    def __init__(self, context, nag_scale, nag_alpha, nag_tau, i2v=False):
+    def __init__(self, context, nag_scale, nag_alpha, nag_tau, i2v=False, input_type="default"):
         self.nag_context = context
         self.nag_scale = nag_scale
         self.nag_alpha = nag_alpha
         self.nag_tau = nag_tau
         self.i2v = i2v
+        self.input_type = input_type
     def __get__(self, obj, objtype=None):
         # Create bound method with stored parameters
         def wrapped_attention(self_module, *args, **kwargs):
@@ -1567,6 +1701,7 @@ class WanCrossAttentionPatch:
             self_module.nag_scale = self.nag_scale
             self_module.nag_alpha = self.nag_alpha
             self_module.nag_tau = self.nag_tau
+            self_module.input_type = self.input_type
             if self.i2v:
                 return wan_i2v_crossattn_forward_nag(self_module, *args, **kwargs)
             else:
@@ -1583,7 +1718,11 @@ class WanVideoNAG:
                 "nag_scale": ("FLOAT", {"default": 11.0, "min": 0.0, "max": 100.0, "step": 0.001, "tooltip": "Strength of negative guidance effect"}),
                 "nag_alpha": ("FLOAT", {"default": 0.25, "min": 0.0, "max": 1.0, "step": 0.001, "tooltip": "Mixing coefficient in that controls the balance between the normalized guided representation and the original positive representation."}),
                 "nag_tau": ("FLOAT", {"default": 2.5, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Clipping threshold that controls how much the guided attention can deviate from the positive attention."}),
-           }
+           },
+           "optional": {
+                "input_type": (["default", "batch"], {"tooltip": "Type of the model input"}),
+           },
+                                                 
         }
     
     RETURN_TYPES = ("MODEL",)
@@ -1593,7 +1732,7 @@ class WanVideoNAG:
     DESCRIPTION = "https://github.com/ChenDarYen/Normalized-Attention-Guidance"
     EXPERIMENTAL = True
 
-    def patch(self, model, conditioning, nag_scale, nag_alpha, nag_tau):
+    def patch(self, model, conditioning, nag_scale, nag_alpha, nag_tau, input_type="default"):
         if nag_scale == 0:
             return (model,)
         
@@ -1611,7 +1750,7 @@ class WanVideoNAG:
         i2v = True if "WAN21_I2V" in type_str else False
     
         for idx, block in enumerate(diffusion_model.blocks):
-            patched_attn = WanCrossAttentionPatch(context, nag_scale, nag_alpha, nag_tau, i2v).__get__(block.cross_attn, block.__class__)
+            patched_attn = WanCrossAttentionPatch(context, nag_scale, nag_alpha, nag_tau, i2v, input_type=input_type).__get__(block.cross_attn, block.__class__)
           
             model_clone.add_object_patch(f"diffusion_model.blocks.{idx}.cross_attn.forward", patched_attn)
             
