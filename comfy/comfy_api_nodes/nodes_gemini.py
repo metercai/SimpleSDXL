@@ -2,6 +2,8 @@
 API Nodes for Gemini Multimodal LLM Usage via Remote API
 See: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
 """
+from __future__ import annotations
+
 
 import os
 from enum import Enum
@@ -301,7 +303,7 @@ class GeminiNode(ComfyNodeABC):
         """
         return GeminiPart(text=text)
 
-    def api_call(
+    async def api_call(
         self,
         prompt: str,
         model: GeminiModel,
@@ -330,7 +332,7 @@ class GeminiNode(ComfyNodeABC):
             parts.extend(files)
 
         # Create response
-        response = SynchronousOperation(
+        response = await SynchronousOperation(
             endpoint=get_gemini_endpoint(model),
             request=GeminiGenerateContentRequest(
                 contents=[

@@ -66,6 +66,7 @@ See what ComfyUI can do with the [example workflows](https://comfyanonymous.gith
    - [Lumina Image 2.0](https://comfyanonymous.github.io/ComfyUI_examples/lumina2/)
    - [HiDream](https://comfyanonymous.github.io/ComfyUI_examples/hidream/)
    - [Cosmos Predict2](https://comfyanonymous.github.io/ComfyUI_examples/cosmos_predict2/)
+   - [Qwen Image](https://comfyanonymous.github.io/ComfyUI_examples/qwen_image/)
 - Image Editing Models
    - [Omnigen 2](https://comfyanonymous.github.io/ComfyUI_examples/omnigen/)
    - [Flux Kontext](https://comfyanonymous.github.io/ComfyUI_examples/flux/#flux-kontext-image-editing-model)
@@ -111,7 +112,7 @@ Workflow examples can be found on the [Examples page](https://comfyanonymous.git
 
 ## Release Process
 
-ComfyUI follows a weekly release cycle every Friday, with three interconnected repositories:
+ComfyUI follows a weekly release cycle targeting Friday but this regularly changes because of model releases or large changes to the codebase. There are three interconnected repositories:
 
 1. **[ComfyUI Core](https://github.com/comfyanonymous/ComfyUI)**
    - Releases a new stable version (e.g., v0.7.0)
