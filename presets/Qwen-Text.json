@@ -1,0 +1,73 @@
+{
+    "default_engine": {
+        "backend_engine": "Comfy",
+        "disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+        "disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+        "available_aspect_ratios_selection": "Flux",
+        "scene_frontend": {
+            "version": "V1.0",
+            "disvisible": ["scene_aspect_ratio", "scene_additional_prompt", "scene_input_image1", "scene_var_number"],
+            "theme": ["千问重绘"],
+            "prompt": {
+                "千问重绘": "简单背景，画面正中央有艺术字。"
+            },
+            "additional_prompt_2": {
+                "千问重绘": "标题：“Qwen”"
+            },
+            "image_preprocessor_method": {
+                "千问重绘":  [["-normalization"]]
+          },
+            "additional_prompt_title_2": "填入想要绘制的文字或在下方输入完整描述",
+            "theme_title": "涂抹需要写字的区域",
+            "aspect_ratio": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
+            "task_method": {
+                "千问重绘": "qwen_inpaint_cn"
+            }
+        }
+    },
+    "default_model": "qwen-image-Q4_K_M.gguf",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 1,
+    "default_vae": "qwen_image_vae.safetensors",
+    "default_image_number":1,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler",
+    "default_scheduler": "simple",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_overwrite_step": 12,
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,qwen-image-Q4_K_M.gguf,13065746976,0,",
+        "loras,Qwen-Image-Lightning-8steps-V1.0.safetensors,1698951104,0,",
+        "clip,qwen_2.5_vl_7b_fp8_scaled.safetensors,9384670680,0,",
+        "vae,qwen_image_vae.safetensors,253806246,0,"
+    ]       
+}
