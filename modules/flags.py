@@ -180,7 +180,7 @@ COMFY_KSAMPLER_NAMES = ['euler', 'euler_cfg_pp', 'euler_ancestral', 'euler_ances
 comfy_scheduler_list = COMFY_SCHEDULER_NAMES = ['normal', 'karras', 'exponential', 'sgm_uniform', 'simple', 'ddim_uniform', 'beta', 'linear_quadratic', 'kl_optimal']
 comfy_sampler_list = COMFY_SAMPLER_NAMES = COMFY_KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
 
-aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common', 'Flux','Illustrious']
+aspect_ratios_templates = ['SDXL', 'HyDiT', 'Common', 'Flux', 'Wan']
 default_aspect_ratio = ['1152*896', '1024*1024', '1280*768', '1280*720', '832*1216']
 available_aspect_ratios = [
     ['704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152',
@@ -200,8 +200,9 @@ available_aspect_ratios = [
     '1024*1024', '1024*1280', '1280*1280', '1280*1024',
     '1280*960', '1280*768', '1280*720', '1152*896', '1152*768', '1344*576'],
 
-    ['768*1344', '832*1216', '896*1152',
-    '1024*1024', '1152*896', '1344*768'],
+    ['576*704', '592*688', '608*672', '640*640',  '672*608', '688*592', '704*576',
+    '768*896', '784*880', '800*864', '832*832','864*800', '880*784', '896*768',
+    '960*1088', '976*1072', '992*1056', '1024*1024', '1056*992', '1072*976', '1088*960'],
 ]
 
 def add_ratio(x):

@@ -2153,7 +2153,7 @@
   "394": {
     "inputs": {
       "samples": [
-        "944",
+        "663",
         0
       ],
       "vae": [
@@ -2422,22 +2422,25 @@
         "728",
         8
       ],
-      "denoise": 1,
+      "denoise": [
+        "756",
+        1
+      ],
       "model": [
         "766",
         0
       ],
       "positive": [
-        "930",
+        "628",
         0
       ],
       "negative": [
-        "930",
-        1
+        "823",
+        0
       ],
       "latent_image": [
-        "930",
-        2
+        "1002",
+        0
       ]
     },
     "class_type": "KSampler",
@@ -2448,7 +2451,7 @@
   "414": {
     "inputs": {
       "samples": [
-        "931",
+        "413",
         0
       ],
       "vae": [
@@ -3806,12 +3809,12 @@
         0
       ],
       "positive": [
-        "942",
+        "422",
         0
       ],
       "negative": [
-        "942",
-        1
+        "769",
+        0
       ],
       "latent_image": [
         "951",
@@ -4111,16 +4114,16 @@
         0
       ],
       "positive": [
-        "937",
+        "429",
         0
       ],
       "negative": [
-        "937",
-        1
+        "769",
+        0
       ],
       "latent_image": [
-        "937",
-        2
+        "1000",
+        0
       ]
     },
     "class_type": "KSampler",
@@ -4131,7 +4134,7 @@
   "683": {
     "inputs": {
       "samples": [
-        "940",
+        "682",
         0
       ],
       "vae": [
@@ -5707,273 +5710,6 @@
       "title": "CLIP Text Encode (Prompt)"
     }
   },
-  "930": {
-    "inputs": {
-      "width": [
-        "934",
-        1
-      ],
-      "height": [
-        "934",
-        2
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": [
-        "933",
-        1
-      ],
-      "positive": [
-        "628",
-        0
-      ],
-      "negative": [
-        "823",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "934",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
-  "931": {
-    "inputs": {
-      "trim_amount": [
-        "930",
-        3
-      ],
-      "samples": [
-        "413",
-        0
-      ]
-    },
-    "class_type": "TrimVideoLatent",
-    "_meta": {
-      "title": "TrimVideoLatent"
-    }
-  },
-  "932": {
-    "inputs": {
-      "value": "a*0.5",
-      "a": [
-        "756",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "933": {
-    "inputs": {
-      "value": "1-a",
-      "a": [
-        "932",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "934": {
-    "inputs": {
-      "width": 1536,
-      "height": 1536,
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "downscale if bigger",
-      "multiple_of": 16,
-      "image": [
-        "658",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "937": {
-    "inputs": {
-      "width": [
-        "941",
-        1
-      ],
-      "height": [
-        "941",
-        2
-      ],
-      "length": 261,
-      "batch_size": 1,
-      "strength": [
-        "939",
-        1
-      ],
-      "positive": [
-        "429",
-        0
-      ],
-      "negative": [
-        "769",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "941",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
-  "938": {
-    "inputs": {
-      "value": "a*0.5",
-      "a": [
-        "756",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "939": {
-    "inputs": {
-      "value": "1-a",
-      "a": [
-        "938",
-        1
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
-  "940": {
-    "inputs": {
-      "trim_amount": [
-        "937",
-        3
-      ],
-      "samples": [
-        "682",
-        0
-      ]
-    },
-    "class_type": "TrimVideoLatent",
-    "_meta": {
-      "title": "TrimVideoLatent"
-    }
-  },
-  "941": {
-    "inputs": {
-      "width": 1536,
-      "height": 1536,
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "downscale if bigger",
-      "multiple_of": 16,
-      "image": [
-        "712",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
-  "942": {
-    "inputs": {
-      "width": [
-        "946",
-        1
-      ],
-      "height": [
-        "946",
-        2
-      ],
-      "length": 1,
-      "batch_size": 1,
-      "strength": [
-        "363",
-        0
-      ],
-      "positive": [
-        "422",
-        0
-      ],
-      "negative": [
-        "769",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "control_video": [
-        "943",
-        0
-      ],
-      "control_masks": [
-        "345",
-        0
-      ]
-    },
-    "class_type": "WanVaceToVideo",
-    "_meta": {
-      "title": "WanVaceToVideo"
-    }
-  },
-  "943": {
-    "inputs": {
-      "amount": 1,
-      "image": [
-        "946",
-        0
-      ]
-    },
-    "class_type": "RepeatImageBatch",
-    "_meta": {
-      "title": "RepeatImageBatch"
-    }
-  },
-  "944": {
-    "inputs": {
-      "trim_amount": [
-        "942",
-        3
-      ],
-      "samples": [
-        "663",
-        0
-      ]
-    },
-    "class_type": "TrimVideoLatent",
-    "_meta": {
-      "title": "TrimVideoLatent"
-    }
-  },
   "945": {
     "inputs": {
       "image": [
@@ -6029,7 +5765,7 @@
   "950": {
     "inputs": {
       "pixels": [
-        "943",
+        "946",
         0
       ],
       "vae": [
@@ -6384,6 +6120,68 @@
     "class_type": "ImageResize+",
     "_meta": {
       "title": "🔧 Image Resize"
+    }
+  },
+  "999": {
+    "inputs": {
+      "generation_width": 1280,
+      "generation_height": 1280,
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "712",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "1000": {
+    "inputs": {
+      "pixels": [
+        "999",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "1001": {
+    "inputs": {
+      "generation_width": 1280,
+      "generation_height": 1280,
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "658",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "1002": {
+    "inputs": {
+      "pixels": [
+        "1001",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
     }
   }
 }
