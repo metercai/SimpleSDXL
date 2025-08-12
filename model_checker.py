@@ -1875,6 +1875,24 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
+    },
+    "wan_t2v_package": {
+        "id": 34,
+        "name": "[34]Wan2.2文生视频扩展包",
+        "note": "Wan2.2文生视频扩展包|显存需求：★★★★ 速度：★",
+        "files": [
+            ("checkpoints/Wan2.2_T2V_High_Noise_14B_VACE-Q4_K_M.gguf", 11629612832),
+            ("checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf", 11629612832),
+            ("clip/umt5-xxl-encoder-Q8_0.gguf", 6043068256),
+            ("vae/Wan2_1_VAE_bf16.safetensors", 253806278),
+            ("loras/lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors", 630697104),
+            ("controlnet/rife/rife49.pth", 21345274)
+        ],
+        "download_links": [
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_High_Noise_14B_VACE-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
+            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
+        ]
     }
 }
 

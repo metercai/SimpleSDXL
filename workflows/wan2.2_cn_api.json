@@ -322,7 +322,7 @@
     "inputs": {
       "sage_attention": "auto",
       "model": [
-        "31",
+        "86",
         0
       ]
     },
@@ -609,6 +609,19 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_5"
+    }
+  },
+  "86": {
+    "inputs": {
+      "reserved": 2,
+      "anything": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "ReservedVRAMSetter",
+    "_meta": {
+      "title": "Set Reserved VRAM(GB) ⚙️"
     }
   }
 }
