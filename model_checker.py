@@ -1848,7 +1848,7 @@ packages = {
         "note": "千问大模型文生图扩展包|显存需求：★★★★★ 速度：★",
         "files": [
             ("checkpoints/qwen-image-Q4_K_M.gguf", 13065746976),
-            ("loras/Qwen-Image-Lightning-8steps-V1.0.safetensors", 1698951104),
+            ("loras/Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors", 849608296),
             ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
             ("vae/qwen_image_vae.safetensors", 253806246)
         ],
@@ -1973,7 +1973,8 @@ OBSOLETE_MODELS = [
     "noob_sdxl_controlnet_pose.fp16.safetensors",
     "NoobAI-XL-v1.1.safetensors",
     "clip-vit-h-14-laion2B-s32B-b79K.safetensors",
-    "fill_remove.safetensors"
+    "fill_remove.safetensors",
+    "Qwen-Image-Lightning-8steps-V1.0.safetensors"
 ]
 def main():
     print()
