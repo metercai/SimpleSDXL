@@ -311,7 +311,7 @@
   },
   "21": {
     "inputs": {
-      "prompt": "女孩在跳舞",
+      "prompt": "",
       "negative_prompt": "",
       "width": 480,
       "height": 640,
@@ -1022,7 +1022,7 @@
         1
       ],
       "upscale_method": "lanczos",
-      "keep_proportion": "stretch",
+      "keep_proportion": "crop",
       "pad_color": "0, 0, 0",
       "crop_position": "center",
       "divisible_by": 16,

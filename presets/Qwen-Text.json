@@ -66,7 +66,7 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,qwen-image-Q4_K_M.gguf,13065746976,0,",
-        "loras,Qwen-Image-Lightning-8steps-V1.0.safetensors,1698951104,0,",
+        "loras,Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors,849608296,0,",
         "clip,qwen_2.5_vl_7b_fp8_scaled.safetensors,9384670680,0,",
         "vae,qwen_image_vae.safetensors,253806246,0,"
     ]       
