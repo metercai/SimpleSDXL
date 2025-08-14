@@ -30,8 +30,8 @@
     "default_refiner_switch": 0.5,
     "default_loras": [
         [
-            "Qwen-Image-Lightning-8steps-V1.0.safetensors",
-            1.0
+            "Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors",
+            0.85
         ],
         [
             "None",
