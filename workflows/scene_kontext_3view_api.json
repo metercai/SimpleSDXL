@@ -352,7 +352,7 @@
   },
   "51": {
     "inputs": {
-      "model_name": "4xNomos8kSCHAT-L.pth",
+      "model_name": "4x_NMKD-Siax_200k.safetensors",
       "rescale_after_model": true,
       "rescale_method": "lanczos",
       "rescale": "to Width/Height",
