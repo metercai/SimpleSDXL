@@ -270,7 +270,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.07.29{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.08.16{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -1893,7 +1893,36 @@ packages = {
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
             "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
-    }
+    },
+    "onekey_kontext_package": {
+        "id": 35,
+        "name": "[35]OneKeyKontext一键精修预置包",
+        "note": "基于Kontext的一键精修|显存需求：★★★★ 速度：★★",
+        "files": [
+            ("checkpoints/flux1-dev-kontext_fp8_scaled.safetensors", 11904640136),
+            ("clip/clip_l.safetensors", 246144152),
+            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
+            ("loras/flux1-turbo.safetensors", 694082424),
+            ("vae/ae.safetensors", 335304388),
+            ("upscale_models/4x_NMKD-Siax_200k.safetensors", 66864028),
+            ("loras/Kontext_general_V1.safetensors", 306593008),
+            ("loras/Kontext_all.safetensors", 306593008),
+            ("loras/Kontext_appliances_V1.safetensors", 343806368),
+            ("loras/Kontext_makeup_V1.safetensors", 171970336),
+            ("loras/Kontext_metal_V1.safetensors", 343806368),
+            ("loras/Kontext_clothing_V1.safetensors", 306593008),
+            ("loras/Kontext_jewelry_V1.safetensors", 306593008),
+            ("loras/Kontext_digital3C.safetensors", 306593008),
+            ("loras/Kontext_composite.safetensors", 343806400),
+            ("loras/Kontext_pattern.safetensors", 343806384),
+            ("loras/Kontext_scene_alpha.safetensors", 343806392),
+            ("loras/Kontext_face_V1.safetensors", 306593008),
+            ("loras/Kontext_angle_beta.safetensors", 343806392),
+            ("loras/Kontext_3view.safetensors", 306593008),
+            ("loras/Kontext_remove_V1.safetensors", 306593008)
+        ],
+        "download_links": []
+    },
 }
 
 MANUAL_DOWNLOAD_MAP = {
