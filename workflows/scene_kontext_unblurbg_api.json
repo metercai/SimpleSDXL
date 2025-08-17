@@ -129,7 +129,7 @@
   },
   "13": {
     "inputs": {
-      "seed": 0
+      "seed": 133108456361422
     },
     "class_type": "SeedInput",
     "_meta": {
@@ -179,7 +179,7 @@
   },
   "22": {
     "inputs": {
-      "image": "welcome.png"
+      "image": "upload_image_55b636467f883e9cf72d399f721b77eb.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -188,10 +188,10 @@
   },
   "23": {
     "inputs": {
-      "prompt": "",
+      "prompt": "Deblur,",
       "negative_prompt": "",
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "cfg": 2.5,
       "steps": 20,
       "refiner_step": 16,
@@ -272,7 +272,7 @@
       "toggle": true,
       "mode": "simple",
       "num_loras": 10,
-      "lora_1_name": "Kontext_body_restore.safetensors",
+      "lora_1_name": "Kontext_deblur.safetensors",
       "lora_1_strength": [
         "46",
         1
@@ -502,7 +502,7 @@
         1
       ],
       "interpolation": "lanczos",
-      "method": "stretch",
+      "method": "fill / crop",
       "condition": "always",
       "multiple_of": 0,
       "image": [

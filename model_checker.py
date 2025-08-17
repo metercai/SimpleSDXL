@@ -1922,7 +1922,8 @@ packages = {
             ("loras/Kontext_remove_V1.safetensors", 306593008),
             ("loras/Kontext_body_restore.safetensors", 343806408),
             ("loras/Kontext_takeclothes.safetensors", 171969320),
-            ("loras/Kontext_put_it_here_V4.2.safetensors", 358706112)
+            ("loras/Kontext_put_it_here_V4.2.safetensors", 358706112),
+            ("loras/Kontext_deblur.safetensors", 306793968)
         ],
         "download_links": []
     },

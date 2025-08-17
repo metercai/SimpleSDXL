@@ -211,8 +211,8 @@
   "24": {
     "inputs": {
       "images": [
-        "51",
-        1
+        "63",
+        0
       ]
     },
     "class_type": "SaveImageWebsocket",
@@ -348,40 +348,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "51": {
-    "inputs": {
-      "model_name": "4x_NMKD-Siax_200k.safetensors",
-      "rescale_after_model": true,
-      "rescale_method": "lanczos",
-      "rescale": "to Width/Height",
-      "percent": 100,
-      "width": [
-        "53",
-        0
-      ],
-      "height": [
-        "54",
-        0
-      ],
-      "longer_side": 1024,
-      "crop": "disabled",
-      "image_output": "Preview",
-      "link_id": 0,
-      "save_prefix": "ComfyUI",
-      "image": [
-        "25",
-        0
-      ],
-      "vae": [
-        "1",
-        0
-      ]
-    },
-    "class_type": "easy hiresFix",
-    "_meta": {
-      "title": "HiresFix"
     }
   },
   "52": {
@@ -524,6 +490,55 @@
     "class_type": "LayerUtility: ImageRemoveAlpha",
     "_meta": {
       "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "62": {
+    "inputs": {
+      "model_name": "4x_NMKD-Siax_200k.safetensors"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "63": {
+    "inputs": {
+      "width": [
+        "53",
+        0
+      ],
+      "height": [
+        "54",
+        0
+      ],
+      "interpolation": "lanczos",
+      "method": "stretch",
+      "condition": "always",
+      "multiple_of": 0,
+      "image": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "64": {
+    "inputs": {
+      "upscale_model": [
+        "62",
+        0
+      ],
+      "image": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
     }
   }
 }
