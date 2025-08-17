@@ -1919,7 +1919,8 @@ packages = {
             ("loras/Kontext_face_V1.safetensors", 306593008),
             ("loras/Kontext_angle_beta.safetensors", 343806392),
             ("loras/Kontext_3view.safetensors", 306593008),
-            ("loras/Kontext_remove_V1.safetensors", 306593008)
+            ("loras/Kontext_remove_V1.safetensors", 306593008),
+            ("loras/Kontext_body_restore.safetensors", 343806408)
         ],
         "download_links": []
     },
