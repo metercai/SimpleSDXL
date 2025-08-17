@@ -25,7 +25,7 @@
                     "IP三视图": "A professional three-view character sheet showing front, side, and back views of the IP character in the image.",
                     "万物移除": "Remove watermark from the scene.",
                     "姿态还原": "Remove clothing,Keep character features unchanged.",
-                    "衣服提取": "Remove the characters, keep the clothing."
+                    "衣服提取": "Remove the characters,hands and legs, keep the clothing."
                 },
                 "disvisible": ["scene_canvas_image", "scene_input_image2", "scene_additional_prompt","scene_additional_prompt_2"],
                 "task_method": {
