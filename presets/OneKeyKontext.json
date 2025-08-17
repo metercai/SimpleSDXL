@@ -6,7 +6,7 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "m1.1",
-                "theme": ["通用","全能","家电","美妆","金属","服装","珠宝","数码电器","融图打光","图案提取","场景生成","人像精修","角度编辑","IP三视图","万物移除","姿态还原","衣服提取"],
+                "theme": ["通用","全能","家电","美妆","金属","服装","珠宝","数码电器","融图打光","图案提取","场景生成","人像精修","角度编辑","IP三视图","万物移除","姿态还原","衣服提取","物体置入"],
                 "theme_title": "一键Kontext精修预设",
                 "prompt": {
                     "通用": "Retouch the product in the image and change the background to a pure white one.",
@@ -25,7 +25,8 @@
                     "IP三视图": "A professional three-view character sheet showing front, side, and back views of the IP character in the image.",
                     "万物移除": "Remove watermark from the scene.",
                     "姿态还原": "Remove clothing,Keep character features unchanged.",
-                    "衣服提取": "Remove the characters,hands and legs, keep the clothing."
+                    "衣服提取": "Remove the characters, keep the clothing.",
+                    "物体置入": "Put it here.Adaptive, automatic light adaptation, 4K, high definition, outstanding picture quality."
                 },
                 "disvisible": ["scene_canvas_image", "scene_input_image2", "scene_additional_prompt","scene_additional_prompt_2"],
                 "task_method": {
@@ -45,7 +46,8 @@
                     "IP三视图": "kontext_3view",
                     "万物移除": "kontext_remove",
                     "姿态还原": "kontext_body",
-                    "衣服提取": "kontext_takeclothes"
+                    "衣服提取": "kontext_takeclothes",
+                    "物体置入": "kontext_putit"
                 },
                 "scene_steps": {
                     "通用": 10,
@@ -64,7 +66,8 @@
                     "IP三视图": 10,
                     "万物移除": 10,
                     "姿态还原": 10,
-                    "衣服提取": 10
+                    "衣服提取": 10,
+                    "物体置入": 10
                 },
                 "var_number_title": "精修强度【1-10】",
                 "var_number": {
@@ -84,7 +87,8 @@
                     "IP三视图": 10,
                     "万物移除": 10,
                     "姿态还原": 10,
-                    "衣服提取": 10
+                    "衣服提取": 10,
+                    "物体置入": 10
                 },
                 "image_preprocessor_method": {
                     "通用": [["-normalization"]],
@@ -103,7 +107,8 @@
                     "IP三视图": [["-normalization"]],
                     "万物移除": [["-normalization"]],
                     "姿态还原": [["-normalization"]],
-                    "衣服提取": [["-normalization"]]
+                    "衣服提取": [["-normalization"]],
+                    "物体置入": [["-normalization"]]
                 },
                 "var_number_max": 10,
                 "aspect_ratio" : ["1024|1:1","1280|1:1","1536|1:1"]
@@ -172,6 +177,7 @@
         "loras,Kontext_3view.safetensors,306593008,0,",
         "loras,Kontext_remove_V1.safetensors,306593008,0,",
         "loras,Kontext_body_restore.safetensors,343806408,0,",
-        "loras,Kontext_takeclothes.safetensors,171969320,0,"
+        "loras,Kontext_takeclothes.safetensors,171969320,0,",
+        "loras,Kontext_put_it_here_V4.2.safetensors,358706112,0,"
         ]
 }
