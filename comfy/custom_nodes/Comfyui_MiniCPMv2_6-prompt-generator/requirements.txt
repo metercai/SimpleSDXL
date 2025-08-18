@@ -1,0 +1,8 @@
+numpy
+pillow
+huggingface_hub
+transformers
+decord
+bitsandbytes
+accelerate
+sentencepiece
