@@ -6,12 +6,14 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "m1.1",
-                "theme": ["FluxKontext","FluxKontextFast"],
+                "theme": ["FluxKontext","FluxKontextFast","Depth Composite(need 2 images)"],
+
                 "theme_title": "FluxKontext需要使用标准化指令进行图像编辑",
                 "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2"],
                 "task_method": {
                     "FluxKontext": "kontext_gguf",
-                    "FluxKontextFast": "kontext_fast_gguf"
+                    "FluxKontextFast": "kontext_fast_gguf",
+                    "Depth Composite(need 2 images)": "kontext_depth_composite"
                 },
                 "scene_steps": {
                     "FluxKontext": 20,

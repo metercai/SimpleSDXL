@@ -1,0 +1,14 @@
+[project]
+name = "Comfyui_MiniCPMv2_6-prompt-generator"
+description = "This is an implementation of [MiniCPMv2_6-prompt-generator](https://huggingface.co/pzc163/MiniCPMv2_6-prompt-generator) by [ComfyUI](https://github.com/comfyanonymous/ComfyUI), including support for single-image caption, generate prompt by upload image and batch-images Prompt generation."
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["numpy", "pillow", "huggingface_hub", "transformers", "decord", "bitsandbytes","accelerate"]
+
+[project.urls]
+Repository = "https://github.com/pzc163/Comfyui_MiniCPMv2_6-prompt-generator"
+
+[tool.comfy]
+PublisherId = "pzc163"
+DisplayName = "Comfyui_MiniCPMv2_6-prompt-generator"
+Icon = ""
