@@ -179,7 +179,7 @@
   },
   "22": {
     "inputs": {
-      "image": "upload_image_55b636467f883e9cf72d399f721b77eb.png"
+      "image": "welcome.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -188,7 +188,7 @@
   },
   "23": {
     "inputs": {
-      "prompt": "Deblur,",
+      "prompt": "",
       "negative_prompt": "",
       "width": 1024,
       "height": 1024,
