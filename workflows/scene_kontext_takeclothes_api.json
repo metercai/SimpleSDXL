@@ -272,7 +272,7 @@
       "toggle": true,
       "mode": "simple",
       "num_loras": 10,
-      "lora_1_name": "Kontext_takeclothes.safetensors",
+      "lora_1_name": "Kontext_takeclothes_V2.safetensors",
       "lora_1_strength": [
         "46",
         1
