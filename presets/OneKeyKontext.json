@@ -25,7 +25,7 @@
                     "IP三视图": "A professional three-view character sheet showing front, side, and back views of the IP character in the image.",
                     "万物移除": "Remove watermark from the scene.",
                     "姿态还原": "Remove clothing,Keep character features unchanged.",
-                    "衣服提取": "Remove the characters,hands,legs,feet,keep the clothing.",
+                    "衣服提取": "extract only the clothes over a white background, product photography style",
                     "物体置入": "Put it here.Adaptive, automatic light adaptation, 4K, high definition, outstanding picture quality.",
                     "清晰背景": "Deblur,background is clear.",
                     "深度参考": "redepthkontext change depth map to photo."
@@ -187,7 +187,7 @@
         "loras,Kontext_3view.safetensors,306593008,0,",
         "loras,Kontext_remove_V1.safetensors,306593008,0,",
         "loras,Kontext_body_restore.safetensors,343806408,0,",
-        "loras,Kontext_takeclothes.safetensors,171969320,0,",
+        "loras,Kontext_takeclothes_V2.safetensors,343806408,0,",
         "loras,Kontext_put_it_here_V4.2.safetensors,358706112,0,",
         "loras,Kontext_deblur.safetensors,306793968,0,",
         "loras,Kontext_depth_referencel.safetensors,343806456,0,"

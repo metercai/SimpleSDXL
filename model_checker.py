@@ -462,7 +462,7 @@ def validate_files(packages):
                 if file == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file.split('SimpleModels/')[-1]}"
+                    link = f"https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/{file.split('SimpleModels/')[-1]}"
 
                 
                 f1.write(f"{link},{size}\n")
@@ -789,7 +789,7 @@ def auto_download_missing_files_with_retry(max_threads=5):
                 link, size = line.split(',')
                 size_mb = int(size) / (1024 * 1024)
                 print(f"{Fore.CYAN}▶ 正在下载: {link} ({size_mb:.1f}MB){Style.RESET_ALL}")
-                original_repo = "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/"
+                original_repo = "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/"
                 if link.startswith(original_repo):
                     relative_path = link.replace(original_repo, "", 1).strip()
                     relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
@@ -890,7 +890,7 @@ def get_download_links_for_package(packages, download_list_path):
                 if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     generated_link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    generated_link = f"https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/{file_path}"
+                    generated_link = f"https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/{file_path}"
 
                 if generated_link == existing_link:
                     valid_files.append((generated_link, file_size))
@@ -1088,9 +1088,7 @@ packages = {
             ("vae/ponyDiffusionV6XL_vae.safetensors", 334641162),
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
         ],
-        "download_links": [
-        "【必要】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_base_simpleai_1214.zip"
-        ]
+        "download_links": []
     },
     "extension_package": {
         "id": 2,
@@ -1118,9 +1116,7 @@ packages = {
             ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_enhance_simpleai_0908.zip"
-        ]
+        "download_links": []
     },
         "kolors_package": {
         "id": 3,
@@ -1159,9 +1155,7 @@ packages = {
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
             ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_kolors_fp16_simpleai_0909.zip"
-        ]
+        "download_links": []
     },
         "additional_package": {
         "id": 4,
@@ -1175,9 +1169,7 @@ packages = {
             ("checkpoints/realisticStockPhoto_v20.safetensors", 6938054242),
             ("checkpoints/sd3_medium_incl_clips_t5xxlfp8.safetensors", 10867168284),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_ckpt_SD3_HY_PonyV6_PGv25_aPencilXL_rsPhoto_simpleai_0909.zip"
-        ]
+        "download_links": []
     },
         "Flux_package": {
         "id": 5,
@@ -1189,9 +1181,7 @@ packages = {
             ("clip/t5xxl_fp16.safetensors", 9787841024),
             ("vae/ae.safetensors", 335304388),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux1_fp16_simpleai_0909.zip"
-        ]
+        "download_links": []
     },
         "Flux_aio_package": {
         "id": 6,
@@ -1221,9 +1211,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_flux_aio_simpleai_1214.zip"
-        ]
+        "download_links": []
     },
         "SD15_aio_package": {
         "id": 7,
@@ -1251,9 +1239,7 @@ packages = {
             ("upscale_models/4x-UltraSharp.pth", 66961958),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604)
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd15_aio_simpleai_1214.zip"
-        ]
+        "download_links": []
     },
         "Kolors_aio_package": {
         "id": 8,
@@ -1307,9 +1293,7 @@ packages = {
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
             ("vae/sdxl_fp16.vae.safetensors", 167335342)
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_kolors_aio_simpleai_1214.zip"
-        ]
+        "download_links": []
     },
         "SD3x_medium_package": {
         "id": 9,
@@ -1322,7 +1306,7 @@ packages = {
             ("vae/sd3x_fp16.vae.safetensors", 167666654),
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors"
+        ""
         ]
     },
         "SD3x_large_package": {
@@ -1337,9 +1321,7 @@ packages = {
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("vae/sd3x_fp16.vae.safetensors", 167666654),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_sd35_large_clips_simpleai_1214.zip"
-        ]
+        "download_links": []
     },
         "MiniCPM_package": {
         "id": 11,
@@ -1374,9 +1356,7 @@ packages = {
             ("llms/MiniCPMv2_6-prompt-generator/tokenizer_config.json", 5663),
             ("llms/MiniCPMv2_6-prompt-generator/vocab.json", 2776833),
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/models_minicpm_v2.6_prompt_simpleai_1224.zip"
-        ]
+        "download_links": []
     },
         "happy_package": {
         "id": 12,
@@ -1421,9 +1401,7 @@ packages = {
             ("ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
             ("vae/sdxl_fp16.vae.safetensors", 167335342),
         ],
-        "download_links": [
-        "【选配】贺年卡基于FluxAIO、可图AIO扩展，请检查所需包体。Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "clothing_package": {
         "id": 13,
@@ -1442,9 +1420,7 @@ packages = {
             ("rembg/General.safetensors", 884878856),
             ("loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
-        "download_links": [
-        "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "3DPurikura_package": {
         "id": 14,
@@ -1463,9 +1439,7 @@ packages = {
             ("loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
             ("loras/StickersRedmond.safetensors", 170540036)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "x1-okremovebg_package": {
         "id": 15,
@@ -1477,9 +1451,7 @@ packages = {
             ("rembg/General.safetensors", 884878856),
             ("rembg/Portrait.safetensors", 884878856)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "x2-okimagerepair_package": {
         "id": 16,
@@ -1502,9 +1474,7 @@ packages = {
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427),
             ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "x3-swapface_package": {
         "id": 17,
@@ -1530,9 +1500,7 @@ packages = {
             ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
             ("loras/comfyui_portrait_lora64.safetensors",612742344)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "Flux_aio_plus_package": {
         "id": 18,
@@ -1563,7 +1531,6 @@ packages = {
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
-        "【选配】基于FluxAIO扩展包扩展",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
         ]
     },
@@ -1587,7 +1554,6 @@ packages = {
             ("loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
-        "【选配】换装基于增强包，FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。",
         "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors"
         ]
     },
@@ -1615,9 +1581,7 @@ packages = {
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
         ],
-        "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
-        ]
+        "download_links": []
     },
         "Illustrious_aio_package": {
         "id": 22,
@@ -1632,10 +1596,7 @@ packages = {
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/miaomiaoHarem_v15b.safetensors"
-        ]
+        "download_links": []
     },
         "StyleTransfer_package": {
         "id": 23,
@@ -1670,9 +1631,7 @@ packages = {
             ("insightface/models/buffalo_l/genderage.onnx", 1322532),
             ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "okdepthstatue_package": {
         "id": 24,
@@ -1688,9 +1647,7 @@ packages = {
             ("clip_vision/clip_vision_vit_h.safetensors", 1972298538),
             ("controlnet/ip-adapter-plus_sdxl_vit-h.bin", 1013454427)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "Framepack_package": {
         "id": 25,
@@ -1724,9 +1681,7 @@ packages = {
             ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661),
             ("loras/ICEdit-normal-lora.safetensors", 231918592)
         ],
-        "download_links": [
-        "【选配】模型文件基于FluxAIO扩展包。部分文件、Lora点击生成会自动下载。"
-        ]
+        "download_links": []
     },
         "Illustrious2_aio_package": {
         "id": 27,
@@ -1741,10 +1696,7 @@ packages = {
             ("controlnet/noob_sdxl_controlnet_inpainting.safetensors", 5004167832),
             ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408)
         ],
-        "download_links": [
-        "【选配】浏览器进入模型仓库https://hf-mirror.com/metercai/SimpleSDXL2/tree/main/SimpleModels。部分文件、Lora点击生成会自动下载。",
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/oneObsession_13.safetensors"
-        ]
+        "download_links": []
     },
         "nunchaku_int4_aio_package": {
         "id": 28,
@@ -1773,9 +1725,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
-        "download_links": [
-        "【按键下载】"
-        ]
+        "download_links": []
     },
         "nunchaku_fp4_aio_package": {
         "id": 29,
@@ -1804,9 +1754,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
-        "download_links": [
-        "【按键下载】"
-        ]
+        "download_links": []
     },
     "kontext_package": {
         "id": 30,
@@ -1820,7 +1768,7 @@ packages = {
             ("vae/ae.safetensors", 335304388)
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-kontext_fp8_scaled.safetensors"
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/flux1-dev-kontext_fp8_scaled.safetensors"
         ]
     },
     "wan_t2i_package": {
@@ -1838,8 +1786,8 @@ packages = {
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
     },
     "qwen_image_package": {
@@ -1853,8 +1801,8 @@ packages = {
             ("vae/qwen_image_vae.safetensors", 253806246)
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/qwen-image-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/qwen_2.5_vl_7b_fp8_scaled.safetensors"
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/qwen-image-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/clip/qwen_2.5_vl_7b_fp8_scaled.safetensors"
         ]
     },
     "wan_i2v_package": {
@@ -1871,9 +1819,9 @@ packages = {
             ("controlnet/rife/rife49.pth", 21345274)
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/Wan2.2-I2V-A14B-LowNoise-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
     },
     "wan_t2v_package": {
@@ -1889,9 +1837,9 @@ packages = {
             ("controlnet/rife/rife49.pth", 21345274)
         ],
         "download_links": [
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_High_Noise_14B_VACE-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
-            "https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/Wan2.2_T2V_High_Noise_14B_VACE-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
+            "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/clip/umt5-xxl-encoder-Q8_0.gguf"
         ]
     },
     "onekey_kontext_package": {
@@ -1921,7 +1869,7 @@ packages = {
             ("loras/Kontext_3view.safetensors", 306593008),
             ("loras/Kontext_remove_V1.safetensors", 306593008),
             ("loras/Kontext_body_restore.safetensors", 343806408),
-            ("loras/Kontext_takeclothes.safetensors", 171969320),
+            ("loras/Kontext_takeclothes_V2.safetensors", 343806408),
             ("loras/Kontext_put_it_here_V4.2.safetensors", 358706112),
             ("loras/Kontext_deblur.safetensors", 306793968),
             ("loras/Kontext_depth_referencel.safetensors", 343806456)
