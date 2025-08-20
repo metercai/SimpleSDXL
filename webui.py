@@ -351,6 +351,9 @@ with shared.gradio_root:
                         with gr.Row():
                             scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
                             scene_mask_color = gr.ColorPicker(label="Scene brush color", value="#70FF81", elem_id="scene_brush_color")
+                        with gr.Row():
+                            scene_seed_random = gr.Checkbox(label='Random', value=True)
+                            scene_image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False)
                         scene_mask_color.change(lambda x: gr.update(brush_color=x),inputs=scene_mask_color,
                             outputs=scene_canvas_image,
                             queue=False,show_progress=False)
@@ -908,6 +911,37 @@ with shared.gradio_root:
 
                     seed_random.change(reversed_checked, inputs=[seed_random], outputs=[image_seed],
                                    queue=False, show_progress=False)
+                    scene_seed_random.change(
+                        lambda x: [gr.update(value=x), gr.update(visible=not x)],
+                        inputs=scene_seed_random,
+                        outputs=[seed_random, image_seed],
+                        queue=False,
+                        show_progress=False
+                    )
+
+                    seed_random.change(
+                        lambda x: [gr.update(value=x), gr.update(visible=not x)],
+                        inputs=seed_random,
+                        outputs=[scene_seed_random, scene_image_seed],
+                        queue=False,
+                        show_progress=False
+                    )
+
+                    scene_image_seed.change(
+                        lambda x: gr.update(value=x),
+                        inputs=scene_image_seed,
+                        outputs=image_seed,
+                        queue=False,
+                        show_progress=False
+                    )
+
+                    image_seed.change(
+                        lambda x: gr.update(value=x),
+                        inputs=image_seed,
+                        outputs=scene_image_seed,
+                        queue=False,
+                        show_progress=False
+                    )
                 with gr.Tab(label="Advanced"):
                     with gr.Group():
                         guidance_scale = gr.Slider(label='Guidance Scale', minimum=0.01, maximum=30.0, step=0.01,
