@@ -17,7 +17,7 @@
                 },
                 "scene_steps": {
                     "FluxKontext": 20,
-                    "FluxKontextFast":8
+                    "FluxKontextFast":10
                 },
                 "var_number_title": "比例遵从：[1]=左图 [2]=右图 [3]=拼合图像 [4]=自定义",
                 "var_number": {
