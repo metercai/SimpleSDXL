@@ -387,6 +387,7 @@ function updatePresetStore(nav_name_list, role, expand_flag, theme) {
     const allButtons = preset_store.querySelectorAll('button');
     allButtons.forEach(button => {
 	const div = button.querySelector('div.gallery');
+    if (!div) return
 	const originalText = div.getAttribute("data-original-text");
         let text = div.textContent.trim();
         let item_name = originalText || text;
