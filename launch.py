@@ -85,7 +85,7 @@ def check_base_environment():
                 pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
                 run(f'"{python}" -m {pkg_command}', f'Installing {extra_pkg_name}', f"Couldn't install {extra_pkg_name}", live=True)
 
-        update_pkgs = [('comfyui_frontend_package', '1.24.4'), ('comfyui_workflow_templates', '0.1.52'), ('transformers', '4.47.1'), ('bitsandbytes', '0.45.5'), ('accelerate', '1.6.0'), ('av', '14.2.0'), ('yarl', '1.18.0'), ('gguf', '0.14.0'), ('sentencepiece', '0.2.0')]
+        update_pkgs = [('comfyui_frontend_package', '1.25.9'), ('comfyui_workflow_templates', '0.1.65'), ('comfyui-embedded-docs', '0.2.6'), ('transformers', '4.47.1'), ('bitsandbytes', '0.45.5'), ('accelerate', '1.6.0'), ('av', '14.2.0'), ('yarl', '1.18.0'), ('gguf', '0.14.0'), ('sentencepiece', '0.2.0')]
         for (update_pkg_name, update_pkg_version) in update_pkgs:
             if not is_installed_version(update_pkg_name, update_pkg_version):
                 pkg_command = f'pip install -U {update_pkg_name}=={update_pkg_version} -i {index_url}'
