@@ -6,16 +6,20 @@
             "available_aspect_ratios_selection": "Flux",
             "scene_frontend": {
                 "version": "m1.1",
-                "theme": ["Qwen-Edit"],
+                "theme": ["Qwen-Edit","Qwen-Edit-fast"],
                 "theme_title": "Qwen-Edit使用中文指令修改图片",
                 "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2","scene_var_number","scene_input_image2"],
                 "task_method": {
-                    "Qwen-Edit": "qwen_edit_cn"},
+                    "Qwen-Edit": "qwen_edit_cn",
+                    "Qwen-Edit-fast": "qwen_edit_fast_cn"
+                },
                 "scene_steps": {
-                    "Qwen-Edit": 8
+                    "Qwen-Edit": 8,
+                    "Qwen-Edit-fast": 4
                 },
                 "image_preprocessor_method": {
-                    "Qwen-Edit": [["-normalization"]]
+                    "Qwen-Edit": [["-normalization"]],
+                    "Qwen-Edit-fast": [["-normalization"]]
                 },
                 "aspect_ratio" : ["1024|1:1"]
             }
@@ -62,7 +66,8 @@
     "vae_downloads": {},
     "model_list": [
         "checkpoints,Qwen_Image_Edit-Q4_K_M.gguf,13065746976,0,",
-        "loras,Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors,849608296,0,",
+        "loras,Qwen-Image-Edit-Lightning-8steps-V1.0-bf16.safetensors,849608296,0,",
+        "loras,Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors,849608296,0,",
         "clip,qwen_2.5_vl_7b_fp8_scaled.safetensors,9384670680,0,",
         "vae,qwen_image_vae.safetensors,253806246,0,"
         ]
