@@ -270,7 +270,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.08.16{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.08.25{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -1873,6 +1873,19 @@ packages = {
             ("loras/Kontext_put_it_here_V4.2.safetensors", 358706112),
             ("loras/Kontext_deblur.safetensors", 306793968),
             ("loras/Kontext_depth_referencel.safetensors", 343806456)
+        ],
+        "download_links": []
+    },
+    "qwen_image_edit_package": {
+        "id":36,
+        "name": "[36]Qwen图像编辑预置包",
+        "note": "基于Qwen_Image_Edit的指令编辑图像|显存需求：★★★★ 速度:★★",
+        "files": [
+            ("checkpoints/Qwen_Image_Edit-Q4_K_M.gguf", 13065746976),
+            ("loras/Qwen-Image-Edit-Lightning-8steps-V1.0-bf16.safetensors", 849608296),
+            ("loras/Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors", 849608296),
+            ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
+            ("vae/qwen_image_vae.safetensors", 253806246)
         ],
         "download_links": []
     },
