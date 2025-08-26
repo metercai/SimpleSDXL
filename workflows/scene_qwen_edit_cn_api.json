@@ -123,7 +123,7 @@
         0
       ],
       "image": [
-        "17",
+        "30",
         0
       ]
     },
@@ -147,7 +147,7 @@
         0
       ],
       "image": [
-        "17",
+        "30",
         0
       ]
     },
@@ -159,7 +159,7 @@
   "13": {
     "inputs": {
       "pixels": [
-        "17",
+        "30",
         0
       ],
       "vae": [
@@ -349,7 +349,7 @@
     "inputs": {
       "noise_radius": 1,
       "preserve_edges": 0.75,
-      "sharpen": 0,
+      "sharpen": 1,
       "ratio": 0.1,
       "image": [
         "14",
@@ -359,6 +359,30 @@
     "class_type": "ImageSmartSharpen+",
     "_meta": {
       "title": "🔧 Image Smart Sharpen"
+    }
+  },
+  "30": {
+    "inputs": {
+      "width": [
+        "17",
+        1
+      ],
+      "height": [
+        "17",
+        2
+      ],
+      "interpolation": "lanczos",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 32,
+      "image": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
