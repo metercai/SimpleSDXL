@@ -347,10 +347,10 @@
   },
   "29": {
     "inputs": {
-      "noise_radius": 7,
+      "noise_radius": 1,
       "preserve_edges": 0.75,
-      "sharpen": 5,
-      "ratio": 0.5,
+      "sharpen": 0,
+      "ratio": 0.1,
       "image": [
         "14",
         0
