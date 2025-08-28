@@ -1,0 +1,79 @@
+{ 
+    "default_engine": {
+            "backend_engine": "Comfy",
+            "disvisible": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "disinteractive": ["input_image_checkbox", "prompt_panel_checkbox", "advanced_checkbox"],
+            "available_aspect_ratios_selection": "Flux",
+            "scene_frontend": {
+                "version": "m1.1",
+                "theme": ["Wan_TTP_Hires.Upscale"],
+                "theme_title": "使用万相模型进行TTP分块放大",
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2","scene_input_image2","scene_aspect_ratio"],
+                "task_method": {
+                    "Wan_TTP_Hires.Upscale": "wan_ttp_cn"
+                },
+                "prompt": {
+                    "Wan_TTP_Hires.Upscale": "(Masterpiece:1.2), (best quality:1.2), ultra high resolution, (ultra-detailed), (beautiful and aesthetic:1.2), 4K, raw, arw, cr2,"
+                },
+                "scene_steps": {
+                    "Wan_TTP_Hires.Upscale": 24
+                },
+                "image_preprocessor_method": {
+                    "Wan_TTP_Hires.Upscale": [["-normalization"]]
+                },
+                "var_number": {
+                    "Wan_TTP_Hires.Upscale": 8
+                },
+                "var_number_title": "最终像素数量（百万）",
+                "var_number_max": 16,
+                "aspect_ratio" : ["1024|1:1"]
+            }
+    },
+    "default_model": "Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf",
+    "default_refiner": "None",
+    "default_refiner_switch": 0.5,
+    "default_loras": [
+        [
+            "lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ],
+        [
+            "None",
+            1.0
+        ]
+    ],
+    "default_cfg_scale": 1,
+    "default_sample_sharpness": 2,
+    "default_sampler": "euler_ancestral",
+    "default_scheduler": "kl_optimal",
+    "default_performance": "Speed",
+    "default_styles": [],
+    "default_aspect_ratio": "1024*1024",
+    "default_image_number": 1,
+    "default_overwrite_step":24,
+    "default_prompt": "",
+    "default_prompt_negative": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+    "checkpoint_downloads": {},
+    "embeddings_downloads": {},
+    "lora_downloads": {},
+    "vae_downloads": {},
+    "model_list": [
+        "checkpoints,Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf,11629612832,0,",
+        "clip,umt5-xxl-encoder-Q8_0.gguf,6043068256,0,",
+        "vae,Wan2_1_VAE_bf16.safetensors,253806278,0,",
+        "loras,lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors,630697104,0,",
+        "upscale_models,4xNomos8kSCHAT-L.pth,331564661,0,"
+        ]
+}
