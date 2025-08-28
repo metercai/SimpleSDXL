@@ -1030,7 +1030,7 @@
         12
       ],
       "attention": "nunchaku-fp16",
-      "cpu_offload": "enable",
+      "cpu_offload": "auto",
       "device_id": 0,
       "data_type": "bfloat16",
       "i2f_mode": "enabled"
