@@ -79,7 +79,7 @@ def check_base_environment():
 
     if is_installed("sageattention"):
         extra_pkgs = [('comfyui_embedded_docs', 'comfyui_embedded_docs==0.2.3'), ('socketio', 'python-socketio'), ('jsonpatch', 'jsonpatch'), 
-                ('alembic', 'alembic'), ('sqlalchemy', 'SQLAlchemy'), ('pydantic', 'pydantic~=2.0'), ('pydantic_settings', 'pydantic-settings~=2.0')]
+                ('alembic', 'alembic'), ('sqlalchemy', 'SQLAlchemy'), ('pyloudnorm', 'pyloudnorm'), ('pydantic', 'pydantic~=2.0'), ('pydantic_settings', 'pydantic-settings~=2.0')]
         for (extra_pkg, extra_pkg_name) in extra_pkgs:
             if not is_installed(extra_pkg):
                 pkg_command = f'pip install {extra_pkg_name} -i {index_url}'
@@ -143,8 +143,8 @@ def prepare_environment():
 
     target_path_win = os.path.join(python_embeded_path, 'Lib/site-packages')
 
-    torch_ver = '2.7.0'
-    torchvisio_ver = '0.22.0'
+    torch_ver = '2.7.1'
+    torchvisio_ver = '0.22.1'
     if shared.sysinfo['gpu_brand'] == 'NVIDIA':
         torch_index_url = "https://download.pytorch.org/whl/cu128"
     elif shared.sysinfo['gpu_brand'] == 'AMD':
@@ -154,8 +154,8 @@ def prepare_environment():
             torch_index_url = "https://download.pytorch.org/whl/"
         else:
             torch_index_url = "https://download.pytorch.org/whl/rocm6.3"
-            torch_ver = '2.7.0'
-            torchvisio_ver = '0.22.0'
+            torch_ver = '2.7.1'
+            torchvisio_ver = '0.22.1'
     elif shared.sysinfo['gpu_brand'] == 'INTEL':
         torch_index_url = "https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/"
     else:
@@ -178,13 +178,13 @@ def prepare_environment():
         run(f'"{python}" -m {torch_command}', "Installing torchaudio", "Couldn't install torchaudio", live=True)
 
     if TRY_INSTALL_XFORMERS:
-        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu128/xformers-0.0.30-cp310-cp310-win_amd64.whl'
-        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu128/xformers-0.0.30-cp310-cp310-manylinux_2_28_x86_64.whl'
+        xformers_whl_url_win = 'https://download.pytorch.org/whl/cu128/xformers-0.0.31-cp310-cp310-win_amd64.whl'
+        xformers_whl_url_linux = 'https://download.pytorch.org/whl/cu128/xformers-0.0.31-cp310-cp310-manylinux_2_28_x86_64.whl'
         if not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.30')
+            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.31')
             if platform.system() == "Windows":
                 if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.30", live=True)
+                    run_pip(f"install -U -I --no-deps {xformers_whl_url_win}", "xformers 0.0.31", live=True)
                 else:
                     print("Installation of xformers is not supported in this version of Python.")
                     print(
@@ -192,7 +192,7 @@ def prepare_environment():
                     if not is_installed("xformers"):
                         exit(0)
             elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.30")
+                run_pip(f"install -U -I --no-deps {xformers_whl_url_linux}", "xformers 0.0.31")
 
     if REINSTALL_ALL or not requirements_met(requirements_file):
         if len(met_diff.keys())>0:
