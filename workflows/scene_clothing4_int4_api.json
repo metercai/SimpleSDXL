@@ -1278,7 +1278,7 @@
         12
       ],
       "attention": "nunchaku-fp16",
-      "cpu_offload": "enable",
+      "cpu_offload": "auto",
       "device_id": 0,
       "data_type": "bfloat16",
       "i2f_mode": "enabled"
@@ -1296,7 +1296,7 @@
         12
       ],
       "attention": "nunchaku-fp16",
-      "cpu_offload": "enable",
+      "cpu_offload": "auto",
       "device_id": 0,
       "data_type": "bfloat16",
       "i2f_mode": "enabled"
@@ -1309,7 +1309,7 @@
   "342": {
     "inputs": {
       "lora_name": "comfyui_subject_lora16.safetensors",
-      "lora_strength": 1,
+      "lora_strength": 0,
       "model": [
         "340",
         0

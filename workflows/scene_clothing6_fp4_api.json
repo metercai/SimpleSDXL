@@ -1545,7 +1545,7 @@
       "model_path": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
       "cache_threshold": 0,
       "attention": "nunchaku-fp16",
-      "cpu_offload": "enable",
+      "cpu_offload": "auto",
       "device_id": 0,
       "data_type": "bfloat16",
       "i2f_mode": "enabled"
@@ -1560,7 +1560,7 @@
       "model_path": "svdq-fp4_r32-flux.1-dev.safetensors",
       "cache_threshold": 0,
       "attention": "nunchaku-fp16",
-      "cpu_offload": "enable",
+      "cpu_offload": "auto",
       "device_id": 0,
       "data_type": "bfloat16",
       "i2f_mode": "enabled"

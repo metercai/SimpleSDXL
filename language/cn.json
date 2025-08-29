@@ -501,7 +501,16 @@
   "FluxKontextFast": "指令修图FK[快速]",
   "FluxKontextFast\u2B07": "指令修图FK[快速]\u2B07",
   "Depth Composite(need 2 images)": "深度预拼图（需要2张图片）",
-  
+  "Wan(T2I)":"Wan文生图",
+  "Wan(T2I)\u2B07":"Wan文生图\u2B07",
+  "Wan(T2V)":"Wan文生视频",
+  "Wan(T2V)\u2B07":"Wan文生视频\u2B07",
+  "Wan(I2V)":"Wan图生视频",
+  "Wan(I2V)\u2B07":"Wan图生视频\u2B07",
+  "Wan-TTP":"Wan超清放大",
+  "Wan-TTP\u2B07":"Wan超清放大\u2B07",
+  "Wan_TTP_Hires.Upscale":"万相TTP分块超清放大",
+
   "Vertical|9:16": "竖屏|9:16",
   "Portrait|4:5": "肖像|4:5",
   "Photo|4:3": "照片|4:3",
