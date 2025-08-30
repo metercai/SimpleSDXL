@@ -1,0 +1,3 @@
+#additional requirements for the face detection
+onnx
+onnxruntime-gpu
