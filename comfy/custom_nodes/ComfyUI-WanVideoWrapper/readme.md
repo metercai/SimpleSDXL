@@ -60,9 +60,13 @@ MAGREF: https://huggingface.co/MAGREF-Video/MAGREF
 
 FantasyTalking: https://github.com/Fantasy-AMAP/fantasy-talking
 
+FantasyPortrait: https://github.com/Fantasy-AMAP/fantasy-portrait
+
 MultiTalk: https://github.com/MeiGen-AI/MultiTalk
 
 EchoShot: https://github.com/D2I-ai/EchoShot
+
+Stand-In: https://github.com/WeChatCV/Stand-In
 
 
 Examples:

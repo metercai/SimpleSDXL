@@ -2,19 +2,88 @@ import folder_paths
 from comfy import model_management as mm
 from comfy.utils import load_torch_file, common_upscale
 from accelerate import init_empty_weights
-from accelerate.utils import set_module_tensor_to_device
 import torch
-from ..utils import log
+from ..utils import log, set_module_tensor_to_device
+import os
+import json
 
+script_directory = os.path.dirname(os.path.abspath(__file__))
+folder_paths.add_model_folder_path("wav2vec2", os.path.join(folder_paths.models_dir, "wav2vec2"))
 
+class Wav2VecModelLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "model": (folder_paths.get_filename_list("wav2vec2"), {"tooltip": "These models are loaded from the 'ComfyUI/models/wav2vec2' -folder",}),
+                "base_precision": (["fp32", "bf16", "fp16"], {"default": "fp16"}),
+                "load_device": (["main_device", "offload_device"], {"default": "main_device", "tooltip": "Initial device to load the model to, NOT recommended with the larger models unless you have 48GB+ VRAM"}),
+            },
+           
+        }
+    
+
+    RETURN_TYPES = ("WAV2VECMODEL",)
+    RETURN_NAMES = ("wav2vec_model", )
+    FUNCTION = "loadmodel"
+    CATEGORY = "WanVideoWrapper"
+
+    def loadmodel(self, model, base_precision, load_device):
+        from transformers import Wav2Vec2Config, Wav2Vec2FeatureExtractor
+        from ..multitalk.wav2vec2 import Wav2Vec2Model as MultiTalkWav2Vec2Model
+        
+        base_dtype = {"fp8_e4m3fn": torch.float8_e4m3fn, "fp8_e4m3fn_fast": torch.float8_e4m3fn, "bf16": torch.bfloat16, "fp16": torch.float16, "fp16_fast": torch.float16, "fp32": torch.float32}[base_precision]
+        device = mm.get_torch_device()
+        offload_device = mm.unet_offload_device()
+
+        if load_device == "offload_device":
+            transfomer_load_device = offload_device
+        else:
+            transfomer_load_device = device
+
+        config_path = os.path.join(script_directory, "wav2vec2_config.json")
+        wav2vec2_config = Wav2Vec2Config(**json.load(open(config_path)))
+
+        with init_empty_weights():
+            wav2vec2 = MultiTalkWav2Vec2Model(wav2vec2_config).eval()
+
+        feature_extractor_config = {
+            "do_normalize": False,
+            "feature_size": 1,
+            "padding_side": "right",
+            "padding_value": 0.0,
+            "return_attention_mask": False,
+            "sampling_rate": 16000
+        }
+        wav2vec_feature_extractor = Wav2Vec2FeatureExtractor(**feature_extractor_config)
+
+        model_path = folder_paths.get_full_path_or_raise("wav2vec2", model)
+        sd = load_torch_file(model_path, device=transfomer_load_device, safe_load=True)
+
+        for name, param in wav2vec2.named_parameters():
+            key = "wav2vec2." + name
+            if "original0" in name:
+                key = "wav2vec2.encoder.pos_conv_embed.conv.weight_g"
+            elif "original1" in name:
+                key = "wav2vec2.encoder.pos_conv_embed.conv.weight_v"
+            value=sd[key]
+            set_module_tensor_to_device(wav2vec2, name, device=offload_device, dtype=base_dtype, value=value)
+
+        wav2vec2_model = {
+            "feature_extractor": wav2vec_feature_extractor,
+            "model": wav2vec2,
+            "dtype": base_dtype,
+            "model_type": "tencent",
+        }
+
+        return (wav2vec2_model,)
+    
 class MultiTalkModelLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": (folder_paths.get_filename_list("diffusion_models"), {"tooltip": "These models are loaded from the 'ComfyUI/models/diffusion_models' -folder",}),
-
-            "base_precision": (["fp32", "bf16", "fp16"], {"default": "fp16"}),
+                "model": (folder_paths.get_filename_list("unet_gguf") + folder_paths.get_filename_list("diffusion_models"), {"tooltip": "These models are loaded from the 'ComfyUI/models/diffusion_models' -folder",}),
             },
         }
 
@@ -23,18 +92,10 @@ class MultiTalkModelLoader:
     FUNCTION = "loadmodel"
     CATEGORY = "WanVideoWrapper"
 
-    def loadmodel(self, model, base_precision):
+    def loadmodel(self, model, base_precision=None):
         from .multitalk import AudioProjModel
-
-        device = mm.get_torch_device()
-        offload_device = mm.unet_offload_device()
-        base_dtype = {"fp8_e4m3fn": torch.float8_e4m3fn, "fp8_e4m3fn_fast": torch.float8_e4m3fn, "bf16": torch.bfloat16, "fp16": torch.float16, "fp16_fast": torch.float16, "fp32": torch.float32}[base_precision]
         
         model_path = folder_paths.get_full_path_or_raise("diffusion_models", model)
-        sd = load_torch_file(model_path, device=offload_device, safe_load=True)
-
-        audio_proj_keys = [k for k in sd.keys() if "audio_proj" in k]
-        audio_proj_sd = {k.replace("audio_proj.", ""): sd.pop(k) for k in audio_proj_keys}
 
         audio_window=5
         intermediate_dim=512
@@ -52,18 +113,14 @@ class MultiTalkModelLoader:
                     context_tokens=context_tokens,
                     norm_output_audio=norm_output_audio,
             )
-        #fantasytalking_proj_model.load_state_dict(sd, strict=False)
-
-        for name, param in multitalk_proj_model.named_parameters():
-            set_module_tensor_to_device(multitalk_proj_model, name, device=offload_device, dtype=base_dtype, value=audio_proj_sd[name])
 
         multitalk = {
             "proj_model": multitalk_proj_model,
-            "sd": sd,
+            "model_path": model_path,
+            "model_type": "InfiniteTalk" if "infinite" in model.lower() else "MultiTalk",
         }
 
         return (multitalk,)
-    
 
 def loudness_norm(audio_array, sr=16000, lufs=-23):
     try:
@@ -83,11 +140,11 @@ class MultiTalkWav2VecEmbeds:
         return {"required": {
             "wav2vec_model": ("WAV2VECMODEL",),
             "audio_1": ("AUDIO",),
-            "normalize_loudness": ("BOOLEAN", {"default": True}),
-            "num_frames": ("INT", {"default": 81, "min": 1, "max": 1000, "step": 1}),
+            "normalize_loudness": ("BOOLEAN", {"default": True, "tooltip": "Normalize the audio loudness to -23 LUFS"}),
+            "num_frames": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 1, "tooltip": "The total frame count to generate."}),
             "fps": ("FLOAT", {"default": 25.0, "min": 1.0, "max": 60.0, "step": 0.1}),
-            "audio_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.1, "tooltip": "Strength of the audio conditioning"}),
-            "audio_cfg_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.1, "tooltip": "When not 1.0, an extra model pass without audio conditioning is done: slower inference but more motion is allowed"}),
+            "audio_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "Strength of the audio conditioning"}),
+            "audio_cfg_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "When not 1.0, an extra model pass without audio conditioning is done: slower inference but more motion is allowed"}),
             "multi_audio_type": (["para", "add"], {"default": "para", "tooltip": "'para' overlay speakers in parallel, 'add' concatenate sequentially"}),
         },
             "optional" : {
@@ -98,15 +155,15 @@ class MultiTalkWav2VecEmbeds:
             }
         }
 
-    RETURN_TYPES = ("MULTITALK_EMBEDS", "AUDIO", )
-    RETURN_NAMES = ("multitalk_embeds", "audio", )
+    RETURN_TYPES = ("MULTITALK_EMBEDS", "AUDIO", "INT", )
+    RETURN_NAMES = ("multitalk_embeds", "audio", "num_frames", )
     FUNCTION = "process"
     CATEGORY = "WanVideoWrapper"
 
     def process(self, wav2vec_model, normalize_loudness, fps, num_frames, audio_1, audio_scale, audio_cfg_scale, multi_audio_type, audio_2=None, audio_3=None, audio_4=None, ref_target_masks=None):
         model_type = wav2vec_model["model_type"]
         if not "tencent" in model_type.lower():
-            raise ValueError("Only tencent wav2vec models supported by MultiTalk")
+            raise ValueError("Only tencent wav2vec2 models supported by MultiTalk")
         import torchaudio
         import numpy as np
         from einops import rearrange
@@ -114,8 +171,8 @@ class MultiTalkWav2VecEmbeds:
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
         dtype = wav2vec_model["dtype"]
-        wav2vec = wav2vec_model["model"]
-        wav2vec_feature_extractor = wav2vec_model["feature_extractor"]
+        wav2vec2 = wav2vec_model["model"]
+        wav2vec2_feature_extractor = wav2vec_model["feature_extractor"]
 
         sr = 16000
 
@@ -151,7 +208,7 @@ class MultiTalkWav2VecEmbeds:
                 audio_segment = loudness_norm(audio_segment, sr=sr)
 
             audio_feature = np.squeeze(
-                wav2vec_feature_extractor(audio_segment, sampling_rate=sr).input_values
+                wav2vec2_feature_extractor(audio_segment, sampling_rate=sr).input_values
             )
 
             audio_feature = torch.from_numpy(audio_feature).float().to(device=device)
@@ -161,9 +218,9 @@ class MultiTalkWav2VecEmbeds:
             audio_duration = len(audio_segment) / sr
             video_length = audio_duration * fps
 
-            wav2vec.to(device)
-            embeddings = wav2vec(audio_feature.to(dtype), seq_len=int(video_length), output_hidden_states=True)
-            wav2vec.to(offload_device)
+            wav2vec2.to(device)
+            embeddings = wav2vec2(audio_feature.to(dtype), seq_len=int(video_length), output_hidden_states=True)
+            wav2vec2.to(offload_device)
 
             if len(embeddings) == 0:
                 print("Fail to extract audio embedding for one speaker")
@@ -238,12 +295,30 @@ class MultiTalkWav2VecEmbeds:
                     offset += w.shape[-1]
                 out_audio = {"waveform": mixed, "sample_rate": sr}
 
+        # Calculate actual frames based on audio duration
+        actual_num_frames = num_frames
+        if len(audio_outputs) > 0:
+            if multi_audio_type == "para":
+                # For parallel mode, use the longest audio duration
+                max_audio_duration = max([ao["waveform"].shape[-1] / sr for ao in audio_outputs])
+                actual_frames_from_audio = int(max_audio_duration * fps)
+            else:  # "add"
+                # For sequential mode, use the total audio duration
+                total_audio_duration = sum([ao["waveform"].shape[-1] / sr for ao in audio_outputs])
+                actual_frames_from_audio = int(total_audio_duration * fps)
+            
+            # Use the smaller of requested frames or actual audio frames
+            actual_num_frames = min(num_frames, actual_frames_from_audio)
+            
+            if actual_frames_from_audio < num_frames:
+                log.info(f"[MultiTalk] Audio duration ({actual_frames_from_audio} frames) is shorter than requested ({num_frames} frames). Using {actual_num_frames} frames.")
+
         # Debug: log final mixed audio length and mode
         total_samples_raw = sum([ao["waveform"].shape[-1] for ao in audio_outputs])
         log.info(f"[MultiTalk] total raw duration = {total_samples_raw/sr:.3f}s")
         log.info(f"[MultiTalk] multi_audio_type={multi_audio_type} | final waveform shape={out_audio['waveform'].shape} | length={out_audio['waveform'].shape[-1]} samples | seconds={out_audio['waveform'].shape[-1]/sr:.3f}s (expected {'sum' if multi_audio_type=='add' else 'max'} of raw)")
 
-        return (multitalk_embeds, out_audio)
+        return (multitalk_embeds, out_audio, actual_num_frames)
 
 
 class WanVideoImageToVideoMultiTalk:
@@ -251,11 +326,11 @@ class WanVideoImageToVideoMultiTalk:
     def INPUT_TYPES(s):
         return {"required": {
             "vae": ("WANVAE",),
-            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the image to encode"}),
-            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the image to encode"}),
-            "frame_window_size": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "Number of frames to encode"}),
-            "motion_frame": ("INT", {"default": 25, "min": 1, "max": 10000, "step": 1, "tooltip": "Driven frame length used in the long video generation."}),
-            "force_offload": ("BOOLEAN", {"default": True}),
+            "width": ("INT", {"default": 832, "min": 64, "max": 2048, "step": 8, "tooltip": "Width of the generation"}),
+            "height": ("INT", {"default": 480, "min": 64, "max": 29048, "step": 8, "tooltip": "Height of the generation"}),
+            "frame_window_size": ("INT", {"default": 81, "min": 1, "max": 10000, "step": 4, "tooltip": "The number of frames to process at once, should be a value the model is generally good at."}),
+            "motion_frame": ("INT", {"default": 25, "min": 1, "max": 10000, "step": 1, "tooltip": "Driven frame length used in the long video generation. Basically the overlap length."}),
+            "force_offload": ("BOOLEAN", {"default": False, "tooltip": "Whether to force offload the model within the loop for VAE operations, enable if you encounter memory issues."}),
             "colormatch": (
             [   
                 'disabled',
@@ -266,13 +341,18 @@ class WanVideoImageToVideoMultiTalk:
                 'hm-mvgd-hm', 
                 'hm-mkl-hm',
             ], {
-               "default": 'disabled'
-            }),
+               "default": 'disabled', "tooltip": "Color matching method to use between the windows"
+            },),
             },
             "optional": {
-                "start_image": ("IMAGE", {"tooltip": "Image to encode"}),
+                "start_image": ("IMAGE", {"tooltip": "Images to encode"}),
                 "tiled_vae": ("BOOLEAN", {"default": False, "tooltip": "Use tiled VAE encoding for reduced memory use"}),
                 "clip_embeds": ("WANVIDIMAGE_CLIPEMBEDS", {"tooltip": "Clip vision encoded image"}),
+                "mode": ([
+                    "auto",
+                    "multitalk",
+                    "infinitetalk"
+                ], {"default": "auto", "tooltip": "The sampling strategy to use in the long video generation loop, should match the model used"})
             }
         }
 
@@ -280,8 +360,9 @@ class WanVideoImageToVideoMultiTalk:
     RETURN_NAMES = ("image_embeds",)
     FUNCTION = "process"
     CATEGORY = "WanVideoWrapper"
+    DESCRIPTION = "Enables Multi/InfiniteTalk long video generation sampling method, the video is created in windows with overlapping frames. Not compatible or necessary to be used with context windows and many other features besides Multi/InfiniteTalk."
 
-    def process(self, vae, width, height, frame_window_size, motion_frame, force_offload, colormatch, start_image=None, tiled_vae=False, clip_embeds=None):
+    def process(self, vae, width, height, frame_window_size, motion_frame, force_offload, colormatch, start_image=None, tiled_vae=False, clip_embeds=None, mode="multitalk"):
 
         H = height
         W = width
@@ -311,7 +392,8 @@ class WanVideoImageToVideoMultiTalk:
             "vae": vae,
             "target_shape": target_shape,
             "clip_context": clip_embeds.get("clip_embeds", None) if clip_embeds is not None else None,
-            "colormatch": colormatch
+            "colormatch": colormatch,
+            "multitalk_mode": mode
         }
 
         return (image_embeds,)
@@ -319,11 +401,13 @@ class WanVideoImageToVideoMultiTalk:
 NODE_CLASS_MAPPINGS = {
     "MultiTalkModelLoader": MultiTalkModelLoader,
     "MultiTalkWav2VecEmbeds": MultiTalkWav2VecEmbeds,
-    "WanVideoImageToVideoMultiTalk": WanVideoImageToVideoMultiTalk    
+    "WanVideoImageToVideoMultiTalk": WanVideoImageToVideoMultiTalk,
+    "Wav2VecModelLoader": Wav2VecModelLoader
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "MultiTalkModelLoader": "MultiTalk Model Loader",
-    "MultiTalkWav2VecEmbeds": "MultiTalk Wav2Vec Embeds",
-    "WanVideoImageToVideoMultiTalk": "WanVideo Image To Video MultiTalk"
+    "MultiTalkModelLoader": "Multi/InfiniteTalk Model Loader",
+    "MultiTalkWav2VecEmbeds": "Multi/InfiniteTalk Wav2vec2 Embeds",
+    "WanVideoImageToVideoMultiTalk": "WanVideo Long I2V Multi/InfiniteTalk",
+    "Wav2VecModelLoader": "Wav2vec2 Model Loader"
 }

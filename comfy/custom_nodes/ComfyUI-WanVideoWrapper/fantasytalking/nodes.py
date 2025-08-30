@@ -20,8 +20,8 @@ class DownloadAndLoadWav2VecModel:
             "required": {
                 "model": (
                     [
-                    "facebook/wav2vec2-base-960h", 
-                    "TencentGameMate/chinese-wav2vec2-base"
+                    "TencentGameMate/chinese-wav2vec2-base",
+                    "facebook/wav2vec2-base-960h"
                     ],
                 ),
 

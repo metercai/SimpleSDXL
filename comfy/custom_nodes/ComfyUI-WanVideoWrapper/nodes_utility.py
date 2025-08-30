@@ -2,6 +2,11 @@ import torch
 import numpy as np
 from comfy.utils import common_upscale
 
+try:
+    from server import PromptServer
+except:
+    PromptServer = None
+
 VAE_STRIDE = (4, 8, 8)
 PATCH_SIZE = (1, 2, 2)
 
@@ -188,7 +193,10 @@ class CreateCFGScheduleFloatList:
             "interpolation": (["linear", "ease_in", "ease_out"], {"default": "linear", "tooltip": "Interpolation method to use for the cfg scale"}),
             "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "Start percent of the steps to apply cfg"}),
             "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "End percent of the steps to apply cfg"}),
-            }
+            },
+            "hidden": {
+                "unique_id": "UNIQUE_ID",
+            },
         }
 
     RETURN_TYPES = ("FLOAT", )
@@ -197,8 +205,8 @@ class CreateCFGScheduleFloatList:
     CATEGORY = "WanVideoWrapper"
     DESCRIPTION = "Helper node to generate a list of floats that can be used to schedule cfg scale for the steps, outside the set range cfg is set to 1.0"
 
-    def process(self, steps, cfg_scale_start, cfg_scale_end, interpolation, start_percent, end_percent):
-        
+    def process(self, steps, cfg_scale_start, cfg_scale_end, interpolation, start_percent, end_percent, unique_id):
+
         # Create a list of floats for the cfg schedule
         cfg_list = [1.0] * steps
         start_idx = min(int(steps * start_percent), steps - 1)
@@ -225,6 +233,78 @@ class CreateCFGScheduleFloatList:
         # If start_percent > 0, always include the first step
         if start_percent > 0:
             cfg_list[0] = 1.0
+
+        if unique_id and PromptServer is not None:
+            try:                
+                PromptServer.instance.send_progress_text(
+                    f"{cfg_list}",
+                    unique_id
+                )
+            except:
+                pass
+
+        return (cfg_list,)
+    
+class CreateScheduleFloatList:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "steps": ("INT", {"default": 30, "min": 2, "max": 1000, "step": 1, "tooltip": "Number of steps to schedule cfg for"} ),
+            "start_value": ("FLOAT", {"default": 5.0, "min": 0.0, "max": 100.0, "step": 0.01, "round": 0.01, "tooltip": "CFG scale to use for the steps"}),
+            "end_value": ("FLOAT", {"default": 5.0, "min": 0.0, "max": 100.0, "step": 0.01, "round": 0.01, "tooltip": "CFG scale to use for the steps"}),
+            "default_value": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1000.0, "step": 0.01, "round": 0.01, "tooltip": "Default value to use for the steps"}),
+            "interpolation": (["linear", "ease_in", "ease_out"], {"default": "linear", "tooltip": "Interpolation method to use for the cfg scale"}),
+            "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "Start percent of the steps to apply cfg"}),
+            "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "End percent of the steps to apply cfg"}),
+            },
+            "hidden": {
+                "unique_id": "UNIQUE_ID",
+            },
+        }
+
+    RETURN_TYPES = ("FLOAT", )
+    RETURN_NAMES = ("float_list",)
+    FUNCTION = "process"
+    CATEGORY = "WanVideoWrapper"
+    DESCRIPTION = "Helper node to generate a list of floats that can be used to schedule things like cfg and lora scale per step"
+
+    def process(self, steps, start_value, end_value, default_value,interpolation, start_percent, end_percent, unique_id):
+
+        # Create a list of floats for the cfg schedule
+        cfg_list = [default_value] * steps
+        start_idx = min(int(steps * start_percent), steps - 1)
+        end_idx = min(int(steps * end_percent), steps - 1)
+        
+        for i in range(start_idx, end_idx + 1):
+            if i >= steps:
+                break
+                
+            if end_idx == start_idx:
+                t = 0
+            else:
+                t = (i - start_idx) / (end_idx - start_idx)
+            
+            if interpolation == "linear":
+                factor = t
+            elif interpolation == "ease_in":
+                factor = t * t
+            elif interpolation == "ease_out":
+                factor = t * (2 - t)
+
+            cfg_list[i] = round(start_value + factor * (end_value - start_value), 2)
+
+        # If start_percent > 0, always include the first step
+        if start_percent > 0:
+            cfg_list[0] = default_value
+
+        if unique_id and PromptServer is not None:
+            try:                
+                PromptServer.instance.send_progress_text(
+                    f"{cfg_list}",
+                    unique_id
+                )
+            except:
+                pass
 
         return (cfg_list,)
     
@@ -254,17 +334,97 @@ class DummyComfyWanModelObject:
                 return None
         return (DummyModel(),)
     
+class WanVideoLatentReScale:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "samples": ("LATENT",),
+                    "direction": (["comfy_to_wrapper", "wrapper_to_comfy"], {"tooltip": "Direction to rescale latents, from comfy to wrapper or vice versa"}),
+                }
+                }
+
+    RETURN_TYPES = ("LATENT",)
+    RETURN_NAMES = ("samples",)
+    FUNCTION = "encode"
+    CATEGORY = "WanVideoWrapper"
+    DESCRIPTION = "Rescale latents to match the expected range for encoding or decoding between native ComfyUI VAE and the WanVideoWrapper VAE."
+
+    def encode(self, samples, direction):
+        samples = samples.copy()
+        latents = samples["samples"]
+
+        if latents.shape[1] == 48:
+            mean = [
+                    -0.2289, -0.0052, -0.1323, -0.2339, -0.2799, 0.0174, 0.1838, 0.1557,
+                    -0.1382, 0.0542, 0.2813, 0.0891, 0.1570, -0.0098, 0.0375, -0.1825,
+                    -0.2246, -0.1207, -0.0698, 0.5109, 0.2665, -0.2108, -0.2158, 0.2502,
+                    -0.2055, -0.0322, 0.1109, 0.1567, -0.0729, 0.0899, -0.2799, -0.1230,
+                    -0.0313, -0.1649, 0.0117, 0.0723, -0.2839, -0.2083, -0.0520, 0.3748,
+                    0.0152, 0.1957, 0.1433, -0.2944, 0.3573, -0.0548, -0.1681, -0.0667,
+                ]
+            std = [
+                    0.4765, 1.0364, 0.4514, 1.1677, 0.5313, 0.4990, 0.4818, 0.5013,
+                    0.8158, 1.0344, 0.5894, 1.0901, 0.6885, 0.6165, 0.8454, 0.4978,
+                    0.5759, 0.3523, 0.7135, 0.6804, 0.5833, 1.4146, 0.8986, 0.5659,
+                    0.7069, 0.5338, 0.4889, 0.4917, 0.4069, 0.4999, 0.6866, 0.4093,
+                    0.5709, 0.6065, 0.6415, 0.4944, 0.5726, 1.2042, 0.5458, 1.6887,
+                    0.3971, 1.0600, 0.3943, 0.5537, 0.5444, 0.4089, 0.7468, 0.7744
+                ]
+        else:
+            mean = [
+                -0.7571, -0.7089, -0.9113, 0.1075, -0.1745, 0.9653, -0.1517, 1.5508,
+                0.4134, -0.0715, 0.5517, -0.3632, -0.1922, -0.9497, 0.2503, -0.2921
+            ]
+            std = [
+                2.8184, 1.4541, 2.3275, 2.6558, 1.2196, 1.7708, 2.6052, 2.0743,
+                3.2687, 2.1526, 2.8652, 1.5579, 1.6382, 1.1253, 2.8251, 1.9160
+            ]
+        mean = torch.tensor(mean).view(1, latents.shape[1], 1, 1, 1)
+        std = torch.tensor(std).view(1, latents.shape[1], 1, 1, 1)
+        inv_std = (1.0 / std).view(1, latents.shape[1], 1, 1, 1)
+        if direction == "comfy_to_wrapper":
+            latents = (latents - mean.to(latents)) * inv_std.to(latents)
+        elif direction == "wrapper_to_comfy":
+            latents = latents / inv_std.to(latents) + mean.to(latents)
+
+        samples["samples"] = latents
+
+        return (samples,)
+    
+class WanVideoSigmaToStep:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                "sigma": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.001}),
+            },
+        }
+
+    RETURN_TYPES = ("INT", )
+    RETURN_NAMES = ("step",)
+    FUNCTION = "convert"
+    CATEGORY = "WanVideoWrapper"
+    DESCRIPTION = "Simply passes a float value as an integer, used to set start/end steps with sigma threshold"
+
+    def convert(self, sigma):
+        return (sigma,)
+    
 NODE_CLASS_MAPPINGS = {
     "WanVideoImageResizeToClosest": WanVideoImageResizeToClosest,
     "WanVideoVACEStartToEndFrame": WanVideoVACEStartToEndFrame,
     "ExtractStartFramesForContinuations": ExtractStartFramesForContinuations,
     "CreateCFGScheduleFloatList": CreateCFGScheduleFloatList,
-    "DummyComfyWanModelObject": DummyComfyWanModelObject
-    }
+    "DummyComfyWanModelObject": DummyComfyWanModelObject,
+    "WanVideoLatentReScale": WanVideoLatentReScale,
+    "CreateScheduleFloatList": CreateScheduleFloatList,
+    "WanVideoSigmaToStep": WanVideoSigmaToStep
+}
 NODE_DISPLAY_NAME_MAPPINGS = {
     "WanVideoImageResizeToClosest": "WanVideo Image Resize To Closest",
     "WanVideoVACEStartToEndFrame": "WanVideo VACE Start To End Frame",
     "ExtractStartFramesForContinuations": "Extract Start Frames For Continuations",
     "CreateCFGScheduleFloatList": "Create CFG Schedule Float List",
-    "DummyComfyWanModelObject": "Dummy Comfy Wan Model Object"
-    }
+    "DummyComfyWanModelObject": "Dummy Comfy Wan Model Object",
+    "WanVideoLatentReScale": "WanVideo Latent ReScale",
+    "CreateScheduleFloatList": "Create Schedule Float List",
+    "WanVideoSigmaToStep": "WanVideo Sigma To Step"
+}

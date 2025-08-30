@@ -90,7 +90,7 @@ def set_module_tensor_to_device(module, tensor_name, device, value=None, dtype=N
             module._buffers[tensor_name] = new_value
         elif value is not None or not check_device_same(torch.device(device), module._parameters[tensor_name].device):
             param_cls = type(module._parameters[tensor_name])
-            new_value = param_cls(new_value, requires_grad=old_value.requires_grad).to(device)
+            new_value = param_cls(new_value, requires_grad=False).to(device)
             module._parameters[tensor_name] = new_value
 
     #if device != "cpu":
@@ -173,7 +173,7 @@ def apply_lora(model, device_to, transformer_load_device, params_to_keep=None, d
                 to_load.append((n, m, params))
 
         to_load.sort(reverse=True)
-        pbar = ProgressBar(len(to_load))
+        #pbar = ProgressBar(len(to_load))
         for x in tqdm(to_load, desc="Loading model and applying LoRA weights:", leave=True):
             name = x[0]
             m = x[1]
@@ -207,7 +207,19 @@ def apply_lora(model, device_to, transformer_load_device, params_to_keep=None, d
                     except:
                         continue
             m.comfy_patched_weights = True
-            pbar.update(1)
+            #pbar.update(1)
+        
+        # After LoRA patching, scale weights that have scale_weight but are NOT LoRA patched
+        if len(scale_weights) > 0 and not getattr(model, "scale_weights_applied", False):
+            for name, param in model.model.diffusion_model.named_parameters():
+                scale_key = name.replace("weight", "scale_weight").replace("diffusion_model.", "") if "weight" in name else None
+                full_param_name = f"diffusion_model.{name}"
+                if scale_key and scale_key in scale_weights and full_param_name not in model.patches:
+                    scale = scale_weights[scale_key]
+                    param_fp32 = param.to(torch.float32)
+                    param_fp32.mul_(scale.to(param.device, torch.float32))
+                    param.copy_(param_fp32.to(param.dtype))
+            model.scale_weights_applied = True
       
         model.current_weight_patches_uuid = model.patches_uuid
         if low_mem_load:

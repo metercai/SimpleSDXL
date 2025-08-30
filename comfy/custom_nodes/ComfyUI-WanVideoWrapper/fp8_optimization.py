@@ -48,26 +48,6 @@ def apply_lora(weight, lora, step=None):
         weight = weight.add(patch_diff, alpha=scale)
     return weight
 
-
-def linear_with_lora_and_scale_forward(cls, input):
-    # Handles both scaled and unscaled, with or without LoRA
-    has_scale = hasattr(cls, "scale_weight")
-    weight = cls.weight.to(input.dtype)
-    bias = cls.bias.to(input.dtype) if cls.bias is not None else None
-
-    if has_scale:
-        scale_weight = cls.scale_weight.to(input.device)
-        if weight.numel() < input.numel():
-            weight = weight * scale_weight
-        else:
-            input = input * scale_weight
-
-    lora = getattr(cls, "lora", None)
-    if lora is not None:
-        weight = apply_lora(weight, lora, cls.step).to(input.dtype)
-
-    return torch.nn.functional.linear(input, weight, bias)
-
 def convert_fp8_linear(module, base_dtype, params_to_keep={}, scale_weight_keys=None):
     log.info("FP8 matmul enabled")
     for name, submodule in module.named_modules():
@@ -81,57 +61,4 @@ def convert_fp8_linear(module, base_dtype, params_to_keep={}, scale_weight_keys=
                 original_forward = submodule.forward
                 setattr(submodule, "original_forward", original_forward)
                 setattr(submodule, "forward", lambda input, m=submodule: fp8_linear_forward(m, base_dtype, input))
- 
-def convert_linear_with_lora_and_scale(module, scale_weight_keys=None, patches=None, params_to_keep={}):
-    log.info("Patching Linear layers...")
-    for name, submodule in module.named_modules():
-        if not any(keyword in name for keyword in params_to_keep):
-            # Set scale_weight if present
-            if scale_weight_keys is not None:
-                scale_key = f"{name}.scale_weight"
-                if scale_key in scale_weight_keys:
-                    setattr(submodule, "scale_weight", scale_weight_keys[scale_key])
 
-            # Set LoRA if present
-            if hasattr(submodule, "lora"):
-                #print(f"removing old LoRA in {name}" )
-                delattr(submodule, "lora")
-            if patches is not None:
-                patch_key1 = f"diffusion_model.{name}.weight"
-                patch_key_compiled = f"diffusion_model.{name.replace('_orig_mod.', '')}.weight"
-                patch = patches.get(patch_key1, []) or patches.get(patch_key_compiled, [])
-                if len(patch) != 0:
-                    lora_diffs = []
-                    for p in patch:
-                        lora_obj = p[1]
-                        if "head" in name:
-                            continue  # For now skip LoRA for head layers
-                        elif hasattr(lora_obj, "weights"):
-                            lora_diffs.append(lora_obj.weights)
-                        elif isinstance(lora_obj, tuple) and lora_obj[0] == "diff":
-                            lora_diffs.append(lora_obj[1])
-                        else:
-                            continue
-                    lora_strengths = [p[0] for p in patch]
-                    lora = (lora_diffs, lora_strengths)
-                    setattr(submodule, "lora", lora)
-                    #print(f"Added LoRA to {name} with {len(lora_diffs)} diffs and strengths {lora_strengths}")
-
-            # Set forward if Linear and has either scale or lora
-            if isinstance(submodule, nn.Linear):
-                has_scale = hasattr(submodule, "scale_weight")
-                has_lora = hasattr(submodule, "lora")
-                if not hasattr(submodule, "original_forward"):
-                    setattr(submodule, "original_forward", submodule.forward)
-                if has_scale or has_lora:
-                    setattr(submodule, "forward", lambda input, m=submodule: linear_with_lora_and_scale_forward(m, input))
-                    setattr(submodule, "step", 0)  # Initialize step for LoRA scheduling
-
-def remove_lora_from_module(module):
-    unloaded = False
-    for name, submodule in module.named_modules():
-        if hasattr(submodule, "lora"):
-            if not unloaded:
-                log.info("Unloading all LoRAs")
-                unloaded = True
-            delattr(submodule, "lora")

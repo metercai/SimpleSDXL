@@ -1,12 +1,24 @@
 import torch
 import torch.nn as nn
+import numpy as np
 from diffusers.quantizers.gguf.utils import GGUFParameter, dequantize_gguf_tensor
+import gguf
 from diffusers.utils import is_accelerate_available
 from contextlib import nullcontext
-
+from ..utils import log
 if is_accelerate_available():
-    import accelerate
     from accelerate import init_empty_weights
+
+def load_gguf(model_path):
+    from gguf import GGUFReader
+    reader = GGUFReader(model_path)
+    parsed_parameters = {}
+    for tensor in reader.tensors:
+        # if the tensor is a torch supported dtype do not use GGUFParameter
+        is_gguf_quant = tensor.tensor_type not in [gguf.GGMLQuantizationType.F32, gguf.GGMLQuantizationType.F16]
+        meta_tensor = torch.empty(tensor.data.shape, dtype=torch.from_numpy(np.empty(0, dtype=tensor.data.dtype)).dtype, device='meta')
+        parsed_parameters[tensor.name] = GGUFParameter(meta_tensor, quant_type=tensor.tensor_type) if is_gguf_quant else meta_tensor
+    return parsed_parameters, reader
 
 #based on https://github.com/huggingface/diffusers/blob/main/src/diffusers/quantizers/gguf/utils.py
 def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modules_to_not_convert=[], patches=None):
@@ -24,6 +36,7 @@ def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modul
 
         if (
             isinstance(module, nn.Linear)
+            and not isinstance(module, GGUFLinear) 
             and _should_convert_to_gguf(state_dict, module_prefix)
             and name not in modules_to_not_convert
         ):
@@ -38,18 +51,17 @@ def _replace_with_gguf_linear(model, compute_dtype, state_dict, prefix="", modul
                     module.bias is not None,
                     compute_dtype=compute_dtype
                 )
-            #set_lora_params(model._modules[name], patches, module_prefix)
+            
             model._modules[name].source_cls = type(module)
             # Force requires_grad to False to avoid unexpected errors
             model._modules[name].requires_grad_(False)
-
     return model
 
-def set_lora_params(module, patches, module_prefix=""):
+def set_lora_params_gguf(module, patches, module_prefix=""):
     # Recursively set lora_diffs and lora_strengths for all GGUFLinear layers
     for name, child in module.named_children():
         child_prefix = (f"{module_prefix}{name}.")
-        set_lora_params(child, patches, child_prefix)
+        set_lora_params_gguf(child, patches, child_prefix)
     if isinstance(module, GGUFLinear):
         key = f"diffusion_model.{module_prefix}weight"
         patch = patches.get(key, [])

@@ -21,7 +21,7 @@ class WanVideoUni3C_ControlnetLoader:
                 "model": (folder_paths.get_filename_list("controlnet"), {"tooltip": "These models are loaded from the 'ComfyUI/models/controlnet' -folder",}),
 
             "base_precision": (["fp32", "bf16", "fp16"], {"default": "fp16"}),
-            "quantization": (['disabled', 'fp8_e4m3fn', 'fp8_e4m3fn_fast', 'fp8_e5m2', 'fp8_e4m3fn_fast_no_ffn'], {"default": 'disabled', "tooltip": "optional quantization method"}),
+            "quantization": (['disabled', 'fp8_e4m3fn', 'fp8_e5m2'], {"default": 'disabled', "tooltip": "optional quantization method"}),
             "load_device": (["main_device", "offload_device"], {"default": "main_device", "tooltip": "Initial device to load the model to, NOT recommended with the larger models unless you have 48GB+ VRAM"}),
             "attention_mode": ([
                     "sdpa",
@@ -138,12 +138,12 @@ class WanVideoUni3C_embeds:
     def INPUT_TYPES(s):
         return {"required": {
             "controlnet": ("WANVIDEOCONTROLNET",),
-            "render_latent": ("LATENT",),
             "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
             "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Start percent of the steps to apply the controlnet"}),
             "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "End percent of the steps to apply the controlnet"}),
             },
             "optional": {
+                "render_latent": ("LATENT",),
                 "render_mask": ("MASK", {"tooltip": "NOT IMPLEMENTED!"}),
             },
         }
@@ -153,16 +153,16 @@ class WanVideoUni3C_embeds:
     FUNCTION = "process"
     CATEGORY = "WanVideoWrapper"
 
-    def process(self, controlnet, render_latent, strength, start_percent, end_percent, render_mask=None):
+    def process(self, controlnet, strength, start_percent, end_percent, render_latent=None, render_mask=None):
 
         device = mm.get_torch_device()
 
-        latent_mask = None
-
-        latents = render_latent["samples"]
-        nframe = latents.shape[2] * 4
-        height = latents.shape[3] * 8
-        width = latents.shape[4] * 8
+        latent_mask = latents = None
+        if render_latent is not None:
+            latents = render_latent["samples"]
+            # nframe = latents.shape[2] * 4
+            # height = latents.shape[3] * 8
+            # width = latents.shape[4] * 8
         
         if render_mask is not None:
             raise NotImplementedError("render_mask is not implemented at this time")
@@ -224,7 +224,7 @@ class WanVideoUni3C_embeds:
             "controlnet_weight": strength,
             "start": start_percent,
             "end": end_percent,
-            "render_latent": latents.to(device),
+            "render_latent": latents,
             "render_mask": latent_mask,
             "camera_embedding": None
         }

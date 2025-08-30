@@ -8,9 +8,9 @@ from tqdm import tqdm
 from ..wanvideo.modules.model import rope_params
 from ..wanvideo.schedulers.fm_solvers_unipc import FlowUniPCMultistepScheduler
 from diffusers.schedulers import FlowMatchEulerDiscreteScheduler
-from ..fp8_optimization import convert_linear_with_lora_and_scale, remove_lora_from_module
+from ..custom_linear import remove_lora_from_module, set_lora_params
 from ..wanvideo.schedulers.scheduling_flow_match_lcm import FlowMatchLCMScheduler
-from ..gguf.gguf import set_lora_params
+from ..gguf.gguf import set_lora_params_gguf
 from einops import rearrange
 
 from ..enhance_a_video.globals import disable_enhance
@@ -146,18 +146,24 @@ class WanVideoDiffusionForcingSampler:
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
 
+        fp8_matmul = model["fp8_matmul"]
         gguf = model["gguf"]
         transformer_options = patcher.model_options.get("transformer_options", None)
+        merge_loras = transformer_options["merge_loras"]
 
-        if len(patcher.patches) != 0 and transformer_options.get("linear_patched", False) is True:
+        patch_linear = transformer_options.get("patch_linear", False)
+
+        if gguf:
+            set_lora_params_gguf(transformer, patcher.patches)
+        elif len(patcher.patches) != 0 and patch_linear:
             log.info(f"Using {len(patcher.patches)} LoRA weight patches for WanVideo model")
-            if not gguf:
-                convert_linear_with_lora_and_scale(transformer, patches=patcher.patches)
-            else:
-                set_lora_params(transformer, patcher.patches)
+            if not merge_loras and fp8_matmul:
+                raise NotImplementedError("FP8 matmul with unmerged LoRAs is not supported")
+            set_lora_params(transformer, patcher.patches)
         else:
-            log.info("Unloading all LoRAs")
             remove_lora_from_module(transformer)
+
+        transformer.lora_scheduling_enabled = transformer_options.get("lora_scheduling_enabled", False)
 
         #torch.compile
         if model["auto_cpu_offload"] is False:

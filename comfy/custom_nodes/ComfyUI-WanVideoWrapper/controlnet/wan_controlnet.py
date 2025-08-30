@@ -15,13 +15,6 @@ from diffusers.models.transformers.transformer_wan import (
     WanTransformerBlock
 )
 
-
-def zero_module(module):
-    for p in module.parameters():
-        nn.init.zeros_(p)
-    return module
-
-
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
 def zero_module(module):
@@ -189,7 +182,6 @@ class WanControlnet(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalModel
                 logger.warning(
                     "Passing `scale` via `attention_kwargs` when not using the PEFT backend is ineffective."
                 )
-
         rotary_emb = self.rope(hidden_states)
 
         # 0. Controlnet encoder
@@ -204,6 +196,9 @@ class WanControlnet(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalModel
 
         # timestep shape: batch_size, or batch_size, seq_len (wan 2.2 ti2v)
         if timestep.ndim == 2:
+            ## for ComfyUI workflow
+            if hidden_states.shape[1] != timestep.shape[1]:
+                timestep = timestep.repeat_interleave(hidden_states.shape[1] // timestep.shape[1], dim=1)
             ts_seq_len = timestep.shape[1]
             timestep = timestep.flatten()  # batch_size * seq_len
         else:
@@ -283,4 +278,4 @@ if __name__ == "__main__":
     print("Output states count", len(controlnet_hidden_states[0]))
     for out_hidden_states in controlnet_hidden_states[0]:
         print(out_hidden_states.shape)
-    
+

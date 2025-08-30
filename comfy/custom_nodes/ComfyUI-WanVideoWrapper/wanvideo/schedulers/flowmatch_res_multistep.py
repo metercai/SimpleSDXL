@@ -51,7 +51,7 @@ class FlowMatchSchedulerResMultistep():
         
         sigma = self.sigmas[timestep_id].reshape(-1, 1, 1, 1)
         sigma_prev = self.sigmas[timestep_id - 1].reshape(-1, 1, 1, 1) if timestep_id > 0 else sigma
-        if (timestep_id + 1 >= len(self.timesteps)).any():
+        if (timestep_id + 1 >= len(self.sigmas)).any():
             sigma_next = torch.tensor(0)
         else:
             sigma_next = self.sigmas[timestep_id + 1].reshape(-1, 1, 1, 1)

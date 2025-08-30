@@ -180,12 +180,11 @@ def draw_body_and_foot(canvas, candidate, subset, score, stick_width=4, draw_bod
     # Append head elements based on the condition
     limbSeq_and_colors += head_elements
 
-    for limb_info in limbSeq_and_colors[:17]:
+    for limb_info in limbSeq_and_colors[:19]:
         limbSeq, color = limb_info
         for n in range(len(subset)):
             index = subset[n][np.array(limbSeq) - 1]
-            conf = score[n][np.array(limbSeq) - 1]
-            if conf[0] < 0.3 or conf[1] < 0.3:
+            if index[0] < 0.3 or index[1] < 0.3:
                 continue
             Y = candidate[index.astype(int), 0] * float(W)
             X = candidate[index.astype(int), 1] * float(H)
@@ -194,11 +193,11 @@ def draw_body_and_foot(canvas, candidate, subset, score, stick_width=4, draw_bod
             length = np.sqrt((X[0] - X[1]) ** 2 + (Y[0] - Y[1]) ** 2)
             angle = math.degrees(math.atan2(X[0] - X[1], Y[0] - Y[1]))
             polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), stick_width), int(angle), 0, 360, 1)
-            cv2.fillConvexPoly(canvas, polygon, alpha_blend_color(color, conf[0] * conf[1]))
+            cv2.fillConvexPoly(canvas, polygon, alpha_blend_color(color, index[0] * index[1]))
 
     canvas = (canvas * 0.6).astype(np.uint8)
 
-    for limb_info in limbSeq_and_colors[:18]:
+    for limb_info in limbSeq_and_colors[:19]:
         limbSeq, color = limb_info
         for i in limbSeq:
             for n in range(len(subset)):
@@ -209,12 +208,9 @@ def draw_body_and_foot(canvas, candidate, subset, score, stick_width=4, draw_bod
                 conf = score[n][i - 1]
                 if not np.isfinite(x) or not np.isfinite(y):
                     continue
-                x = int(np.clip(x * W, 0, W - 1
-                ))
+                x = int(np.clip(x * W, 0, W - 1))
                 y = int(np.clip(y * H, 0, H - 1))
-                # x = int(x * W)
-                # y = int(y * H)
-                cv2.circle(canvas, (x, y), 4, alpha_blend_color(color, conf), thickness=-1)
+                cv2.circle(canvas, (x, y), body_keypoint_size, alpha_blend_color(color, conf), thickness=-1)
 
     return canvas
 

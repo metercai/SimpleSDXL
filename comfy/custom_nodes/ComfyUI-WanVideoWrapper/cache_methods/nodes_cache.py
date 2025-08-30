@@ -100,7 +100,7 @@ class WanVideoEasyCache:
         return {
             "required": {
                 "easycache_thresh": ("FLOAT", {"default": 0.015, "min": 0.0, "max": 1.0, "step": 0.001, "tooltip": "How strongly to cache the output of diffusion model. This value must be non-negative."}),
-                "start_step": ("INT", {"default": 10, "min": 1, "max": 9999, "step": 1, "tooltip": "Step to start applying EasyCache"}),
+                "start_step": ("INT", {"default": 10, "min": 0, "max": 9999, "step": 1, "tooltip": "Step to start applying EasyCache"}),
                 "end_step": ("INT", {"default": -1, "min": -1, "max": 9999, "step": 1, "tooltip": "Step to end applying EasyCache"}),
                 "cache_device": (["main_device", "offload_device"], {"default": "offload_device", "tooltip": "Device to cache to"}),
             },
