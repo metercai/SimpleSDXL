@@ -172,7 +172,7 @@ def get_path_models_root() -> str:
     logger.info(f'The path_models_root: {os.path.abspath(path_models_root)}')
     return path_models_root
 
-def get_dir_or_set_default(key, default_value, as_array=False, make_directory=False):
+def get_dir_or_set_default(key, default_value, as_array=False, make_directory=True):
     global config_dict, visited_keys, always_save_keys
 
     if key not in visited_keys:
@@ -245,6 +245,8 @@ path_ipadapter = get_dir_or_set_default('path_ipadapter', f'{path_models_root}/i
 path_pulid = get_dir_or_set_default('path_pulid', f'{path_models_root}/pulid')
 path_insightface = get_dir_or_set_default('path_insightface', f'{path_models_root}/insightface')
 path_style_models = get_dir_or_set_default('path_style_models', f'{path_models_root}/style_models')
+path_audio_encoders = get_dir_or_set_default('path_audio_encoders', f'{path_models_root}/audio_encoders')
+path_model_patches = get_dir_or_set_default('path_model_patches', f'{path_models_root}/model_patches')
 
 model_cata_map = {
     'checkpoints': paths_checkpoints,
@@ -265,7 +267,9 @@ model_cata_map = {
     'pulid': [path_pulid],
     'ipadapter': [path_ipadapter],
     'insightface': [path_insightface],
-    'style_models': [path_style_models]
+    'style_models': [path_style_models],
+    'audio_encoders': [path_audio_encoders],
+    'model_patches': [path_model_patches]
     }
 
 from enhanced.simpleai import init_modelsinfo, get_path_in_user_dir
@@ -995,6 +999,9 @@ comfyui:
      inpaint: {inpaint}
      pulid: {pulid}
      insightface: {insightface}
+     style_models: {style_models}
+     audio_encoders: {audio_encoders}
+     model_patches: {model_patches}
      '''
 
 paths2str = lambda p,n: p[0] if len(p)<=1 else '|\n'+''.join([' ']*(5+len(n)))+''.join(['\n']+[' ']*(5+len(n))).join(p) 
@@ -1016,7 +1023,10 @@ config_comfy_text = config_comfy_formatted_text.format(
         ipadapter=paths2str([path_ipadapter]+paths_controlnet, 'ipadapter'), 
         inpaint=paths2str(paths_inpaint,'inpaint'), 
         pulid=path_pulid, 
-        insightface=path_insightface)
+        insightface=path_insightface,
+        style_models=path_style_models,
+        audio_encoders=path_audio_encoders,
+        model_patches=path_model_patches)
 
 with open(config_comfy_path, "w", encoding="utf-8") as comfy_file:
     comfy_file.write(config_comfy_text)
