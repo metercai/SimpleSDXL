@@ -213,7 +213,7 @@ def switch_layout_template(presetdata: dict | str, state_params, preset_url=''):
     base_model_list = modules.config.get_base_model_list(template_engine, task_method)
     print(f'template_engine:{template_engine}')
 
-    engine_class_display = template_engine if template_engine in ['Flux', 'Kolors', 'Wan'] else 'SD15' if template_engine=='Comfy' and task_method=='sd15_aio' else 'Illustrious' if template_engine=='Comfy' and task_method=='il_v_pre_aio' else 'SDXL'
+    engine_class_display = template_engine if template_engine in ['Flux', 'Kolors', 'Wan', 'Qwen'] else 'SD15' if template_engine=='Comfy' and task_method=='sd15_aio' else 'Illustrious' if template_engine=='Comfy' and task_method=='il_v_pre_aio' else 'SDXL'
 
     results = [params_backend]
     results.append(get_layout_invert_visible_inter('advanced_checkbox', visible, inter))

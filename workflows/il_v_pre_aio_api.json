@@ -202,90 +202,6 @@
       "title": "i2i_uov_is_mix_ip"
     }
   },
-  "61": {
-    "inputs": {
-      "boolean": [
-        "62",
-        0
-      ],
-      "on_true": [
-        "66",
-        0
-      ],
-      "on_false": [
-        "467",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "62": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "467",
-        9
-      ],
-      "b": [
-        "63",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "63": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "64": {
-    "inputs": {
-      "value": 0.85
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "66": {
-    "inputs": {
-      "boolean": [
-        "129",
-        0
-      ],
-      "on_true": [
-        "123",
-        0
-      ],
-      "on_false": [
-        "64",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "68": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
   "80": {
     "inputs": {
       "value": false
@@ -492,43 +408,6 @@
       "title": "i2i_uov_fn"
     }
   },
-  "119": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "467",
-        9
-      ],
-      "b": [
-        "276",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "120": {
-    "inputs": {
-      "boolean": [
-        "119",
-        0
-      ],
-      "on_true": [
-        "183",
-        0
-      ],
-      "on_false": [
-        "467",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "121": {
     "inputs": {
       "value": 2
@@ -545,32 +424,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_uov_tiled_steps"
-    }
-  },
-  "123": {
-    "inputs": {
-      "value": 0.5
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "129": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "118",
-        0
-      ],
-      "b": [
-        "68",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
     }
   },
   "132": {
@@ -936,32 +789,6 @@
       "title": "If else"
     }
   },
-  "183": {
-    "inputs": {
-      "value": 0.2
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "185": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "467",
-        9
-      ],
-      "b": [
-        "223",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
   "188": {
     "inputs": {
       "seed": [
@@ -985,8 +812,8 @@
         8
       ],
       "denoise": [
-        "61",
-        0
+        "467",
+        9
       ],
       "model": [
         "197",
@@ -1256,24 +1083,6 @@
       "title": "LayerColor: ColorAdapter"
     }
   },
-  "222": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "223": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "224": {
     "inputs": {
       "samples": [
@@ -1330,26 +1139,6 @@
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
-    }
-  },
-  "230": {
-    "inputs": {
-      "boolean": [
-        "185",
-        0
-      ],
-      "on_true": [
-        "222",
-        0
-      ],
-      "on_false": [
-        "467",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
     }
   },
   "231": {
@@ -1702,15 +1491,6 @@
       "title": "VAE Encode (for Inpainting)"
     }
   },
-  "276": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "277": {
     "inputs": {
       "upscale_method": "lanczos",
@@ -1821,8 +1601,8 @@
         8
       ],
       "denoise": [
-        "230",
-        0
+        "467",
+        9
       ],
       "model": [
         "234",
@@ -1870,8 +1650,8 @@
         8
       ],
       "denoise": [
-        "120",
-        0
+        "467",
+        9
       ],
       "mode_type": "Chess",
       "tile_width": [
@@ -2102,8 +1882,8 @@
         8
       ],
       "denoise": [
-        "230",
-        0
+        "467",
+        9
       ],
       "model": [
         "234",
@@ -2156,7 +1936,7 @@
   "305": {
     "inputs": {
       "model": [
-        "364",
+        "596",
         0
       ]
     },
@@ -2815,62 +2595,6 @@
     "class_type": "easy compare",
     "_meta": {
       "title": "Compare"
-    }
-  },
-  "361": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "362",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_4"
-    }
-  },
-  "362": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "363",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_3"
-    }
-  },
-  "363": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "496",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_2"
-    }
-  },
-  "364": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "361",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_5"
     }
   },
   "365": {
@@ -4927,20 +4651,6 @@
     "class_type": "easy string",
     "_meta": {
       "title": "String"
-    }
-  },
-  "496": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "596",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_1"
     }
   },
   "498": {

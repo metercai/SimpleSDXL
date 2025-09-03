@@ -118,6 +118,7 @@ inpaint_engine_versions = {
     "nun_int4_aio": ['Nun_int4','None'],
     "nun_fp4_aio": ['Nun_fp4','None'],
     "wan_aio_cn": ['VACE'],
+    "qwen_aio_cn": ['Qwen_Inpaint'],
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
@@ -231,7 +232,7 @@ available_aspect_ratios_list = {
 }
 
 
-backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan']
+backend_engines = ['Fooocus', 'Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan', 'Qwen']
 
 model_file_filter = {
         'SD3x'   : ['sd3'],
@@ -239,6 +240,7 @@ model_file_filter = {
         'HyDiT'  : ['hunyuan'],
         'Kolors' : ['kolors'],
         'Wan'    : ['wan'],
+        'Qwen'   : ['qwen'],
         }
 model_file_filter['Fooocus'] = model_file_filter['SD3x'] + model_file_filter['Flux'] + model_file_filter['HyDiT']
 
@@ -253,6 +255,7 @@ task_class_mapping = {
             'HyDiT'  : 'Hunyuan-DiT',
             'Flux'   : 'Flux.1',
             'Wan'    : 'Wan2.2',
+            'Qwen'   : 'Qwen',
             }
 def get_taskclass_by_fullname(fullname):
     if ':' in fullname:
@@ -262,7 +265,7 @@ def get_taskclass_by_fullname(fullname):
             return taskclass
     return None
 
-comfy_classes = ['Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan']
+comfy_classes = ['Comfy', 'Kolors', 'SD3x', 'HyDiT', 'Flux', 'Wan', 'Qwen']
 
 default_class_params = {
     'Fooocus': {
@@ -334,6 +337,16 @@ default_class_params = {
         'available_scheduler_name': comfy_scheduler_list,
         'backend_params': {
             "task_method": "wan_aio_cn",
+            },
+        },
+    'Qwen': {
+        'disvisible': [],
+        'disinteractive': [],
+        'available_aspect_ratios_selection': 'SDXL',
+        'available_sampler_name': comfy_sampler_list,
+        'available_scheduler_name': comfy_scheduler_list,
+        'backend_params': {
+            "task_method": "qwen_aio_cn",
             },
         },
     }

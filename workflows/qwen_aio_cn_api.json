@@ -2,7 +2,7 @@
   "1": {
     "inputs": {
       "conditioning": [
-        "657",
+        "767",
         0
       ]
     },
@@ -18,47 +18,6 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_uov_image"
-    }
-  },
-  "4": {
-    "inputs": {
-      "control_net_name": "flux.1-dev_controlnet_upscaler.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "5": {
-    "inputs": {
-      "pixels": [
-        "305",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "6": {
-    "inputs": {
-      "samples": [
-        "328",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
     }
   },
   "7": {
@@ -158,23 +117,6 @@
       "title": "i2i_uov_fn"
     }
   },
-  "65": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "728",
-        9
-      ],
-      "b": [
-        "611",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
   "72": {
     "inputs": {
       "value": 0.15
@@ -182,24 +124,6 @@
     "class_type": "easy float",
     "_meta": {
       "title": "Float"
-    }
-  },
-  "88": {
-    "inputs": {
-      "value": 0.5
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "i2i_uov_hires_fix_w"
-    }
-  },
-  "89": {
-    "inputs": {
-      "value": 0.8
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "i2i_uov_hires_fix_s"
     }
   },
   "94": {
@@ -238,55 +162,6 @@
       "title": "i2i_uov_multiple"
     }
   },
-  "98": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "i2i_uov_hires_fix_blurred"
-    }
-  },
-  "102": {
-    "inputs": {
-      "boolean": [
-        "493",
-        0
-      ],
-      "on_true": [
-        "14",
-        0
-      ],
-      "on_false": [
-        "103",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "103": {
-    "inputs": {
-      "boolean": [
-        "514",
-        0
-      ],
-      "on_true": [
-        "15",
-        0
-      ],
-      "on_false": [
-        "515",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "106": {
     "inputs": {
       "upscale_method": "lanczos",
@@ -312,25 +187,11 @@
   },
   "118": {
     "inputs": {
-      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
+      "unet_name": "qwen-image-Q4_K_M.gguf"
     },
     "class_type": "UnetLoaderGGUF",
     "_meta": {
       "title": "base_model_gguf"
-    }
-  },
-  "120": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "654",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_2"
     }
   },
   "121": {
@@ -704,23 +565,10 @@
       "title": "Compare"
     }
   },
-  "190": {
-    "inputs": {
-      "value": "a*5",
-      "a": [
-        "98",
-        0
-      ]
-    },
-    "class_type": "SimpleMath+",
-    "_meta": {
-      "title": "🔧 Simple Math"
-    }
-  },
   "195": {
     "inputs": {
       "samples": [
-        "327",
+        "326",
         0
       ],
       "vae": [
@@ -767,26 +615,6 @@
       "title": "Load Upscale Model"
     }
   },
-  "199": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "627",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
   "202": {
     "inputs": {
       "comparison": "a > b",
@@ -824,46 +652,6 @@
       "title": "If else"
     }
   },
-  "206": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 1,
-      "model": [
-        "627",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
-  "207": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "627",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
   "208": {
     "inputs": {
       "model": [
@@ -874,68 +662,6 @@
     "class_type": "DifferentialDiffusion",
     "_meta": {
       "title": "Differential Diffusion"
-    }
-  },
-  "209": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "210",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
-  "210": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "211",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_5"
-    }
-  },
-  "211": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "212",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_4"
-    }
-  },
-  "212": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "120",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_3"
     }
   },
   "213": {
@@ -984,7 +710,7 @@
   },
   "220": {
     "inputs": {
-      "value": "a/4*3",
+      "value": "a",
       "a": [
         "728",
         5
@@ -993,55 +719,6 @@
     "class_type": "SimpleMath+",
     "_meta": {
       "title": "🔧 Simple Math"
-    }
-  },
-  "221": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 0.5,
-      "max_consecutive_cache_hits": 2,
-      "model": [
-        "208",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
-  "222": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 1,
-      "model": [
-        "208",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
-  "223": {
-    "inputs": {
-      "unet_name": "flux-hyp8-Q5_K_M.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "refiner"
     }
   },
   "224": {
@@ -1109,26 +786,6 @@
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
-    }
-  },
-  "229": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "449",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "239": {
@@ -1238,22 +895,6 @@
       "title": "🔧 Simple Math"
     }
   },
-  "262": {
-    "inputs": {
-      "samples": [
-        "326",
-        0
-      ],
-      "mask": [
-        "300",
-        0
-      ]
-    },
-    "class_type": "SetLatentNoiseMask",
-    "_meta": {
-      "title": "Set Latent Noise Mask"
-    }
-  },
   "263": {
     "inputs": {
       "samples": [
@@ -1274,7 +915,7 @@
     "inputs": {
       "noise_mask": true,
       "positive": [
-        "657",
+        "767",
         0
       ],
       "negative": [
@@ -1319,27 +960,6 @@
       "title": "If else"
     }
   },
-  "269": {
-    "inputs": {
-      "grow_mask_by": 16,
-      "pixels": [
-        "217",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "mask": [
-        "300",
-        0
-      ]
-    },
-    "class_type": "VAEEncodeForInpaint",
-    "_meta": {
-      "title": "VAE Encode (for Inpainting)"
-    }
-  },
   "270": {
     "inputs": {
       "boolean": [
@@ -1347,7 +967,7 @@
         11
       ],
       "on_true": [
-        "269",
+        "784",
         0
       ],
       "on_false": [
@@ -1631,47 +1251,6 @@
       "title": "Grow Mask With Blur"
     }
   },
-  "305": {
-    "inputs": {
-      "blur_radius": [
-        "190",
-        0
-      ],
-      "sigma": 0.5,
-      "image": [
-        "306",
-        0
-      ]
-    },
-    "class_type": "ImageBlur",
-    "_meta": {
-      "title": "Image Blur"
-    }
-  },
-  "306": {
-    "inputs": {
-      "width": [
-        "317",
-        1
-      ],
-      "height": [
-        "317",
-        2
-      ],
-      "interpolation": "lanczos",
-      "method": "fill / crop",
-      "condition": "always",
-      "multiple_of": 0,
-      "image": [
-        "3",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "309": {
     "inputs": {
       "width": [
@@ -1793,7 +1372,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -1807,7 +1389,7 @@
         9
       ],
       "model": [
-        "207",
+        "627",
         0
       ],
       "positive": [
@@ -1838,7 +1420,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -1883,7 +1468,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -1897,7 +1485,7 @@
         9
       ],
       "model": [
-        "221",
+        "785",
         0
       ],
       "positive": [
@@ -1929,7 +1517,10 @@
         "220",
         0
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -1943,9 +1534,9 @@
         "220",
         0
       ],
-      "return_with_leftover_noise": "enable",
+      "return_with_leftover_noise": "disable",
       "model": [
-        "222",
+        "782",
         0
       ],
       "positive": [
@@ -1953,8 +1544,8 @@
         0
       ],
       "negative": [
-        "264",
-        1
+        "1",
+        0
       ],
       "latent_image": [
         "270",
@@ -1964,102 +1555,6 @@
     "class_type": "KSamplerAdvanced",
     "_meta": {
       "title": "KSampler (Advanced)"
-    }
-  },
-  "327": {
-    "inputs": {
-      "add_noise": "enable",
-      "noise_seed": [
-        "417",
-        0
-      ],
-      "steps": [
-        "728",
-        5
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "728",
-        7
-      ],
-      "scheduler": [
-        "728",
-        8
-      ],
-      "start_at_step": [
-        "220",
-        0
-      ],
-      "end_at_step": [
-        "728",
-        5
-      ],
-      "return_with_leftover_noise": "disable",
-      "model": [
-        "209",
-        0
-      ],
-      "positive": [
-        "634",
-        0
-      ],
-      "negative": [
-        "264",
-        1
-      ],
-      "latent_image": [
-        "262",
-        0
-      ]
-    },
-    "class_type": "KSamplerAdvanced",
-    "_meta": {
-      "title": "KSampler (Advanced)"
-    }
-  },
-  "328": {
-    "inputs": {
-      "seed": [
-        "417",
-        0
-      ],
-      "steps": [
-        "728",
-        5
-      ],
-      "cfg": 1,
-      "sampler_name": [
-        "728",
-        7
-      ],
-      "scheduler": [
-        "728",
-        8
-      ],
-      "denoise": [
-        "609",
-        0
-      ],
-      "model": [
-        "199",
-        0
-      ],
-      "positive": [
-        "613",
-        0
-      ],
-      "negative": [
-        "613",
-        1
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
     }
   },
   "332": {
@@ -2092,7 +1587,7 @@
   },
   "336": {
     "inputs": {
-      "vae_name": "ae.safetensors"
+      "vae_name": "qwen_image_vae.safetensors"
     },
     "class_type": "VAELoader",
     "_meta": {
@@ -2355,76 +1850,6 @@
       "title": "Compare"
     }
   },
-  "352": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "353",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_4"
-    }
-  },
-  "353": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "354",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_3"
-    }
-  },
-  "354": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "355",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_2"
-    }
-  },
-  "355": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "401",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_1"
-    }
-  },
-  "356": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "352",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_5"
-    }
-  },
   "357": {
     "inputs": {
       "index": [
@@ -2487,15 +1912,6 @@
       "title": "PromptReplace"
     }
   },
-  "359": {
-    "inputs": {
-      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "i2i_enhance_area_model_1_gguf"
-    }
-  },
   "360": {
     "inputs": {
       "boolean": [
@@ -2514,27 +1930,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "361": {
-    "inputs": {
-      "grow_mask_by": 16,
-      "pixels": [
-        "344",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "mask": [
-        "345",
-        0
-      ]
-    },
-    "class_type": "VAEEncodeForInpaint",
-    "_meta": {
-      "title": "VAE Encode (for Inpainting)"
     }
   },
   "362": {
@@ -2755,7 +2150,7 @@
         0
       ],
       "on_true": [
-        "361",
+        "786",
         0
       ],
       "on_false": [
@@ -2766,26 +2161,6 @@
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "378": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 3,
-      "model": [
-        "627",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "379": {
@@ -3054,15 +2429,15 @@
         0
       ],
       "value0": [
-        "449",
+        "571",
         0
       ],
       "value1": [
-        "359",
+        "787",
         0
       ],
       "value2": [
-        "359",
+        "787",
         0
       ]
     },
@@ -3215,7 +2590,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -3229,7 +2607,7 @@
         1
       ],
       "model": [
-        "378",
+        "627",
         0
       ],
       "positive": [
@@ -3355,7 +2733,7 @@
         4
       ],
       "clip": [
-        "730",
+        "766",
         0
       ]
     },
@@ -3459,88 +2837,13 @@
         0
       ],
       "on_false": [
-        "647",
+        "772",
         0
       ]
     },
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "430": {
-    "inputs": {
-      "boolean": [
-        "490",
-        0
-      ],
-      "on_true": [
-        "175",
-        0
-      ],
-      "on_false": [
-        "102",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "431": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "472",
-        0
-      ],
-      "b": [
-        "432",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "432": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "433": {
-    "inputs": {
-      "boolean": [
-        "431",
-        0
-      ],
-      "on_true": [
-        "451",
-        0
-      ],
-      "on_false": [
-        "452",
-        2
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "434": {
-    "inputs": {
-      "clip_name": "sigclip_vision_patch14_384.safetensors"
-    },
-    "class_type": "CLIPVisionLoader",
-    "_meta": {
-      "title": "Load CLIP Vision"
     }
   },
   "435": {
@@ -3560,22 +2863,6 @@
       "title": "Compare"
     }
   },
-  "439": {
-    "inputs": {
-      "flow": [
-        "452",
-        0
-      ],
-      "initial_value1": [
-        "433",
-        0
-      ]
-    },
-    "class_type": "easy forLoopEnd",
-    "_meta": {
-      "title": "For Loop End"
-    }
-  },
   "440": {
     "inputs": {
       "value": 3
@@ -3583,129 +2870,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "Int"
-    }
-  },
-  "444": {
-    "inputs": {
-      "pulid_file": "pulid_flux_v0.9.1.safetensors"
-    },
-    "class_type": "PulidFluxModelLoader",
-    "_meta": {
-      "title": "Load PuLID Flux Model"
-    }
-  },
-  "445": {
-    "inputs": {},
-    "class_type": "PulidFluxEvaClipLoader",
-    "_meta": {
-      "title": "Load Eva Clip (PuLID Flux)"
-    }
-  },
-  "446": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "PulidFluxInsightFaceLoader",
-    "_meta": {
-      "title": "Load InsightFace (PuLID Flux)"
-    }
-  },
-  "448": {
-    "inputs": {
-      "weight": [
-        "495",
-        0
-      ],
-      "start_at": 0,
-      "end_at": [
-        "747",
-        0
-      ],
-      "model": [
-        "468",
-        2
-      ],
-      "pulid_flux": [
-        "444",
-        0
-      ],
-      "eva_clip": [
-        "445",
-        0
-      ],
-      "face_analysis": [
-        "446",
-        0
-      ],
-      "image": [
-        "499",
-        0
-      ]
-    },
-    "class_type": "ApplyPulidFlux",
-    "_meta": {
-      "title": "Apply PuLID Flux"
-    }
-  },
-  "449": {
-    "inputs": {
-      "flow": [
-        "468",
-        0
-      ],
-      "initial_value1": [
-        "471",
-        0
-      ]
-    },
-    "class_type": "easy forLoopEnd",
-    "_meta": {
-      "title": "For Loop End"
-    }
-  },
-  "451": {
-    "inputs": {
-      "downsampling_factor": 1.5,
-      "downsampling_function": "area",
-      "mode": "keep aspect ratio",
-      "weight": [
-        "736",
-        0
-      ],
-      "autocrop_margin": 0.1,
-      "conditioning": [
-        "452",
-        2
-      ],
-      "style_model": [
-        "737",
-        0
-      ],
-      "clip_vision": [
-        "434",
-        0
-      ],
-      "image": [
-        "459",
-        0
-      ]
-    },
-    "class_type": "ReduxAdvanced",
-    "_meta": {
-      "title": "ReduxAdvanced"
-    }
-  },
-  "452": {
-    "inputs": {
-      "total": 4,
-      "initial_value1": [
-        "458",
-        0
-      ]
-    },
-    "class_type": "easy forLoopStart",
-    "_meta": {
-      "title": "For Loop Start"
     }
   },
   "458": {
@@ -3719,156 +2883,13 @@
         0
       ],
       "on_false": [
-        "657",
+        "767",
         0
       ]
     },
     "class_type": "easy ifElse",
     "_meta": {
       "title": "If else"
-    }
-  },
-  "459": {
-    "inputs": {
-      "index": [
-        "452",
-        1
-      ],
-      "value0": [
-        "638",
-        0
-      ],
-      "value1": [
-        "639",
-        0
-      ],
-      "value2": [
-        "7",
-        0
-      ],
-      "value3": [
-        "8",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像"
-    }
-  },
-  "468": {
-    "inputs": {
-      "total": 4,
-      "initial_value1": [
-        "724",
-        0
-      ]
-    },
-    "class_type": "easy forLoopStart",
-    "_meta": {
-      "title": "For Loop Start"
-    }
-  },
-  "469": {
-    "inputs": {
-      "value": 4
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "470": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "480",
-        0
-      ],
-      "b": [
-        "469",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "471": {
-    "inputs": {
-      "boolean": [
-        "470",
-        0
-      ],
-      "on_true": [
-        "448",
-        0
-      ],
-      "on_false": [
-        "468",
-        2
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "472": {
-    "inputs": {
-      "index": [
-        "452",
-        1
-      ],
-      "value0": [
-        "585",
-        0
-      ],
-      "value1": [
-        "586",
-        0
-      ],
-      "value2": [
-        "525",
-        0
-      ],
-      "value3": [
-        "556",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像功能"
-    }
-  },
-  "480": {
-    "inputs": {
-      "index": [
-        "468",
-        1
-      ],
-      "value0": [
-        "585",
-        0
-      ],
-      "value1": [
-        "586",
-        0
-      ],
-      "value2": [
-        "525",
-        0
-      ],
-      "value3": [
-        "556",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像功能"
     }
   },
   "488": {
@@ -3887,40 +2908,6 @@
       "title": "Zoe Depth Map"
     }
   },
-  "490": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "586",
-        0
-      ],
-      "b": [
-        "552",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "493": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "525",
-        0
-      ],
-      "b": [
-        "552",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
   "494": {
     "inputs": {
       "boolean": [
@@ -3933,108 +2920,6 @@
       ],
       "on_false": [
         "118",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "495": {
-    "inputs": {
-      "index": [
-        "468",
-        1
-      ],
-      "value0": [
-        "584",
-        0
-      ],
-      "value1": [
-        "175",
-        0
-      ],
-      "value2": [
-        "14",
-        0
-      ],
-      "value3": [
-        "15",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像权重"
-    }
-  },
-  "499": {
-    "inputs": {
-      "index": [
-        "468",
-        1
-      ],
-      "value0": [
-        "638",
-        0
-      ],
-      "value1": [
-        "639",
-        0
-      ],
-      "value2": [
-        "7",
-        0
-      ],
-      "value3": [
-        "8",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像"
-    }
-  },
-  "507": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "514": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "556",
-        0
-      ],
-      "b": [
-        "552",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "515": {
-    "inputs": {
-      "boolean": [
-        "514",
-        0
-      ],
-      "on_true": [
-        "15",
-        0
-      ],
-      "on_false": [
-        "507",
         0
       ]
     },
@@ -4164,7 +3049,7 @@
   },
   "532": {
     "inputs": {
-      "control_net_name": "flux.1-dev_controlnet_union_pro_2.0.safetensors"
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Union.safetensors"
     },
     "class_type": "ControlNetLoader",
     "_meta": {
@@ -4419,38 +3304,11 @@
       "title": "图像处理"
     }
   },
-  "545": {
-    "inputs": {
-      "positive": [
-        "541",
-        2
-      ],
-      "negative": [
-        "1",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "pixels": [
-        "542",
-        0
-      ]
-    },
-    "class_type": "InstructPixToPixConditioning",
-    "_meta": {
-      "title": "InstructPixToPixConditioning"
-    }
-  },
   "546": {
     "inputs": {
-      "boolean": [
-        "555",
-        0
-      ],
+      "boolean": false,
       "on_true": [
-        "545",
+        "540",
         0
       ],
       "on_false": [
@@ -4463,33 +3321,6 @@
       "title": "If else"
     }
   },
-  "547": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "548": {
-    "inputs": {
-      "value": true
-    },
-    "class_type": "easy boolean",
-    "_meta": {
-      "title": "Boolean"
-    }
-  },
-  "549": {
-    "inputs": {
-      "value": false
-    },
-    "class_type": "easy boolean",
-    "_meta": {
-      "title": "Boolean"
-    }
-  },
   "550": {
     "inputs": {
       "value": 1
@@ -4499,69 +3330,6 @@
       "title": "Int"
     }
   },
-  "552": {
-    "inputs": {
-      "value": 3
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "553": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "586",
-        0
-      ],
-      "b": [
-        "581",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "554": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "556",
-        0
-      ],
-      "b": [
-        "581",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "555": {
-    "inputs": {
-      "boolean": [
-        "565",
-        0
-      ],
-      "on_true": [
-        "548",
-        0
-      ],
-      "on_false": [
-        "549",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
   "556": {
     "inputs": {
       "value": 0
@@ -4569,121 +3337,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_ip_fn4"
-    }
-  },
-  "557": {
-    "inputs": {
-      "boolean": [
-        "554",
-        0
-      ],
-      "on_true": [
-        "579",
-        0
-      ],
-      "on_false": [
-        "554",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "558": {
-    "inputs": {
-      "boolean": [
-        "565",
-        0
-      ],
-      "on_true": [
-        "559",
-        0
-      ],
-      "on_false": [
-        "547",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "559": {
-    "inputs": {
-      "boolean": [
-        "567",
-        0
-      ],
-      "on_true": [
-        "584",
-        0
-      ],
-      "on_false": [
-        "430",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "563": {
-    "inputs": {
-      "total": 2,
-      "initial_value1": [
-        "566",
-        0
-      ]
-    },
-    "class_type": "easy forLoopStart",
-    "_meta": {
-      "title": "For Loop Start"
-    }
-  },
-  "565": {
-    "inputs": {
-      "flow": [
-        "563",
-        0
-      ],
-      "initial_value1": [
-        "557",
-        0
-      ]
-    },
-    "class_type": "easy forLoopEnd",
-    "_meta": {
-      "title": "For Loop End"
-    }
-  },
-  "566": {
-    "inputs": {
-      "value": true
-    },
-    "class_type": "easy boolean",
-    "_meta": {
-      "title": "Boolean"
-    }
-  },
-  "567": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "585",
-        0
-      ],
-      "b": [
-        "552",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
     }
   },
   "568": {
@@ -4742,138 +3395,6 @@
       "title": "lora_5"
     }
   },
-  "573": {
-    "inputs": {
-      "value": 5
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "574": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
-    }
-  },
-  "576": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "525",
-        0
-      ],
-      "b": [
-        "581",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "577": {
-    "inputs": {
-      "boolean": [
-        "553",
-        0
-      ],
-      "on_true": [
-        "578",
-        0
-      ],
-      "on_false": [
-        "553",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "578": {
-    "inputs": {
-      "boolean": [
-        "580",
-        0
-      ],
-      "on_true": [
-        "563",
-        2
-      ],
-      "on_false": [
-        "580",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "579": {
-    "inputs": {
-      "boolean": [
-        "576",
-        0
-      ],
-      "on_true": [
-        "577",
-        0
-      ],
-      "on_false": [
-        "576",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "580": {
-    "inputs": {
-      "comparison": "a != b",
-      "a": [
-        "585",
-        0
-      ],
-      "b": [
-        "581",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "581": {
-    "inputs": {
-      "index": [
-        "563",
-        1
-      ],
-      "value0": [
-        "574",
-        0
-      ],
-      "value1": [
-        "573",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "Any Index Switch"
-    }
-  },
   "582": {
     "inputs": {
       "boolean": [
@@ -4898,7 +3419,7 @@
     "inputs": {
       "total": 3,
       "initial_value1": [
-        "439",
+        "458",
         0
       ]
     },
@@ -4932,19 +3453,6 @@
     "class_type": "easy int",
     "_meta": {
       "title": "i2i_ip_fn2"
-    }
-  },
-  "587": {
-    "inputs": {
-      "sage_attention": "auto",
-      "model": [
-        "494",
-        0
-      ]
-    },
-    "class_type": "PathchSageAttentionKJ",
-    "_meta": {
-      "title": "Patch Sage Attention KJ"
     }
   },
   "594": {
@@ -5005,7 +3513,10 @@
         "94",
         0
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -5041,7 +3552,7 @@
         0
       ],
       "model": [
-        "206",
+        "627",
         0
       ],
       "positive": [
@@ -5064,30 +3575,6 @@
     "class_type": "UltimateSDUpscale",
     "_meta": {
       "title": "Ultimate SD Upscale"
-    }
-  },
-  "604": {
-    "inputs": {
-      "width": [
-        "728",
-        2
-      ],
-      "height": [
-        "728",
-        3
-      ],
-      "upscale_method": "lanczos",
-      "keep_proportion": false,
-      "divisible_by": 2,
-      "crop": 0,
-      "image": [
-        "653",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJ",
-    "_meta": {
-      "title": "Resize Image (deprecated)"
     }
   },
   "607": {
@@ -5117,81 +3604,6 @@
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
-    }
-  },
-  "609": {
-    "inputs": {
-      "boolean": [
-        "65",
-        0
-      ],
-      "on_true": [
-        "610",
-        0
-      ],
-      "on_false": [
-        "728",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "610": {
-    "inputs": {
-      "value": 0.8500000000000002
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "611": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "613": {
-    "inputs": {
-      "strength": [
-        "88",
-        0
-      ],
-      "start_percent": 0,
-      "end_percent": [
-        "89",
-        0
-      ],
-      "positive": [
-        "628",
-        0
-      ],
-      "negative": [
-        "130",
-        0
-      ],
-      "control_net": [
-        "4",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "image": [
-        "305",
-        0
-      ]
-    },
-    "class_type": "ControlNetApplySD3",
-    "_meta": {
-      "title": "Apply Controlnet with VAE"
     }
   },
   "616": {
@@ -5237,11 +3649,11 @@
         0
       ],
       "on_true": [
-        "449",
+        "571",
         0
       ],
       "on_false": [
-        "724",
+        "571",
         0
       ]
     },
@@ -5257,11 +3669,11 @@
         0
       ],
       "on_true": [
-        "449",
+        "571",
         0
       ],
       "on_false": [
-        "724",
+        "571",
         0
       ]
     },
@@ -5281,7 +3693,7 @@
         0
       ],
       "on_false": [
-        "657",
+        "767",
         0
       ]
     },
@@ -5362,10 +3774,6 @@
       "value4": [
         "601",
         0
-      ],
-      "value5": [
-        "604",
-        0
       ]
     },
     "class_type": "easy anythingIndexSwitch",
@@ -5407,30 +3815,6 @@
       "title": "Compare"
     }
   },
-  "647": {
-    "inputs": {
-      "clip_l": [
-        "705",
-        0
-      ],
-      "t5xxl": [
-        "705",
-        0
-      ],
-      "guidance": [
-        "728",
-        4
-      ],
-      "clip": [
-        "730",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncodeFlux",
-    "_meta": {
-      "title": "CLIPTextEncodeFlux"
-    }
-  },
   "649": {
     "inputs": {
       "seed": [
@@ -5441,7 +3825,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -5452,7 +3839,7 @@
       ],
       "denoise": 0.9900000000000002,
       "model": [
-        "229",
+        "571",
         0
       ],
       "positive": [
@@ -5497,40 +3884,6 @@
       "title": "Any Index Switch"
     }
   },
-  "653": {
-    "inputs": {
-      "color_space": "RGB",
-      "factor": 1,
-      "device": "auto",
-      "batch_size": 0,
-      "image": [
-        "6",
-        0
-      ],
-      "reference": [
-        "306",
-        0
-      ]
-    },
-    "class_type": "ImageColorMatch+",
-    "_meta": {
-      "title": "🔧 Image Color Match"
-    }
-  },
-  "654": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "223",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_1"
-    }
-  },
   "655": {
     "inputs": {
       "width": [
@@ -5553,30 +3906,6 @@
     "class_type": "ImageResizeKJ",
     "_meta": {
       "title": "Resize Image (deprecated)"
-    }
-  },
-  "657": {
-    "inputs": {
-      "clip_l": [
-        "728",
-        0
-      ],
-      "t5xxl": [
-        "728",
-        0
-      ],
-      "guidance": [
-        "728",
-        4
-      ],
-      "clip": [
-        "730",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncodeFlux",
-    "_meta": {
-      "title": "CLIPTextEncodeFlux"
     }
   },
   "658": {
@@ -5682,7 +4011,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -5696,7 +4028,7 @@
         0
       ],
       "model": [
-        "665",
+        "401",
         0
       ],
       "positive": [
@@ -5715,38 +4047,6 @@
     "class_type": "KSampler",
     "_meta": {
       "title": "KSampler"
-    }
-  },
-  "664": {
-    "inputs": {
-      "model": [
-        "356",
-        0
-      ]
-    },
-    "class_type": "DifferentialDiffusion",
-    "_meta": {
-      "title": "Differential Diffusion"
-    }
-  },
-  "665": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 2,
-      "model": [
-        "664",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
     }
   },
   "666": {
@@ -6049,7 +4349,10 @@
         "728",
         5
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -6063,7 +4366,7 @@
         1
       ],
       "model": [
-        "378",
+        "627",
         0
       ],
       "positive": [
@@ -6106,12 +4409,18 @@
         "756",
         4
       ],
-      "seed": 591264717767163,
+      "seed": [
+        "417",
+        0
+      ],
       "steps": [
         "756",
         7
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -6147,7 +4456,7 @@
         0
       ],
       "model": [
-        "687",
+        "627",
         0
       ],
       "positive": [
@@ -6172,38 +4481,24 @@
       "title": "Ultimate SD Upscale"
     }
   },
-  "687": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "728",
-        12
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 2,
-      "model": [
-        "627",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
   "690": {
     "inputs": {
       "upscale_by": [
         "756",
         4
       ],
-      "seed": 591264717767163,
+      "seed": [
+        "417",
+        0
+      ],
       "steps": [
         "756",
         7
       ],
-      "cfg": 1,
+      "cfg": [
+        "728",
+        4
+      ],
       "sampler_name": [
         "728",
         7
@@ -6239,7 +4534,7 @@
         0
       ],
       "model": [
-        "687",
+        "627",
         0
       ],
       "positive": [
@@ -6781,9 +5076,9 @@
     "inputs": {
       "find1": "none",
       "replace1": "0",
-      "find2": "Q4",
+      "find2": "Qwen_Inpaint",
       "replace2": "1",
-      "find3": "fp8",
+      "find3": "Qwen_Inpaint",
       "replace3": "2",
       "prompt": [
         "362",
@@ -6808,29 +5103,12 @@
       "title": "For Loop Start"
     }
   },
-  "724": {
-    "inputs": {
-      "lora_name": "flux1-depth-dev-lora.safetensors",
-      "strength_model": [
-        "558",
-        0
-      ],
-      "model": [
-        "571",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "flux_depthlora"
-    }
-  },
   "725": {
     "inputs": {
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
       "model": [
-        "587",
+        "494",
         0
       ]
     },
@@ -6841,7 +5119,7 @@
   },
   "727": {
     "inputs": {
-      "value": 1
+      "value": 2
     },
     "class_type": "easy int",
     "_meta": {
@@ -6850,18 +5128,18 @@
   },
   "728": {
     "inputs": {
-      "prompt": "",
+      "prompt": "lady",
       "negative_prompt": "",
       "width": 1024,
       "height": 1024,
-      "cfg": 6,
-      "steps": 20,
+      "cfg": 1,
+      "steps": 8,
       "refiner_step": 999,
       "sampler": "euler",
       "scheduler": "simple",
       "denoise": 1,
       "clip_skip": -1,
-      "inpaint_disable_initial_latent": false,
+      "inpaint_disable_initial_latent": true,
       "wavespeed_strength": 0,
       "save_final_enhanced_image_only": false
     },
@@ -6878,83 +5156,6 @@
     "class_type": "UNETLoader",
     "_meta": {
       "title": "base_model"
-    }
-  },
-  "730": {
-    "inputs": {
-      "clip_name1": "clip_l.safetensors",
-      "clip_name2": "clip_l.safetensors",
-      "type": "flux",
-      "device": "default"
-    },
-    "class_type": "DualCLIPLoader",
-    "_meta": {
-      "title": "clip_model"
-    }
-  },
-  "736": {
-    "inputs": {
-      "index": [
-        "452",
-        1
-      ],
-      "value0": [
-        "584",
-        0
-      ],
-      "value1": [
-        "175",
-        0
-      ],
-      "value2": [
-        "14",
-        0
-      ],
-      "value3": [
-        "15",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像权重"
-    }
-  },
-  "737": {
-    "inputs": {
-      "style_model_name": "flux1-redux-dev.safetensors"
-    },
-    "class_type": "StyleModelLoader",
-    "_meta": {
-      "title": "Load Style Model"
-    }
-  },
-  "747": {
-    "inputs": {
-      "index": [
-        "468",
-        1
-      ],
-      "value0": [
-        "126",
-        0
-      ],
-      "value1": [
-        "16",
-        0
-      ],
-      "value2": [
-        "17",
-        0
-      ],
-      "value3": [
-        "18",
-        0
-      ]
-    },
-    "class_type": "easy anythingIndexSwitch",
-    "_meta": {
-      "title": "图像停止"
     }
   },
   "754": {
@@ -7049,6 +5250,177 @@
     "class_type": "BatchCropFromMaskAdvanced",
     "_meta": {
       "title": "Batch Crop From Mask Advanced"
+    }
+  },
+  "766": {
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "767": {
+    "inputs": {
+      "text": [
+        "728",
+        0
+      ],
+      "clip": [
+        "766",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "772": {
+    "inputs": {
+      "text": [
+        "705",
+        0
+      ],
+      "clip": [
+        "766",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "782": {
+    "inputs": {
+      "strength": 1,
+      "model": [
+        "208",
+        0
+      ],
+      "model_patch": [
+        "783",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ],
+      "image": [
+        "217",
+        0
+      ],
+      "mask": [
+        "300",
+        0
+      ]
+    },
+    "class_type": "QwenImageDiffsynthControlnet",
+    "_meta": {
+      "title": "QwenImageDiffsynthControlnet"
+    }
+  },
+  "783": {
+    "inputs": {
+      "name": "Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors"
+    },
+    "class_type": "ModelPatchLoader",
+    "_meta": {
+      "title": "ModelPatchLoader"
+    }
+  },
+  "784": {
+    "inputs": {
+      "pixels": [
+        "217",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "785": {
+    "inputs": {
+      "boolean": [
+        "728",
+        11
+      ],
+      "on_true": [
+        "782",
+        0
+      ],
+      "on_false": [
+        "208",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "786": {
+    "inputs": {
+      "pixels": [
+        "344",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "787": {
+    "inputs": {
+      "strength": 1,
+      "model": [
+        "571",
+        0
+      ],
+      "model_patch": [
+        "788",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ],
+      "image": [
+        "344",
+        0
+      ],
+      "mask": [
+        "345",
+        0
+      ]
+    },
+    "class_type": "QwenImageDiffsynthControlnet",
+    "_meta": {
+      "title": "QwenImageDiffsynthControlnet"
+    }
+  },
+  "788": {
+    "inputs": {
+      "name": "Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors"
+    },
+    "class_type": "ModelPatchLoader",
+    "_meta": {
+      "title": "ModelPatchLoader"
     }
   }
 }

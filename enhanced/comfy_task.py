@@ -123,7 +123,7 @@ def get_comfy_task(user_did, task_class, task_name, task_method, default_params,
     comfy_params.update_mapping_rule('base_model', 'NunchakuFluxDiTLoader:base_model:model_path')
     comfy_params.update_mapping_rule('sampler', 'GeneralInput:GeneralInput:sampler')
     comfy_params.update_mapping_rule('scheduler', 'GeneralInput:GeneralInput:scheduler')
-    if task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan'] and task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan']:
+    if task_class in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan', 'Qwen'] and task_name not in ['Kolors', 'Flux', 'HyDiT', 'SD3x', 'Wan', 'Qwen']:
         task_name = task_class
     if task_name == 'default':
         if task_method == default_method_names[1]:
@@ -243,6 +243,10 @@ def get_comfy_task(user_did, task_class, task_name, task_method, default_params,
             check_download_flux_model(base_model, clip_model if clip_model!='auto' else None)
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     elif task_name == 'SD15AIO' and '_aio' in task_method:
+        return ComfyTask(task_method, comfy_params, input_images, total_steps)
+    elif task_name == 'Qwen' and '_aio' in task_method:
+        if 'base_model_gguf' in default_params:
+            comfy_params.delete_params(['base_model'])
         return ComfyTask(task_method, comfy_params, input_images, total_steps)
     else:  # SeamlessTiled
         #check_download_base_model(default_params["base_model"])

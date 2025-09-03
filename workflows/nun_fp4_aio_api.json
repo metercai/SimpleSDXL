@@ -1289,7 +1289,7 @@
   },
   "269": {
     "inputs": {
-      "grow_mask_by": 0,
+      "grow_mask_by": 16,
       "pixels": [
         "217",
         0
@@ -2002,7 +2002,7 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "788",
+        "791",
         0
       ],
       "positive": [
@@ -2445,7 +2445,7 @@
   },
   "361": {
     "inputs": {
-      "grow_mask_by": 0,
+      "grow_mask_by": 16,
       "pixels": [
         "344",
         0
@@ -2965,7 +2965,11 @@
         0
       ],
       "value1": [
-        "792",
+        "784",
+        0
+      ],
+      "value2": [
+        "784",
         0
       ]
     },
@@ -6900,7 +6904,7 @@
     },
     "class_type": "NunchakuFluxLoraLoader",
     "_meta": {
-      "title": "NunchakuFluxLoraLoade4"
+      "title": "NunchakuFluxLoraLoader4"
     }
   },
   "781": {
@@ -6947,77 +6951,7 @@
   },
   "784": {
     "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "lora_strength": 0,
-      "model": [
-        "790",
-        0
-      ]
-    },
-    "class_type": "NunchakuFluxLoraLoader",
-    "_meta": {
-      "title": "NunchakuFluxLoraLoader1"
-    }
-  },
-  "785": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "lora_strength": 0,
-      "model": [
-        "784",
-        0
-      ]
-    },
-    "class_type": "NunchakuFluxLoraLoader",
-    "_meta": {
-      "title": "NunchakuFluxLoraLoader2"
-    }
-  },
-  "786": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "lora_strength": 0,
-      "model": [
-        "785",
-        0
-      ]
-    },
-    "class_type": "NunchakuFluxLoraLoader",
-    "_meta": {
-      "title": "NunchakuFluxLoraLoader3"
-    }
-  },
-  "787": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "lora_strength": 0,
-      "model": [
-        "786",
-        0
-      ]
-    },
-    "class_type": "NunchakuFluxLoraLoader",
-    "_meta": {
-      "title": "NunchakuFluxLoraLoader4"
-    }
-  },
-  "788": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "lora_strength": 0,
-      "model": [
-        "787",
-        0
-      ]
-    },
-    "class_type": "NunchakuFluxLoraLoader",
-    "_meta": {
-      "title": "NunchakuFluxLoraLoader5"
-    }
-  },
-  "790": {
-    "inputs": {
-      "model_path": "svdq-fp4_r32-flux.1-dev.safetensors",
+      "model_path": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
       "cache_threshold": [
         "728",
         12
@@ -7030,10 +6964,10 @@
     },
     "class_type": "NunchakuFluxDiTLoader",
     "_meta": {
-      "title": "inpaint_refiner"
+      "title": "Nunchaku FLUX DiT Loader"
     }
   },
-  "792": {
+  "786": {
     "inputs": {
       "model_path": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
       "cache_threshold": [
@@ -7049,6 +6983,76 @@
     "class_type": "NunchakuFluxDiTLoader",
     "_meta": {
       "title": "Nunchaku FLUX DiT Loader"
+    }
+  },
+  "787": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "lora_strength": 0,
+      "model": [
+        "786",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "NunchakuFluxLoraLoader1"
+    }
+  },
+  "788": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "lora_strength": 0,
+      "model": [
+        "787",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "NunchakuFluxLoraLoader2"
+    }
+  },
+  "789": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "lora_strength": 0,
+      "model": [
+        "788",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "NunchakuFluxLoraLoader3"
+    }
+  },
+  "790": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "lora_strength": 0,
+      "model": [
+        "789",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "NunchakuFluxLoraLoader4"
+    }
+  },
+  "791": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "lora_strength": 0,
+      "model": [
+        "790",
+        0
+      ]
+    },
+    "class_type": "NunchakuFluxLoraLoader",
+    "_meta": {
+      "title": "NunchakuFluxLoraLoader5"
     }
   }
 }
