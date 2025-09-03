@@ -352,6 +352,43 @@ with shared.gradio_root:
                             scene_image_number = gr.Slider(label='Image Number', minimum=1, maximum=5, step=1, value=2)
                             scene_mask_color = gr.ColorPicker(label="Scene brush color", value="#70FF81", elem_id="scene_brush_color")
                         with gr.Row():
+                            scene_use_lora = gr.Checkbox(label='Use LoRAs', value=False, visible=True)
+                        lora_group = gr.Group(visible=False)
+                        with lora_group:
+                            with gr.Row():
+                                scene_lora_model = gr.Dropdown(label='LoRA 1 / HighNoise ',
+                                                              choices=['None'] + modules.config.lora_filenames, value='None',
+                                                              elem_classes='lora_model', scale=5, elem_id="scene_lora_dropdown_0",interactive=True)
+                                scene_lora_weight = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
+                                                             maximum=modules.config.default_loras_max_weight, step=0.01, value=1.0,
+                                                             elem_classes='lora_weight', scale=5,interactive=True)
+                            with gr.Row():
+                                scene_lora_model_2 = gr.Dropdown(label='LoRA 2 / HighNoise',
+                                                               choices=['None'] + modules.config.lora_filenames, value='None',
+                                                               elem_classes='lora_model', scale=5, elem_id="scene_lora_dropdown_1",interactive=True)
+                                scene_lora_weight_2 = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
+                                                                maximum=modules.config.default_loras_max_weight, step=0.01, value=1.0,
+                                                                elem_classes='lora_weight', scale=5,interactive=True)
+                            with gr.Row():
+                                scene_lora_model_3 = gr.Dropdown(label='LoRA 3 / LowNoise',
+                                                               choices=['None'] + modules.config.lora_filenames, value='None',
+                                                               elem_classes='lora_model', scale=5, elem_id="scene_lora_dropdown_2",interactive=True)
+                                scene_lora_weight_3 = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
+                                                                maximum=modules.config.default_loras_max_weight, step=0.01, value=1.0,
+                                                                elem_classes='lora_weight', scale=5,interactive=True)
+                            with gr.Row():
+                                scene_lora_model_4 = gr.Dropdown(label='LoRA 4 / LowNoise',
+                                                               choices=['None'] + modules.config.lora_filenames, value='None',
+                                                               elem_classes='lora_model', scale=5, elem_id="scene_lora_dropdown_3",interactive=True)
+                                scene_lora_weight_4 = gr.Slider(label='Weight', minimum=modules.config.default_loras_min_weight,
+                                                                maximum=modules.config.default_loras_max_weight, step=0.01, value=1.0,
+                                                                elem_classes='lora_weight', scale=5,interactive=True)
+                        scene_use_lora.change(
+                            fn=lambda x: gr.update(visible= x),
+                            inputs=scene_use_lora,
+                            outputs=lora_group
+                        )
+                        with gr.Row():
                             scene_seed_random = gr.Checkbox(label='Random', value=True)
                             scene_image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False)
                         scene_mask_color.change(lambda x: gr.update(brush_color=x),inputs=scene_mask_color,
@@ -1213,7 +1250,26 @@ with shared.gradio_root:
                                                     maximum=modules.config.default_loras_max_weight, step=0.01, value=weight,
                                                     elem_classes='lora_weight', scale=5)
                             lora_ctrls += [lora_enabled, lora_model, lora_weight]
-
+                    scene_lora_model.change(
+                        fn=lambda model, weight: (model, weight) if model != "None" else (lora_ctrls[1].value, lora_ctrls[2].value),
+                        inputs=[scene_lora_model, scene_lora_weight],
+                        outputs=[lora_ctrls[1], lora_ctrls[2]]
+                    )
+                    scene_lora_model_2.change(
+                        fn=lambda model, weight: (model, weight) if model != "None" else (lora_ctrls[4].value, lora_ctrls[5].value),
+                        inputs=[scene_lora_model_2, scene_lora_weight_2],
+                        outputs=[lora_ctrls[4], lora_ctrls[5]]
+                    )
+                    scene_lora_model_3.change(
+                        fn=lambda model, weight: (model, weight) if model != "None" else (lora_ctrls[7].value, lora_ctrls[8].value),
+                        inputs=[scene_lora_model_3, scene_lora_weight_3],
+                        outputs=[lora_ctrls[7], lora_ctrls[8]]
+                    )
+                    scene_lora_model_4.change(
+                        fn=lambda model, weight: (model, weight) if model != "None" else (lora_ctrls[10].value, lora_ctrls[11].value),
+                        inputs=[scene_lora_model_4, scene_lora_weight_4],
+                        outputs=[lora_ctrls[10], lora_ctrls[11]]
+                    )
                 with gr.Row():
                     refresh_files = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
                 #with gr.Row():
@@ -1813,7 +1869,8 @@ with shared.gradio_root:
                .then(lambda: None, _js='()=>{refresh_style_localization();}') \
                .then(lambda: None, _js='()=>{refresh_scene_localization();}') \
                .then(inpaint_mode_change, inputs=[inpaint_mode, inpaint_engine_state, outpaint_selections, state_topbar], outputs=[inpaint_additional_prompt, outpaint_selections, example_inpaint_prompts, inpaint_disable_initial_latent, inpaint_engine, inpaint_strength, inpaint_respective_field], show_progress=False, queue=False) \
-               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False)
+               .then(inpaint_engine_state_change, inputs=[inpaint_engine_state, state_topbar] + enhance_inpaint_mode_ctrls, outputs=enhance_inpaint_engine_ctrls, queue=False, show_progress=False) \
+               .then(fn=lambda: ["None"]*4, inputs=[], outputs=[scene_lora_model, scene_lora_model_2, scene_lora_model_3, scene_lora_model_4])
 
 
     shared.gradio_root.load(fn=lambda x: x, inputs=system_params, outputs=state_topbar, _js=topbar.get_system_params_js, queue=False, show_progress=False) \

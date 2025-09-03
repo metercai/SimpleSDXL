@@ -34,7 +34,7 @@
     "default_refiner_switch": 0.5,
     "default_loras": [
         [
-            "lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors",
+            "None",
             1.0
         ],
         [

@@ -126,7 +126,7 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "lora_1"
+      "title": "lightlora"
     }
   },
   "149": {
@@ -155,57 +155,6 @@
     "class_type": "VAELoader",
     "_meta": {
       "title": "VAE加载器"
-    }
-  },
-  "161": {
-    "inputs": {
-      "toggle": true,
-      "mode": "simple",
-      "num_loras": 10,
-      "lora_1_name": "None",
-      "lora_1_strength": 1,
-      "lora_1_model_strength": 1,
-      "lora_1_clip_strength": 1,
-      "lora_2_name": "None",
-      "lora_2_strength": 1,
-      "lora_2_model_strength": 1,
-      "lora_2_clip_strength": 1,
-      "lora_3_name": "None",
-      "lora_3_strength": 1,
-      "lora_3_model_strength": 1,
-      "lora_3_clip_strength": 1,
-      "lora_4_name": "None",
-      "lora_4_strength": 1,
-      "lora_4_model_strength": 1,
-      "lora_4_clip_strength": 1,
-      "lora_5_name": "None",
-      "lora_5_strength": 1,
-      "lora_5_model_strength": 1,
-      "lora_5_clip_strength": 1,
-      "lora_6_name": "None",
-      "lora_6_strength": 1,
-      "lora_6_model_strength": 1,
-      "lora_6_clip_strength": 1,
-      "lora_7_name": "None",
-      "lora_7_strength": 1,
-      "lora_7_model_strength": 1,
-      "lora_7_clip_strength": 1,
-      "lora_8_name": "None",
-      "lora_8_strength": 1,
-      "lora_8_model_strength": 1,
-      "lora_8_clip_strength": 1,
-      "lora_9_name": "None",
-      "lora_9_strength": 1,
-      "lora_9_model_strength": 1,
-      "lora_9_clip_strength": 1,
-      "lora_10_name": "None",
-      "lora_10_strength": 1,
-      "lora_10_model_strength": 1,
-      "lora_10_clip_strength": 1
-    },
-    "class_type": "easy loraStack",
-    "_meta": {
-      "title": "EasyLoraStack"
     }
   },
   "165": {
@@ -390,6 +339,62 @@
       "title": "SaveImageWebsocket"
     }
   },
+  "178": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "180",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_2"
+    }
+  },
+  "179": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "178",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_3"
+    }
+  },
+  "180": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "145",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_1"
+    }
+  },
+  "181": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "179",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "lora_4"
+    }
+  },
   "166:122": {
     "inputs": {
       "upscale_model": [
@@ -406,22 +411,6 @@
       "title": "Upscale Image (using Model)"
     }
   },
-  "166:162": {
-    "inputs": {
-      "lora_stack": [
-        "161",
-        0
-      ],
-      "model": [
-        "145",
-        0
-      ]
-    },
-    "class_type": "easy loraStackApply",
-    "_meta": {
-      "title": "Easy Apply LoraStack"
-    }
-  },
   "166:112": {
     "inputs": {
       "anything": [
@@ -432,19 +421,6 @@
     "class_type": "easy cleanGpuUsed",
     "_meta": {
       "title": "Clean VRAM Used"
-    }
-  },
-  "166:139": {
-    "inputs": {
-      "shift": 8,
-      "model": [
-        "166:162",
-        0
-      ]
-    },
-    "class_type": "ModelSamplingSD3",
-    "_meta": {
-      "title": "ModelSamplingSD3"
     }
   },
   "166:153": {
@@ -491,6 +467,19 @@
     "class_type": "TTP_Image_Tile_Batch",
     "_meta": {
       "title": "TTP_Image_Tile_Batch"
+    }
+  },
+  "166:139": {
+    "inputs": {
+      "shift": 8,
+      "model": [
+        "181",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "ModelSamplingSD3"
     }
   },
   "166:128": {
