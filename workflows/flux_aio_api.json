@@ -158,43 +158,6 @@
       "title": "i2i_uov_fn"
     }
   },
-  "63": {
-    "inputs": {
-      "boolean": [
-        "64",
-        0
-      ],
-      "on_true": [
-        "180",
-        0
-      ],
-      "on_false": [
-        "728",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "64": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "728",
-        9
-      ],
-      "b": [
-        "173",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
   "65": {
     "inputs": {
       "comparison": "a <= b",
@@ -212,70 +175,6 @@
       "title": "Compare"
     }
   },
-  "67": {
-    "inputs": {
-      "boolean": [
-        "68",
-        0
-      ],
-      "on_true": [
-        "74",
-        0
-      ],
-      "on_false": [
-        "728",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "68": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "728",
-        9
-      ],
-      "b": [
-        "69",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "69": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "70": {
-    "inputs": {
-      "value": 0.5
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "71": {
-    "inputs": {
-      "value": 0.85
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "72": {
     "inputs": {
       "value": 0.15
@@ -283,52 +182,6 @@
     "class_type": "easy float",
     "_meta": {
       "title": "Float"
-    }
-  },
-  "74": {
-    "inputs": {
-      "boolean": [
-        "76",
-        0
-      ],
-      "on_true": [
-        "70",
-        0
-      ],
-      "on_false": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "76": {
-    "inputs": {
-      "comparison": "a == b",
-      "a": [
-        "20",
-        0
-      ],
-      "b": [
-        "77",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
-    }
-  },
-  "77": {
-    "inputs": {
-      "value": 2
-    },
-    "class_type": "easy int",
-    "_meta": {
-      "title": "Int"
     }
   },
   "88": {
@@ -538,23 +391,6 @@
     "class_type": "ConditioningZeroOut",
     "_meta": {
       "title": "ConditioningZeroOut"
-    }
-  },
-  "132": {
-    "inputs": {
-      "comparison": "a <= b",
-      "a": [
-        "728",
-        9
-      ],
-      "b": [
-        "315",
-        0
-      ]
-    },
-    "class_type": "easy compare",
-    "_meta": {
-      "title": "Compare"
     }
   },
   "140": {
@@ -801,15 +637,6 @@
       "title": "Int"
     }
   },
-  "173": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "174": {
     "inputs": {
       "value": false
@@ -858,15 +685,6 @@
     "class_type": "VAEDecode",
     "_meta": {
       "title": "VAE Decode"
-    }
-  },
-  "180": {
-    "inputs": {
-      "value": 1
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
     }
   },
   "189": {
@@ -1892,44 +1710,6 @@
       "title": "Scale Image to Total Pixels"
     }
   },
-  "313": {
-    "inputs": {
-      "boolean": [
-        "132",
-        0
-      ],
-      "on_true": [
-        "314",
-        0
-      ],
-      "on_false": [
-        "728",
-        9
-      ]
-    },
-    "class_type": "easy ifElse",
-    "_meta": {
-      "title": "If else"
-    }
-  },
-  "314": {
-    "inputs": {
-      "value": 0.15
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
-  "315": {
-    "inputs": {
-      "value": 0
-    },
-    "class_type": "easy float",
-    "_meta": {
-      "title": "Float"
-    }
-  },
   "316": {
     "inputs": {
       "image": [
@@ -2023,8 +1803,8 @@
         8
       ],
       "denoise": [
-        "67",
-        0
+        "728",
+        9
       ],
       "model": [
         "207",
@@ -2113,8 +1893,8 @@
         8
       ],
       "denoise": [
-        "63",
-        0
+        "728",
+        9
       ],
       "model": [
         "221",
@@ -5235,8 +5015,8 @@
         8
       ],
       "denoise": [
-        "313",
-        0
+        "728",
+        9
       ],
       "mode_type": "Chess",
       "tile_width": [
