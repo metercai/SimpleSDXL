@@ -118,6 +118,7 @@ inpaint_engine_versions = {
     "nun_int4_aio": ['Nun_int4','None'],
     "nun_fp4_aio": ['Nun_fp4','None'],
     "wan_aio_cn": ['VACE'],
+    "qwen_aio_cn": ['Qwen_Inpaint'],
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",

@@ -75,6 +75,7 @@ def load_model_paths():
             "style_models": [os.path.abspath(os.path.join(script_dir, config.get("path_style_models", "")))],
             "configs": [os.path.abspath(os.path.join(simplemodels_root, "configs"))],
             "prompt_expansion": [os.path.abspath(os.path.join(simplemodels_root, "prompt_expansion"))],
+            "model_patches": [os.path.join(simplemodels_root, "model_patches")]
         }
 
     except Exception as e:
@@ -103,6 +104,7 @@ def load_model_paths():
             "style_models": [os.path.join(simplemodels_root, "style_models")],
             "configs": [os.path.normpath(os.path.join(simplemodels_root, "configs"))],
             "prompt_expansion": [os.path.normpath(os.path.join(simplemodels_root, "prompt_expansion"))],
+            "model_patches": [os.path.join(simplemodels_root, "model_patches")]
         }
 
     for key in path_mapping:
@@ -270,7 +272,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.08.25{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.09.03{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -1148,8 +1150,8 @@ packages = {
             ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
             ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
             ("diffusers/Kolors/unet/config.json", 1785),
-            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 145),
+            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 145),
             ("diffusers/Kolors/vae/config.json", 611),
             ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
@@ -1277,8 +1279,8 @@ packages = {
             ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
             ("diffusers/Kolors/unet/config.json", 1785),
             ("diffusers/Kolors/vae/config.json", 611),
-            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 0),
-            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 0),
+            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 145),
+            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 145),
             ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
             ("insightface/models/antelopev2/2d106det.onnx", 5030888),
             ("insightface/models/antelopev2/genderage.onnx", 1322532),
@@ -1347,7 +1349,6 @@ packages = {
             ("llms/MiniCPMv2_6-prompt-generator/pytorch_model-00001-of-00002.bin", 4454731094),
             ("llms/MiniCPMv2_6-prompt-generator/pytorch_model-00002-of-00002.bin", 1503635286),
             ("llms/MiniCPMv2_6-prompt-generator/pytorch_model.bin.index.json", 233389),
-            ("llms/MiniCPMv2_6-prompt-generator/README.md", 2124),
             ("llms/MiniCPMv2_6-prompt-generator/resampler.py", 34699),
             ("llms/MiniCPMv2_6-prompt-generator/special_tokens_map.json", 1041),
             ("llms/MiniCPMv2_6-prompt-generator/test.py", 1162),
@@ -1886,6 +1887,25 @@ packages = {
             ("loras/Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors", 849608296),
             ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
             ("vae/qwen_image_vae.safetensors", 253806246)
+        ],
+        "download_links": []
+    },
+    "qwen_aio_package": {
+        "id":37,
+        "name": "[37]Qwen全功能预置包",
+        "note": "QwenImage全功能包|显存需求：★★★★★ 速度:★★",
+        "files": [
+            ("checkpoints/qwen-image-Q4_K_M.gguf", 13065746976),
+            ("controlnet/Qwen-Image-InstantX-ControlNet-Union.safetensors", 3536027816),
+            ("controlnet/lllyasviel/Annotators/ZoeD_M12_N.pt", 1443406099),
+            ("controlnet/parsing_bisenet.pth", 53289463),
+            ("upscale_models/4x-UltraSharp.pth", 66961958),
+            ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
+            ("vae/qwen_image_vae.safetensors", 253806246),
+            ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
+            ("loras/Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors", 849608296),
+            ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
+            ("model_patches/Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors", 2266862656)
         ],
         "download_links": []
     },
