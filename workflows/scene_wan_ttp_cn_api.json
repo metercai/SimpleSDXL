@@ -20,7 +20,7 @@
       ],
       "overlap_rate": 0.05,
       "image": [
-        "165",
+        "182",
         0
       ]
     },
@@ -395,6 +395,39 @@
       "title": "lora_4"
     }
   },
+  "182": {
+    "inputs": {
+      "generation_width": [
+        "183",
+        0
+      ],
+      "generation_height": [
+        "183",
+        1
+      ],
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "165",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "183": {
+    "inputs": {
+      "image": [
+        "165",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
   "166:122": {
     "inputs": {
       "upscale_model": [
@@ -421,6 +454,19 @@
     "class_type": "easy cleanGpuUsed",
     "_meta": {
       "title": "Clean VRAM Used"
+    }
+  },
+  "166:139": {
+    "inputs": {
+      "shift": 8,
+      "model": [
+        "181",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "ModelSamplingSD3"
     }
   },
   "166:153": {
@@ -460,26 +506,13 @@
         0
       ],
       "image": [
-        "165",
+        "182",
         0
       ]
     },
     "class_type": "TTP_Image_Tile_Batch",
     "_meta": {
       "title": "TTP_Image_Tile_Batch"
-    }
-  },
-  "166:139": {
-    "inputs": {
-      "shift": 8,
-      "model": [
-        "181",
-        0
-      ]
-    },
-    "class_type": "ModelSamplingSD3",
-    "_meta": {
-      "title": "ModelSamplingSD3"
     }
   },
   "166:128": {
