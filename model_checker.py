@@ -11,6 +11,10 @@ import atexit
 import json
 from collections import defaultdict
 from multiprocessing import current_process
+DEFAULT_DOWNLOAD_PREFIX = "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/"
+HF_DOWNLOAD_PREFIX = "https://huggingface.co/metercai/SimpleSDXL2/resolve/main/"
+CURRENT_DOWNLOAD_PREFIX = os.getenv('CURRENT_DOWNLOAD_PREFIX', DEFAULT_DOWNLOAD_PREFIX)
+current_source = "ModelScope魔搭国内源" if CURRENT_DOWNLOAD_PREFIX == DEFAULT_DOWNLOAD_PREFIX else "HuggingFace拥抱脸国外源"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(script_dir)
@@ -464,9 +468,8 @@ def validate_files(packages):
                 if file == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    link = f"https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/{file.split('SimpleModels/')[-1]}"
+                    link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{file.split('SimpleModels/')[-1]}"
 
-                
                 f1.write(f"{link},{size}\n")
                 
                 f2.write(f"{link}\n")
@@ -791,7 +794,7 @@ def auto_download_missing_files_with_retry(max_threads=5):
                 link, size = line.split(',')
                 size_mb = int(size) / (1024 * 1024)
                 print(f"{Fore.CYAN}▶ 正在下载: {link} ({size_mb:.1f}MB){Style.RESET_ALL}")
-                original_repo = "https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/"
+                original_repo = CURRENT_DOWNLOAD_PREFIX
                 if link.startswith(original_repo):
                     relative_path = link.replace(original_repo, "", 1).strip()
                     relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
@@ -892,7 +895,7 @@ def get_download_links_for_package(packages, download_list_path):
                 if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
                     generated_link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
                 else:
-                    generated_link = f"https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/{file_path}"
+                    generated_link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{file_path}"
 
                 if generated_link == existing_link:
                     valid_files.append((generated_link, file_size))
@@ -2020,7 +2023,8 @@ if __name__ == "__main__":
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻")
         print(f">>>输入【{Fore.YELLOW}S{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------下载模型预览图<<<     备注：只下载checkpoints和lora预览图")
-
+        print(f">>>输入【{Fore.YELLOW}H{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】--------切换下载源到Huggingface<<<     备注：当前使用源：{current_source}")
+        print(f">>>输入【{Fore.YELLOW}M{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】--------切换下载源到ModelScope<<<<      备注：当前使用源：{current_source}")
         user_input = input("请选择操作(不需要括号):")
 
         if user_input == "":
@@ -2073,5 +2077,17 @@ if __name__ == "__main__":
         elif user_input.lower() == "s":
             print("下载预览图...")
             trigger_manual_download()
+        elif user_input.lower() == "h":
+            CURRENT_DOWNLOAD_PREFIX = HF_DOWNLOAD_PREFIX
+            current_source = "HuggingFace拥抱脸国外源"
+            validate_files(packages)
+            print(f"{Fore.GREEN}√下载源已切换到Huggingface：{CURRENT_DOWNLOAD_PREFIX}{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}※提示：此切换只在本次运行有效，重启程序后将恢复默认设置。{Style.RESET_ALL}")
+        elif user_input.lower() == "m":
+            CURRENT_DOWNLOAD_PREFIX = DEFAULT_DOWNLOAD_PREFIX
+            current_source = "ModelScope魔搭国内源"
+            validate_files(packages)
+            print(f"{Fore.GREEN}√下载源已切换到ModelScope：{CURRENT_DOWNLOAD_PREFIX}{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}※提示：此切换只在本次运行有效，重启程序后将恢复默认设置。{Style.RESET_ALL}")
         else:
             print(f"{Fore.RED}△无效的输入，请输入回车或有效的包体编号（不需要括号）。{Style.RESET_ALL}")
