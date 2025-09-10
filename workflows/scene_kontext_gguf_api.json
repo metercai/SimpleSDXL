@@ -141,11 +141,11 @@
       "spacing_width": 0,
       "spacing_color": "white",
       "image1": [
-        "22",
+        "53",
         0
       ],
       "image2": [
-        "12",
+        "52",
         0
       ]
     },
@@ -175,7 +175,7 @@
     "inputs": {
       "channel": "red",
       "image": [
-        "12",
+        "52",
         0
       ]
     },
@@ -221,7 +221,7 @@
         0
       ],
       "on_true": [
-        "22",
+        "53",
         0
       ],
       "on_false": [
@@ -266,7 +266,7 @@
     "inputs": {
       "sage_attention": "auto",
       "model": [
-        "49",
+        "50",
         0
       ]
     },
@@ -478,7 +478,7 @@
   "41": {
     "inputs": {
       "image": [
-        "12",
+        "52",
         0
       ]
     },
@@ -502,7 +502,7 @@
   "43": {
     "inputs": {
       "image": [
-        "22",
+        "53",
         0
       ]
     },
@@ -511,7 +511,7 @@
       "title": "FluxKontextImageScale"
     }
   },
-  "46": {
+  "47": {
     "inputs": {
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
       "strength_model": 0,
@@ -525,20 +525,6 @@
       "title": "lora_1"
     }
   },
-  "47": {
-    "inputs": {
-      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
-      "strength_model": 0,
-      "model": [
-        "46",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "lora_2"
-    }
-  },
   "48": {
     "inputs": {
       "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
@@ -550,7 +536,7 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
-      "title": "lora_3"
+      "title": "lora_2"
     }
   },
   "49": {
@@ -564,7 +550,81 @@
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
+      "title": "lora_3"
+    }
+  },
+  "50": {
+    "inputs": {
+      "lora_name": "sd_xl_offset_example-lora_1.0.safetensors",
+      "strength_model": 0,
+      "model": [
+        "49",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
       "title": "lora_4"
+    }
+  },
+  "51": {
+    "inputs": {
+      "mask": [
+        "12",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "52": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "12",
+        0
+      ],
+      "mask": [
+        "51",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "53": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "22",
+        0
+      ],
+      "mask": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "54": {
+    "inputs": {
+      "mask": [
+        "22",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
     }
   }
 }
