@@ -601,7 +601,7 @@
       "upscale_method": "lanczos",
       "megapixels": 1.64,
       "image": [
-        "230",
+        "233",
         0
       ]
     },
@@ -717,6 +717,38 @@
     "class_type": "InvertMask",
     "_meta": {
       "title": "InvertMask"
+    }
+  },
+  "232": {
+    "inputs": {
+      "mask": [
+        "89",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "233": {
+    "inputs": {
+      "boolean": [
+        "232",
+        0
+      ],
+      "on_true": [
+        "89",
+        0
+      ],
+      "on_false": [
+        "230",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

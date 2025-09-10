@@ -261,7 +261,7 @@
   "173": {
     "inputs": {
       "image": [
-        "132",
+        "193",
         0
       ]
     },
@@ -428,6 +428,147 @@
       "title": "🔧 Get Image Size"
     }
   },
+  "184": {
+    "inputs": {
+      "mask": [
+        "132",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "185": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "132",
+        0
+      ],
+      "mask": [
+        "184",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "186": {
+    "inputs": {
+      "image": [
+        "193",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "187": {
+    "inputs": {
+      "value": "a*b/10000",
+      "a": [
+        "186",
+        0
+      ],
+      "b": [
+        "186",
+        1
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "188": {
+    "inputs": {
+      "comparison": "a > b",
+      "a": [
+        "187",
+        0
+      ],
+      "b": [
+        "191",
+        0
+      ]
+    },
+    "class_type": "easy compare",
+    "_meta": {
+      "title": "Compare"
+    }
+  },
+  "190": {
+    "inputs": {
+      "boolean": [
+        "188",
+        0
+      ],
+      "on_true": [
+        "193",
+        0
+      ],
+      "on_false": [
+        "166:122",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "191": {
+    "inputs": {
+      "value": "a/4*100",
+      "a": [
+        "169",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "192": {
+    "inputs": {
+      "mask": [
+        "132",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "193": {
+    "inputs": {
+      "boolean": [
+        "192",
+        0
+      ],
+      "on_true": [
+        "132",
+        0
+      ],
+      "on_false": [
+        "185",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
   "166:122": {
     "inputs": {
       "upscale_model": [
@@ -435,25 +576,13 @@
         0
       ],
       "image": [
-        "132",
+        "193",
         0
       ]
     },
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
-    }
-  },
-  "166:112": {
-    "inputs": {
-      "anything": [
-        "166:122",
-        0
-      ]
-    },
-    "class_type": "easy cleanGpuUsed",
-    "_meta": {
-      "title": "Clean VRAM Used"
     }
   },
   "166:139": {
@@ -467,6 +596,18 @@
     "class_type": "ModelSamplingSD3",
     "_meta": {
       "title": "ModelSamplingSD3"
+    }
+  },
+  "166:112": {
+    "inputs": {
+      "anything": [
+        "190",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
     }
   },
   "166:153": {

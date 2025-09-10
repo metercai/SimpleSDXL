@@ -141,11 +141,11 @@
       "spacing_width": 0,
       "spacing_color": "white",
       "image1": [
-        "53",
+        "58",
         0
       ],
       "image2": [
-        "52",
+        "56",
         0
       ]
     },
@@ -175,7 +175,7 @@
     "inputs": {
       "channel": "red",
       "image": [
-        "52",
+        "56",
         0
       ]
     },
@@ -221,7 +221,7 @@
         0
       ],
       "on_true": [
-        "53",
+        "58",
         0
       ],
       "on_false": [
@@ -478,7 +478,7 @@
   "41": {
     "inputs": {
       "image": [
-        "52",
+        "56",
         0
       ]
     },
@@ -502,7 +502,7 @@
   "43": {
     "inputs": {
       "image": [
-        "53",
+        "58",
         0
       ]
     },
@@ -625,6 +625,70 @@
     "class_type": "InvertMask",
     "_meta": {
       "title": "InvertMask"
+    }
+  },
+  "55": {
+    "inputs": {
+      "mask": [
+        "12",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "56": {
+    "inputs": {
+      "boolean": [
+        "55",
+        0
+      ],
+      "on_true": [
+        "12",
+        0
+      ],
+      "on_false": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "57": {
+    "inputs": {
+      "mask": [
+        "22",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "58": {
+    "inputs": {
+      "boolean": [
+        "57",
+        0
+      ],
+      "on_true": [
+        "22",
+        0
+      ],
+      "on_false": [
+        "53",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

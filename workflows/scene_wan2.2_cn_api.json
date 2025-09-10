@@ -813,7 +813,7 @@
       "divisible_by": 16,
       "device": "cpu",
       "image": [
-        "85",
+        "89",
         0
       ]
     },
@@ -839,7 +839,7 @@
       "divisible_by": 16,
       "device": "cpu",
       "image": [
-        "83",
+        "87",
         0
       ]
     },
@@ -852,7 +852,7 @@
     "inputs": {
       "channel": "red",
       "image": [
-        "83",
+        "87",
         0
       ]
     },
@@ -1001,7 +1001,7 @@
       "generation_height": 480,
       "aspect_ratio_preservation": "keep_input",
       "image": [
-        "85",
+        "89",
         0
       ]
     },
@@ -1022,7 +1022,7 @@
       ],
       "aspect_ratio_preservation": "keep_input",
       "image": [
-        "85",
+        "89",
         0
       ]
     },
@@ -1089,6 +1089,70 @@
     "class_type": "LayerUtility: ImageRemoveAlpha",
     "_meta": {
       "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "86": {
+    "inputs": {
+      "mask": [
+        "54",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "87": {
+    "inputs": {
+      "boolean": [
+        "86",
+        0
+      ],
+      "on_true": [
+        "54",
+        0
+      ],
+      "on_false": [
+        "83",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "88": {
+    "inputs": {
+      "mask": [
+        "38",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "89": {
+    "inputs": {
+      "boolean": [
+        "88",
+        0
+      ],
+      "on_true": [
+        "38",
+        0
+      ],
+      "on_false": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

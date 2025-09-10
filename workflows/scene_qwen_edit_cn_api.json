@@ -257,7 +257,7 @@
       ],
       "aspect_ratio_preservation": "keep_input",
       "image": [
-        "35",
+        "38",
         0
       ]
     },
@@ -402,6 +402,38 @@
     "class_type": "InvertMask",
     "_meta": {
       "title": "InvertMask"
+    }
+  },
+  "37": {
+    "inputs": {
+      "mask": [
+        "3",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "38": {
+    "inputs": {
+      "boolean": [
+        "37",
+        0
+      ],
+      "on_true": [
+        "3",
+        0
+      ],
+      "on_false": [
+        "35",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }

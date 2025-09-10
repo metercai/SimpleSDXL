@@ -22,11 +22,11 @@
       "direction": "right",
       "match_image_size": true,
       "image1": [
-        "11",
+        "18",
         0
       ],
       "image2": [
-        "10",
+        "16",
         0
       ]
     },
@@ -81,11 +81,11 @@
       "direction": "down",
       "match_image_size": true,
       "image1": [
-        "11",
+        "18",
         0
       ],
       "image2": [
-        "10",
+        "16",
         0
       ]
     },
@@ -178,6 +178,70 @@
     "class_type": "InvertMask",
     "_meta": {
       "title": "InvertMask"
+    }
+  },
+  "15": {
+    "inputs": {
+      "mask": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "16": {
+    "inputs": {
+      "boolean": [
+        "15",
+        0
+      ],
+      "on_true": [
+        "1",
+        0
+      ],
+      "on_false": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "17": {
+    "inputs": {
+      "mask": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "18": {
+    "inputs": {
+      "boolean": [
+        "17",
+        0
+      ],
+      "on_true": [
+        "2",
+        0
+      ],
+      "on_false": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
     }
   }
 }
