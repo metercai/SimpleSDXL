@@ -8,7 +8,7 @@
                 "version": "m1.1",
                 "theme": ["Qwen-Edit","Qwen-Edit-fast"],
                 "theme_title": "Qwen-Edit使用中文指令修改图片",
-                "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2","scene_var_number","scene_input_image2"],
+                "disvisible": ["scene_canvas_image", "scene_additional_prompt","scene_additional_prompt_2"],
                 "task_method": {
                     "Qwen-Edit": "qwen_edit_cn",
                     "Qwen-Edit-fast": "qwen_edit_fast_cn"
@@ -21,7 +21,13 @@
                     "Qwen-Edit": [["-normalization"]],
                     "Qwen-Edit-fast": [["-normalization"]]
                 },
-                "aspect_ratio" : ["1024|1:1"]
+                "aspect_ratio" : ["1024|1:1"],
+                "var_number": {
+                    "Qwen-Edit": 1,
+                    "Qwen-Edit-fast": 1
+                },
+                "var_number_title": "参考右图1为姿势(pose)，2为深度(depth) ，3为线稿(canny)",
+                "var_number_max": 3
             }
     },
     "default_model": "Qwen_Image_Edit-Q4_K_M.gguf",
@@ -68,6 +74,7 @@
         "checkpoints,Qwen_Image_Edit-Q4_K_M.gguf,13065746976,0,",
         "loras,Qwen-Image-Edit-Lightning-8steps-V1.0-bf16.safetensors,849608296,0,",
         "loras,Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors,849608296,0,",
+        "controlnet,Qwen-Image-InstantX-ControlNet-Union.safetensors,3536027816,0,",
         "clip,qwen_2.5_vl_7b_fp8_scaled.safetensors,9384670680,0,",
         "vae,qwen_image_vae.safetensors,253806246,0,"
         ]
