@@ -28,31 +28,15 @@
       "title": "CLIP Text Encode (Prompt)"
     }
   },
-  "3": {
-    "inputs": {
-      "base_resolution": [
-        "21",
-        2
-      ],
-      "image": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "FramePackFindNearestBucket",
-    "_meta": {
-      "title": "Find Nearest Bucket"
-    }
-  },
   "4": {
     "inputs": {
       "width": [
-        "3",
-        0
+        "81",
+        1
       ],
       "height": [
-        "3",
-        1
+        "81",
+        2
       ],
       "length": [
         "1",
@@ -72,7 +56,7 @@
         0
       ],
       "start_image": [
-        "11",
+        "81",
         0
       ]
     },
@@ -95,19 +79,6 @@
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "6": {
-    "inputs": {
-      "base_resolution": 480,
-      "image": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "FramePackFindNearestBucket",
-    "_meta": {
-      "title": "首次动态采样分辨率"
     }
   },
   "7": {
@@ -147,32 +118,6 @@
       "title": "Load VAE"
     }
   },
-  "11": {
-    "inputs": {
-      "width": [
-        "3",
-        0
-      ],
-      "height": [
-        "3",
-        1
-      ],
-      "upscale_method": "lanczos",
-      "keep_proportion": "stretch",
-      "pad_color": "0, 0, 0",
-      "crop_position": "center",
-      "divisible_by": 16,
-      "device": "cpu",
-      "image": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJv2",
-    "_meta": {
-      "title": "Resize Image v2"
-    }
-  },
   "13": {
     "inputs": {
       "weight": 2,
@@ -188,32 +133,6 @@
     "class_type": "WanVideoEnhanceAVideoKJ",
     "_meta": {
       "title": "WanVideo Enhance A Video (native)"
-    }
-  },
-  "14": {
-    "inputs": {
-      "width": [
-        "6",
-        0
-      ],
-      "height": [
-        "6",
-        1
-      ],
-      "upscale_method": "lanczos",
-      "keep_proportion": "stretch",
-      "pad_color": "0, 0, 0",
-      "crop_position": "center",
-      "divisible_by": 16,
-      "device": "cpu",
-      "image": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJv2",
-    "_meta": {
-      "title": "Resize Image v2"
     }
   },
   "15": {
@@ -382,11 +301,11 @@
   "24": {
     "inputs": {
       "width": [
-        "14",
+        "80",
         1
       ],
       "height": [
-        "14",
+        "80",
         2
       ],
       "length": [
@@ -407,7 +326,7 @@
         0
       ],
       "start_image": [
-        "14",
+        "80",
         0
       ]
     },
@@ -597,11 +516,11 @@
   "48": {
     "inputs": {
       "width": [
-        "11",
+        "81",
         1
       ],
       "height": [
-        "11",
+        "81",
         2
       ],
       "interpolation": "area",
@@ -880,12 +799,12 @@
   "62": {
     "inputs": {
       "width": [
-        "3",
-        0
+        "81",
+        1
       ],
       "height": [
-        "3",
-        1
+        "81",
+        2
       ],
       "upscale_method": "lanczos",
       "keep_proportion": "crop",
@@ -894,7 +813,7 @@
       "divisible_by": 16,
       "device": "cpu",
       "image": [
-        "38",
+        "85",
         0
       ]
     },
@@ -920,7 +839,7 @@
       "divisible_by": 16,
       "device": "cpu",
       "image": [
-        "54",
+        "83",
         0
       ]
     },
@@ -933,7 +852,7 @@
     "inputs": {
       "channel": "red",
       "image": [
-        "54",
+        "83",
         0
       ]
     },
@@ -1074,6 +993,102 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_4"
+    }
+  },
+  "80": {
+    "inputs": {
+      "generation_width": 480,
+      "generation_height": 480,
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "81": {
+    "inputs": {
+      "generation_width": [
+        "21",
+        2
+      ],
+      "generation_height": [
+        "21",
+        3
+      ],
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "85",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "82": {
+    "inputs": {
+      "mask": [
+        "54",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "83": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "54",
+        0
+      ],
+      "mask": [
+        "82",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "84": {
+    "inputs": {
+      "mask": [
+        "38",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "85": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "38",
+        0
+      ],
+      "mask": [
+        "84",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
     }
   }
 }

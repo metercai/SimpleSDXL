@@ -257,7 +257,7 @@
       ],
       "aspect_ratio_preservation": "keep_input",
       "image": [
-        "3",
+        "35",
         0
       ]
     },
@@ -372,6 +372,36 @@
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
       "title": "lora_4"
+    }
+  },
+  "35": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "3",
+        0
+      ],
+      "mask": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "36": {
+    "inputs": {
+      "mask": [
+        "3",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
     }
   }
 }

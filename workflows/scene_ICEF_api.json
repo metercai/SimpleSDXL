@@ -195,7 +195,7 @@
   "55": {
     "inputs": {
       "lora_name": "ICEdit-normal-lora.safetensors",
-      "strength_model": 1.0000000000000002,
+      "strength_model": 1,
       "model": [
         "73",
         0
@@ -355,7 +355,7 @@
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
-      "denoise": 0.15000000000000002,
+      "denoise": 0.15,
       "model": [
         "79",
         0
@@ -599,9 +599,9 @@
   "130": {
     "inputs": {
       "upscale_method": "lanczos",
-      "megapixels": 1.6400000000000003,
+      "megapixels": 1.64,
       "image": [
-        "89",
+        "230",
         0
       ]
     },
@@ -687,6 +687,36 @@
     "class_type": "GetImageSize+",
     "_meta": {
       "title": "🔧 Get Image Size"
+    }
+  },
+  "230": {
+    "inputs": {
+      "fill_background": true,
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "89",
+        0
+      ],
+      "mask": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "231": {
+    "inputs": {
+      "mask": [
+        "89",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
     }
   }
 }
