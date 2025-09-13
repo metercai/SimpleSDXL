@@ -7,28 +7,25 @@
       "scene_frontend": {
           "version": "V1.0",
           "disvisible": ["scene_aspect_ratio", "scene_additional_prompt", "scene_input_image1", "scene_var_number"],
-          "theme": ["橡皮擦", "魔法擦"],
+          "theme": ["橡皮擦"],
           "prompt": {
               "橡皮擦": "Remove the selected objects from the image,  {additional_prompt} "
           },
           "additional_prompt_2": {
-              "橡皮擦": "",
-              "魔法擦": ""
+              "橡皮擦": ""
           },
           "image_preprocessor_method": {
-            "橡皮擦":  [["-normalization"]],
-            "魔法擦": [["-normalization"]]
+            "橡皮擦":  [["-normalization"]]
         },
           "additional_prompt_title_2": "擦除背景描述(非必填）",
           "theme_title": "涂抹需要擦除的区域",
           "aspect_ratio": ["9:16", "4:5", "4:3", "3:2", "16:9", "21:9"],
           "task_method": {
-              "橡皮擦": "eraser_one",
-              "魔法擦": "eraser_two"
+              "橡皮擦": "eraser_one"
           }
       }
   },
-  "default_model": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
+  "default_model": "flux.1-fill-dev-OneReward_fp8.safetensors",
   "default_refiner": "None",
   "default_refiner_switch": 0.5,
   "default_loras": [
@@ -69,7 +66,7 @@
   "lora_downloads": {},
   "vae_downloads": {},
   "model_list": [
-      "checkpoints,flux1-fill-dev-hyp8-Q4_K_S.gguf,6809920800,0,",
+      "checkpoints,flux.1-fill-dev-OneReward_fp8.safetensors,11902532704,0,",
       "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
       "clip,clip_l.safetensors,246144152,0,",
       "clip,t5xxl_fp8_e4m3fn.safetensors,4893934904,0,",

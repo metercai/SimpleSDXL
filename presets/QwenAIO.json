@@ -58,6 +58,6 @@
         "loras,sd_xl_offset_example-lora_1.0.safetensors,49553604,0,",
         "loras,Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors,849608296,0,",
         "upscale_models,4xNomosUniDAT_bokeh_jpg.safetensors,154152604,0,",
-        "model_patches,Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors,2266862656,0,"
+        "controlnet,Qwen-Image-InstantX-ControlNet-Inpainting.safetensors,4234599432,0,"
         ]
 }

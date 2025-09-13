@@ -113,7 +113,7 @@ inpaint_engine_versions = {
     "SDXL": ['v2.6', 'v2.5', 'None'],
     "sd15_aio": ['powerpaint', 'None'],
     "kolors_aio": ['kolors_inpainting', 'None'],
-    "flux_aio": ['Q4', 'fp8', 'None'],
+    "flux_aio": ['fp8', 'None'],
     "il_v_pre_aio": ['NoobAI_Inpainting','None'],
     "nun_int4_aio": ['Nun_int4','None'],
     "nun_fp4_aio": ['Nun_fp4','None'],
@@ -122,8 +122,7 @@ inpaint_engine_versions = {
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
-    "flux_aio_Q4": "flux1-fill-dev-hyp8-Q4_K_S.gguf",
-    "flux_aio_fp8": "flux1-fill-dev_fp8.safetensors",
+    "flux_aio_fp8": "flux.1-fill-dev-OneReward_fp8.safetensors",
     "nun_int4_aio_Nun_int4": "svdq-int4_r32-flux.1-fill-dev.safetensors",
     "nun_fp4_aio_Nun_fp4": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
     }

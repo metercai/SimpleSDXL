@@ -15,7 +15,7 @@
       ],
       "sampler_name": "euler",
       "scheduler": "normal",
-      "denoise": 0.9000000000000001,
+      "denoise": 0.9,
       "model": [
         "479:3",
         0
@@ -154,19 +154,10 @@
       "title": "Differential Diffusion"
     }
   },
-  "45": {
-    "inputs": {
-      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
   "48": {
     "inputs": {
       "lora_name": "flux1-turbo.safetensors",
-      "strength_model": 1.0000000000000002,
+      "strength_model": 1,
       "model": [
         "480",
         0
@@ -229,7 +220,7 @@
   },
   "59": {
     "inputs": {
-      "scale": 1.0000000000000002,
+      "scale": 1,
       "method": "lanczos",
       "scale_by": "longest",
       "scale_by_length": [
@@ -252,7 +243,7 @@
   },
   "61": {
     "inputs": {
-      "scale": 1.0000000000000002,
+      "scale": 1,
       "method": "lanczos",
       "scale_by": "by_scale",
       "scale_by_length": 1024,
@@ -647,7 +638,7 @@
       "matting_method": "SegmentAnything",
       "sam_model": "sam_vit_h (2.56GB)",
       "grounding_dino_model": "GroundingDINO_SwinT_OGC (694MB)",
-      "sam_threshold": 0.30000000000000004,
+      "sam_threshold": 0.3,
       "sam_prompt": [
         "472",
         0
@@ -720,7 +711,7 @@
   "479": {
     "inputs": {
       "lora_name": "comfyui_portrait_lora64.safetensors",
-      "strength_model": 1.0000000000000002,
+      "strength_model": 1,
       "model": [
         "48",
         0
@@ -735,13 +726,23 @@
     "inputs": {
       "sage_attention": "auto",
       "model": [
-        "45",
+        "481",
         0
       ]
     },
     "class_type": "PathchSageAttentionKJ",
     "_meta": {
       "title": "Patch Sage Attention KJ"
+    }
+  },
+  "481": {
+    "inputs": {
+      "unet_name": "flux.1-fill-dev-OneReward_fp8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "base_model"
     }
   },
   "403:0": {
@@ -793,7 +794,7 @@
       "downsampling_function": "area",
       "mode": "autocrop with mask",
       "weight": 1,
-      "autocrop_margin": 0.05000000000000001,
+      "autocrop_margin": 0.05,
       "conditioning": [
         "26",
         0
@@ -822,7 +823,7 @@
   },
   "479:3": {
     "inputs": {
-      "weight": 1.0000000000000002,
+      "weight": 1,
       "start_at": 0,
       "end_at": 1,
       "model": [

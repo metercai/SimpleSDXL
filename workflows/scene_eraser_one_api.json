@@ -2,7 +2,7 @@
   "301": {
     "inputs": {
       "samples": [
-        "360",
+        "359",
         0
       ],
       "vae": [
@@ -26,7 +26,10 @@
   },
   "307": {
     "inputs": {
-      "guidance": 30,
+      "guidance": [
+        "425",
+        4
+      ],
       "conditioning": [
         "313",
         0
@@ -40,9 +43,9 @@
   "309": {
     "inputs": {
       "lora_name": "removal_timestep_alpha-2-1740.safetensors",
-      "strength_model": 1.0000000000000002,
+      "strength_model": 1,
       "model": [
-        "334",
+        "423",
         0
       ]
     },
@@ -53,7 +56,10 @@
   },
   "313": {
     "inputs": {
-      "text": "",
+      "text": [
+        "425",
+        0
+      ],
       "clip": [
         "345",
         0
@@ -61,7 +67,7 @@
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "prompt"
+      "title": "clip"
     }
   },
   "314": {
@@ -72,7 +78,7 @@
         0
       ],
       "negative": [
-        "342",
+        "426",
         0
       ],
       "vae": [
@@ -80,7 +86,7 @@
         0
       ],
       "pixels": [
-        "382",
+        "424",
         0
       ],
       "mask": [
@@ -100,28 +106,6 @@
     "class_type": "LoadImage",
     "_meta": {
       "title": "i2i_inpaint_image"
-    }
-  },
-  "334": {
-    "inputs": {
-      "unet_name": "flux1-fill-dev-hyp8-Q4_K_S.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "base_model"
-    }
-  },
-  "342": {
-    "inputs": {
-      "text": "",
-      "clip": [
-        "345",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "negative_prompt"
     }
   },
   "343": {
@@ -241,8 +225,8 @@
         "357",
         0
       ],
-      "start": 0,
-      "end": 1,
+      "start": 0.3,
+      "end": 0.8,
       "max_consecutive_cache_hits": 2,
       "model": [
         "309",
@@ -270,12 +254,18 @@
         "369",
         0
       ],
-      "steps": 80,
+      "steps": [
+        "425",
+        5
+      ],
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",
       "start_at_step": 0,
-      "end_at_step": 8,
+      "end_at_step": [
+        "425",
+        5
+      ],
       "return_with_leftover_noise": "disable",
       "model": [
         "356",
@@ -299,62 +289,6 @@
       "title": "KSampler (Advanced)"
     }
   },
-  "360": {
-    "inputs": {
-      "add_noise": "enable",
-      "noise_seed": [
-        "369",
-        0
-      ],
-      "steps": 30,
-      "cfg": 1,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "start_at_step": 18,
-      "end_at_step": 30,
-      "return_with_leftover_noise": "disable",
-      "model": [
-        "366",
-        0
-      ],
-      "positive": [
-        "314",
-        0
-      ],
-      "negative": [
-        "314",
-        1
-      ],
-      "latent_image": [
-        "390",
-        0
-      ]
-    },
-    "class_type": "KSamplerAdvanced",
-    "_meta": {
-      "title": "KSampler (Advanced)"
-    }
-  },
-  "362": {
-    "inputs": {
-      "object_to_patch": "diffusion_model",
-      "residual_diff_threshold": [
-        "357",
-        0
-      ],
-      "start": 0,
-      "end": 1,
-      "max_consecutive_cache_hits": 2,
-      "model": [
-        "422",
-        0
-      ]
-    },
-    "class_type": "ApplyFBCacheOnModel",
-    "_meta": {
-      "title": "Apply First Block Cache"
-    }
-  },
   "364": {
     "inputs": {
       "expand": 10,
@@ -375,21 +309,9 @@
       "title": "Grow Mask With Blur"
     }
   },
-  "366": {
-    "inputs": {
-      "model": [
-        "362",
-        0
-      ]
-    },
-    "class_type": "DifferentialDiffusion",
-    "_meta": {
-      "title": "Differential Diffusion"
-    }
-  },
   "369": {
     "inputs": {
-      "seed": 1034834470000144
+      "seed": 0
     },
     "class_type": "easy seed",
     "_meta": {
@@ -431,32 +353,14 @@
       "title": "Get Mask Size & Count"
     }
   },
-  "382": {
-    "inputs": {
-      "width": 1280,
-      "height": 1280,
-      "interpolation": "lanczos",
-      "method": "keep proportion",
-      "condition": "downscale if bigger",
-      "multiple_of": 0,
-      "image": [
-        "353",
-        0
-      ]
-    },
-    "class_type": "ImageResize+",
-    "_meta": {
-      "title": "🔧 Image Resize"
-    }
-  },
   "383": {
     "inputs": {
       "width": [
-        "382",
+        "424",
         1
       ],
       "height": [
-        "382",
+        "424",
         2
       ],
       "keep_proportions": false,
@@ -531,36 +435,6 @@
       "title": "Get Mask Size & Count"
     }
   },
-  "390": {
-    "inputs": {
-      "samples": [
-        "359",
-        0
-      ],
-      "mask": [
-        "392",
-        0
-      ]
-    },
-    "class_type": "SetLatentNoiseMask",
-    "_meta": {
-      "title": "Set Latent Noise Mask"
-    }
-  },
-  "392": {
-    "inputs": {
-      "amount": 10,
-      "device": "auto",
-      "mask": [
-        "364",
-        0
-      ]
-    },
-    "class_type": "MaskBlur+",
-    "_meta": {
-      "title": "🔧 Mask Blur"
-    }
-  },
   "399": {
     "inputs": {
       "expand": [
@@ -591,11 +465,11 @@
     "inputs": {
       "comparison": "a > b",
       "a": [
-        "382",
+        "424",
         1
       ],
       "b": [
-        "382",
+        "424",
         2
       ]
     },
@@ -611,11 +485,11 @@
         0
       ],
       "on_true": [
-        "382",
+        "424",
         1
       ],
       "on_false": [
-        "382",
+        "424",
         2
       ]
     },
@@ -650,13 +524,63 @@
       "title": "🔧 Simple Math"
     }
   },
-  "422": {
+  "423": {
     "inputs": {
-      "unet_name": "flux-hyp8-Q5_K_M.gguf"
+      "unet_name": "flux.1-fill-dev-OneReward_fp8.safetensors",
+      "weight_dtype": "default"
     },
-    "class_type": "UnetLoaderGGUF",
+    "class_type": "UNETLoader",
     "_meta": {
       "title": "base_model"
+    }
+  },
+  "424": {
+    "inputs": {
+      "generation_width": 1280,
+      "generation_height": 1280,
+      "aspect_ratio_preservation": "keep_input",
+      "image": [
+        "353",
+        0
+      ]
+    },
+    "class_type": "WanVideoImageResizeToClosest",
+    "_meta": {
+      "title": "WanVideo Image Resize To Closest"
+    }
+  },
+  "425": {
+    "inputs": {
+      "prompt": "",
+      "negative_prompt": "",
+      "width": 1280,
+      "height": 1280,
+      "cfg": 30,
+      "steps": 20,
+      "refiner_step": 16,
+      "sampler": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "clip_skip": -1,
+      "inpaint_disable_initial_latent": false,
+      "wavespeed_strength": 0.12,
+      "save_final_enhanced_image_only": false
+    },
+    "class_type": "GeneralInput",
+    "_meta": {
+      "title": "GeneralInput"
+    }
+  },
+  "426": {
+    "inputs": {
+      "conditioning": [
+        "313",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
     }
   }
 }

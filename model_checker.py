@@ -23,6 +23,17 @@ if current_process().name != "MainProcess":
 elif platform.system() == 'Windows':
     root_dir = os.path.dirname(root_dir)
 
+def ensure_directory_exists(directory):
+    """确保目录存在，如果不存在则创建"""
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory)
+            print_colored(f"√创建目录: {directory}", Fore.GREEN)
+        except Exception as e:
+            print_colored(f"×创建目录失败: {directory}, 错误: {e}", Fore.RED)
+            return False
+    return True
+
 def load_model_paths():
     global simplemodels_root
 
@@ -117,6 +128,10 @@ def load_model_paths():
             for p in path_mapping[key]
         ]
         path_mapping[key] = list(set(path_mapping[key]))
+
+    for key, paths in path_mapping.items():
+        for path in paths:
+            ensure_directory_exists(path)
 
     return path_mapping
 
@@ -276,7 +291,7 @@ def print_instructions():
     time.sleep(0.1)
     print(f"{Fore.GREEN}★{Style.RESET_ALL}打开默认浏览器设置，关闭GPU加速、或图形加速的选项。{Fore.GREEN}★{Style.RESET_ALL}大内存(64+)与固态硬盘存放模型有助于减少模型加载时间。{Fore.GREEN}★{Style.RESET_ALL}")
     time.sleep(0.1)
-    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.09.03{Fore.GREEN}★{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}★{Style.RESET_ALL}疑难杂症进QQ群求助：938075852{Fore.GREEN}★{Style.RESET_ALL}脚本：✿   冰華 |版本:25.09.13{Fore.GREEN}★{Style.RESET_ALL}")
     print()
     time.sleep(0.1)
     
@@ -1123,78 +1138,13 @@ packages = {
         ],
         "download_links": []
     },
-        "kolors_package": {
-        "id": 3,
-        "name": "[3]可图扩展包",
-        "note": "可图文生图-默认模型[Kolors_V1.0]|显存需求：★★ 速度：★★★☆",
-        "files": [
-            ("diffusers/Kolors/model_index.json", 427),
-            ("diffusers/Kolors/MODEL_LICENSE", 14920),
-            ("diffusers/Kolors/README.md", 4707),
-            ("diffusers/Kolors/scheduler/scheduler_config.json", 606),
-            ("diffusers/Kolors/text_encoder/config.json", 1323),
-            ("diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
-            ("diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
-            ("diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
-            ("diffusers/Kolors/text_encoder/quantization.py", 14692),
-            ("diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
-            ("diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
-            ("diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
-            ("diffusers/Kolors/text_encoder/vocab.txt", 1018370),
-            ("diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
-            ("diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
-            ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
-            ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
-            ("diffusers/Kolors/unet/config.json", 1785),
-            ("diffusers/Kolors/unet/diffusion_pytorch_model.fp16.safetensors", 145),
-            ("diffusers/Kolors/vae/diffusion_pytorch_model.fp16.safetensors", 145),
-            ("diffusers/Kolors/vae/config.json", 611),
-            ("loras/Hyper-SDXL-8steps-lora.safetensors", 787359648),
-            ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
-            ("vae/sdxl_fp16.vae.safetensors", 167335342),
-        ],
-        "download_links": []
-    },
-        "additional_package": {
-        "id": 4,
-        "name": "[4]额外模型包",
-        "note": "动漫/混元/PG/小马/写实/SD3|显存需求：★★ 速度：★★★☆",
-        "files": [
-            ("checkpoints/animaPencilXL_v500.safetensors", 6938041144),
-            ("checkpoints/hunyuan_dit_1.2.safetensors", 8240228270),
-            ("checkpoints/playground-v2.5-1024px.safetensors", 6938040576),
-            ("checkpoints/ponyDiffusionV6XL.safetensors", 6938041050),
-            ("checkpoints/realisticStockPhoto_v20.safetensors", 6938054242),
-            ("checkpoints/sd3_medium_incl_clips_t5xxlfp8.safetensors", 10867168284),
-        ],
-        "download_links": []
-    },
-        "Flux_package": {
-        "id": 5,
-        "name": "[5]Flux全量包",
-        "note": "Flux官方满血版-默认模型[Flux_devFP16]|显存需求：★★★★★ 速度：★★",
-        "files": [
-            ("checkpoints/flux1-dev.safetensors", 23802932552),
-            ("clip/clip_l.safetensors", 246144152),
-            ("clip/t5xxl_fp16.safetensors", 9787841024),
-            ("vae/ae.safetensors", 335304388),
-        ],
-        "download_links": []
-    },
         "Flux_aio_package": {
-        "id": 6,
-        "name": "[6]Flux_AIO扩展包",
+        "id": 3,
+        "name": "[3]Flux_AIO扩展包",
         "note": "Flux全功能-默认模型[Flux_Q5K_M]|显存需求：★★★☆ 速度：★★",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
             ("clip/t5xxl_fp16.safetensors", 9787841024),
@@ -1219,8 +1169,8 @@ packages = {
         "download_links": []
     },
         "SD15_aio_package": {
-        "id": 7,
-        "name": "[7]SD1.5_AIO扩展包",
+        "id": 4,
+        "name": "[4]SD1.5_AIO扩展包",
         "note": "SD1.5全功能-默认模型[realisticVision]|显存需求：★ 速度：★★★★",
         "files": [
             ("checkpoints/realisticVisionV60B1_v51VAE.safetensors", 2132625894),
@@ -1247,8 +1197,8 @@ packages = {
         "download_links": []
     },
         "Kolors_aio_package": {
-        "id": 8,
-        "name": "[8]Kolors_AIO扩展包",
+        "id": 5,
+        "name": "[5]Kolors_AIO扩展包",
         "note": "可图全功能-默认模型[Kolors_V1.0]|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
@@ -1300,37 +1250,9 @@ packages = {
         ],
         "download_links": []
     },
-        "SD3x_medium_package": {
-        "id": 9,
-        "name": "[9]SD3.5_medium扩展包",
-        "note": "SD3.5中号文生图-默认模型[SD3.5medium]|显存需求：★★ 速度：★★★",
-        "files": [
-            ("checkpoints/sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors", 11638004202),
-            ("clip/clip_l.safetensors", 246144152),
-            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("vae/sd3x_fp16.vae.safetensors", 167666654),
-        ],
-        "download_links": [
-        ""
-        ]
-    },
-        "SD3x_large_package": {
-        "id": 10,
-        "name": "[10]SD3.5_Large 扩展包",
-        "note": "SD3.5大号文生图-默认模型[SD3.5large]|显存需求：★★★★★ 速度：★★",
-        "files": [
-            ("checkpoints/sd3.5_large.safetensors", 16460379262),
-            ("clip/clip_g.safetensors", 1389382176),
-            ("clip/clip_l.safetensors", 246144152),
-            ("clip/t5xxl_fp16.safetensors", 9787841024),
-            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("vae/sd3x_fp16.vae.safetensors", 167666654),
-        ],
-        "download_links": []
-    },
         "MiniCPM_package": {
-        "id": 11,
-        "name": "[11]MiniCPMv26反推扩展包",
+        "id": 6,
+        "name": "[6]MiniCPMv26反推扩展包",
         "note": "本地多模态大语言模型[反推、翻译、扩写]|显存需求：★★ 速度：★★",
 
         "files": [
@@ -1362,92 +1284,9 @@ packages = {
         ],
         "download_links": []
     },
-        "happy_package": {
-        "id": 12,
-        "name": "[12]贺年卡",
-        "note": "贺卡预设|显存需求：★★★ 速度：★★",
-        "files": [
-            ("loras/flux_graffiti_v1.safetensors", 612893792),
-            ("loras/kolors_crayonsketch_e10.safetensors", 170566628),
-            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("vae/ae.safetensors", 335304388),
-            ("checkpoints/kolors_unet_fp16.safetensors", 5159140240),
-            ("clip_vision/kolors_clip_ipa_plus_vit_large_patch14_336.bin", 1711974081),
-            ("controlnet/xinsir_cn_union_sdxl_1.0_promax.safetensors", 2513342408),
-            ("diffusers/Kolors/model_index.json", 427),
-            ("diffusers/Kolors/MODEL_LICENSE", 14920),
-            ("diffusers/Kolors/README.md", 4707),
-            ("diffusers/Kolors/scheduler/scheduler_config.json", 606),
-            ("diffusers/Kolors/text_encoder/config.json", 1323),
-            ("diffusers/Kolors/text_encoder/configuration_chatglm.py", 2332),
-            ("diffusers/Kolors/text_encoder/modeling_chatglm.py", 55722),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00001-of-00007.bin", 1827781090),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00002-of-00007.bin", 1968299480),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00003-of-00007.bin", 1927415036),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00004-of-00007.bin", 1815225998),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00005-of-00007.bin", 1968299544),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00006-of-00007.bin", 1927415036),
-            ("diffusers/Kolors/text_encoder/pytorch_model-00007-of-00007.bin", 1052808542),
-            ("diffusers/Kolors/text_encoder/pytorch_model.bin.index.json", 20437),
-            ("diffusers/Kolors/text_encoder/quantization.py", 14692),
-            ("diffusers/Kolors/text_encoder/tokenization_chatglm.py", 12223),
-            ("diffusers/Kolors/text_encoder/tokenizer.model", 1018370),
-            ("diffusers/Kolors/text_encoder/tokenizer_config.json", 249),
-            ("diffusers/Kolors/text_encoder/vocab.txt", 1018370),
-            ("diffusers/Kolors/tokenizer/tokenization_chatglm.py", 12223),
-            ("diffusers/Kolors/tokenizer/tokenizer.model", 1018370),
-            ("diffusers/Kolors/tokenizer/tokenizer_config.json", 249),
-            ("diffusers/Kolors/tokenizer/vocab.txt", 1018370),
-            ("diffusers/Kolors/unet/config.json", 1785),
-            ("diffusers/Kolors/vae/config.json", 611),
-            ("ipadapter/kolors_ipa_faceid_plus.bin", 2385842603),
-            ("ipadapter/kolors_ip_adapter_plus_general.bin", 1013163359),
-            ("vae/sdxl_fp16.vae.safetensors", 167335342),
-        ],
-        "download_links": []
-    },
-        "clothing_package": {
-        "id": 13,
-        "name": "[13]换装包",
-        "note": "万物迁移-默认模型[FluxFill_Q4]|显存需求：★★★ 速度：★★",
-        "files": [
-            ("inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("clip/clip_l.safetensors", 246144152), 
-            ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
-            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("vae/ae.safetensors", 335304388),
-            ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
-            ("style_models/flux1-redux-dev.safetensors", 129063232),
-            ("rembg/General.safetensors", 884878856),
-            ("loras/comfyui_subject_lora16.safetensors", 153268392)
-        ],
-        "download_links": []
-    },
-        "3DPurikura_package": {
-        "id": 14,
-        "name": "[14]3D大头贴",
-        "note": "3D个性头像-默认模型[Yamers_Cartoon]|显存需求：★★ 速度：★★",
-        "files": [
-            ("checkpoints/SDXL_Yamers_Cartoon_Arcadia.safetensors", 6938040714),
-            ("upscale_models/RealESRGAN_x4plus_anime_6B.pth", 17938799),
-            ("rembg/Portrait.safetensors", 884878856),
-            ("ipadapter/ip-adapter-faceid-plusv2_sdxl.bin", 1487555181),
-            ("insightface/models/buffalo_l/1k3d68.onnx", 143607619),
-            ("insightface/models/buffalo_l/2d106det.onnx", 5030888),
-            ("insightface/models/buffalo_l/det_10g.onnx", 16923827),
-            ("insightface/models/buffalo_l/genderage.onnx", 1322532),
-            ("insightface/models/buffalo_l/w600k_r50.onnx", 174383860),
-            ("loras/ip-adapter-faceid-plusv2_sdxl_lora.safetensors", 371842896),
-            ("loras/StickersRedmond.safetensors", 170540036)
-        ],
-        "download_links": []
-    },
         "x1-okremovebg_package": {
-        "id": 15,
-        "name": "[15]一键抠图",
+        "id": 7,
+        "name": "[7]一键抠图",
         "note": "抠图去背景神器|显存需求：★ 速度：★★★★★",
         "files": [
             ("rembg/ckpt_base.pth", 367520613),
@@ -1458,8 +1297,8 @@ packages = {
         "download_links": []
     },
         "x2-okimagerepair_package": {
-        "id": 16,
-        "name": "[16]一键修复",
+        "id": 8,
+        "name": "[8]一键修复",
         "note": "上色、修复模糊、旧照片[XL/Flux]|显存需求：★★★ 速度：★☆",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
@@ -1481,11 +1320,11 @@ packages = {
         "download_links": []
     },
         "x3-swapface_package": {
-        "id": 17,
-        "name": "[17]一键换脸",
-        "note": "高精度换脸-默认模型[FluxFill_Q4]|显存需求：★★★ 速度：★★",
+        "id": 9,
+        "name": "[9]一键换脸",
+        "note": "高精度换脸-默认模型[OneReward_fp8]|显存需求：★★★ 速度：★★",
         "files": [
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
@@ -1507,12 +1346,13 @@ packages = {
         "download_links": []
     },
         "Flux_aio_plus_package": {
-        "id": 18,
-        "name": "[18]Flux_AIO_plus扩展包",
+        "id": 10,
+        "name": "[10]Flux_AIO_plus扩展包",
         "note": "Flux全功能-默认模型[Fluxdev_fp8]|显存需求：★★★★ 速度：★★☆",
         "files": [
+            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/flux1-dev-fp8.safetensors", 11901525888),
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
             ("clip/t5xxl_fp16.safetensors", 9787841024),
@@ -1539,8 +1379,8 @@ packages = {
         ]
     },
         "clothing_plus_package": {
-        "id": 19,
-        "name": "[19]换装plus包",
+        "id": 11,
+        "name": "[11]换装plus包",
         "note": "万物迁移-默认模型[Fluxdev_fp8]|显存需求：★★★☆ 速度：★★★",
         "files": [
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
@@ -1562,25 +1402,23 @@ packages = {
         ]
     },
         "eraser-a_package": {
-        "id": 20,
-        "name": "[20]一键消除",
+        "id": 12,
+        "name": "[12]一键消除",
         "note": "一键消除-默认模型[FluxQ5/Fill_Q4]|显存需求：★★ 速度：★★☆",
         "files": [
-            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
+            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("vae/ae.safetensors", 335304388),
-            ("loras/removal_timestep_alpha-2-1740.safetensors",89746016),
-            ("style_models/flux1-redux-dev.safetensors", 129063232)
+            ("loras/removal_timestep_alpha-2-1740.safetensors",89746016)
         ],
         "download_links": [
         "【选配】一键消除基于FluxAIO组件扩展，请检查所需包体。部分文件、Lora点击生成会自动下载。"
         ]
     },
         "Illustrious_package": {
-        "id": 21,
-        "name": "[21]光辉模型包",
+        "id": 13,
+        "name": "[13]光辉模型包",
         "note": "支持NoobAI/光辉文生图-默认模型[miaomiaoV15b]|显存需求：★★ 速度：★★★☆",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202)
@@ -1588,8 +1426,8 @@ packages = {
         "download_links": []
     },
         "Illustrious_aio_package": {
-        "id": 22,
-        "name": "[22]光辉AIO扩展包",
+        "id": 14,
+        "name": "[14]光辉AIO扩展包",
         "note": "NoobAI/光辉全功能-默认模型[miaomiaoV15b]|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/miaomiaoHarem_v15b.safetensors", 6938043202),
@@ -1603,8 +1441,8 @@ packages = {
         "download_links": []
     },
         "StyleTransfer_package": {
-        "id": 23,
-        "name": "[23]风格转绘扩展包",
+        "id": 15,
+        "name": "[15]风格转绘扩展包",
         "note": "多种图像风格转绘|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/LEOSAM_HelloWorldXL_70.safetensors", 6938040682),
@@ -1638,8 +1476,8 @@ packages = {
         "download_links": []
     },
         "okdepthstatue_package": {
-        "id": 24,
-        "name": "[24]深度图、雕像扩展包",
+        "id": 16,
+        "name": "[16]深度图、雕像扩展包",
         "note": "深度图、白瓷雕像风格扩展|显存需求：★★ 速度：★★★★★",
         "files": [
             ("checkpoints/juggernautXL_juggXIByRundiffusion.safetensors", 7105350536),
@@ -1654,8 +1492,8 @@ packages = {
         "download_links": []
     },
         "Framepack_package": {
-        "id": 25,
-        "name": "[25]Framepack视频扩展包",
+        "id": 17,
+        "name": "[17]Framepack视频扩展包",
         "note": "图像转视频功能支持-默认模型[FramePackfp8]|显存需求：★★★ 速度：★",
         "files": [
             ("checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors", 16331849976),
@@ -1670,26 +1508,9 @@ packages = {
             "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
         ]
     },
-        "ICEdit_package": {
-        "id": 26,
-        "name": "[26]ICEdit图像编辑扩展包",
-        "note": "指令编辑图像-默认模型[FluxQ5/Fill_Q4]|显存需求：★★★ 速度：★★",
-        "files": [
-            ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("checkpoints/flux1-fill-dev-hyp8-Q4_K_S.gguf", 6809920800),
-            ("clip/clip_l.safetensors", 246144152),
-            ("clip/t5xxl_fp16.safetensors", 9787841024),
-            ("clip_vision/sigclip_vision_patch14_384.safetensors", 856505640),
-            ("vae/ae.safetensors", 335304388),
-            ("style_models/flux1-redux-dev.safetensors", 129063232),
-            ("upscale_models/4xNomos8kSCHAT-L.pth", 331564661),
-            ("loras/ICEdit-normal-lora.safetensors", 231918592)
-        ],
-        "download_links": []
-    },
         "Illustrious2_aio_package": {
-        "id": 27,
-        "name": "[27]光辉2.0_AIO扩展包",
+        "id": 18,
+        "name": "[18]光辉2.0_AIO扩展包",
         "note": "NoobAI/光辉2.0全功能-默认模型oneObsV13|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/oneObsession_13.safetensors", 6938040682),
@@ -1703,8 +1524,8 @@ packages = {
         "download_links": []
     },
         "nunchaku_int4_aio_package": {
-        "id": 28,
-        "name": "[28]双截棍int4量化Flux扩展包",
+        "id": 19,
+        "name": "[19]双截棍int4量化Flux扩展包",
         "note": "适配非50系-默认模型[svdq-int4]|显存需求：★★★ 速度：★★★",
         "files": [
             ("checkpoints/svdq-int4_r32-flux.1-dev.safetensors", 6768309832),
@@ -1732,8 +1553,8 @@ packages = {
         "download_links": []
     },
         "nunchaku_fp4_aio_package": {
-        "id": 29,
-        "name": "[29]双截棍fp4量化Flux扩展包",
+        "id": 20,
+        "name": "[20]双截棍fp4量化Flux扩展包",
         "note": "仅适配50系-默认模型[svdq-fp4]|显存需求：★★☆ 速度：★★★",
         "files": [
             ("checkpoints/svdq-fp4_r32-flux.1-dev.safetensors", 7038706888),
@@ -1761,8 +1582,8 @@ packages = {
         "download_links": []
     },
     "kontext_package": {
-        "id": 30,
-        "name": "[30]Flux_Kontext扩展包",
+        "id": 21,
+        "name": "[21]Flux_Kontext扩展包",
         "note": "Flux_Kontext指令修图功能扩展包|显存需求：★★★☆ 速度：★★",
         "files": [
             ("checkpoints/flux1-dev-kontext_fp8_scaled.safetensors", 11904640136),
@@ -1776,8 +1597,8 @@ packages = {
         ]
     },
     "wan_t2i_package": {
-        "id": 31,
-        "name": "[31]Wan2.2_T2I扩展包",
+        "id": 22,
+        "name": "[22]Wan2.2_T2I扩展包",
         "note": "万相2.2文生图扩展包|显存需求：★★★ 速度：★★",
         "files": [
             ("checkpoints/Wan2.2_T2V_Low_Noise_14B_VACE-Q4_K_M.gguf", 11629612832),
@@ -1795,8 +1616,8 @@ packages = {
         ]
     },
     "qwen_image_package": {
-        "id": 32,
-        "name": "[32]Qwen-Image文生图扩展包",
+        "id": 23,
+        "name": "[23]Qwen-Image文生图扩展包",
         "note": "千问大模型文生图扩展包|显存需求：★★★★★ 速度：★",
         "files": [
             ("checkpoints/qwen-image-Q4_K_M.gguf", 13065746976),
@@ -1810,8 +1631,8 @@ packages = {
         ]
     },
     "wan_i2v_package": {
-        "id": 33,
-        "name": "[33]Wan2.2图生视频扩展包",
+        "id": 24,
+        "name": "[24]Wan2.2图生视频扩展包",
         "note": "Wan2.2图生图扩展包|显存需求：★★★★ 速度：★",
         "files": [
             ("checkpoints/Wan2.2-I2V-A14B-HighNoise-Q4_K_M.gguf", 9651728896),
@@ -1829,8 +1650,8 @@ packages = {
         ]
     },
     "wan_t2v_package": {
-        "id": 34,
-        "name": "[34]Wan2.2文生视频扩展包",
+        "id": 25,
+        "name": "[25]Wan2.2文生视频扩展包",
         "note": "Wan2.2文生视频扩展包|显存需求：★★★★ 速度：★",
         "files": [
             ("checkpoints/Wan2.2_T2V_High_Noise_14B_VACE-Q4_K_M.gguf", 11629612832),
@@ -1847,8 +1668,8 @@ packages = {
         ]
     },
     "onekey_kontext_package": {
-        "id": 35,
-        "name": "[35]OneKeyKontext一键精修预置包",
+        "id": 26,
+        "name": "[26]OneKeyKontext一键精修预置包",
         "note": "基于Kontext的一键精修|显存需求：★★★★ 速度：★★",
         "files": [
             ("checkpoints/flux1-dev-kontext_fp8_scaled.safetensors", 11904640136),
@@ -1881,8 +1702,8 @@ packages = {
         "download_links": []
     },
     "qwen_image_edit_package": {
-        "id":36,
-        "name": "[36]Qwen图像编辑预置包",
+        "id":27,
+        "name": "[27]Qwen图像编辑预置包",
         "note": "基于Qwen_Image_Edit的指令编辑图像|显存需求：★★★★ 速度:★★",
         "files": [
             ("checkpoints/Qwen_Image_Edit-Q4_K_M.gguf", 13065746976),
@@ -1894,8 +1715,8 @@ packages = {
         "download_links": []
     },
     "qwen_aio_package": {
-        "id":37,
-        "name": "[37]Qwen全功能预置包",
+        "id":28,
+        "name": "[28]Qwen全功能预置包",
         "note": "QwenImage全功能包|显存需求：★★★★★ 速度:★★",
         "files": [
             ("checkpoints/qwen-image-Q4_K_M.gguf", 13065746976),
@@ -1908,7 +1729,7 @@ packages = {
             ("loras/sd_xl_offset_example-lora_1.0.safetensors", 49553604),
             ("loras/Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors", 849608296),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
-            ("model_patches/Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors", 2266862656)
+            ("controlnet/Qwen-Image-InstantX-ControlNet-Inpainting.safetensors", 4234599432)
         ],
         "download_links": []
     },
@@ -1920,7 +1741,6 @@ MANUAL_DOWNLOAD_MAP = {
         "flux1-dev.jpg",
         "flux1-dev-fp8.jpg",
         "flux1-fill-dev_fp8.jpg",
-        "flux1-fill-dev-hyp8-Q4_K_S.jpg",
         "flux-hyp8-Q5_K_M.jpg",
         "hunyuan_dit_1.2.jpg",
         "juggernautXL_juggXIByRundiffusion.jpg",
@@ -1992,7 +1812,19 @@ OBSOLETE_MODELS = [
     "NoobAI-XL-v1.1.safetensors",
     "clip-vit-h-14-laion2B-s32B-b79K.safetensors",
     "fill_remove.safetensors",
-    "Qwen-Image-Lightning-8steps-V1.0.safetensors"
+    "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+    "hunyuan_dit_1.2.safetensors",
+    "playground-v2.5-1024px.safetensors",
+    "ponyDiffusionV6XL.safetensors",
+    "realisticStockPhoto_v20.safetensors",
+    "sd3_medium_incl_clips_t5xxlfp8.safetensors",
+    "flux1-fill-dev-hyp8-Q4_K_S.gguf",
+    "sd3.5_medium_incl_clips_t5xxlfp8scaled.safetensors",
+    "sd3x_fp16.vae.safetensors",
+    "sd3.5_large.safetensors",
+    "clip_g.safetensors",
+    "StickersRedmond.safetensors",
+    "flux1-fill-dev_fp8.safetensors"
 ]
 def main():
     print()
