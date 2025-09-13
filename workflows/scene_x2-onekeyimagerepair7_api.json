@@ -36,7 +36,7 @@
       ],
       "sampler_name": "euler_cfg_pp",
       "scheduler": "sgm_uniform",
-      "denoise": 0.8500000000000002,
+      "denoise": 0.85,
       "model": [
         "217",
         0
@@ -155,7 +155,7 @@
       "condition": "always",
       "multiple_of": 8,
       "image": [
-        "30",
+        "222",
         0
       ]
     },
@@ -223,16 +223,16 @@
   },
   "197": {
     "inputs": {
-      "prompt": [
-        "202",
-        0
-      ],
       "find1": "noise",
       "replace1": "",
       "find2": "spots",
       "replace2": "",
       "find3": "cracks",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "202",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -241,16 +241,16 @@
   },
   "198": {
     "inputs": {
-      "prompt": [
-        "197",
-        0
-      ],
       "find1": "incomplete",
       "replace1": "",
       "find2": "scratch",
       "replace2": "",
       "find3": "crack",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "197",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -259,16 +259,16 @@
   },
   "199": {
     "inputs": {
-      "prompt": [
-        "201",
-        0
-      ],
       "find1": "old picture",
       "replace1": "",
       "find2": "old portrait",
       "replace2": "",
       "find3": "old image",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "201",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -277,16 +277,16 @@
   },
   "200": {
     "inputs": {
-      "prompt": [
-        "196",
-        4
-      ],
       "find1": "photograph",
       "replace1": "photo",
       "find2": "old photo",
       "replace2": "",
       "find3": "",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "196",
+        4
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -295,16 +295,16 @@
   },
   "201": {
     "inputs": {
-      "prompt": [
-        "200",
-        0
-      ],
       "find1": "vintage photo",
       "replace1": "",
       "find2": "old time photo",
       "replace2": "",
       "find3": "old style photo",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "200",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -313,16 +313,16 @@
   },
   "202": {
     "inputs": {
-      "prompt": [
-        "199",
-        0
-      ],
       "find1": "fuzzy",
       "replace1": "",
       "find2": "blurry",
       "replace2": "clear, sharp, focused",
       "find3": "yellowing",
-      "replace3": ""
+      "replace3": "",
+      "prompt": [
+        "199",
+        0
+      ]
     },
     "class_type": "easy promptReplace",
     "_meta": {
@@ -335,7 +335,7 @@
       "image_output": "Preview",
       "save_prefix": "ComfyUI",
       "image_ref": [
-        "30",
+        "222",
         0
       ],
       "image_target": [
@@ -368,11 +368,11 @@
   },
   "217": {
     "inputs": {
-      "weight": 0.30000000000000004,
+      "weight": 0.3,
       "style_boost": 1,
       "combine_embeds": "concat",
       "start_at": 0,
-      "end_at": 0.8000000000000002,
+      "end_at": 0.8,
       "embeds_scaling": "V only",
       "model": [
         "174",
@@ -383,7 +383,7 @@
         0
       ],
       "image": [
-        "30",
+        "222",
         0
       ],
       "clip_vision": [
@@ -409,6 +409,89 @@
       "title": "Save Image"
     }
   },
+  "220": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "221": {
+    "inputs": {
+      "boolean": [
+        "225",
+        0
+      ],
+      "on_true": [
+        "220",
+        0
+      ],
+      "on_false": [
+        "224",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "222": {
+    "inputs": {
+      "fill_background": [
+        "221",
+        0
+      ],
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "30",
+        0
+      ],
+      "mask": [
+        "223",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "223": {
+    "inputs": {
+      "mask": [
+        "30",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "224": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "225": {
+    "inputs": {
+      "mask": [
+        "30",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
   "194:0": {
     "inputs": {
       "model_name": "4xNomos8kSCHAT-L.pth"
@@ -416,6 +499,15 @@
     "class_type": "UpscaleModelLoader",
     "_meta": {
       "title": "Load Upscale Model"
+    }
+  },
+  "193:0": {
+    "inputs": {
+      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
     }
   },
   "194:1": {
@@ -434,18 +526,9 @@
       "title": "Upscale Image (using Model)"
     }
   },
-  "193:0": {
-    "inputs": {
-      "control_net_name": "xinsir_cn_union_sdxl_1.0_promax.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
   "193:1": {
     "inputs": {
-      "strength": 0.8000000000000002,
+      "strength": 0.8,
       "start_percent": 0,
       "end_percent": 1,
       "positive": [

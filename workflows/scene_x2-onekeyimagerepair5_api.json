@@ -17,7 +17,7 @@
       "condition": "always",
       "multiple_of": 8,
       "image": [
-        "15",
+        "34",
         0
       ]
     },
@@ -55,7 +55,7 @@
       "facedetection": "retinaface_resnet50",
       "model": "codeformer-v0.1.0.pth",
       "visibility": 1,
-      "codeformer_weight": 0.8000000000000002,
+      "codeformer_weight": 0.8,
       "image": [
         "18",
         0
@@ -71,7 +71,7 @@
       "facedetection": "retinaface_resnet50",
       "model": "GFPGANv1.4.pth",
       "visibility": 1,
-      "codeformer_weight": 0.8000000000000002,
+      "codeformer_weight": 0.8,
       "image": [
         "18",
         0
@@ -142,7 +142,99 @@
       "title": "result_image1"
     }
   },
+  "32": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "33": {
+    "inputs": {
+      "boolean": [
+        "37",
+        0
+      ],
+      "on_true": [
+        "32",
+        0
+      ],
+      "on_false": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "34": {
+    "inputs": {
+      "fill_background": [
+        "33",
+        0
+      ],
+      "background_color": "#FFFFFF",
+      "RGBA_image": [
+        "15",
+        0
+      ],
+      "mask": [
+        "35",
+        0
+      ]
+    },
+    "class_type": "LayerUtility: ImageRemoveAlpha",
+    "_meta": {
+      "title": "LayerUtility: ImageRemoveAlpha"
+    }
+  },
+  "35": {
+    "inputs": {
+      "mask": [
+        "15",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "36": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "37": {
+    "inputs": {
+      "mask": [
+        "15",
+        1
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
   "27:0": {
+    "inputs": {
+      "model_name": "4xNomos8kSCHAT-L.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "24:0": {
     "inputs": {
       "model_name": "4xNomos8kSCHAT-L.pth"
     },
@@ -165,15 +257,6 @@
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Upscale Image (using Model)"
-    }
-  },
-  "24:0": {
-    "inputs": {
-      "model_name": "4xNomos8kSCHAT-L.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
     }
   },
   "24:1": {
