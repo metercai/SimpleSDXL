@@ -1485,7 +1485,7 @@
         9
       ],
       "model": [
-        "785",
+        "208",
         0
       ],
       "positive": [
@@ -1536,16 +1536,16 @@
       ],
       "return_with_leftover_noise": "disable",
       "model": [
-        "782",
+        "208",
         0
       ],
       "positive": [
-        "634",
+        "790",
         0
       ],
       "negative": [
-        "1",
-        0
+        "790",
+        1
       ],
       "latent_image": [
         "270",
@@ -2433,11 +2433,11 @@
         0
       ],
       "value1": [
-        "787",
+        "571",
         0
       ],
       "value2": [
-        "787",
+        "571",
         0
       ]
     },
@@ -2879,7 +2879,7 @@
         0
       ],
       "on_true": [
-        "264",
+        "785",
         0
       ],
       "on_false": [
@@ -3713,7 +3713,7 @@
         0
       ],
       "on_false": [
-        "264",
+        "785",
         0
       ]
     },
@@ -4032,7 +4032,7 @@
         0
       ],
       "positive": [
-        "667",
+        "795",
         0
       ],
       "negative": [
@@ -5128,7 +5128,7 @@
   },
   "728": {
     "inputs": {
-      "prompt": "lady",
+      "prompt": "",
       "negative_prompt": "",
       "width": 1024,
       "height": 1024,
@@ -5295,44 +5295,6 @@
       "title": "CLIP Text Encode (Prompt)"
     }
   },
-  "782": {
-    "inputs": {
-      "strength": 1,
-      "model": [
-        "208",
-        0
-      ],
-      "model_patch": [
-        "783",
-        0
-      ],
-      "vae": [
-        "336",
-        0
-      ],
-      "image": [
-        "217",
-        0
-      ],
-      "mask": [
-        "300",
-        0
-      ]
-    },
-    "class_type": "QwenImageDiffsynthControlnet",
-    "_meta": {
-      "title": "QwenImageDiffsynthControlnet"
-    }
-  },
-  "783": {
-    "inputs": {
-      "name": "Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors"
-    },
-    "class_type": "ModelPatchLoader",
-    "_meta": {
-      "title": "ModelPatchLoader"
-    }
-  },
   "784": {
     "inputs": {
       "pixels": [
@@ -5356,11 +5318,11 @@
         11
       ],
       "on_true": [
-        "782",
+        "790",
         0
       ],
       "on_false": [
-        "208",
+        "264",
         0
       ]
     },
@@ -5385,15 +5347,74 @@
       "title": "VAE Encode"
     }
   },
-  "787": {
+  "790": {
     "inputs": {
       "strength": 1,
-      "model": [
-        "571",
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "767",
         0
       ],
-      "model_patch": [
-        "788",
+      "negative": [
+        "1",
+        0
+      ],
+      "control_net": [
+        "791",
+        0
+      ],
+      "vae": [
+        "336",
+        0
+      ],
+      "image": [
+        "217",
+        0
+      ],
+      "mask": [
+        "300",
+        0
+      ]
+    },
+    "class_type": "ControlNetInpaintingAliMamaApply",
+    "_meta": {
+      "title": "ControlNetInpaintingAliMamaApply"
+    }
+  },
+  "791": {
+    "inputs": {
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Inpainting.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "793": {
+    "inputs": {
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Inpainting.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "794": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "667",
+        0
+      ],
+      "negative": [
+        "667",
+        1
+      ],
+      "control_net": [
+        "793",
         0
       ],
       "vae": [
@@ -5409,18 +5430,29 @@
         0
       ]
     },
-    "class_type": "QwenImageDiffsynthControlnet",
+    "class_type": "ControlNetInpaintingAliMamaApply",
     "_meta": {
-      "title": "QwenImageDiffsynthControlnet"
+      "title": "ControlNetInpaintingAliMamaApply"
     }
   },
-  "788": {
+  "795": {
     "inputs": {
-      "name": "Qwen-Image-Blockwise-ControlNet-Inpaint.safetensors"
+      "boolean": [
+        "714",
+        0
+      ],
+      "on_true": [
+        "794",
+        0
+      ],
+      "on_false": [
+        "667",
+        0
+      ]
     },
-    "class_type": "ModelPatchLoader",
+    "class_type": "easy ifElse",
     "_meta": {
-      "title": "ModelPatchLoader"
+      "title": "If else"
     }
   }
 }
