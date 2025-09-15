@@ -197,7 +197,7 @@
     },
     "class_type": "SaveImageWebsocket",
     "_meta": {
-      "title": "result_image2"
+      "title": "result_image1"
     }
   },
   "16": {
@@ -824,18 +824,6 @@
     "class_type": "easy string",
     "_meta": {
       "title": "String"
-    }
-  },
-  "66": {
-    "inputs": {
-      "images": [
-        "56",
-        0
-      ]
-    },
-    "class_type": "SaveImageWebsocket",
-    "_meta": {
-      "title": "result_image1"
     }
   }
 }
