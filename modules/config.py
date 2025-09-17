@@ -1117,11 +1117,11 @@ def downloading_inpaint_models(v):
         patch_file = os.path.join(paths_checkpoints[0], 'flux1-fill-dev-hyp8-Q4_K_S.gguf')
     if v == 'fp8':
         load_file_from_url(
-            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors',
+            url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev-OneReward_fp8.safetensors',
             model_dir=paths_checkpoints[0],
-            file_name='flux1-fill-dev_fp8.safetensors'
+            file_name='flux1-fill-dev-OneReward_fp8.safetensors'
         )
-        patch_file = os.path.join(paths_checkpoints[0], 'flux1-fill-dev_fp8.safetensors')
+        patch_file = os.path.join(paths_checkpoints[0], 'flux1-fill-dev-OneReward_fp8.safetensors')
     if v == 'kolors_inpainting':
         load_file_from_url(
             url='https://huggingface.co/metercai/SimpleSDXL2/resolve/main/SimpleModels/unet/kolors_inpainting.safetensors',

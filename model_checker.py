@@ -1144,7 +1144,7 @@ packages = {
         "note": "Flux全功能-默认模型[Flux_Q5K_M]|显存需求：★★★☆ 速度：★★",
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
-            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
+            ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
             ("clip/t5xxl_fp16.safetensors", 9787841024),
@@ -1324,7 +1324,7 @@ packages = {
         "name": "[9]一键换脸",
         "note": "高精度换脸-默认模型[OneReward_fp8]|显存需求：★★★ 速度：★★",
         "files": [
-            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
+            ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("pulid/pulid_flux_v0.9.1.safetensors", 1142099520),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
@@ -1352,7 +1352,7 @@ packages = {
         "files": [
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("checkpoints/flux1-dev-fp8.safetensors", 11901525888),
-            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
+            ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/EVA02_CLIP_L_336_psz14_s6B.pt", 856461210),
             ("clip/t5xxl_fp16.safetensors", 9787841024),
@@ -1375,7 +1375,7 @@ packages = {
             ("style_models/flux1-redux-dev.safetensors", 129063232)
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
+        "【选配】https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/flux1-dev-fp8.safetensors"
         ]
     },
         "clothing_plus_package": {
@@ -1385,7 +1385,7 @@ packages = {
         "files": [
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
             ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
-            ("checkpoints/flux1-fill-dev_fp8.safetensors", 11902532704),
+            ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
@@ -1398,7 +1398,7 @@ packages = {
             ("loras/comfyui_subject_lora16.safetensors", 153268392)
         ],
         "download_links": [
-        "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/flux1-fill-dev_fp8.safetensors"
+        "【选配】https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/flux1-fill-dev-OneReward_fp8.safetensors"
         ]
     },
         "eraser-a_package": {
@@ -1406,7 +1406,7 @@ packages = {
         "name": "[12]一键消除",
         "note": "一键消除-默认模型[FluxQ5/Fill_Q4]|显存需求：★★ 速度：★★☆",
         "files": [
-            ("checkpoints/flux.1-fill-dev-OneReward_fp8.safetensors", 11902532704),
+            ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("clip/clip_l.safetensors", 246144152),
             ("clip/t5xxl_fp8_e4m3fn.safetensors", 4893934904),
             ("vae/ae.safetensors", 335304388),
@@ -1503,9 +1503,9 @@ packages = {
             ("vae/hunyuan_video_vae_bf16.safetensors", 492984198)
         ],
         "download_links": [
-            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors",
-            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/clip/llava_llama3_fp8_scaled.safetensors",
-            "【选配】https://hf-mirror.com/metercai/SimpleSDXL2/resolve/main/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
+            "【选配】https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/checkpoints/FramePackI2V_HY_fp8_e4m3fn.safetensors",
+            "【选配】https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/clip/llava_llama3_fp8_scaled.safetensors",
+            "【选配】https://www.modelscope.cn/models/metercai/SimpleSDXL2/resolve/master/SimpleModels/vae/hunyuan_video_vae_bf16.safetensors"
         ]
     },
         "Illustrious2_aio_package": {

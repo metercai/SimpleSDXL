@@ -875,7 +875,7 @@
   },
   "237": {
     "inputs": {
-      "unet_name": "flux.1-fill-dev-OneReward_fp8.safetensors",
+      "unet_name": "flux1-fill-dev-OneReward_fp8.safetensors",
       "weight_dtype": "fp8_e4m3fn_fast"
     },
     "class_type": "UNETLoader",

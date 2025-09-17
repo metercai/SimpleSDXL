@@ -122,7 +122,7 @@ inpaint_engine_versions = {
     }
 inpaint_engine_model_names = {
     "kolors_aio_kolors_inpainting": "kolors_inpainting.safetensors",
-    "flux_aio_fp8": "flux.1-fill-dev-OneReward_fp8.safetensors",
+    "flux_aio_fp8": "flux1-fill-dev-OneReward_fp8.safetensors",
     "nun_int4_aio_Nun_int4": "svdq-int4_r32-flux.1-fill-dev.safetensors",
     "nun_fp4_aio_Nun_fp4": "svdq-fp4_r32-flux.1-fill-dev.safetensors",
     }

@@ -50,7 +50,7 @@
     "model_list": [
         "checkpoints,flux-hyp8-Q5_K_M.gguf,8421981408,0,",
         "checkpoints,flux1-dev-fp8.safetensors,11901525888,0,",
-        "checkpoints,flux.1-fill-dev-OneReward_fp8.safetensors,11902532704,0,",
+        "checkpoints,flux1-fill-dev-OneReward_fp8.safetensors,11902532704,0,",
         "checkpoints,juggernautXL_juggXIByRundiffusion.safetensors,7105350536,0,",
 	"controlnet,flux.1-dev_controlnet_union_pro_2.0.safetensors,4281779224,0,",
         "controlnet,flux.1-dev_controlnet_upscaler.safetensors,3583232168,0,",
