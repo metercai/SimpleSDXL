@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import requests
@@ -302,7 +303,17 @@ def get_unique_filename(file_path, extension=".corrupted"):
         base = f"{file_path}{extension}_{counter}"
         counter += 1
     return base
+def get_actual_file_path(file_path):
+    url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+    url_match = re.search(url_pattern, file_path)
 
+    if url_match:
+        local_path = file_path.split(url_match.group(0))[0].rstrip('/')
+        url_file_name = os.path.basename(url_match.group(0))
+        actual_file_path = os.path.join(local_path, url_file_name)
+        return os.path.normpath(actual_file_path)
+    else:
+        return os.path.normpath(file_path)
 def validate_files(packages):
     cleanup()
     path_mapping = load_model_paths()
@@ -354,7 +365,21 @@ def validate_files(packages):
 
             found = False
             actual_dir = None
-
+            url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+            url_match = re.search(url_pattern, expected_path)
+            if url_match:
+                local_dir = expected_path.split(url_match.group(0))[0].rstrip('/')
+                file_name = os.path.basename(url_match.group(0))
+                for base_dir in search_dirs:
+                    actual_full_path = os.path.join(base_dir, local_dir.replace(path_type, "", 1).lstrip('/'), file_name)
+                    actual_full_path = os.path.normpath(actual_full_path)
+                    if os.path.exists(actual_full_path):
+                        actual_dir = os.path.dirname(actual_full_path)
+                        found = True
+                        expected_path = os.path.join(local_dir, file_name)
+                        break
+                if found:
+                    continue
             for base_dir in search_dirs:
                 full_path = os.path.join(base_dir, sub_path) if sub_path else os.path.join(base_dir, os.path.basename(expected_path))
                 if os.path.exists(full_path):
@@ -440,7 +465,12 @@ def validate_files(packages):
         if missing_files:
             print(f"{Fore.RED}×{package_name}有文件缺失，请检查以下文件:{Style.RESET_ALL}")
             for file, expected_size in missing_files:
-                print(normalize_path(file))
+                url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+                url_match = re.search(url_pattern, file)
+                if url_match:
+                    print(normalize_path(file.split(url_match.group(0))[0] + os.path.basename(url_match.group(0))))
+                else:
+                    print(normalize_path(file))
                 download_files[file] = expected_size
             if package_name not in missing_package_names:
                 missing_package_names.append(package_name)
@@ -480,13 +510,15 @@ def validate_files(packages):
     if sorted_download_files:
         with open("downloadlist.txt", "w") as f1, open("缺失模型下载链接.txt", "w") as f2:
             for file, size in sorted_download_files:
-                if file == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                    link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
+                url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+                url_match = re.search(url_pattern, file)
+
+                if url_match:
+                    link = url_match.group(0)
                 else:
                     link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{file.split('SimpleModels/')[-1]}"
 
                 f1.write(f"{link},{size}\n")
-                
                 f2.write(f"{link}\n")
         print(f"{Fore.YELLOW}>>>问题文件的文件下载链接已保存到 '缺失模型下载链接.txt'。<<<<<<<<<<<<<<<<<<<<<{Style.RESET_ALL}")
     if "[1]基础模型包" in missing_package_names:
@@ -809,15 +841,47 @@ def auto_download_missing_files_with_retry(max_threads=5):
                 link, size = line.split(',')
                 size_mb = int(size) / (1024 * 1024)
                 print(f"{Fore.CYAN}▶ 正在下载: {link} ({size_mb:.1f}MB){Style.RESET_ALL}")
-                original_repo = CURRENT_DOWNLOAD_PREFIX
-                if link.startswith(original_repo):
-                    relative_path = link.replace(original_repo, "", 1).strip()
+
+                # 检查是否是原始仓库链接
+                if link.startswith(CURRENT_DOWNLOAD_PREFIX):
+                    relative_path = link.replace(CURRENT_DOWNLOAD_PREFIX, "", 1).strip()
                     relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1)
                     path_type = relative_path_without_prefix.split('/')[0].lower()
                 else:
-                    relative_path = link.replace("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", "", 1).strip()
-                    relative_path_without_prefix = link.split("https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/", 1)[-1].strip()
-                    path_type = "inpaint"
+                    found_path = None
+                    for package_name, package_info in packages.items():
+                        for file_path, _ in package_info["files"]:
+                            if link in file_path:
+                                found_path = file_path
+                                break
+                        if found_path:
+                            break
+
+                    if found_path:
+                        url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+                        url_match = re.search(url_pattern, found_path)
+                        if url_match:
+                            save_directory = found_path.split(url_match.group(0))[0].rstrip('/')
+                            path_type = save_directory.split('/')[0].lower() if save_directory else "default"
+                            url_path = url_match.group(0)
+                            file_name_from_url = os.path.basename(url_path)
+                            relative_path = os.path.join(save_directory, file_name_from_url)
+                            relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1) if "SimpleModels/" in relative_path else relative_path
+                        else:
+                            path_type = found_path.split('/')[0].lower()
+                            relative_path = found_path
+                            relative_path_without_prefix = relative_path.replace("SimpleModels/", "", 1) if "SimpleModels/" in relative_path else relative_path
+                    else:
+                        url_parts = link.split('/')
+                        possible_types = ["checkpoints", "loras", "controlnet", "embeddings", "vae", "inpaint", "ipadapter"]
+                        path_type = "default"
+                        for part in url_parts:
+                            if part.lower() in possible_types:
+                                path_type = part.lower()
+                                break
+                        file_name_from_url = os.path.basename(link)
+                        relative_path = os.path.join(path_type, file_name_from_url)
+                        relative_path_without_prefix = relative_path
 
                 sorted_base_dir = sorted(
                     path_mapping.get(path_type, []),
@@ -906,11 +970,16 @@ def get_download_links_for_package(packages, download_list_path):
     for line in existing_lines:
         existing_link = line.split(",")[0]
         for package_name, package_info in packages.items():
-            for file_path, file_size in package_info["files"]:
-                if file_path == "inpaint/GroundingDINO_SwinT_OGC.cfg.py":
-                    generated_link = "https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py"
+            for full_file_path, file_size in package_info["files"]:
+                url_pattern = r'https?://[^\s/$.?#].[^\s]*'
+                url_match = re.search(url_pattern, full_file_path)
+
+                if url_match:
+                    generated_link = url_match.group(0)
+                    save_directory = full_file_path.split(url_match.group(0))[0].rstrip('/')
+                    file_name = os.path.basename(url_match.group(0))
                 else:
-                    generated_link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{file_path}"
+                    generated_link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{full_file_path}"
 
                 if generated_link == existing_link:
                     valid_files.append((generated_link, file_size))
@@ -1332,7 +1401,7 @@ packages = {
             ("vae/ae.safetensors", 335304388),
             ("loras/flux1-turbo.safetensors", 694082424),
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("inpaint/https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py", 1006),
             ("inpaint/sam_vit_h_4b8939.pth", 2564550879),
             ("style_models/flux1-redux-dev.safetensors", 129063232),
             ("insightface/models/antelopev2/1k3d68.onnx", 143607619),
@@ -1384,7 +1453,7 @@ packages = {
         "note": "万物迁移-默认模型[Fluxdev_fp8]|显存需求：★★★☆ 速度：★★★",
         "files": [
             ("inpaint/groundingdino_swint_ogc.pth", 693997677),
-            ("inpaint/GroundingDINO_SwinT_OGC.cfg.py", 1006),
+            ("inpaint/https://hf-mirror.com/ShilongLiu/GroundingDINO/resolve/main/GroundingDINO_SwinT_OGC.cfg.py", 1006),
             ("checkpoints/flux1-fill-dev-OneReward_fp8.safetensors", 11902532704),
             ("checkpoints/flux-hyp8-Q5_K_M.gguf", 8421981408),
             ("clip/clip_l.safetensors", 246144152),
@@ -1710,6 +1779,7 @@ packages = {
             ("loras/Qwen-Image-Edit-Lightning-8steps-V1.0-bf16.safetensors", 849608296),
             ("loras/Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors", 849608296),
             ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
+            ("controlnet/Qwen-Image-InstantX-ControlNet-Union.safetensors", 3536027816),
             ("vae/qwen_image_vae.safetensors", 253806246)
         ],
         "download_links": []
@@ -1730,6 +1800,19 @@ packages = {
             ("loras/Qwen-Image-Lightning-8steps-V1.1-bf16.safetensors", 849608296),
             ("upscale_models/4xNomosUniDAT_bokeh_jpg.safetensors", 154152604),
             ("controlnet/Qwen-Image-InstantX-ControlNet-Inpainting.safetensors", 4234599432)
+        ],
+        "download_links": []
+    },
+    "qwen_image_edit_plus_package": {
+        "id":29,
+        "name": "[29]QwenPlus图像编辑预置包",
+        "note": "Qwen_Image_EditPlus指令编辑图像|显存需求：★★★★ 速度:★★",
+        "files": [
+            ("checkpoints/https://www.modelscope.cn/models/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/master/split_files/diffusion_models/qwen_image_edit_2509_fp8_e4m3fn.safetensors", 20430698424),
+            ("loras/Qwen-Image-Edit-Lightning-8steps-V1.0-bf16.safetensors", 849608296),
+            ("loras/Qwen-Image-Edit-Lightning-4steps-V1.0-bf16.safetensors", 849608296),
+            ("clip/qwen_2.5_vl_7b_fp8_scaled.safetensors", 9384670680),
+            ("vae/qwen_image_vae.safetensors", 253806246)
         ],
         "download_links": []
     },
