@@ -369,7 +369,7 @@
   "65": {
     "inputs": {
       "prompt": [
-        "2",
+        "118",
         0
       ],
       "clip": [
@@ -381,7 +381,7 @@
         0
       ],
       "image1": [
-        "100",
+        "113",
         0
       ]
     },
@@ -501,7 +501,7 @@
   "81": {
     "inputs": {
       "prompt": [
-        "2",
+        "118",
         0
       ],
       "clip": [
@@ -513,7 +513,7 @@
         0
       ],
       "image1": [
-        "100",
+        "113",
         0
       ],
       "image2": [
@@ -529,7 +529,7 @@
   "82": {
     "inputs": {
       "prompt": [
-        "2",
+        "118",
         0
       ],
       "clip": [
@@ -541,7 +541,7 @@
         0
       ],
       "image1": [
-        "100",
+        "113",
         0
       ],
       "image2": [
@@ -776,7 +776,7 @@
   "99": {
     "inputs": {
       "pixels": [
-        "100",
+        "113",
         0
       ],
       "vae": [
@@ -801,18 +801,6 @@
       "title": "FluxKontextImageScale"
     }
   },
-  "101": {
-    "inputs": {
-      "image": [
-        "100",
-        0
-      ]
-    },
-    "class_type": "GetImageSize",
-    "_meta": {
-      "title": "Get Image Size"
-    }
-  },
   "102": {
     "inputs": {
       "image": [
@@ -835,6 +823,257 @@
     "class_type": "FluxKontextImageScale",
     "_meta": {
       "title": "FluxKontextImageScale"
+    }
+  },
+  "104": {
+    "inputs": {
+      "image": "welcome.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "i2i_inpaint_mask"
+    }
+  },
+  "107": {
+    "inputs": {
+      "color": "0, 255, 0",
+      "image": [
+        "100",
+        0
+      ],
+      "mask": [
+        "110",
+        0
+      ]
+    },
+    "class_type": "DrawMaskOnImage",
+    "_meta": {
+      "title": "Draw Mask On Image"
+    }
+  },
+  "108": {
+    "inputs": {
+      "mask": [
+        "109",
+        0
+      ]
+    },
+    "class_type": "easy isMaskEmpty",
+    "_meta": {
+      "title": "Is Mask Empty"
+    }
+  },
+  "109": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "110": {
+    "inputs": {
+      "x": 0,
+      "y": 0,
+      "operation": "subtract",
+      "destination": [
+        "127",
+        0
+      ],
+      "source": [
+        "112",
+        0
+      ]
+    },
+    "class_type": "MaskComposite",
+    "_meta": {
+      "title": "MaskComposite"
+    }
+  },
+  "112": {
+    "inputs": {
+      "expand": -10,
+      "tapered_corners": false,
+      "mask": [
+        "127",
+        0
+      ]
+    },
+    "class_type": "GrowMask",
+    "_meta": {
+      "title": "GrowMask"
+    }
+  },
+  "113": {
+    "inputs": {
+      "boolean": [
+        "108",
+        0
+      ],
+      "on_true": [
+        "100",
+        0
+      ],
+      "on_false": [
+        "107",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "114": {
+    "inputs": {
+      "image": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "FluxKontextImageScale",
+    "_meta": {
+      "title": "FluxKontextImageScale"
+    }
+  },
+  "117": {
+    "inputs": {
+      "string_a": [
+        "2",
+        0
+      ],
+      "string_b": "消除绿色方框",
+      "delimiter": "，"
+    },
+    "class_type": "StringConcatenate",
+    "_meta": {
+      "title": "Concatenate"
+    }
+  },
+  "118": {
+    "inputs": {
+      "boolean": [
+        "108",
+        0
+      ],
+      "on_true": [
+        "2",
+        0
+      ],
+      "on_false": [
+        "117",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "119": {
+    "inputs": {
+      "continue": [
+        "123",
+        0
+      ],
+      "in": [
+        "107",
+        0
+      ]
+    },
+    "class_type": "easy blocker",
+    "_meta": {
+      "title": "Blocker"
+    }
+  },
+  "121": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "122": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "easy boolean",
+    "_meta": {
+      "title": "Boolean"
+    }
+  },
+  "123": {
+    "inputs": {
+      "boolean": [
+        "108",
+        0
+      ],
+      "on_true": [
+        "121",
+        0
+      ],
+      "on_false": [
+        "122",
+        0
+      ]
+    },
+    "class_type": "easy ifElse",
+    "_meta": {
+      "title": "If else"
+    }
+  },
+  "124": {
+    "inputs": {
+      "images": [
+        "119",
+        0
+      ]
+    },
+    "class_type": "SaveImageWebsocket",
+    "_meta": {
+      "title": "result_image2"
+    }
+  },
+  "126": {
+    "inputs": {
+      "sort_method": "left_to_right",
+      "bbox_select": "all",
+      "select_index": "0,",
+      "object_mask": [
+        "109",
+        0
+      ]
+    },
+    "class_type": "LayerMask: ObjectDetectorMask",
+    "_meta": {
+      "title": "LayerMask: Object Detector Mask"
+    }
+  },
+  "127": {
+    "inputs": {
+      "grow_top": 0,
+      "grow_bottom": 0,
+      "grow_left": 0,
+      "grow_right": 0,
+      "image": [
+        "100",
+        0
+      ],
+      "bboxes": [
+        "126",
+        0
+      ]
+    },
+    "class_type": "LayerMask: DrawBBoxMask",
+    "_meta": {
+      "title": "LayerMask: Draw BBox Mask"
     }
   }
 }
