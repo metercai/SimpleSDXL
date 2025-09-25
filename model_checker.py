@@ -965,6 +965,7 @@ def get_download_links_for_package(packages, download_list_path):
         existing_links = [line.strip().split(",")[0] for line in f.readlines()]
 
     valid_files = []
+    added_links = set()
     with open(download_list_path, "r") as f:
         existing_lines = [line.strip() for line in f.readlines()]
 
@@ -982,8 +983,9 @@ def get_download_links_for_package(packages, download_list_path):
                 else:
                     generated_link = f"{CURRENT_DOWNLOAD_PREFIX}SimpleModels/{full_file_path}"
 
-                if generated_link == existing_link:
+                if generated_link == existing_link and generated_link not in added_links:
                     valid_files.append((generated_link, file_size))
+                    added_links.add(generated_link)
                     break
 
     valid_files = sorted(valid_files, key=lambda x: x[1])
@@ -1934,7 +1936,7 @@ if __name__ == "__main__":
     print()
     while True:
         print(f">>>按下【{Fore.YELLOW}Enter回车{Style.RESET_ALL}】----------------启动全部文件下载<<<     备注：支持断点续传，顺序从小文件开始。")
-        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：若速度太慢直接拿链接用P2P软件下载")
+        print(f">>>输入【{Fore.YELLOW}包体编号{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】----------启动预置包补全<<<     备注：可输入多个编号，例如1,5,7")
         print(f">>>数字【{Fore.YELLOW}0{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-清理日志/下载/图片缓存与坏文件<<<     备注：△谨慎执行。慎防误删私有模型")
         print(f">>>输入【{Fore.YELLOW}DEL{Style.RESET_ALL}】【{Fore.YELLOW}包体编号{Style.RESET_ALL}】----------删除已有包体文件<<<     备注：△谨慎执行。自动避开关联文件")
         print(f">>>输入【{Fore.YELLOW}R{Style.RESET_ALL}】+【{Fore.YELLOW}回车{Style.RESET_ALL}】-----------------------重新检测<<<     备注：再玩一遍，玩不腻")
@@ -1946,6 +1948,37 @@ if __name__ == "__main__":
         if user_input == "":
             print("※启动自动下载模块,支持断点续传，关闭窗口可中断。")
             auto_download_missing_files_with_retry(max_threads=5)
+        elif ',' in user_input or '，' in user_input:
+            selected_packages = {}
+            normalized_input = user_input.replace('，', ',')
+            package_ids = normalized_input.split(',')
+            valid_input = True
+
+            for pkg_id_str in package_ids:
+                pkg_id_str = pkg_id_str.strip()
+                if not pkg_id_str.isdigit():
+                    print(f"{Fore.RED}△输入格式错误：'{pkg_id_str}' 不是有效的包体编号{Style.RESET_ALL}")
+                    valid_input = False
+                    break
+
+                package_id = int(pkg_id_str)
+                found = False
+
+                for package_name, package_info in packages.items():
+                    if package_info["id"] == package_id:
+                        selected_packages[package_name] = package_info
+                        found = True
+                        break
+
+                if not found:
+                    print(f"{Fore.RED}△包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
+                    valid_input = False
+                    break
+
+            if valid_input and selected_packages:
+                print(f"{Fore.GREEN}√已选择 {len(selected_packages)} 个包体，正在生成合并的下载列表...{Style.RESET_ALL}")
+                get_download_links_for_package(selected_packages, "downloadlist.txt")
+                auto_download_missing_files_with_retry(max_threads=5)
         elif user_input.isdigit():
             package_id = int(user_input)
             selected_package = None
@@ -1963,7 +1996,6 @@ if __name__ == "__main__":
                 delete_log_files()
             else:
                 print(f"{Fore.RED}△包体编号{package_id} 无效，请输入正确的包体ID。{Style.RESET_ALL}")
-
         elif user_input.lower().startswith("del"):
             try:
                 path_mapping = load_model_paths()
