@@ -377,6 +377,7 @@ def validate_files(packages):
                         actual_dir = os.path.dirname(actual_full_path)
                         found = True
                         expected_path = os.path.join(local_dir, file_name)
+                        non_missing_size += expected_size
                         break
                 if found:
                     continue
